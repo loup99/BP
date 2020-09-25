@@ -1,0 +1,55 @@
+﻿#Events run from the yearly_pulse on_action
+namespace = yearly_bp_religion
+
+#Clears Henotikon if nothing remains to support it:
+#    * If no Nicene Emperor, void henotikon
+#    * If all Nicene Emperors have less than 2 holy sites, void henotikon
+
+#Every year, fervor drops by 5 while the Henotikon isn't universal
+yearly_bp_religion.0001 = {
+	type = character_event
+	hidden = yes
+	trigger = {
+		is_target_in_global_variable_list = {
+			name = unavailable_unique_decisions
+			target = flag:issued_henotikon
+		}
+		NOT = {
+			is_target_in_global_variable_list = {
+				name = unavailable_unique_decisions
+				target = flag:revoked_henotikon
+			}
+		}
+		any_ruler = { has_title = title:e_byzantium }
+	}
+	
+	immediate = {
+		save_scope_as = henotikon_emperor
+		henotikon_continues = yes
+	}
+}
+
+#If no byzantine emperor and not yet revoked, void the henotikon
+yearly_bp_religion.0002 = {
+	hidden = yes
+	trigger = {
+		is_target_in_global_variable_list = {
+			name = unavailable_unique_decisions
+			target = flag:issued_henotikon
+		}
+		NOT = {
+			is_target_in_global_variable_list = {
+				name = unavailable_unique_decisions
+				target = flag:revoked_henotikon
+			}
+		}
+		NOT = { any_ruler = { has_title = title:e_byzantium } }
+	}
+	
+	immediate = {
+		every_player = {
+			limit = { has_faith = faith:nicene }
+			trigger_event = nicene_decision_events.0005
+		}
+	}
+}
