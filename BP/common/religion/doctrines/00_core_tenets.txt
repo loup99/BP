@@ -908,7 +908,10 @@
 		}
 
 		is_shown = {
-			has_doctrine = abrahamic_hostility_doctrine
+			OR = {
+				has_doctrine = abrahamic_hostility_doctrine
+				religion_tag = dualism_religion
+			}
 		}
 
 		traits = {
@@ -1242,10 +1245,7 @@
 
 	tenet_dharmic_pacifism = { #Mix of reincarnation and pacifism rites
 		icon = core_tenet_dharmawheel
-		is_shown = {
-			has_doctrine = eastern_hostility_doctrine
-			NOT = { religion_tag = zoroastrianism_religion }
-		}
+		is_shown = { has_doctrine = eastern_hostility_doctrine }
 
 		piety_cost = {
 			if = {
@@ -1294,10 +1294,7 @@
 	tenet_inner_journey = {
 		icon = core_tenet_meditation
 
-		is_shown = {
-			has_doctrine = eastern_hostility_doctrine
-			NOT = { religion_tag = zoroastrianism_religion }
-		}
+		is_shown = { has_doctrine = eastern_hostility_doctrine }
 
 		piety_cost = {
 			value = faith_tenet_cost_low
@@ -1766,6 +1763,7 @@
 			OR = {
 				has_doctrine = pagan_hostility_doctrine
 				has_doctrine = eastern_hostility_doctrine
+				has_doctrine = mazdan_hostility_doctrine
 			}
 		}
 
@@ -1956,6 +1954,7 @@
 					flag:tenet_christian_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
 				}
 			}
 		}
@@ -2002,6 +2001,7 @@
 					flag:tenet_christian_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
 				}
 			}
 		}
@@ -2051,6 +2051,7 @@
 					flag:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
 				}
 			}
 		}
@@ -2104,6 +2105,7 @@
 					flag:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_christian_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
 				}
 			}
 		}
@@ -2156,6 +2158,7 @@
 					flag:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_christian_syncretism = { is_in_list = selected_doctrines }
 					flag:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
 				}
 			}
 		}
@@ -2529,7 +2532,6 @@
 		}
 	}
 	
-	
 	#########################
 	# BP Christian Tenets	#
 	#########################
@@ -2716,4 +2718,88 @@
 		}
 	}
 	
+	#####################
+	# BP Mazdan Tenets	#
+	#####################
+	tenet_complex_exegensis = {
+		icon = core_tenet_bigbook
+		
+		is_shown = { religion_tag = dualism_religion }
+		
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_literalism
+				NOT = { flag:tenet_literalism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_astrology
+				NOT = { flag:tenet_astrology = { is_in_list = selected_doctrines } }
+			}
+		}
+		
+		piety_cost = {
+			value = faith_tenet_cost_mid
+			if = {
+				limit = { has_doctrine = tenets }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		
+		parameters = { divine_the_stars_active = yes }
+		
+		character_modifier = { monthly_learning_lifestyle_xp_gain_mult = 0.1 }
+		
+		traits = {
+			virtues = { temperate = 2 }
+			sins = { gluttonous = 2 }
+		}
+	}
+	
+	tenet_zoroastrian_syncretism = {
+		icon = tenet_zoroastrian_syncretism
+		is_shown = { NOT = { religion_tag = mazdan_religion } }
+		
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					flag:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		
+		piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = dualism_religion
+						has_doctrine = pagan_hostility_doctrine
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else = { value = faith_tenet_cost_mid }
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_zoroastrian_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		
+		parameters = {
+			hostility_override_special_doctrine_is_zoroastrian_faith = 2
+			zoroastrian_syncretic_actor_opinion_active = yes
+			opinion_of_zoroastrian_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+		traits = {
+			virtues = { honest }
+			sins = { deceitful }
+		}
+		
+	}
 }#end:doctrine_core_tenets
