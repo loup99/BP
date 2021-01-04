@@ -1,0 +1,88 @@
+﻿issue_henotikon_effects = {
+	faith:nicene.religion = { #All Christian faiths
+		#All branches of Christianity that are Eutychian, Monophysite, or Nestorian are condemned
+		#And no longer in union with Nicea, if they were otherwise
+		every_faith = {
+			limit = {
+				this.religion = faith:nicene.religion
+				OR = {
+					has_doctrine = doctrine_christian_christology_eutychianism
+					has_doctrine = doctrine_christian_christology_nestorianism
+					has_doctrine = doctrine_christian_christology_monophysitism
+				}
+				NOT = { this = root.faith }
+			}
+			if = {
+				limit = { has_doctrine = special_doctrine_ecumenical_christian }
+				remove_doctrine = special_doctrine_ecumenical_christian
+			}
+			change_fervor = -20
+		}
+		#Add Henotikon issued doctrine to applicable faiths (i.e., those with ecumenism)
+		every_faith = {
+			limit = {
+				this.religion = faith:nicene.religion
+				has_doctrine = special_doctrine_ecumenical_christian
+			}
+			add_doctrine = doctrine_christian_henotikon_issued
+		}
+		#Nicene fervor drops sharply initially
+		every_faith = {
+			limit = { this = root.faith }
+			change_fervor = -10
+		}
+	}
+}#end:issue_henotikon_effects
+
+henotikon_revoked_effects = {
+	#All Christian faiths with ecumenism improve fervor
+	faith:nicene.religion = {
+		every_faith = {
+			limit = {
+				this.religion = faith:nicene.religion
+				has_doctrine = special_doctrine_ecumenical_christian
+			}
+			change_fervor = 5
+		}
+		#Remove Henotikon Issued from faiths
+		every_faith = {
+			limit = {
+				this.religion = faith:nicene.religion
+				has_doctrine = doctrine_christian_henotikon_issued
+			}
+			remove_doctrine = doctrine_christian_henotikon_issued
+		}
+	}
+	#cleanup henotikon traits
+	every_living_character = {
+		limit = { has_trait = embraced_henotikon }
+		remove_trait = embraced_henotikon
+	}
+	every_living_character = {
+		limit = { has_trait = repudiated_henotikon }
+		remove_trait = repudiated_henotikon
+	}
+}#end:henotikon_revoked_effects
+
+henotikon_voided_effects = {
+	#All Christian faiths with ecumenism improve fervor
+	faith:nicene.religion = {
+		#Remove Henotikon Issued from faiths
+		every_faith = {
+			limit = {
+				this.religion = faith:nicene.religion
+				has_doctrine = doctrine_christian_henotikon_issued
+			}
+			remove_doctrine = doctrine_christian_henotikon_issued
+		}
+	}
+	#cleanup henotikon traits
+	every_living_character = {
+		limit = { has_trait = embraced_henotikon }
+		remove_trait = embraced_henotikon
+	}
+	every_living_character = {
+		limit = { has_trait = repudiated_henotikon }
+		remove_trait = repudiated_henotikon
+	}
+}#end:henotikon_voided_effects

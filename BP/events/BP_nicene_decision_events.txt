@@ -1,0 +1,264 @@
+﻿namespace = nicene_decision_events
+
+##################################################
+# Henotikon Related Events
+##################################################
+
+#decision_issue_henotikon
+#0001-0009: Issuing the Henotikon
+#0001	- Tell issuer about Henotikon
+#0002	- Tell ecumenical rulers about the Henotikon
+#0003	- Tell non-ecumenical christians about the henotikon
+#0004	- Tell non-christians about the henotikon
+#0011-0019: Events while henotikon is issued
+#0021-0029: Revoking the henotikon events
+#0021	- Tell issuer about Henotikon revocation
+#0022	- Tell everyone in diplo range about Henotikon revocation
+#0031-0039: Voiding the henotikon events
+#0031	- No more Byzantine Empire, so the Henotikon crumbles
+
+# I issued the Henotikon
+nicene_decision_events.0001 = {
+	type = character_event
+	title = nicene_decision_events.0001.t
+	desc = nicene_decision_events.0001.desc
+	
+	theme = realm
+	left_portrait = {
+		character = scope:henotikon_issuer
+		animation = personality_zealous
+	}
+	
+	immediate = {
+		play_music_cue = "mx_cue_positive_effect"
+		hidden_effect = { issue_henotikon_effects = yes }
+	}
+	
+	option = { 
+		name = nicene_decision_events.0001.a
+		add_trait = embraced_henotikon
+		
+		add_character_flag = {
+			flag = changed_henotikon_state
+			years = 5
+		}
+	}
+}
+
+#I'm ecumenical christian and someone issued the Henotikon
+nicene_decision_events.0002 = {
+	type = character_event
+	title = nicene_decision_events.0002.t
+	desc = nicene_decision_events.0002.desc
+	
+	theme = realm
+	left_portrait = {
+		character = scope:henotikon_issuer
+		animation = personality_zealous
+	}
+	
+	immediate = { play_music_cue = "mx_cue_positive_effect" }
+	
+	option = { #Accept the Henotikon
+		name = nicene_decision_events.0002.a
+		add_trait = embraced_henotikon
+		add_piety = -50
+		
+		add_character_flag = {
+			flag = changed_henotikon_state
+			years = 5
+		} 
+		
+		#Very few independents will accept
+		ai_chance = {
+			base = 10
+			
+			modifier = { #If I'm zealous I will refuse the Henotikon
+				add = -500
+				has_trait = zealous
+			}
+			modifier = { #If I'm independent clergy I will refuse the Henotikon
+				add = -500
+				AND = {
+					NOT = { is_vassal_or_below_of = scope:henotikon_issuer }
+					is_clergy = yes
+				}
+			}
+			
+			modifier = { #If I'm independent secular I will likely refuse the Henotikon
+				add = -5
+				AND = {
+					NOT = { is_vassal_or_below_of = scope:henotikon_issuer }
+					is_clergy = no
+				}
+			}
+			
+			modifier = { #If I'm not a zealous vassal, I'll likely accept the Henotikon
+				add = 80
+				AND = {
+					is_vassal_or_below_of = scope:henotikon_issuer
+					NOT = { has_trait = zealous }
+				}
+			}
+		}
+	}#end option: Accept the Henotikon
+	
+	option = { #Refuse the henotikon
+		name = nicene_decision_events.0002.b
+		add_trait = repudiated_henotikon
+		add_piety = 100
+		
+		add_character_flag = {
+			flag = changed_henotikon_state
+			years = 5
+		} 
+		
+		ai_chance = {
+			base = 90
+			
+			modifier = { #If I'm a vassal but not zealous, I'll rarely refuse the henotikon
+				add = -80
+				AND = {
+					is_vassal_or_below_of = scope:henotikon_issuer
+					NOT = { has_trait = zealous }
+				}
+			}
+			
+			modifier = { #If I'm independent clergy I will refuse the Henotikon
+				add = 500
+				AND = {
+					NOT = { is_vassal_or_below_of = scope:henotikon_issuer }
+					is_clergy = yes
+				}
+			}
+			
+			modifier = { #If I'm independent secular I will likely refuse the Henotikon
+				add = 10
+				AND = {
+					NOT = { is_vassal_or_below_of = scope:henotikon_issuer }
+					is_clergy = no
+				}
+			}
+			
+			modifier = { #If I'm zealous I will refuse the Henotikon
+				add = 500
+				has_trait = zealous
+			}
+		}
+	}#end option: Refuse the henotikon
+}
+
+#I'm non-ecumenical christian and someone issued the Henotikon
+nicene_decision_events.0003 = {
+	type = character_event
+	title = nicene_decision_events.0003.t
+	desc = nicene_decision_events.0003.desc
+	
+	theme = realm
+	left_portrait = {
+		character = scope:henotikon_issuer
+		animation = personality_zealous
+	}
+	
+	immediate = { play_music_cue = "mx_cue_positive_effect" }
+	
+	option = { name = name_i_see }
+}
+
+#I'm non-christian and someone issued the Henotikon
+nicene_decision_events.0004 = {
+	type = character_event
+	title = nicene_decision_events.0004.t
+	desc = nicene_decision_events.0004.desc
+	
+	theme = realm
+	left_portrait = {
+		character = scope:henotikon_issuer
+		animation = personality_zealous
+	}
+	
+	immediate = { play_music_cue = "mx_cue_positive_effect" }
+	
+	option = { name = name_i_see }
+}
+
+#I'm the new emperor and I must accept the henotikon at least initially
+nicene_decision_events.0011 = {
+	type = character_event
+	title = nicene_decision_events.0011.t
+	desc = nicene_decision_events.0011.desc
+	
+	theme = realm
+	left_portrait = {
+		character = scope:henotikon_revoker
+		animation = personality_zealous
+	}
+	
+	immediate = { play_music_cue = "mx_cue_positive_effect" }
+	
+	option = {
+		name = nicene_decision_events.0011.a
+		add_trait = embraced_henotikon
+		
+		add_character_flag = {
+			flag = changed_henotikon_state
+			years = 5
+		}
+	}
+}
+
+# I revoked the Henotikon
+nicene_decision_events.0021 = {
+	type = character_event
+	title = nicene_decision_events.0021.t
+	desc = nicene_decision_events.0021.desc
+	
+	theme = realm
+	left_portrait = {
+		character = scope:henotikon_revoker
+		animation = personality_zealous
+	}
+	
+	immediate = { play_music_cue = "mx_cue_positive_effect" }
+	
+	option = {
+		name = nicene_decision_events.0021.a
+		hidden_effect = { henotikon_revoked_effects = yes }
+	}
+}
+
+#Someone revoked the Henotikon
+nicene_decision_events.0022 = {
+	type = character_event
+	title = nicene_decision_events.0022.t
+	desc = nicene_decision_events.0022.desc
+	
+	theme = realm
+	left_portrait = {
+		character = scope:henotikon_revoker
+		animation = personality_zealous
+	}
+	
+	immediate = { play_music_cue = "mx_cue_positive_effect" }
+	
+	option = { name = nicene_decision_events.0022.a }
+}
+
+#No more byzantine emperor, set henotikon revoked and remove county modifiers
+nicene_decision_events.0031 = {
+	title = nicene_decision_events.0031.t
+	desc =  nicene_decision_events.0031.desc
+	
+	theme = realm
+	
+	immediate = {}
+	
+	option = {
+		name = name_i_see
+		hidden_effect = { henotikon_voided_effects = yes }
+	}
+}
+
+##################################################
+# Next Nicene Event Bloc
+##################################################
