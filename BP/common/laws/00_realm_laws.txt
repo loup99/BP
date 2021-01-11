@@ -1,6 +1,6 @@
 ﻿@crown_authority_cooldown_years = 20
 @tribal_authority_cooldown_years = 10
-@centralization_cooldown_years = 10
+@bureaucracy_cooldown_years = 10
 
 crown_authority = {
 	default = crown_authority_1
@@ -339,5 +339,219 @@ subroman_authority = {
 		flag = can_change_succession_laws
 		
 		can_keep = { realm_law_use_subroman_authority = yes }
+	}
+}
+
+bureaucratic_authority = {
+	default = bureaucratic_authority_2
+	cumulative = no
+	flag = realm_law
+	
+	bureaucratic_authority_0 = {
+		modifier = {
+			vassal_tax_contribution_mult = 0.50
+			vassal_levy_contribution_mult = -0.50
+			direct_vassal_opinion = -10
+		}
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+		flag = can_change_partition_succession_laws
+		flag = vassal_refusal_is_treason
+		flag = can_change_succession_laws
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_designate_heirs
+		
+		can_keep = { realm_law_use_bureaucratic_authority = yes }
+	}
+	
+	bureaucratic_authority_1 = {
+		modifier = {
+			vassal_tax_contribution_mult = 0.25
+			vassal_levy_contribution_mult = -0.50
+			direct_vassal_opinion = -5
+		}
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+		flag = can_change_partition_succession_laws
+		flag = vassal_refusal_is_treason
+		flag = can_change_succession_laws
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_designate_heirs
+
+		can_keep = { realm_law_use_bureaucratic_authority = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = bureaucratic_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = bureaucratic_authority_2
+							has_realm_law = bureaucratic_authority_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = { limit = { NOT = { has_realm_law = bureaucratic_authority_2 } } }
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = bureaucratic_authority_0 }
+				value = 1
+			}
+		}
+	}
+	
+	bureaucratic_authority_2 = {
+		modifier = { vassal_levy_contribution_mult = -0.50 }
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+		flag = can_change_partition_succession_laws
+		flag = vassal_refusal_is_treason
+		flag = can_change_succession_laws
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_designate_heirs
+		
+		can_keep = { realm_law_use_bureaucratic_authority = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
+				has_realm_law = bureaucratic_authority_1
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
+			}
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = bureaucratic_authority_1 }
+				value = 1
+			}
+		}
+	}
+	
+	bureaucratic_authority_3 = {
+		modifier = {
+			vassal_levy_contribution_mult = -0.25
+			direct_vassal_opinion = -5
+		}
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+		flag = can_change_partition_succession_laws
+		flag = vassal_refusal_is_treason
+		flag = can_change_succession_laws
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_designate_heirs
+		
+		can_keep = { realm_law_use_bureaucratic_authority = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = bureaucratic_authority_4 } }
+				has_realm_law = bureaucratic_authority_2
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = bureaucratic_authority_4 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = { limit = { NOT = { has_realm_law = bureaucratic_authority_4 } } }
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+		}
+	}
+	
+	bureaucratic_authority_4 = {
+		modifier = { direct_vassal_opinion = -10 }
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+		flag = can_change_partition_succession_laws
+		flag = vassal_refusal_is_treason
+		flag = can_change_succession_laws
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_designate_heirs
+		
+		can_keep = { realm_law_use_bureaucratic_authority = yes }
+
+		can_pass = {
+			has_realm_law = bureaucratic_authority_3
+			custom_description = {
+				subject = root
+				text = "has_crown_authority_cooldown"
+				NOT = { has_variable = crown_authority_cooldown }
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+		}
 	}
 }

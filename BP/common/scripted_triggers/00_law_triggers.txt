@@ -1,5 +1,22 @@
 ﻿###Overwrite base game to differentiate crown authority, centralization, and tribal authority
 
+### Authorities
+realm_law_use_crown_authority = {
+	AND = {
+		NOT = { has_government = tribal_government }
+		NOT = { has_government = subroman_government }
+		NOT = { has_government = bureaucratic_government }
+		NOT = { has_government = military_command }
+	}
+}
+
+realm_law_use_subroman_authority = { has_government = subroman_government }
+
+realm_law_use_bureaucratic_authority = { has_government = bureaucratic_government }
+
+realm_law_use_tribal_authority = { has_government = tribal_government }
+
+### Gender Triggers
 character_gender_can_rule_title_trigger = {
 	trigger_if = {
 		limit = {
@@ -49,6 +66,20 @@ character_gender_can_inherit_from_trigger = {
 	}
 }
 
+### Imperial elective triggers
+#Only for bureaucratic_government
+can_have_imperial_elective_succession_realm_law_trigger = { has_government = bureaucratic_government }
+
+can_keep_partition_succession_law_trigger = {
+	#The 'can_keep' triggers are dependent on actually having the law.
+	#If they aren't, the trigger breakdown for the player breaks and shows incomplete information.
+	trigger_if = { 
+		limit = { has_realm_law = imperial_elective }
+	}
+	can_have_imperial_elective_succession_realm_law_trigger = yes
+}
+
+### Partition Triggers
 has_partition_succession_realm_law_trigger = {
 	OR = {
 		has_realm_law = confederate_partition_succession_law
@@ -56,19 +87,6 @@ has_partition_succession_realm_law_trigger = {
 		has_realm_law = high_partition_succession_law
 	}
 }
-
-realm_law_use_tribal_authority = {
-	has_government = tribal_government
-}
-
-realm_law_use_crown_authority = {
-	AND = {
-		NOT = { has_government = tribal_government }
-		NOT = { has_government = subroman_government }
-	}
-}
-
-realm_law_use_subroman_authority = { has_government = subroman_government }
 
 can_have_confederate_partition_succession_law_trigger = {
 	OR = {
@@ -164,6 +182,7 @@ can_have_high_partition_succession_law_trigger = {
 	}
 }
 
+### Single Heir triggers
 can_keep_single_heir_succession_law_trigger = {
 	# The 'can_keep' triggers are dependent on actually having the law. If they aren't, the trigger breakdown for the player breaks and shows incomplete information.
 	trigger_if = {
@@ -264,6 +283,7 @@ can_have_single_heir_dynasty_house_trigger = {
 	}
 }
 
+### Special Triggers
 can_have_bishop_theocratic_succession_law_trigger = {
 	OR = {
 		is_theocratic_lessee = yes
@@ -315,3 +335,6 @@ title_can_reduce_partition_law_trigger = {
 		}
 	}
 }
+
+#Exclusionary elective triggers
+#Used to exclude bureaucratic_government from all but imperial_elective

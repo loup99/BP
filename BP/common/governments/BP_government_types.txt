@@ -1,5 +1,4 @@
 ﻿high_tribal_government = {
-	create_cadet_branches = yes
 	rulers_should_have_dynasty = yes
 	
 	always_use_patronym = yes
@@ -12,7 +11,7 @@
 	
 	prestige_opinion_override = { -10 0 3 5 10 20 }
 	
-	vassal_contract = { tribal_government_obligations }
+	vassal_contract = { high_tribal_government_obligations }
 	
 	character_modifier = {
 		title_creation_cost_mult = -0.25
@@ -22,7 +21,9 @@
 		feudal_government_vassal_opinion = -10
 		clan_government_vassal_opinion = -10
 		republic_government_vassal_opinion = -10
-	
+		#subroman_government_vassal_opinion = -10
+		#prefeudal_government_vassal_opinion = -10
+		
 		ai_war_chance = 0.25
 	}
 	
@@ -48,6 +49,7 @@ prefeudal_government = {
 	color = {0.913 0.722 0.988}
 }
 
+#More civilian-oriented than military_command
 subroman_government = {
 	create_cadet_branches = yes
 	rulers_should_have_dynasty = yes
@@ -57,16 +59,12 @@ subroman_government = {
 	required_county_holdings = { castle_holding city_holding church_holding }
 	
 	vassal_contract = {
-		feudal_government_taxes
-		feudal_government_levies
-		special_contract
+		subroman_government_taxes
+		subroman_government_levies
 		religious_rights
-		fortification_rights
-		coinage_rights
-		succession_rights
-		war_declaration_rights
-		council_rights
 		title_revocation_rights
+		#These are bureacratic_government-locked contracts
+		bureaucratic_special_contract
 	}
 	
 	character_modifier = {
@@ -77,4 +75,76 @@ subroman_government = {
 	}
 	
 	color = {0.750 0.000 0.000}
+}
+
+military_command_government = {
+	create_cadet_branches = yes
+	rulers_should_have_dynasty = yes
+	
+	primary_holding = castle_holding
+	valid_holdings = { castle_holding city_holding }
+	required_county_holdings = { castle_holding city_holding church_holding }
+	
+	can_get_government = {
+		can_get_military_command_trigger = yes
+	}
+
+	vassal_contract = {
+		religious_rights
+		war_declaration_rights
+		council_rights
+		title_revocation_rights
+		
+		military_government_salary
+		military_government_obligations
+		imperial_autonomy
+		#These are bureacratic_government-locked contracts
+		bureaucratic_special_contract
+	}
+	
+	#Inverted from subroman_government
+	character_modifier = {
+		domain_tax_mult = -0.15
+		vassal_tax_contribution_mult = -0.15
+		levy_size = 0.25
+		vassal_levy_contribution_mult = 0.25
+	}
+	
+	color = { 216 227 36 }
+}
+
+bureaucratic_government = {
+	create_cadet_branches = yes
+	rulers_should_have_dynasty = yes
+	
+	primary_holding = castle_holding
+	valid_holdings = { castle_holding city_holding }
+	
+	required_county_holdings = { castle_holding city_holding church_holding }
+	
+	#Only empires can be bureaucratic_government
+	can_get_government = {
+		is_independent_ruler = yes
+		primary_title.tier > tier_kingdom
+		OR = {
+			has_government = bureaucratic_government #so the administration doesnt disappear if emperor somehow changes culture
+			#has_character_flag = bureacratic_government_temp_override
+			culture = { has_innovation = innovation_roman_administration }
+		}
+	}
+	
+	#Can never be a vassal, so no vassal contracts applicable
+	vassal_contract = {}
+	
+	character_modifier = {
+		domain_tax_mult = 0.15
+		domain_limit = 5
+		vassal_limit = 10
+		vassal_tax_contribution_mult = 0.15
+		levy_size = -0.25
+		vassal_levy_contribution_mult = -0.25
+		men_at_arms_cap = 5 #i.e., double total number of maa in innovations
+	}
+	
+	color = {0.500 0.000 0.000}
 }

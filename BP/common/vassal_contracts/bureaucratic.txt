@@ -1,0 +1,68 @@
+﻿#NB: these are contracts applied specifically when the liege is bureaucratic!
+#Due to how CK3 is coded, vassal contracts apply only to the vassal, not the liege
+
+@ai_standard_liege_desire = 2
+@ai_standard_vassal_desire = 1
+
+bureaucratic_special_contract = {
+	display_mode = radiobutton
+	is_shown = {
+		scope:vassal.primary_title.tier >= tier_duchy
+		scope:liege = { has_government = bureaucratic_government }
+	}
+	obligation_levels = {
+		bureaucratic_special_contract_none = {
+			position = { 0 1 }
+			default = yes
+			
+			ai_vassal_desire =  {}
+			ai_liege_desire =  {}
+		}
+		bureaucratic_special_contract_exarchate = {
+			is_valid = {
+				scope:liege.culture = { has_innovation = innovation_exarchate }
+				scope:liege = { has_government = bureaucratic_government }
+				scope:vassal.primary_title.tier >= tier_kingdom
+			}
+			parent = bureaucratic_special_contract_none
+			position = { 1 1 }
+			
+			tax_factor = bureaucratic_exarchate_contract_tax
+			levies_factor = bureaucratic_exarchate_contract_levies
+			vassal_opinion = 10
+			
+			vassal_modifier = {
+				vassal_limit = 5
+				domain_limit = 1
+				fellow_vassal_opinion = -15
+			}
+			
+			ai_liege_desire =  {}
+			ai_liege_desire =  {}
+		}
+		
+		bureaucratic_special_contract_theme = {
+			is_valid = { 
+				scope:liege.culture = { has_innovation = innovation_themata }
+				scope:liege = { has_government = bureaucratic_government }
+				scope:vassal.primary_title.tier = tier_duchy
+			}
+			parent = bureaucratic_special_contract_none
+			position = { 1 0 }
+			
+			tax_factor = bureaucratic_theme_contract_tax
+			levies_factor = bureaucratic_theme_contract_levies
+			
+			vassal_modifier = {
+				levy_size = 0.25
+				army_maintenance_mult = -0.2
+				garrison_size = 0.2
+				levy_reinforcement_rate = 0.2
+				controlled_province_advantage = 5
+			}
+			
+			ai_liege_desire =  {}
+			ai_liege_desire =  {}
+		}
+	}
+}

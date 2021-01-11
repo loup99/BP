@@ -1,0 +1,93 @@
+﻿imperial_elective = {
+	elector_vote_strength = {
+		base = 1
+		modifier = { #Imperial Dignity
+			desc = tooltip_feudal_vote_strength_emperor_tier
+			add = 3
+			highest_held_title_tier = 5
+		}
+		modifier = { #Royal Dignity
+			desc = tooltip_feudal_vote_strength_king_tier
+			add = 2
+			highest_held_title_tier = 4
+		}
+		modifier = { #Princely Dignity
+			desc = tooltip_feudal_vote_strength_duke_tier
+			add = 1
+			highest_held_title_tier = 3
+		}
+		modifier = { #Powerful Vassal
+			desc = tooltip_feudal_vote_strength_powerful_vassal
+			add = {
+				value = 1
+				#Additional point if the vassal is more powerful than the current ruler 
+				#(Vassal King who meets this condition will have more voting power than the Emperor himself (1+1+1+2 = 5))
+				if = { 
+					limit = { max_military_strength > scope:holder.max_military_strength }
+					add = 1
+				}
+			}
+			NOT = { this = scope:holder }
+			is_powerful_vassal = yes
+		}
+		modifier = { #Clerical Influence
+			desc = tooltip_feudal_vote_strength_theocrat
+			add = 1
+			NOT = { this = scope:holder }
+			OR = {
+				has_government = theocracy_government
+				has_council_position = councillor_court_chaplain
+			}
+			faith = scope:holder.faith
+			faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+			#TODO_CD:Possible trigger checking for investiture succession?
+		}
+	}
+	
+	electors = {
+		add = holder
+		add = {
+			type = title_dejure_vassals
+			limit = {
+				OR = { #1 or 2 tiers of difference for Electors.
+					scope:title = { tier = tier_county }
+					AND = {
+						scope:title = { tier = tier_duchy }
+						highest_held_title_tier >= 1
+					}
+					AND = {
+						scope:title = { tier = tier_kingdom }
+						highest_held_title_tier >= 2
+					}
+					AND = {
+						scope:title = { tier = tier_empire }
+						highest_held_title_tier >= 3
+					}
+				}
+				#Only de facto direct vassal (no sub-vassals)
+				is_vassal_of = scope:holder
+			}
+		}
+	}
+	
+	candidates = {
+		#Direct vassals (irrespective of de jure status)
+		add = {
+			type = holder_direct_vassals
+			limit = { feudal_elective_potential_landed_candidate_trigger = yes }
+		}
+		#Claimants to the title
+		add = {
+			type = title_claimants
+			limit = { imperial_elective_potential_landless_claimant_candidate_trigger = yes }
+		}
+		#Close and Extended Family
+		add = {
+			type = holder_close_or_extended_family
+			limit = {
+				is_close_family_of = scope:holder
+				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+			}
+		}
+	}
+}
