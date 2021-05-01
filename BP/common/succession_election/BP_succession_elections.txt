@@ -1,0 +1,188 @@
+﻿imperial_elective = {
+	electors = {
+		add = holder
+		
+		add = { #All de-facto vassals that are Dukes or above.
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				highest_held_title_tier >= 3
+			}
+		}
+	}
+	
+	#Elector strength is tied to overall vassal power
+	elector_vote_strength = {
+		base = 1
+		modifier = { #Imperial Dignity
+			desc = tooltip_imperial_vote_strength_emperor
+			add = 3
+			highest_held_title_tier = 5
+		}
+		modifier = { #Powerful Vassal
+			desc = tooltip_imperial_vote_strength_powerful_vassal
+			add = {
+				value = 2
+				#Additional point if the vassal is more powerful than the current ruler 
+				#(Vassal King who meets this condition will have more voting power than the Emperor himself (1+1+1+2 = 5))
+				if = { 
+					limit = { max_military_strength > scope:holder.max_military_strength }
+					add = 1
+				}
+			}
+			NOT = { this = scope:holder }
+			is_powerful_vassal = yes
+		}
+		modifier = { #Clerical Influence
+			desc = tooltip_imperial_vote_strength_theocrat
+			add = 1
+			NOT = { this = scope:holder }
+			OR = {
+				has_government = theocracy_government
+				has_council_position = councillor_court_chaplain
+			}
+			faith = scope:holder.faith
+			faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+			#TODO_CD:Possible trigger checking for investiture succession?
+		}
+	}
+	
+	candidate_score = {
+		base = 0
+		######################	Elector self-voting pattern	##########################
+		elector_self_voting_pattern_imperial_elective_modifier = yes
+
+		##########################	Holder voting pattern	##########################
+		holder_voting_pattern_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (circumstances)	##########################
+		elector_voting_pattern_circumstances_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (prestige/piety)	##########################
+		elector_voting_pattern_prestige_piety_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (traits)	##########################
+		elector_voting_pattern_traits_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (opinion)	##########################
+		elector_voting_pattern_opinion_imperial_elective_modifier = yes
+	}
+	
+	candidates = {
+		#Direct vassals (irrespective of de jure status)
+		add = {
+			type = holder_direct_vassals
+			limit = { imperial_elective_potential_landed_candidate_trigger = yes }
+		}
+		#Claimants to the title
+		add = {
+			type = title_claimants
+			limit = { imperial_elective_potential_landless_claimant_candidate_trigger = yes }
+		}
+		#Close and Extended Family
+		add = {
+			type = holder_close_or_extended_family
+			limit = {
+				is_close_family_of = scope:holder
+				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+			}
+		}
+	}
+}
+
+#Eranshar elections should always favor the current imperial house unless overthrown, so should favor
+#Renown over prestige/piety, but clerical vassals should also hold more sway than Rome because of integration
+#of Zoroastrian faith with the empire
+eranshar_elective = {
+	electors = {
+		add = holder
+		
+		add = { #All de-facto vassals that are Dukes or above.
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				highest_held_title_tier >= 3
+			}
+		}
+	}
+	
+	#Elector strength is tied to overall vassal power
+	elector_vote_strength = {
+		base = 1
+		modifier = { #Imperial Dignity
+			desc = tooltip_eranshar_vote_strength_emperor
+			add = 3
+			highest_held_title_tier = 5
+		}
+		modifier = { #Powerful Vassal
+			desc = tooltip_eranshar_vote_strength_powerful_vassal
+			add = {
+				value = 2
+				#Additional point if the vassal is more powerful than the current ruler 
+				#(Vassal King who meets this condition will have more voting power than the Emperor himself (1+1+1+2 = 5))
+				if = { 
+					limit = { max_military_strength > scope:holder.max_military_strength }
+					add = 1
+				}
+			}
+			NOT = { this = scope:holder }
+			is_powerful_vassal = yes
+		}
+		modifier = { #Clerical Influence
+			desc = tooltip_eranshar_vote_strength_theocrat
+			add = 3
+			NOT = { this = scope:holder }
+			OR = {
+				has_government = theocracy_government
+				has_council_position = councillor_court_chaplain
+			}
+			faith = scope:holder.faith
+			faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+			#TODO_CD:Possible trigger checking for investiture succession?
+		}
+	}
+	
+	candidate_score = {
+		base = 0
+		######################	Elector self-voting pattern	##########################
+		elector_self_voting_pattern_eranshar_elective_modifier = yes
+
+		##########################	Holder voting pattern	##########################
+		holder_voting_pattern_eranshar_elective_modifier = yes
+
+		##########################	Elector voting patterns (circumstances)	##########################
+		elector_voting_pattern_circumstances_eranshar_elective_modifier = yes
+
+		##########################	Elector voting patterns (prestige/piety)	##########################
+		elector_voting_pattern_prestige_piety_eranshar_elective_modifier = yes
+
+		##########################	Elector voting patterns (traits)	##########################
+		elector_voting_pattern_traits_eranshar_elective_modifier = yes
+
+		##########################	Elector voting patterns (opinion)	##########################
+		elector_voting_pattern_opinion_eranshar_elective_modifier = yes
+	}
+	
+	#Direct vassals should be lowest on the tier and really only installed on two conditions:
+	#Factional revolt or dyansty dies out.
+	candidates = {
+		#Direct vassals (irrespective of de jure status)
+		add = {
+			type = holder_direct_vassals
+			limit = { imperial_elective_potential_landed_candidate_trigger = yes }
+		}
+		#Claimants to the title
+		add = {
+			type = title_claimants
+			limit = { imperial_elective_potential_landless_claimant_candidate_trigger = yes }
+		}
+		#Close and Extended Family
+		add = {
+			type = holder_close_or_extended_family
+			limit = {
+				is_close_family_of = scope:holder
+				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+			}
+		}
+	}
+}
