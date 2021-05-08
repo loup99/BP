@@ -909,7 +909,11 @@
 			first_valid = {
 				triggered_desc = {
 					trigger = { religion_tag = egyptian_religion }
-					desc = tenet_legalism_maat
+					desc = tenet_legalism_maat_name
+				}
+				triggered_desc = {
+					trigger = { religion_tag = hellenism_religion }
+					desc = tenet_legalism_dikaiosyne_name
 				}
 				desc = tenet_legalism_name
 			}
@@ -918,9 +922,13 @@
 		desc = {
 			first_valid = {
 				triggered_desc = {
-						trigger = { religion_tag = egyptian_religion }
-						desc = tenet_legalism_maat_desc
-					}
+					trigger = { religion_tag = egyptian_religion }
+					desc = tenet_legalism_maat_desc
+				}
+				triggered_desc = {
+					trigger = { religion_tag = hellenism_religion }
+					desc = tenet_legalism_dikaiosyne_desc
+				}
 				desc = tenet_legalism_desc
 			}
 		}
@@ -941,7 +949,28 @@
 
 	tenet_literalism = {
 		icon = core_tenet_altar
-			piety_cost = {
+		
+		name = {
+			first_valid = {
+				triggered_desc = {
+					trigger = { religion_tag = hellenism_religion }
+					desc = tenet_philosophical_name
+				}
+				desc = tenet_literalism_name
+			}
+		}
+		
+		desc = {
+			first_valid = {
+				triggered_desc = {
+					trigger = { religion_tag = hellenism_religion }
+					desc = tenet_philosophical_desc
+				}
+				desc = tenet_literalism_desc
+			}
+		}
+		
+		piety_cost = {
 			if = {
 				limit = {
 					OR = {
@@ -966,6 +995,7 @@
 			OR = {
 				has_doctrine = abrahamic_hostility_doctrine
 				religion_tag = dualism_religion
+				religion_tag = hellenism_religion
 			}
 		}
 
@@ -1066,15 +1096,11 @@
 		name = {
 			first_valid = {
 				triggered_desc = {
-					trigger = {
-						religion_tag = islam_religion
-					}
+					trigger = { religion_tag = islam_religion }
 					desc = tenet_religious_legal_pronouncements_fatwa
 				}
 				triggered_desc = {
-					trigger = {
-						religion_tag = judaism_religion
-					}
+					trigger = { religion_tag = judaism_religion }
 					desc = tenet_religious_legal_pronouncements_halakha
 				}
 				desc = tenet_religious_legal_pronouncements_name
@@ -3039,6 +3065,12 @@
 		
 		piety_cost = {
 			value = faith_tenet_cost_low
+			
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_dharmic_pacifism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
 		}
 		
 		parameters = {
@@ -3111,7 +3143,15 @@
 		
 		is_shown = { always = yes }
 		
-		piety_cost = { value = faith_tenet_cost_low }
+		piety_cost = {
+			value = faith_tenet_cost_low
+			
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_dharmic_pacifism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
 		
 		can_pick = {}
 		
@@ -3128,9 +3168,14 @@
 			religion_tag = hellenism_religion
 		}
 		
-		
 		piety_cost = {
 			value = faith_tenet_cost_high
+			
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_dharmic_pacifism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
 		}
 		
 		can_pick = {
@@ -3152,10 +3197,14 @@
 					flag:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
 				}
 			}
+			custom_description = {
+				text = incompatible_tenet_cosmopolitanism_trigger
+				NOT = { flag:tenet_cosmopolitanism = { is_in_list = selected_doctrines } }
+			}
 		}
 		
 		parameters = {
-			hostility_override_pagan_hostility_doctrine = 1
+			hostility_override_special_doctrine_is_pagan_faith = 1
 			hostility_override_eastern_hostility_doctrine = 1
 		}
 		
@@ -3168,5 +3217,77 @@
 			virtues = { humble }
 			sins = { arrogant }
 		}
+	}
+	
+	#Similar to pacifism but more (philosophically) materially inclined so no piety gain, but 
+	#views other religions as astray instead of hostile or evil (unilaterally, that is).
+	tenet_cosmopolitanism = {
+		icon = hellenic_reformed
+		
+		is_shown = {
+			religion_tag = hellenism_religion
+		}
+		
+		can_pick = {
+			custom_description = {
+				text = doctrine_inverted_pluralism_pluralistic_trigger
+				NOR = {
+					flag:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines }
+					flag:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
+				}
+			}
+			custom_description = {
+				text = incompatible_tenet_interpratio_romana_trigger
+				NOT = { flag:tenet_interpratio_romana = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					flag:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					flag:tenet_hellenism_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		
+		piety_cost = {
+			value = faith_tenet_cost_massive
+			
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_dharmic_pacifism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		
+		parameters = {
+			holy_wars_forbidden = yes
+			hostility_override_abrahamic_hostility_doctrine = 1
+			hostility_override_pagan_hostility_doctrine = 1
+			hostility_override_eastern_hostility_doctrine = 1
+			hostility_override_mazdan_hostility_doctrine = 1
+		}
+		
+		character_modifier = {
+			monthly_learning_lifestyle_xp_gain_mult = 0.2
+			domain_limit = 1
+			different_faith_county_opinion_mult = -0.5
+			vassal_opinion = 10
+		}
+		
+		traits = {
+			virtues = {
+				calm
+				humble
+			}
+			sins = {
+				wrathful
+				arrogant
+			}
+		}
+		
 	}
 }#end:doctrine_core_tenets
