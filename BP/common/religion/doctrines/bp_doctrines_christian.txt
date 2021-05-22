@@ -1300,8 +1300,52 @@ doctrine_christian_soteriology = {
 				multiply = christian_doctrine_unchanged_cost_mult
 			}
 		}
-		can_pick = {}
-		parameters = {}
+		can_pick = {
+			#Pleasures of the flesh can't be sins
+			custom_description = {
+				text = incompatible_tenet_monasticism_trigger
+				NOT = { flag:tenet_monasticism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_asceticism_trigger
+				NOT = { flag:tenet_asceticism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_mendicant_preachers_trigger
+				NOT = { flag:tenet_mendicant_preachers = { is_in_list = selected_doctrines } }
+			}
+			#Must have a tenet to make carnality not sinful
+			custom_description = {
+				text = tenet_carnal_exaltation_or_polyamory_trigger
+				OR = {
+					flag:tenet_polyamory = { is_in_list = selected_doctrines }
+					flag:tenet_carnal_exaltation = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		parameters = {
+			hostility_same_religion = 3
+			hostility_override_doctrine_christian_soteriology_antinomianism = 1
+		}
+		character_modifier = {
+			opinion_of_same_faith = 30
+			different_faith_opinion = -30
+			attraction_opinion = 5
+			fertility = 0.30
+		}
+		traits = {
+			virtues = {
+				chaste = 0
+				reveler_1 = 1
+				reveler_2 = 1
+				reveler_3 = 1
+				forgiving = 2
+			}
+			sins = {
+				lustful = 0
+				gluttonous = 0
+			}
+		}
 	}
 	
 	#For Gnostics of the more Dualist bent (namely All Dualists right now, but that can be debated)
@@ -1341,7 +1385,7 @@ doctrine_christian_soteriology = {
 }
 
 #Judaic role doesn't really raise to many ecumenical questions, really just opinion shifts on Jews
-#Mostly for Audianism and Ebionites
+#Mostly for Ebionites as Jewish Syncretims is no longer a tenet for christians
 doctrine_christian_judaic_role = {
 	group = "christian_doctrines"
 	
@@ -1365,6 +1409,7 @@ doctrine_christian_judaic_role = {
 		parameters = {}
 	}
 	
+	#This replaces jewish syncretism for christians
 	doctrine_christian_judaic_role_judaizers = {
 		piety_cost = {
 			if = {
@@ -1385,7 +1430,16 @@ doctrine_christian_judaic_role = {
 		can_pick = {
 			NOT = { flag:tenet_gnosticism = { is_in_list = selected_doctrines } }
 		}
-		parameters = {}
+		parameters = {
+			hostility_override_special_doctrine_is_jewish_faith = 2
+			jewish_syncretic_actor_opinion_active = yes
+			opinion_of_jewish_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+		
+		traits = {
+			virtues = { patient }
+			sins = { cynical greedy }
+		}
 	}
 	
 	doctrine_christian_judaic_role_demiurge = {
@@ -1417,7 +1471,9 @@ doctrine_christian_judaic_role = {
 				}
 			}
 		}
-		parameters = {}
+		parameters = {
+			hositility_override_doctrine_christian_judaic_role_judaizers = 3
+		}
 	}
 }
 
@@ -1434,6 +1490,16 @@ special_tolerance = {
 	}
 	
 	special_doctrine_ecumenical_christian = {
-		parameters = { hostility_override_special_doctrine_ecumenical_christian = 1 }
+		parameters = {
+			hostility_override_special_doctrine_ecumenical_christian = 1
+			hostility_override_special_doctrine_full_communion_christian = 1
+		}
+	}
+	
+	special_doctrine_full_communion_christian = {
+		parameters = {
+			hostility_override_special_doctrine_ecumenical_christian = 1
+			hostility_override_special_doctrine_full_communion_christian = 0
+		}
 	}
 }
