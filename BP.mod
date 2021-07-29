@@ -1,13 +1,3 @@
 name = "Butterfly Project"
 
 path = "mod/BP"
-user_dir = "BP"
-replace_path = "common/dynasties"
-replace_path = "history"
-replace_path = "history/characters"
-replace_path = "history/diplomacy"
-replace_path = "history/provinces"
-replace_path = "history/technology"
-replace_path = "history/titles"
-replace_path = "history/provinces"
-replace_path = "history/wars"
