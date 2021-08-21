@@ -316,21 +316,20 @@ window = {
 
 ### START: FOR RELIGION-SPECIFIC DOCTRINES HERE
 
-								
+								#Christian Doctrines
 								vbox = {
+									visible = "[GetPlayer.GetFaith.HasDoctrineByKey( 'special_doctrine_is_christian_faith' )]"
 									layoutpolicy_horizontal = expanding
 									spacing = 10
 
 									text_label_left = {
 										layoutpolicy_horizontal = expanding
-										text = "FAITH_DOCTRINES_RELIGION_SPECIFIC"
+										text = "FAITH_DOCTRINES_CHRISTIAN_SPECIFIC"
 										default_format = "#low"
 									}
 
 									fixedgridbox = {
-										#Only Make Christian doctrines visible to christians
-										visible = "[GetPlayer.GetFaith.HasDoctrineByKey( 'special_doctrine_is_christian_faith' )]"
-										name = "FAITH_DOCTRINES_RELIGION_SPECIFIC"
+										name = "FAITH_DOCTRINES_CHRISTIAN_SPECIFIC"
 										datamodel = "[FaithCreationWindow.GetGroupingHelper( 'christian_doctrines' ).GetGrouping]"
 
 										flipdirection = yes
@@ -338,9 +337,32 @@ window = {
 										addrow = 65
 										datamodel_wrap = 2
 
-										item = {
-											widget_doctrine_selection_item = {}
-										}
+										item = { widget_doctrine_selection_item = {} }
+									}
+								}
+
+								#Hindu doctrines
+								vbox = {
+									visible = "[GetPlayer.GetFaith.HasDoctrineByKey( 'special_doctrine_is_hinduism_faith' )]"
+									layoutpolicy_horizontal = expanding
+									spacing = 10
+
+									text_label_left = {
+										layoutpolicy_horizontal = expanding
+										text = "FAITH_DOCTRINES_HINDU_SPECIFIC"
+										default_format = "#low"
+									}
+
+									fixedgridbox = {
+										name = "FAITH_DOCTRINES_HINDU_SPECIFIC"
+										datamodel = "[FaithCreationWindow.GetGroupingHelper( 'hindu_doctrines' ).GetGrouping]"
+
+										flipdirection = yes
+										addcolumn = 270
+										addrow = 65
+										datamodel_wrap = 2
+
+										item = { widget_doctrine_selection_item_unique = {} }
 									}
 								}
 
@@ -971,12 +993,23 @@ window = {
 
 											icon_doctrine = {
 												name = "doctrine_icon_other"
-												visible = "[And(Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' )), Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' )))]"
+												visible = "[And( Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' )), Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' )) )]"
 												texture = "[FaithDoctrine.GetGroup.GetIcon]"
 												size = { 60 60 }
 												position = { 5 10 }
 											}
+											
+############################################################################## SPECIAL ##################################################
+											icon_doctrine = {
+												name = "doctrine_icon_hindu"
+												visible = "[EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'hindu_doctrines' )]"
+												texture = "[FaithDoctrine.GetIcon]"
+												size = { 60 60 }
+												position = { 5 10 }
+											}
+############################################################################## END SPECIAL ##############################################
 
+											## Core Tenets setup
 											widget = {
 												name = "doctrine_icon_core_bg"
 												visible = "[EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' )]"
@@ -1214,6 +1247,65 @@ types "FaithCreation"
 				{
 					texture = "[FaithDoctrine.GetGroup.GetIcon]"
 				}
+
+				alpha = "[Select_float( GetPlayer.GetFaith.HasDoctrine( GuiFaithDoctrineItem.GetDoctrine ), '(float)0.4', '(float)1.0' )]"
+			}
+
+			vbox = {
+				layoutpolicy_horizontal = expanding
+
+				text_single = {
+					name = "doctrine_group_name"
+					text = "[FaithDoctrine.GetGroup.GetName( GuiFaithDoctrineItem.GetFaith )]"
+					align = left
+					default_format = "#low"
+					layoutpolicy_horizontal = expanding
+					autoresize = no
+					fontsize_min = 12
+				}
+
+				text_single = {
+					name = "faith_name"
+					text = "[FaithDoctrine.GetNameNoTooltip( GuiFaithDoctrineItem.GetFaith )]"
+					datacontext = "[GuiFaithDoctrineItem.GetFaith]"
+					layoutpolicy_horizontal = expanding
+					elide = right
+					autoresize = no
+					fontsize_min = 12
+					align = left
+				}
+			}
+		}
+	}
+	
+	#For cases with unique art
+	type widget_doctrine_selection_item_unique = button_standard_hover {
+		size = { 240 53 }
+		tooltip = "FAITH_WINDOW_DOCTRINE_CHANGE_TOOLTIP"
+		datacontext = "[GuiFaithCreationDoctrineItem.GetGuiFaithDoctrineItem]"
+		datacontext = "[GuiFaithDoctrineItem.GetDoctrine]"
+		onclick = "[GuiFaithCreationDoctrineItem.GetFaithCreationWindow.GetDoctrineGroupWindow.ShowWindow( GuiFaithCreationDoctrineItem.GetSlotIndex )]"
+		onclick = "[GetVariableSystem.Set( 'faith_creation_right_view', 'doctrine_selection' )]"
+		onclick = "[GetVariableSystem.Set( 'doctrine_group_name', FaithDoctrine.GetGroup.GetName( GuiFaithDoctrineItem.GetFaith ) )]"
+		down = "[And(GetVariableSystem.HasValue( 'doctrine_group_name', FaithDoctrine.GetGroup.GetName( GuiFaithDoctrineItem.GetFaith ) ), GetVariableSystem.HasValue( 'faith_creation_right_view', 'doctrine_selection' ))]"
+
+		background = {
+			using = Background_Area
+			margin = { 5 5 }
+		}
+
+		hbox = {
+			name = "faith_list_item"
+			datacontext = "[GuiFaithDoctrineItem.GetDoctrine]"
+			spacing = 5
+			using = tooltip_nw
+			tooltip = "FAITH_WINDOW_DOCTRINE_TOOLTIP"
+
+			icon_doctrine = {
+				name = "doctrine_icon"
+				size = { 50 50 }
+				block "doctrine_icon_texture"
+				{ texture = "[FaithDoctrine.GetIcon]" }
 
 				alpha = "[Select_float( GetPlayer.GetFaith.HasDoctrine( GuiFaithDoctrineItem.GetDoctrine ), '(float)0.4', '(float)1.0' )]"
 			}
