@@ -1,0 +1,199 @@
+﻿#Effects used in animal events
+
+#################
+# Elephant
+#################
+
+#Effect to start the story and show the right modifier
+start_elephant_story_cycle_effect = {
+	show_as_tooltip = {
+		add_character_modifier = {
+			modifier = elephant_story_modifier
+		}
+	}
+	hidden_effect = {
+		create_story = story_cycle_pet_elephant
+	}
+}
+
+#Pick out name options to show
+assign_name_options_elephant_story_cycle_effect = {
+	random_list = {
+		1 = {
+			trigger = { NOT = { has_character_flag = name_raja } }
+			add_character_flag = name_raja
+		}
+		1 = {
+			trigger = { NOT = { has_character_flag = name_balarama } }
+			add_character_flag = name_balarama
+		}
+		10 = {
+			trigger = {
+				NOT = { has_character_flag = name_drona }
+			}
+			add_character_flag = name_drona
+		}
+		10 = {
+			trigger = {
+				NOT = { has_character_flag = name_kandula }
+			}
+			add_character_flag = name_kandula
+		}
+		10 = {
+			trigger = {
+				NOT = { has_character_flag = name_arjuna }
+			}
+			add_character_flag = name_arjuna
+		}
+		10 = {
+			trigger = {
+				NOT = { has_character_flag = name_hanno }
+			}
+			add_character_flag = name_hanno
+		}
+		10 = { 
+			trigger = { 
+				NOT = { has_character_flag = name_kaavan }
+			}
+			add_character_flag = name_kaavan
+		}
+		10 = { 
+			trigger = { 
+				NOT = { has_character_flag = name_suleiman }
+			}
+			add_character_flag = name_suleiman
+		}
+		10 = {
+			trigger = {
+				NOT = { has_character_flag = name_jumbo }
+				has_culture_group = culture_group:east_african_group
+			}
+			add_character_flag = name_jumbo
+		}
+	}
+}
+
+clear_name_options_elephant_story_cycle_effect = {
+	remove_character_flag = name_raja
+	remove_character_flag = name_balarama
+	remove_character_flag = name_kandula
+	remove_character_flag = name_drona
+	remove_character_flag = name_arjuna
+	remove_character_flag = name_kaavan
+	remove_character_flag = name_hanno
+	remove_character_flag = name_jumbo
+	remove_character_flag = name_suleiman
+}
+
+#Assign the gender of the Elephant
+assign_elephant_gender_effect = {
+	save_temporary_scope_value_as = {
+		name = gender
+		value = flag:$GENDER$
+	}
+	if = {
+		limit = { scope:gender = flag:random }
+		hidden_effect = {
+			random_list = {
+				50 = {
+					set_variable = {
+						name = elephant_gender
+						value = flag:female
+					}
+				}
+				50 = {
+					set_variable = {
+						name = elephant_gender
+						value = flag:male
+					}
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			OR = {
+				scope:gender = flag:male
+				scope:gender = flag:female
+			}
+		}
+		set_variable = {
+			name = elephant_gender
+			value = flag:$GENDER$
+		}
+	}
+}
+
+#Assign the skin-color of the elephant
+assign_elephant_skin_color_effect = {
+	save_temporary_scope_value_as = {
+		name = skin_color
+		value = flag:$COLOR$
+	}
+	if = {
+		limit = { scope:fur_color = flag:random }
+		hidden_effect = {
+			random_list = {
+				90 = {
+					set_variable = {
+						name = elephant_skin_color
+						value = flag:gray
+					}
+				}
+				10 = {
+					set_variable = {
+						name = elephant_skin_color
+						value = flag:white
+					}
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			OR = {
+				scope:skin_color = flag:white
+				scope:skin_color = flag:gray
+			}
+		}
+		set_variable = {
+			name = elephant_skin_color
+			value = flag:$COLOR$
+		}
+	}
+}
+
+#Remove everything related to the story
+remove_elephant_story_modifiers_effect = {
+	if = {
+		limit = {
+			has_character_modifier = elephant_story_modifier
+		}
+		remove_character_modifier = elephant_story_modifier
+	}
+}
+
+#Effect to transfer the story to another character
+transfer_elephant_story_cycle_to_effect = {
+	remove_cat_story_modifiers_effect = yes
+
+	$CHARACTER$ = {
+		set_variable = {
+			name = story_cycle_elephant_name
+			value = $STORY$.var:story_cycle_elephant_name
+		}
+		add_character_modifier = {
+			modifier = elephant_story_modifier
+		}
+		add_character_flag = had_elephant_story
+	}
+
+	remove_variable = story_cycle_elephant_name
+
+	$STORY$ = {
+		make_story_owner = $CHARACTER$
+	}
+}
+
+
+

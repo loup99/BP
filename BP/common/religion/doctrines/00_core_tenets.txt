@@ -1,4 +1,13 @@
-﻿doctrine_core_tenets = {
+﻿#LT-Rascek: Some tenet changes taken from "Dharmachakra" and modified
+#
+#Usage Note from Dharmachakra:
+#Latest Version: 1.3.0 "Vishnu" (Released 26/12/2020)
+#
+#Dharmachakra is a flavor mod for CK3 focused on the Indian Subcontient and the neighboring regions of Burma and Tibet, as well as the Dharmic Religions of Buddhism, Jainism, and Hinduism and religions influenced by them.
+#
+#Feel free to use my work in your mods - all I ask is that I am credited and (if possible) to give me a heads up.
+
+doctrine_core_tenets = {
 	group = "core_tenets"
 	number_of_picks = 3
 
@@ -771,6 +780,18 @@
 	############################
 
 	tenet_adaptive = {
+		name = {
+			first_valid = {
+				triggered_desc = {
+					trigger = {
+						religion_tag = jainism_religion
+					}
+					desc = tenet_adaptive_jain_name
+				}
+				desc = tenet_adaptive_name
+			}
+		}
+
 		icon = core_tenet_cabal
 		piety_cost = {
 			if = {
@@ -807,10 +828,7 @@
 		can_pick = {
 			custom_description = {
 				text = doctrine_inverted_pluralism_pluralistic_trigger
-				NOR = {
-					flag:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines }
-					flag:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
-				}
+				NOT = {	flag:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }}
 			}
 		}
 
@@ -1389,6 +1407,7 @@
 
 		parameters = {
 			reincarnation_resistance_to_conversion = yes
+			reincarnation_events_active = yes
 			holy_wars_forbidden = yes
 			pacifist_opinion_active = yes
 			opinion_of_pacifist_opinion_active = 10
@@ -1489,6 +1508,50 @@
 
 		character_modifier = {
 			monthly_piety_gain_per_happy_powerful_vassal_add = 0.3
+		}
+	}
+
+	tenet_dhammavicaya = {
+		icon = core_tenet_altar
+			piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = islam_religion
+						religion_tag = judaism_religion
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_literalism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			religion_tag = buddhism_religion
+		}
+
+		traits = {
+			virtues = {
+				education_learning_3
+				education_learning_4
+				scholar
+			}
+		}
+
+		character_modifier = {
+			monthly_learning_lifestyle_xp_gain_mult = 0.1
+		}
+
+		parameters = {
+			literalist_debate_enabled = yes
 		}
 	}
 

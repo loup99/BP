@@ -1,0 +1,404 @@
+﻿namespace = dharma_jainism
+
+
+#######################################
+#									  #
+#        Jainism Flavor Events        #
+#									  #
+#######################################
+
+
+#######################################
+# Visiting Monks 
+#######################################
+dharma_jainism.001 = {# jain Monk comes to visit
+	type = character_event
+	title = dharma_jainism.001.t
+	desc = dharma_jainism.001.desc
+	theme = faith
+	override_background = {
+		event_background = throne_room
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	trigger = {
+		is_at_war = no
+		religion = religion:jainism_religion
+		is_landed = yes	
+	}
+
+	option = {
+		name = dharma_jainism.001.a
+		hidden_effect = {
+			trigger_event = { id = dharma_jainism.002 days = 10 }
+			trigger_event = { id = dharma_jainism.003 days = 15 }
+			trigger_event = { id = dharma_jainism.004 days = 20 }
+		}
+	}
+}
+dharma_jainism.002 = {# Donations for the Monk
+	type = character_event
+	title = dharma_jainism.002.t
+	desc = dharma_jainism.002.desc
+	theme = faith
+	override_background = {
+		event_background = india_shrine
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	option = {# Here you go. 
+		name = dharma_jainism.002.a
+		remove_short_term_gold = 20
+		stress_impact = {
+			base = miniscule_stress_impact_loss
+			greedy = minor_stress_gain
+			improvident = minor_stress_impact_loss
+			generous = minor_stress_impact_loss
+		}
+	}
+}
+dharma_jainism.003 = {# Meditating with the Monk
+	type = character_event
+	title = dharma_jainism.003.t
+	desc = dharma_jainism.003.desc
+	theme = faith
+	override_background = {
+		event_background = india_shrine
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	option = {# sorry I am busy
+		name = dharma_jainism.003.busy
+		add_piety = -25
+	}
+	option = {# Meditate
+		name = dharma_jainism.003.meditate
+		add_piety = 25
+	}
+
+}
+dharma_jainism.004 = {# Fasting with the Monk
+	type = character_event
+	title = dharma_jainism.004.t
+	desc = dharma_jainism.004.desc
+	theme = faith
+	override_background = {
+		event_background = india_shrine
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	option = {# fast for a day
+		name = dharma_jainism.004.fast
+		stress_impact = {
+			base = minor_stress_impact_gain
+			# People with these traits like fasting
+			inappetetic = minor_stress_loss
+			temperate = minor_stress_loss
+			zealous = minor_stress_loss
+			chaste = minor_stress_loss
+			# People with these traits don't like to fast
+			gluttonous = minor_stress_gain
+			temperate = minor_stress_gain
+			lustful = minor_stress_gain
+			comfort_eater = minor_stress_gain
+			hashishiyah = minor_stress_gain
+			rakish = minor_stress_gain
+			drunkard = minor_stress_gain
+			reveler_1 = minor_stress_gain
+			reveler_2 = minor_stress_gain
+			reveler_3 = minor_stress_gain
+			reveler_4 = minor_stress_gain
+
+		}
+		add_piety = 50
+	}
+	option = {# Don't fast
+		name = dharma_jainism.004.nofast
+		stress_impact = {
+			# People with these traits like fasting
+			inappetetic = miniscule_stress_impact_gain
+			temperate = miniscule_stress_impact_gain
+			zealous = miniscule_stress_impact_gain
+			chaste = miniscule_stress_impact_gain
+			# People with these traits don't like to fast
+			gluttonous = minor_stress_loss
+			temperate = minor_stress_loss
+			lustful = minor_stress_loss
+			comfort_eater = minor_stress_loss
+			hashishiyah = minor_stress_loss
+			rakish = minor_stress_loss
+			drunkard = minor_stress_loss
+			reveler_1 = minor_stress_gain
+			reveler_2 = minor_stress_gain
+			reveler_3 = minor_stress_gain
+			reveler_4 = minor_stress_gain
+		}
+		add_piety = -50
+	}
+}
+#######################################
+# Jain Flavor Events 
+#######################################
+dharma_jainism.006 = {# Non-Indian merchants upset about naked Jain ascetics
+	type = character_event
+	title = dharma_jainism.006.t
+	desc = dharma_jainism.006.desc
+	theme = faith
+	override_background = {
+		event_background = india_shrine
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	trigger = {
+		is_at_war = no
+		is_landed = yes	
+		capital_province = {
+			geographical_region = world_india
+		}
+	}
+
+	immediate = {
+		random_sub_realm_barony = {
+			title_province = {
+				county = {
+					limit = {
+						geographical_region = world_india
+						is_coastal = yes
+					}
+					save_scope_as = guild_county
+				}
+			}
+		}
+		# Compile list of affected characters for Option B
+		every_vassal = {
+			limit = {
+				religion = religion:jainism_religion
+			}
+			add_to_list = jain_characters
+		}
+		every_courtier = {
+			limit = {
+				religion = religion:jainism_religion
+			}
+			add_to_list = jain_characters
+		}
+	}
+
+	option = {# So What
+		name = dharma_jainism.006.monks_stay
+		if = {
+			limit = { religion = religion:jainism_religion }
+			add_piety = minor_piety_gain
+		}
+		if = {
+			limit = { NOT = { religion = religion:jainism_religion } }
+			add_piety = miniscule_piety_gain
+		}
+		scope:guild_county = {
+			add_county_modifier = {
+				modifier = stewardship_domain_special_1500_resentful_guilds
+				days = 1825
+			}
+		}
+	}
+	option = {# tell the Jain ascetics to move
+		name = dharma_jainism.006.monks_move
+		if = {
+			limit = { religion = religion:jainism_religion }
+			add_piety = minor_piety_loss
+		}
+		if = {
+			limit = { NOT = { religion = religion:jainism_religion } }
+			add_piety = miniscule_piety_loss
+		}
+		every_in_list = {
+			list = jain_characters
+			add_opinion = {
+				modifier = annoyed_opinion
+				target = root
+				opinion = -10
+			}
+		}
+	}
+
+}
+dharma_jainism.007 = {# Meditating on the Five Great Vows
+	type = character_event
+	title = dharma_jainism.007.t
+	desc = dharma_jainism.007.desc
+	theme = faith
+	override_background = {
+		event_background = throne_room
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	trigger = {
+		is_at_war = no
+		religion = religion:jainism_religion
+		is_landed = yes	
+	}
+
+	option = {# Ahimsa
+		name = dharma_jainism.007.ahimsa
+		add_character_modifier = {
+			modifier = jain_vow_ahimsa
+			days = 365
+		}
+	}
+	option = {# Satya
+		name = dharma_jainism.007.satya
+		add_character_modifier = {
+			modifier = jain_vow_satya
+			days = 365
+		}
+	}
+	option = {# Asteya
+		name = dharma_jainism.007.asteya
+		add_character_modifier = {
+			modifier = jain_vow_asteya
+			days = 365
+		}
+	}
+	option = {# Aparigraha
+		name = dharma_jainism.007.aparigraha
+		add_character_modifier = {
+			modifier = jain_vow_aparigraha
+			days = 365
+		}
+	}
+	option = {# Brahamacarya
+		name = dharma_jainism.007.brahmacarya
+		add_character_modifier = {
+			modifier = jain_vow_brahamacarya
+			days = 365
+		}
+	}
+
+}
+dharma_jainism.008 = {# Fasting
+	type = character_event
+	title = dharma_jainism.008.t
+	desc = dharma_jainism.008.desc
+	theme = faith
+	override_background = {
+		event_background = throne_room
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	trigger = {
+		is_at_war = no
+		religion = religion:jainism_religion
+		is_landed = yes	
+	}
+
+	option = {# Chauvihar
+		name = dharma_jainism.008.chauvihar
+		flavor = dharma_jainism.008.chauvihar.tt
+		add_piety = 2
+		stress_impact = {
+			base = miniscule_stress_impact_gain
+			gluttonous = minor_stress_gain
+		}
+	}
+	option = {# Aayambil
+		name = dharma_jainism.008.aayambil
+		flavor = dharma_jainism.008.aayambil.tt
+		add_piety = 6
+		stress_impact = {
+			base = miniscule_stress_impact_gain
+			gluttonous = minor_stress_gain
+		}
+	}
+	option = {# Aathai - 8 day fast
+		name = dharma_jainism.008.aathai
+		flavor = dharma_jainism.008.aathai.tt
+		stress_impact = {
+			base = minor_stress_impact_gain
+			inappetetic = miniscule_stress_impact_gain
+			gluttonous = minor_stress_gain
+		}
+		add_piety = 24
+		add_character_modifier = {
+			modifier = exhausted_modifier
+			days = 11
+		}
+	}
+	option = {# Navai - 9 day fast
+		name = dharma_jainism.008.navai
+		flavor = dharma_jainism.008.navai.tt
+		stress_impact = {
+			base = minor_stress_impact_gain
+			inappetetic = miniscule_stress_impact_gain
+			gluttonous = minor_stress_gain
+		}
+		add_piety = 26
+		add_character_modifier = {
+			modifier = exhausted_modifier
+			days = 12
+		}
+	}
+	option = {# Solbhathu - 16 day fast
+		name = dharma_jainism.008.solbhathu
+		flavor = dharma_jainism.008.solbhathu.tt
+		stress_impact = {
+			base = medium_stress_impact_gain
+			inappetetic = minor_stress_gain
+			gluttonous = medium_stress_gain
+		}
+		add_piety = 35
+		add_character_modifier = {
+			modifier = exhausted_modifier
+			days = 19
+		}
+	}
+}
+dharma_jainism.009 = {# New statue of the tirthankaras
+	type = character_event
+	title = dharma_jainism.009.t
+	desc = dharma_jainism.009.desc
+	theme = faith
+	override_background = {
+		event_background = wood_temple
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}	
+
+	trigger = {
+		is_at_war = no
+		religion = religion:jainism_religion
+		is_landed = yes	
+	}
+
+	option = {# patronize the statue
+		name = dharma_jainism.009.patronize
+		add_gold = -50
+		add_piety = 40
+	}
+	option = {# Sadly I can't afford it atm
+		name = dharma_jainism.009.no_patronize
+		add_piety = -20
+	}
+}
