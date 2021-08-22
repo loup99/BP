@@ -203,3 +203,59 @@ select_personal_deity_zoroastrian_decision = {
 		base = 100
 	}
 }
+
+peregrinition_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+
+	desc = peregrinition_decision_desc
+	selection_tooltip = peregrinition_decision_tooltip
+	major = yes
+
+	is_shown = {
+		faith = { has_doctrine_parameter = peregrinition_active }
+	}
+
+	is_valid = {
+		OR = {
+			has_trait = zealous
+			has_trait = humble
+		}
+		NOT = { has_trait = ambitious }
+		exists = primary_heir
+	}
+
+	effect = {
+		save_scope_as = actor
+		depose = yes
+		hidden_effect = { add_piety_level = 1 }
+		show_as_tooltip = { add_piety_level = 1 }
+		add_trait = devoted
+		if = {
+			limit = { is_married = yes }
+			every_spouse = { divorce = scope:actor }
+		}
+	}
+
+	ai_check_interval = 60
+	
+	ai_potential = {
+		exists = primary_heir
+		primary_heir = { dynasty = root.dynasty }
+		is_at_war = no
+	}
+
+	#Cribbed from Consolateum
+	ai_will_do = {
+		base = 0
+
+		# 100% chance at 50 zeal
+		ai_value_modifier = {
+			ai_zeal = 2
+		}
+
+		modifier = {
+			add = 40
+			is_close_family_of = primary_heir
+		}
+	}
+}
