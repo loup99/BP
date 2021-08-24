@@ -216,24 +216,61 @@ peregrinition_decision = {
 	}
 
 	is_valid = {
-		OR = {
-			has_trait = zealous
-			has_trait = humble
-		}
+		save_scope_as = actor
+		has_trait = zealous
 		NOT = { has_trait = ambitious }
-		exists = primary_heir
+		#You can't leave without your heir being of age
+		trigger_if = {
+			limit = { is_ruler = yes }
+			custom_description = {
+				text = is_a_ruler_and_has_a_valid_player_heir
+				exists = player_heir
+				player_heir = { age >= 16 }
+			}
+		}
 	}
 
 	effect = {
 		save_scope_as = actor
-		depose = yes
 		hidden_effect = { add_piety_level = 1 }
 		show_as_tooltip = { add_piety_level = 1 }
 		add_trait = devoted
 		if = {
+			limit = { is_ruler = yes }
+			depose = yes
+		}
+		#Remove spouses and spouse adjacent
+		if = {
 			limit = { is_married = yes }
 			every_spouse = { divorce = scope:actor }
 		}
+		if = {
+			limit = { exists = betrothed }
+			break_betrothal = betrothed
+		}
+		if = {
+			limit = { is_concubine = yes }
+			this.concubinist = { remove_concubine = scope:actor }
+		}
+		if = {
+			limit = { number_of_concubines > 0 }
+			every_concubine = { scope:actor = { remove_concubine = prev } }
+		}
+		#Remove wards
+		if = {
+			limit = { any_courtier = { has_relation_ward = scope:actor } }
+			every_courtier = {
+				limit = { has_relation_ward = scope:actor }
+				remove_relation_ward = scope:actor
+				return_to_court = yes
+			}
+		}
+		#Remove all claims
+		every_claim = {
+			scope:actor = { remove_claim = prev }
+		}
+		#Go into the wilderness
+		select_and_move_to_pool_effect = yes
 	}
 
 	ai_check_interval = 60
