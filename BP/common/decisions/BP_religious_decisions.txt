@@ -296,3 +296,86 @@ peregrinition_decision = {
 		}
 	}
 }
+
+automutiliation_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+
+	desc = automutiliation_decision_desc
+	selection_tooltip = automutiliation_decision_tooltip
+	major = yes
+
+	is_shown = {
+		faith = { has_doctrine = special_doctrine_sacred_eunuchs }
+	}
+
+	is_valid = {
+		save_scope_as = actor
+		has_trait = zealous
+		#You can't hurt yourself without at least an heir
+		trigger_if = {
+			limit = { is_ruler = yes }
+			custom_description = {
+				text = is_a_ruler_and_has_a_player_heir
+				exists = player_heir
+			}
+		}
+	}
+
+	effect = {
+		save_scope_as = actor
+		hidden_effect = { add_piety_level = 1 }
+		show_as_tooltip = { add_piety_level = 1 }
+		add_trait = devoted
+		add_trait = eunuch
+		
+		#Remove spouses and spouse adjacent
+		if = {
+			limit = { is_married = yes }
+			every_spouse = { divorce = scope:actor }
+		}
+		if = {
+			limit = { exists = betrothed }
+			break_betrothal = betrothed
+		}
+		if = {
+			limit = { is_concubine = yes }
+			this.concubinist = { remove_concubine = scope:actor }
+		}
+		if = {
+			limit = { number_of_concubines > 0 }
+			every_concubine = { scope:actor = { remove_concubine = prev } }
+		}
+		show_as_tooltip = {
+			random_list = {
+				90 = {}
+				4 = { add_trait = ill }
+				3 = { add_trait = wounded_1 }
+				2 = { add_trait = wounded_2 }
+				1 = { add_trait = wounded_3 }
+			}
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {
+		exists = primary_heir
+		primary_heir = { dynasty = root.dynasty }
+		is_at_war = no
+	}
+
+	#Cribbed from Consolateum
+	ai_will_do = {
+		base = 0
+
+		# 100% chance at 50 zeal
+		ai_value_modifier = {
+			ai_zeal = 2
+		}
+
+		modifier = {
+			add = 40
+			is_close_family_of = primary_heir
+		}
+	}
+}
