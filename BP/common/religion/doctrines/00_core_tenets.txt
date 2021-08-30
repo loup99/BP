@@ -3396,6 +3396,57 @@ doctrine_core_tenets = {
 		
 	}
 
+	tenet_ethnic_religion = {
+		icon = core_tenet_followers
+		piety_cost = {
+			if = { #Not-as-universal faiths
+				limit = {
+					religion_tag = judaism_religion
+					religion_tag = jainism_religion
+					religion_tag = dualism_religion #Because Mandeanism
+					religion_tag = hinduism_religion
+				}
+				value = faith_tenet_cost_high
+			}
+			else = { #Cheaper for Pagans
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_communal_identity }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			NOR = { #Not for universalist faiths
+				religion_tag = religion:christianity_religion
+				religion_tag = religion:islam_religion
+				religion_tag = religion:zoroastrianism_religion
+				religion_tag = religion:buddhism_religion
+			}
+		} #Only inheritable from starting religions
+
+		can_pick = { #Should not use communal identity with this; they overlap
+			custom_description = {
+				text = incompatible_tenet_communal_identity_trigger
+				NOT = { flag:tenet_communal_identity = { is_in_list = selected_doctrines } }
+			}
+		}
+
+		parameters = {
+			same_culture_conversion_bonus_active = yes
+			tenet_ethnic_religion_other_culture_conversion_penalty_active = yes
+			tenet_ethnic_religion_conversion_resistance_active = yes
+		}
+
+		character_modifier = {
+			name = "tenet_communal_identity_opinion"
+			same_faith_opinion = 20
+		}
+	}
+
 	#############################
 	# Empty Template Tenet 		#
 	#############################
