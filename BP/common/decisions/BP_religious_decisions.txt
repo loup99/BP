@@ -1,188 +1,259 @@
-﻿#TODO: Based on Germanic Decision, use some scripted modifiers to handles Mars/Ares type localizations
-#TODO: Make options in event window scrollable so all aspects can be added
-select_personal_deity_hellenic_decision = {
+﻿#Christian Decisions
+peregrinition_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
 
-	desc = select_personal_deity_hellenic_decision_desc
-	selection_tooltip = select_personal_deity_hellenic_decision_tooltip
+	desc = peregrinition_decision_desc
+	selection_tooltip = peregrinition_decision_tooltip
+	major = yes
 
 	is_shown = {
-		religion = religion:hellenism_religion
-		faith = { has_doctrine_parameter = select_personal_god_active }
+		faith = { has_doctrine_parameter = peregrinition_active }
 	}
 
-	is_valid = {}
-
-	is_valid_showing_failures_only = {
-		# Have to at _least_ not be in piety debt.
-		piety >= 0
-	}
-	
-	cooldown = { years = 2 }
-
-	effect = {
-		show_as_tooltip = {
-			random_list = {
-				desc = select_personal_deity_hellenic_decision_tt
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_zeus
-					add_character_modifier = kharis_hellenism_zeus
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_hera
-					add_character_modifier = kharis_hellenism_hera
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_athena
-					add_character_modifier = kharis_hellenism_athena
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_ares
-					add_character_modifier = kharis_hellenism_ares
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_demeter
-					add_character_modifier = kharis_hellenism_demeter
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_posidion
-					add_character_modifier = kharis_hellenism_posidion
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_dionysos
-					add_character_modifier = kharis_hellenism_dionysos
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_hephestios
-					add_character_modifier = kharis_hellenism_hephestios
-				}
-				100 = {
-					show_chance = no
-					desc = select_personal_deity_hellenic_decision.select_hermes
-					add_character_modifier = kharis_hellenism_hermes
-				}
-				#100 = {
-				#	show_chance = no
-				#	desc = select_personal_deity_hellenic_decision.select_apollon
-				#	add_character_modifier = kharis_hellenism_apollon
-				#}
-				#100 = {
-				#	show_chance = no
-				#	desc = select_personal_deity_hellenic_decision.select_aphroditite
-				#	add_character_modifier = kharis_hellenism_aphroditite
-				#}
-				#100 = {
-				#	show_chance = no
-				#	desc = select_personal_deity_hellenic_decision.select_artemis
-				#	add_character_modifier = kharis_hellenism_artemis
-				#}
-				#100 = {
-				#	show_chance = no
-				#	desc = select_personal_deity_hellenic_decision.select_herakles
-				#	add_character_modifier = kharis_hellenism_herakles
-				#}
-				#100 = {
-				#	show_chance = no
-				#	desc = select_personal_deity_hellenic_decision.select_asklepios
-				#	add_character_modifier = kharis_hellenism_asklepios
-				#}
+	is_valid = {
+		has_trait = zealous
+		NOT = { has_trait = ambitious }
+		#You can't leave without your heir being of age
+		trigger_if = {
+			limit = { is_ruler = yes }
+			custom_description = {
+				text = is_a_ruler_and_has_a_valid_player_heir
+				exists = player_heir
+				player_heir = { age >= 16 }
 			}
 		}
-		trigger_event = hellenic_decision.0101
 	}
 
-	ai_check_interval = 96
+	effect = {
+		save_scope_as = actor
+		hidden_effect = { add_piety_level = 1 }
+		show_as_tooltip = { add_piety_level = 1 }
+		add_trait = devoted
+		if = {
+			limit = { is_ruler = yes }
+			depose = yes
+		}
+		#Remove spouses and spouse adjacent
+		if = {
+			limit = { is_married = yes }
+			every_spouse = { divorce = scope:actor }
+		}
+		if = {
+			limit = { exists = betrothed }
+			break_betrothal = betrothed
+		}
+		if = {
+			limit = { is_concubine = yes }
+			this.concubinist = { remove_concubine = scope:actor }
+		}
+		if = {
+			limit = { number_of_concubines > 0 }
+			every_concubine = { scope:actor = { remove_concubine = prev } }
+		}
+		#Remove wards
+		if = {
+			limit = { any_courtier = { has_relation_ward = scope:actor } }
+			every_courtier = {
+				limit = { has_relation_ward = scope:actor }
+				remove_relation_ward = scope:actor
+				return_to_court = yes
+			}
+		}
+		#Remove all claims
+		every_claim = {
+			scope:actor = { remove_claim = prev }
+		}
+		#Go into the wilderness
+		select_and_move_to_pool_effect = yes
+	}
+
+	ai_check_interval = 60
 	
 	ai_potential = {
-		piety >= minor_piety_value
-		NOR = {
-			has_character_modifier = kharis_hellenism_zeus
-			has_character_modifier = kharis_hellenism_hera
-			has_character_modifier = kharis_hellenism_athena
-			has_character_modifier = kharis_hellenism_ares
-			has_character_modifier = kharis_hellenism_demeter
-			has_character_modifier = kharis_hellenism_posidion
-			has_character_modifier = kharis_hellenism_dionysos
-			has_character_modifier = kharis_hellenism_hephestios
-			has_character_modifier = kharis_hellenism_hermes
-			#has_character_modifier = kharis_hellenism_apollon
-			#has_character_modifier = kharis_hellenism_aphroditite
-			#has_character_modifier = kharis_hellenism_artemis
-			#has_character_modifier = kharis_hellenism_herakles
-			#has_character_modifier = kharis_hellenism_asklepios
-		}
+		exists = primary_heir
+		primary_heir = { dynasty = root.dynasty }
+		is_at_war = no
 	}
 
+	#Cribbed from Consolateum
 	ai_will_do = {
-		base = 100
+		base = 0
+
+		# 100% chance at 50 zeal
+		ai_value_modifier = {
+			ai_zeal = 2
+		}
+
+		modifier = {
+			add = 40
+			is_close_family_of = primary_heir
+		}
 	}
 }
 
-select_personal_deity_zoroastrian_decision = {
+#Pagan Decisions
+automutiliation_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
 
-	desc = select_personal_deity_zoroastrian_decision_desc
-	selection_tooltip = select_personal_deity_zoroastrian_decision_tooltip
+	desc = automutiliation_decision_desc
+	selection_tooltip = automutiliation_decision_tooltip
+	major = yes
 
 	is_shown = {
-		religion = religion:zoroastrianism_religion
-		faith = { has_doctrine_parameter = select_personal_god_active }
+		faith = { has_doctrine = special_doctrine_sacred_eunuchs }
 	}
 
-	is_valid = {}
+	is_valid = {
+		has_trait = zealous
+		#You can't hurt yourself without at least an heir
+		trigger_if = {
+			limit = { is_ruler = yes }
+			custom_description = {
+				text = is_a_ruler_and_has_a_player_heir
+				exists = player_heir
+			}
+		}
+	}
+
+	effect = {
+		save_scope_as = actor
+		hidden_effect = { add_piety_level = 1 }
+		show_as_tooltip = { add_piety_level = 1 }
+		add_trait = devoted
+		add_trait = eunuch
+		
+		#Remove spouses and spouse adjacent
+		if = {
+			limit = { is_married = yes }
+			every_spouse = { divorce = scope:actor }
+		}
+		if = {
+			limit = { exists = betrothed }
+			break_betrothal = betrothed
+		}
+		if = {
+			limit = { is_concubine = yes }
+			this.concubinist = { remove_concubine = scope:actor }
+		}
+		if = {
+			limit = { number_of_concubines > 0 }
+			every_concubine = { scope:actor = { remove_concubine = prev } }
+		}
+		show_as_tooltip = {
+			random_list = {
+				90 = {}
+				4 = { add_trait = ill }
+				3 = { add_trait = wounded_1 }
+				2 = { add_trait = wounded_2 }
+				1 = { add_trait = wounded_3 }
+			}
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {
+		exists = primary_heir
+		primary_heir = { dynasty = root.dynasty }
+		is_at_war = no
+	}
+
+	#Cribbed from Consolateum
+	ai_will_do = {
+		base = 0
+
+		# 100% chance at 50 zeal
+		ai_value_modifier = {
+			ai_zeal = 2
+		}
+
+		modifier = {
+			add = 40
+			is_close_family_of = primary_heir
+		}
+	}
+}
+
+#Hindu Decisions
+
+#Philosophies
+# Orthodox Schools: Samkhya, Yoga, Vedanta, Vaiśeṣika, Nyaya, Mīmāṃsā
+# Hetrodox Schools: Sramana, Carvaka, Ajivika
+
+select_hindu_philosophy_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+
+	desc = select_hindu_philosophy_decision_desc
+	selection_tooltip = select_hindu_philosophy_decision_tooltip
+
+	is_shown = {
+		religion = religion:hinduism_religion
+		is_adult = yes
+	}
+
+	is_valid = {
+		has_trait = scholar
+	}
 
 	is_valid_showing_failures_only = {
 		# Have to at _least_ not be in piety debt.
 		piety >= 0
+		is_imprisoned = no
 	}
-	
+
 	cooldown = { years = 2 }
 
+	#Link triggers to BP_hindu_decisions.txt
 	effect = {
 		show_as_tooltip = {
 			random_list = {
-				desc = select_personal_deity_zoroastrian_decision_tt
+				desc = select_hindu_philosophy_decision_tt
 				100 = {
 					show_chance = no
-					desc = select_personal_deity_zoroastrian_decision.select_vohu_manah
-					add_character_modifier = bhakti_vohu_manah
+					desc = select_hindu_philosophy_decision.samkhya
+					add_trait = hindu_philosophy_samkhya
+				}
+				100 = {
+					trigger = { NOT = { has_trait = cynical } }
+					show_chance = no
+					desc = select_hindu_philosophy_decision.yoga
+					add_trait = hindu_philosophy_yoga
 				}
 				100 = {
 					show_chance = no
-					desc = select_personal_deity_zoroastrian_decision.select_khshathra_vairya
-					add_character_modifier = bhakti_khshathra_vairya
+					desc = select_hindu_philosophy_decision.nyaya
+					add_trait = hindu_philosophy_nyaya
 				}
 				100 = {
 					show_chance = no
-					desc = select_personal_deity_zoroastrian_decision.select_haurvatat
-					add_character_modifier = bhakti_haurvatat
+					desc = select_hindu_philosophy_decision.vaisheshika
+					add_trait = hindu_philosophy_vaisheshika
 				}
 				100 = {
 					show_chance = no
-					desc = select_personal_deity_zoroastrian_decision.select_asha_vahishta
-					add_character_modifier = bhakti_asha_vahishta
+					desc = select_hindu_philosophy_decision.mimamsa
+					add_trait = hindu_philosophy_mimamsa
 				}
 				100 = {
 					show_chance = no
-					desc = select_personal_deity_zoroastrian_decision.select_armaiti
-					add_character_modifier = bhakti_armaiti
+					desc = select_hindu_philosophy_decision.vedanta
+					add_trait = hindu_philosophy_vedanta
 				}
 				100 = {
+					trigger = { NOT = { has_trait = zealous } }
 					show_chance = no
-					desc = select_personal_deity_zoroastrian_decision.select_ameretat
-					add_character_modifier = bhakti_ameretat
+					desc = select_hindu_philosophy_decision.charvaka
+					add_trait = hindu_philosophy_charvaka
+				}
+				100 = {
+					trigger = { NOT = { has_trait = zealous } }
+					show_chance = no
+					desc = select_hindu_philosophy_decision.ajivika
+					add_trait = hindu_philosophy_ajivika
 				}
 			}
 		}
-		trigger_event = zoroastrian_decision.0101
+		trigger_event = hindu_decision.0101
 	}
 
 	ai_check_interval = 96
@@ -190,12 +261,14 @@ select_personal_deity_zoroastrian_decision = {
 	ai_potential = {
 		piety >= minor_piety_value
 		NOR = {
-			has_character_modifier = bhakti_vohu_manah
-			has_character_modifier = bhakti_khshathra_vairya
-			has_character_modifier = bhakti_haurvatat
-			has_character_modifier = bhakti_asha_vahishta
-			has_character_modifier = bhakti_armaiti
-			has_character_modifier = bhakti_ameretat
+			has_trait = hindu_philosophy_samkhya
+			has_trait = hindu_philosophy_yoga
+			has_trait = hindu_philosophy_nyaya
+			has_trait = hindu_philosophy_vaisheshika
+			has_trait = hindu_philosophy_mimamsa
+			has_trait = hindu_philosophy_vedanta
+			has_trait = hindu_philosophy_charvaka
+			has_trait = hindu_philosophy_ajivika
 		}
 	}
 

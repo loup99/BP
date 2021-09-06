@@ -355,10 +355,9 @@ window = {
 							using = Animation_Refresh_FadeOut
 						}
 
-						state = {
-							using = Animation_Refresh_FadeIn
-						}
+						state = { using = Animation_Refresh_FadeIn }
 
+						#Sins and Virtues
 						hbox = {
 							name = "sins_and_virtues"
 							layoutpolicy_vertical = expanding
@@ -487,6 +486,7 @@ window = {
 							}
 						}
 
+						#Main Doctrines
 						text_label_center = {
 							layoutpolicy_horizontal = expanding
 							text = "FAITH_DOCTRINES_IMPORTANT"
@@ -590,25 +590,52 @@ window = {
 
 ### START: FOR RELIGION-SPECIFIC DOCTRINES HERE
 
-						divider = {
+					#Christian Doctrines
+					vbox = {
+							visible = "[Faith.HasDoctrineByKey( 'special_doctrine_is_christian_faith' )]"
 							layoutpolicy_horizontal = expanding
-						}
+							spacing = 10
 
-						text_label_left = {
+							text_label_left = {
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_DOCTRINES_CHRISTIAN_SPECIFIC"
+								default_format = "#low"
+							}
+
+							#Christian Doctrines
+							fixedgridbox = {
+								datamodel = "[FaithWindow.GetGroupingHelper( 'christian_doctrines' ).GetGrouping]"
+								flipdirection = yes
+								addcolumn = 230
+								addrow = 65
+								datamodel_wrap = 2
+
+								item = { widget_doctrine_item = {} }
+							}
+							
+						}
+						
+						vbox = {
+							visible = "[Faith.HasDoctrineByKey( 'special_doctrine_is_hinduism_faith' )]"
 							layoutpolicy_horizontal = expanding
-							text = "FAITH_DOCTRINES_RELIGION_SPECIFIC"
-							default_format = "#low"
-						}
+							spacing = 10
 
-						fixedgridbox = {
-							datamodel = "[FaithWindow.GetGroupingHelper( 'christian_doctrines' ).GetGrouping]"
-							flipdirection = yes
-							addcolumn = 270
-							addrow = 65
-							datamodel_wrap = 2
+							text_label_left = {
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_DOCTRINES_HINDU_SPECIFIC"
+								default_format = "#low"
+							}
 
-							item = {
-								widget_doctrine_item = {}
+							
+							#Hindu Doctrines
+							fixedgridbox = {
+								datamodel = "[FaithWindow.GetGroupingHelper( 'hindu_doctrines' ).GetGrouping]"
+								flipdirection = yes
+								addcolumn = 270
+								addrow = 65
+								datamodel_wrap = 2
+
+								item = { widget_doctrine_item_unique = {} }
 							}
 						}
 
@@ -1463,4 +1490,69 @@ types FaithWindow
 			}
 		}
 	}
+	
+######################### NEW CODE #################################
+	type widget_doctrine_item_unique = widget {
+		size = { 210 53 }
+		block "wdi_context"
+		{
+			datacontext = "[GuiFaithDoctrineItem.GetDoctrine]"
+			datacontext = "[GuiFaithDoctrineItem.GetFaith]"
+		}
+
+		block "background" {
+			background = {
+				using = Background_Area
+				margin = { 5 5 }
+			}
+		}
+
+		hbox = {
+			name = "faith_list_item"
+			block "tooltip" { #### current solution as to not display 2 different tooltips for special doctrines
+				tooltip = "FAITH_WINDOW_DOCTRINE_TOOLTIP_WITH_FAITH"
+			}
+			spacing = 8
+
+			using = tooltip_ne
+
+			block "doctrine_icon"
+			{
+				icon_doctrine = {
+					name = "doctrine_group_icon"
+					size = { 50 50 }
+
+					texture = "[FaithDoctrine.GetIcon]"
+				}
+			}
+
+			vbox = {
+				layoutpolicy_horizontal = expanding
+
+				text_single = {
+					name = "doctrine_group_name"
+					layoutpolicy_horizontal = expanding
+					align = left
+					autoresize = no
+					fontsize_min = 12
+					# default_format = "#low"
+					block "text_title"
+					{ text = "[FaithDoctrine.GetGroup.GetName( Faith.Self )]" }
+				}
+
+				text_single = {
+					name = "faith_name"
+					layoutpolicy_horizontal = expanding
+					elide = right
+					autoresize = no
+					fontsize_min = 12
+					align = left
+					default_format = "#high"
+					block "text_desc"
+					{ text = "[FaithDoctrine.GetNameNoTooltip( Faith.Self )]" }
+				}
+			}
+		}
+	}
 }
+######################### NEW CODE #################################
