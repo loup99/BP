@@ -15,6 +15,9 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	target_de_jure_regions_above = yes
 	ignore_effect = change_title_holder
 	
+	#One of the two must loose
+	white_peace_possible = no
+	
 	ai_can_target_all_titles = {}
 	ai_score_mult = {}
 
@@ -41,8 +44,10 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 
 	on_invalidated_desc = msg_invasion_war_invalidated_message
 	
-	on_invalidated = {}
+	#If invalidated, destroy the Kingdom of Italy but don't imprison Odacer
+	on_invalidated = { scope:attacker = { destroy_title = title:k_italy } }
 
+	#No cost, event driven
 	cost = {}
 	
 	on_declaration = { on_declared_war = yes }
@@ -96,12 +101,12 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				}
 			}
 		}
-		#Destroy invalid titles (WORKS!)
+		#Destroy invalid titles
 		every_in_list = {
 			list = titles_destroyed
 			scope:defender = { destroy_title = prev }
 		}
-		#Transfer Counties (not working)
+		#Transfer Counties
 		every_in_list = {
 			list = titles_taken
 			change_title_holder = {
@@ -110,7 +115,7 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				take_baronies = no
 			}
 		}
-		#Transfer vassals (not working)
+		#Transfer vassals
 		every_in_list = {
 			list = vassals_taken
 			change_liege = {
@@ -120,104 +125,23 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		}
 		resolve_title_and_vassal_change = scope:change
 		
-		#title:e_wre = {
-		#	every_in_de_facto_hierarchy = {
-		#		continue = {
-		#			OR = {
-		#				NOT = { exists = holder }
-		#			}
-		#		}
-		#		limit = {
-		#			tier = tier_county
-		#			exists = holder
-		#			holder = {
-		#				OR = {
-		#					this = scope:defender
-		#					target_is_liege_or_above = scope:defender
-		#				}
-		#			}
-		#		}
-		#		if = {
-		#			limit = { holder = scope:defender }
-		#			add_to_temporary_list = titles_taken
-		#		}
-		#		else = { holder = { add_to_temporary_list = vassals_taken } }
-		#	}
-		#}
-		#scope:defender = {
-		#	every_held_title = {
-		#		limit = { tier >= tier_duchy }
-		#		root = { destroy_title = prev }
-		#	}
-		#}
-		##Resolve Vassal Transfer
-		#every_in_list = {
-		#	list = titles_destroyed
-		#	destroy_title = title:e_wre
-		#}
-		##Resolve Vassal Transfer
-		#every_in_list = {
-		#	list = vassals_taken
-		#	change_liege = {
-		#		liege = scope:attacker
-		#		change = scope:change
-		#	}
-		#}
-		##Resolve Title Transfer
-		#every_in_list = {
-		#	list = titles_taken
-		#	change_title_holder = {
-		#		holder = scope:attacker
-		#		change = scope:change
-		#		take_baronies = no
-		#	}
-		#}
-
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
-		#modify_all_participants_fame_values = {}
-
+		modify_all_participants_fame_values = {
+			WINNER = scope:attacker
+			LOSER = scope:defender
+			FAME_BASE = scope:cb_prestige_factor # Set by 'setup_invasion_cb'
+			IS_RELIGIOUS_WAR = no
+			WINNER_FAME_SCALE = 10
+			LOSER_FAME_SCALE = -10
+			WINNER_ALLY_FAME_SCALE = 10
+			LOSER_ALLY_FAME_SCALE = 10
+		}
+		
 		# Truce
-		#add_truce_attacker_victory_effect = yes
+		add_truce_attacker_victory_effect = yes
 	}
 
-	on_white_peace_desc = {
-		first_valid = {
-			triggered_desc = {
-				trigger = { scope:defender = { is_local_player = yes } }
-				desc = invasion_war_white_peace_desc_defender
-			}
-			desc = invasion_war_white_peace_desc
-		}
-	}
-	
-	on_white_peace = {
-		scope:attacker = { show_pow_release_message_effect = yes }
-
-		# Prestige for the attacker's war allies
-		add_from_contribution_attackers = {
-			prestige = major_prestige_value
-			opinion = { modifier = contributed_in_war }
-		}
-
-		# Prestige for the defender's war allies
-		add_from_contribution_defenders = {
-			prestige = major_prestige_value
-			opinion = { modifier = contributed_in_war }
-		}
-
-		# Truce
-		add_truce_white_peace_effect = yes
-
-		scope:attacker = {
-			add_prestige = mongol_invasion_cb_prestige_white_peace
-			stress_impact = {
-				ambitious = medium_stress_impact_gain
-				arrogant = medium_stress_impact_gain
-			}
-		}
-
-		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
-	}
+	#No white peace possible
 
 	on_defeat_desc = {
 		first_valid = {
@@ -232,25 +156,25 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 
-		# Prestige loss for the attacker
+		# Prestige loss for the attacker and imprionment
 		scope:attacker = {
-			pay_short_term_gold = {
-				gold = 5
-				target = scope:defender
-				yearly_income = yes
-			}
 			add_prestige = {
 				value = massive_prestige_value
 				multiply = -1.0
 			}
-		}
-		
-		setup_invasion_cb = {
-			titles = target_titles
-			attacker = scope:attacker
-			defender = scope:defender
-			claimant = scope:claimant
-			victory = no
+			#Destroy the Kingdom of Italy
+			destroy_title = title:k_italy
+			#Imprison Odacer
+			hard_imprison_character_effect = {
+				TARGET = this
+				IMPRISONER = scope:defender
+			}
+			scope:defender = {
+				add_opinion = {
+					target = prev
+					modifier = vassal_lost_faction_revolt_war
+				}
+			}
 		}
 
 		# Attacker loses Prestige, all other war participants gain Prestige (Defender gains full prestige, all allies on both sides gain based on war contribution).
@@ -267,9 +191,7 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	
 		add_truce_attacker_defeat_effect = yes
 		
-		scope:attacker = {
-			save_temporary_scope_as = loser
-		}
+		scope:attacker = { save_temporary_scope_as = loser }
 		on_lost_aggression_war_discontent_loss = yes
 	}
 	
