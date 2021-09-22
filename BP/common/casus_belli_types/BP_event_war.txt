@@ -10,9 +10,9 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	allowed_for_character_display_regardless = {}
 	
 	allowed_against_character = {}
-	target_titles = all
-	target_title_tier = all
-	target_de_jure_regions_above = yes
+	target_titles = none
+	target_title_tier = none
+	target_de_jure_regions_above = no
 	ignore_effect = change_title_holder
 	
 	#One of the two must loose
@@ -21,26 +21,9 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	ai_can_target_all_titles = {}
 	ai_score_mult = {}
 
-	valid_to_start = {
-		scope:target = {
-			any_in_de_jure_hierarchy = {
-				tier = tier_county
-				neighboring_county_or_viking_conquest_trigger = { CHARACTER = root }
-			}
-		}
-	}
+	valid_to_start = { always = yes }
 
-	should_invalidate = {
-		NOT = {
-			any_in_list = {
-				list = target_titles
-				any_in_de_jure_hierarchy = {
-					tier = tier_county
-					holder = { target_is_same_character_or_above = scope:defender }
-				}
-			}
-		}
-	}
+	should_invalidate = { NOT = { exists = title:e_wre } }
 
 	on_invalidated_desc = msg_invasion_war_invalidated_message
 	
@@ -96,8 +79,12 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 						}
 						add_to_temporary_list = titles_destroyed
 					}
-					#Otherwise, the character will change lieges
-					else = { holder = { add_to_temporary_list = vassals_taken } }
+					#Transfer all direct vassal to the new king
+					else_if = {
+						limit = { holder = { is_vassal_of = scope:defender } }
+						holder = { add_to_temporary_list = vassals_taken }
+						
+					}
 				}
 			}
 		}
@@ -129,12 +116,12 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		modify_all_participants_fame_values = {
 			WINNER = scope:attacker
 			LOSER = scope:defender
-			FAME_BASE = scope:cb_prestige_factor # Set by 'setup_invasion_cb'
+			FAME_BASE = 1000
 			IS_RELIGIOUS_WAR = no
-			WINNER_FAME_SCALE = 10
-			LOSER_FAME_SCALE = -10
-			WINNER_ALLY_FAME_SCALE = 10
-			LOSER_ALLY_FAME_SCALE = 10
+			WINNER_FAME_SCALE = 1
+			LOSER_FAME_SCALE = -1
+			WINNER_ALLY_FAME_SCALE = 0.5
+			LOSER_ALLY_FAME_SCALE = 0.5
 		}
 		
 		# Truce
@@ -181,12 +168,12 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		modify_all_participants_fame_values = {
 			WINNER = scope:defender
 			LOSER = scope:attacker
-			FAME_BASE = scope:cb_prestige_factor # Set by 'setup_claim_cb'
+			FAME_BASE = 1000
 			IS_RELIGIOUS_WAR = no
-			WINNER_FAME_SCALE = 10
-			LOSER_FAME_SCALE = -10
-			WINNER_ALLY_FAME_SCALE = 10
-			LOSER_ALLY_FAME_SCALE = 10
+			WINNER_FAME_SCALE = 1
+			LOSER_FAME_SCALE = -1
+			WINNER_ALLY_FAME_SCALE = 0.5
+			LOSER_ALLY_FAME_SCALE = 0.5
 		}
 	
 		add_truce_attacker_defeat_effect = yes
