@@ -1,5 +1,5 @@
 ﻿#Cribbed from Vanilla CK3 Imperial Reconquest
-wre_imperial_reconquest_cb = {
+the_roman_empires_imperial_reconquest_cb = {
 	group = de_jure
 
 	#you should at least have to siege down something, and the wars should have the potential to be longer and costlier
@@ -11,11 +11,22 @@ wre_imperial_reconquest_cb = {
 
 	allowed_for_character = {
 		scope:attacker = {
-			has_title = title:e_wre
+			#Title ownserhips restrictions
+			OR = {
+				AND = { #WRE case
+					has_title = title:e_wre
+					NOT = { has_title = title:e_byzantium }
+					NOT = { has_claim_on = title:e_roman_empire }
+				}
+				AND = { #ERE case
+					has_title = title:e_byzantium
+					NOT = { has_title = title:e_wre }
+					NOT = { has_claim_on = title:e_roman_empire }
+				}
+				has_title = title:e_roman_empire
+			}
 			valid_reconquest_culture_trigger = yes
 			is_independent_ruler = yes #Unnecessary until tributaries makes a come-back
-			NOT = { has_title = title:e_byzantium }
-			NOT = { has_claim_on = title:e_roman_empire }
 		}
 	}
 	
@@ -23,6 +34,7 @@ wre_imperial_reconquest_cb = {
 		scope:defender = {
 			NOT = { faith.religion = religion:islam_religion }
 			NOR = {
+				has_title = title:e_wre
 				has_title = title:e_byzantium
 				has_title = title:e_roman_empire
 			}
@@ -45,11 +57,36 @@ wre_imperial_reconquest_cb = {
 	}
 	
 	valid_to_start = {
-		scope:target = {
-			tier = tier_kingdom
-			any_in_de_jure_hierarchy = {
-				tier = tier_county
-				title_province = { geographical_region = world_roman_empire_west }
+		OR = {
+			AND = { #WRE case
+				scope:attacker = { has_title = title:e_wre }
+				scope:target = {
+					tier = tier_kingdom
+					any_in_de_jure_hierarchy = {
+						tier = tier_county
+						title_province = { geographical_region = world_roman_empire_west }
+					}
+				}
+			}
+			AND = { #ERE case
+				scope:attacker = { has_title = title:e_byzantium }
+				scope:target = {
+					tier = tier_kingdom
+					any_in_de_jure_hierarchy = {
+						tier = tier_county
+						title_province = { geographical_region = world_roman_empire_east }
+					}
+				}
+			}
+			AND = { #Roman Empire case
+				scope:attacker = { has_title = title:e_roman_empire }
+				scope:target = {
+					tier = tier_kingdom
+					any_in_de_jure_hierarchy = {
+						tier = tier_county
+						title_province = { geographical_region = world_roman_empire }
+					}
+				}
 			}
 		}
 	}
