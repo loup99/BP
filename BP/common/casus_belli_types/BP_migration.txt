@@ -1,5 +1,5 @@
 ﻿#Migration CB
-# Originally written by Zusk, ported by LT-Rascek
+# Originally written by Zusk, ported to CK3 by LT-Rascek
 migration_war = { #Cribbed from Vanilla Invasions
 	group = invasion
 
@@ -48,7 +48,7 @@ migration_war = { #Cribbed from Vanilla Invasions
 			create_title_and_vassal_change = {
 				type = independency
 				save_scope_as = change_migration_declared
-				add_claim_on_loss = yes
+				add_claim_on_loss = no
 			}
 			#Liberate infidel/non-cultural vassals
 			every_vassal = {
@@ -62,9 +62,9 @@ migration_war = { #Cribbed from Vanilla Invasions
 						}
 					}
 					becomes_independent = { change = scope:change_migration_declared }
-					resolve_title_and_vassal_change = scope:change_migration_declared
 				}
 			}
+			resolve_title_and_vassal_change = scope:change_migration_declared
 			#Spawn armies in counties of the same faith & religion
 			primary_title = {
 				every_in_de_facto_hierarchy = {
@@ -73,8 +73,14 @@ migration_war = { #Cribbed from Vanilla Invasions
 						culture = scope:attacker.culture
 						faith = scope:attacker.faith
 					}
-					create_migratory_army = yes
-					change_development_level = this.migration_depopulation
+					if = {
+						limit = {
+							culture = scope:attacker.culture
+							faith = scope:attacker.faith
+						}
+						create_migratory_army = yes
+						change_development_level = this.migration_depopulation
+					}
 				}
 			}
 		}
@@ -137,6 +143,12 @@ migration_war = { #Cribbed from Vanilla Invasions
 				add_to_temporary_list = titles_taken
 			}
 		}
+		scope:attacker = { #Mark titles for later separation
+			every_held_title = {
+				limit = { tier = tier_county }
+				add_to_temporary_list = attackers_counties
+			}
+		}
 		#Seize counties outside of the target that are occupied
 		scope:defender = {
 			primary_title = {
@@ -186,15 +198,58 @@ migration_war = { #Cribbed from Vanilla Invasions
 				years = 10
 			}
 		}
+		hidden_effect = {
+			#Liberate remaining vassals of your culture/religion
+			scope:attacker = {
+				create_title_and_vassal_change = {
+					type = independency
+					save_scope_as = change_victorious_migration
+					add_claim_on_loss = yes
+				}
+				every_vassal = {
+					limit = { primary_title.tier > tier_barony }
+					becomes_independent = { change = scope:change_victorious_migration }
+				}
+			}
+			#Create new chars and hand them the attacker's counties
+			every_in_list = {
+				list = attackers_counties
+				
+				create_character = {
+					location = scope:attacker.location
+					culture = this.culture
+					faith = this.faith
+					gender_female_chance = { #TODO: Make more-religion/culture dynamic
+						if = {
+							limit = { scope:attacker = { is_male = yes } }
+							value = 0
+						}
+						else = {
+							value = 100
+						}
+					}
+					save_scope_as = new_char
+				}
+				change_title_holder = {
+					holder = scope:new_char
+					change = scope:change_victorious_migration
+					take_baronies = yes
+				}
+				scope:new_char = {
+					becomes_independent = { change = scope:change_victorious_migration }
+				}
+			}
+			resolve_title_and_vassal_change = scope:change_victorious_migration
+		}
 	}
 
 	on_white_peace_desc = {
 		first_valid = {
 			triggered_desc = {
 				trigger = { scope:defender = { is_local_player = yes } }
-				desc = invasion_war_white_peace_desc_defender
+				desc = migration_war_white_peace_desc_defender
 			}
-			desc = invasion_war_white_peace_desc
+			desc = migration_war_white_peace_desc
 		}
 	}
 	
@@ -212,9 +267,7 @@ migration_war = { #Cribbed from Vanilla Invasions
 		# Prestige for the defender's war allies
 		add_from_contribution_defenders = {
 			prestige = major_prestige_value
-			opinion = {
-				modifier = contributed_in_war
-			}
+			opinion = { modifier = contributed_in_war }
 		}
 
 		# Truce
@@ -228,11 +281,7 @@ migration_war = { #Cribbed from Vanilla Invasions
 			}
 		}
 
-		scope:defender = {
-			stress_impact = {
-				arrogant = medium_stress_impact_gain
-			}
-		}
+		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
 		scope:attacker = {
@@ -247,9 +296,9 @@ migration_war = { #Cribbed from Vanilla Invasions
 		first_valid = {
 			triggered_desc = {
 				trigger = { scope:defender = { is_local_player = yes } }
-				desc = invasion_war_white_peace_desc_defender
+				desc = migration_war_defeat_desc_defender
 			}
-			desc = invasion_war_white_peace_desc
+			desc = migration_war_defeat_desc
 		}
 	}
 	
