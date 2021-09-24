@@ -1,7 +1,7 @@
 ﻿#Migration CB
 # Originally written by Zusk, ported to CK3 by LT-Rascek
 migration_war = { #Cribbed from Vanilla Invasions
-	group = invasion
+	group = migration
 
 	combine_into_one = yes
 	should_show_war_goal_subview = yes
@@ -112,7 +112,7 @@ migration_war = { #Cribbed from Vanilla Invasions
 		}
 		triggered_desc = {
 			trigger = { scope:attacker = { is_local_player = yes } }
-			desc = invasion_war_warning_desc
+			desc = migration_war_warning_desc
 		}
 	}
 	
@@ -165,6 +165,14 @@ migration_war = { #Cribbed from Vanilla Invasions
 		
 		every_in_list = {
 			list = titles_taken
+			
+			change_development_level = this.migration_new_administration
+			
+			add_county_modifier = {
+				modifier = county_recently_migrated_to_modifier
+				years = 25
+			}
+			
 			change_title_holder = {
 				holder = scope:attacker
 				change = scope:change
@@ -214,6 +222,12 @@ migration_war = { #Cribbed from Vanilla Invasions
 			#Create new chars and hand them the attacker's counties
 			every_in_list = {
 				list = attackers_counties
+				
+				add_county_modifier = {
+					modifier = county_recently_migrated_away_modifier
+					years = 25
+				}
+				change_county_control = -75
 				
 				create_character = {
 					location = scope:attacker.location
@@ -315,6 +329,15 @@ migration_war = { #Cribbed from Vanilla Invasions
 			add_prestige = {
 				value = massive_prestige_value
 				multiply = -1.0
+			}
+			#Failing migration hurts you
+			every_held_title = {
+				limit = { tier = tier_county }
+				add_county_modifier = {
+					modifier = county_failed_migraiton_modifier
+					years = 10
+				}
+				change_county_control = -25
 			}
 		}
 		
