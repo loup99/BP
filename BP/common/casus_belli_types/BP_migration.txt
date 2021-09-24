@@ -162,23 +162,6 @@ migration_war = { #Cribbed from Vanilla Invasions
 				}
 			}
 		}
-		
-		every_in_list = {
-			list = titles_taken
-			
-			change_development_level = this.migration_new_administration
-			
-			add_county_modifier = {
-				modifier = county_recently_migrated_to_modifier
-				years = 25
-			}
-			
-			change_title_holder = {
-				holder = scope:attacker
-				change = scope:change
-				take_baronies = yes
-			}
-		}
 		resolve_title_and_vassal_change = scope:change
 
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
@@ -217,6 +200,15 @@ migration_war = { #Cribbed from Vanilla Invasions
 				every_vassal = {
 					limit = { primary_title.tier > tier_barony }
 					becomes_independent = { change = scope:change_victorious_migration }
+				}
+			}
+			every_in_list = {
+				list = titles_taken
+				
+				change_development_level = this.migration_new_administration
+				add_county_modifier = {
+					modifier = county_recently_migrated_to_modifier
+					years = 25
 				}
 			}
 			#Create new chars and hand them the attacker's counties
@@ -264,6 +256,10 @@ migration_war = { #Cribbed from Vanilla Invasions
 				desc = migration_war_white_peace_desc_defender
 			}
 			desc = migration_war_white_peace_desc
+		}
+		triggered_desc = {
+			trigger = { scope:attacker = { is_local_player = yes } }
+			desc = migration_war_warning_desc
 		}
 	}
 	
@@ -314,6 +310,10 @@ migration_war = { #Cribbed from Vanilla Invasions
 			}
 			desc = migration_war_defeat_desc
 		}
+		triggered_desc = {
+			trigger = { scope:attacker = { is_local_player = yes } }
+			desc = migration_war_warning_desc
+		}
 	}
 	
 	on_defeat = {
@@ -329,15 +329,6 @@ migration_war = { #Cribbed from Vanilla Invasions
 			add_prestige = {
 				value = massive_prestige_value
 				multiply = -1.0
-			}
-			#Failing migration hurts you
-			every_held_title = {
-				limit = { tier = tier_county }
-				add_county_modifier = {
-					modifier = county_failed_migraiton_modifier
-					years = 10
-				}
-				change_county_control = -25
 			}
 		}
 		
@@ -373,6 +364,19 @@ migration_war = { #Cribbed from Vanilla Invasions
 				years = 10
 			}
 		}
+		hidden_effect = {
+			scope:attacker = {
+				#Failing migration hurts you
+				every_held_title = {
+					limit = { tier = tier_county }
+					add_county_modifier = {
+						modifier = county_failed_migraiton_modifier
+						years = 10
+					}
+					change_county_control = -25
+				}
+			}
+		}
 	}
 	
 	transfer_behavior = transfer
@@ -384,7 +388,7 @@ migration_war = { #Cribbed from Vanilla Invasions
 	defender_allies_inherit = yes
 	
 	war_name = "MIGRATION_WAR_NAME"
-	war_name_base = "MIGRATION_WAR_NAME"
+	war_name_base = "MIGRATION_WAR_NAME_BASE"
 	cb_name = "MIGRATION_CB_NAME"
 	
 	interface_priority = 100
