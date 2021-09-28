@@ -1,5 +1,6 @@
-﻿create_migratory_army = {
-	scope:attacker = {
+﻿### Army Spawns
+create_migratory_army = {
+	$ATTACKER$ = {
 		spawn_army = {
 			name = event_troop_default_name
 			levies = prev.migration_levies
@@ -66,5 +67,514 @@ create_zeno_army = {
 		location = $LOCATION$
 		war = scope:war
 		inheritable = no
+	}
+}
+
+### General Migration CB Code
+
+#Migration CB Title Shenanigans
+migration_cb_title_management = {
+	create_title_and_vassal_change = {
+		type = conquest
+		save_scope_as = change_titles_taken
+		add_claim_on_loss = yes
+	}
+	create_title_and_vassal_change = {
+		type = granted
+		save_scope_as = change_grant_title_to_other_chars
+		add_claim_on_loss = no
+	}
+	create_title_and_vassal_change = {
+		type = independency
+		save_scope_as = change_vassal_status
+		add_claim_on_loss = no
+	}
+	#Seize all holdings in the target kingdom
+	every_in_list = {
+		list = $TARGET_TITLES$
+		
+		#Go over counties to seize
+		every_in_de_jure_hierarchy = {
+			limit = {
+				tier = tier_county
+				exists = holder
+				holder = {
+					OR = {
+						target_is_liege_or_above = $DEFENDER$
+						this = $DEFENDER$
+					}
+				}
+			}
+			add_to_temporary_list = titles_taken
+		}
+	}
+	#Mark titles for later separation and mark independence if needed
+	$ATTACKER$ = {
+		every_held_title = {
+			limit = { tier = tier_county }
+			add_to_temporary_list = attackers_counties
+		}
+		if = {
+			limit = { is_independent_ruler = no }
+			becomes_independent = { change = scope:change_grant_title_to_other_chars }
+		}
+	}
+	#Seize titles
+	every_in_list = {
+		list = titles_taken
+		change_title_holder = {
+			holder = $ATTACKER$
+			change = scope:change_titles_taken
+			take_baronies = yes
+		}
+	}
+	#Liberate vassals, or hand them to your liege if not independent
+	$ATTACKER$ = {
+		if = {
+			limit = { is_independent_ruler = yes }
+			every_vassal = {
+				limit = { primary_title.tier > tier_barony }
+				becomes_independent = { change = scope:change_vassal_status }
+			}
+		}
+		else = {
+			every_vassal = {
+				limit = { primary_title.tier > tier_barony }
+				change_liege = {
+					liege = $ATTACKER$.liege
+					change = scope:change_vassal_status
+				}
+			}
+		}
+	}
+	#If I am an independent ruler, make new holders for my counties
+	if = {
+		limit = { $ATTACKER$ = { is_independent_ruler = yes } }
+		every_in_list = {
+			list = attackers_counties
+			
+			create_character = {
+				location = $ATTACKER$.location
+				culture = this.culture
+				faith = this.faith
+				gender_female_chance = { #TODO: Make more-religion/culture dynamic
+					if = {
+						limit = { $ATTACKER$ = { is_male = yes } }
+						value = 0
+					}
+					else = {
+						value = 100
+					}
+				}
+				save_scope_as = new_char
+			}
+			change_title_holder = {
+				holder = scope:new_char
+				change = scope:change_grant_title_to_other_chars
+				take_baronies = yes
+			}
+			scope:new_char = { becomes_independent = { change = scope:change_vassal_status } }
+		}
+	}
+	#Otherwise give my counties to my liege
+	else = {
+		every_in_list = {
+			list = attackers_counties
+			
+			change_title_holder = {
+				holder = $ATTACKER$.liege
+				change = scope:change_grant_title_to_other_chars
+				take_baronies = yes
+			}
+		}
+	}
+	resolve_title_and_vassal_change = scope:change_titles_taken
+	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars
+	resolve_title_and_vassal_change = scope:change_vassal_status
+	#Apply county effects
+	hidden_effect = { #apply county modifiers to new counties
+		#text = "minor_migration_apply_modifiers_to_new_counties"
+		every_in_list = {
+			list = titles_taken
+			add_county_modifier = {
+				modifier = county_recently_migrated_to_minor_modifier
+				years = 10
+			}
+			add_county_modifier = {
+				modifier = county_modifier_minor_migration_minor_aristocracy
+				years = 50
+			}
+		}
+	}
+	hidden_effect = { #apply county modifiers to old counties
+		#text = "minor_migration_apply_modifiers_to_old_counties"
+		#Regardless, apply county modifiers
+		every_in_list = {
+			list = attackers_counties
+			add_county_modifier = {
+				modifier = county_recently_migrated_away_minor_modifier
+				years = 10
+			}
+			change_county_control = -50
+		}
+	}
+}
+#Migration CB Titular Title Shenanigans
+create_titular_title_if_needed = {
+	#If our primary title **isn't** titular, create a new one of the same rank
+	#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
+	#and counties that have been handed out become independent
+	if = {
+		limit = { $ATTACKER$.primary_title = { is_titular = no } }
+		
+		create_title_and_vassal_change = {
+			type = created
+			save_scope_as = change_primary_title
+			add_claim_on_loss = no
+		}
+		
+		$ATTACKER$ = {
+			primary_title = { save_scope_as = old_title }
+			
+			if = {
+				limit = { $ATTACKER$.primary_title.tier = tier_duchy }
+				create_dynamic_title = {
+					tier = duchy
+					name = MIGRATORY_TITLE_NAME
+				}
+			}
+			else = {
+				create_dynamic_title = {
+					tier = kingdom
+					name = MIGRATORY_TITLE_NAME
+				}
+			}
+			scope:new_title = {
+				change_title_holder = {
+					holder = $ATTACKER$
+					change = scope:change_primary_title
+				}
+			}
+		}
+		resolve_title_and_vassal_change = scope:change_primary_title
+		$ATTACKER$ = {
+			scope:new_title = {
+				set_coa = $ATTACKER$.house
+				set_color_from_title = $ATTACKER$.capital_province.county
+				set_capital_county = $ATTACKER$.capital_province.county
+			}
+			set_primary_title_to = scope:new_title
+			destroy_title = scope:old_title
+		}
+	}
+}
+#Migration CB Improve Government (Minor Wars only)
+improve_government_form = {
+#If the target was advanced, bootstrap improvement to government form
+	if = {
+		limit = { 
+			$DEFENDER$ = {
+				OR = {
+					has_government = subroman_government
+					has_government = eranshar_government
+					has_government = gupta_government
+					has_government = gubernatorial_government
+					has_government = bureaucratic_government
+					has_government = feudal_government
+				}
+			}
+		}
+		$ATTACKER$ = { change_government = high_tribal_government }
+	}
+}
+#Add migratory invasion flag
+add_migration_flag = {
+	$ATTACKER$ = {
+		add_character_flag = {
+			flag = launched_migration_war_recently
+			years = 10
+		}
+	}
+}
+#Setup new capital
+setup_new_capital = {
+	$ATTACKER$ = {
+		every_held_title = {
+			limit = { tier = tier_county }
+			add_to_list = counties_held
+		}
+	}
+	ordered_in_list = {
+		list = counties_held
+		order_by = this.development_level
+		save_scope_as = new_capital
+		$ATTACKER$ = { set_realm_capital = scope:new_capital }
+	}
+}
+
+### Major Migrations
+
+#Liberate non-participants
+add_attackers_and_liberate_non_particpants = {
+	scope:attacker = {
+		trigger_event = migration_war.0001
+		every_vassal = {
+			limit = { primary_title.tier > tier_barony }
+			save_scope_as = target_vassal
+			trigger_event = migration_war.0002
+		}
+	}
+}
+#Spawn armies based on development
+spawn_armies_from_development = {
+	$ATTACKER$ = {
+		every_held_title = {
+			limit = { tier = tier_county }
+			if = {
+				limit = { major_migration_valid_source_counties = { ATTACKER = $ATTACKER$ } }
+				create_migratory_army = { ATTACKER = $ATTACKER$ }
+				change_development_level = this.migration_depopulation
+			}
+		}
+	}
+}
+#Major Migration CB Title Shenanigans
+major_migration_cb_title_management = {
+	create_title_and_vassal_change = {
+		type = conquest
+		save_scope_as = change_titles_taken
+		add_claim_on_loss = yes
+	}
+	create_title_and_vassal_change = {
+		type = granted
+		save_scope_as = change_grant_title_to_other_chars
+		add_claim_on_loss = no
+	}
+	create_title_and_vassal_change = {
+		type = independency
+		save_scope_as = change_vassal_status
+		add_claim_on_loss = no
+	}
+	#Mark former counties for later separation and number of vassals for bookkeeping
+	$ATTACKER$ = {
+		every_held_title = {
+			limit = { tier = tier_county }
+			add_to_temporary_list = former_counties
+			if = {
+				limit = { major_migration_valid_source_counties = { ATTACKER = this.holder } }
+				add_to_temporary_list = former_source_counties
+			}
+		}
+		every_vassal = {
+			limit = {
+				primary_title.tier > tier_barony
+				has_character_flag = participating_vassal
+			}
+			add_to_temporary_list = participating_vassals
+			every_held_title = {
+				limit = { tier = tier_county }
+				add_to_temporary_list = former_counties
+				if = {
+					limit = { major_migration_valid_source_counties = { ATTACKER = this.holder } }
+					add_to_temporary_list = former_source_counties
+				}
+			}
+		}
+	}
+	#Mark all counties in the target kingdom for transfer
+	every_in_list = {
+		list = $TARGET_TITLES$
+		every_in_de_jure_hierarchy = {
+			limit = {
+				tier = tier_county
+				exists = holder
+				holder = {
+					OR = {
+						target_is_liege_or_above = $DEFENDER$
+						this = $DEFENDER$
+					}
+				}
+			}
+			add_to_temporary_list = full_list_of_target_counties
+			add_to_temporary_list = target_counties
+			add_to_temporary_list = counties_seized
+		}
+	}
+	#Mark all counties outside of the target that are occupied
+	$DEFENDER$ = {
+		primary_title = {
+			every_in_de_facto_hierarchy = {
+				limit = { tier = tier_county }
+				if = {
+					limit = { this.county_controller = $ATTACKER$ }
+					add_to_temporary_list = captured_out_of_target_counties
+					add_to_temporary_list = counties_seized
+				}
+			}
+		}
+	}
+	#Change the holder of the seized counties
+	
+	##Start with target counties (because of how the GUI works)
+	
+	### Give the leader his counties
+	
+	#Give the most developed county to the leader
+	ordered_in_list = {
+		list = target_counties
+		order_by = this.development_level
+		save_scope_as = presumed_capital
+		change_title_holder = {
+			holder = $ATTACKER$
+			change = scope:change_titles_taken
+			take_baronies = yes
+		}
+		remove_from_list = target_counties
+	}
+	#Give the at least half the remaining counties
+	ordered_in_list = {
+		list = target_counties
+		order_by = major_migration_selection_value
+		max = major_migration_max_number_of_leader_counties
+		change_title_holder = {
+			holder = $ATTACKER$
+			change = scope:change_titles_taken
+			take_baronies = yes
+		}
+		remove_from_list = target_counties
+	}
+	
+	### Distribute remaining titles
+	if = {
+		limit = {
+			$ATTACKER$ = {
+				vassal_count > 0
+				any_vassal = { has_character_flag = participating_vassal }
+			}
+		}
+		every_in_list = {
+			list = participating_vassals
+			save_scope_as = target_vassal
+			ordered_in_list = { #Give the vassal his capital...
+				list = target_counties
+				order_by = this.development_level
+				save_temporary_scope_as = presumed_capital
+				change_title_holder = {
+					holder = scope:target_vassal
+					change = scope:change_titles_taken
+					take_baronies = yes
+				}
+				remove_from_list = target_counties
+			}
+			ordered_in_list = { #...and his remaining counties
+				list = target_counties
+				order_by = major_migration_selection_value
+				max = major_migration_max_number_of_vassal_counties
+				change_title_holder = {
+					holder = scope:target_vassal
+					change = scope:change_titles_taken
+					take_baronies = yes
+				}
+				remove_from_list = target_counties
+			}
+		}
+	}
+	else = {
+		every_in_list = {
+			list = target_counties
+			change_title_holder = {
+				holder = $ATTACKER$
+				change = scope:change_titles_taken
+				take_baronies = yes
+			}
+			add_to_temporary_list = attackers_counties
+			remove_from_list = target_counties
+		}
+	}
+	
+	#Hand out non-target titles to the leader
+	every_in_list = {
+		list = captured_out_of_target_counties
+		change_title_holder = {
+			holder = $ATTACKER$
+			change = scope:change_titles_taken
+			take_baronies = yes
+		}
+	}
+	#Release former counties to new rulers
+	every_in_list = {
+		list = former_counties
+		
+		create_character = {
+			location = $ATTACKER$.location
+			culture = this.culture
+			faith = this.faith
+			gender_female_chance = { #TODO: Make more-religion/culture dynamic
+				if = {
+					limit = { $ATTACKER$ = { is_male = yes } }
+					value = 0
+				}
+				else = {
+					value = 100
+				}
+			}
+			save_scope_as = new_char
+		}
+		change_title_holder = {
+			holder = scope:new_char
+			change = scope:change_grant_title_to_other_chars
+			take_baronies = yes
+		}
+		scope:new_char = { becomes_independent = { change = scope:change_vassal_status } }
+	}
+	resolve_title_and_vassal_change = scope:change_titles_taken
+	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars
+	resolve_title_and_vassal_change = scope:change_vassal_status
+	#Apply modifiers to counties
+	hidden_effect = { #apply county modifiers to new counties
+		#text = "minor_migration_apply_modifiers_to_new_counties"
+		every_in_list = {
+			list = counties_seized
+			add_county_modifier = {
+				modifier = county_recently_migrated_to_modifier
+				years = major_migration_immigration_emigration_impact_period
+			}
+			add_county_modifier = {
+				modifier = county_modifier_migration_recent_immigration
+				years = major_migration_immigration_emigration_conversion_period
+			}
+			#Change county culture/faiths; 30% chance per county, modified by development/culture
+			random = {
+				chance = major_migration_county_flip_chance
+				modifier = { add = this.major_migration_negative_development_level_modifier } #Modify chance by development
+				modifier = { #Sharing **either** faith or culture => no chance
+					add = major_migration_county_flip_chance_negative
+					OR = {
+						this.culture = holder.culture
+						this.faith = holder.faith
+					}
+				}
+				set_county_faith = holder.faith
+				set_county_culture = holder.culture
+			}
+		}
+	}
+	hidden_effect = { #apply county modifiers to old counties
+		#text = "minor_migration_apply_modifiers_to_old_counties"
+		every_in_list = {
+			list = former_counties
+			change_county_control = major_migration_new_char_county_control_loss
+		}
+		every_in_list = { #If the county was a source for migration, apply conversion boost
+			list = former_source_counties
+			add_county_modifier = {
+				modifier = county_recently_migrated_away_modifier
+				years = major_migration_immigration_emigration_conversion_period
+			}
+			add_county_modifier = {
+				modifier = county_modifier_migration_recent_emigration
+				years = major_migration_immigration_emigration_impact_period
+			}
+		}
 	}
 }

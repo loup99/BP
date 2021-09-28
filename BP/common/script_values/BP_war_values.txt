@@ -11,13 +11,126 @@
 }
 migration_depopulation = {
 	value = county.development_level
-	multiply = -0.5
+	multiply = -0.33
 	#Give a whole number.
 	floor = yes
 }
-migration_new_administration = {
-	value = county.development_level
-	multiply = -0.25
+migration_inverse_development_level = {
+	value = 100
+	subtract = county.development_level
 	#Give a whole number.
 	floor = yes
 }
+
+#Determination of how to hand out target counties
+major_migration_duchy_average_development_level = {
+	value = 0
+	this.duchy = { every_county = { add = this.development_level } }
+	divide = 100 #Scale value from 0 to 1
+	multiply = 100
+}
+major_migration_county_development_level_scale = {
+	value = 0
+	add = this.development_level
+	divide = 100 #Scale value from 0 to 1
+	multiply = 10
+}
+major_migration_duchy_proximity = {
+	value = 1
+	#Chain of neighboring counties
+	#Anything that traces back to the presumed_capital has high priority
+	#More than this leads to noticable lags in the CB window when switching targets
+	if = { #Neighbors-1
+		limit = {
+			this.duchy = {
+				any_county = {
+					any_neighboring_county={any_neighboring_county={this=scope:presumed_capital}}
+				}
+			}
+		}
+		multiply = 2
+	}
+	if = { #Neighbors
+		limit = {
+			this.duchy = {
+				any_county = {
+					any_neighboring_county={this=scope:presumed_capital}
+				}
+			}
+		}
+		multiply = 2
+	}
+	divide = 4 #Scale value from 0 to 1
+	multiply = 1000
+}
+major_migration_selection_value = {
+	value = 0
+	
+	## Emphasize being next to to presumed_capital or in whole duchy
+	
+	#If I am in the same duchy as the presumed capital, I have the highest priority
+	if = {
+		limit = { this.duchy = scope:presumed_capital.duchy }
+		add = 10000
+	}
+	else = { #Otherwise, select duchies by closeness to capital
+		add = major_migration_duchy_proximity
+	}
+	
+	#Preference more developed equidistanct duchies
+	add = major_migration_duchy_average_development_level
+	
+	#Tie breaker/emphasis improvement
+	add = major_migration_county_development_level_scale
+}
+major_migration_max_number_of_leader_counties = {
+	#Count up fraction of target counties going to the leader
+	value = 0
+	every_in_list = {
+		list = full_list_of_target_counties
+		add = 1
+	}
+	divide = 2
+	subtract = 1
+	ceiling = yes
+}
+major_migration_number_of_vassals = {
+	value = 0
+	every_in_list = {
+		list = participating_vassals
+		add = 1
+	}
+}
+major_migration_max_number_of_vassal_counties = {
+	#Count up fraction of target counties going to the leader
+	value = 0
+	every_in_list = {
+		list = full_list_of_target_counties
+		add = 1
+	}
+	subtract = major_migration_max_number_of_leader_counties
+	divide = major_migration_number_of_vassals
+	subtract = 1
+	ceiling = yes
+	#check_range_bounds = no
+}
+
+# Determination of whether a county flips religion & culture or not
+major_migration_county_flip_chance = 30
+major_migration_max_valid_development_for_flip = 10
+major_migration_negative_development_level_modifier = {
+	value = this.development_level
+	divide = major_migration_max_valid_development_for_flip
+	multiply = -1.00
+	multiply = major_migration_county_flip_chance
+	#Give a whole number.
+	floor = yes
+}
+major_migration_county_flip_chance_negative = {
+	value = major_migration_county_flip_chance
+	multiply = -1.00
+}
+#Major Migration county modifier periods (all in years)
+major_migration_immigration_emigration_conversion_period = 10 #How long we get bonuses to convert/promote cultures
+major_migration_immigration_emigration_impact_period = 25 #How long taxes/development/levies are impacted
+major_migration_new_char_county_control_loss = -50 #How much control is lost when giving former counties to newly made chars
