@@ -1,5 +1,11 @@
 ﻿namespace = heresy
 
+#Note of changes:
+#	Removed non-existing vanilla CK3 faiths
+#	All Abrahamics now add all dualists to the list of faiths
+#	Revisited rairity of Dualist faiths
+#	Moved later spawning faith/religions (e.g., catholic/orthodox/syriac_orthodox/islam) to the never spawn pile for now
+
 ##################################
 # Heresy Outbreak (Non-Eastern) #
 # by Sean Hughes				 #
@@ -15,9 +21,7 @@ scripted_trigger nearby_county_of_faith = {
 
 scripted_trigger no_heretical_hof_faith_trigger = { #Head of Faith shouldn't convert.
 	OR = {
-		NOT = {
-			exists = root.religious_head
-		}
+		NOT = { exists = root.religious_head }
 		AND = {
 			exists = root.religious_head
 			NOT = { this = root.religious_head }
@@ -70,7 +74,7 @@ heresy.0001 = {
 			}
 			#If no Dukes exist, accept a Count.
 			alternative_limit = {
-				is_valid_heresiarch = yes		
+				is_valid_heresiarch = yes
 			}
 
 			weight = {
@@ -93,9 +97,7 @@ heresy.0001 = {
 					factor = 10
 					has_game_rule = strict_regional_heresy
 					trigger_if = {
-						limit = {
-							faith = faith:catholic
-						}
+						limit = { faith = faith:catholic }
 						capital_county = {
 							title_province = {
 								OR = {
@@ -107,9 +109,7 @@ heresy.0001 = {
 						}
 					}
 					trigger_if = {
-						limit = {
-							faith = faith:orthodox
-						}
+						limit = { faith = faith:orthodox }
 						capital_county = {
 							title_province = {
 								OR = {
@@ -124,20 +124,14 @@ heresy.0001 = {
 			}
 
 			save_scope_as = heretic_ruler
-			primary_title = {
-				save_scope_as = heretic_title
-			}
-			capital_county = {
-				save_scope_as = heretic_capital
-			}
+			primary_title = { save_scope_as = heretic_title }
+			capital_county = { save_scope_as = heretic_capital }
 		}
 
 
 		#Once we have a heresiarch, look for a valid heretical faith to them to convert to.
 		if = {
-			limit = {
-				exists = scope:heretic_ruler
-			}
+			limit = { exists = scope:heretic_ruler }
 
 			#Save a list of provinces in our religion group (we will be reusing this a lot for distance checks).
 			every_province = {
@@ -154,51 +148,19 @@ heresy.0001 = {
 
 			# Compile a list of possible heresies to convert to.
 			religion = {
-				every_faith = {
-					add_to_list = potential_heresies
-				}
+				every_faith = { add_to_list = potential_heresies }
 				if = {
 					# Abrahamics also get bonus dualistic heresies
-					limit = {
-						is_in_family = rf_abrahamic
-					}
-					if = {
-						limit = {
-							this = religion:christianity_religion
-						}
-						faith:mandeaism = {
-							add_to_list = potential_heresies
-						}
-						faith:priscillianism = {
-							add_to_list = potential_heresies
-						}
-						faith:cainitism = {
-							add_to_list = potential_heresies
-						}
-
-					}
-					else_if = {
-						limit = {
-							this = religion:islam_religion
-						}
-						faith:manichean = {
-							add_to_list = potential_heresies
-						}
-						faith:sabianism = {
-							add_to_list = potential_heresies
-						}
-						faith:valentinianism = {
-							add_to_list = potential_heresies
-						}
-					}
-					else_if = {
-						limit = {
-							this = religion:judaism_religion
-						}
-						faith:sethianism = {
-							add_to_list = potential_heresies
-						}
-					}
+					limit = { is_in_family = rf_abrahamic }
+					#Add all Dualist faiths
+					faith:manichean = { add_to_list = potential_heresies }
+					faith:valentinianism = { add_to_list = potential_heresies }
+					faith:sethianism = { add_to_list = potential_heresies }
+					faith:priscillianism = { add_to_list = potential_heresies }
+					faith:marcosianism = { add_to_list = potential_heresies }
+					faith:mandeaism = { add_to_list = potential_heresies }
+					faith:sabianism = { add_to_list = potential_heresies }
+					faith:cainitism = { add_to_list = potential_heresies }
 				}
 			}
 
@@ -241,16 +203,14 @@ heresy.0001 = {
 					}
 				}
 				# Priority 4: Any faith.
-				alternative_limit = {
-					always = yes
-				}
+				alternative_limit = { always = yes }
 
 				weight = {
 					base = 50
 
 					# Preferred heresies get another bonus.
 					modifier = {
-						factor = 5			
+						factor = 5
 						is_preferred_heresy = {
 							ORIGIN_FAITH = root
 							HERETICAL_FAITH = this
@@ -273,50 +233,118 @@ heresy.0001 = {
 					}
 
 					# Certain Faiths should be much more rare in general.
-					# Uncommon Faiths
+					
+					# Uncommon Faiths : Steadily declined after Vth century
 					modifier = {
 						factor = 0.5
 						OR = {
+							#Christians
+							this = faith:audianism
+							this = faith:montanism
+							this = faith:patripassianism
 							#Dualist
-							this = faith:mandeaism
-							this = faith:sabianism
+							this = faith:valentinianism
 						}
 					}
-					#Rare Faiths
+					#Rare Faiths: Declined rapidly after 476 or fairly rare anyway
 					modifier = {
 						factor = 0.1
 						OR = {
+							#Christians
+							this = faith:antinomianism
+							this = faith:apollinarism
+							this = faith:doceticism
+							this = faith:melchisdechianism
+							this = faith:monarchianism
+							this = faith:pelagianism
+							this = faith:pneumatomachianism
+							#Dualists
 							this = faith:sethianism
-							this = faith:priscillianism
-							this = faith:cainitism
 						}
 					}
-					# Disabled Faiths
+					#Exceptionally Rare Faiths ; Dead by 476 or were not well attested after, but **might** be revivable...
+					modifier = {
+						factor = 0.05
+						OR = {
+							#Christians
+							this = faith:binitarianism
+							this = faith:marcionism
+							this = faith:messalian
+							this = faith:total_depravity
+							#Dualists
+							this = faith:cainitism
+							this = faith:marcosianism
+							this = faith:sabianism
+							this = faith:sethianism
+						}
+					}
+					#Localized Faiths
+					#Localized by region/culture; given larger than normal location bonuses to compensate
+					modifier = {
+						factor = 0.01
+						OR = {
+							#Christians
+							this = faith:ebionite
+							#Jews
+							this = faith:samaritan
+							this = faith:tzadikite
+							#Dualists
+							this = faith:mandeaism
+							#Mazdans
+							this = faith:urartuism
+						}
+					}
+					# Disabled Faiths (never spawn as heresy)
 					modifier = {
 						factor = 0
 						OR = {
+							#Christian Religion
+							
 							this = faith:insular_celtic
 							this = faith:adamites
+							#Autocephalous Churches should never spawn as heresies
+							this = { has_doctrine = tenet_autocephaly }
+							#TODO: Reimplement after flags added for it to spawn
+							this = faith:eutychianism
+							this = faith:iconoclast
+							this = faith:paulician
+							#TODO: Reimplement after schism implemented
+							this = faith:catholic
+							this = faith:orthodox
+							
+							#Judaism Religion
+							
+							#Reimplement after flags added for it to spawn
+							this = faith:kabarism
+							#Otherwise Rare Faiths
+							this = faith:malabarism #Cochin Jews
+							
+							#Islam Religion
+							
+							#TODO: Reimplement after ROI
+							this.religion = religion:islam_religion
+							
+							#Mazdan Religions
+							
+							#TODO: Reimplement after flags added for it to spawn
+							this = faith:gayomarthianism
+							this = faith:khurramism
+							this = faith:mazdakism
 						}
 					}
 
-					# Paulicians more likely in Anatolia
+					#### Regional weighting ####
+
+					#Christian Faiths
+
+					#Miaphysitism is more likely in East Africa
 					modifier = {
 						factor = regional_heresy_factor
-						this = faith:paulician
+						this = faith:miaphysitism
 						scope:heretic_capital = {
 							title_province = {
-								geographical_region = world_asia_minor
-							}
-						}
-					}
-					# Iconoclasts more likely in Constantinople
-					modifier = {
-						factor = regional_heresy_factor
-						this = faith:iconoclast
-						scope:heretic_capital = {
-							title_province = {
-								geographical_region = custom_k_thessalonika
+								geographical_region = world_roman_empire_east_africa
+								geographical_region = world_africa_east
 							}
 						}
 					}
@@ -328,18 +356,47 @@ heresy.0001 = {
 							title_province = {
 								OR = {
 									geographical_region = world_india
+									geographical_region = world_steppe_tarim
+									geographical_region = world_steppe_east
+									geographical_region = world_persian_empire
 									geographical_region = world_middle_east
-
 								}
 							}
 						}
 					}
+					# Monophysitism more likely in Arabia
+					modifier = {
+						factor = regional_heresy_factor
+						this = faith:monophysitism
+						scope:heretic_capital = { title_province = { geographical_region = world_arabia } }
+					}
+					# Donatism more likely in NW Africa
+					modifier = {
+						factor = regional_heresy_factor
+						this = faith:donatism
+						scope:heretic_capital = { title_province = { geographical_region = world_africa_north_west } }
+					}
+					### Minor Faiths ###
+					
+					# Paulicians more likely in Anatolia
+					modifier = {
+						factor = regional_heresy_factor
+						this = faith:paulician
+						scope:heretic_capital = { title_province = { geographical_region = world_roman_empire_east_asia_minor } }
+					}
+					# Iconoclasts more likely in Constantinople
+					modifier = {
+						factor = regional_heresy_factor
+						this = faith:iconoclast
+						scope:heretic_capital = { title_province = { geographical_region = custom_k_thessalonika } }
+					}
+
 					# Priscillianism more likely in Egypt or Iberia
 					modifier = {
 						factor = regional_heresy_factor
 						this = faith:priscillianism
 						scope:heretic_capital = {
-							title_province = {						
+							title_province = {
 								OR = {
 									geographical_region = world_africa_north_east
 									geographical_region = world_europe_west_iberia
@@ -347,17 +404,55 @@ heresy.0001 = {
 							}
 						}
 					}
+					
+					#Special Localized Faiths
+					
+					# Ebionites most likely in Syria
+					modifier = {
+						factor = regional_heresy_factor_localized
+						this = faith:ebionite
+						scope:heretic_capital = { title_province = { geographical_region = world_roman_empire_east_levant } }
+					}
+					# Samaritans most likely in Syria
+					modifier = {
+						factor = regional_heresy_factor_localized
+						this = faith:samaritan
+						scope:heretic_capital = { title_province = { geographical_region = world_roman_empire_east_levant } }
+					}
+					# Tzadikites most likely in the Caucsues
+					modifier = {
+						factor = regional_heresy_factor_localized
+						this = faith:tzadikite
+						scope:heretic_capital = { title_province = { geographical_region = world_caucasus } }
+					}
+					# Mandeans most likely in the Middle East
+					modifier = {
+						factor = regional_heresy_factor_localized
+						this = faith:mandeaism
+						scope:heretic_capital = {
+							title_province = {
+								OR = {
+									geographical_region = world_roman_empire_east_levant
+									geographical_region = world_roman_empire_east_levant
+								}
+							}
+						}
+					}
+					# Arwordi most likely in the Caucsues
+					modifier = {
+						factor = regional_heresy_factor_localized
+						this = faith:urartuism
+						scope:heretic_capital = { title_province = { geographical_region = world_caucasus } }
+					}
 				}
-
 				save_scope_as = heretic_faith
 			}
+			
+			
 
 			#Trigger the heresy event for all rulers of the same Faith.
 			if = {
-				limit = {
-					exists = scope:heretic_faith
-				}
-
+				limit = { exists = scope:heretic_faith }
 				save_scope_as = origin_faith
 
 				#Determine roughly how many Counties we expext to flip to the heretical Faith.
@@ -403,18 +498,14 @@ heresy.0001 = {
 
 				# Modify heresy power for pluralist/fundamentalist
 				if = {
-					limit = {
-						has_doctrine_parameter = pluralism_pluralistic_resistant_to_heresy
-					}
+					limit = { has_doctrine_parameter = pluralism_pluralistic_resistant_to_heresy }
 					change_variable = {
 						name = heresy_power
 						multiply = hostility_multiplier_pluralism
 					}
 				}
 				else_if = {
-					limit = {
-						has_doctrine_parameter = pluralism_fundamentalist_vulnerable_to_heresy
-					}
+					limit = { has_doctrine_parameter = pluralism_fundamentalist_vulnerable_to_heresy }
 					change_variable = {
 						name = heresy_power
 						multiply = hostility_multiplier_fundamentalist
@@ -423,9 +514,7 @@ heresy.0001 = {
 
 				# Changes to another religion have reduced heresy power
 				if = {
-					limit = {
-						NOT = { scope:origin_faith.religion = scope:heretic_faith.religion }
-					}
+					limit = { NOT = { scope:origin_faith.religion = scope:heretic_faith.religion } }
 					change_variable = {
 						name = heresy_power
 						multiply = 0.5
@@ -447,7 +536,7 @@ heresy.0001 = {
 					}
 				}
 			}
-		}	
+		}
 	}
 }
 
@@ -522,40 +611,24 @@ heresy.0005 = {
 			}
 
 			save_scope_as = heretic_ruler
-			primary_title = {
-				save_scope_as = heretic_title
-			}
-			capital_county = {
-				save_scope_as = heretic_capital
-			}
+			primary_title = { save_scope_as = heretic_title }
+			capital_county = { save_scope_as = heretic_capital }
 		}
 
 
 		#Once we have a heresiarch, look for a valid heretical faith to them to convert to.
 		if = {
-			limit = {
-				exists = scope:heretic_ruler
-			}
+			limit = { exists = scope:heretic_ruler }
 
 			#Religions
-			faith:theravada.religion = { #Buddhism
-				add_to_list = eastern_religions
-			}
-			faith:manichean.religion = { #Hinduism
-				add_to_list = eastern_religions
-			}
-			faith:vaishnavism.religion = { #Jainism
-				add_to_list = eastern_religions
-			}
-			faith:digambara.religion = { #Dualism
-				add_to_list = eastern_religions
-			}
+			faith:theravada.religion = { add_to_list = eastern_religions } #Buddhism
+			faith:manichean.religion = { add_to_list = eastern_religions } #Dualism
+			faith:vaishnavism.religion = { add_to_list = eastern_religions } #Hinduism
+			faith:digambara.religion = { add_to_list = eastern_religions } #Jainism
 
 			every_in_list = {
 				list = eastern_religions
-				every_faith = {
-					add_to_list = eastern_faiths
-				}
+				every_faith = { add_to_list = eastern_faiths }
 			}
 
 			#Save a list of provinces in our religion group (we will be reusing this a lot for distance checks).
@@ -641,16 +714,13 @@ heresy.0005 = {
 							this = faith:theravada
 							this = faith:mahayana
 							this = faith:vajrayana
-
 							#Hindu
 							this = faith:vaishnavism
 							this = faith:smartism
 							this = faith:srikula_shaktism
-
 							#Jain
 							this = faith:digambara
 							this = faith:svetambara
-
 							#Dualist
 							this = faith:manichean
 						}
@@ -663,10 +733,8 @@ heresy.0005 = {
 							#Hindu
 							this = faith:krishnaism
 							this = faith:kalikula_shaktism
-
 							#Jain
 							this = faith:yapaniya
-
 							#Dualist
 							this = faith:mandeaism
 							this = faith:sabianism
@@ -691,10 +759,7 @@ heresy.0005 = {
 
 			#Trigger the heresy event for all rulers of the same Faith.
 			if = {
-				limit = {
-					exists = scope:heretic_faith
-				}
-
+				limit = { exists = scope:heretic_faith }
 				save_scope_as = origin_faith
 
 				#Determine roughly how many Counties we expext to flip to the heretical Faith.
@@ -740,18 +805,14 @@ heresy.0005 = {
 
 				# Modify heresy power for pluralist/fundamentalist
 				if = {
-					limit = {
-						has_doctrine_parameter = pluralism_pluralistic_resistant_to_heresy
-					}
+					limit = { has_doctrine_parameter = pluralism_pluralistic_resistant_to_heresy }
 					change_variable = {
 						name = heresy_power
 						multiply = hostility_multiplier_pluralism
 					}
 				}
 				else_if = {
-					limit = {
-						has_doctrine_parameter = pluralism_fundamentalist_vulnerable_to_heresy
-					}
+					limit = { has_doctrine_parameter = pluralism_fundamentalist_vulnerable_to_heresy }
 					change_variable = {
 						name = heresy_power
 						multiply = hostility_multiplier_fundamentalist
@@ -776,7 +837,6 @@ heresy.0005 = {
 		}	
 	}
 }
-
 
 ##################
 # New Major Heresy
@@ -810,11 +870,7 @@ heresy.0010 = {
 	major = yes
 	theme = faith
 	
-	trigger = {
-		scope:origin_faith = {
-			var:heresy_power > 0
-		}
-	}
+	trigger = { scope:origin_faith = { var:heresy_power > 0 } }
 
 	major_trigger = {
 		OR = {
@@ -841,11 +897,7 @@ heresy.0010 = {
 		#Consume heresy power to fuel this conversion.
 		scope:origin_faith = {
 			if = {
-				limit = {
-					scope:heretic_ruler = {
-						highest_held_title_tier >= 3
-					}
-				}
+				limit = { scope:heretic_ruler = { highest_held_title_tier >= 3 } }
 				#If we're a Duke, consume more heresy power.
 				change_variable = {
 					name = heresy_power
@@ -1029,15 +1081,9 @@ scripted_trigger no_heretical_hof_faith_0011_trigger = { #Head of Faith shouldn'
 heresy.0011 = {
 	hidden = yes
 	
-	trigger = {
-		scope:origin_faith = {
-			var:heresy_power > 0
-		}
-	}
+	trigger = { scope:origin_faith = { var:heresy_power > 0 } }
 
-	weight_multiplier = {
-		base = 1
-	}
+	weight_multiplier = { base = 1 }
 
 	immediate = {
 		clear_saved_scope = convert_ruler
@@ -1103,18 +1149,12 @@ heresy.0011 = {
 			}
 
 			save_scope_as = convert_ruler
-			primary_title = {
-				save_scope_as = convert_title
-			}
-			capital_county = {
-				save_scope_as = convert_capital
-			}
+			primary_title = { save_scope_as = convert_title }
+			capital_county = { save_scope_as = convert_capital }
 		}
 
 		if = {
-			limit = {
-				exists = scope:convert_ruler
-			}
+			limit = { exists = scope:convert_ruler }
 			hidden_effect = {
 				add_character_flag = {
 					flag = converted_by_heresy_0011_event
@@ -1181,7 +1221,7 @@ heresy.0011 = {
 								squared_distance = {
 									target = scope:convert_capital
 									value < squared_distance_medium
-								}	
+								}
 							}
 						}
 					}
@@ -1200,7 +1240,7 @@ heresy.0011 = {
 					limit = {
 						scope:my_faith = scope:heretic_faith
 					}
-					send_interface_message = {				
+					send_interface_message = {
 						type = event_heresy_outbreak_good
 						title = heresy.0011.notification.same_faith
 						left_icon = scope:convert_ruler
