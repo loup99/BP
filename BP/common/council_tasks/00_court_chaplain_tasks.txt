@@ -490,6 +490,36 @@ task_conversion = {
 				desc = COURT_CHAPLAIN_CONVERSION_AUTOCEPHALY_RESIST_INFIDEL_CONVERSIONS
 			}
 		}
+		if = { #Apostolic Churches resist converting to other faiths
+			limit = {
+				exists = scope:county
+				scope:county.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+			}
+			add = {
+				value = scope:councillor.conversion_apostolic_succession_conversion_resistance
+				desc = COURT_CHAPLAIN_CONVERSION_TENET_RESIST_SAME_RELIGION_CONVERSION
+			}
+		}
+		if = { #Rigorism resists conversion both ways, unless county faith and liege faith are both rigorists
+			limit = {
+				exists = scope:county
+				#XOR condition; other rigorist faiths have no impediment like say Khawarijis...
+				AND = {
+					OR = {
+						scope:county.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+						scope:councillor.liege.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+					}
+					NOR = {
+						scope:county.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+						scope:councillor.liege.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+					}
+				}
+			}
+			add = {
+				value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
+				desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_RESISTANCE_BOTH_WAYS
+			}
+		}
 		##### Change from Vanilla #####
 
 		#Conversion bonuses for Character Faith Tenets
