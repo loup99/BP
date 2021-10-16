@@ -490,16 +490,6 @@ task_conversion = {
 				desc = COURT_CHAPLAIN_CONVERSION_AUTOCEPHALY_RESIST_INFIDEL_CONVERSIONS
 			}
 		}
-		if = { #Apostolic Churches resist converting to other faiths
-			limit = {
-				exists = scope:county
-				scope:county.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
-			}
-			add = {
-				value = scope:councillor.conversion_apostolic_succession_conversion_resistance
-				desc = COURT_CHAPLAIN_CONVERSION_TENET_RESIST_SAME_RELIGION_CONVERSION
-			}
-		}
 		if = { #Rigorism resists conversion both ways, unless county faith and liege faith are both rigorists
 			limit = {
 				exists = scope:county
@@ -934,6 +924,8 @@ task_conversion = {
 		}
 		
 		##### Change from Vanilla #####
+		
+		#Nerf unreformed faith impact for major migrations
 		if = {
 			limit = {
 				scope:councillor.faith = { has_doctrine_parameter = unreformed }
@@ -948,6 +940,45 @@ task_conversion = {
 				desc = COURT_CHAPLAIN_CONVERSION_UNREFORMED_FAITH_PENALTY
 			}
 		}
+		##### Change from Vanilla #####
+		
+		##### Change from Vanilla #####
+		
+		# Innovation Impacts
+		multiply = {
+			value = 1
+			desc = "IMPACT_OF_MISSING_INNOVATIONS"
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_state_religion } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_doctrine_and_dogma } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_scriptural_cannon } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_established_faith } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+		}
+		
+		# Ecumenism impacts
+		if = {
+			limit = {
+				scope:councillor.liege.faith = { has_ecumenical_doctrine_trigger = yes }
+				exists = scope:county
+				scope:county.faith = { has_ecumenical_doctrine_trigger = yes }
+			}
+			multiply = {
+				value = conversion_ecumenical_target_weight
+				desc = CONVERSION_SPEED_ECUMENISM_IMPACT
+			}
+		}
+		
 		##### Change from Vanilla #####
 		
 		# Conversion speed game rules
@@ -1002,7 +1033,6 @@ task_conversion = {
 							AND = {
 								liege = scope:councillor_liege
 								is_ruler = yes
-								has_government = feudal_government 
 								is_independent_ruler = no
 								vassal_contract_has_flag = religiously_protected
 							}
@@ -1010,7 +1040,6 @@ task_conversion = {
 								exists = liege
 								liege = scope:councillor_liege
 								is_ruler = yes
-								has_government = feudal_government 
 								is_independent_ruler = no
 								vassal_contract_has_flag = religiously_protected
 							}

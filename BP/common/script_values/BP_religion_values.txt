@@ -18,6 +18,8 @@ christian_doctrine_judaic_role_cost_massive = 2000
 
 christian_doctrine_unchanged_cost_mult = 0
 
+#Heresy events
+
 regional_heresy_factor_localized = {
 	if = {
 		limit = { has_game_rule = default_regional_heresy }
@@ -32,7 +34,9 @@ regional_heresy_factor_localized = {
 	}
 }
 
-# Ethnic Religion Tenet Values
+# Faith Tenet Values
+
+#Ethnic religions
 conversion_tenet_ethnic_religion_conversion_resistance = {
 	value = 0
 	if = {
@@ -55,7 +59,6 @@ conversion_tenet_ethnic_religion_convertor_resistance = {
 		multiply = 0.75
 	}
 }
-
 #Autocephaly Values
 conversion_tenet_autocephaly_not_culture_group = {
 	value = 0
@@ -92,36 +95,28 @@ conversion_tenet_autocephaly_of_culture_group = {
 		multiply = 0.33
 	}
 }
-
-#Aposotolic Succession Values
-conversion_apostolic_succession_conversion_resistance = {
-	value = 0
-	if = {
-		limit = {
-				scope:county.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
-				exists = scope:county
-			}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.33
-	}
-}
-
 #Rigorism Values
 conversion_tenet_rigorism_conversion_resistance_both_ways = {
 	value = 0
 	if = {
 		limit = {
+			#XOR condition; other rigorist faiths have no impediment like say Khawarijis...
+			AND = {
 				OR = {
-					scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+					scope:county.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+					scope:councillor.liege.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
 				}
-				exists = scope:county
+				NOR = {
+					scope:county.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+					scope:councillor.liege.faith = { has_doctrine_parameter = apostolic_succession_conversion_resistance }
+				}
 			}
+			exists = scope:county
+		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.50
+		multiply = 0.33
 	}
 }
-
 # Interpratio Romana Tenet Values
 conversion_interpratio_romana_malus = {
 	value = 0
@@ -149,4 +144,3 @@ conversion_recent_immigration_bonus = {
 	add = court_chaplain_conversion_base_total
 	multiply = 0.50
 }
-
