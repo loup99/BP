@@ -42,7 +42,10 @@ liege_modify_vassal_contract_interaction = {
 		}
 		trigger_else = {
 			scope:actor = {
-				has_changed_contract_obligation_trigger = { WHO = scope:recipient }
+				has_changed_contract_obligation_trigger = {
+					WHO = scope:recipient
+					LIEGE = scope:actor
+				}
 				
 				custom_description = {
 					text = "liege_modify_vassal_contract_cannot_exceed_tyranny_cap"
@@ -76,7 +79,7 @@ liege_modify_vassal_contract_interaction = {
 				}
 				trigger_else = {} # Otherwise we're fine!
 			}
-				
+			
 			# Cannot change more than three things at once
 			custom_description = {
 				text = "vassal_modify_vassal_contract_obligation_change_limit"
@@ -141,7 +144,7 @@ liege_modify_vassal_contract_interaction = {
 					}
 					if = {
 						limit = { has_government = gubernatorial_government }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = gubernatorial_government_taxes }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = gubernatorial_taxes }
 					}
 					if = {
 						limit = { has_government = eranshar_government }
@@ -159,6 +162,13 @@ liege_modify_vassal_contract_interaction = {
 					if = {
 						limit = { vassal_contract_has_flag = tributary_installed_flag }
 						set_obligation_if_changed_effect_tributaries = { OBLIGATION_TYPE = tributary_special_contract }
+					}
+					if = {
+						limit = {
+							valid_bureacratic_vassal_governance_vassal_gov_trigger = yes
+							scope:actor = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes }
+						}
+						set_obligation_if_changed_effect_bureaucratic_vassal_governance = { OBLIGATION_TYPE = bureaucratic_vassal_governance }
 					}
 				}
 			}
@@ -210,18 +220,15 @@ vassal_modify_vassal_contract_interaction = {
 
 	can_send = {
 		trigger_if = { #If you're blocked we don't want to show anything else
-			limit = {
-				scope:actor = {
-					vassal_contract_is_blocked_from_modification = yes
-				}
-			}
-			scope:actor = {
-				vassal_contract_is_blocked_from_modification = no
-			}
+			limit = { scope:actor = { vassal_contract_is_blocked_from_modification = yes } }
+			scope:actor = { vassal_contract_is_blocked_from_modification = no }
 		}
 		trigger_else = {
 			scope:actor = {
-				has_changed_contract_obligation_trigger = { WHO = scope:actor }
+				has_changed_contract_obligation_trigger = {
+					WHO = scope:actor
+					LIEGE = scope:recipient
+				}
 				
 				# Must be an even trade overall
 				custom_description = {
@@ -258,51 +265,58 @@ vassal_modify_vassal_contract_interaction = {
 				hidden_effect = { set_vassal_contract_modification_blocked = yes }
 
 				if = {
-						limit = { has_government = feudal_government }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = feudal_government_taxes }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = feudal_government_levies }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = special_contract }
+					limit = { has_government = feudal_government }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = feudal_government_taxes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = feudal_government_levies }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = special_contract }
+				}
+				if = {
+					limit = { valid_government_rights_general_trigger = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = fortification_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = coinage_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = succession_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = war_declaration_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = title_revocation_rights }
+				}
+				if = {
+					limit = { has_government = prefeudal_government }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = prefeudal_government_obligation }
+				}
+				if = {
+					limit = { has_government = subroman_government }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = subroman_government_taxes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = subroman_government_levies }
+				}
+				if = {
+					limit = { has_government = gubernatorial_government }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = gubernatorial_taxes }
+				}
+				if = {
+					limit = { has_government = eranshar_government }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_government_taxes }
+					#TODO: FIXME! set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_marzban_contract }
+				}
+				if = {
+					limit = { valid_government_bureaucratic_special_trigger = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = bureaucratic_special_contract }
+				}
+				if = {
+					limit = { valid_government_foederatus_special_trigger = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = foederatus_special_contract }
+				}
+				if = {
+					limit = { vassal_contract_has_flag = tributary_installed_flag }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = tributary_special_contract }
+				}
+				if = {
+					limit = {
+						valid_bureacratic_vassal_governance_vassal_gov_trigger = yes
+						scope:recipient = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes }
 					}
-					if = {
-						limit = { valid_government_rights_general_trigger = yes }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = fortification_rights }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = coinage_rights }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = succession_rights }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = war_declaration_rights }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = title_revocation_rights }
-					}
-					if = {
-						limit = { has_government = prefeudal_government }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = prefeudal_government_obligation }
-					}
-					if = {
-						limit = { has_government = subroman_government }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = subroman_government_taxes }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = subroman_government_levies }
-					}
-					if = {
-						limit = { has_government = gubernatorial_government }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = gubernatorial_government_taxes }
-					}
-					if = {
-						limit = { has_government = eranshar_government }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_government_taxes }
-						#TODO: FIXME! set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_marzban_contract }
-					}
-					if = {
-						limit = { valid_government_bureaucratic_special_trigger = yes }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = bureaucratic_special_contract }
-					}
-					if = {
-						limit = { valid_government_foederatus_special_trigger = yes }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = foederatus_special_contract }
-					}
-					if = {
-						limit = { vassal_contract_has_flag = tributary_installed_flag }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = tributary_special_contract }
-					}
+					set_obligation_if_changed_effect_bureaucratic_vassal_governance = { OBLIGATION_TYPE = bureaucratic_vassal_governance }
+				}
 			}
 		}
 	}

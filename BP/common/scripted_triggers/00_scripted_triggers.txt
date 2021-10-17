@@ -304,6 +304,7 @@ vassal_contract_can_be_modified_trigger = {
 # WHO = Who's contract levels are being checked
 has_changed_contract_obligation_trigger = {
 	$WHO$ = { save_temporary_scope_as = obligation_check }
+	$LIEGE$ = { save_temporary_scope_as = the_liege_check }
 	custom_description = {
 		text = "modify_vassal_contract_select_different_obligation_level"
 		OR = {
@@ -340,7 +341,7 @@ has_changed_contract_obligation_trigger = {
 			}
 			trigger_if = {
 				limit = { scope:obligation_check = { has_government = gubernatorial_government } }
-				local_var:gubernatorial_government_taxes != scope:obligation_check.vassal_contract_obligation_level:gubernatorial_government_taxes
+				local_var:gubernatorial_taxes != scope:obligation_check.vassal_contract_obligation_level:gubernatorial_taxes
 			}
 			trigger_if = {
 				limit = { scope:obligation_check = { has_government = eranshar_government } }
@@ -358,13 +359,15 @@ has_changed_contract_obligation_trigger = {
 				local_var:foederatus_special_contract != scope:obligation_check.vassal_contract_obligation_level:foederatus_special_contract
 			}
 			trigger_if = {
-				limit = { scope:obligation_check = { valid_government_foederatus_special_trigger = yes } }
-				local_var:foederatus_special_contract != scope:obligation_check.vassal_contract_obligation_level:foederatus_special_contract
+				limit = { vassal_contract_has_flag = tributary_installed_flag }
+				local_var:tributary_special_contract != scope:obligation_check.vassal_contract_obligation_level:tributary_special_contract
 			}
 			trigger_if = {
-				#limit = { vassal_contract_has_flag = tributary_installed_flag }
-				limit = { always = yes }
-				local_var:tributary_special_contract != scope:obligation_check.vassal_contract_obligation_level:tributary_special_contract
+				limit = {
+					scope:obligation_check = { valid_bureacratic_vassal_governance_vassal_gov_trigger = yes }
+					scope:the_liege_check = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes }
+				}
+				local_var:bureaucratic_vassal_governance != scope:obligation_check.vassal_contract_obligation_level:bureaucratic_vassal_governance
 			}
 		}
 	}
