@@ -386,262 +386,6 @@ elector_voting_pattern_circumstances_imperial_elective_modifier = {
 		NOT = { this = scope:candidate }
 		scope:candidate = { age > 50 }
 	}
-	#Culturism
-	modifier = {
-		desc = tooltip_feudal_elector_vote_fellow_culture
-		NOT = { this = scope:candidate }
-		root.culture = scope:candidate.culture
-		add = {
-			add = 10
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				add = 10
-			}
-		}
-	}
-	modifier = {
-		desc = tooltip_feudal_elector_vote_stranger
-		scope:holder.culture = root.culture #Only a concern if Elector and current ruler share culture.
-		NOT = { root.culture = scope:candidate.culture }
-		has_same_culture_group_as = scope:candidate
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 15
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 15
-			}
-		}
-	}
-	modifier = {
-		desc = tooltip_feudal_elector_vote_foreigner
-		scope:holder.culture = root.culture #Only a concern if Elector and current ruler share culture.
-		NOT = { has_same_culture_group_as = scope:candidate }
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 30
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 30
-			}
-		}
-	}
-	modifier = { #Candidate is a foreigner's pet
-		desc = tooltip_feudal_elector_vote_strangers_pet
-		scope:candidate = {
-			this = scope:holder_candidate
-			NOT = { this.culture = root.culture }
-			has_same_culture_group_as = root
-			this.culture = scope:holder.culture
-		}
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 10
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 10
-			}
-		}
-	}
-	modifier = { #Candidate is a foreigner's pet
-		desc = tooltip_feudal_elector_vote_foreigners_pet
-		scope:candidate = {
-			this = scope:holder_candidate
-			NOT = { has_same_culture_group_as = root }
-			this.culture = scope:holder.culture
-		}
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 15
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 15
-			}
-		}
-	}
-	modifier = { #If candidate is elected, he will rule from a capital outside this de jure.
-		desc = tooltip_feudal_elector_vote_political_concerns
-		is_landed = yes
-		exists = capital_county
-		capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } }
-
-		OR = { # If the current holder is reigning from within the title, there is no reason to believe a lower tier candidate would not.
-			scope:holder = { 
-				capital_county = {
-					scope:title = {
-						NOT = { is_de_jure_liege_or_above_target = prev }
-					}
-				}
-			}
-			scope:candidate = {
-				highest_held_title_tier >= scope:title.tier
-			}
-		}
-
-		scope:candidate = {
-			is_ruler = yes
-			is_vassal_of = scope:holder
-			exists = capital_county
-			NOT = { capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } } }
-		}
-		add = {
-			subtract = 15
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 15
-			}
-		}
-	}
-	modifier = { #Candidate is a foreign ruler.
-		desc = tooltip_feudal_elector_vote_encroaching_foreigner
-		is_landed = yes
-		exists = capital_county
-		scope:candidate = {
-			is_ruler = yes
-			NOT = { target_is_liege_or_above = scope:holder }
-		}
-		add = {
-			subtract = 30
-			if = { #Candidate is a foreign non-dejure ruler.
-				limit = {
-					NOT = { capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } } }
-				}
-				subtract = 470
-			}
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 50
-			}
-		}
-	}
-	#Faithism
-	modifier = { #Accepted but different faith. (Buddhism vs Hinduism)
-		desc = tooltip_feudal_elector_vote_different_faith
-		NOT = { root.faith = scope:candidate.faith }
-		ai_zeal >= 0 #Does not care otherwise.
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_fully_accepted_level
-			}
-		}
-		add = {
-			subtract = 25
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 25
-			}
-		}
-	}
-	modifier = { #Astray (Catholic vs Orthodox)
-		desc = tooltip_feudal_elector_vote_astray
-		NOT = { root.faith = scope:candidate.faith }
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_astray_level
-			}
-		}
-		add = {
-			subtract = 50
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 50
-			}
-		}
-	}
-	modifier = { #Heretic (Catholic vs Cathar)
-		desc = tooltip_feudal_elector_vote_heretic
-		add = {
-			subtract = 100
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= low_positive_zeal
-				}
-				subtract = 50
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= medium_positive_zeal
-				}
-				subtract = 50
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= high_positive_zeal
-				}
-				subtract = 50
-			}
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 100
-			}
-		}
-		NOT = { root.faith = scope:candidate.faith }
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_hostile_level
-			}
-		}
-	}
-	modifier = { #Infidel (Catholic vs Ashari)
-		desc = tooltip_feudal_elector_vote_evil_heathen
-		add = {
-			subtract = 200
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= low_positive_zeal
-				}
-				subtract = 75
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= medium_positive_zeal
-				}
-				subtract = 75
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= high_positive_zeal
-				}
-				subtract = 75
-			}
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 150
-			}
-		}
-		NOT = { root.faith = scope:candidate.faith }
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_evil_level
-			}
-		}
-	}
 
 	#Barbarism
 	modifier = {
@@ -2537,11 +2281,7 @@ elector_self_voting_pattern_eranshar_elective_modifier = {
 			has_trait = depressed
 			has_trait = ambitious
 		}
-		NOT = {
-			scope:holder = {
-				is_parent_of = root
-			}
-		}
+		NOT = { scope:holder = { is_parent_of = root } }
 	}
 	modifier = {
 		add = -25
@@ -2696,9 +2436,7 @@ holder_voting_pattern_eranshar_elective_modifier = {
 		NOT = { player_heir = root }
 		scope:holder = {
 			this = root
-			NOT = {
-				has_relation_rival = scope:candidate #Unless is rival.
-			}
+			NOT = { has_relation_rival = scope:candidate } #Unless is rival.
 		}
 	}
 	modifier = { #Current ruler should prefer his own children.
@@ -2709,9 +2447,7 @@ holder_voting_pattern_eranshar_elective_modifier = {
 				limit = {
 					exists = root.house
 					exists = scope:candidate.house
-					NOT = {
-						root.house = scope:candidate.house
-					}
+					NOT = { root.house = scope:candidate.house }
 				}
 				subtract = 50
 			}
@@ -2719,20 +2455,14 @@ holder_voting_pattern_eranshar_elective_modifier = {
 				limit = {
 					exists = root.dynasty
 					exists = scope:candidate.dynasty
-					NOT = {
-						root.dynasty = scope:candidate.dynasty
-					}
+					NOT = { root.dynasty = scope:candidate.dynasty }
 				}
 				subtract = 150
 			}
 		}
 		scope:holder = {
 			this = root
-			NOT = {
-				scope:candidate = {
-					is_child_of = scope:holder
-				}
-			}
+			NOT = { scope:candidate = { is_child_of = scope:holder } }
 		}
 	}
 	modifier = { #Heir is unable to sire another heir.
@@ -2740,11 +2470,7 @@ holder_voting_pattern_eranshar_elective_modifier = {
 		desc = tooltip_feudal_holder_elector_vote_infertile
 		scope:holder = root
 		scope:candidate = {
-			NOT = {
-				any_child = {
-					is_alive = yes
-				}
-			}
+			NOT = { any_child = { is_alive = yes } }
 			OR = {
 				has_trait = celibate
 				has_trait = eunuch
@@ -2761,9 +2487,7 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 	modifier = { #Gender weights
 		desc = tooltip_feudal_elector_vote_agnatic_woman
 		OR = {
-			scope:title = { #Title might have different law than realm's.
-				has_title_law = male_preference_law
-			}
+			scope:title = { has_title_law = male_preference_law } #Title might have different law than realm's.
 			AND = { #If title has neither the required law nor its opposites, check for realm law.
 				scope:holder = { has_realm_law = male_preference_law }
 				scope:title = {
@@ -2781,9 +2505,7 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 			if = { #Increase if both.
 				limit = {
 					OR = {
-						scope:title = { #Title might have different law than realm's.
-							has_title_law = male_preference_law
-						}
+						scope:title = { has_title_law = male_preference_law } #Title might have different law than realm's.
 						AND = { #If title has neither the required law nor its opposites, check for realm law.
 							scope:holder = { has_realm_law = male_preference_law }
 							scope:title = {
@@ -2810,9 +2532,7 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 	modifier = { #Gender weights
 		desc = tooltip_feudal_elector_vote_enatic_man
 		OR = {
-			scope:title = { #Title might have different law than realm's.
-				has_title_law = female_preference_law
-			}
+			scope:title = { has_title_law = female_preference_law } #Title might have different law than realm's.
 			AND = { #If title has neither the required law nor its opposites, check for realm law.
 				scope:holder = { has_realm_law = female_preference_law }
 				scope:title = {
@@ -2824,9 +2544,7 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 			}
 			faith = { has_doctrine = doctrine_gender_female_dominated }
 		}
-		scope:candidate = {
-			is_female = no
-		}
+		scope:candidate = { is_female = no }
 		add = {
 			subtract = 100
 			if = { #Increase if both.
@@ -2859,13 +2577,14 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 		}
 	}
 	#Ageism
+	
+	#Youth values doubled compared to fedual elective; uncle-nephew/brother succession occured frequently
+	#But less comman than father to son
 	modifier = {
-		add = -30
+		add = -60
 		desc = tooltip_feudal_elector_vote_baby
 		NOT = { this = scope:candidate }
-		scope:candidate = {
-			age < 5
-		}
+		scope:candidate = { age < 5 }
 	}
 	modifier = {
 		desc = tooltip_feudal_elector_vote_child
@@ -2875,17 +2594,15 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 			age < 16
 		}
 		add = {
-			subtract = 10
+			subtract = 20
 			if = {
-				limit = {
-					age < 10
-				}
-				subtract = 15
+				limit = { age < 10 }
+				subtract = 30
 			}
 		}
 	}
 	modifier = { #Still too young for older rulers
-		add = -10
+		add = -20
 		desc = tooltip_feudal_elector_vote_youngster
 		NOT = { this = scope:candidate }
 		age > 40
@@ -2910,262 +2627,6 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 		NOT = { this = scope:candidate }
 		scope:candidate = { age > 50 }
 	}
-	#Culturism
-	modifier = {
-		desc = tooltip_feudal_elector_vote_fellow_culture
-		NOT = { this = scope:candidate }
-		root.culture = scope:candidate.culture
-		add = {
-			add = 10
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				add = 10
-			}
-		}
-	}
-	modifier = {
-		desc = tooltip_feudal_elector_vote_stranger
-		scope:holder.culture = root.culture #Only a concern if Elector and current ruler share culture.
-		NOT = { root.culture = scope:candidate.culture }
-		has_same_culture_group_as = scope:candidate
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 15
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 15
-			}
-		}
-	}
-	modifier = {
-		desc = tooltip_feudal_elector_vote_foreigner
-		scope:holder.culture = root.culture #Only a concern if Elector and current ruler share culture.
-		NOT = { has_same_culture_group_as = scope:candidate }
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 30
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 30
-			}
-		}
-	}
-	modifier = { #Candidate is a foreigner's pet
-		desc = tooltip_feudal_elector_vote_strangers_pet
-		scope:candidate = {
-			this = scope:holder_candidate
-			NOT = { this.culture = root.culture }
-			has_same_culture_group_as = root
-			this.culture = scope:holder.culture
-		}
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 10
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 10
-			}
-		}
-	}
-	modifier = { #Candidate is a foreigner's pet
-		desc = tooltip_feudal_elector_vote_foreigners_pet
-		scope:candidate = {
-			this = scope:holder_candidate
-			NOT = { has_same_culture_group_as = root }
-			this.culture = scope:holder.culture
-		}
-		NOT = { is_close_family_of = scope:candidate }
-		add = {
-			subtract = 15
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 15
-			}
-		}
-	}
-	modifier = { #If candidate is elected, he will rule from a capital outside this de jure.
-		desc = tooltip_feudal_elector_vote_political_concerns
-		is_landed = yes
-		exists = capital_county
-		capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } }
-
-		OR = { # If the current holder is reigning from within the title, there is no reason to believe a lower tier candidate would not.
-			scope:holder = { 
-				capital_county = {
-					scope:title = {
-						NOT = { is_de_jure_liege_or_above_target = prev }
-					}
-				}
-			}
-			scope:candidate = {
-				highest_held_title_tier >= scope:title.tier
-			}
-		}
-
-		scope:candidate = {
-			is_ruler = yes
-			is_vassal_of = scope:holder
-			exists = capital_county
-			NOT = { capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } } }
-		}
-		add = {
-			subtract = 15
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 15
-			}
-		}
-	}
-	modifier = { #Candidate is a foreign ruler.
-		desc = tooltip_feudal_elector_vote_encroaching_foreigner
-		is_landed = yes
-		exists = capital_county
-		scope:candidate = {
-			is_ruler = yes
-			NOT = { target_is_liege_or_above = scope:holder }
-		}
-		add = {
-			subtract = 30
-			if = { #Candidate is a foreign non-dejure ruler.
-				limit = {
-					NOT = { capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } } }
-				}
-				subtract = 470
-			}
-			if = { #Boost for Scandinavian Elective.
-				limit = {
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				subtract = 50
-			}
-		}
-	}
-	#Faithism
-	modifier = { #Accepted but different faith. (Buddhism vs Hinduism)
-		desc = tooltip_feudal_elector_vote_different_faith
-		NOT = { root.faith = scope:candidate.faith }
-		ai_zeal >= 0 #Does not care otherwise.
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_fully_accepted_level
-			}
-		}
-		add = {
-			subtract = 25
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 25
-			}
-		}
-	}
-	modifier = { #Astray (Catholic vs Orthodox)
-		desc = tooltip_feudal_elector_vote_astray
-		NOT = { root.faith = scope:candidate.faith }
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_astray_level
-			}
-		}
-		add = {
-			subtract = 50
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 50
-			}
-		}
-	}
-	modifier = { #Heretic (Catholic vs Cathar)
-		desc = tooltip_feudal_elector_vote_heretic
-		add = {
-			subtract = 100
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= low_positive_zeal
-				}
-				subtract = 50
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= medium_positive_zeal
-				}
-				subtract = 50
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= high_positive_zeal
-				}
-				subtract = 50
-			}
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 100
-			}
-		}
-		NOT = { root.faith = scope:candidate.faith }
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_hostile_level
-			}
-		}
-	}
-	modifier = { #Infidel (Catholic vs Ashari)
-		desc = tooltip_feudal_elector_vote_evil_heathen
-		add = {
-			subtract = 200
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= low_positive_zeal
-				}
-				subtract = 75
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= medium_positive_zeal
-				}
-				subtract = 75
-			}
-			if = { #Further increased by AI zeal.
-				limit = {
-					ai_zeal >= high_positive_zeal
-				}
-				subtract = 75
-			}
-			if = { #Further increased for Princely Elective.
-				limit = {
-					scope:title = { has_title_law = princely_elective_succession_law }
-				}
-				subtract = 150
-			}
-		}
-		NOT = { root.faith = scope:candidate.faith }
-		faith = {
-			faith_hostility_level = {
-				target = scope:candidate.faith
-				value = faith_evil_level
-			}
-		}
-	}
 
 	#Barbarism
 	modifier = {
@@ -3186,9 +2647,7 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 		add = -15
 		desc = tooltip_feudal_elector_vote_settled
 		has_government = clan_government
-		scope:candidate = {
-			NOT = { has_government = clan_government }
-		}
+		scope:candidate = { NOT = { has_government = clan_government } }
 	}
 	#Nepotism
 	modifier = {
@@ -3198,9 +2657,7 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 		exists = root.dynasty
 		exists = scope:candidate.dynasty
 		root.dynasty = scope:candidate.dynasty
-		scope:candidate = {
-			NOT = { is_close_family_of = root }
-		}
+		scope:candidate = { NOT = { is_close_family_of = root } }
 	}
 	modifier = {
 		add = 20
@@ -3235,34 +2692,10 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 		exists = scope:holder.dynasty
 		scope:candidate = { #Candidate in question must not be of the same house as the Elector.
 			dynasty = scope:holder.dynasty
-			NOT = {
-				house = root.house
-			}
+			NOT = { house = root.house }
 		}
 	}
 	#Educational preferences
-	modifier = { # Warrior society prefers warriors
-		desc = tooltip_feudal_elector_vote_martial_education
-		this_is_martial_society_trigger = yes
-		scope:candidate = {
-			martial >= 10
-			OR = {
-				has_trait = education_martial
-				has_lifestyle = martial_lifestyle
-				has_trait = lifestyle_blademaster
-				has_martial_lifestyle_trait_trigger = yes
-			}
-		}
-		add = {
-			add = 15
-			if = {
-				limit = { # Scandinavian elective boost
-					scope:title = { has_title_law = scandinavian_elective_succession_law }
-				}
-				multiply = 2
-			}
-		}
-	}
 	modifier = { # Diplomatic society prefers stewards and diplomats
 		add = 15
 		desc = tooltip_feudal_elector_vote_diplomatic_education
@@ -3321,7 +2754,7 @@ elector_voting_pattern_circumstances_eranshar_elective_modifier = {
 }
 
 elector_voting_pattern_prestige_piety_eranshar_elective_modifier = {
-	##########################	Elector voting patterns (prestige/piety)	##########################
+	########################## Elector voting patterns (prestige/piety) ##########################
 	#Prestige
 	modifier = {
 		desc = tooltip_feudal_elector_vote_prestige_negative
@@ -3343,25 +2776,19 @@ elector_voting_pattern_prestige_piety_eranshar_elective_modifier = {
 	modifier = {
 		desc = tooltip_feudal_elector_vote_dynasty_prestige
 		add = {
-			value = 20
+			value = 50
 			if = {
-				limit = {
-					scope:candidate.dynasty = { dynasty_prestige_level >= 10 }
-				}
-				add = 20
+				limit = { scope:candidate.dynasty = { dynasty_prestige_level >= high_dynasty_prestige_level } }
+				add = 50
 			}
 			if = {
-				limit = {
-					scope:candidate.dynasty = { dynasty_prestige_level >= 7 }
-				}
-				add = 20
+				limit = { scope:candidate.dynasty = { dynasty_prestige_level >= max_dynasty_prestige_level } }
+				add = 50
 			}
 		}
 		NOT = { this = scope:candidate }
 		exists = scope:candidate.dynasty
-		scope:candidate.dynasty = {
-			dynasty_prestige_level >= 4
-		}
+		scope:candidate.dynasty = { dynasty_prestige_level >= medium_dynasty_prestige_level }
 	}
 	#Piety
 	modifier = {
@@ -3371,39 +2798,6 @@ elector_voting_pattern_prestige_piety_eranshar_elective_modifier = {
 		NOT = { this = scope:candidate }
 		ai_zeal > 0
 		scope:candidate = { piety_level < 1 }
-	}
-	modifier = { #More extreme for Princely Elective
-		desc = tooltip_feudal_elector_vote_piety_negative
-		scope:title = { has_title_law = princely_elective_succession_law }
-		NOT = { this = scope:candidate }
-		ai_zeal > -30
-		scope:candidate = { piety_level < 1 }
-	}
-	modifier = {
-		desc = tooltip_feudal_elector_vote_piety_positive
-		NOT = { scope:title = { has_title_law = princely_elective_succession_law } }
-		add = {
-			value = scope:candidate.piety_level
-			subtract = 1
-			multiply = 5
-		}
-		NOT = { this = scope:candidate }
-		faith = scope:candidate.faith
-		ai_zeal > 0
-		scope:candidate = { piety_level >= 2 }
-	}
-	modifier = { #More extreme for Princely Elective
-		desc = tooltip_feudal_elector_vote_piety_positive
-		scope:title = { has_title_law = princely_elective_succession_law }
-		add = {
-			value = scope:candidate.piety_level
-			subtract = 1
-			multiply = 10
-		}
-		NOT = { this = scope:candidate }
-		faith = scope:candidate.faith
-		ai_zeal > -30
-		scope:candidate = { piety_level >= 2 }
 	}
 }
 
