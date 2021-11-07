@@ -1,1 +1,97 @@
-﻿
+﻿#The culture of the people both high and low is veering towards Celtic - embrace it?
+reclaim_britannia_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_destiny_goal.dds"
+	major = yes
+
+	ai_check_interval = 120
+
+	desc = reclaim_britannia_decision_desc
+
+	is_shown = {
+		has_culture_group = culture_group:celtic_group
+
+		is_landed = yes
+		any_sub_realm_county = {
+			title_province = {  geographical_region = world_europe_west_britannia }
+			NOT = { has_culture_group = culture_group:celtic_group }
+		}
+		NOT = {
+			is_target_in_global_variable_list = {
+				name = unavailable_unique_decisions
+				target = flag:reclaim_britannia_decision
+			}
+		}
+	}
+
+	is_valid = {
+		completely_controls_region  = world_europe_west_britannia
+
+		# You can have no more than 1 powerful vassal with the "wrong" culture
+		custom_description = {
+			text = reclaim_britannia_custom_decision
+			
+			trigger_if = {
+				limit = {
+					any_vassal = {
+						is_powerful_vassal = yes
+						NOT = { has_culture_group = culture_group:celtic_group }
+					}
+				}
+				any_vassal = {
+					count <= 1
+					is_powerful_vassal = yes
+					NOT = { has_culture_group = culture_group:celtic_group }
+				}
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_imprisoned = no
+		is_available_adult = yes
+		is_at_war = no
+	}
+
+	effect = {
+		add_to_global_variable_list = {
+			name = unavailable_unique_decisions
+			target = flag:reclaim_britannia_decision
+		}
+		show_as_tooltip = {
+			reclaim_britannia_decision_effect = yes
+		}
+		trigger_event = british_isles.0001
+		# Send event to other players
+		every_player = {
+			limit = {
+				NOT = { this = root }
+				OR = {
+					has_culture_group = culture_group:west_germanic_group
+					has_culture_group = culture_group:celtic_group
+					has_culture = culture:norman
+				}
+			}
+			trigger_event = british_isles.0002
+		}
+	}
+	
+	ai_potential = {
+		always = yes
+	}
+
+	ai_will_do = {
+		base = 100
+	}
+}
+
+#### Changed from Vanilla: Removed embrace_english_culture_decision
+
+#### Changed from Vanilla: Removed england_request_laudabiliter_decision
+
+#### Changed from Vanilla: Removed negotiate_the_danelaw_decision
+
+#### Changed from Vanilla: Removed negotiate_the_danelaw_integrate_duchies_decision
+
+#### Changed from Vanilla: Removed formalise_the_daneland_decision
+
+#### Changed from Vanilla: Removed restore_dumnonia_decision
