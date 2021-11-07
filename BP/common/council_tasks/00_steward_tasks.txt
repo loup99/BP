@@ -595,7 +595,7 @@ task_promote_culture = {
 				desc = STEWARD_PROMOTE_CULTURE_INNOVATION_BONUS_EAST_SETTLING
 			}
 		}
-		##### Change from Vanilla #####
+		##### Changed from Vanilla vvvv
 		# Added to support roman colonization
 		if = {
 			limit = {
@@ -606,7 +606,7 @@ task_promote_culture = {
 				desc = STEWARD_PROMOTE_CULTURE_INNOVATION_BONUS_COLONIAE
 			}
 		}
-		##### Change from Vanilla #####
+		##### Changed from Vanilla ^^^^
 		if = { # Development reduces the speed.
 			limit = {
 				exists = scope:county
@@ -644,26 +644,7 @@ task_promote_culture = {
 				desc = STEWARD_PROMOTE_CULTURE_SHUUBIYYA
 			}
 		}
-		if = {
-			limit = {
-				OR = {
-					scope:councillor_liege.culture_group = culture_group:goidelic_group
-					scope:councillor_liege.culture_group = culture_group:brythonic_group
-				}
-				exists = scope:county
-				scope:county = {
-					has_county_modifier = reclaim_britannia_culture_modifier
-					NOR= {
-						culture_group = culture_group:goidelic_group
-						culture_group = culture_group:brythonic_group
-					}
-				}
-			}
-			add = {
-				value = promote_culture_reclaimed_brittania_bonus
-				desc = STEWARD_PROMOTE_CULTURE_RECLAIMING_BRITANNIA
-			}
-		}
+		##### Change from Vanilla: Removed Reclaim Britainia Modifiers
 		if = {
 			limit = {
 				exists = scope:county
@@ -679,6 +660,41 @@ task_promote_culture = {
 				desc = STEWARD_PROMOTE_CULTURE_ALLOWED_NOMAD_SETTLEMENT
 			}
 		}
+		
+		##### Change from Vanilla vvvv
+		#Minor Migration Modifiers
+		if = { # A thin aristocracy has difficulty promoting its culture
+			limit = {
+				exists = scope:county
+				scope:county = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy }
+			}
+			add = {
+				value = scope:councillor.promote_culture_minor_migration_minor_aristocracy_penalty
+				desc = STEWARD_PROMOTE_CULTURE_MINOR_ARISTOCRACY
+			}
+		}
+		#Major Migratinon Modifiers
+		if = { # Depopulated regions are easy to settle
+			limit = {
+				exists = scope:county
+				scope:county = { has_county_modifier = county_modifier_migration_recent_emigration }
+			}
+			add = {
+				value = scope:councillor.promote_culture_recent_emigration_bonus
+				desc = STEWARD_PROMOTE_CULTURE_RECENTLY_MIGRATED_AWAY
+			}
+		}
+		if = { # Have a short time to settle your migratory peoples
+			limit = {
+				exists = scope:county
+				scope:county = { has_county_modifier = county_modifier_migration_recent_immigration }
+			}
+			add = {
+				value = scope:councillor.promote_culture_recent_immigration_bonus
+				desc = STEWARD_PROMOTE_CULTURE_RECENTLY_MIGRATED_TO
+			}
+		}
+		##### Change from Vanilla ^^^^
 		
 		# Conversion speed game rules
 		if = {
@@ -807,22 +823,20 @@ task_promote_culture = {
 							}
 							scope:county.culture = culture:norse
 						}
+						##### Change from Vanilla #####
+						#Remove Goidelic/Brythonic Group
 						AND = { # The vikings want to culture convert the Brits
 							OR = {
 								scope:councillor_liege.culture = culture:norse
 								scope:councillor_liege.culture = culture:norwegian
 							}
-							scope:county = {
-								any_county_province = {
-									is_coastal = yes
-								}
-							}
+							scope:county = { any_county_province = { is_coastal = yes } }
 							OR = {
 								scope:county.culture_group = culture_group:west_germanic_group
-								scope:county.culture_group = culture_group:goidelic_group
-								scope:county.culture_group = culture_group:brythonic_group
+								scope:county.culture_group = culture_group:celtic_group
 							}
 						}
+						##### Change from Vanilla #####
 						AND = { # The Portuguese should want to convert Suebi
 							scope:councillor_liege.culture = culture:portuguese
 							scope:county.culture = culture:suebi

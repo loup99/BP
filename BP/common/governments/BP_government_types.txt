@@ -44,6 +44,8 @@ prefeudal_government = {
 	valid_holdings = { castle_holding tribal_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
 	
+	fallback = 2
+	
 	prestige_opinion_override = { -10 0 3 5 10 20 }
 	
 	#dynasty_named_realms = yes
@@ -112,6 +114,17 @@ subroman_government = {
 	valid_holdings = { castle_holding city_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
 	
+	fallback = 1
+	
+	can_get_government = {
+		OR = {
+			has_government = bureaucratic_government
+			has_government = gubernatorial_government
+			has_government = subroman_government
+		}
+		any_liege_or_above = { has_government = subroman_government }
+	}
+	
 	vassal_contract = {
 		subroman_government_taxes
 		subroman_government_levies
@@ -158,7 +171,7 @@ eranshar_government = {
 		direct_vassal_opinion = -25
 		vassal_limit = 20 #Replaces vassals of certain types not being included
 		men_at_arms_maintenance = -0.5
-		vassal_levy_contribution_add = 1.00 #Checkme for accuracy!
+		vassal_levy_contribution_add = 0.35 #Let's not get too crazy here...
 	}
 	
 	flag = government_can_raid_rule
@@ -196,7 +209,6 @@ gupta_government = {
 }
 
 #Roman-centric governments
-#TODO: not for independent rulers; should turn into subroman if independent
 gubernatorial_government = {
 	create_cadet_branches = no
 	rulers_should_have_dynasty = yes
@@ -204,6 +216,22 @@ gubernatorial_government = {
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding city_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
+	
+	#Not for independent rulers
+	can_get_government = {
+		is_independent_ruler = no
+		OR = {
+			has_government = bureaucratic_government
+			has_government = gubernatorial_government
+			has_government = subroman_government
+		}
+		any_liege_or_above = {
+			OR = {
+				has_government = bureaucratic_government
+				has_government = gubernatorial_government
+			}
+		}
+	}
 	
 	vassal_contract = {
 		gubernatorial_government_taxes
@@ -221,7 +249,6 @@ gubernatorial_government = {
 		domain_tax_mult = 0.25
 		vassal_tax_contribution_mult = 0.25
 		levy_size = -0.50
-		vassal_levy_contribution_mult = -0.50
 	}
 	
 	color = {0.750 0.500 0.500}
@@ -239,9 +266,16 @@ bureaucratic_government = {
 	#Only empires can be bureaucratic_government
 	can_get_government = {
 		is_independent_ruler = yes
-		primary_title.tier > tier_kingdom
+		primary_title.tier = tier_empire
 		OR = {
-			has_government = bureaucratic_government #so the administration doesnt disappear if emperor somehow changes culture
+			OR = {
+				#Valid Successor Governments
+				has_government = subroman_government
+				has_government = prefeudal_government
+				has_government = gubernatorial_government
+				#so the administration doesnt disappear if emperor somehow changes culture
+				has_government = bureaucratic_government
+			}
 			#has_character_flag = bureacratic_government_temp_override
 			culture = { has_innovation = innovation_roman_administration }
 		}
