@@ -63,6 +63,9 @@ on_title_gain = {
 		}
 		##### Change from Vanilla #####
 		
+		#Notes:
+		# * is_ruler added to ensure granting titles doesn't risk changing gov't of current holders
+		
 		#Convert valid predecessor government types to Bureaucratic Government
 		#For cases like: A prefeudal_government holder becomes e_ere holder
 		if = {
@@ -88,6 +91,7 @@ on_title_gain = {
 		if = {
 			limit = {
 				is_independent_ruler = no
+				is_ruler = no
 				exists = scope:previous_holder
 				scope:previous_holder = {
 					OR = {
@@ -102,14 +106,20 @@ on_title_gain = {
 					}
 				}
 			}
-			#Need to change the contract type first, then gubernatorial is fine
-			root = {
-				vassal_contract_set_obligation_level = {
-					type = bureaucratic_vassal_governance
-					level = 1
+			if = { #If we're *NOT* tribal and not already a ruler, then propagate gubernatorial_government 
+				limit = {
+					NOT = { scope:title.title_capital_county.title_province = { has_holding_type = tribal_holding } }
+					is_ruler = no
 				}
+				#Need to change the contract type first, then gubernatorial is fine
+				root = {
+					vassal_contract_set_obligation_level = {
+						type = bureaucratic_vassal_governance
+						level = 1
+					}
+				}
+				change_government = gubernatorial_government
 			}
-			change_government = gubernatorial_government
 		}
 		
 		### For government type safety; aka keep the same governments upon title granting
@@ -121,6 +131,7 @@ on_title_gain = {
 				exists = scope:previous_holder
 				scope:title.tier > tier_barony
 				scope:previous_holder = { has_government = high_tribal_government }
+				is_ruler = no
 			}
 			change_government = high_tribal_government
 		}
@@ -130,6 +141,7 @@ on_title_gain = {
 				exists = scope:previous_holder
 				scope:title.tier > tier_barony
 				scope:previous_holder = { has_government = tribal_government }
+				is_ruler = no
 			}
 			change_government = tribal_government
 		}
@@ -139,6 +151,7 @@ on_title_gain = {
 				exists = scope:previous_holder
 				scope:title.tier > tier_barony
 				scope:previous_holder = { has_government = nomad_government }
+				is_ruler = no
 			}
 			change_government = nomad_government
 		}
