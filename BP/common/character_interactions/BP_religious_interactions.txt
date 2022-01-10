@@ -1,0 +1,104 @@
+﻿replace_pentarch_interaction = {
+	category = interaction_category_religion
+	desc = replace_pentarch_interaction_desc
+	#notification_text = TODO
+	popup_on_receive = yes
+	pause_on_receive = yes
+	
+	ai_targets = { ai_recipients = vassals }
+	ai_target_quick_trigger = { adult = yes }
+	ai_frequency = 120
+
+	is_shown = {
+		scope:actor = {
+			faith = {
+				religion_tag = christianity_religion
+				#Only tenets for which the pentarchy matters
+				OR = {
+					has_doctrine = tenet_pentarchy
+					has_doctrine = tenet_apostolic_succession
+					has_doctrine = tenet_autocephaly
+				}
+			}
+		}
+		scope:recipient = {
+			is_vassal_or_below_of = scope:actor
+			OR = {
+				has_title = title:d_antioch_church
+				has_title = title:d_patriarch_jerusalem
+				has_title = title:d_patriarch_alexandria
+				has_title = title:d_orthodox
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			has_strong_usable_hook = scope:recipient
+			is_at_war = no
+		}
+		scope:recipient = { NOT = { faith = scope:actor.faith } }
+	}
+
+	send_option = {
+		is_valid = { scope:actor = { has_strong_usable_hook = scope:recipient } }
+		flag = hook
+		localization = GENERIC_SPEND_A_HOOK
+	}
+	should_use_extra_icon = { scope:actor = { has_strong_usable_hook = scope:recipient } }
+	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+
+	send_options_exclusive = no
+
+	auto_accept = {
+		custom_description = {
+			text = "spending_hook"
+			subject = scope:actor
+			object = scope:recipient
+			scope:hook = yes
+		}
+	}
+
+	on_accept = {
+		#Create a new char of your faith and give him the pentarchy
+		if = {
+			limit = { scope:hook = yes }
+			scope:actor = {
+				use_hook = scope:recipient
+				trigger_event = BP_char_interaction.0003
+			}
+		}
+		else = { scope:actor = { trigger_event = BP_char_interaction.0003 } } #Only for error catching
+	}
+
+	on_decline = {
+		#Should not be declinable as can only be used if strong hook is used
+	}
+	
+	ai_potential = {
+		is_adult = yes
+	}
+	
+	ai_will_do = {
+		base = 100
+		
+		modifier = {
+			scope:hook = yes
+			add = 1
+		}
+		
+		modifier = {
+			factor = 0
+			scope:recipient.demand_conversion_likelihood_calculation < 10
+		}
+	}
+	
+		ai_accept = {
+		base = 0
+		modifier = {
+			desc = SCHEME_WEAK_HOOK_USED
+			add = 50
+			scope:hook = yes
+		}
+	}
+}
