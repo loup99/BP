@@ -87,43 +87,25 @@ on_title_gain = {
 			change_government = bureaucratic_government
 			add_character_flag = bureacratic_ruler
 		}
-		#Bureaucratic and gubernatorial governments granting titles yields gubernatorial
+		
+		### For government type safety; aka keep the same governments upon title granting
+		#TODO: Should figure out how to safely remove these
+		
+		#Gubernatorial
 		if = {
 			limit = {
-				is_independent_ruler = no
-				is_ruler = no
 				exists = scope:previous_holder
+				scope:title.tier > tier_barony
 				scope:previous_holder = {
 					OR = {
 						has_government = gubernatorial_government
 						has_government = bureaucratic_government
 					}
 				}
-				any_liege_or_above = {
-					OR = {
-						has_government = gubernatorial_government
-						has_government = bureaucratic_government
-					}
-				}
+				is_ruler = no
 			}
-			if = { #If we're *NOT* tribal and not already a ruler, then propagate gubernatorial_government 
-				limit = {
-					NOT = { scope:title.title_capital_county.title_province = { has_holding_type = tribal_holding } }
-					is_ruler = no
-				}
-				#Need to change the contract type first, then gubernatorial is fine
-				root = {
-					vassal_contract_set_obligation_level = {
-						type = bureaucratic_vassal_governance
-						level = 1
-					}
-				}
-				change_government = gubernatorial_government
-			}
+			change_government = gubernatorial_government
 		}
-		
-		### For government type safety; aka keep the same governments upon title granting
-		#TODO: Should figure out how to safely remove these
 		
 		#High Tribal
 		if = {
