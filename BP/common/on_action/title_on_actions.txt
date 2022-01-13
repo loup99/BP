@@ -91,6 +91,8 @@ on_title_gain = {
 		#### Title granting safety check (prevent boostrapping chars)
 		
 		#Titles that were granted to non-landed have special checks to prevent government bootstrapping
+		#Advanced governments (can't hold tribal_holding) giving tribals yield high_tribal_government; 
+		#nomad_government, high_tribal_government, and tribal_government yield the same government
 		if = {
 			limit = {
 				AND = {
@@ -100,7 +102,68 @@ on_title_gain = {
 					root.capital_county = { this != scope:title }
 				}
 			}
-			change_government = feudal_government
+			
+			#Primitive Governments (can hold tribal_holding)
+			if = {
+				limit = { scope:previous_holder = { has_government = tribal_government } }
+				change_government = tribal_government
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = nomad_government } }
+				change_government = nomad_government
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = high_tribal_government } }
+				change_government = high_tribal_government
+			}
+			#Advanced Governments (Cannot hold tribal_holding)
+			else_if = {
+				limit = { scope:previous_holder = { has_government = prefeudal_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = prefeudal_government }
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = subroman_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = subroman_government }
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = eranshar_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = eranshar_government }
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = gupta_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = gupta_government }
+			}
+			else_if = {
+				limit = {
+					scope:previous_holder = {
+						OR = {
+							has_government = gubernatorial_government
+							has_government = bureaucratic_government
+						}
+					}
+				}
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = gubernatorial_government }
+			}
 		}
 		
 		##### Change from Vanilla ^^^^^
