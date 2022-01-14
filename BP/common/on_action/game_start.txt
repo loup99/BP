@@ -1,5 +1,7 @@
 ﻿# Called from code after history generation
 # Empty scope
+
+##### Change from Vanilla vvvvv
 on_game_start = {
 	effect = {
 		### HRE SETUP ###
@@ -81,6 +83,8 @@ on_game_start = {
 				}
 			}
 		}
+		
+		#Title Tweaks
 		if = {
 			limit = { game_start_date <= 1000.1.1 }
 			title:e_scandinavia = { set_coa = e_scandinavia_norse }
@@ -183,8 +187,69 @@ on_game_start = {
 			title:c_dublin = { set_coa = c_dublin_norse }
 			title:c_argyll = { set_coa = c_argyll_norse }
 		}
+		
+		#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
+		#in through the back door
+		every_barony = {
+			#Which isn't a capital
+			limit = { is_capital_barony = no }
+			#All castle holders should have the government of the county holder
+			if = {
+				limit = { this.title_province = { has_holding_type = castle_holding } }
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = { #NB: Causes singular "illegal government" error
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = theocracy_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = high_tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = prefeudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = nomad_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_government } }
+					this.holder = { change_government = subroman_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = eranshar_government } }
+					this.holder = { change_government = eranshar_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = gupta_government } }
+					this.holder = { change_government = gupta_government }
+				}
+				else_if = {
+					limit = {
+						this.county.holder = {
+							OR = {
+								has_government = gubernatorial_government
+								has_government = bureaucratic_government
+							}
+						}
+					}
+					this.holder = { change_government = gubernatorial_government }
+				}
+			}
+		}
 	}
 }
+##### Change from Vanilla ^^^^^
 
 # Like on_game_start, except it is called once the host (or player, in single player) exits the lobby. Good for anything where you need to know who the players are, or what the game rules are
 on_game_start_after_lobby = {
