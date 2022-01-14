@@ -25,6 +25,7 @@ offer_foederatus_interaction = {
 			is_independent_ruler = yes
 			highest_held_title_tier < scope:actor.highest_held_title_tier
 			NOT = { government_has_flag = can_not_be_vassal_or_liege }
+			valid_government_foederatus_special_trigger = yes
 		}
 	}
 
@@ -283,7 +284,14 @@ offer_foederatus_interaction = {
 		resolve_title_and_vassal_change = scope:grant_new_counties_to_recipient
 		resolve_title_and_vassal_change = scope:grant_old_titles_to_new_chars
 		resolve_title_and_vassal_change = scope:liberate_old_counties_with_new_chars
-		scope:recipient = { vassal_contract_set_obligation_level = { type = foederatus_special_contract level = 1 } }
+		scope:recipient = {
+			hidden_effect = {
+				if = {
+					limit = { is_independent_ruler = no }
+					vassal_contract_set_obligation_level = { type = foederatus_special_contract level = 1 }
+				}
+			}
+		}
 		
 		#Create Titular title if primary isn't titular
 		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
