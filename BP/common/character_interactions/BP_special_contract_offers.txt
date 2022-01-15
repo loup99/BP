@@ -53,14 +53,30 @@ offer_foederatus_interaction = {
 		scope:target = {
 			is_leased_out = no
 			#Cannot hand out: Your primary title, anything up the chain from your capital
-			this.tier = tier_county
-			NOT = { this = scope:actor.primary_title }
-			NOT = { this = scope:actor.capital_county }
-			#Cannot hand out anything the same tier (or greater!) than your primary tier
-			NOT = { this.tier >= scope:actor.primary_title.tier }
+			custom_description = {
+				text = "is_a_county"
+				this.tier = tier_county
+			}
+			custom_description = {
+				text = "is_primary_title"
+				NOT = { this = scope:actor.primary_title }
+			}
+			custom_description = {
+				text = "is_capital_county"
+				NOT = { this = scope:actor.capital_county }
+			}
+			#Cannot hand out anything the same tier (or greater!) than the target's primary tier
+			custom_description = {
+				text = "is_greater_than_primary_tier"
+				subject = scope:recipient
+				NOT = { this.tier >= scope:recipient.primary_title.tier }
+			}
 			trigger_if = {
 				limit = { this.tier <= tier_duchy }
-				NOT = { this.duchy = scope:actor.capital_county.duchy }
+				custom_description = {
+					text = "is_in_capital_duchy"
+					NOT = { this.duchy = scope:actor.capital_county.duchy }
+				}
 			}
 		}
 	}
