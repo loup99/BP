@@ -1,0 +1,185 @@
+﻿#Taken and tweaked from Successions Expanded
+imperial_elective_emperor_vote_weight = {
+	modifier = { #Imperial Dignity
+		desc = tooltip_bp_imperial_vote_strength_emperor
+		add = 250
+		scope:holder = root
+	}
+	modifier = { #...Yet it can be reduced in certain circumstances.
+		add = -50
+		desc = tooltip_bp_imperial_vote_strength_emperor_unpurpled
+		scope:holder = root
+		NOT = { has_trait = born_in_the_purple }
+	}
+	modifier = { #The Imperator/Basileios must have an untarnished body.
+		add = -50
+		desc = tooltip_imperial_vote_strength_emperor_deformed
+		scope:holder = root
+		is_adult = yes
+		bp_byzantine_elective_deformed_emperor_trigger = yes
+	}
+	modifier = { #Children are not leaders.
+		add = -100
+		desc = tooltip_imperial_vote_strength_emperor_child
+		scope:holder = root
+		NOT = { is_adult = yes }
+	}
+	modifier = { #Being a good orator.
+		add = 10
+		desc = tooltip_imperial_vote_strength_emperor_diplomacy
+		scope:holder = root
+		is_adult = yes
+		diplomacy >= 10
+		add = {
+			value = 10
+			if = {
+				limit = { diplomacy >= 15 }
+				add = 5
+			}
+			if = {
+				limit = { diplomacy >= 20 }
+				add = 5
+			}
+			if = {
+				limit = { diplomacy >= 25 }
+				add = 5
+			}
+		}
+	}
+}
+imperial_elective_secular_vassal_vote_weight = {
+	modifier = { #Powerful people can pull strings.
+		add = 5
+		desc = tooltip_imperial_vote_strength_elector_tier
+		is_vassal_of = scope:holder
+		NOT = { scope:holder = root }
+		NOT = { vassal_contract_has_flag = foederatus_installed }
+		highest_held_title_tier > tier_county
+		add = {
+			value = 5
+			if = {
+				limit = { highest_held_title_tier > tier_duchy }
+				add = 10
+			}
+		}
+	}
+	#Prestigious secular rulers get extra sway
+	imperial_elective_voiting_weight_secular_prestige = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_elector_prestige
+	}
+	#Commanders
+	imperial_elective_voiting_weight_trait_scaling_martial_chars = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_chancellor_diplomacy
+	}
+	#Diplomacy increases the Chancellor's influence.
+	imperial_elective_voiting_weight_trait_scaling_with_council_position = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_chancellor_diplomacy
+		COUNCIL_POSITION = councillor_chancellor
+		ATTRIBUTE = diplomacy
+	}
+	#Stewardship increases the Steward's influence.
+	imperial_elective_voiting_weight_trait_scaling_with_council_position = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_steward_stewardship
+		COUNCIL_POSITION = councillor_steward
+		ATTRIBUTE = stewardship
+	}
+	#Intrigue increases the Spymaster's influence.
+	imperial_elective_voiting_weight_trait_scaling_with_council_position = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_spymaster_intrigue
+		COUNCIL_POSITION = councillor_spymaster
+		ATTRIBUTE = intrigue
+	}
+	#Learning increases the Court Chaplains influence.
+	imperial_elective_voiting_weight_trait_scaling_with_council_position = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_chaplain_learning
+		COUNCIL_POSITION = councillor_court_chaplain
+		ATTRIBUTE = learning
+	}
+}
+imperial_elective_gubernatorial_vassal_additional_vote_weight = {
+	#Intrigue gives on influence in the bureaucracy
+	imperial_elective_voiting_weight_court_influence = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_gubernatorial_intrigue
+		ATTRIBUTE = intrigue
+	}
+	#Stewardship gives on influence in the bureaucracy
+	imperial_elective_voiting_weight_court_influence = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_gubernatorial_diplomacy
+		ATTRIBUTE = diplomacy
+	}
+	#Stewardship gives on influence in the bureaucracy
+	imperial_elective_voiting_weight_court_influence = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_gubernatorial_stewardship
+		ATTRIBUTE = stewardship
+	}
+}
+imperial_elective_theocratic_vassal_vote_weight = {
+	modifier = { #Head of Faith holds a lot of sway
+		add = 50
+		desc = tooltip_imperial_vote_strength_chaplain_patriarch
+		is_vassal_of = scope:holder
+		scope:holder.faith = root.faith
+		NOT = { scope:holder = root }
+		faith = { exists = religious_head }
+		scope:holder.faith.religious_head = root.faith.religious_head
+	}
+	#Clerics (who are already in doctrinal agreement in the electors scope) hold a lot of sway
+	modifier = {
+		add = 20
+		desc = tooltip_imperial_vote_strength_theocrat
+		NOT = { this = scope:holder }
+		has_government = theocracy_government
+	}
+	#Learning greatly increases the value of cleric's vote
+	imperial_elective_voiting_weight_theocrat_learning = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_cleric_learning
+	}
+	#As does piety
+	imperial_elective_voiting_weight_theocrat_piety = {
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_cleric_piety_level
+	}
+}
+imperial_elective_foederatus_vote_weight = {
+	imperial_elective_voiting_weight_foederatus_martial = { #Commanders
+		TITLE_HOLDER = scope:holder
+		TOOLTIP = tooltip_imperial_vote_strength_foederatus_martial
+	}
+	modifier = { #But the sword gives them some sway
+		add = 10
+		desc = tooltip_imperial_vote_strength_foederatus_army_strength
+		is_vassal_of = scope:holder
+		NOT = { scope:holder = root }
+		vassal_contract_has_flag = foederatus_installed
+		number_of_maa_regiments >= 1
+		add = {
+			value = 5
+			if = {
+				limit = { number_of_maa_regiments > 1 }
+				add = 5
+			}
+			if = {
+				limit = { number_of_maa_regiments > 2 }
+				add = 5
+			}
+			if = {
+				limit = { number_of_maa_regiments > 3 }
+				add = 5
+			}
+			if = {
+				limit = { number_of_maa_regiments > 4 }
+				add = 5
+			}
+		}
+	}
+}

@@ -1,0 +1,126 @@
+﻿# Choices for AI aspects taken from common/decisions/80_major_decisions_roman.txt:restore_roman_empire_decision
+sole_roman_empire_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	
+	desc = sole_roman_empire_decision_desc
+	selection_tooltip = sole_roman_empire_decision_tooltip
+	major = yes
+	
+	ai_check_interval = 120
+	
+	is_shown = {
+		OR = {
+			has_title = title:e_wre
+			has_title = title:e_byzantium
+		}
+		OR = {
+			religion = religion:christianity_religion
+			religion = religion:hellenism_religion
+		}
+		OR = {
+			culture_group = culture_group:latin_group
+			culture_group = culture_group:byzantine_group
+		}
+		NOT = { has_claim_on = title:e_roman_empire }
+		NOT = { #Can only be done once
+			is_target_in_global_variable_list = {
+				name = unavailable_unique_decisions
+				target = flag:flag_sole_roman_empire
+			}
+		}
+	}
+	
+	is_valid = {
+		prestige_level >= medium_prestige_level
+		gold >= 300
+		NAND = {
+			title:e_wre = { exists = holder }
+			title:e_byzantium = { exists = holder }
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_capable_adult = yes
+		is_imprisoned = no
+		is_independent_ruler = yes
+		is_at_war = no
+	}
+	
+	effect = {
+		save_scope_as = last_roman
+		scope:last_roman = {
+			add_pressed_claim = title:e_roman_empire
+			remove_short_term_gold = 300
+		}
+		trigger_event = { id = bp_imperial_legacy.0001 }
+		hidden_effect = {
+			add_to_global_variable_list = {
+				name = unavailable_unique_decisions
+				target = flag:flag_sole_roman_empire
+			}
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 100 }
+}
+
+#NB: Taken from restore_roman_empire_decision and tweaked
+unite_both_roman_empires_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	desc = unite_both_roman_empires_decision_desc
+	selection_tooltip = unite_both_roman_empires_decision_tooltip
+	major = yes
+	
+	ai_check_interval = 120
+	
+	is_shown = {
+		is_ruler = yes
+		is_landed = yes
+		has_title = title:e_byzantium
+		has_title = title:e_wre
+		OR = {
+			culture_group = culture_group:latin_group
+			culture_group = culture_group:byzantine_group
+		}
+		NOT = { #Can only do it once.
+			is_target_in_global_variable_list = {
+				name = unavailable_unique_decisions
+				target = flag:flag_restored_roman_empire
+			}
+		}
+	}
+	
+	is_valid = {
+		prestige_level >= max_prestige_level
+		has_title = title:e_byzantium
+		has_title = title:e_wre
+	}
+	
+	is_valid_showing_failures_only = {
+		is_capable_adult = yes
+		is_imprisoned = no
+		is_independent_ruler = yes
+	}
+	
+	effect = {
+		custom_tooltip = restore_roman_empire_decision_effect_tooltip
+		show_as_tooltip = { create_roman_empire_scripted_effect = yes }
+		trigger_event = { id = roman_restoration.0001 }
+		hidden_effect = {
+			add_to_global_variable_list = {
+				name = unavailable_unique_decisions
+				target = flag:flag_restored_roman_empire
+			}
+			set_global_variable = {
+				name = flag_restored_roman_empire
+				value = root
+			}
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 100 }
+}

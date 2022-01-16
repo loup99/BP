@@ -1,0 +1,125 @@
+﻿#Taken from Successions Expanded & Modified
+imperial_elective = {
+	electors = {#Roman Empire election scheme; can only have landed electors unfortunately
+		add = holder
+		
+		#All de-facto secular vassals that gubernatorial, regardless of religion
+		#But don't include tributaries or foederati
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				has_government = gubernatorial_government
+				NOT = { has_government = theocracy_government }
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+			}
+		}
+		#All de-facto secular vassals that are Kings or above, regardless of religion 
+		#But don't include tributaries or foederati
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				highest_held_title_tier >= tier_kingdom
+				NOT = { has_government = gubernatorial_government }
+				NOT = { has_government = theocracy_government }
+				NOR = {
+					vassal_contract_has_flag = tributary_installed_flag
+					vassal_contract_has_flag = foederatus_installed
+				}
+			}
+		}
+		#All de-facto religious vassals, whose faith is in agreement with ours
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				has_government = theocracy_government
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				faith.religion = scope:holder.religion
+				faith = {
+					faith_hostility_level = {
+						target = scope:holder.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+		}
+		#All foederati, regardless of rank (Barracks Emperors and Gallic Empire say so)
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				vassal_contract_has_flag = foederatus_installed
+			}
+		}
+	}
+	
+	#Elector strength depends on electoral skills and government type more than anything else
+	elector_vote_strength = {
+		base = 0
+		#Vote Weight of the Emperor
+		imperial_elective_emperor_vote_weight = yes
+		imperial_elective_secular_vassal_vote_weight = yes
+		imperial_elective_gubernatorial_vassal_additional_vote_weight = yes
+		imperial_elective_theocratic_vassal_vote_weight = yes
+		imperial_elective_foederatus_vote_weight = yes
+	}
+	
+	candidate_score = {
+		base = 0
+		######################	Elector self-voting pattern	##########################
+		elector_self_voting_pattern_imperial_elective_modifier = yes
+
+		##########################	Holder voting pattern	##########################
+		holder_voting_pattern_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (circumstances)	##########################
+		elector_voting_pattern_circumstances_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (prestige/piety)	##########################
+		elector_voting_pattern_prestige_piety_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (traits)	##########################
+		elector_voting_pattern_traits_imperial_elective_modifier = yes
+
+		##########################	Elector voting patterns (opinion)	##########################
+		elector_voting_pattern_opinion_imperial_elective_modifier = yes
+		
+		##########################	Naming a Caesar/Caesar	##########################
+		elector_voting_pattern_caesar_imperial_elective_modifier = yes
+	}
+	
+	candidates = {
+		#Close and Extended Family
+		add = {
+			type = holder_close_family
+			limit = {
+				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+			}
+		}
+		#Claimants to the title that are landed must be under the emperor to vote for them
+		#Avoids landed claimants like Syagrius from being elected
+		add = {
+			type = title_claimants
+			limit = {
+				imperial_elective_potential_landless_claimant_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+			}
+		}
+		#Direct vassals (irrespective of de jure status)
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				imperial_elective_potential_landed_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+				OR = {
+					is_powerful_vassal = yes
+					is_knight = yes
+				}
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+			}
+		}
+	}
+}

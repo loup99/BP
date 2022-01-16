@@ -1,9 +1,25 @@
-﻿change_vassal_gubernatorial_governments = {
-	every_vassal_or_below = {
-		limit = { primary_title.tier > tier_barony }
-		if = {
-			limit = { has_government = gubernatorial_government }
-			change_government = subroman_government
-		}
+﻿change_government_to_gubernatorial = {
+	#In the case of bureaucratic_government, there's no vassal contracts, so we 
+	#need an intermediate switch to support the bureaucratic_vassal_governance
+	#contract
+	change_government = gubernatorial_government
+	vassal_contract_set_obligation_level = {
+		type = bureaucratic_vassal_governance
+		level = 1
 	}
+	change_government = gubernatorial_government
+	add_character_flag = gubernatorial_ruler
+}
+#E.g., independency or invalid liege govt
+revert_gubernatorial_government = {
+	vassal_contract_set_obligation_level = {
+		type = bureaucratic_vassal_governance
+		level = 0
+	}
+	change_government = subroman_government
+	remove_character_flag = gubernatorial_ruler
+}
+fix_invalid_gubernatorial_state = {
+	change_government = subroman_government
+	remove_character_flag = gubernatorial_ruler
 }
