@@ -1,6 +1,15 @@
 ﻿#faith scope
 has_ecumenical_doctrine_trigger = { has_doctrine_parameter = is_special_doctrine_christian_ecumenism }
 
+#Only tenets for which the pentarchy matters
+valid_pentarch_doctrines = {
+	OR = {
+		has_doctrine = tenet_pentarchy
+		has_doctrine = tenet_apostolic_succession
+		has_doctrine = tenet_autocephaly
+	}
+}
+
 is_a_pentarch_trigger = {
 	custom_description = {
 		text = "is_a_pentarch"
@@ -27,11 +36,63 @@ pentarch_titles = {
 	has_title = title:d_orthodox
 }
 
-#Only tenets for which the pentarchy matters
-valid_pentarch_doctrines = {
-	OR = {
-		has_doctrine = tenet_pentarchy
-		has_doctrine = tenet_apostolic_succession
-		has_doctrine = tenet_autocephaly
+#Triggers for seizing pentarch baronies
+missing_pentarch_seat_trigger = {
+	AND = {
+		#Basic requirements
+		has_title = $PENTARCH_DUCHY$
+		NOT = { has_title = $PENTARCH_BAORNY$ }
+		OR = {
+			#Title holder must be in line with our views to gracefully step aside
+			custom_description = {
+				text = coreligionist_barony_holder
+				AND = {
+					$PENTARCH_BAORNY$.holder.faith = { valid_pentarch_doctrines = yes }
+					$PENTARCH_BAORNY$.holder.faith = { faith_hostility_level = { target = $PENTARCH_BAORNY$.holder.faith value < 2 } }
+				}
+			}
+			#or, the county holder in question agrees with us
+			custom_description = {
+				text = coreligionist_county_holder
+				AND = {
+					$PENTARCH_COUNTY$.holder.faith = { valid_pentarch_doctrines = yes }
+					$PENTARCH_COUNTY$.holder.faith = { faith_hostility_level = { target = $PENTARCH_DUCHY$.holder.faith value < 2 } }
+				}
+			}
+		}
+	}
+}
+missing_pentarch_barony = {
+	trigger_if = {
+		limit = { has_title = title:d_patriarch_antioch }
+		missing_pentarch_seat_trigger = {
+			PENTARCH_DUCHY = title:d_patriarch_antioch
+			PENTARCH_COUNTY = title:c_antiocheia
+			PENTARCH_BAORNY = title:b_jabala
+		}
+	}
+	trigger_if = {
+		limit = { has_title = title:d_patriarch_jerusalem }
+		missing_pentarch_seat_trigger = {
+			PENTARCH_DUCHY = title:d_patriarch_jerusalem
+			PENTARCH_COUNTY = title:c_jerusalem
+			PENTARCH_BAORNY = title:b_nablus
+		}
+	}
+	trigger_if = {
+		limit = { has_title = title:d_patriarch_alexandria }
+		missing_pentarch_seat_trigger = {
+			PENTARCH_DUCHY = title:d_patriarch_alexandria
+			PENTARCH_COUNTY = title:c_alexandria
+			PENTARCH_BAORNY = title:b_wadi_natrun
+		}
+	}
+	trigger_if = {
+		limit = { has_title = title:d_patriarch_rome }
+		missing_pentarch_seat_trigger = {
+			PENTARCH_DUCHY = title:d_patriarch_rome
+			PENTARCH_COUNTY = title:c_roma
+			PENTARCH_BAORNY = title:b_vatican
+		}
 	}
 }
