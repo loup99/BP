@@ -78,11 +78,35 @@ on_title_gain = {
 						has_character_flag = bureacratic_ruler #Living bureacrats with no titles
 					}
 				}
+				#New ruler can't have invalid government
+				root = {
+					NOR = {
+						#Unplayable Govts
+						has_government = republic_government
+						has_government = mercenary_government
+						has_government = holy_order_government
+						has_government = theocracy_government
+						#Primitive Govts
+						has_government = tribal_government
+						has_government = nomad_government
+						has_government = high_tribal_government
+						#Advanced Govts
+						has_government = eranshar_government
+						has_government = gupta_government
+					}
+				}
 			}
 			change_government = bureaucratic_government
 			add_character_flag = bureacratic_ruler
 		}
-		
+		else = {
+			debug_log = "Invalid Holder of Bureaucratic Government Title"
+			#NB: Throws a few illegal govt and no vassal contract errors
+			every_vassal_or_below = {
+				limit = { has_government = gubernatorial_government }
+				revert_gubernatorial_government = yes
+			}
+		}
 		#### Title granting safety check (prevent boostrapping chars)
 		
 		#Titles that were granted to non-landed have special checks to prevent government bootstrapping
@@ -299,10 +323,17 @@ on_rank_down = { # Will not fire during history execution or for dying character
 		##### Changed from Vanilla vvvvv
 		#Whenever a bureacratic_ruler gets deposed, switch his govt
 		if = {
-			limit = { root = { has_character_flag = bureacratic_ruler } }
+			limit = {
+				root = {
+					has_character_flag = bureacratic_ruler
+					is_independent_ruler = no
+				}
+			}
 			change_government_to_gubernatorial = yes
 			remove_character_flag = bureacratic_ruler
 		}
+		#In this case, the bureacrat lost the title and was kicked out (e.g. title usurped)
+		else = { change_government = subroman_government }
 		##### Changed from Vanilla ^^^^^
 	}
 }
