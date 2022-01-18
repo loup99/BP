@@ -1,0 +1,45 @@
+﻿Coding Philosophy Notes:
+
+0). Above all else, code that works is better than code that doesn't or code that's pretty!
+
+1). Whenever possible, write code to a separate file instead of overwriting Vanilla
+	Reason: Keeps code base fairly harmonized whenever vanilla updates
+
+2). Whenever overriding Vanilla files, keep changes fairly minimal
+	a). When changing one line, or removing a code block, note with "##### Changed from Vanilla: <Notes>"
+	b). When changing a block of lines, start with "##### Changed from Vanilla vvvvv" and end with "##### Changed from Vanilla ^^^^^"
+		Reason: Keeps things easily regex searchable
+
+3). CK3 scripting supports quasi-templating like code via $NAME$ semantics, where $NAME$ is replaced inline. [1]
+Use that to reduce code duplication
+	Reason: Code duplication leads to the risk of some blocks of code being missed and makes maintenance harder
+
+4). Place as many references as possible in common/scripted_effects/ and common/scripted_triggers/ instead of in
+actionable folders like common/decisions/ or common/laws/
+	Reason: Prevents having code spread out across files for ease of maintenance
+
+5). One line are preferred whenever possible [2]
+	Reason: Prevents extraneous folding in Notepadd++/Visual Studio and improves code clarity
+
+6). The more complicated the code, the more comments are needed to explain what you're trying to do
+	Reason: Code does exactly what you tell it to do. Best also explain what you want it to do as well 
+##### Examples
+
+[1] Pseudo-code example
+make_feudal.txt:
+if = {
+	limit = { this.tier >= tier_barony }
+	do_thing = { NAME = this }
+}
+common/scripted_effects/effects.txt:
+	do_thing = {
+		$NAME$.holder = { change_government = feudal_government }
+	}
+
+[2]
+Do this:
+ this.faith = { has_doctrine = core_tenet_blah }
+Not this:
+this.faith = {
+	has_doctrine = core_tenet_blah
+}
