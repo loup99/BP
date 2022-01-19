@@ -1,17 +1,32 @@
-﻿#Roman Empire election scheme; can only have landed electors unfortunately
+﻿#Taken from Successions Expanded & Modified
 imperial_elective = {
-	electors = {
+	electors = {#Roman Empire election scheme; can only have landed electors unfortunately
 		add = holder
 		
-		#All de-facto secular vassals that are Dukes or above, regardless of religion
-		#But don't include tributaries but foederati okay (Barracks Emperors and Gallic Empire say so)
+		#All de-facto secular vassals that gubernatorial, regardless of religion
+		#But don't include tributaries or foederati (Barracks Emperors and Gallic Empire say so)
 		add = {
 			type = holder_direct_vassals
 			limit = {
 				scope:title = { tier = tier_empire }
-				highest_held_title_tier >= 3
+				has_government = gubernatorial_government
 				NOT = { has_government = theocracy_government }
 				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+			}
+		}
+		#All de-facto secular vassals that are Kings or above, regardless of religion 
+		#But don't include tributaries or foederati
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				highest_held_title_tier >= tier_kingdom
+				NOT = { has_government = gubernatorial_government }
+				NOT = { has_government = theocracy_government }
+				NOR = {
+					vassal_contract_has_flag = tributary_installed_flag
+					vassal_contract_has_flag = foederatus_installed
+				}
 			}
 		}
 		#All de-facto religious vassals dukes and above, whose faith is in agreement with ours
@@ -19,7 +34,6 @@ imperial_elective = {
 			type = holder_direct_vassals
 			limit = {
 				scope:title = { tier = tier_empire }
-				highest_held_title_tier >= 3
 				has_government = theocracy_government
 				NOT = { vassal_contract_has_flag = tributary_installed_flag }
 				faith.religion = scope:holder.religion
@@ -31,42 +45,25 @@ imperial_elective = {
 				}
 			}
 		}
+		#All foederati, regardless of rank
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				vassal_contract_has_flag = foederatus_installed
+			}
+		}
 	}
 	
 	#Elector strength is tied to overall vassal power
 	elector_vote_strength = {
-		base = 1
-		modifier = { #Imperial Dignity
-			desc = tooltip_imperial_vote_strength_emperor
-			add = 3
-			highest_held_title_tier = 5
-		}
-		modifier = { #Powerful Vassal
-			desc = tooltip_imperial_vote_strength_powerful_vassal
-			add = {
-				value = 2
-				#Additional point if the vassal is more powerful than the current ruler 
-				#(Vassal King who meets this condition will have more voting power than the Emperor himself (1+1+1+2 = 5))
-				if = { 
-					limit = { max_military_strength > scope:holder.max_military_strength }
-					add = 1
-				}
-			}
-			NOT = { this = scope:holder }
-			is_powerful_vassal = yes
-		}
-		modifier = { #Clerical Influence
-			desc = tooltip_imperial_vote_strength_theocrat
-			add = 1
-			NOT = { this = scope:holder }
-			OR = {
-				has_government = theocracy_government
-				has_council_position = councillor_court_chaplain
-			}
-			faith = scope:holder.faith
-			faith = { has_doctrine = doctrine_theocracy_lay_clergy }
-			#TODO_CD:Possible trigger checking for investiture succession?
-		}
+		base = 0
+		#Vote Weight of the Emperor
+		imperial_elective_emperor_vote_weight = yes
+		imperial_elective_secular_vassal_vote_weight = yes
+		imperial_elective_gubernatorial_vassal_additional_vote_weight = yes
+		imperial_elective_theocratic_vassal_vote_weight = yes
+		imperial_elective_foederatus_vote_weight = yes #Must be at end, uses a multiplication
 	}
 	
 	candidate_score = {
@@ -91,23 +88,34 @@ imperial_elective = {
 	}
 	
 	candidates = {
-		#Direct vassals (irrespective of de jure status)
+		#Close and Extended Family
 		add = {
-			type = holder_direct_vassals
-			limit = { imperial_elective_potential_landed_candidate_trigger = yes }
+			type = holder_close_family
+			limit = {
+				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+			}
 		}
 		#Claimants to the title that are landed must be under the emperor to vote for them
 		#Avoids landed claimants like Syagrius from being elected
 		add = {
 			type = title_claimants
-			limit = { imperial_elective_potential_landless_claimant_candidate_trigger = yes }
-		}
-		#Close and Extended Family
-		add = {
-			type = holder_close_or_extended_family
 			limit = {
-				is_close_family_of = scope:holder
-				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+				imperial_elective_potential_landless_claimant_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+			}
+		}
+		#Direct vassals (irrespective of de jure status)
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				imperial_elective_potential_landed_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+				OR = {
+					is_powerful_vassal = yes
+					is_knight = yes
+				}
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
 			}
 		}
 	}
