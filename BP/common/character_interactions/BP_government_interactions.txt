@@ -1,0 +1,149 @@
+﻿#Taken from Succession Expanded & Adapted
+choose_despot = {
+	interface_priority = 10
+	common_interaction = yes
+	category = interaction_category_friendly
+	force_notification = yes
+
+	desc = choose_despot_desc
+
+	notification_text = choose_despot_notification
+	is_shown = {
+		scope:actor = {
+			has_government = bureaucratic_government
+			NOT = {
+				any_in_list = {
+					variable = despot_emperor
+					is_alive = yes
+				}
+			}
+		}
+		scope:recipient = {
+			OR = {
+				AND = {
+					is_close_family_of = scope:actor
+					any_liege_or_above = { this = scope:actor }
+				}
+				AND = {
+					has_government = bureaucratic_government
+					any_liege_or_above = { this = scope:actor }
+				}
+				AND = {
+					OR = {
+						is_powerful_vassal_of = scope:actor
+						is_knight_of = scope:actor
+					}
+				}
+				is_spouse_of = scope:actor
+			}
+			byzantine_elective_deformed_candidate_trigger = no
+		}
+	}
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			has_government = bureaucratic_government
+			NOT = {
+				any_in_list = {
+					variable = despot_emperor
+					is_alive = yes
+				}
+			}
+		}
+		scope:recipient = {
+			OR = {
+				AND = {
+					is_close_family_of = scope:actor
+					any_liege_or_above = { this = scope:actor }
+				}
+				AND = {
+					has_government = bureaucratic_government
+					any_liege_or_above = { this = scope:actor }
+				}
+				AND = {
+					OR = {
+						is_powerful_vassal_of = scope:actor
+						is_knight_of = scope:actor
+					}
+				}
+				is_spouse_of = scope:actor
+			}
+			byzantine_elective_deformed_candidate_trigger = no
+		}
+	}
+	auto_accept = yes
+	can_send = { always = yes }
+	on_send = {
+		scope:actor = {
+			add_to_variable_list = { name = despot_emperor target = scope:recipient }
+			scope:recipient = { add_character_modifier = despot_modifier }
+		}
+	}
+	ai_targets = {
+		ai_recipients = children
+		chance = 1
+	}
+	ai_target_quick_trigger = {
+		adult = yes
+	}
+	ai_frequency = 60
+	ai_potential = { has_government = bureaucratic_government }
+	ai_will_do = 10
+}
+unselect_despot = {
+	interface_priority = 11
+	common_interaction = yes
+	category = interaction_category_friendly
+	force_notification = yes
+
+	desc = unselect_despot_desc
+
+	notification_text = unselect_despot_notification
+	is_shown = {
+		scope:actor = {
+			any_in_list = {
+				variable = despot_emperor
+				this = scope:recipient
+			}
+		}
+	}
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			any_in_list = {
+				variable = despot_emperor
+				this = scope:recipient
+			}
+			OR = {
+				is_ai = no
+				AND = {
+					is_ai = yes
+					scope:recipient = { byzantine_elective_deformed_candidate_trigger = yes }
+				}
+			}
+		}	
+	}
+	auto_accept = yes
+	can_send = {
+		always = yes
+	}
+	on_send = {
+		scope:actor = {
+			remove_list_variable = { name = despot_emperor target = scope:recipient }
+			scope:recipient = { remove_character_modifier = despot_modifier }
+		}
+		scope:recipient = {
+			add_opinion = {
+				target = scope:actor
+				modifier = removed_as_despot
+				opinion = -30
+			}
+		}
+	}
+	ai_targets = {
+		ai_recipients = children
+		chance = 1
+	}
+	ai_target_quick_trigger = { adult = yes }
+	ai_frequency = 60
+	ai_potential = { has_government = bureaucratic_government }
+	ai_will_do = 100
+}
