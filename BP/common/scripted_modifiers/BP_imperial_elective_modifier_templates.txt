@@ -1,0 +1,205 @@
+﻿### VOTING WEIGHT TEMPLATES
+
+#In template code, mercenary_government used in place of "NULL" arguement
+imperial_elective_voiting_weight_piety_prestige = {
+	modifier = { #As does piety
+		add = $SCALE_VALUE$
+		desc = $TOOLTIP$
+		is_vassal_of = $TITLE_HOLDER$
+		NOT = { $TITLE_HOLDER$ = root }
+		NOT = { vassal_contract_has_flag = foederatus_installed } #Excessive, but will be true for theocrats anyway
+		trigger_if = {
+			limit = { always = $USE_THEOCRACY_TRIGGER$ }
+			has_government = theocracy_government
+		}
+		$RESOURCE$_level >= medium_$RESOURCE$_level
+		add = {
+			value = $SCALE_START$
+			if = {
+				limit = { $RESOURCE$_level >= high_$RESOURCE$_level }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $RESOURCE$_level >= very_high_$RESOURCE$_level }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $RESOURCE$_level >= max_$RESOURCE$_level }
+				add = $SCALE_VALUE$
+			}
+		}
+	}
+}
+imperial_elective_voiting_weight_theocrat_piety = {
+	imperial_elective_voiting_weight_piety_prestige = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		RESOURCE = piety
+		USE_THEOCRACY_TRIGGER = yes
+		SCALE_VALUE = 10
+		SCALE_START = 10
+	}
+}
+imperial_elective_voiting_weight_secular_prestige = {
+	imperial_elective_voiting_weight_piety_prestige = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		RESOURCE = prestige
+		USE_THEOCRACY_TRIGGER = no
+		SCALE_VALUE = 5
+		SCALE_START = 5
+	}
+}
+#General code for applying most voting weights based on attributes
+imperial_elective_voiting_weight_attribute_scaling_template = {
+	modifier = {
+		add = 10
+		desc = $TOOLTIP$
+		is_vassal_of = $TITLE_HOLDER$
+		NOT = { $TITLE_HOLDER$ = root }
+		trigger_if = {
+			limit = { always = $USES_FOEDERATUS$ }
+			vassal_contract_has_flag = foederatus_installed
+		}
+		trigger_else = { NOT = { vassal_contract_has_flag = foederatus_installed } }
+		trigger_if = {
+			limit = { always = $USES_GOVERNMENT$ }
+			has_government = $GOVERNMENT$
+		}
+		trigger_if = {
+			limit = { always = $IS_MILITARY_CASE$ }
+			OR = {
+				is_knight_of = $TITLE_HOLDER$
+				has_council_position = $COUNCIL_POSITION$
+			}
+		}
+		trigger_else_if = {
+			limit = { always = $USES_COUNCIL_POSITION$ }
+			has_council_position = $COUNCIL_POSITION$
+		}
+		trigger_else = {} #ERROR SUPPRESSION
+		$ATTRIBUTE$ >= 8
+		add = {
+			value = $SCALE_START$
+			if = {
+				limit = { $ATTRIBUTE$ >= 10 }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $ATTRIBUTE$ > 12 }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $ATTRIBUTE$ > 14 }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $ATTRIBUTE$ > 16 }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $ATTRIBUTE$ > 18 }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $ATTRIBUTE$ > 20 }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $ATTRIBUTE$ > 25 }
+				add = $SCALE_VALUE$
+			}
+			if = {
+				limit = { $ATTRIBUTE$ > 30 }
+				add = $SCALE_VALUE$
+			}
+			if = { #Marshal's double their attribute strength
+				limit = {
+					AND = {
+						always = $IS_MILITARY_CASE$
+						always = $USES_COUNCIL_POSITION$
+						has_council_position = $COUNCIL_POSITION$
+					}
+				}
+				multiply = 2
+			}
+		}
+	}
+}
+imperial_elective_voiting_weight_trait_scaling_with_council_position = {
+	imperial_elective_voiting_weight_attribute_scaling_template = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		USES_COUNCIL_POSITION = yes
+		IS_MILITARY_CASE = no
+		COUNCIL_POSITION = $COUNCIL_POSITION$
+		USES_FOEDERATUS = no
+		USES_GOVERNMENT = no
+		GOVERNMENT = mercenary_government
+		ATTRIBUTE = $ATTRIBUTE$
+		SCALE_START = 10
+		SCALE_VALUE = 5
+		
+	}
+}
+imperial_elective_voiting_weight_trait_scaling_martial_chars = {
+	imperial_elective_voiting_weight_attribute_scaling_template = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		USES_COUNCIL_POSITION = yes
+		IS_MILITARY_CASE = yes
+		COUNCIL_POSITION = councillor_marshal
+		USES_FOEDERATUS = no
+		USES_GOVERNMENT = no
+		GOVERNMENT = mercenary_government
+		ATTRIBUTE = martial
+		SCALE_START = 10
+		SCALE_VALUE = 5
+	}
+}
+imperial_elective_voiting_weight_trait_scaling_with_government = {
+	imperial_elective_voiting_weight_attribute_scaling_template = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		USES_COUNCIL_POSITION = no
+		IS_MILITARY_CASE = no
+		COUNCIL_POSITION = councillor_court_chaplain #To ensure compile validity; won't be used
+		USES_FOEDERATUS = no
+		USES_GOVERNMENT = yes
+		GOVERNMENT = $GOVERNMENT$
+		ATTRIBUTE = $ATTRIBUTE$
+		SCALE_START = 10
+		SCALE_VALUE = 5
+	}
+}
+imperial_elective_voiting_weight_foederatus_martial = {
+	imperial_elective_voiting_weight_attribute_scaling_template = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		USES_COUNCIL_POSITION = no
+		IS_MILITARY_CASE = yes
+		COUNCIL_POSITION = councillor_marshal
+		USES_FOEDERATUS = yes
+		USES_GOVERNMENT = no
+		GOVERNMENT = mercenary_government #To ensure compile validity; won't be used
+		ATTRIBUTE = martial
+		SCALE_START = 10
+		SCALE_VALUE = 5
+	}
+}
+imperial_elective_voiting_weight_court_influence = {
+	imperial_elective_voiting_weight_trait_scaling_with_government = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		ATTRIBUTE = $ATTRIBUTE$
+		GOVERNMENT = gubernatorial_government
+	}
+}
+imperial_elective_voiting_weight_theocrat_learning = {
+	imperial_elective_voiting_weight_trait_scaling_with_government = {
+		TITLE_HOLDER = $TITLE_HOLDER$
+		TOOLTIP = $TOOLTIP$
+		ATTRIBUTE = learning
+		GOVERNMENT = theocracy_government
+	}
+}
