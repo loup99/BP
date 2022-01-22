@@ -1,9 +1,8 @@
 ﻿namespace = bp_historical_flavor
 
 #bp_historical_flavor.0001 - Vandals get a bunch of Roman Slaves
-#bp_historical_flavor.0002 - Fall of Rome to Barbarians
 
-# Roman vandal prisoners, Genseric took countless Romans back to Carthage as slaves during his sack of Rome
+# Roman prisoners of the Vandals, Genseric took countless Romans back to Carthage as slaves during his sack of Rome
 bp_historical_flavor.0001 = { #WTWSMS id: zusk_event.50
 	type = character_event
 	title = bp_historical_flavor.0001.name
@@ -121,103 +120,5 @@ bp_historical_flavor.0001 = { #WTWSMS id: zusk_event.50
 			save_scope_as = the_slave
 			scope:geneseric = { imprison = { target = scope:the_slave type = dungeon } }
 		}
-	}
-}
-
-bp_historical_flavor.0002 = { #WTWSMS id: zusk_event.30
-	title = bp_historical_flavor.0002.name
-	desc = bp_historical_flavor.0002.desc
-	type = character_event
-	theme = battle
-	override_background = { event_background = burning_building }
-	
-	immediate = {
-		#Prevent from firing twice
-		title:c_roma.holder = { save_scope_as = barbarian_ruler }
-		set_global_variable = {
-			name = fall_of_rome
-			value = scope:barbarian_ruler
-		}
-	}
-	
-	right_portrait = {
-		character = scope:barbarian_ruler
-		animation = war_over_win
-	}
-	
-	option = { #General Response
-		name = bp_historical_flavor.0002.general_response
-		trigger = {
-			NOT = { has_title = title:e_byzantium }
-			NOT = { religion = religion:germanic_religion }
-			NOT = { faith = faith:nicene }
-			NOT = { this = scope:barbarian_ruler }
-			NOT = { this = character:93 }
-			NOT = { this = character:175110 }
-		}
-	}
-	option = { #Germanic Pagans
-		name = bp_historical_flavor.0002.germanic_religion_response
-		trigger = {
-			NOT = { has_title = title:e_byzantium }
-			NOT = { faith = faith:nicene }
-			NOT = { this = scope:barbarian_ruler }
-			NOT = { this = character:93 }
-			NOT = { this = character:175110 }
-			religion = religion:germanic_religion
-		}
-		add_piety = 100
-	}
-	option = { #Christians harmonized with the Imperial church
-		name = bp_historical_flavor.0002.imperial_christian_response
-		trigger = {
-			NOT = { has_title = title:e_byzantium }
-			NOT = { faith = faith:nicene }
-			NOT = { this = scope:barbarian_ruler }
-			NOT = { this = character:93 }
-			NOT = { this = character:175110 }
-			AND = {
-				religion = religion:christianity_religion
-				this.faith = { considers_astray_trigger = { FAITH = faith:nicene } }
-			}
-		}
-		add_piety = -100
-	}
-	option = { #Odoacer
-		name = bp_historical_flavor.0002.odoacer_response
-		trigger = { this = scope:barbarian_ruler }
-		add_piety = 1000
-		add_prestige = 1000
-	}
-	option = { #Genseric
-		name = bp_historical_flavor.0002.genseric_response
-		trigger = { this = character:93 }
-	}
-	option = { #Julius Nepos
-		name = bp_historical_flavor.0002.nepos_response
-		trigger = { this = character:175110 }
-		#Add triggered event to transfer e_wre
-	}
-	option = { #Byzantine Option
-		name = bp_historical_flavor.0002.byzantine_response
-		trigger = {
-			has_title = title:e_byzantium
-			NOT = { this = scope:barbarian_ruler }
-			NOT = { this = character:93 }
-			NOT = { this = character:175110 }
-		}
-		#Drop everyone's fervor who's in agreement with the Imperial Church
-		faith:nicene = { change_fervor = -100 }
-		religion:christianity_religion = {
-			every_faith = {
-				limit = {
-					this = { considers_astray_trigger = { FAITH = faith:nicene } }
-					NOT = { this = faith:nicene }
-				}
-				change_fervor = -50
-			}
-		}
-		add_piety = -1000
-		add_prestige = -1000
 	}
 }
