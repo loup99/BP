@@ -1,6 +1,6 @@
 ﻿namespace = bp_narrative_events
 
-#bp_historical_flavor.0001 - Fall of Rome to Barbarians
+#bp_narrative_events.0001 - Fall of Rome to Barbarians
 
 #Fall of Rome
 bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
@@ -11,8 +11,20 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 	override_background = { event_background = burning_building }
 	
 	immediate = {
+		#Find our barbarian ruler
+		title:c_roma.holder = {
+			if = {
+				limit = { fall_of_rome_trigger = yes }
+				save_scope_as = barbarian_ruler
+			}
+			else = {
+				every_liege_or_above = {
+					limit = { is_independent_ruler = yes }
+					save_scope_as = barbarian_ruler
+				}
+			}
+		}
 		#Prevent from firing twice
-		title:c_roma.holder = { save_scope_as = barbarian_ruler }
 		set_global_variable = {
 			name = fall_of_rome
 			value = scope:barbarian_ruler
@@ -29,10 +41,13 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		trigger = {
 			NOT = { has_title = title:e_byzantium }
 			NOT = { religion = religion:germanic_religion }
-			NOT = { faith = faith:nicene }
 			NOT = { this = scope:barbarian_ruler }
 			NOT = { this = character:93 }
 			NOT = { this = character:175110 }
+			NAND = {
+				religion = religion:christianity_religion
+				this.faith = { considers_astray_trigger = { FAITH = faith:nicene } }
+			}
 		}
 	}
 	option = { #Germanic Pagans
@@ -76,6 +91,7 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		name = bp_narrative_events.0001.nepos_response
 		trigger = { this = character:175110 }
 		#Add triggered event to transfer e_wre
+		trigger_event = { id = bp_narrative_events.0002 days = 0 }
 	}
 	option = { #Byzantine Option
 		name = bp_narrative_events.0001.byzantine_response

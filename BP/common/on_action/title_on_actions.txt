@@ -218,15 +218,19 @@ on_title_gain = {
 			change_government_to_gubernatorial = yes
 		}
 		
-		#Trigger Fall of Rome Event
+		#Check Trigger Fall of Rome Event
 		if = {
 			limit = {
-				scope:title = title:c_roma
 				#Only shocking the first time...
 				NOT = { has_global_variable = fall_of_rome }
-				root = { fall_of_rome_trigger = yes }
+				title:c_roma.holder = {
+					OR = {
+						fall_of_rome_trigger = yes
+						any_liege_or_above = { fall_of_rome_trigger = yes }
+					}
+				}
 			}
-			every_ruler = {
+			every_ruler = { #Inform all playable characters
 				limit = { primary_title.tier >= tier_county }
 				trigger_event = { id = bp_narrative_events.0001 }
 			}
