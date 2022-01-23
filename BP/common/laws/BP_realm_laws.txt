@@ -1,6 +1,7 @@
 ﻿@crown_authority_cooldown_years = 20
 @high_tribal_centralization_cooldown_years = 10
 @bureaucracy_cooldown_years = 10
+@subroman_decay_cooldown_years = 50
 
 #TODO: Implement imprisonment restrictions
 high_tribal_centralization = {
@@ -337,19 +338,192 @@ prefeudal_authority = {
 	}
 }
 
-#Subromain government special effects
-subroman_authority = {
-	default = subroman_authority_0
-	cumulative = no
+#Since theis models decay more than anything else, you can only improve your status
+#not decline it
+subroman_decay = {
+	default = subroman_decay_0
+	cumulative = yes
 	flag = realm_law
 	
-	subroman_authority_0 = {
+	subroman_decay_0 = {
 		modifier = {}
+		
+		can_keep = { realm_law_use_subroman_decay = yes }
+		
+		can_pass = {
+			custom_description = {
+				text = can_never_voluntary_reach_this_state
+				always = no
+			}
+		}
+		
+		pass_cost = {
+			prestige = { add = improve_subroman_decay_prestige_cost }
+			gold = { add = improve_subroman_decay_gold_cost }
+		}
+		
+		on_pass = {
+			if = {
+				limit = { NOT = { has_realm_law = subroman_decay_0 } }
+				set_variable = {
+					name = subroman_decay_cooldown
+					years = @subroman_decay_cooldown_years
+				}
+			}
+		}
+	}
+	subroman_decay_1 = {
+		modifier = {
+			domain_tax_mult = 0.1
+			vassal_levy_contribution_mult = -0.10
+			vassal_tax_contribution_mult = 0.10
+			men_at_arms_cap = 1
+		}
 		flag = title_revocation_allowed
 		flag = vassal_retraction_allowed
+		
+		can_keep = { realm_law_use_subroman_decay = yes }
+		
+		can_pass = {
+			has_realm_law = subroman_decay_0
+			trigger_if = {
+				limit = { has_realm_law = subroman_decay_0 }
+				custom_description = {
+					subject = root
+					text = "has_subroman_decay_cooldown"
+					NOT = { has_variable = subroman_decay_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = { add = improve_subroman_decay_prestige_cost }
+			gold = { add = improve_subroman_decay_gold_cost }
+		}
+		
+		on_pass = {
+			if = {
+				limit = { NOT = { has_realm_law = subroman_decay_1 } }
+				set_variable = {
+					name = subroman_decay_cooldown
+					years = @subroman_decay_cooldown_years
+				}
+			}
+		}
+	}
+	subroman_decay_2 = {
+		modifier = {
+			domain_tax_mult = 0.1
+			vassal_levy_contribution_mult = -0.10
+			vassal_tax_contribution_mult = 0.10
+			men_at_arms_cap = 1
+		}
 		flag = can_change_succession_laws
 		
-		can_keep = { realm_law_use_subroman_authority = yes }
+		can_keep = { realm_law_use_subroman_decay = yes }
+		
+		can_pass = {
+			has_realm_law = subroman_decay_1
+			trigger_if = {
+				limit = { has_realm_law = subroman_decay_1 }
+				custom_description = {
+					subject = root
+					text = "has_subroman_decay_cooldown"
+					NOT = { has_variable = subroman_decay_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = { add = improve_subroman_decay_prestige_cost }
+			gold = { add = improve_subroman_decay_gold_cost }
+		}
+		
+		on_pass = {
+			if = {
+				limit = { NOT = { has_realm_law = subroman_decay_2 } }
+				set_variable = {
+					name = subroman_decay_cooldown
+					years = @subroman_decay_cooldown_years
+				}
+			}
+		}
+	}
+	subroman_decay_3 = {
+		modifier = {
+			domain_tax_mult = 0.1
+			vassal_levy_contribution_mult = -0.10
+			vassal_tax_contribution_mult = 0.10
+			men_at_arms_cap = 1
+		}
+		flag = vassal_internal_wars_banned
+		
+		can_keep = { realm_law_use_subroman_decay = yes }
+		
+		can_pass = {
+			has_realm_law = subroman_decay_2
+			trigger_if = {
+				limit = { has_realm_law = subroman_decay_2 }
+				custom_description = {
+					subject = root
+					text = "has_subroman_decay_cooldown"
+					NOT = { has_variable = subroman_decay_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = { add = improve_subroman_decay_prestige_cost }
+			gold = { add = improve_subroman_decay_gold_cost }
+		}
+		
+		on_pass = {
+			if = {
+				limit = { NOT = { has_realm_law = subroman_decay_3 } }
+				set_variable = {
+					name = subroman_decay_cooldown
+					years = @subroman_decay_cooldown_years
+				}
+			}
+		}
+	}
+	subroman_decay_4 = {
+		modifier = {
+			domain_tax_mult = 0.1
+			vassal_levy_contribution_mult = -0.10
+			vassal_tax_contribution_mult = 0.10
+			men_at_arms_cap = 1
+		}
+		flag = vassal_all_wars_banned
+		flag = can_designate_heirs
+		
+		can_keep = { realm_law_use_subroman_decay = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = subroman_decay_3 }
+				custom_description = {
+					subject = root
+					text = "has_subroman_decay_cooldown"
+					NOT = { has_variable = subroman_decay_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = { add = improve_subroman_decay_prestige_cost }
+			gold = { add = improve_subroman_decay_gold_cost }
+		}
+		
+		on_pass = {
+			if = {
+				limit = { NOT = { has_realm_law = subroman_decay_4 } }
+				set_variable = {
+					name = subroman_decay_cooldown
+					years = @subroman_decay_cooldown_years
+				}
+			}
+		}
 	}
 }
 

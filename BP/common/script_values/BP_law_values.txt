@@ -1,13 +1,15 @@
-﻿#Crown Authority Change
-increase_centralization_prestige_base = 100
+﻿# (2^31-1)/1000
+change_fixed_title_succession_law_prestige_cost = 2147482
 
+#Crown Authority Change
+increase_centralization_prestige_base = 100
 increase_centralization_prestige_cost = {
 	add = {
 		desc = "BASE_VALUE"
 		value = increase_centralization_prestige_base
 		format = "BASE_VALUE_FORMAT"
 	}
-
+	
 	# +10 Prestige cost per county controlled by you(r vassals)
 	add = {
 		desc = "realm_size"
@@ -17,9 +19,7 @@ increase_centralization_prestige_cost = {
 
 	# Learning Modifier (2% more expensive for each skill point below 8 Learning)
 	if = {
-		limit = {
-			learning < 8
-		}
+		limit = { learning < 8 }
 		add = {
 			desc = "poor_learning_law_cost_tooltip"
 			value = {
@@ -30,9 +30,7 @@ increase_centralization_prestige_cost = {
 		}
 	}
 	else_if = { # (2% less expensive for each skill point below 8 Learning)
-		limit = {
-			learning > 8
-		}
+		limit = { learning > 8 }
 		add = {
 			desc = "learning_law_cost_tooltip"
 			value = {
@@ -45,11 +43,7 @@ increase_centralization_prestige_cost = {
 
 	# Tenet Modifiers
 	if = {
-		limit = {
-			faith = {
-				has_doctrine_parameter = legalism_modified_law_costs
-			}
-		}
+		limit = { faith = { has_doctrine_parameter = legalism_modified_law_costs } }
 		add = {
 			desc = "rite_legalism_law_cost_tooltip"
 			value = {
@@ -60,9 +54,7 @@ increase_centralization_prestige_cost = {
 		}
 	}
 	if = {
-		limit = {
-			faith = { has_doctrine_parameter = natural_primitivism_law_cost_increase }
-		}
+		limit = { faith = { has_doctrine_parameter = natural_primitivism_law_cost_increase } }
 		add = {
 			desc = "rite_primitivism_law_cost_tooltip"
 			value = natural_primitivism_modifier
@@ -79,9 +71,7 @@ increase_centralization_prestige_cost = {
 		}
 	}
 	if = {
-		limit = {
-			faith = { has_doctrine_parameter = religious_legal_pronouncements_law_cost_reduction }
-		}
+		limit = { faith = { has_doctrine_parameter = religious_legal_pronouncements_law_cost_reduction } }
 		multiply = {
 			desc = "rite_pronouncements_law_cost_tooltip"
 			value = 0.9 # religious_legal_pronouncements_modifier = -0.1
@@ -107,5 +97,175 @@ increase_centralization_prestige_cost = {
 	}
 }
 
-# (2^31-1)/1000
-change_fixed_title_succession_law_prestige_cost = 2147482
+improve_subroman_decay_prestige_base = 100
+improve_subroman_decay_prestige_cost = {
+	add = {
+		desc = "BASE_VALUE"
+		value = increase_centralization_prestige_base
+		format = "BASE_VALUE_FORMAT"
+	}
+	
+	# +10 Prestige cost per county controlled by you(r vassals)
+	add = {
+		desc = "realm_size"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_PRESTIGE_COST"
+		value = subrealm_size_modifier
+	}
+	
+	# Learning Modifier (2% more expensive for each skill point below 8 Learning)
+	if = {
+		limit = { learning < 8 }
+		add = {
+			desc = "poor_learning_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	else_if = { # (2% less expensive for each skill point below 8 Learning)
+		limit = { learning > 8 }
+		add = {
+			desc = "learning_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	
+	# Tenet Modifiers
+	if = {
+		limit = { faith = { has_doctrine_parameter = legalism_modified_law_costs } }
+		add = {
+			desc = "rite_legalism_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = legalism_law_cost_modifier
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = natural_primitivism_law_cost_increase } }
+		add = {
+			desc = "rite_primitivism_law_cost_tooltip"
+			value = natural_primitivism_modifier
+		}
+	}
+	if = {
+		limit = {
+			is_independent_ruler = no
+			vassal_contract_has_flag = locked_to_partition
+		}
+		multiply = {
+			desc = "succession_rights_forced_partition"
+			value = 1.25 # succession_rights_contract_law_cost = 0.25
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = religious_legal_pronouncements_law_cost_reduction } }
+		multiply = {
+			desc = "rite_pronouncements_law_cost_tooltip"
+			value = 0.9 # religious_legal_pronouncements_modifier = -0.1
+		}
+	}
+	
+	# Character Modifier Bonuses
+	if = {
+		limit = { has_character_modifier = yearly_benevolent_forgiveness_modifier }
+		multiply = {
+			desc = "character_modifiers_law_cost_tooltip"
+			value = 0.9 # yearly_benevolent_forgiveness_modifier = -10%
+		}
+	}
+	
+	# Character Modifier Maluses
+	if = {
+		limit = { has_character_modifier = vassal_distrust_modifier }
+		multiply = {
+			desc = "character_modifiers_law_cost_tooltip"
+			value = 1.1 # vassal_distrust_modifier = +10%
+		}
+	}
+}
+
+#Minimal development for it not to add to the costs
+subroman_minimal_development_required = 20
+
+subroman_county_development_modifier = {
+	value = subroman_minimal_development_required
+	subtract = this.development_level
+	min = 0
+}
+
+subroman_subrealm_development_modifier = {
+	value = 0
+	every_sub_realm_county = { add = subroman_county_development_modifier }
+}
+
+subroman_subrealm_size_modifier = {
+	value = 0
+	every_sub_realm_county = { add = 1 }
+	multiply = 10
+}
+
+improve_subroman_decay_gold_base = 100
+improve_subroman_decay_gold_cost = {
+	add = {
+		desc = "BASE_VALUE"
+		value = improve_subroman_decay_gold_base
+		format = "BASE_VALUE_FORMAT"
+	}
+	
+	# Each county adds 10
+	add = {
+		desc = "realm_size"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
+		value = subroman_subrealm_size_modifier
+	}
+	
+	# The lack of development of every county contributes
+	add = {
+		desc = "realm_development"
+		format = "BREAKDOWN_FORMAT_REALM_DEVELOPMENT_GOLD_COST"
+		value = subroman_subrealm_development_modifier
+	}
+	
+	# Character Education Modifier
+	if = {
+		limit = {
+			NOT = { has_trait = education_stewardship_1 }
+			NOT = { has_trait = education_stewardship_2 }
+			NOT = { has_trait = education_stewardship_3 }
+			NOT = { has_trait = education_stewardship_4 }
+		}
+		multiply = {
+			desc = "character_no_stewardship_education_modifier"
+			value = 1.5
+		}
+	}
+	else_if = {
+		limit = { has_trait = education_stewardship_1 }
+		multiply = {
+			desc = "character_poor_stewardship_education_modifier"
+			value = 1.2
+		}
+	}
+	else_if = {
+		limit = { has_trait = education_stewardship_2 }
+		multiply = {
+			desc = "character_poor_stewardship_education_modifier"
+			value = 1.1
+		}
+	}
+	else_if = {
+		limit = { has_trait = education_stewardship_4 }
+		multiply = {
+			desc = "character_good_stewardship_education_modifier"
+			value = 0.8
+		}
+	}
+}
