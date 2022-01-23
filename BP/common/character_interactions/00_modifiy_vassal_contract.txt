@@ -18,7 +18,19 @@ liege_modify_vassal_contract_interaction = {
 			exists = liege
 			liege = scope:actor
 			is_ruler = yes
-			vassal_contract_has_modifiable_obligations = yes
+			#Is available when the vassal has modifyable obligations OR is a foederatus/tributary
+			trigger_if = {
+				liege = { government_has_fixed_obligation_types = no }
+				vassal_contract_has_modifiable_obligations = yes
+			}
+			trigger_else = {
+				trigger_if = {
+					limit = {
+						vassal_contract_has_flag = foederatus_installed
+						vassal_contract_has_flag = tributary_installed_flag
+					}
+				}
+			}
 		}
 	}
 
@@ -156,12 +168,12 @@ liege_modify_vassal_contract_interaction = {
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = bureaucratic_special_contract }
 					}
 					if = {
-						limit = { valid_government_foederatus_special_trigger = yes }
-						set_obligation_if_changed_effect_tributaries_foederati = { OBLIGATION_TYPE = foederatus_special_contract }
+						limit = { vassal_contract_has_flag = foederatus_installed }
+						set_obligation_if_changed_effect_tributaries_foederati_tributary = { OBLIGATION_TYPE = foederatus_special_contract }
 					}
 					if = {
 						limit = { vassal_contract_has_flag = tributary_installed_flag }
-						set_obligation_if_changed_effect_tributaries_foederati = { OBLIGATION_TYPE = tributary_special_contract }
+						set_obligation_if_changed_effect_tributaries_foederati_tributary = { OBLIGATION_TYPE = tributary_special_contract }
 					}
 					if = {
 						limit = {
