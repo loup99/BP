@@ -1,0 +1,116 @@
+﻿namespace = bp_subroman_events
+
+@subroman_event_decay_cooldown_years = 30
+
+#bp_subroman_events.0001 - Subroman government decays
+
+bp_subroman_events.0001 = {
+	type = character_event
+	title = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { has_realm_law = subroman_decay_0 }
+				desc = bp_subroman_events.0001.transition_to_feudalism
+			}
+			desc = bp_subroman_events.0001.t
+		}
+	}
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { has_realm_law = subroman_decay_0 }
+				desc = bp_subroman_events.0001.desc_fedualism
+			}
+			desc = bp_subroman_events.0001.desc
+		}
+	}
+	
+	theme = realm
+	
+	trigger = {
+		NOT = { has_variable = subroman_decay_cooldown } #Don't fire if he's recently improved government
+		NOT = { has_variable = subroman_event_decay_cooldown } #Don't fire too often either
+	}
+	
+	immediate = {}
+	
+	right_portrait = {
+		character = root
+		animation = personality_rational
+	}
+	
+	option = {
+		name = {
+			trigger = { has_realm_law = subroman_decay_0 }
+			text = bp_subroman_events.0001.never_give_up_on_rome
+		}
+		name = { text = bp_subroman_events.0001.maintain_the_institutions }
+		
+		remove_long_term_gold = avoid_subroman_decay_gold_cost
+		
+		#AI will give a 50/50 shot on doing this unless it would trigger feudalism
+		#Exception: Not enough cash
+		ai_chance = {
+			base = 50
+			modifier = {
+				add = 50
+				has_realm_law = subroman_decay_0
+			}
+			modifier = {
+				add = -1000
+				gold < avoid_subroman_decay_gold_cost
+			}
+		}
+	}
+	option = {
+		name = bp_subroman_events.0001.let_them_degrade
+		
+		trigger = { NOT = { root = { has_realm_law = subroman_decay_0 } } }
+		
+		if = {
+			limit = { root = { has_realm_law = subroman_decay_4 } }
+			add_realm_law_skip_effects = subroman_decay_3
+		}
+		else_if = {
+			limit = { root = { has_realm_law = subroman_decay_3 } }
+			add_realm_law_skip_effects = subroman_decay_2
+		}
+		else_if = {
+			limit = { root = { has_realm_law = subroman_decay_2 } }
+			add_realm_law_skip_effects = subroman_decay_1
+		}
+		else_if = {
+			limit = { root = { has_realm_law = subroman_decay_1 } }
+			add_realm_law_skip_effects = subroman_decay_0
+		}
+		
+		set_variable = {
+			name = subroman_event_decay_cooldown
+			years = @subroman_event_decay_cooldown_years
+		}
+		
+		ai_chance = {
+			base = 50
+			modifier = {
+				add = 100
+				gold < avoid_subroman_decay_gold_cost
+			}
+		}
+	}
+	option = {
+		name = bp_subroman_events.0001.embrace_feudalism
+		
+		trigger = { root = { has_realm_law = subroman_decay_0 } }
+		
+		change_government = feudal_government
+		
+		#Should only occur when AI is out of money
+		ai_chance = {
+			base = 1
+			modifier = {
+				add = -1000
+				gold > avoid_subroman_decay_gold_cost
+			}
+		}
+	}
+}
