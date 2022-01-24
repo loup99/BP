@@ -1,4 +1,27 @@
-﻿change_government_to_gubernatorial = {
+﻿#Applies both bureaucratic and gubernatorial taxation based on grantor realm law
+apply_taxation_law = {
+	if = {
+		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_0 } }
+		add_realm_law_skip_effects = gubernatorial_taxation_0
+	}
+	else_if = {
+		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_1 } }
+		add_realm_law_skip_effects = gubernatorial_taxation_1
+	}
+	else_if = {
+		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_2 } }
+		add_realm_law_skip_effects = gubernatorial_taxation_2
+	}
+	else_if = {
+		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_3 } }
+		add_realm_law_skip_effects = gubernatorial_taxation_3
+	}
+	else_if = {
+		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_4 } }
+		add_realm_law_skip_effects = gubernatorial_taxation_4
+	}
+}
+change_government_to_gubernatorial = {
 	#In the case of bureaucratic_government, there's no vassal contracts, so we 
 	#need an intermediate switch to support the bureaucratic_vassal_governance
 	#contract
@@ -9,6 +32,17 @@
 	}
 	change_government = gubernatorial_government
 	add_character_flag = gubernatorial_ruler
+	
+	#Inherit appropriate taxation information
+	if = {
+		limit = { scope:previous_holder = { has_government = bureaucratic_government } }
+		apply_taxation_law = { GOVERNMENT = bureaucratic }
+	}
+	else_if = {
+		limit = { scope:previous_holder = { has_government = gubernatorial_government } }
+		apply_taxation_law = { GOVERNMENT = gubernatorial }
+	}
+	else = { debug_log = "INVALID_GUBERNATORIAL_LIEGE" }
 }
 #E.g., independency or invalid liege govt
 revert_gubernatorial_government = {
