@@ -152,9 +152,23 @@ on_title_gain = {
 				limit = { scope:previous_holder = { has_government = tribal_government } }
 				change_government = tribal_government
 			}
+			#Nomads can *only( hold tribals
 			else_if = {
 				limit = { scope:previous_holder = { has_government = nomad_government } }
-				change_government = nomad_government
+				
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = castle_holding } }
+					change_government = tribal_government
+				}
+				else_if = {
+					limit = { scope:title.title_province = { has_holding_type = city_holding } }
+					change_government = republic_government
+				}
+				else_if = {
+					limit = { scope:title.title_province = { has_holding_type = church_holding } }
+					change_government = prefeudal_government #Problematic, but works as band-aid
+				}
+				else = { change_government = nomad_government }
 			}
 			else_if = {
 				limit = { scope:previous_holder = { has_government = high_tribal_government } }

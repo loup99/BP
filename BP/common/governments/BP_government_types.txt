@@ -83,35 +83,75 @@ nomad_government = {
 	supply_limit_mult_for_others = -0.5
 	primary_holding = tribal_holding
 	required_county_holdings = { tribal_holding }
-
-	valid_holdings = { castle_holding }
-
-	prestige_opinion_override = { -10 0 3 5 10 20 }
+	
+	primary_culture_groups = { mongolic_group turkic_group }
+	
+	create_cadet_branches = yes
+	rulers_should_have_dynasty = yes
+	
+	required_county_holdings = { castle_holding city_holding church_holding }
 	always_use_patronym = yes
 	
 	vassal_contract = {
-		tribal_government_obligations
+		nomadic_government_obligations
 		foederatus_special_contract
 		tributary_special_contract
+	}
+	
+	opinion_of_liege = {
+		scope:vassal = {
+			if = {
+				limit = { NOT = { is_allied_to = scope:liege } }
+				if = {
+					limit = { is_powerful_vassal = yes }
+					value = -30
+				}
+				else = { value = -15 }
+			}
+		}
+	}
+	opinion_of_liege_desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:vassal = {
+						NOT = { is_allied_to = scope:liege }
+						is_powerful_vassal = yes
+					}
+				}
+				desc = "GOVERNMENT_CLAN_NOT_ALLIED_POWERFUL"
+			}
+			triggered_desc = {
+				trigger = {
+					scope:vassal = {
+						NOT = { is_allied_to = scope:liege }
+						is_powerful_vassal = no
+					}
+				}
+				desc = "GOVERNMENT_CLAN_NOT_ALLIED"
+			}
+		}
 	}
 	
 	character_modifier = {
 		title_creation_cost_mult = -0.5
 		army_maintenance_mult = -0.5
-		development_growth_factor = -0.5
-
+		development_growth_factor = -0.75
+		
 		feudal_government_vassal_opinion = -20
 		clan_government_vassal_opinion = -20
 		republic_government_vassal_opinion = -20
-		#subroman_government_vassal_opinion = -20
-		#prefeudal_government_vassal_opinion = -20
-		#high_tribal_government_vassal_opinion = -10
-	
-		ai_war_chance = 0.25
+		
+		men_at_arms_cap = 1
+		levy_size = 0.5
+		domain_tax_mult = -0.5
+		
+		ai_war_chance = 0.50
 	}
 	
 	flag = government_can_raid_rule
 	flag = cannot_advance_beyond_tribal_era
+	flag = nomad_government_character_modifier
 	
 	color ={ 201 179 36 }
 }
