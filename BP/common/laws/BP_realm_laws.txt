@@ -1,4 +1,4 @@
-﻿@crown_authority_cooldown_years = 20
+﻿@prefeudal_authority_cooldown_years = 20
 @high_tribal_organization_cooldown_years = 10
 @bureaucracy_cooldown_years = 10
 @subroman_decay_cooldown_years = 50
@@ -169,7 +169,7 @@ high_tribal_organization = {
 
 prefeudal_authority = {
 	default = prefeudal_authority_0
-	cumulative = no
+	cumulative = yes
 	flag = realm_law
 	
 	prefeudal_authority_0 = {
@@ -183,21 +183,22 @@ prefeudal_authority = {
 	
 	prefeudal_authority_1 = {
 		modifier = {
-			direct_vassal_opinion = 5
-			vassal_tax_contribution_mult = -0.10
-			vassal_levy_contribution_mult = -0.10
+			direct_vassal_opinion = -5
+			vassal_tax_contribution_mult = 0.10
+			vassal_levy_contribution_mult = 0.10
+			development_growth_factor = 0.05
 		}
-		flag = can_change_partition_succession_laws
-
+		flag = title_revocation_allowed
+		
 		can_keep = { realm_law_use_prefedual_authority = yes }
-
+		
 		can_pass = {
 			trigger_if = {
 				limit = { has_realm_law = prefeudal_authority_0 }
 				custom_description = {
 					subject = root
-					text = "has_crown_authority_cooldown"
-					NOT = { has_variable = crown_authority_cooldown }
+					text = "has_prefeudal_authority_cooldown"
+					NOT = { has_variable = prefeudal_authority_cooldown }
 				}
 				root.culture = { has_innovation = innovation_writing }
 			}
@@ -224,11 +225,11 @@ prefeudal_authority = {
 				}
 			}
 			set_variable = {
-				name = crown_authority_cooldown
-				years = @crown_authority_cooldown_years
+				name = prefeudal_authority_cooldown
+				years = @prefeudal_authority_cooldown_years
 			}
 		}
-
+		
 		ai_will_do = {
 			if = {
 				limit = { has_realm_law = prefeudal_authority_0 }
@@ -239,38 +240,33 @@ prefeudal_authority = {
 	
 	prefeudal_authority_2 = {
 		modifier = {
-			direct_vassal_opinion = -5
+			direct_vassal_opinion = -10
 			vassal_tax_contribution_mult = 0.10
 			vassal_levy_contribution_mult = 0.10
+			development_growth_factor = 0.05
 		}
-		flag = title_revocation_allowed
+		flag = can_change_partition_succession_laws
 		flag = vassal_retraction_allowed
 		
-		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
-		
 		can_keep = { realm_law_use_prefedual_authority = yes }
-
+		
 		can_pass = {
 			trigger_if = {
-				limit = {
-					NOT = { has_realm_law = prefeudal_authority_3 }
-				}
+				limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
 				has_realm_law = prefeudal_authority_1
 				custom_description = {
 					subject = root
-					text = "has_crown_authority_cooldown"
-					NOT = { has_variable = crown_authority_cooldown }
+					text = "has_prefeudal_authority_cooldown"
+					NOT = { has_variable = prefeudal_authority_cooldown }
 				}
 			}
 			root.culture = { has_innovation = innovation_mundium }
 		}
-
+		
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = {
-						NOT = { has_realm_law = prefeudal_authority_3 }
-					}
+					limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
 					add = increase_crown_authority_prestige_cost
 				}
 			}
@@ -278,16 +274,14 @@ prefeudal_authority = {
 		
 		on_pass = {
 			if = {
-				limit = {
-					NOT = { has_realm_law = prefeudal_authority_3 }
-				}
+				limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
 			}
 			set_variable = {
-				name = crown_authority_cooldown
-				years = @crown_authority_cooldown_years
+				name = prefeudal_authority_cooldown
+				years = @prefeudal_authority_cooldown_years
 			}
 		}
-
+		
 		ai_will_do = {
 			if = {
 				limit = { has_realm_law = prefeudal_authority_1 }
@@ -299,10 +293,12 @@ prefeudal_authority = {
 	prefeudal_authority_3 = {
 		modifier = {
 			direct_vassal_opinion = -10
-			vassal_tax_contribution_mult = 0.20
-			vassal_levy_contribution_mult = 0.20
+			vassal_tax_contribution_mult = 0.10
+			vassal_levy_contribution_mult = 0.10
+			development_growth_factor = 0.05
 		}
 		flag = can_change_succession_laws
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 		
 		can_keep = { realm_law_use_prefedual_authority = yes }
 
@@ -310,8 +306,8 @@ prefeudal_authority = {
 			has_realm_law = prefeudal_authority_2
 			custom_description = {
 				subject = root
-				text = "has_crown_authority_cooldown"
-				NOT = { has_variable = crown_authority_cooldown }
+				text = "has_prefeudal_authority_cooldown"
+				NOT = { has_variable = prefeudal_authority_cooldown }
 			}
 			root.culture = { has_innovation = innovation_plenary_assemblies }
 		}
@@ -319,9 +315,7 @@ prefeudal_authority = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = {
-						NOT = { has_realm_law = prefeudal_authority_3 }
-					}
+					limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
 					add = increase_crown_authority_prestige_cost
 				}
 			}
@@ -329,8 +323,8 @@ prefeudal_authority = {
 		
 		on_pass = {
 			set_variable = {
-				name = crown_authority_cooldown
-				years = @crown_authority_cooldown_years
+				name = prefeudal_authority_cooldown
+				years = @prefeudal_authority_cooldown_years
 			}
 		}
 	}
