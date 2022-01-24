@@ -570,47 +570,30 @@ gubernatorial_authority = {
 	}
 }
 
-bureaucratic_authority = {
-	default = bureaucratic_authority_2
+bureaucratic_taxation = {
+	default = bureaucratic_taxation_2
 	cumulative = no
 	flag = realm_law
 	
-	bureaucratic_authority_0 = {
+	bureaucratic_taxation_0 = {
 		modifier = {
-			vassal_tax_contribution_mult = 0.50
-			vassal_levy_contribution_mult = -0.50
-			direct_vassal_opinion = -10
+			domain_tax_mult = 0.0
+			county_opinion_add = 10
 		}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_partition_succession_laws
-		flag = vassal_refusal_is_treason
-		flag = can_change_succession_laws
-		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
-		flag = can_designate_heirs
 		
-		can_keep = { realm_law_use_bureaucratic_authority = yes }
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
 	}
 	
-	bureaucratic_authority_1 = {
+	bureaucratic_taxation_1 = {
 		modifier = {
-			vassal_tax_contribution_mult = 0.25
-			vassal_levy_contribution_mult = -0.50
-			direct_vassal_opinion = -5
+			domain_tax_mult = 0.05
+			county_opinion_add = 5
 		}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_partition_succession_laws
-		flag = vassal_refusal_is_treason
-		flag = can_change_succession_laws
-		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
-		flag = can_designate_heirs
 
-		can_keep = { realm_law_use_bureaucratic_authority = yes }
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
 
 		can_pass = {
 			trigger_if = {
-				limit = { has_realm_law = bureaucratic_authority_0 }
 				custom_description = {
 					subject = root
 					text = "has_bureaucracy_cooldown"
@@ -622,19 +605,20 @@ bureaucratic_authority = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = {
-						NOR = {
-							has_realm_law = bureaucratic_authority_2
-							has_realm_law = bureaucratic_authority_3
-						}
-					}
-					add = increase_crown_authority_prestige_cost
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
 				}
 			}
 		}
 		
 		on_pass = {
-			if = { limit = { NOT = { has_realm_law = bureaucratic_authority_2 } } }
+			if = { limit = { NOT = { has_realm_law = bureaucratic_taxation_2 } } }
 			set_variable = {
 				name = bureaucracy_cooldown
 				years = @bureaucracy_cooldown_years
@@ -643,28 +627,21 @@ bureaucratic_authority = {
 
 		ai_will_do = {
 			if = {
-				limit = { has_realm_law = bureaucratic_authority_0 }
+				limit = { has_realm_law = bureaucratic_taxation_0 }
 				value = 1
 			}
 		}
 	}
 	
-	bureaucratic_authority_2 = {
-		modifier = { vassal_levy_contribution_mult = -0.50 }
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_partition_succession_laws
-		flag = vassal_refusal_is_treason
-		flag = can_change_succession_laws
-		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
-		flag = can_designate_heirs
+	bureaucratic_taxation_2 = {
+		modifier = {
+			domain_tax_mult = 0.10
+		}
 		
-		can_keep = { realm_law_use_bureaucratic_authority = yes }
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
 
 		can_pass = {
 			trigger_if = {
-				limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
-				has_realm_law = bureaucratic_authority_1
 				custom_description = {
 					subject = root
 					text = "has_bureaucracy_cooldown"
@@ -676,15 +653,31 @@ bureaucratic_authority = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
-					add = increase_crown_authority_prestige_cost
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
 				}
 			}
 		}
 		
 		on_pass = {
 			if = {
-				limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
+				limit = { NOT = { has_realm_law = bureaucratic_taxation_3 } }
 			}
 			set_variable = {
 				name = bureaucracy_cooldown
@@ -694,31 +687,22 @@ bureaucratic_authority = {
 
 		ai_will_do = {
 			if = {
-				limit = { has_realm_law = bureaucratic_authority_1 }
+				limit = { has_realm_law = bureaucratic_taxation_1 }
 				value = 1
 			}
 		}
 	}
 	
-	bureaucratic_authority_3 = {
+	bureaucratic_taxation_3 = {
 		modifier = {
-			vassal_levy_contribution_mult = -0.25
-			direct_vassal_opinion = -5
+			domain_tax_mult = 0.15
+			county_opinion_add = -10
 		}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_partition_succession_laws
-		flag = vassal_refusal_is_treason
-		flag = can_change_succession_laws
-		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
-		flag = can_designate_heirs
 		
-		can_keep = { realm_law_use_bureaucratic_authority = yes }
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
 
 		can_pass = {
 			trigger_if = {
-				limit = { NOT = { has_realm_law = bureaucratic_authority_4 } }
-				has_realm_law = bureaucratic_authority_2
 				custom_description = {
 					subject = root
 					text = "has_bureaucracy_cooldown"
@@ -730,14 +714,42 @@ bureaucratic_authority = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = { NOT = { has_realm_law = bureaucratic_authority_4 } }
-					add = increase_crown_authority_prestige_cost
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
 				}
 			}
 		}
 		
 		on_pass = {
-			if = { limit = { NOT = { has_realm_law = bureaucratic_authority_4 } } }
+			if = { limit = { NOT = { has_realm_law = bureaucratic_taxation_4 } } }
 			set_variable = {
 				name = bureaucracy_cooldown
 				years = @bureaucracy_cooldown_years
@@ -745,32 +757,71 @@ bureaucratic_authority = {
 		}
 	}
 	
-	bureaucratic_authority_4 = {
-		modifier = { direct_vassal_opinion = -10 }
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_partition_succession_laws
-		flag = vassal_refusal_is_treason
-		flag = can_change_succession_laws
-		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
-		flag = can_designate_heirs
+	bureaucratic_taxation_4 = {
+		modifier = {
+			domain_tax_mult = 0.25
+			county_opinion_add = -20
+		}
 		
-		can_keep = { realm_law_use_bureaucratic_authority = yes }
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
 
 		can_pass = {
-			has_realm_law = bureaucratic_authority_3
-			custom_description = {
-				subject = root
-				text = "has_crown_authority_cooldown"
-				NOT = { has_variable = crown_authority_cooldown }
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
 			}
 		}
 		
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = { NOT = { has_realm_law = bureaucratic_authority_3 } }
-					add = increase_crown_authority_prestige_cost
+					limit = { has_realm_law = bureaucratic_taxation_3 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_3 }
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
 				}
 			}
 		}
