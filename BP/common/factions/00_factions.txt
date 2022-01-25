@@ -598,6 +598,7 @@
 	county_allow_create = no
 }
 
+##### Changed from Vanilla vvvvv
 liberty_faction = {
 	casus_belli = liberty_faction_war
 
@@ -652,23 +653,22 @@ liberty_faction = {
 	}
 
 	is_character_valid = {
-		NOR = { #No prince-bishop can ever join
+		#No prince-bishop can ever join
+		NOR = {
 			has_government = theocracy_government
 			AND = {
 				exists = cp:councillor_court_chaplain
 				this = cp:councillor_court_chaplain
 			}
 		}
-
+		
 		scope:faction.faction_target = liege
 		highest_held_title_tier > tier_barony
-
+		
 		#Not blocked through events
 		custom_description = {
 			text = character_blocked_from_joining
-			NOT = {
-				has_character_flag = joining_faction_block
-			}
+			NOT = { has_character_flag = joining_faction_block }
 		}
 	}
 
@@ -991,6 +991,7 @@ liberty_faction = {
 		}
 	}
 
+##### Changed from Vanilla vvvvv
 	can_character_create = {
 		NOR = { #No prince-bishop can ever join
 			has_government = theocracy_government
@@ -1012,14 +1013,56 @@ liberty_faction = {
 				has_relation_friend = scope:target
 			}
 		}
+		
+		#Invalid for gubernatorials and bureaucratics
+		#(they **like** high taxes on the peasants and other faction preferences)
 		custom_description = {
-			text = has_lowest_crown_authority
-			subject = scope:target
-			scope:target = {
-				OR = {
-					has_realm_law = crown_authority_1
-					has_realm_law = crown_authority_2
-					has_realm_law = crown_authority_3
+			text = no_liberty_faction_against_gubernatorials_or_bureaucratics
+			NOT = { scope:target = { has_bureaucratic_type_government = yes } }
+		}
+		
+		#For countries with crown authority
+		trigger_if = {
+			limit = { uses_crown_authority = yes }
+			custom_description = {
+				text = has_lowest_crown_authority
+				subject = scope:target
+				scope:target = {
+					OR = {
+						has_realm_law = crown_authority_1
+						has_realm_law = crown_authority_2
+						has_realm_law = crown_authority_3
+					}
+				}
+			}
+		}
+		#For countries with prefeudal authority
+		trigger_if = {
+			limit = { has_government = prefeudal_government }
+			custom_description = {
+				text = has_lowest_prefeudal_authority
+				subject = scope:target
+				scope:target = {
+					OR = {
+						has_realm_law = prefeudal_authority_1
+						has_realm_law = prefeudal_authority_2
+						has_realm_law = prefeudal_authority_3
+					}
+				}
+			}
+		}
+		#For countries with high tribal organization
+		trigger_if = {
+			limit = { has_government = high_tribal_government }
+			custom_description = {
+				text = has_lowest_high_tribal_organization
+				subject = scope:target
+				scope:target = {
+					OR = {
+						has_realm_law = high_tribal_organization_1
+						has_realm_law = high_tribal_organization_2
+						has_realm_law = high_tribal_organization_3
+					}
 				}
 			}
 		}
@@ -1042,11 +1085,14 @@ liberty_faction = {
 			character_has_faction_disabling_modifier_trigger = yes
 		}
 	}
+##### Changed from Vanilla ^^^^
 
 	county_allow_join = no
 	county_allow_create = no
 }
+##### Changed from Vanilla ^^^^^
 
+##### Changed from Vanilla vvvvv
 claimant_faction = {
 	casus_belli = claimant_faction_war
 
@@ -1212,7 +1258,7 @@ claimant_faction = {
 				this = cp:councillor_court_chaplain
 			}
 		}
-
+		
 		trigger_if = {
 			limit = {
 				exists = joined_faction
@@ -1231,14 +1277,14 @@ claimant_faction = {
 		trigger_else = {
 			always = no
 		}
-
+		
 		is_adult = yes
 		NOT = { is_allied_to = scope:target }
 		NOT = { has_truce = scope:target }
 		scope:target = {
 			NOT = { has_strong_hook = root }
 		}
-
+		
 		OR = {
 			is_ai = no
 			NOR = {
@@ -1277,7 +1323,7 @@ claimant_faction = {
 			character_has_faction_disabling_modifier_trigger = yes
 		}
 	}
-
+	
 	is_character_valid = { # Is the character valid to stay in the faction? This is also checked when creating it...
 		NOR = { #No prince-bishop can ever join
 			has_government = theocracy_government
@@ -1343,6 +1389,15 @@ claimant_faction = {
 		####
 		# AI modifiers
 		####
+		
+		##### Changed from Vanilla vvvvv
+		
+		#Gubernatorials are more likely to start claimant factions
+		modifier = {
+			add = 25 #Taken from Gender weights
+			has_government = gubernatorial_government
+		}
+		##### Changed from Vanilla ^^^^^
 		
 		# Gender concerns (general)
 		modifier = {
@@ -1691,6 +1746,15 @@ claimant_faction = {
 				}
 			}
 		}
+		
+		##### Changed from Vanilla vvvvv
+		
+		#Gubernatorials are more likely to join claimant factions
+		modifier = {
+			add = 25 #Taken from Gender weights
+			has_government = gubernatorial_government
+		}
+		##### Changed from Vanilla ^^^^^
 		
 		# Gender concerns (general)
 		modifier = {
@@ -2097,3 +2161,4 @@ claimant_faction = {
 
 	ignore_soft_block = yes
 }
+##### Changed from Vanilla ^^^^^
