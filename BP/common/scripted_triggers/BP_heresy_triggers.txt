@@ -1,0 +1,188 @@
+﻿bp_is_preferred_heresy = {
+	is_valid_heresy = {
+		ORIGIN_FAITH = $ORIGIN_FAITH$
+		HERETICAL_FAITH = $HERETICAL_FAITH$
+	}
+
+	OR = {
+		#If we're Chistian, pick a heretical faiths which is in the same
+		#regional group as our origin faith
+		#(i.e., Lollards for Catholics, Iconoclasts for Orthodox, etc.)
+		AND = {
+			religion_tag = christianity_religion
+			OR = {
+				faiths_are_in_western_europe_christianity_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$ }
+				faiths_are_in_orthodox_christianity_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$ }
+				faiths_are_in_eastern_christianity_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$ }
+				faiths_are_in_west_african_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$ }
+			}
+		}
+
+		#If we're Muslim, we want to stay within our 'branch' of Islam:
+		#Removed; no Muslims right now
+
+		#Otherwise, we don't have any special preferences.
+		NOT = { religion_tag = christianity_religion }
+	}
+}
+
+bp_is_valid_heresy = {
+	#The origin faith can never be its own heresy.
+	NOT = { $ORIGIN_FAITH$ = $HERETICAL_FAITH$}
+
+	#Depending on the origin faith's religion/religion group, there may have additional requirements for a heresy to be considered valid.
+	OR = {
+		#For Christian faiths, at least one of the two must be hostile
+		#May not be symmetric (see rigorism), so need to do the OR structure
+		AND = {
+			religion_tag = christianity_religion
+			OR = {
+				$ORIGIN_FAITH$ = { NOT = { considers_astray_trigger = { TARGET_FAITH = $HERETICAL_FAITH$ } } }
+				$HERETICAL_FAITH$ = { NOT = { considers_astray_trigger = { TARGET_FAITH = $ORIGIN_FAITH$ } } }
+			}
+		}
+		#Eastern Faiths can shift and spread amongst each other.
+		AND = {
+			OR = {
+				religion_tag = buddhism_religion
+				religion_tag = hinduism_religion
+				religion_tag = jainism_religion
+			}
+		}
+		#No special requirements for Muslims, Jews, Dualists, Pagans, or Zoroastrians.
+		religion_tag = islam_religion
+		religion_tag = judaism_religion
+		religion_tag = zoroastrianism_religion
+		religion_tag = dualism_religion
+		has_doctrine = pagan_hostility_doctrine
+	}
+}
+
+#Christian Heresy Groups
+
+#NB: This is for "historic" games, so group 1 should probably be smaller than group 2
+bp_faiths_are_in_western_christianity_group = {
+	OR = {
+		$FAITH_1$ = faith:aquileianism
+		$FAITH_1$ = faith:arian
+		$FAITH_1$ = faith:catholic
+		$FAITH_1$ = faith:insular_celtic
+		$FAITH_1$ = faith:nicene
+	}
+	OR = {
+		$FAITH_1$ = faith:aquileianism
+		$FAITH_1$ = faith:arian
+		$FAITH_1$ = faith:catholic
+		$FAITH_1$ = faith:insular_celtic
+		$FAITH_1$ = faith:nicene
+		#General Christian (aka, more defined by a single doctrine)
+		$FAITH_2$ = faith:antinomianism
+		$FAITH_2$ = faith:monarchianism
+		$FAITH_2$ = faith:patripassianism
+		$FAITH_2$ = faith:pelagianism
+		$FAITH_2$ = faith:total_depravity
+		#Gnostics
+		$FAITH_2$ = faith:priscillianism
+		$FAITH_2$ = faith:manichean #Tolouse
+		$FAITH_2$ = faith:marcosianism
+		$FAITH_2$ = faith:valentinianism
+	}
+}
+
+bp_faiths_are_in_orthodox_christianity_group = {
+	OR = {
+		$FAITH_1$ = faith:apollinarism
+		$FAITH_1$ = faith:arian
+		$FAITH_1$ = faith:iconoclast
+		$FAITH_1$ = faith:melchisdechianism
+		$FAITH_1$ = faith:montanism
+		$FAITH_1$ = faith:nicene
+		$FAITH_1$ = faith:georgian_orthodox
+		$FAITH_1$ = faith:paulician
+	}
+	OR = {
+		$FAITH_1$ = faith:apollinarism
+		$FAITH_1$ = faith:arian
+		$FAITH_1$ = faith:iconoclast
+		$FAITH_1$ = faith:melchisdechianism
+		$FAITH_1$ = faith:montanism
+		$FAITH_1$ = faith:nicene
+		$FAITH_1$ = faith:georgian_orthodox
+		$FAITH_1$ = faith:paulician
+		#General Christian (aka, more defined by a single doctrine)
+		$FAITH_2$ = faith:antinomianism
+		$FAITH_2$ = faith:monarchianism
+		$FAITH_2$ = faith:patripassianism
+		$FAITH_2$ = faith:pelagianism
+		$FAITH_2$ = faith:total_depravity
+		#Gnostics
+		$FAITH_2$ = faith:valentinianism
+	}
+}
+
+bp_faiths_are_in_eastern_christianity_group = {
+	OR = {
+		$FAITH_1$ = faith:miaphysitism
+		$FAITH_1$ = faith:armenian_apostolic
+		$FAITH_1$ = faith:nestorian
+		$FAITH_1$ = faith:messalian
+		$FAITH_1$ = faith:paulician
+		$FAITH_1$ = faith:syrian_orthodox
+		$FAITH_2$ = faith:doceticism
+		$FAITH_2$ = faith:monophysitism
+		$FAITH_2$ = faith:messalian
+		$FAITH_2$ = faith:syrian_orthodox
+	}
+	OR = {
+		$FAITH_2$ = faith:miaphysitism
+		$FAITH_2$ = faith:armenian_apostolic
+		$FAITH_2$ = faith:nestorian
+		$FAITH_2$ = faith:messalian
+		$FAITH_2$ = faith:paulician
+		$FAITH_2$ = faith:syrian_orthodox
+		$FAITH_2$ = faith:doceticism
+		$FAITH_2$ = faith:monophysitism
+		$FAITH_2$ = faith:messalian
+		$FAITH_2$ = faith:syrian_orthodox
+		#General Christian (aka, more defined by a single doctrine)
+		$FAITH_2$ = faith:antinomianism
+		$FAITH_2$ = faith:audianism
+		$FAITH_2$ = faith:monarchianism
+		$FAITH_2$ = faith:patripassianism
+		$FAITH_2$ = faith:pelagianism
+		$FAITH_2$ = faith:total_depravity
+		#Gnostics
+		$FAITH_2$ = faith:cainitism
+		$FAITH_2$ = faith:mandeaism
+		$FAITH_2$ = faith:manichean
+		$FAITH_2$ = faith:sabianism
+		$FAITH_2$ = faith:sethianism
+		$FAITH_2$ = faith:valentinianism
+	}
+}
+
+faiths_are_in_west_african_group = {
+	OR = {
+		$FAITH_1$ = faith:arian
+		$FAITH_1$ = faith:audianism
+		$FAITH_1$ = faith:catholic
+		$FAITH_1$ = faith:nicene
+		$FAITH_1$ = faith:donatism
+	}
+	OR = {
+		$FAITH_1$ = faith:arian
+		$FAITH_1$ = faith:catholic
+		$FAITH_1$ = faith:nicene
+		$FAITH_1$ = faith:donatism
+		#General Christian (aka, more defined by a single doctrine)
+		$FAITH_2$ = faith:antinomianism
+		$FAITH_2$ = faith:audianism
+		$FAITH_2$ = faith:monarchianism
+		$FAITH_2$ = faith:patripassianism
+		$FAITH_2$ = faith:pelagianism
+		$FAITH_2$ = faith:total_depravity
+		#Gnostics
+		$FAITH_2$ = faith:priscillianism
+		$FAITH_2$ = faith:valentinianism
+	}
+}
