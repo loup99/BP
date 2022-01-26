@@ -1,0 +1,145 @@
+﻿#Cribbed features of populists & peasants
+
+@base_tax_revolt_discontent_progress = 3
+
+tax_revolt_faction = {
+	casus_belli = tax_revolt
+	name = FACTION_TAX_REVOLT_DYNAMIC_NAME
+	short_effect_desc = tax_revolt_faction_short_effect_desc
+
+	sort_order = 5
+
+	leaders_allowed_to_leave = no
+	player_can_join = no
+	power_threshold = 0 # Peasant Factions place their demand regardless of their Power
+
+	discontent_progress = { base = @base_tax_revolt_discontent_progress }
+
+	requires_county = yes
+	requires_character = no
+
+	is_valid = { always = yes }
+
+	is_county_valid = {
+		# Peasants can only join a faction against their direct liege.
+		holder = scope:faction.faction_target
+	}
+
+	#Nobles will *not* join peasants in revolting!
+	is_character_valid = { always = no }
+
+	demand = {
+		save_scope_as = faction
+		setup_peasant_leader_effect = yes
+		special_character = { save_scope_as = peasant_leader }
+
+		faction_leader = {
+			add_opinion = {
+				modifier = angry_opinion
+				target = root.faction_target
+				opinion = -50
+			}
+		}
+		scope:faction.faction_target = { trigger_event = faction_demand.1101 }
+	}
+
+	ai_demand_chance = {
+		base = 0
+
+		modifier = {
+			add = 100
+			any_faction_county_member = {}
+		}
+	}
+
+	on_creation = {}
+
+	on_destroy = {
+		set_variable = {
+			name = peasant_destroying
+			value = yes
+		}
+		
+		if = {
+			limit = { exists = special_character }
+			special_character = {
+				if = {
+					#Verify that the title exists before trying to destroy it
+					limit = { has_variable = peasant_title }
+					destroy_title = this.var:peasant_title
+				}
+				
+				if = {
+					limit = { is_alive = yes }
+					# Zero out our wallet since the revolt is over.
+					if = {
+						limit = { # To make sure we're not in debt
+							gold > 0
+						}
+						remove_long_term_gold = gold 
+					}
+					
+					# The peasant leader mysteriously vanishes on the next game tick.
+					if = {
+						limit = { NOT = { has_character_flag = peasant_revolt_do_not_kill } }
+						trigger_event = { 
+							id = faction_demand.1102
+							days = 1
+						}
+					}
+				}
+			}
+		}
+	}
+
+	county_join_score = { base = 100000 }
+
+	county_create_score = { base = 100000 }
+
+	ai_join_score = {
+	}
+
+	can_character_join = { always = no }
+
+	# Peasants can only join a faction against their direct liege.
+	can_county_join = {
+		holder = scope:faction.faction_target
+	}
+
+	# Peasants can only join a faction against their direct liege.
+	can_county_create = {
+		holder = scope:target
+
+		####
+		# BLOCKERS
+		####
+		# General Faction immunity
+		#custom_description = {
+		#	text = character_is_immune_to_factions
+		#	subject = scope:target
+		#	NOT = { scope:target = { immune_to_factions_trigger = yes } }
+		#}
+	}
+
+	can_character_become_leader = { always = yes }
+
+	# Give the peasant leader a small purse so they don't immediately go bankrupt with army maintenance.
+	on_war_start = { every_faction_county_member = { root.faction_leader = { add_gold = 10 } } }
+
+	leader_leaves = {
+		# Should only trigger when the leader is captured in battle.
+		if = {
+			limit = {
+				NOT = { has_variable = peasant_destroying }
+				exists = faction_war
+			}
+			faction_war = { end_war = defender }
+		}
+	}
+
+	county_power = county_levies_to_raise
+	character_allow_create = no
+	special_character_title = "FACTIONS_WINDOW_LEADER"
+	inherit_membership = no
+	county_can_switch_to_other_faction = yes
+}
