@@ -1,10 +1,6 @@
 ﻿# Called from code after history generation
 # Empty scope
 
-# Design notes
-#2022-01-16: having a separate BP_game_start.txt:on_game_start throws a "There is more than on 'effect' defined using most recent: file: commmon/on_action/game_start.txt"
-#2022-01-16: current design with "change_government = gubernatorial_government" seems to work instead of using change_government_to_gubernatorial scripted effect
-
 ##### Change from Vanilla vvvvv
 on_game_start = {
 	#### Changed from Vanilla: Removed on start events
@@ -292,14 +288,9 @@ on_game_start = {
 				}
 				else_if = {
 					limit = {
-						this.county.holder = {
-							OR = {
-								has_government = gubernatorial_government
-								has_government = bureaucratic_government
-							}
-						}
+						this.county.holder = { has_government = bureaucratic_government }
 					}
-					this.holder = { change_government = gubernatorial_government }
+					this.holder = { change_government = bureaucratic_government }
 				}
 			}
 			#Handle cases of lay clergy faiths holding temples as well
@@ -348,26 +339,18 @@ on_game_start = {
 				}
 				else_if = { #NB: Causes singular "illegal_government" error in 476 start
 					limit = {
-						this.county.holder = {
-							OR = {
-								has_government = gubernatorial_government
-								has_government = bureaucratic_government
-							}
-						}
+						this.county.holder = { has_government = bureaucratic_government }
 					}
-					this.holder = { change_government = gubernatorial_government }
+					this.holder = { change_government = bureaucratic_government }
 				}
 			}
 		}
-		#Make every gubernatorial_government holder to have proper contracts and laws
-		#TODO: Make use "change_government_to_gubernatorial instead"
+		#Make every bureaucratic holder to have proper contracts and laws
 		every_ruler = {
-			limit = { has_government = gubernatorial_government }
-			vassal_contract_set_obligation_level = {
-				type = bureaucratic_vassal_governance
-				level = 1
+			limit = {
+				has_government = bureaucratic_government
+				is_independent_ruler = no
 			}
-			add_character_flag = gubernatorial_ruler
 			every_held_title = {
 				if = {
 					limit = { tier >= tier_duchy }
@@ -390,11 +373,6 @@ on_game_start = {
 				type = religious_rights
 				level = 1
 			}
-		}
-		#Make every bureaucratic_government ruler have the appropriate flag
-		every_ruler = {
-			limit = { has_government = bureaucratic_government }
-			add_character_flag = bureacratic_ruler
 		}
 		#Determine how decrepit to make Subroman Institutions
 		every_ruler = {
@@ -425,8 +403,8 @@ on_game_start = {
 			add_realm_law_skip_effects = bureaucratic_taxation_2
 			every_vassal_or_below = {
 				if = {
-					limit = { has_government = gubernatorial_government }
-					add_realm_law_skip_effects = gubernatorial_taxation_2
+					limit = { has_government = bureaucratic_government }
+					add_realm_law_skip_effects = bureaucratic_taxation_2
 				}
 			}
 		}

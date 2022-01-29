@@ -33,13 +33,12 @@ on_title_destroyed = {
 		#Handle the destruction of a bureacratic title for whatever reason
 		root = {
 			if = {
-				limit = { has_character_flag = bureacratic_ruler }
-				remove_character_flag = bureacratic_ruler
+				limit = { valid_bureaucratic_government_state_trigger = no }
 				change_government = subroman_government
 				add_realm_law_skip_effects = subroman_decay_4
 			}
 			every_vassal_or_below = {
-				limit = { has_government = gubernatorial_government }
+				limit = { has_government = bureaucratic_government }
 				change_government = subroman_government
 				add_realm_law_skip_effects = subroman_decay_4
 			}
@@ -88,31 +87,34 @@ on_title_gain = {
 		#Notes:
 		# * is_ruler added to ensure granting titles doesn't risk changing gov't of current holders
 		
-		#Convert valid predecessor government types to Bureaucratic Government
-		#For cases like: A prefeudal_government holder becomes e_ere holder
+		#If I'm getting a bureaucratic empire, change my government to bureacratic
 		if = {
 			limit = {
-				is_independent_ruler = yes
-				#The title was previously bureaucratic_government
-				scope:previous_holder = {
-					OR = {
-						has_government = bureaucratic_government #dead bureacrats
-						has_character_flag = bureacratic_ruler #Living bureacrats with no titles
-					}
-				}
-				#New ruler can't have invalid government
+				scope:previous_holder = { has_government = bureaucratic_government }
 				root = { invalid_bureaucratic_precursor_government = no }
+				scope:title.tier = tier_empire
 			}
 			change_government = bureaucratic_government
-			add_character_flag = bureacratic_ruler
 		}
 		else_if = {
+			#Change the government to bureaucratic unless I have an invalid precursor government
+			limit = {
+				scope:previous_holder = { has_government = bureaucratic_government }
+				root = {
+					invalid_bureaucratic_precursor_government = no
+					NOT = { has_government = prefeudal_government }
+					is_independent_ruler = no
+				}
+			}
+			change_government = bureaucratic_government
+		}
+		else = {
 			limit = { root = { invalid_bureaucratic_precursor_government = yes } }
 			debug_log = "Invalid Holder of Bureaucratic Government Title"
 			#NB: Throws a few illegal govt and no vassal contract errors
 			every_vassal_or_below = {
-				limit = { has_government = gubernatorial_government }
-				revert_gubernatorial_government = yes
+				limit = { has_government = bureaucratic_government }
+				revert_bureaucratic_government = yes
 			}
 		}
 		
@@ -230,21 +232,21 @@ on_title_gain = {
 				else = { change_government = gupta_government } #Occasional errors
 			}
 			else_if = {
-				limit = { scope:previous_holder = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes } }
+				limit = { scope:previous_holder = { has_government = bureaucratic_government } }
 				if = {
 					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
 					change_government = high_tribal_government
 				}
-				else = { change_government_to_gubernatorial = { TITLE = scope:title} }
+				else = { change_government = bureaucratic_government }
 			}
 		}
-		#For barony grants for bureaucratic_government and gubernatorial_government
+		#For barony grants for bureaucratic_government
 		else_if = {
 			limit = {
 				AND = {
 					scope:transfer_type = flag:granted #Only for title grants
 					scope:title = { tier = tier_barony }
-					scope:previous_holder = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes }
+					scope:previous_holder = { has_government = bureaucratic_government }
 					scope:title.title_province = {
 						OR = {
 							has_holding_type = castle_holding
@@ -253,7 +255,7 @@ on_title_gain = {
 					}
 				}
 			}
-			change_government_to_gubernatorial = { TITLE = scope:title}
+			change_government = bureaucratic_government
 		}
 		
 		#Check Trigger Fall of Rome Event
@@ -390,15 +392,10 @@ on_rank_down = { # Will not fire during history execution or for dying character
 			update_embassies_effect = yes
 		}
 		##### Changed from Vanilla vvvvv
-		if = { #Changed a bureacrat's status induces government changes
-			limit = { has_character_flag = bureacratic_ruler }
-			remove_character_flag = bureacratic_ruler
-			if = {
-				limit = { is_independent_ruler = yes }
-				change_government = subroman_government
-				add_realm_law_skip_effects = subroman_decay_4
-			}
-			else = { change_government_to_gubernatorial = { TITLE = scope:title} }
+		if = {
+			limit = { valid_bureaucratic_government_state_trigger = no }
+			change_government = subroman_government
+			add_realm_law_skip_effects = subroman_decay_4
 		}
 		##### Changed from Vanilla ^^^^^
 	}
