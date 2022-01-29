@@ -1,30 +1,42 @@
 ﻿#Applies both bureaucratic and gubernatorial taxation based on grantor realm law
-apply_taxation_law = {
+get_taxation_law = {
 	if = {
-		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_0 } }
+		limit = { scope:previous_holder = { has_realm_law = bureaucratic_taxation_0 } }
 		add_realm_law_skip_effects = bureaucratic_taxation_0
 	}
 	else_if = {
-		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_1 } }
+		limit = { scope:previous_holder = { has_realm_law = bureaucratic_taxation_1 } }
 		add_realm_law_skip_effects = bureaucratic_taxation_1
 	}
 	else_if = {
-		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_2 } }
+		limit = { scope:previous_holder = { has_realm_law = bureaucratic_taxation_2 } }
 		add_realm_law_skip_effects = bureaucratic_taxation_2
 	}
 	else_if = {
-		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_3 } }
+		limit = { scope:previous_holder = { has_realm_law = bureaucratic_taxation_3 } }
 		add_realm_law_skip_effects = bureaucratic_taxation_3
 	}
 	else_if = {
-		limit = { scope:previous_holder = { has_realm_law = $GOVERNMENT$_taxation_4 } }
+		limit = { scope:previous_holder = { has_realm_law = bureaucratic_taxation_4 } }
 		add_realm_law_skip_effects = bureaucratic_taxation_4
 	}
 }
 #E.g., independency or invalid liege govt
-revert_bureaucratic_government = {
-	change_government = subroman_government
-	add_realm_law_skip_effects = subroman_decay_4
+revert_bureaucratic_government_if_necessary = { #Top-level liege root
+	if = {
+		limit = { valid_bureaucratic_government_state_trigger = no }
+		change_government = subroman_government
+		add_realm_law_skip_effects = subroman_decay_4
+		#Because we change the top dog's government, the rest should now be invalid
+		revert_vassal_bureaucratic_government_if_necessary = yes
+	}
+}
+revert_vassal_bureaucratic_government_if_necessary = { #Top level liege root
+	every_vassal_or_below = {
+		limit = { valid_bureaucratic_government_state_trigger = no }
+		change_government = subroman_government
+		add_realm_law_skip_effects = subroman_decay_4
+	}
 }
 #Decrease realm law
 decrease_realm_law = {
