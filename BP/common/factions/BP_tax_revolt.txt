@@ -3,7 +3,7 @@
 @base_tax_revolt_discontent_progress = 3
 
 tax_revolt_faction = {
-	casus_belli = tax_revolt
+	casus_belli = peasant_war #tax_revolt
 	name = FACTION_TAX_REVOLT_DYNAMIC_NAME
 	short_effect_desc = tax_revolt_faction_short_effect_desc
 
@@ -13,7 +13,10 @@ tax_revolt_faction = {
 	player_can_join = no
 	power_threshold = 0 # Peasant Factions place their demand regardless of their Power
 
-	discontent_progress = { base = @base_tax_revolt_discontent_progress }
+	discontent_progress = {
+		base = 1000
+		#base = @base_tax_revolt_discontent_progress
+	}
 
 	requires_county = yes
 	requires_character = no
@@ -21,16 +24,12 @@ tax_revolt_faction = {
 	is_valid = { always = yes }
 
 	is_county_valid = {
-		# Tax revolts are only against the top liege
-		scope:faction.faction_target = holder.top_liege
-		
-		#Only valid for counties which have bureaucratic-type governments
-		#Other revolts should apply for non-bureaucratic-type governments
+		# Peasants can only join a faction against their direct liege.
+		holder = scope:faction.faction_target
 		holder = { has_government = bureaucratic_government }
 	}
 
-	#Nobles will *not* join peasants in revolting!
-	is_character_valid = { always = no }
+	is_character_valid = { always = yes }
 
 	demand = {
 		save_scope_as = faction
@@ -44,7 +43,7 @@ tax_revolt_faction = {
 				opinion = -50
 			}
 		}
-		scope:faction.faction_target = { trigger_event = bp_faction_demand.0001 }
+		scope:faction.faction_target = { trigger_event = faction_demand.1101 }
 	}
 
 	ai_demand_chance = {
@@ -77,15 +76,16 @@ tax_revolt_faction = {
 					limit = { is_alive = yes }
 					# Zero out our wallet since the revolt is over.
 					if = {
-						limit = { gold > 0 } # To make sure we're not in debt
-						remove_long_term_gold = gold 
+						# To make sure we're not in debt
+						limit = { gold > 0 }
+						remove_long_term_gold = gold
 					}
 					
 					# The peasant leader mysteriously vanishes on the next game tick.
 					if = {
 						limit = { NOT = { has_character_flag = peasant_revolt_do_not_kill } }
 						trigger_event = {
-							id = bp_faction_demand.0002
+							id = faction_demand.1102
 							days = 1
 						}
 					}
@@ -93,72 +93,63 @@ tax_revolt_faction = {
 			}
 		}
 	}
-
-	ai_join_score = {}
-
-	can_character_join = { always = no }
-
-	# While not everyone will start it, no peasant likes taxes
-	can_county_join = {
-		#Still have to be under bureaucratic-type of rule
-		holder = { has_government = bureaucratic_government }
-	}
 	
-	#This is MTTH
-	county_join_score = {
+	county_join_score =  {
 		base = 0
 		compare_modifier = {
 			value = county_opinion
 			multiplier = -1.0
 		}
 	}
-
-	# Peasants can only join a faction against their direct liege.
-	can_county_create = {
-		#Can only be against the top liege
-		scope:target = holder.top_liege
-		
-		#Must have bureaucratic-type of government
-		holder = { has_government = bureaucratic_government }
-		
-		#What type of county can start a tax revolt
-		OR = {
-			#Starts in liege's domain (regardless of culture/faith)
-			holder = scope:target.top_liege
-			#Or they are ruled by someone of their religion and culture
-			AND = {
-				faith = holder.faith
-				culture = holder.culture
-			}
-		}
-		
-		####
-		# BLOCKERS
-		####
-		# General Faction immunity
-		#custom_description = {
-		#	text = character_is_immune_to_factions
-		#	subject = scope:target
-		#	NOT = { scope:target = { immune_to_factions_trigger = yes } }
-		#}
-	}
 	
-	#This is MTTH
 	county_create_score = {
 		base = 0
+		
+		####
+		# AI Modifiers
+		####
+		
 		compare_modifier = {
 			value = county_opinion
 			multiplier = -1.0
 		}
 	}
-
+	
+	ai_join_score = {}
+	
+	can_character_join = { joined_faction = scope:faction }
+	
+	# Peasants can only join a faction against their direct liege.
+	can_county_join = { holder = scope:faction.faction_target }
+	
+	can_county_create = {
+		# Peasants can only join a faction against their direct liege.
+		holder = scope:target
+		
+		### ####
+		### # BLOCKERS
+		### ####
+		### # General Faction immunity
+		### custom_description = {
+		### 	text = character_is_immune_to_factions
+		### 	subject = scope:target
+		### 	NOT = { scope:target = { immune_to_factions_trigger = yes } }
+		### }
+	}
+	
 	can_character_become_leader = { always = yes }
-
-	# Give the peasant leader a small purse so they don't immediately go bankrupt with army maintenance.
-	on_war_start = { every_faction_county_member = { root.faction_leader = { add_gold = 10 } } }
-
-	# Should only trigger when the leader is captured in battle.
+	
+	on_war_start = {
+		# Give the peasant leader a small purse so they don't immediately go bankrupt with army maintenance.
+		every_faction_county_member = {
+			root.faction_leader = {
+				add_gold = 10
+			}
+		}
+	}
+	
 	leader_leaves = {
+		# Should only trigger when the leader is captured in battle.
 		if = {
 			limit = {
 				NOT = { has_variable = peasant_destroying }
@@ -167,8 +158,9 @@ tax_revolt_faction = {
 			faction_war = { end_war = defender }
 		}
 	}
-
+	
 	county_power = county_levies_to_raise
+	
 	character_allow_create = no
 	special_character_title = "FACTIONS_WINDOW_LEADER"
 	inherit_membership = no
