@@ -73,6 +73,36 @@ on_title_gain = {
 		}
 		##### Change from Vanilla vvvvv
 		
+		#Handle bureaucratic succession
+		
+		#If I am stepping up in the world and don't have an invalid government,
+		#I become a bureacrat
+		
+		#Only run this check for empires who are bureacratic
+		if = {
+			limit = {
+				scope:title.tier = tier_empire
+				scope:previous_holder = { has_government = bureaucratic_government }
+			}
+			
+			if = {
+				limit = {
+					#If my primary title is what's changing hands
+					scope:title = root.primary_title
+					#and I have a valid precursor government
+					root = { invalid_bureaucratic_precursor_government = no }
+				}
+				#Change my government to bureaucratic, if it wasn't already
+				if = {
+					limit = { NOT = { has_government = bureaucratic_government } }
+					change_government = bureaucratic_government
+				}
+			}
+			#Otherwise, revert everybodies governments to subroman
+			else = { revert_bureaucratic_government_if_necessary = yes }
+		}
+		
+		
 		#Bureaucrats getting bureaucratic titles
 		if = {
 			limit = {
@@ -101,7 +131,7 @@ on_title_gain = {
 			root = { revert_vassal_bureaucratic_government_if_necessary = yes }
 		}
 		
-		#### Title granting safety check (prevent boostrapping chars)
+		#### Title granting safety check (prevent boostrapping government via grants to chars)
 		
 		#Titles that were granted to non-landed have special checks to prevent government bootstrapping
 		#Advanced governments (can't hold tribal_holding) giving tribals yield high_tribal_government; 
@@ -311,14 +341,11 @@ on_title_gain_usurpation = {
 on_title_lost = {
 	events = {}
 	##### Change from Vanilla vvvvv
-	
-	#TODO: This chaing will need more work, but should be good enough for Alpha
 	effect = {
 		if = {
-			limit = { scope:new_holder = { has_government = bureaucratic_government } }
+			limit = { valid_bureaucratic_government_state_trigger = no }
 			revert_bureaucratic_government_if_necessary = yes
 		}
-		else = { change_government = prefeudal_government }
 	}
 	##### Change from Vanilla ^^^^^
 }
