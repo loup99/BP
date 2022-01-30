@@ -42,7 +42,44 @@
 
 	cost = { prestige = 250 }
 
-	effect = { change_government = high_tribal_government }
+	effect = {
+		change_government = high_tribal_government
+		#Make every top-level title have partition succession instead of confederate partition
+		root = {
+			every_held_title = {
+				limit = { this.tier = root.primary_title.tier }
+				add_title_law = partition_succession_law
+				
+				#Apply appropriate gender laws
+				if = {
+					limit = {
+						root = {
+							OR = {
+								has_realm_law = male_preference_law
+								has_realm_law = male_only_law
+							}
+						}
+					}
+					add_title_law = male_only_law
+				}
+				if = {
+					limit = { root = { has_realm_law = equal_law } }
+					add_title_law = equal_law
+				}
+				if = {
+					limit = {
+						root = {
+							OR = {
+								has_realm_law = female_preference_law
+								has_realm_law = female_only_law
+							}
+						}
+					}
+					add_title_law = female_only_law
+				}
+			}
+		}
+	}
 
 	ai_potential = { always = yes }
 
