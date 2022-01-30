@@ -490,6 +490,26 @@ task_conversion = {
 				desc = COURT_CHAPLAIN_CONVERSION_AUTOCEPHALY_RESIST_INFIDEL_CONVERSIONS
 			}
 		}
+		if = { #Rigorism resists conversion both ways, unless county faith and liege faith are both rigorists
+			limit = {
+				exists = scope:county
+				#XOR condition; other rigorist faiths have no impediment like say Khawarijis...
+				AND = {
+					OR = {
+						scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+						scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+					}
+					NOR = {
+						scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+						scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+					}
+				}
+			}
+			add = {
+				value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
+				desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_RESISTANCE_BOTH_WAYS
+			}
+		}
 		##### Change from Vanilla #####
 
 		#Conversion bonuses for Character Faith Tenets
@@ -904,6 +924,8 @@ task_conversion = {
 		}
 		
 		##### Change from Vanilla #####
+		
+		#Nerf unreformed faith impact for major migrations
 		if = {
 			limit = {
 				scope:councillor.faith = { has_doctrine_parameter = unreformed }
@@ -918,6 +940,45 @@ task_conversion = {
 				desc = COURT_CHAPLAIN_CONVERSION_UNREFORMED_FAITH_PENALTY
 			}
 		}
+		##### Change from Vanilla #####
+		
+		##### Change from Vanilla #####
+		
+		# Innovation Impacts
+		multiply = {
+			value = 1
+			desc = "IMPACT_OF_MISSING_INNOVATIONS"
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_state_religion } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_doctrine_and_dogma } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_scriptural_cannon } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+			if = {
+				limit = { scope:councillor.liege.culture = { NOT = { has_innovation = innovation_established_faith } } }
+				multiply = { value = conversion_not_have_innovation }
+			}
+		}
+		
+		# Ecumenism impacts
+		if = {
+			limit = {
+				scope:councillor.liege.faith = { has_ecumenical_doctrine_trigger = yes }
+				exists = scope:county
+				scope:county.faith = { has_ecumenical_doctrine_trigger = yes }
+			}
+			multiply = {
+				value = conversion_ecumenical_target_weight
+				desc = CONVERSION_SPEED_ECUMENISM_IMPACT
+			}
+		}
+		
 		##### Change from Vanilla #####
 		
 		# Conversion speed game rules
@@ -972,7 +1033,6 @@ task_conversion = {
 							AND = {
 								liege = scope:councillor_liege
 								is_ruler = yes
-								has_government = feudal_government 
 								is_independent_ruler = no
 								vassal_contract_has_flag = religiously_protected
 							}
@@ -980,7 +1040,6 @@ task_conversion = {
 								exists = liege
 								liege = scope:councillor_liege
 								is_ruler = yes
-								has_government = feudal_government 
 								is_independent_ruler = no
 								vassal_contract_has_flag = religiously_protected
 							}

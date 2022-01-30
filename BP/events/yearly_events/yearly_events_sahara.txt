@@ -699,10 +699,7 @@ scripted_trigger appropriate_nomad_adjacent_county_trigger = {
 	title_province = { geographical_region = custom_sahara_proper }
 
 	#Does not already have an appropriate nomad culture.
-	NOR = {
-		culture = culture:butr
-		culture = culture:zaghawa
-	}
+	NOT = { culture = culture:zaghawa }
 }
 
 scripted_effect pick_nomad-appropriate_county_effect = {
@@ -785,12 +782,7 @@ yearly_saharan.0021 = {
 		##Then add any that already border a suitably-cultured county to a list.
 		every_in_list = {
 			list = saharan_nomad_counties
-			limit = {
-				OR = {
-					any_neighboring_county = { culture = culture:zaghawa }
-					any_neighboring_county = { culture = culture:butr }
-				}
-			}
+			limit = { any_neighboring_county = { culture = culture:zaghawa } }
 			add_to_list = prettified_saharan_nomad_county_spread
 		}
 		##If that list contains anything, sort the county that could use the most buff from it.
@@ -826,13 +818,6 @@ yearly_saharan.0021 = {
 				value = flag:zaghawa
 			}
 		}
-		##Otherwise, the nomads are Berbers.
-		else = {
-			save_scope_value_as = {
-				name = nomad_type
-				value = flag:butr
-			}
-		}
 
 		#Create a suitable nomad to be the face of the event.
 		if = {
@@ -842,17 +827,6 @@ yearly_saharan.0021 = {
 				template = saharan_clan_leader_character
 				faith = scope:target_county.faith
 				culture = culture:zaghawa
-				save_scope_as = nomad_leader
-			}
-		}
-		##This could technically be an ELSE, but having an ELSE_IF suppresses an error that would otherwise have to be fixed by making the script more fragile.
-		else_if = {
-			limit = { scope:nomad_type = flag:butr}
-			create_character = {
-				location = scope:target_county.title_province
-				template = saharan_clan_leader_character
-				faith = scope:target_county.faith
-				culture = culture:butr
 				save_scope_as = nomad_leader
 			}
 		}
@@ -911,7 +885,6 @@ yearly_saharan.0021 = {
 				limit = { scope:nomad_type = flag:zaghawa }
 				set_county_culture = culture:zaghawa
 			}
-			else = { set_county_culture = culture:butr }
 		}
 
 		stress_impact = { arrogant = minor_stress_impact_gain }
@@ -942,7 +915,6 @@ yearly_saharan.0021 = {
 				limit = { scope:nomad_type = flag:zaghawa }
 				set_county_culture = culture:zaghawa
 			}
-			else = { set_county_culture = culture:butr }
 		}
 
 		stress_impact = { arrogant = miniscule_stress_impact_gain }

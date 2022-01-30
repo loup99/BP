@@ -61,7 +61,10 @@ on_title_gain = {
 				years = 4
 			}
 		}
-		##### Change from Vanilla #####
+		##### Change from Vanilla vvvvv
+		
+		#Notes:
+		# * is_ruler added to ensure granting titles doesn't risk changing gov't of current holders
 		
 		#Convert valid predecessor government types to Bureaucratic Government
 		#For cases like: A prefeudal_government holder becomes e_ere holder
@@ -77,77 +80,120 @@ on_title_gain = {
 				scope:previous_holder = {
 					OR = {
 						has_government = bureaucratic_government #dead bureacrats
-						has_character_flag = bureacratic_ruler #Living bureacrats with not titles
+						has_character_flag = bureacratic_ruler #Living bureacrats with no titles
 					}
 				}
 			}
 			change_government = bureaucratic_government
 			add_character_flag = bureacratic_ruler
 		}
-		#Bureaucratic and gubernatorial governments granting titles yields gubernatorial
+		
+		#### Title granting safety check (prevent boostrapping chars)
+		
+		#Titles that were granted to non-landed have special checks to prevent government bootstrapping
+		#Advanced governments (can't hold tribal_holding) giving tribals yield high_tribal_government; 
+		#nomad_government, high_tribal_government, and tribal_government yield the same government
 		if = {
 			limit = {
-				is_independent_ruler = no
-				exists = scope:previous_holder
-				scope:previous_holder = {
-					OR = {
-						has_government = gubernatorial_government
-						has_government = bureaucratic_government
+				AND = {
+					scope:transfer_type = flag:granted #Only for title grants
+					scope:title = { tier >= tier_county } #Which was a county or better
+					#Who wasn't getting upgraded (from baron to county) *or* who already _had_ counties
+					root.capital_county = { this != scope:title } #NB: Throws singular error, but it WORKS!
+				}
+			}
+			#Unplayable Governments: Should not change whenever gaining titles
+			if = {
+				limit = {
+					root = {
+						OR = {
+							has_government = republic_government
+							has_government = mercenary_government
+							has_government = holy_order_government
+						}
 					}
 				}
-				any_liege_or_above = {
-					OR = {
-						has_government = gubernatorial_government
-						has_government = bureaucratic_government
+			}
+			#Theocracy (special)
+			else_if = {
+				limit = { scope:previous_holder = { has_government = theocracy_government } }
+				change_government = theocracy_government
+			}
+			#Primitive Governments (can hold tribal_holding)
+			else_if = {
+				limit = { scope:previous_holder = { has_government = tribal_government } }
+				change_government = tribal_government
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = nomad_government } }
+				change_government = nomad_government
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = high_tribal_government } }
+				change_government = high_tribal_government
+			}
+			#Advanced Governments (Cannot hold tribal_holding)
+			else_if = {
+				limit = { scope:previous_holder = { has_government = prefeudal_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = prefeudal_government }
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = subroman_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = subroman_government } #Occasional errors
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = eranshar_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = eranshar_government }
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = gupta_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = gupta_government } #Occasional errors
+			}
+			else_if = {
+				limit = {
+					scope:previous_holder = {
+						OR = {
+							has_government = gubernatorial_government
+							has_government = bureaucratic_government
+						}
 					}
 				}
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = gubernatorial_government } #Occasional errors
+			}
+		}
+		else_if = {
+			limit = {
+				scope:transfer_type = flag:granted
+				scope:previous_holder = { has_government = bureaucratic_government }
+				scope:title = { tier = tier_barony }
+				scope:title.title_province = { has_holding_type = castle_holding }
 			}
 			change_government = gubernatorial_government
 		}
-		
-		### For government type safety; aka keep the same governments upon title granting
-		#TODO: Should figure out how to safely remove these
-		
-		#High Tribal
-		if = {
-			limit = {
-				exists = scope:previous_holder
-				scope:title.tier > tier_barony
-				scope:previous_holder = { has_government = high_tribal_government }
-			}
-			change_government = high_tribal_government
+		else_if = {
+			limit = { }
 		}
-		#Tribal
-		if = {
-			limit = {
-				exists = scope:previous_holder
-				scope:title.tier > tier_barony
-				scope:previous_holder = { has_government = tribal_government }
-			}
-			change_government = tribal_government
-		}
-		#Nomadic
-		if = {
-			limit = {
-				exists = scope:previous_holder
-				scope:title.tier > tier_barony
-				scope:previous_holder = { has_government = nomad_government }
-			}
-			change_government = nomad_government
-		}
-		
-		#Non-bureatics can't have gubernatorial vassals
-		if = {
-			limit = {
-				NOR = {
-					has_government = bureaucratic_government
-					has_government = gubernatorial_government
-				}
-			}
-			change_vassal_gubernatorial_governments = yes
-		}
-		
-		##### Change from Vanilla #####
+		##### Change from Vanilla ^^^^^
 	}
 	##### Change from Vanilla #####
 	events = {

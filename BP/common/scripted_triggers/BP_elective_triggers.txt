@@ -60,19 +60,6 @@ imperial_elective_potential_landless_claimant_candidate_trigger = {
 	OR = {
 		any_liege_or_above = { this = scope:holder }
 		is_ruler = no
-		scope:holder = { is_independent_ruler = yes }
-		scope:holder = {
-			exists = liege
-			NOT = {
-				any_liege_or_above = {
-					has_realm_law_flag = titles_cannot_leave_realm_on_succession
-					NOR = {
-						this = scope:potential_candidate
-						target_is_vassal_or_below = scope:potential_candidate
-					}
-				}
-			}
-		}
 	}
 	NOT = { #Landless characters should not be heirs to Theocracies/Republics.
 		any_heir_title = {
@@ -96,24 +83,8 @@ imperial_elective_potential_landless_claimant_candidate_trigger = {
 
 imperial_elective_potential_landed_candidate_trigger = {
 	save_temporary_scope_as = potential_candidate
-	has_same_government = scope:holder
-	#Either the candidate is in the realm, or the title is independent, or the realm of the title does NOT have protected inheritance.
-	OR = {
-		any_liege_or_above = { this = scope:holder }
-		scope:holder = { is_independent_ruler = yes }
-		scope:holder = {
-			exists = liege
-			NOT = {
-				any_liege_or_above = {
-					has_realm_law_flag = titles_cannot_leave_realm_on_succession
-					NOR = {
-						this = scope:potential_candidate
-						target_is_vassal_or_below = scope:potential_candidate
-					}
-				}
-			}
-		}
-	}
+	#The candidate is in the realm
+	any_liege_or_above = { this = scope:holder }
 	OR = {
 		highest_held_title_tier > 2 #Or Duke-tier... (if title is King or Emperor tier)
 		AND = {
@@ -135,9 +106,17 @@ imperial_elective_potential_landed_candidate_trigger = {
 		}
 		this.faith = scope:holder.faith
 	}
-	has_unelectable_trait_trigger = no
-	has_unelectable_government_trigger = no
-	byzantine_elective_deformed_candidate_trigger = no
+	scope:potential_candidate = {
+		has_unelectable_trait_trigger = no
+		has_unelectable_government_trigger = no
+		byzantine_elective_deformed_candidate_trigger = no
+		faith = {
+			faith_hostility_level = {
+				target = scope:holder.faith
+				value <= faith_astray_level
+			}
+		}
+	}
 }
 
 imperial_elective_potential_landless_dynastic_candidate_trigger = {
@@ -196,13 +175,13 @@ imperial_elective_potential_landless_dynastic_candidate_trigger = {
 	byzantine_elective_deformed_candidate_trigger = no
 }
 
-imperial_elective_potential_landless_claimant_candidate_trigger = {
+#Eranshar Triggers
+eranshar_elective_potential_landless_dynastic_candidate_trigger = {
 	save_temporary_scope_as = potential_candidate
-	#Either the candidate is in the realm, or is landless, or the title is independent, or the realm of the title does NOT have protected inheritance.
-	OR = {
+	#Either the candidate is in the realm, or is landless, or the realm of the title does NOT have protected inheritance.
+	OR = { 
 		any_liege_or_above = { this = scope:holder }
 		is_ruler = no
-		scope:holder = { is_independent_ruler = yes }
 		scope:holder = {
 			exists = liege
 			NOT = {
@@ -231,7 +210,67 @@ imperial_elective_potential_landless_claimant_candidate_trigger = {
 		}
 		faith = scope:holder.faith
 	}
+	NOR = {
+		AND = {
+			exists = mother
+			mother = {
+				is_alive = yes
+				parent_for_elective_succession_trigger = yes
+			}
+		}
+		AND = {
+			exists = father
+			father = {
+				is_alive = yes
+				parent_for_elective_succession_trigger = yes
+			}
+		}
+	}
 	has_unelectable_trait_trigger = no
 	has_unelectable_government_trigger = no
-	byzantine_elective_deformed_candidate_trigger = no
+}
+
+eranshar_elective_potential_landed_candidate_trigger = {
+	save_temporary_scope_as = potential_candidate
+	#Either the candidate is in the realm, or the realm of the title does NOT have protected inheritance.
+	OR = {
+		any_liege_or_above = { this = scope:holder }
+		scope:holder = {
+			exists = liege
+			NOT = {
+				any_liege_or_above = {
+					has_realm_law_flag = titles_cannot_leave_realm_on_succession
+					NOR = {
+						this = scope:potential_candidate
+						target_is_vassal_or_below = scope:potential_candidate
+					}
+				}
+			}
+		}
+	}
+	OR = {
+		highest_held_title_tier > 2 #Or Duke-tier... (if title is King or Emperor tier)
+		AND = {
+			scope:holder = { highest_held_title_tier = 3 }
+			highest_held_title_tier > 1 #...Or Count-tier under a Duchy...
+		}
+		AND = {
+			scope:holder = { highest_held_title_tier < 3 }
+			is_ruler = yes #...Or Baron-tier under a County.
+			is_landed = yes
+		}
+	}
+	OR = { #If the title controls the faith, candidates must be of the same faith.
+		scope:holder = {
+			NAND = {
+				exists = faith.religious_head
+				this = faith.religious_head #TODO_CD:It might need to be changed to check only for the title rather than the holder. (controlled_faith = scope:holder.faith)
+			}
+		}
+		this.faith = scope:holder.faith
+	}
+	scope:potential_candidate = {
+		has_unelectable_trait_trigger = no
+		has_unelectable_government_trigger = no
+	}
 }

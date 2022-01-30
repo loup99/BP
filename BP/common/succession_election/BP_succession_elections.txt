@@ -1,12 +1,34 @@
-﻿imperial_elective = {
+﻿#Roman Empire election scheme; can only have landed electors unfortunately
+imperial_elective = {
 	electors = {
 		add = holder
 		
-		add = { #All de-facto vassals that are Dukes or above.
+		#All de-facto secular vassals that are Dukes or above, regardless of religion
+		#But don't include tributaries but foederati okay (Barracks Emperors and Gallic Empire say so)
+		add = {
 			type = holder_direct_vassals
 			limit = {
 				scope:title = { tier = tier_empire }
 				highest_held_title_tier >= 3
+				NOT = { has_government = theocracy_government }
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+			}
+		}
+		#All de-facto religious vassals dukes and above, whose faith is in agreement with ours
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				scope:title = { tier = tier_empire }
+				highest_held_title_tier >= 3
+				has_government = theocracy_government
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				faith.religion = scope:holder.religion
+				faith = {
+					faith_hostility_level = {
+						target = scope:holder.faith
+						value <= faith_astray_level
+					}
+				}
 			}
 		}
 	}
@@ -74,7 +96,8 @@
 			type = holder_direct_vassals
 			limit = { imperial_elective_potential_landed_candidate_trigger = yes }
 		}
-		#Claimants to the title
+		#Claimants to the title that are landed must be under the emperor to vote for them
+		#Avoids landed claimants like Syagrius from being elected
 		add = {
 			type = title_claimants
 			limit = { imperial_elective_potential_landless_claimant_candidate_trigger = yes }
@@ -97,11 +120,15 @@ eranshar_elective = {
 	electors = {
 		add = holder
 		
-		add = { #All de-facto vassals that are Dukes or above.
+		#All de-facto vassals that are Dukes or above, including theocrats
+		#but no tributaries
+		add = {
 			type = holder_direct_vassals
 			limit = {
 				scope:title = { tier = tier_empire }
 				highest_held_title_tier >= 3
+				faith = { this.religion = religion:zoroastrianism_religion }
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
 			}
 		}
 	}
@@ -136,9 +163,29 @@ eranshar_elective = {
 				has_government = theocracy_government
 				has_council_position = councillor_court_chaplain
 			}
-			faith = scope:holder.faith
-			faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+			religion = scope:holder.faith.religion
 			#TODO_CD:Possible trigger checking for investiture succession?
+		}
+		#Heads of important dynasties get more votes
+		modifier = {
+			desc = tooltip_eranshar_vote_strength_dynasty_head
+			add = {
+				value = 1
+				if = {
+					limit = { this.dynasty = { dynasty_prestige_level >= medium_dynasty_prestige_level } }
+					add = 1
+				}
+				if = {
+					limit = { this.dynasty = { dynasty_prestige_level >= high_dynasty_prestige_level } }
+					add = 1
+				}
+				if = {
+					limit = { this.dynasty = { dynasty_prestige_level >= max_dynasty_prestige_level } }
+					add = 1
+				}
+			}
+			this = this.dynasty.dynast
+			this.dynasty = { dynasty_prestige_level >= low_dynasty_prestige_level }
 		}
 	}
 	
@@ -161,28 +208,31 @@ eranshar_elective = {
 
 		##########################	Elector voting patterns (opinion)	##########################
 		elector_voting_pattern_opinion_eranshar_elective_modifier = yes
+		
+		##########################	Elector voting patterns (not ruling dynasty)	##########################
+		modifier = {
+			desc = tooltip_eransh_elector_vote_not_ruling_dynasty
+			add = -50
+			NOT = { scope:candidate.dynasty = scope:holder.dynasty }
+		}
 	}
 	
 	#Direct vassals should be lowest on the tier and really only installed on two conditions:
 	#Factional revolt or dyansty dies out.
 	candidates = {
+		add = {
+			type = holder_close_or_extended_family
+			limit = {
+				OR = {
+					eranshar_elective_potential_landless_dynastic_candidate_trigger = yes
+					eranshar_elective_potential_landed_candidate_trigger = yes
+				}
+			}
+		}
 		#Direct vassals (irrespective of de jure status)
 		add = {
 			type = holder_direct_vassals
 			limit = { imperial_elective_potential_landed_candidate_trigger = yes }
-		}
-		#Claimants to the title
-		add = {
-			type = title_claimants
-			limit = { imperial_elective_potential_landless_claimant_candidate_trigger = yes }
-		}
-		#Close and Extended Family
-		add = {
-			type = holder_close_or_extended_family
-			limit = {
-				is_close_family_of = scope:holder
-				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
-			}
 		}
 	}
 }
