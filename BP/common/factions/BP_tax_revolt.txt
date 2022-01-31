@@ -25,7 +25,7 @@ tax_revolt_faction = {
 
 	is_county_valid = {
 		# Peasants can only join a faction against their direct liege.
-		holder = scope:faction.faction_target
+		scope:faction.faction_target = holder.top_liege
 		holder = { has_government = bureaucratic_government }
 	}
 
@@ -94,46 +94,141 @@ tax_revolt_faction = {
 		}
 	}
 	
-	county_join_score =  {
-		base = 0
-		compare_modifier = {
-			value = county_opinion
-			multiplier = -1.0
-		}
-	}
-	
-	county_create_score = {
-		base = 0
-		
-		####
-		# AI Modifiers
-		####
-		
-		compare_modifier = {
-			value = county_opinion
-			multiplier = -1.0
-		}
-	}
-	
 	ai_join_score = {}
 	
 	can_character_join = { joined_faction = scope:faction }
 	
-	# Peasants can only join a faction against their direct liege.
-	can_county_join = { holder = scope:faction.faction_target }
+	# Tax revolts target the top liege
+	can_county_join = { scope:faction.faction_target = holder.top_liege }
+	
+	#MTTH
+	county_join_score = {
+		base = 0
+		compare_modifier = {
+			value = county_opinion
+			multiplier = -1.0
+		}
+
+		# If a suitable Popular Faction exists, perfer to join it instead.
+		modifier = {
+			add = -10
+			AND = {
+				county_opinion <= -15
+				scope:faction.faction_target = {
+					top_liege = {
+						any_targeting_faction = {
+							faction_is_type = populist_faction
+							any_faction_county_member = { this.title_province.faith = root.title_province.faith }
+						}
+					}
+				}
+			}
+		}
+
+		# Reduced weight for a character's own capital to join a revolt against them.
+		modifier = {
+			add = -10
+			this.title_province = scope:faction.faction_target.capital_province
+		}
+
+		legalism_virtue_and_sin_modifier = {
+			TARGET = scope:faction.faction_target
+			SCORE_PER_TRAIT = 10 # Worth 10 opinion per virtue.
+		}
+
+		# Difficulty Settings
+		modifier = { # Easy
+			add = -50
+			has_game_rule = easy_difficulty
+			scope:faction.faction_target = { is_ai = no }
+		}
+		modifier = { # Very Easy
+			add = -150
+			has_game_rule = very_easy_difficulty
+			scope:faction.faction_target = { is_ai = no }
+		}
+	}
 	
 	can_county_create = {
 		# Peasants can only join a faction against their direct liege.
-		holder = scope:target
+		scope:target = holder.top_liege
 		
-		### ####
-		### # BLOCKERS
-		### ####
-		### # General Faction immunity
-		### custom_description = {
-		### 	text = character_is_immune_to_factions
-		### 	subject = scope:target
-		### 	NOT = { scope:target = { immune_to_factions_trigger = yes } }
+		####
+		# BLOCKERS
+		####
+		# General Faction immunity
+		custom_description = {
+			text = character_is_immune_to_factions
+			subject = scope:target
+			NOT = { scope:target = { immune_to_factions_trigger = yes } }
+		}
+	}
+	
+	#MTTH
+	county_create_score = {
+		base = 0
+
+		####
+		# AI Modifiers
+		####
+
+		compare_modifier = {
+			value = county_opinion
+			multiplier = -1.0
+		}
+
+		# If a suitable Popular Faction exists, perfer to join it instead.
+		modifier = {
+			add = -10
+			AND = {
+				county_opinion <= -15
+				scope:target = {
+					top_liege = {
+						any_targeting_faction = {
+							faction_is_type = populist_faction
+							any_faction_county_member = { this.title_province.faith = root.title_province.faith }
+						}
+					}
+				}
+			}
+		}
+
+		# Reduced weight for a character's own capital to join a revolt against them.
+		modifier = {
+			add = -20
+			this.title_province = scope:target.capital_province
+		}
+
+		legalism_virtue_and_sin_modifier = {
+			TARGET = scope:target
+			SCORE_PER_TRAIT = 10 # Worth 10 opinion per virtue.
+		}
+
+		# Difficulty Settings
+		modifier = { # Easy
+			add = -50
+			has_game_rule = easy_difficulty
+			scope:target = { is_ai = no }
+		}
+		modifier = { # Very Easy
+			add = -150
+			has_game_rule = very_easy_difficulty
+			scope:target = { is_ai = no }
+		}
+		
+		### TODO: Uncomment when finished so it gives players a grace period
+		### # 10-year 'grace period' from populist factions forming after game start
+		### modifier = {
+		### 	years_from_game_start <= 10
+		### 	factor = {
+		### 		value = 0
+		### 		if = {
+		### 			limit = { years_from_game_start >= 5 }
+		### 			add = years_from_game_start
+		### 			subtract = 5
+		### 			divide = 5 # In year 6 factions can begin forming, but at 20% weighting. This increases to 40% in year 7, 60% in year 8, etc., up to 100% in year 10 where things are then normal.
+		### 		}
+		### 	}
 		### }
 	}
 	
