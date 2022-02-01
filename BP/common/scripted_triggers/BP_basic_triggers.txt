@@ -116,6 +116,25 @@ can_designate_heirs_trigger = {
 		government_has_flag = government_can_designate_heirs
 	}
 }
+can_use_temporal_condemnation = {
+	OR = {
+		$ACTOR$.faith = { has_doctrine_parameter = temporal_condemnation_enabled } #Vanilla condition
+		$ACTOR$ = { has_realm_law_flag = enables_temporal_condemnation }
+	}
+}
+#recipient scope
+can_demand_conversion = {
+	#Zoroastrian approved cults can't forcibly convert each other
+	trigger_if = {
+		limit = { religion = religion:zoroastrianism_religion }
+		NAND = {
+			faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+			$ACTOR$.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+		}
+	}
+	#Vanilla Condition
+	trigger_else = { NOT = { faith = $ACTOR$.faith } }
+}
 
 #Check by authority type
 uses_crown_authority = {
@@ -159,7 +178,3 @@ XOR_trigger = {
 		}
 	}
 }
-
-
-
-
