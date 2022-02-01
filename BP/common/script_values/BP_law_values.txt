@@ -317,6 +317,235 @@ avoid_subroman_decay_gold_cost = {
 	multiply = 0.5
 }
 
+### Eranshar Values
+
+#Infidel Counties: Reducing clerical influence reduces cost by 5 for each
+eranshar_infidel_county_scaling = -10
+eranshar_infidel_county_number_modifier = {
+	value = 0
+	every_realm_county = {
+		limit = {
+			OR = {
+				NOT = { this.religion = religion:zoroastrianism_religion }
+				NOT = { this.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult } }
+			}
+			#Unreformed religions are ignorable
+			this.faith = { NOT = { has_doctrine = unreformed_faith_doctrine } }
+		}
+		add = 1
+	}
+	multiply = eranshar_infidel_county_scaling
+}
+
+#How much the faithful counties increase the cost
+eranshar_faithful_county_scaling = 20
+eranshar_faithful_county_number_modifier = {
+	value = 0
+	every_realm_county = {
+		limit = {
+			this.religion = religion:zoroastrianism_religion
+			this.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+		}
+		add = 1
+	}
+	multiply = eranshar_faithful_county_scaling
+}
+
+#How much each piety level increases the cost
+piety_level_multiplier = 1.25
+
+#Modifiers for action direction
+decrease_clerical_influence_piety_base = 100
+decrease_clerical_influence_piety_cost = {
+	add = {
+		desc = "BASE_VALUE"
+		value = decrease_clerical_influence_piety_base
+		format = "BASE_VALUE_FORMAT"
+	}
+	
+	# Eranshar County makes decreasing clerical influence harder by 10
+	add = {
+		desc = "faithful_counties"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
+		value = eranshar_faithful_county_number_modifier
+	}
+	
+	# Infidel County makes decreasing clerical influence easier by 5
+	add = {
+		desc = "infidel_counties"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
+		value = eranshar_infidel_county_number_modifier
+	}
+	
+	# Learning Modifier (2% more expensive for each skill point below 8 Learning)
+	if = {
+		limit = { learning < 8 }
+		add = {
+			desc = "poor_learning_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	else_if = { # (2% less expensive for each skill point below 8 Learning)
+		limit = { learning > 8 }
+		add = {
+			desc = "learning_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	
+	# Tenet Modifiers
+	if = {
+		limit = { faith = { has_doctrine_parameter = legalism_modified_law_costs } }
+		add = {
+			desc = "rite_legalism_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = legalism_law_cost_modifier
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = natural_primitivism_law_cost_increase } }
+		add = {
+			desc = "rite_primitivism_law_cost_tooltip"
+			value = natural_primitivism_modifier
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = religious_legal_pronouncements_law_cost_reduction } }
+		multiply = {
+			desc = "rite_pronouncements_law_cost_tooltip"
+			value = 0.9 # religious_legal_pronouncements_modifier = -0.1
+		}
+	}
+	
+	#Devotion modifiers; it gets more expensive to reduce the more pious you are
+	if = {
+		limit = { piety_level >= max_piety_level }
+		multiply = {
+			desc = you_are_pious_tooltip
+			value = piety_level_multiplier
+			multiply = max_piety_level
+		}
+	}
+	else_if = {
+		limit = { piety_level >= very_high_piety_level }
+		multiply = {
+			desc = you_are_pious_tooltip
+			value = piety_level_multiplier
+			multiply = very_high_piety_level
+		}
+	}
+	else_if = {
+		limit = { piety_level >= high_piety_level }
+		multiply = {
+			desc = you_are_pious_tooltip
+			value = piety_level_multiplier
+			multiply = high_piety_level
+		}
+	}
+	else_if = {
+		limit = { piety_level >= medium_piety_level }
+		multiply = {
+			desc = you_are_pious_tooltip
+			value = piety_level_multiplier
+			multiply = medium_piety_level
+		}
+	}
+	else_if = {
+		limit = { piety_level >= low_piety_level }
+		multiply = {
+			desc = you_are_pious_tooltip
+			value = piety_level_multiplier
+			multiply = low_piety_level
+		}
+	}
+}
+
+eranshar_county_realm_size_scaling = 5
+eranshar_realm_size_modifier = {
+	value = 0
+	every_realm_county = { add = 1 }
+	multiply = eranshar_county_realm_size_scaling
+}
+
+#Modifiers for action direction
+change_clerical_influence_prestige_base = 100
+change_clerical_influence_prestige_cost = {
+	add = {
+		desc = "BASE_VALUE"
+		value = change_clerical_influence_prestige_base
+		format = "BASE_VALUE_FORMAT"
+	}
+	
+	# Each county adds 5 just from size
+	add = {
+		desc = "realm_size"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
+		value = eranshar_realm_size_modifier
+	}
+	
+	# Learning Modifier (2% more expensive for each skill point below 8 Learning)
+	if = {
+		limit = { learning < 8 }
+		add = {
+			desc = "poor_learning_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	else_if = { # (2% less expensive for each skill point below 8 Learning)
+		limit = { learning > 8 }
+		add = {
+			desc = "learning_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	
+	# Tenet Modifiers
+	if = {
+		limit = { faith = { has_doctrine_parameter = legalism_modified_law_costs } }
+		add = {
+			desc = "rite_legalism_law_cost_tooltip"
+			value = {
+				add = increase_centralization_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = legalism_law_cost_modifier
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = natural_primitivism_law_cost_increase } }
+		add = {
+			desc = "rite_primitivism_law_cost_tooltip"
+			value = natural_primitivism_modifier
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = religious_legal_pronouncements_law_cost_reduction } }
+		multiply = {
+			desc = "rite_pronouncements_law_cost_tooltip"
+			value = 0.9 # religious_legal_pronouncements_modifier = -0.1
+		}
+	}
+}
+
 ### Bureaucatric and Gubernatorial values
 increase_taxation_bureaucratic_prestige_base = 100
 increase_taxation_bureaucratic_prestige_cost = {
