@@ -3,6 +3,7 @@
 @bureaucracy_cooldown_years = 10
 @subroman_decay_cooldown_years = 50
 @recent_subroman_decay_upgrade_cooldown_years = 10
+@eranshar_authority_cooldown_years = 10
 @clerical_influence_cooldown_years = 25
 
 high_tribal_organization = {
@@ -706,45 +707,156 @@ subroman_decay = {
 #Eranshar Governmnet special effects
 eranshar_authority = {
 	default = eranshar_authority_0
-	cumulative = no
+	cumulative = yes
 	flag = realm_law
 	
 	eranshar_authority_0 = {
-		modifier = {}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_succession_laws
+		modifier = {
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 		
 		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {}
+		
+		pass_cost = {}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
 	}
 	eranshar_authority_1 = {
-		modifier = {}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
+		modifier = {
+			powerful_vassal_opinion = -10
+			vassal_tax_contribution_add = 0.10
+			vassal_levy_contribution_add = 0.10
+			domain_limit = 1
+			men_at_arms_cap = 1
+			character_capital_county_monthly_development_growth_add = 0.1
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 		flag = can_change_succession_laws
 		
 		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = eranshar_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_eranshar_authority_cooldown"
+					NOT = { has_variable = crown_authority_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = eranshar_authority_2
+							has_realm_law = eranshar_authority_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
 	}
 	eranshar_authority_2 = {
-		modifier = {}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_succession_laws
+		modifier = {
+			powerful_vassal_opinion = -10
+			vassal_tax_contribution_add = 0.10
+			vassal_levy_contribution_add = 0.10
+			domain_limit = 1
+			men_at_arms_cap = 1
+			character_capital_county_monthly_development_growth_add = 0.1
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = vassal_internal_wars_banned
 		
 		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = eranshar_authority_3 } }
+				has_realm_law = eranshar_authority_1
+				custom_description = {
+					subject = root
+					text = "has_crown_authority_cooldown"
+					NOT = { has_variable = eranshar_authority_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = eranshar_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
 	}
 	eranshar_authority_3 = {
-		modifier = {}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		flag = can_change_succession_laws
+		modifier = {
+			powerful_vassal_opinion = -10
+			vassal_tax_contribution_add = 0.10
+			vassal_levy_contribution_add = 0.10
+			domain_limit = 1
+			men_at_arms_cap = 1
+			character_capital_county_monthly_development_growth_add = 0.1
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = vassal_all_wars_banned
 		
 		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {
+			has_realm_law = eranshar_authority_2
+			custom_description = {
+				subject = root
+				text = "has_crown_authority_cooldown"
+				NOT = { has_variable = eranshar_authority_cooldown }
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = eranshar_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
 	}
 }
-
 #Directly influences Zoroastrian doctrines for Asavan faiths
-
 clerical_influence = {
 	default = clerical_influence_0
 	cumulative = no
@@ -842,6 +954,7 @@ clerical_influence = {
 			theocracy_government_levy_contribution_add = 0.15 #i.e., 15%-70%, depending on devotion
 			monthly_piety_gain_mult = -0.05
 			monthly_county_control_change_factor = 0.10
+			domain_limit = 1
 		}
 		
 		can_keep = { realm_law_use_clerical_influence = yes }
@@ -937,6 +1050,7 @@ clerical_influence = {
 			different_faith_county_opinion_mult = 0.25 #Inverse of adaptive
 			monthly_piety_gain_mult = 0.05
 			monthly_county_control_change_factor = 0.20
+			domain_limit = 2
 		}
 		flag = enables_temporal_condemnation
 		
@@ -1033,6 +1147,7 @@ clerical_influence = {
 			different_faith_county_opinion_mult = 0.50 #Double inverse of adaptive
 			monthly_piety_gain_mult = 0.10
 			monthly_county_control_change_factor = 0.30
+			domain_limit = 3
 		}
 		flag = enables_temporal_condemnation
 		

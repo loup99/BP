@@ -53,9 +53,7 @@ revoke_title_interaction = {
 				text = "character_interactions_revoke_title_from_ally_without_reason"
 				object = scope:recipient
 				OR = {
-					NOT = {
-						is_allied_to = scope:recipient
-					}
+					NOT = { is_allied_to = scope:recipient }
 					has_revoke_title_reason = scope:recipient
 				}
 			}
@@ -74,12 +72,20 @@ revoke_title_interaction = {
 				}
 			}
 			trigger_if = {
-				limit = {
-					scope:recipient = { vassal_contract_has_flag = vassal_contract_cannot_revoke_titles }
-				}
+				limit = { scope:recipient = { vassal_contract_has_flag = vassal_contract_cannot_revoke_titles } }
 				custom_description = {
 					text = vassal_contract_forbids_revocation
 					scope:recipient = { NOT = { vassal_contract_has_flag = vassal_contract_cannot_revoke_titles } }
+				}
+			}
+			#Eranshar need significant power to do so without reason
+			trigger_if = {
+				limit = {
+					NOT = { has_revoke_title_reason = scope:recipient }
+				}
+				custom_description = {
+					text = realm_law_must_enable_retraction
+					NOT = { has_realm_law_flag = may_revoke_titles_without_cause }
 				}
 			}
 		}
