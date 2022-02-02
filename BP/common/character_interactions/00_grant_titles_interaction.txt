@@ -24,6 +24,7 @@
 		}
 	}
 	
+	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
 		scope:recipient = { can_be_granted_titles_by = { RULER = scope:actor } }
 		NOT = { scope:actor = { is_at_war_with = scope:recipient } }
@@ -32,34 +33,54 @@
 			text = is_not_theocratic_court_chaplain
 			subject = scope:recipient
 			NAND = {
-				scope:actor.faith = {
-					has_doctrine = doctrine_theocracy_temporal
-				}
+				scope:actor.faith = { has_doctrine = doctrine_theocracy_temporal }
 				scope:recipient = {
-					faith = {
-						has_doctrine = doctrine_theocracy_temporal
-					}
+					faith = { has_doctrine = doctrine_theocracy_temporal }
 					has_council_position = councillor_court_chaplain
 				}
 			}
 		}
-		scope:actor = {
-			any_held_title = {
-				count > 1
-			}
-		}
+		scope:actor = { any_held_title = { count > 1 } }
 		scope:recipient = { is_diplomatically_available = yes }
 		trigger_if = {
+			limit = { scope:recipient = { is_ruler = no } }
+			scope:recipient = { is_imprisoned = no }
+		}
+		##### Changed from Vanilla vvvvv
+		
+		#At low levels of power, Eranshar rulers must give titles to landed chars or powerful families
+		trigger_if = {
 			limit = {
-				scope:recipient = {
-					is_ruler = no
+				scope:actor = {
+					primary_title.tier >= tier_kingdom
+					has_government = eranshar_government
+					has_realm_law_flag = must_give_titles_to_powerful_families_or_landed_chars_if_possible
+					OR = {
+						any_vassal = { primary_title.tier >= tier_county }
+						any_courtier = {
+							NOT = { this.dynasty = scope:actor.dynasty }
+							dynasty_prestige_level >= low_dynasty_prestige_level
+						}
+					}
 				}
 			}
 			scope:recipient = {
-				is_imprisoned = no
+				custom_description = {
+					text = must_already_be_landed_or_from_a_powerful_family
+					subject = scope:recipient
+					OR = {
+						primary_title.tier >= tier_county
+						dynasty = {
+							NOT = { this = scope:actor.dynasty }
+							dynasty_prestige_level >= low_dynasty_prestige_level
+						}
+					}
+				}
 			}
 		}
+		##### Changed from Vanilla ^^^^^
 	}
+	##### Changed from Vanilla ^^^^^
 	
 	##### Changed from Vanilla vvvvv
 	can_be_picked_title = {
