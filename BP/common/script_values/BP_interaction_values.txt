@@ -10,3 +10,86 @@ foederatus_scaled_development_level_new_land = {
 	#Give a whole number.
 	ceiling = yes
 }
+### Eranshar revocation cost calculation
+eranshar_title_revocation_count_counties = {
+	value = 0
+	scope:target = {
+		every_in_de_jure_hierarchy = {
+			limit = { this.tier = tier_county }
+			add = 1
+		}
+	}
+}
+#I.e., how does crown authority effect this
+eranshar_title_revocation_authority_value = {
+	value = 1
+	if = {
+		limit = { scope:actor = { has_realm_law = eranshar_authority_3 } }
+		multiply = 0.5
+	}
+	if = {
+		limit = { scope:actor = { has_realm_law = eranshar_authority_2 } }
+		multiply = 1.0
+	}
+	if = {
+		limit = { scope:actor = { has_realm_law = eranshar_authority_1 } }
+		multiply = 2.0
+	}
+	if = {
+		limit = { scope:actor = { has_realm_law = eranshar_authority_0 } }
+		multiply = 4.0
+	}
+}
+eranshar_title_revocation_cost = {
+	value = 0
+	#Get the Renown level of the recipient
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 1 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 2 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 3 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 4 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 5 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 6 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 7 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 8 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 9 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	if = {
+		limit = { scope:recipient.dynasty = { dynasty_prestige_level >= 10 } }
+		add = eranshar_title_revocation_count_counties
+	}
+	#Don't anger powerful families if you know what is good for you...
+	if = {
+		limit = { scope:recipient = { is_powerful_vassal = yes } }
+		multiply = 1.5
+	}
+	multiply = -1
+	#Apply crown authority effects
+	multiply = eranshar_title_revocation_authority_value
+}
+
