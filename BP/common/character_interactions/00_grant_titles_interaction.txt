@@ -55,12 +55,19 @@
 					primary_title.tier >= tier_kingdom
 					has_government = eranshar_government
 					has_realm_law_flag = must_give_titles_to_powerful_families_or_landed_chars_if_possible
+					#Have to actually have a vassal or courtier that fits the bill
 					OR = {
-						any_vassal = { primary_title.tier >= tier_county }
-						any_courtier = {
-							NOT = { this.dynasty = scope:actor.dynasty }
+						#Any (county+) landed vassal or courtier have
+						any_vassal = {
+							primary_title.tier >= tier_county
 							dynasty = {
 								exists = this
+								dynasty_prestige_level >= low_dynasty_prestige_level
+							}
+						}
+						any_courtier = {
+							dynasty = {
+								exists = this #This is false for lowborn
 								dynasty_prestige_level >= low_dynasty_prestige_level
 							}
 						}
@@ -70,16 +77,9 @@
 			scope:recipient = {
 				custom_description = {
 					text = must_already_be_landed_or_from_a_powerful_family
-					#subject = scope:recipient
-					OR = {
-						primary_title.tier >= tier_county
-						AND = {
-							exists = dynasty
-							dynasty = {
-								NOT = { this = scope:actor.dynasty }
-								dynasty_prestige_level >= low_dynasty_prestige_level
-							}
-						}
+					AND = {
+						exists = dynasty
+						dynasty = { dynasty_prestige_level >= low_dynasty_prestige_level }
 					}
 				}
 			}
