@@ -1,66 +1,93 @@
 ﻿@ai_standard_liege_desire = 2
 @ai_standard_vassal_desire = 1
 
-eranshar_government_taxes = {
-	display_mode = tree
-	icon = gold_icon
+eranshar_government_obligations = {
+	uses_opinion_of_liege = yes
 	obligation_levels = {
-		eranshar_tax_exempt = {
-			position = { 0 0 }
-
-			tax = 0.00
-			levies = eranshar_levies
+		default = {
+			levies = {
+				scope:vassal = {
+					if = {
+						limit = { is_ai = yes }
+						value = eranshar_government_levies_default
+						if = {
+							limit = { scope:opinion_of_liege > 0 }
+							add = {
+								value = scope:opinion_of_liege
+								multiply = eranshar_government_levies_opinion_scale_positive
+							}
+						}
+						else = {
+							add = {
+								value = scope:opinion_of_liege
+								multiply = eranshar_government_levies_opinion_scale_negative
+							}
+						}
+					}
+					else = { value = eranshar_government_levies_player } # is a player
+				}
+			}
+			min_levies = {
+				scope:liege = {
+					if = {
+						limit = { has_realm_law = eranshar_authority_1 }
+						value = eranshar_government_levies_min_ca_1
+					}
+					else_if = {
+						limit = { has_realm_law = eranshar_authority_2 }
+						value = eranshar_government_levies_min_ca_2
+					}
+					else_if = {
+						limit = { has_realm_law = eranshar_authority_3 }
+						value = eranshar_government_levies_min_ca_3
+					}
+					else = { value = 0.0 }
+				}
+			}
+			tax = {
+				scope:vassal = {
+					if = {
+						limit = { is_ai = yes }
+						value = eranshar_government_tax_default
+						if = {
+							limit = { scope:opinion_of_liege > 0 }
+							add = {
+								value = scope:opinion_of_liege
+								multiply = eranshar_government_tax_opinion_scale_positive
+							}
+						}
+						else = {
+							add = {
+								value = scope:opinion_of_liege
+								multiply = eranshar_government_tax_opinion_scale_negative
+							}
+						}
+					}
+					else = { value = eranshar_government_tax_player } # is a player
+				}
+			}
+			min_tax = {
+				scope:liege = {
+					if = {
+						limit = { has_realm_law = eranshar_authority_1 }
+						value = eranshar_government_tax_min_ca_1
+					}
+					else_if = {
+						limit = { has_realm_law = eranshar_authority_2 }
+						value = eranshar_government_tax_min_ca_2
+					}
+					else_if = {
+						limit = { has_realm_law = eranshar_authority_3 }
+						value = eranshar_government_tax_min_ca_3
+					}
+					else = { value = 0.0 }
+				}
+			}
+			tax_contribution_postfix = "eranshar_government_tax_contribution_postfix"
+			levies_contribution_postfix = "eranshar_government_levies_contribution_postfix"
 			
-			vassal_opinion = 10
-
-			ai_liege_desire = 1
-			ai_vassal_desire = 5
-		}
-		eranshar_tax_low = {
-			parent = eranshar_tax_exempt
-			position = { 1 0 }
-
-			tax = 0.05
-			
-			vassal_opinion = 5
-
-			ai_liege_desire = 2
-			ai_vassal_desire = 4
-		}
-		eranshar_tax_normal = {
-			default = yes
-			parent = eranshar_tax_low
-			position = { 2 0 }
-
-			tax = 0.10
-			levies = eranshar_levies
-
-			ai_liege_desire = 3
-			ai_vassal_desire = 3
-		}
-		eranshar_tax_high = {
-			parent = eranshar_tax_normal
-			position = { 3 0 }
-			
-			tax = 0.15
-			levies = eranshar_levies
-			
-			vassal_opinion = -15
-
-			ai_liege_desire = 4
-			ai_vassal_desire = 2
-		}
-		eranshar_tax_extortionate = {
-			parent = eranshar_tax_high
-			position = { 4 0 }
-			
-			tax = 0.20
-			levies = eranshar_levies
-			
-			vassal_opinion = -25
-
-			ai_liege_desire = 5
-			ai_vassal_desire = 1
+			unclamped_contribution_label = "eranshar_government_unclamped_contribution_label"
+			min_contribution_label = "eranshar_government_min_contribution_label"
 		}
 	}
 }
