@@ -97,13 +97,13 @@ character_gender_can_inherit_from_trigger = {
 #Only for bureaucratic_government
 can_have_imperial_elective_succession_realm_law_trigger = { has_government = bureaucratic_government }
 
-can_keep_partition_succession_law_trigger = {
+can_keep_imperial_elective_succession_law_trigger = {
 	#The 'can_keep' triggers are dependent on actually having the law.
 	#If they aren't, the trigger breakdown for the player breaks and shows incomplete information.
-	trigger_if = { 
+	trigger_if = {
 		limit = { has_realm_law = imperial_elective }
+		can_have_imperial_elective_succession_realm_law_trigger = yes
 	}
-	can_have_imperial_elective_succession_realm_law_trigger = yes
 }
 
 ### Partition Triggers
@@ -117,14 +117,7 @@ has_partition_succession_realm_law_trigger = {
 
 ##### Changed from Vanilla vvvvv
 can_have_confederate_partition_succession_law_trigger = {
-	OR = {
-		has_government = feudal_government
-		has_government = tribal_government
-		has_government = clan_government
-		#BP Governments
-		has_government = high_tribal_government
-		has_government = prefeudal_government
-	}
+	always = yes #I mean, yeah, it's the fallback
 }
 ##### Changed from Vanilla ^^^^^
 
@@ -149,19 +142,26 @@ can_keep_partition_succession_law_trigger = {
 	}
 }
 
+##### Changed from Vanilla vvvvv
 can_have_partition_succession_law_trigger = {
-	culture = { has_innovation = innovation_writing }
-	custom_description = {
-		text = succession_laws_must_have_organised_government_tooltip
-		OR = {
-			has_government = feudal_government
-			has_government = clan_government
-			#BP Governments
-			has_government = prefeudal_government
-			has_government = high_tribal_government
+	OR = {
+		#These can always have it
+		has_government = high_tribal_government
+		has_government = bureaucratic_government
+		has_government = gupta_government
+		has_government = eranshar_government
+		has_government = subroman_government
+		#Can only have it with the innovation
+		AND = {
+			culture = { has_innovation = innovation_writing }
+			custom_description = {
+				text = succession_laws_must_have_organised_government_tooltip
+				primitive_type_governments_trigger = no
+			}
 		}
 	}
 }
+##### Changed from Vanilla ^^^^^
 
 can_keep_high_partition_succession_law_trigger = {
 	# The 'can_keep' triggers are dependent on actually having the law. If they aren't, the trigger breakdown for the player breaks and shows incomplete information.
@@ -183,6 +183,7 @@ can_keep_high_partition_succession_law_trigger = {
 	}
 }
 
+##### Changed from Vanilla vvvvv
 can_have_high_partition_succession_law_trigger = {
 	trigger_if = {
 		limit = {
@@ -199,13 +200,10 @@ can_have_high_partition_succession_law_trigger = {
 	trigger_else = { culture = { has_innovation = innovation_heraldry } }
 	custom_description = {
 		text = succession_laws_must_have_organised_government_tooltip
-		OR = {
-			has_government = feudal_government
-			has_government = clan_government
-			has_government = high_tribal_government
-		}
+		primitive_type_governments_trigger = no
 	}
 }
+##### Changed from Vanilla ^^^^^
 
 ### Single Heir triggers
 can_keep_single_heir_succession_law_trigger = {
@@ -220,25 +218,26 @@ can_keep_single_heir_succession_law_trigger = {
 	}
 }
 
+##### Changed from Vanilla vvvvv
 can_have_single_heir_succession_law_trigger = {
 	OR = {
+		#These can always have it
 		has_government = bureaucratic_government
 		has_government = gupta_government
+		has_government = eranshar_government
+		has_government = subroman_government
+		#Can only have it with the innovation
 		AND = {
 			culture = { has_innovation = innovation_primogeniture }
 			# Non-tribals only
 			custom_description = {
 				text = succession_laws_must_have_organised_government_tooltip
-				OR = {
-					has_government = feudal_government
-					has_government = clan_government
-					#BP Governments
-					has_government = prefeudal_government
-				}
+				primitive_type_governments_trigger = no
 			}
 		}
 	}
 }
+##### Changed from Vanilla ^^^^^
 
 can_keep_single_heir_youngest_succession_law_trigger = {
 	# The 'can_keep' triggers are dependent on actually having the law. If they aren't, the trigger breakdown for the player breaks and shows incomplete information.
@@ -252,15 +251,19 @@ can_keep_single_heir_youngest_succession_law_trigger = {
 }
 
 can_have_single_heir_youngest_succession_law_trigger = {
-	culture = { has_innovation = innovation_primogeniture }
-	# Non-tribals only
-	custom_description = {
-		text = succession_laws_must_have_organised_government_tooltip
-		OR = {
-			has_government = feudal_government
-			has_government = clan_government
-			#BP Governments
-			has_government = prefeudal_government
+	OR = {
+		#These can always have it
+		has_government = bureaucratic_government
+		has_government = gupta_government
+		has_government = eranshar_government
+		has_government = subroman_government
+		#Can only have it with the innovation
+		AND = {
+			culture = { has_innovation = innovation_primogeniture }
+			custom_description = {
+				text = succession_laws_must_have_organised_government_tooltip
+				primitive_type_governments_trigger = no
+			}
 		}
 	}
 }
@@ -272,12 +275,11 @@ can_keep_single_heir_dynasty_house_trigger = {
 		OR = {
 			can_have_single_heir_dynasty_house_trigger = yes
 			historical_succession_access_single_heir_dynasty_house_trigger = yes
-			#BP Governments
-			has_government = prefeudal_government
 		}
 	}
 }
 
+##### Changed from Vanilla vvvvv
 can_have_single_heir_dynasty_house_trigger = {
 	exists = house
 	trigger_if = {
@@ -288,9 +290,7 @@ can_have_single_heir_dynasty_house_trigger = {
 			}
 			culture = { NOT = { has_innovation = innovation_heraldry } }
 		}
-		culture = {
-			has_innovation = innovation_table_of_princes
-		}
+		culture = { has_innovation = innovation_table_of_princes }
 	}
 	trigger_else_if = {
 		limit = {
@@ -302,14 +302,10 @@ can_have_single_heir_dynasty_house_trigger = {
 	trigger_else = { culture = { has_innovation = innovation_heraldry } }
 	custom_description = {
 		text = succession_laws_must_have_organised_government_tooltip
-		OR = {
-			has_government = feudal_government
-			has_government = clan_government
-			#BP Governments
-			has_government = prefeudal_government
-		}
+		primitive_type_governments_trigger = no
 	}
 }
+##### Changed from Vanilla ^^^^^
 
 ### Special Triggers
 can_have_bishop_theocratic_succession_law_trigger = {

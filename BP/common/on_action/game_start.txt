@@ -353,19 +353,6 @@ on_game_start = {
 				}
 			}
 		}
-		#Make every bureaucratic holder to have proper contracts and laws
-		every_ruler = {
-			limit = {
-				has_government = bureaucratic_government
-				is_independent_ruler = no
-			}
-			every_held_title = {
-				if = {
-					limit = { tier >= tier_duchy }
-					add_title_law = gubernatorial_elective_succession_law
-				}
-			}
-		}
 		#Give all prefeudal_government vassals of Eranshar rulers religious rights to prevent Persia
 		#replacing non-Zoroastrian rulers quickly
 		every_ruler = {
@@ -427,6 +414,43 @@ on_game_start = {
 				add_realm_law_skip_effects = clerical_influence_2
 			}
 			else = { add_realm_law_skip_effects = clerical_influence_1 }
+		}
+		
+		### Setup Succession Laws
+		
+		#All high tribals start with partition
+		#TODO: FIXME! Issue seems tied to title GUI not showing adding title laws
+		### every_ruler = {
+		### 	limit = { has_government = high_tribal_government }
+		### 	every_held_title = {
+		### 		limit = {
+		### 			already_has_a_title_succession_order_or_election_law_trigger = no
+		### 			tier >= tier_duchy
+		### 		}
+		### 		add_title_law = partition_succession_law
+		### 	}
+		### }
+		#Give everyone who is eranshar and NOT persia house seniority succession
+		every_ruler = {
+			limit = {
+				has_government = eranshar_government
+				NOT = { has_title = title:e_persia }
+			}
+			add_realm_law = single_heir_dynasty_house
+		}
+		#Every Gubernatorial (duchy) gets gubernatorial elective; the rest get primogentiture
+		every_ruler = {
+			limit = {
+				has_government = bureaucratic_government
+				is_independent_ruler = no
+			}
+			add_realm_law = single_heir_succession_law
+			every_held_title = {
+				if = {
+					limit = { tier >= tier_duchy }
+					add_title_law = gubernatorial_elective_succession_law
+				}
+			}
 		}
 	}
 }
