@@ -1,7 +1,7 @@
-﻿apply_bm_476_effects = {
-	#Cultural effects
+﻿#Aka, apply laws based on culture & religion
+general_religio_cultural_effects = {
 	every_ruler = {
-		if = { #Agnatic-Only start cultures/governments
+		if = { #Agnatic cultures/religions + governments
 			limit = {
 				OR = {
 					#Governments and religion requirements
@@ -23,6 +23,8 @@
 					culture = culture:roman
 					#Anatolian Groups
 					culture_group = culture_group:anatolian_group
+					#Germanic cultures
+					culture = culture:old_frankish #Salic Law
 					#Semites
 					culture_group = culture_group:central_semitic_group
 					culture_group = culture_group:south_semitic_group
@@ -35,25 +37,81 @@
 					culture_group = culture_group:mongolic_group
 				}
 			}
-			add_realm_law = male_only_law
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law = male_only_law
+			}
 		}
 		else_if = {
 			limit = { culture_group = culture_group:vasconic_group }
-			add_realm_law = equal_law
+			if = {
+				limit = { NOT = { has_realm_law = equal_law } }
+				add_realm_law = equal_law
+			}
 		}
 	}
-	
-	#Specific character effects
+}
+
+#Aka, set specific government succession laws in a programatic way
+specific_title_law_effects = {
+	#Apply Gaelic Succession
+	every_ruler = {
+		if = {
+			limit = { has_government = high_tribal_government }
+			add_realm_law = partition_succession_law
+		}
+		else_if = {
+			limit = { has_government = eranshar_government }
+			add_realm_law = single_heir_dynasty_house
+		}
+		else_if = {
+			limit = {
+				has_government = bureaucratic_government
+				NOT = { has_realm_law = single_heir_succession_law } #Suppress error throws
+			}
+			add_realm_law = single_heir_succession_law
+		}
+		every_held_title = {
+			limit = { this.tier >= tier_duchy }
+			if = {
+				limit = { BP_historical_start_imperial_elective_succession_law = yes }
+				add_title_law = imperial_elective_succession_law
+			}
+			else_if = {
+				limit = { BP_historical_access_mahestan_elective_succession_law_trigger = yes }
+				add_title_law = mahestan_elective_succession_law
+			}
+			else_if = {
+				limit = { BP_historical_start_gaelic_elective_succession_law = yes }
+				add_title_law = gaelic_elective_succession_law
+			}
+			else_if = {
+				limit = { BP_historical_start_feudal_elective_succession_law_trigger = yes }
+				add_title_law = feudal_elective_succession_law
+			}
+			else_if = {
+				limit = {
+					this.holder = {
+						has_government = bureaucratic_government
+						is_independent_ruler = no
+					}
+				}
+				add_title_law = gubernatorial_elective_succession_law
+			}
+		}
+	}
+}
+
+apply_general_effects = {
+	general_religio_cultural_effects = yes
+	specific_title_law_effects = yes
+}
+
+apply_bm_476_effects = {
+	#Bookmark-specific character effects
 	#NB: could be moved into history, probably, but putting it here means it will overwrite
 	#Whatever changes are done above.
-	character:175110 = { #Julius Nepos of Dalmatia
-		add_realm_law = single_heir_succession_law
-		add_realm_law = male_only_law
-	}
-	character:96054 = { #Romulus 'Augustulus' of the WRE
-		add_realm_law = single_heir_succession_law
-		add_realm_law = male_only_law
-	}
+	character:175110 = { add_realm_law = single_heir_succession_law } #Julius Nepos of Dalmatia
 	character:19 = { #Afrianus Syagrius of Soissons
 		add_realm_law = single_heir_succession_law
 		add_realm_law = male_only_law
@@ -62,11 +120,4 @@
 		add_realm_law = single_heir_succession_law
 		add_realm_law = male_only_law
 	}
-	character:63 = { add_realm_law = single_heir_succession_law } #Theodoric Amali of the Ostrogoths
-	character:55 = { add_realm_law = single_heir_succession_law } #Odoacer of the Skirians
-	character:20 = { add_realm_law = male_only_law } #Gundobad of the Burgudians
-	character:1301275 = { add_realm_law = single_heir_succession_law } #Hermeneric Masdrig of Suebia
-	character:212851 = { add_realm_law = male_only_law } #Agriulfum Gomeding of Macromanni
-	character:330952 = { add_realm_law = male_only_law } #Exilarch Huna VI of Exilarchy
-	character:20782 = { add_realm_law = single_heir_succession_law } #Maximus Aurulis Crixusof Septem
 }
