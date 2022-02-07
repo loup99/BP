@@ -1,4 +1,231 @@
-﻿#Aka, apply laws based on culture & religion
+﻿### Character events
+bp_character_events = {
+	character:93 = { #Genseric of the Vandals
+		if = {
+			limit = {
+				is_alive = yes
+				is_landed = yes
+			}
+			save_scope_as = geneseric
+			trigger_event = { id = bp_historical_flavor.0001 } #Vandals have lots of Roman slaves at start
+		}
+	}
+}
+### Other effects
+
+#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking in through the back door
+stop_feudal_baronies_from_appearing = {
+	every_barony = {
+		#Which isn't a capital
+		limit = { is_capital_barony = no }
+		#All castle holders should have the government of the county holder
+		if = {
+			limit = { this.title_province = { has_holding_type = castle_holding } }
+			#Vanilla Governments
+			if = {
+				limit = { this.county.holder = { has_government = tribal_government } }
+				this.holder = { change_government = tribal_government }
+			}
+			else_if = { #NB: Causes singular "illegal_government" error in 476 start
+				limit = { this.county.holder = { has_government = republic_government } }
+				this.holder = { change_government = republic_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = theocracy_government } }
+				this.holder = { change_government = theocracy_government }
+			}
+			#BP Governments
+			else_if = {
+				limit = { this.county.holder = { has_government = high_tribal_government } }
+				this.holder = { change_government = high_tribal_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = prefeudal_government } }
+				this.holder = { change_government = prefeudal_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = nomad_government } }
+				this.holder = { change_government = nomad_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = subroman_government } }
+				this.holder = { change_government = subroman_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = eranshar_government } }
+				this.holder = { change_government = eranshar_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = gupta_government } }
+				this.holder = { change_government = gupta_government }
+			}
+			else_if = {
+				limit = {
+					this.county.holder = { has_government = bureaucratic_government }
+				}
+				this.holder = { change_government = bureaucratic_government }
+			}
+		}
+		#Handle cases of lay clergy faiths holding temples as well
+		else_if = {
+			limit = {
+				this.title_province = { has_holding_type = church_holding }
+				this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+			}
+			#Vanilla Governments
+			if = {
+				limit = { this.county.holder = { has_government = tribal_government } }
+				this.holder = { change_government = tribal_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = republic_government } }
+				this.holder = { change_government = republic_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = theocracy_government } }
+				this.holder = { change_government = theocracy_government }
+			}
+			#BP Governments
+			else_if = {
+				limit = { this.county.holder = { has_government = high_tribal_government } }
+				this.holder = { change_government = high_tribal_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = prefeudal_government } }
+				this.holder = { change_government = prefeudal_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = nomad_government } }
+				this.holder = { change_government = nomad_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = subroman_government } }
+				this.holder = { change_government = subroman_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = eranshar_government } }
+				this.holder = { change_government = eranshar_government }
+			}
+			else_if = {
+				limit = { this.county.holder = { has_government = gupta_government } }
+				this.holder = { change_government = gupta_government }
+			}
+			else_if = {
+				limit = {
+					this.county.holder = { has_government = bureaucratic_government }
+				}
+				this.holder = { change_government = bureaucratic_government }
+			}
+		}
+	}
+}
+
+### Update the renown of the Seven Great Iranian Houses and Arsacids
+setup_seven_great_iranian_houses = {
+	#Parthian Empire should be at least significant for holding an empire for 247 years
+	#before game start:
+	#2 Renown/month * 12 * 247 > 5900
+	#They start at Well-Known without any bump; let's make them famous
+	dynasty:100685 = { add_dynasty_prestige_level = 2 } #Arsacids
+	
+	#See: https://sourcebooks.fordham.edu/med/fryeheri.asp for more details beyond wiki
+	
+	#Make the 7 Great Parthian Houses be "Noteworthy" or better
+	#Surenids, Karenids, and Ispahbudhanids were of particular power, so they are 4
+	#Rest are level 3
+	#
+	#See "Pourshariati, Parvaneh (2008), Decline and Fall of the Sasanian Empire: The Sasanian-Parthian 
+	#Confederacy and the Arab Conquest of Iran, London: I.B. Tauris." Ch 1.1, near the end
+	
+	#NB: History yields different dynasty_prestige_levels, so 
+	# We should have: 
+	# Surenids, Karenids, Ispahbudhanids: Level 4 (Reputable)
+	# All the rest: Level 3 (Noteworthy)
+	
+	#House of Ispahbudhan of Gurgan
+	#Legendary Origin: Koshm of Phraates IV married a "general of all Iranians"
+	dynasty:10424228 = { add_dynasty_prestige_level = 3 }
+	#House of Varaz/Waraz of Azerbaijan/Armenia [wiki says Khorostan, other source says NE]
+	dynasty:10424226 = { add_dynasty_prestige_level = 2 }
+	#House of Karen of Nahavand
+	#Less-legendary Origin: Son of Phraates IV
+	dynasty:7511     = { add_dynasty_prestige_level = 3 }
+	#House of Mihran of Ray
+	#Were of noticable margrave power in Sasanid power structure
+	dynasty:1042070  = { add_dynasty_prestige_level = 1 }
+	#House of Spandiyadh of Ray
+	#Make claim of legendary figure Isfandiyar, son of Vishtaspa, Zoroaster's follower
+	dynasty:10424229 = { add_dynasty_prestige_level = 2 }
+	#House of Zik of Adurbadagan
+	#Strong Margrave house, if relative upstart (only starts being mentioned ca. 360s)
+	dynasty:10424230 = { add_dynasty_prestige_level = 2 }
+	#House of Suren of Sakastan
+	#Powerful within the Sassanid state
+	dynasty:10424223 = { add_dynasty_prestige_level = 3 }
+}
+
+setup_iranian_government_features = {
+	setup_seven_great_iranian_houses = yes
+	
+	#Give all prefeudal_government vassals of Eranshar rulers religious rights to prevent Persia
+	#replacing non-Zoroastrian rulers quickly
+	every_ruler = {
+		limit = {
+			OR = {
+				has_government = prefeudal_government
+				has_government = subroman_government
+			}
+			this.liege = { has_government = eranshar_government }
+			NOT = { vassal_contract_has_flag = tributary_installed_flag }
+		}
+		vassal_contract_set_obligation_level = {
+			type = religious_rights
+			level = 1
+		}
+	}
+}
+
+#Set Byzantine tax structure
+setup_byzantine_government_features = {
+	every_ruler = {
+		limit = {
+			has_government = bureaucratic_government
+			has_title = title:e_byzantium
+		}
+		add_realm_law_skip_effects = bureaucratic_taxation_2
+		every_vassal_or_below = {
+			if = {
+				limit = { has_government = bureaucratic_government }
+				add_realm_law_skip_effects = bureaucratic_taxation_2
+			}
+		}
+	}
+}
+
+#Determine how decrepit to make Subroman Institutions
+determine_subroman_status = {
+	every_ruler = {
+		limit = { has_government = subroman_government }
+		if = {
+			limit = { game_start_date > 700.1.1 }
+			add_realm_law_skip_effects = subroman_decay_0
+		}
+		else_if = {
+			limit = { game_start_date > 600.1.1 }
+			add_realm_law_skip_effects = subroman_decay_1
+		}
+		else_if = {
+			limit = { game_start_date > 500.1.1 }
+			add_realm_law_skip_effects = subroman_decay_2
+		}
+		else_if = {
+			limit = { game_start_date > 400.1.1 }
+			add_realm_law_skip_effects = subroman_decay_3
+		}
+	}
+}
+
+#Aka, apply laws based on culture & religion
 general_religio_cultural_effects = {
 	every_ruler = {
 		if = { #Agnatic cultures/religions + governments
@@ -76,11 +303,45 @@ specific_title_law_effects = {
 }
 
 apply_general_effects = {
+	stop_feudal_baronies_from_appearing = yes
+	setup_iranian_government_features = yes
+	setup_byzantine_government_features = yes
+	determine_subroman_status = yes
 	general_religio_cultural_effects = yes
 	specific_title_law_effects = yes
 }
 
+setup_gupta_laws_bm_476 = {
+	#Set up Gupta Contracts
+	every_ruler = {
+		limit = {
+			has_government = gupta_government
+			this.liege = { has_title = title:e_rajastan }
+			NOT = { this.liege = this } #Suppress contract error
+		}
+		vassal_contract_decrease_obligation_level = gupta_government_taxes
+		vassal_contract_increase_obligation_level = gupta_government_levies
+	}
+}
+
+setup_sasanian_laws_bm_476 = {
+	#Set up Sasanid State Laws
+	every_ruler = {
+		limit = {
+			has_title = title:e_persia
+			religion = religion:zoroastrianism_religion
+		}
+		if = {
+			limit = { game_start_date < 500.1.1 }
+			add_realm_law_skip_effects = clerical_influence_2
+		}
+		else = { add_realm_law_skip_effects = clerical_influence_1 }
+	}
+}
+
 apply_bm_476_effects = {
+	setup_sasanian_laws_bm_476 = yes
+	setup_gupta_laws_bm_476 = yes
 	#Bookmark-specific character effects
 	#NB: could be moved into history, probably, but putting it here means it will overwrite
 	#Whatever changes are done above.
