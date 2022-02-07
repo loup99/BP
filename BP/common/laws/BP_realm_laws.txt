@@ -5,6 +5,7 @@
 @recent_subroman_decay_upgrade_cooldown_years = 10
 @eranshar_authority_cooldown_years = 10
 @clerical_influence_cooldown_years = 25
+@gupta_authority_cooldown_years = 10
 
 high_tribal_organization = {
 	default = high_tribal_organization_0
@@ -1189,6 +1190,148 @@ clerical_influence = {
 			set_variable = {
 				name = clerical_influence_cooldown
 				years = @clerical_influence_cooldown_years
+			}
+		}
+	}
+}
+
+gupta_authority = {
+	default = gupta_authority_0
+	cumulative = yes
+	flag = realm_law
+	
+	gupta_authority_0 = {
+		modifier = {}
+
+		can_keep = { realm_law_use_gupta_authority = yes }
+	}
+	
+	gupta_authority_1 = {
+		modifier = {}
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+
+		can_keep = { realm_law_use_gupta_authority = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = gupta_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_gupta_authority_cooldown"
+					NOT = { has_variable = gupta_authority_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = gupta_authority_2
+							has_realm_law = gupta_authority_3
+						}
+					}
+					add = increase_gupta_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = gupta_authority_cooldown
+				years = @gupta_authority_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = gupta_authority_0 }
+				value = 1
+			}
+		}
+	}
+	
+	gupta_authority_2 = {
+		modifier = {}
+		
+		
+		can_keep = { realm_law_use_gupta_authority = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = gupta_authority_3 } }
+				has_realm_law = gupta_authority_1
+				custom_description = {
+					subject = root
+					text = "has_gupta_authority_cooldown"
+					NOT = { has_variable = gupta_authority_cooldown }
+				}
+			}
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = gupta_authority_3 } }
+					add = increase_gupta_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = gupta_authority_cooldown
+				years = @gupta_authority_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = gupta_authority_1 }
+				value = 1
+			}
+		}
+	}
+	
+	gupta_authority_3 = {
+		modifier = {}
+		
+		can_keep = { realm_law_use_gupta_authority = yes }
+
+		can_pass = {
+			has_realm_law = gupta_authority_2
+			custom_description = {
+				subject = root
+				text = "has_gupta_authority_cooldown"
+				NOT = { has_variable = gupta_authority_cooldown }
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = gupta_authority_3 } }
+					add = increase_gupta_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = gupta_authority_cooldown
+				years = @gupta_authority_cooldown_years
 			}
 		}
 	}
