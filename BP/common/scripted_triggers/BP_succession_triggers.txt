@@ -22,23 +22,94 @@ BP_historical_access_single_heir_dynasty_house_trigger = {
 		has_title = title:k_vandalica
 	}
 }
-### Other
+### Gender Law Triggers
+BP_start_with_male_only = {
+	AND = {
+		BP_historical_start_equal_law = no
+		BP_historical_start_female_preference_law = no
+		BP_historical_start_male_preference_law = no
+		OR = {
+			#Vanilla Condition
+			this.faith = {
+				has_doctrine = doctrine_gender_male_dominated
+				religion_tag = islam_religion
+			}
+			#BP conditions
+			OR = {
+				this.culture = culture:roman
+				#Germans
+				this.culture = culture:old_frankish #Salic Law
+				this.culture = culture:burgundian
+				this.culture = culture:vandalic
+				#Iranian-Altaic Hybrid Cultures
+				this.culture = culture:hepthalite
+				this.culture = culture:xionite
+				this.culture = culture:hunas
+			}
+			OR = {
+				#Anatolians
+				this.culture_group = culture_group:anatolian_group
+				#Iranians
+				this.culture_group = culture_group:iranian_group
+				#Semites
+				this.culture_group = culture_group:central_semitic_group
+				this.culture_group = culture_group:south_semitic_group
+				this.culture_group = culture_group:israelite_group
+				#Celts
+				this.culture_group = culture_group:continental_celtic_group
+				#Turco-Mongols
+				this.culture_group = culture_group:turkic_group
+				this.culture_group = culture_group:mongolic_group
+				this.culture_group = culture_group:magyar_group
+			}
+			#General WtWSMS Trigger for Agnatic Succession (based on cursory analysis)
+			AND = {
+				OR = {
+					has_government = gupta_government
+					has_government = nomad_government
+					has_government = tribal_government
+				}
+				faith = {
+					NOR = {
+						has_doctrine = doctrine_gender_equal
+						has_doctrine = doctrine_gender_female_dominated
+					}
+				}
+			}
+		}
+	}
+}
+BP_historical_start_equal_law = {
+	OR = {
+		#Vanilla conditions
+		AND = {
+			faith = { has_doctrine = doctrine_gender_equal }
+			NOT = { has_realm_law = female_only_law } # For when female_only_law ceases to be valid
+		}
+		#BP conditions
+		OR = {
+			has_title = title:k_frisia
+			has_title = title:k_angloland
+		}
+		culture_group = culture_group:vasconic_group
+	}
+}
+BP_historical_start_female_preference_law = {
+	OR = {
+		#Vanilla Conditions
+		OR = {
+			faith = { has_doctrine = doctrine_gender_female_dominated }
+			has_realm_law = female_only_law # For when male_only_law ceases to be a legal option
+		}
+		#BP Condition
+		has_title = title:d_astures #Currently not working
+	}
+}
 BP_historical_start_male_preference_law = {
 	OR = {
 		has_title = title:d_aileach
 		has_title = title:d_deasmhumhain
 	}
-}
-
-BP_historical_start_equal_law = {
-	OR = {
-		has_title = title:k_frisia
-		has_title = title:k_angloland
-	}
-}
-
-BP_historical_start_female_preference_law = {
-	has_title = title:d_astures
 }
 
 ### BP Triggers (i.e., used in BP_game_start_effects)
