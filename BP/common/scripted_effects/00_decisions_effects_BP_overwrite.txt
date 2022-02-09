@@ -1,0 +1,100 @@
+﻿reclaim_britannia_decision_effect = {
+	every_sub_realm_county = {
+		limit = {
+			NOR = {
+				culture = { has_cultural_pillar = heritage_goidelic }
+				culture = { has_cultural_pillar = heritage_brythonic }
+			}
+			title_province = { geographical_region = world_europe_west_britannia }
+		}
+		custom = british_isles.0001.custom
+		add_county_modifier = {
+			modifier = reclaim_britannia_culture_modifier
+			days = 3650
+		}
+	}
+	capital_county = { set_county_culture = root.culture }
+	if = {
+		limit = { culture = { has_cultural_pillar = heritage_goidelic } }
+		give_nickname = nick_the_tuatha_de_danann
+	}
+	else = { give_nickname = nick_pendragon }
+}
+
+unite_africa_decision_effects = {
+	#Prestige
+	add_prestige = massive_prestige_gain
+
+	#Religion bonuses
+	if = {
+		limit = {
+			faith = {
+				OR = {
+					religion_tag = islam_religion
+					religion_tag = west_african_roog_religion
+					religion_tag = west_african_religion
+					religion_tag = west_african_bori_religion
+					this = faith:miaphysitism
+
+				}
+			}
+		}
+		add_piety = massive_piety_gain
+		faith = {
+			change_fervor = {
+				value = medium_fervor_gain
+				desc = fervor_gain_united_africa
+			}
+		}
+
+		if = {
+			limit = {
+				any_vassal_or_below = {
+					NOT = { faith = scope:africa_uniter.faith }
+					is_ai = yes
+					exists = capital_province
+					capital_province = { geographical_region = world_africa }
+				}
+			}
+			every_vassal_or_below = {
+				custom = every_non_root_faith_vassal_africa
+				limit = {
+					NOT = { faith = scope:africa_uniter.faith }
+					is_ai = yes
+					exists = capital_province
+					capital_province = { geographical_region = world_africa }
+				}
+				random = {
+					chance = 33
+					set_character_faith = scope:africa_uniter.faith
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				any_realm_province = {
+					NOT = { faith = scope:africa_uniter.faith }
+					geographical_region = world_africa
+				}
+			}
+			every_realm_province = {
+				limit = {
+					NOT = { faith = scope:africa_uniter.faith }
+					geographical_region = world_africa
+				}
+				county = { add_to_list = every_realm_county }
+			}
+
+			every_in_list = {
+				list = every_realm_county
+				custom = every_non_root_faith_county_africa
+				random = {
+					chance = 33
+					custom_tooltip = every_non_africa_uniter_faith_convert
+					hidden_effect = { set_county_faith = scope:africa_uniter.faith }
+				}
+			}
+		}
+	}
+}
