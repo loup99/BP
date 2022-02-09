@@ -1,0 +1,47 @@
+﻿# Determines if a faith can be created, on top of the piety requirement, and the doctrine requirements
+# Also handles reforming a faith, check for the unreformed doctrine to enable those additional checks
+# Root is the faith creator
+faith_creation = {
+	trigger_if = {
+		limit = {
+			highest_held_title_tier = tier_county
+			is_independent_ruler = no
+		}
+		custom_description = {
+			text = "faith_creation_duchy_or_higher"
+			highest_held_title_tier >= tier_duchy
+		}
+	}
+
+	is_adult = yes
+	is_at_war = no
+	culture = { has_innovation = innovation_state_religion }
+	custom_description = {
+		text = "character_is_not_real_head"
+		NOT = { faith.religious_head = root }
+	}
+
+	custom_description = {
+		text = "character_can_only_create_one_faith"
+		NOT = { exists = var:has_created_a_faith }
+	}
+
+	trigger_if = {
+		limit = { faith = { has_doctrine_parameter = unreformed } }
+		
+		NOT = {
+			custom_description = {
+				text = faith_has_been_reformed
+				object = faith
+				exists = faith.var:has_been_reformed
+			}
+		}
+
+		faith = {
+			num_realm_holy_sites_faithful_holders = {
+				CHARACTER = root
+				COUNT = 3
+			}
+		}
+	}
+}

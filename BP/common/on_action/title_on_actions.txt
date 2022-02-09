@@ -21,12 +21,16 @@
 # flag:faction_demand
 # flag:swear_fealty
 
-##### Change from Vanilla #####
-# Remove Danelaw-England Partition event
+# A title is destroyed
+# root = the holder before destruction
+# scope:landed_title = the title that is being destroyed
+# Does *not* provide scope:transfer_type
 on_title_destroyed = {
-	events = {}
+	events = {
+		british_isles.1031	# Danelaw-England partition calc.
+	}
 }
-##### Change from Vanilla #####
+
 
 # A title is transferred to a new character
 # root = the new holder
@@ -34,6 +38,9 @@ on_title_destroyed = {
 # scope:previous_holder = previous holder. Might be dead
 on_title_gain = {
 	effect = {
+		##### Start Vanilla Section vvvvv
+		scope:title = { update_dynamic_coa = yes }
+		
 		if = {
 			limit = {
 				scope:title = { is_holy_order = yes }
@@ -61,7 +68,82 @@ on_title_gain = {
 				years = 4
 			}
 		}
-		##### Change from Vanilla vvvvv
+		
+		# Grandeur in elective realms
+		if = {
+			limit = {
+				exists = var:previous_holder_grandeur_value
+				has_royal_court = yes
+			}
+			hidden_effect = {
+				change_current_court_grandeur = -100 # Reset to 0
+				change_current_court_grandeur = var:previous_holder_grandeur_value
+				remove_variable = previous_holder_grandeur_value
+			}
+		}
+
+		# Petition allowed again
+		if = {
+			limit = { has_variable = petition_title_cooldown }
+			remove_variable = petition_title_cooldown
+		}
+
+		if = {
+			limit = {
+				exists = scope:previous_holder
+				scope:previous_holder = {
+					any_character_artifact = {
+						has_variable = artifact_succession_title #Is this an artifact that should follow a title?
+						var:artifact_succession_title = { is_title_created = yes } #Does the title the artifact should follow exist?
+						var:artifact_succession_title = scope:title #Scope title is the artifact title
+					}
+				}
+			}
+			scope:previous_holder = {
+				every_character_artifact = {
+					limit = {
+						has_variable = artifact_succession_title #Is this an artifact that should follow a title?
+						var:artifact_succession_title = { is_title_created = yes } #Does the title the artifact should follow exist?
+						var:artifact_succession_title = scope:title #Scope title is the artifact title
+					}
+					if = {
+						limit = {
+							OR = {
+								scope:transfer_type = flag:conquest
+								scope:transfer_type = flag:conquest_holy_war
+								scope:transfer_type = flag:conquest_claim
+								scope:transfer_type = flag:conquest_populist
+								scope:transfer_type = flag:abdication
+								scope:transfer_type = flag:usurped
+								scope:transfer_type = flag:revoked
+								scope:transfer_type = flag:faction_demand
+							}
+						}
+						set_owner = {
+							target = root
+							history = {
+								type = conquest
+								actor = scope:previous_holder
+								recipient = root
+								location = scope:previous_holder.location
+							}
+						}
+					}
+					else = {
+						set_owner = {
+							target = root
+							history = {
+								type = inherited
+								recipient = root
+							}
+						}
+					}
+				}
+			}
+		}
+		##### End Vanilla Section ^^^^^
+		
+		##### Changed from Vanilla vvvvv
 		
 		#Notes:
 		# * is_ruler added to ensure granting titles doesn't risk changing gov't of current holders
@@ -201,19 +283,25 @@ on_title_gain = {
 		roman_restoration.0199		#Restoring the Pentarchy.
 		religious_decision.0312		# Base game: new holder of a county with a runestone
 		fp1_other_decisions.0113	# FP1: new holder of a county with a runestone
-		coa.1						# check if title Coat of Arms should change.
 		delay = { days = 1 }
 		realm_maintenance.2001		#Big notification about inheriting emperor tier title
+		british_isles.1032			# Danelaw-England partition calc.
+		fp1_major_decisions.1011	# Harald Tanglehair becomes Harald Fairhair.
+		fp1_major_decisions.1012	# If Norway has just been created for the first time, flag that.
+		title_event.0001			# Rename West Francia to France
+		title_event.0002			# Rename East Francia to Germany
 	}
 	##### Change from Vanilla #####
 }
+
 
 # A title is inherited by a character
 # root = the new holder
 # scope:title = the title that changes hands
 # scope:previous_holder = previous holder. Should be dead
 on_title_gain_inheritance = {
-	events = {}
+	events = {
+	}
 	effect = {
 		if = {
 			limit = {
@@ -230,22 +318,149 @@ on_title_gain_inheritance = {
 # scope:title = the title that changes hands
 # scope:previous_holder = previous holder. Shouldn't be dead
 on_title_gain_usurpation = {
-	events = {}
+	events = {
+	}
 }
 
-##### Change from Vanilla #####
-# Removed danelaw effect
-##### Change from Vanilla #####
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
 on_title_lost = {
-	events = {}
+	events = {
+		british_isles.1033	# Danelaw-England partition calc.
+	}
+
+	effect = {
+		#Make sure nobody ever has only the Kingdom of Fashion
+		if = {
+			limit = {
+				scope:title = { tier = tier_kingdom }
+				has_title = title:k_fashion
+				NOT = {
+					any_held_title = { # Only trigger if you don't have any kingdom titles other than Fashion and the kingdom you just lost. Double negative is confusing but it's the only way I could think to script it
+						tier = tier_kingdom
+						NOT = { this = title:k_fashion }
+						NOT = { this = scope:title }
+					}
+				}
+			}
+			destroy_title = title:k_fashion
+		}
+		#Earmark landless Scandinavians for adventuring.
+		if = {
+			limit = {
+				#We only want to grab tribal cultures.
+				culture = {
+					NOT = { has_cultural_era_or_later = culture_era_early_medieval }
+				}
+				#Must have lost their last piece of land.
+				is_landed = no
+				#If they've ventured far outside Europe, they're unlikely to come back, so we don't #want them.
+				scope:title = {
+					tier = tier_county
+					title_province = {
+						OR = {
+							geographical_region = world_europe
+							geographical_region = world_asia_minor
+						}
+					}
+				}
+			}
+			#Norse, Norwegians, & Danes go into the western adventurer list.
+			if = {
+				limit = {
+					OR = {
+						has_culture = culture:norse
+						has_culture = culture:norwegian
+						has_culture = culture:danish
+					}
+				}
+				add_to_global_variable_list = {
+					name = western_scandinavian_adventurer_list
+					target = this
+				}
+			}
+			#Norse & Swedes go into the eastern adventurer list.
+			if = {
+				limit = {
+					OR = {
+						has_culture = culture:norse
+						has_culture = culture:swedish
+					}
+				}
+				add_to_global_variable_list = {
+					name = eastern_scandinavian_adventurer_list
+					target = this
+				}
+			}
+		}
+
+		#To remove concubines if a character becomes unlanded
+		if = {
+			limit = {
+				is_landed = no
+				any_concubine = { count >= 1 }
+			}
+			every_concubine = {
+				root = {
+					remove_concubine = prev
+				}
+			}
+		}
+
+		#Apply loss of stress to the Rivals
+		if = {
+			limit = {
+				scope:title.tier >= tier_county
+				OR = {
+					scope:transfer_type = flag:conquest
+					scope:transfer_type = flag:conquest_holy_war
+					scope:transfer_type = flag:conquest_claim
+					scope:transfer_type = flag:conquest_populist
+					scope:transfer_type = flag:abdication
+					scope:transfer_type = flag:usurped
+					scope:transfer_type = flag:revoked
+					scope:transfer_type = flag:faction_demand
+				}
+			}
+			root = {
+				save_scope_as = actor
+			}
+			every_relation ={
+				type = rival
+
+				send_interface_message = {
+					type = event_generic_neutral
+					title = msg_rival_dethroned
+					left_icon = scope:actor
+					right_icon = scope:title
+
+					custom_tooltip = msg_rival_dethroned_desc
+
+					stress_impact = { 
+						base = medium_stress_loss
+						vengeful = medium_stress_loss
+					}
+				}
+			}
+		}
+	}
 }
 
 # A claim is gained by a character
 # root = the claimant
 # scope:title = the title that is claimed
 on_explicit_claim_gain = {
-	events = {
-		coa.1 # check if title Coat of Arms should change.
+	effect = {
+		if = {
+			limit = { 
+				title:k_england.holder = root
+			}
+			title:k_england = {
+				update_dynamic_coa = yes
+			}
+		}
 	}
 }
 
@@ -253,8 +468,15 @@ on_explicit_claim_gain = {
 # root = the claimant
 # scope:title = the title that was claimed
 on_explicit_claim_lost = {
-	events = {
-		coa.1 # check if title Coat of Arms should change.
+	effect = {
+		if = {
+			limit = { 
+				title:k_england.holder = root 
+			}
+			title:k_england = {
+				update_dynamic_coa = yes
+			}
+		}
 	}
 }
 
@@ -262,7 +484,8 @@ on_explicit_claim_lost = {
 # root = character ranking up
 # scope:title = old primary title
 on_rank_up = { # Will not fire during history execution or for dying characters
-	events = {}
+	events = {
+	}
 	effect = {
 		add_achievement_flag_effect = { FLAG = achievement_moving_up_in_the_world_flag }
 		update_embassies_effect = yes
@@ -292,11 +515,25 @@ on_rank_up = { # Will not fire during history execution or for dying characters
 # root = character ranking down
 # scope:title = old primary title
 on_rank_down = { # Will not fire during history execution or for dying characters
-	events = {}
+	events = {
+	}
 	effect = {
-		add_character_flag = {
-			flag = make_suicide_available
-			years = 5
+		if = {
+			limit = {
+				NOR = {
+					has_trait = humble
+					has_trait = content
+					has_trait = generous
+				}
+			}
+			add_character_flag = {
+				flag = make_suicide_available
+				years = 5
+			}
+			set_variable = {
+				name = rank_demoted
+				value = yes
+			}
 		}
 		update_embassies_effect = yes
 		every_ally = {

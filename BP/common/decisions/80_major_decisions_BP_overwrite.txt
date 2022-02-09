@@ -1,0 +1,84 @@
+﻿##### Changed from Vanilla vvvvv
+#A decision to feudalize the entire realm (wow!)
+convert_whole_realm_to_feudalism_decision = { #by Linnéa Thimrén
+	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	major = yes
+	desc = convert_whole_realm_to_feudalism_decision_desc
+
+	ai_check_interval = 36
+
+	is_shown = {
+		has_government = tribal_government
+		OR = {
+			is_independent_ruler = yes
+			AND = {
+				is_independent_ruler = no
+				liege = {
+					NOR = {
+						has_government = feudal_government
+						has_government = clan_government
+					}
+				}
+			}
+		}
+	}
+
+	is_valid = {
+		has_realm_law = tribal_authority_3
+		custom_description = {
+			text = faith_is_reformed
+			subject = root
+			faith = { NOT = { has_doctrine_parameter = unreformed } }
+		}
+		prestige_level >= 2
+		capital_province.county = {
+			development_level >= convert_to_feudalism_development_requirement
+		}
+
+		custom_description = { #You need to have 70% of all (non-regional/unique) tribal innovations!
+			text = has_all_tribal_innovations
+			subject = root.culture
+			culture = {
+				calc_true_if = {
+					amount >= 7
+					has_innovation = innovation_vexilium
+					has_innovation = innovation_mustering_grounds
+					has_innovation = innovation_castrae
+					has_innovation = innovation_quilted_armor
+					has_innovation = innovation_development_00
+					has_innovation = innovation_leges_barbarorum
+					has_innovation = innovation_writing
+					has_innovation = innovation_barter
+					has_innovation = innovation_oppidum
+				}
+			}
+		}
+	}
+
+	cost = {
+		prestige = 200
+	}
+
+	effect = {
+		trigger_event = major_decisions.0001
+		save_scope_as = actor
+		convert_whole_realm_to_feudalism_effect = yes
+		hidden_effect = {
+			every_vassal = {
+				trigger_event = {
+					id = major_decisions.0002
+					days = 3
+				}
+			}
+		}
+	}
+
+	ai_potential = {
+		NOT = { has_title = title:e_mongol_empire } #Stop the Mongols from slowing their conquest.
+	}
+
+	ai_will_do = {
+		base = 100
+	}
+}
+##### Changed from Vanilla ^^^^^

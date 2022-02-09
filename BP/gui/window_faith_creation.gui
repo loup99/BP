@@ -19,7 +19,7 @@ window = {
 		on_start = "[GetVariableSystem.Set( 'faith_creation_doctrine_page', 'main_group' )]"
 		on_start = "[GetVariableSystem.Set( 'faith_creation_icon_selection', 'false' )]"
 		on_start = "[GetVariableSystem.Clear('faith_creation_right_view')]"
-		on_start = "[GetVariableSystem.Clear('faith_creation_left_view_vassals')]"
+		on_start = "[GetVariableSystem.Clear('conversion_view_vassals')]"
 	}
 
 	state = {
@@ -77,7 +77,7 @@ window = {
 				layoutpolicy_vertical = expanding
 
 				vbox = {
-					visible = "[Not(VariableSystem.Exists( 'faith_creation_left_view_vassals' ))]"
+					visible = "[Not(VariableSystem.Exists( 'conversion_view_vassals' ))]"
 					spacing = 10
 
 					hbox = {
@@ -107,26 +107,28 @@ window = {
 						}
 
 						hbox = {
+							visible = "[GetPlayer.GetFaith.IsUnreformed]"
 							layoutpolicy_horizontal = expanding
-							# spacing = 5
+
 							icon = {
 									visible = "[GetPlayer.GetFaith.IsUnreformed]"
 									name = "faith_icon"
 									size = { 45 45 }
 									texture = "[FaithCreationWindow.GetFaithIcon]"
 								}
-								text_single = {
-									name = "faith_name_static"
-									visible = "[GetPlayer.GetFaith.IsUnreformed]"
-									text = "FAITH_WINDOW_FAITH_NAME"
-									default_format = "#high"
-									using = Font_Size_Big
-								}
+
+							text_single = {
+								name = "faith_name_static"
+								visible = "[GetPlayer.GetFaith.IsUnreformed]"
+								text = "FAITH_WINDOW_FAITH_NAME"
+								default_format = "#high"
+								using = Font_Size_Big
 							}
+						}
 
 						button_standard = {
 							name = "faith_name"
-							size = { 586 60 }
+							size = { 550 60 }
 							visible = "[Not( GetPlayer.GetFaith.IsUnreformed )]"
 							onclick = "[GetVariableSystem.Set( 'faith_creation_right_view', 'name_selection' )]"
 							tooltip = FAITH_WINDOW_FAITH_NAME_TOOLTIP
@@ -141,7 +143,26 @@ window = {
 								using = Font_Size_Big
 								align = center|nobaseline
 							}
+
+							button_replace = {
+								name = "reset"
+								parentanchor = right|vcenter
+								position = { -6 0 }
+								size = { 40 40 }
+							}
 						}
+
+						map_color_button = {
+							tooltip = "CREATE_FAITH_SELECT_COLOR"
+							blockoverride "mcb_click"
+							{
+								onclick = "[GetVariableSystem.Set( 'faith_creation_right_view', 'color_selection' )]"
+							}
+							blockoverride "mcb_color"
+							{
+								tintcolor = "[FaithCreationWindow.GetColor]"
+							}
+						}						
 					}
 
 					divider = {
@@ -313,11 +334,9 @@ window = {
 										}
 									}
 								}
-
-### START: FOR RELIGION-SPECIFIC DOCTRINES HERE
-
-								#Christian Doctrines
-								vbox = {
+								
+								##### Changed from Vanilla vvvvv
+								vbox = { #Christian Faiths
 									visible = "[GetPlayer.GetFaith.HasDoctrineByKey( 'special_doctrine_is_christian_faith' )]"
 									layoutpolicy_horizontal = expanding
 									spacing = 10
@@ -328,7 +347,7 @@ window = {
 										default_format = "#low"
 									}
 
-									fixedgridbox = {
+									fixedgridbox = { #Christian Doctrines
 										name = "FAITH_DOCTRINES_CHRISTIAN_SPECIFIC"
 										datamodel = "[FaithCreationWindow.GetGroupingHelper( 'christian_doctrines' ).GetGrouping]"
 
@@ -340,9 +359,7 @@ window = {
 										item = { widget_doctrine_selection_item = {} }
 									}
 								}
-
-								#Hindu doctrines
-								vbox = {
+								vbox = { #Hindu Faiths
 									visible = "[GetPlayer.GetFaith.HasDoctrineByKey( 'special_doctrine_is_hinduism_faith' )]"
 									layoutpolicy_horizontal = expanding
 									spacing = 10
@@ -353,7 +370,7 @@ window = {
 										default_format = "#low"
 									}
 
-									fixedgridbox = {
+									fixedgridbox = { #Hindu Doctrines
 										name = "FAITH_DOCTRINES_HINDU_SPECIFIC"
 										datamodel = "[FaithCreationWindow.GetGroupingHelper( 'hindu_doctrines' ).GetGrouping]"
 
@@ -365,9 +382,7 @@ window = {
 										item = { widget_doctrine_selection_item_unique = {} }
 									}
 								}
-
-### END: FOR RELIGION-SPECIFIC DOCTRINES HERE
-
+								##### Changed from Vanilla ^^^^^
 							}
 						}
 					}
@@ -473,7 +488,7 @@ window = {
 
 				# Vassal conversion list
 				vassal_conversion_preview = {
-					visible = "[VariableSystem.Exists( 'faith_creation_left_view_vassals')]"
+					visible = "[VariableSystem.Exists( 'conversion_view_vassals')]"
 					size = { 100% 100% }
 				}
 			}
@@ -512,6 +527,29 @@ window = {
 						layoutpolicy_horizontal = expanding
 						spacing = 20
 						margin = { 30 0 }
+
+						vbox = {
+							layoutpolicy_horizontal = expanding
+							spacing = 10
+							visible = "[Not( FaithCreationWindow.CanCreateFaith )]"
+							text_label_left = {
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_CREATION_BLOCKERS_HEADER"
+								default_format = "#low"
+							}
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+
+								text_multi = {
+									autoresize = yes
+									max_width = 440
+									text = "[FaithCreationWindow.GetCreationBlockers]"
+								}
+
+								expand = {}
+							}
+						}
 
 						vbox = {
 							name = "old_faith_tolerance"
@@ -565,8 +603,9 @@ window = {
 
 								button_standard = {
 									name = "see_vassals"
-									onclick = "[VariableSystem.Toggle( 'faith_creation_left_view_vassals' )]"
+									onclick = "[VariableSystem.Toggle( 'conversion_view_vassals' )]"
 									text = "FAITH_CREATION_OPEN_VASSAL_LIST"
+									down = "[VariableSystem.HasValue( 'conversion_view_vassals', 'true' )]"
 								}
 
 								expand = {}
@@ -604,6 +643,7 @@ window = {
 							name = "theocracy_info"
 							layoutpolicy_horizontal = expanding
 							layoutpolicy_vertical = expanding
+							visible = "[Not( ObjectsEqual( GetPlayer.GetFaith.HasParameterByKey( 'lay_clergy' ), FaithCreationWindow.HasParameter( 'lay_clergy' ) ) ) )]"
 
 							text_label_left = {
 								layoutpolicy_horizontal = expanding
@@ -733,7 +773,6 @@ window = {
 					vbox = {
 						name = "cost"
 						tooltip = "FAITH_CREATION_COST_TOOLTIP"
-						minimumsize = { 130 0 }
 
 						text_single = {
 							layoutpolicy_horizontal = expanding
@@ -928,6 +967,36 @@ window = {
 					}
 				}
 
+				vbox = {
+					name = "color_selection"
+					visible = "[VariableSystem.HasValue( 'faith_creation_right_view', 'color_selection' )]"
+					margin = { 0 20 }
+					margin_top = 15
+					margin_left = 2
+					spacing = 10
+
+					text_label_center = {
+						layoutpolicy_horizontal = expanding
+						text = "MAP_COLOR_SELECTION_LABEL"
+						max_width = 280
+					}
+
+					colorpicker_simple = {
+						visible = yes
+						color = "[FaithCreationWindow.GetColor]"
+						oncoloredited = "[FaithCreationWindow.SetColor]"
+					}
+
+					expand = {}
+
+					button_standard = {
+						name = "done"
+						onclick = "[VariableSystem.Clear( 'faith_creation_right_view' )]"
+						text = "DONE"
+						default_format = "#high"
+					}
+				}
+
 
 				## Doctrine selection
 				vbox = {
@@ -946,9 +1015,10 @@ window = {
 						alpha = 0
 					}
 
-					text_single = {
-						name = "header_label"
+					text_label_center = {
+						layoutpolicy_horizontal = expanding
 						text = "[VariableSystem.Get( 'doctrine_group_name' )]"
+						max_width = 280
 					}
 
 					scrollbox = {
@@ -993,23 +1063,12 @@ window = {
 
 											icon_doctrine = {
 												name = "doctrine_icon_other"
-												visible = "[And( Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' )), Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' )) )]"
+												visible = "[And(Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' )), Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' )))]"
 												texture = "[FaithDoctrine.GetGroup.GetIcon]"
 												size = { 60 60 }
 												position = { 5 10 }
 											}
-											
-############################################################################## SPECIAL ##################################################
-											icon_doctrine = {
-												name = "doctrine_icon_hindu"
-												visible = "[EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'hindu_doctrines' )]"
-												texture = "[FaithDoctrine.GetIcon]"
-												size = { 60 60 }
-												position = { 5 10 }
-											}
-############################################################################## END SPECIAL ##############################################
 
-											## Core Tenets setup
 											widget = {
 												name = "doctrine_icon_core_bg"
 												visible = "[EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' )]"
@@ -1194,7 +1253,8 @@ template faith_window_trait_tooltip
 		{
 			hbox = {
 				margin_right = 5
-				margin_top = -10
+				margin_top = 5
+				
 				icon = {
 					size = { 52 52 }
 					texture = "[Trait.GetIcon( GetPlayer )]"
@@ -1277,7 +1337,8 @@ types "FaithCreation"
 			}
 		}
 	}
-	
+
+	##### Changed from Vanilla vvvvv
 	#For cases with unique art
 	type widget_doctrine_selection_item_unique = button_standard_hover {
 		size = { 240 53 }
@@ -1336,6 +1397,7 @@ types "FaithCreation"
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	type vassal_conversion_preview = widget {
 		name = "vassal_conversion_preview_list"
@@ -1344,7 +1406,7 @@ types "FaithCreation"
 			margin = { 0 15 }
 			spacing = 5
 
-			text_single = {
+			text_label_center = {
 				name = "header"
 				text = "[vassals|E]"
 				using = Font_Size_Medium
@@ -1362,6 +1424,7 @@ types "FaithCreation"
 					layoutpolicy_horizontal = expanding
 
 					hbox = {
+						margin_left = 8
 						spacing = 5
 
 						text_single = {
@@ -1461,7 +1524,7 @@ types "FaithCreation"
 				vbox = {
 					visible = "[EqualTo_int32( VassalConversionWindow.GetNumberOfVassals, '(int32)0' )]"
 					text_single = {
-						text = "NO_VASSALS_TO_DISPLAY"
+						text = "NO_CONVERSION_VASSALS_TO_DISPLAY"
 					}
 				}
 			}
@@ -1474,7 +1537,7 @@ types "FaithCreation"
 				button_standard = {
 					name = "close"
 					text = "CLOSE_LABEL"
-					onclick = "[VariableSystem.Toggle( 'faith_creation_left_view_vassals' )]"
+					onclick = "[VariableSystem.Toggle( 'conversion_view_vassals' )]"
 				}
 			}
 
