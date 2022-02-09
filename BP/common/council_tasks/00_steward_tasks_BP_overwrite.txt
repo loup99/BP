@@ -1,4 +1,5 @@
-﻿task_promote_culture = {
+﻿##FIXME: Reimplement BP innovation effects
+task_promote_culture = {
 	position = councillor_steward
 
 	task_type = task_type_county
@@ -9,7 +10,29 @@
 	highlight_own_realm = yes
 	
 	effect_desc = {
-		desc = task_promote_culture_effect_desc
+		desc = {
+			desc = task_promote_culture_effect_desc
+			triggered_desc = {
+				trigger = {
+					trigger_if = {
+						limit = { exists = scope:county }
+						scope:county = {
+							NOT = { culture = scope:councillor_liege.culture }
+						}
+						NOT = {
+							scope:councillor_liege.culture = {
+								is_hybrid_culture = yes
+								any_parent_culture = {
+									this = scope:county.culture
+								}
+							}
+						}
+					}
+					trigger_else = { always = no }
+				}
+				desc = task_promote_culture_acceptance_effect_desc
+			}
+		}
 		desc = {
 			desc = council_task_possible_side_effects
 			triggered_desc = {
@@ -75,7 +98,6 @@
 		}
 	}
 
-	##### Changed from Vanilla vvvvv
 	progress = {
 		value = 0
 		add = {
@@ -86,100 +108,10 @@
 			value = scope:councillor.steward_promote_culture_monthly_increase
 			desc = SCALED_COUNCILLOR_STEWARDSHIP_VALUE
 		}
-		# Relation Bonuses/Penalties
-		if = { # Friend
-			limit = {
-				scope:councillor_liege = {
-					has_relation_friend = scope:councillor
-					NOT = { has_relation_best_friend = scope:councillor }
-				}
-			}
-			add = {
-				value = scope:councillor.steward_promote_culture_monthly_increase_friend_bonus
-				desc = COUNCILLOR_IS_YOUR_FRIEND
-			}
-		}
-		if = { # Best Friend
-			limit = {
-				scope:councillor_liege = {
-					has_relation_best_friend = scope:councillor
-				}
-			}
-			add = {
-				value = scope:councillor.steward_promote_culture_monthly_increase_best_friend_bonus
-				desc = COUNCILLOR_IS_YOUR_BEST_FRIEND
-			}
-		}
-		if = { # Rival
-			limit = {
-				scope:councillor_liege = {
-					has_relation_rival = scope:councillor
-					NOT = { has_relation_nemesis = scope:councillor }
-				}
-			}
-			add = {
-				value = scope:councillor.steward_promote_culture_monthly_increase_rival_bonus
-				desc = COUNCILLOR_IS_YOUR_RIVAL
-			}
-		}
-		if = { # Nemesis
-			limit = {
-				scope:councillor_liege = {
-					has_relation_nemesis = scope:councillor
-				}
-			}
-			add = {
-				value = scope:councillor.steward_promote_culture_monthly_increase_nemesis_bonus
-				desc = COUNCILLOR_IS_YOUR_NEMESIS
-			}
-		}
-		if = {
-			limit = {
-				exists = scope:councillor_liege.dynasty
-				scope:councillor_liege.dynasty = { has_dynasty_perk = erudition_legacy_5 }
-			}
-			add = {
-				value = steward_promote_culture_erudition_bonus
-				desc = ERUDITION_DYNASTY_PERK_BONUS_VALUE
-			}
-		}
-		if = {
-			limit = {
-				exists = scope:county
-				scope:councillor_liege.faith = {
-					has_doctrine_parameter = same_faith_promote_culture_bonus_active
-				}
-				scope:county.faith = scope:councillor_liege.faith
-			}
-			add = {
-				value = scope:councillor.promote_culture_communal_identity_bonus
-				desc = STEWARD_PROMOTE_CULTURE_COMMUNAL_IDENTITY_BONUS_MODIFIER
-			}
-		}
-		if = {
-			limit = {
-				scope:councillor_liege.culture = {
-					has_innovation = innovation_east_settling
-				}
-			}
-			add = {
-				value = scope:councillor.promote_culture_east_settling_bonus
-				desc = STEWARD_PROMOTE_CULTURE_INNOVATION_BONUS_EAST_SETTLING
-			}
-		}
-		##### Changed from Vanilla vvvvv
-		# Added to support roman colonization
-		if = {
-			limit = {
-				scope:councillor_liege.culture = { has_innovation = innovation_coloniae }
-			}
-			add = {
-				value = scope:councillor.promote_culture_coloniae_bonus
-				desc = STEWARD_PROMOTE_CULTURE_INNOVATION_BONUS_COLONIAE
-			}
-		}
-		##### Changed from Vanilla ^^^^
-		if = { # Development reduces the speed.
+
+		add = steward_promote_culture_contextual_bonuses
+		
+		if = { # Development reduces the speed. Should be the last non-multiply modifier applied to avoid negative values
 			limit = {
 				exists = scope:county
 				scope:county = {
@@ -191,82 +123,6 @@
 				desc = STEWARD_PROMOTE_CULTURE_DEVELOPMENT_PENALTY
 			}
 		}
-		#Reduce for various county modifiers.
-		if = { #Reduced conversion speed if the county has protected traditions.
-			limit = {
-				exists = scope:county
-				scope:county = {
-					has_county_modifier = governance_1073_conversion_resistance_modifier
-				}
-			}
-			add = {
-				value = scope:councillor.promote_culture_local_traditions_respected_penalty
-				desc = STEWARD_PROMOTE_CULTURE_LOCAL_TRADITIONS_RESPECTED
-			}
-		}
-		if = {
-			limit  = {
-				exists = scope:county
-				scope:county = {
-					has_county_modifier = county_shuubiyya_modifier
-				}
-			}
-			add = {
-				value = scope:councillor.promote_culture_shuubiyya_penalty
-				desc = STEWARD_PROMOTE_CULTURE_SHUUBIYYA
-			}
-		}
-		##### Change from Vanilla: Removed Reclaim Britainia Modifiers
-		if = {
-			limit = {
-				exists = scope:county
-				scope:county = {
-					OR = {
-						has_county_modifier = enthusiastic_nomad_settlement_saharan_modifier
-						has_county_modifier = nomad_settlement_saharan_modifier
-					}
-				}
-			}
-			add = {
-				value = scope:councillor.promote_culture_allowed_nomad_settlement_penalty
-				desc = STEWARD_PROMOTE_CULTURE_ALLOWED_NOMAD_SETTLEMENT
-			}
-		}
-		
-		##### Change from Vanilla vvvvv
-		#Minor Migration Modifiers
-		if = { # A thin aristocracy has difficulty promoting its culture
-			limit = {
-				exists = scope:county
-				scope:county = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy }
-			}
-			add = {
-				value = scope:councillor.promote_culture_minor_migration_minor_aristocracy_penalty
-				desc = STEWARD_PROMOTE_CULTURE_MINOR_ARISTOCRACY
-			}
-		}
-		#Major Migratinon Modifiers
-		if = { # Depopulated regions are easy to settle
-			limit = {
-				exists = scope:county
-				scope:county = { has_county_modifier = county_modifier_migration_recent_emigration }
-			}
-			add = {
-				value = scope:councillor.promote_culture_recent_emigration_bonus
-				desc = STEWARD_PROMOTE_CULTURE_RECENTLY_MIGRATED_AWAY
-			}
-		}
-		if = { # Have a short time to settle your migratory peoples
-			limit = {
-				exists = scope:county
-				scope:county = { has_county_modifier = county_modifier_migration_recent_immigration }
-			}
-			add = {
-				value = scope:councillor.promote_culture_recent_immigration_bonus
-				desc = STEWARD_PROMOTE_CULTURE_RECENTLY_MIGRATED_TO
-			}
-		}
-		##### Change from Vanilla ^^^^^
 		
 		# Conversion speed game rules
 		if = {
@@ -306,21 +162,56 @@
 			}
 		}
 	}
-	##### Changed from Vanilla ^^^^^
 
-	##### Changed from Vanilla vvvvv
 	potential_county = {
 		scope:county = {
 			NOT = { culture = scope:councillor_liege.culture }
+			trigger_if = {
+				limit = {
+					scope:councillor_liege = { has_variable = hold_court_8130_culture_block }
+				}
+				custom_tooltip = {
+					text = hold_court_8130_conversion_tt
+					NOT = { culture = scope:councillor_liege.var:hold_court_8130_culture_block }
+				}
+			}
 		}
 		trigger_if = {
 			limit = {
 				scope:councillor_liege = { is_ai = yes }
 			}
+			NAND = { # Princes in the HRE tend to not convert each other's cultures
+				exists = title:e_hre.holder
+				scope:councillor_liege.top_liege = title:e_hre.holder
+				OR = {
+					scope:councillor_liege.culture = culture:czech
+					scope:councillor_liege.culture = { has_cultural_pillar = heritage_central_germanic }
+				}
+				OR = {
+					scope:county.culture = culture:czech
+					scope:county.culture = { has_cultural_pillar = heritage_central_germanic }
+				}
+			}
 			OR = {
-				is_independent_ruler = yes
-				scope:councillor_liege.primary_title.tier > tier_county
+				NOT = {
+					scope:county.culture = {
+						cultural_acceptance = { target = scope:councillor_liege.culture value >= 50 }
+					}
+				}
+				scope:councillor_liege.culture = { # All AI's are motivated to spread new Hybrid/Divergent cultures
+					OR = {
+						is_hybrid_culture = yes
+						is_divergent_culture = yes
+					}
+					NOT = { # Leave the Welsh alone!
+						this = culture:anglo_saxon
+					}
+					any_parent_culture = {
+						this = scope:county.culture
+					}
+				}
 				AND = {
+					# Scottish rulers should convert counties of 'old' cultures to the new one.
 					scope:councillor_liege.culture = culture:scottish
 					OR = {
 						scope:county.culture = culture:anglo_saxon
@@ -330,6 +221,38 @@
 					}
 				}
 				AND = {
+					# English rulers should convert counties of 'old' cultures to the new one.
+					scope:councillor_liege.culture = culture:english
+					OR = {
+						scope:county.culture = culture:anglo_saxon
+						scope:county.culture = culture:norman
+					}
+				}
+			}
+			OR = {
+				is_independent_ruler = yes
+				scope:councillor_liege.primary_title.tier > tier_county
+				scope:councillor_liege.culture = { # All AI's are motivated to spread new Hybrid/Divergent cultures
+					OR = {
+						is_hybrid_culture = yes
+						is_divergent_culture = yes
+					}
+					any_parent_culture = {
+						this = scope:county.culture
+					}
+				}
+				AND = {
+					# Scottish rulers should convert counties of 'old' cultures to the new one.
+					scope:councillor_liege.culture = culture:scottish
+					OR = {
+						scope:county.culture = culture:anglo_saxon
+						scope:county.culture = culture:gaelic
+						scope:county.culture = culture:cumbrian
+						scope:county.culture = culture:pictish
+					}
+				}
+				AND = {
+					# English rulers should convert counties of 'old' cultures to the new one.
 					scope:councillor_liege.culture = culture:english
 					OR = {
 						scope:county.culture = culture:anglo_saxon
@@ -353,19 +276,25 @@
 						}
 					}
 					OR = {
+						#scope:councillor_liege.culture = { # All AI's are motivated to spread new Hybrid cultures
+						#	is_hybrid_culture = yes
+						#	any_parent_culture = {
+						#		this = scope:county.culture
+						#	}
+						#}
 						# Unless they're a nomadic culture converting in the steppe or Asia Minor...
-						AND = {
-							OR = {
-								scope:councillor_liege.culture_group = culture_group:mongolic_group
-								scope:councillor_liege.culture_group = culture_group:turkic_group
-							}
-							scope:county.title_province = {
-								OR = {
-									geographical_region = world_asia_minor
-									geographical_region = world_steppe
-								}
-							}
-						}
+						#AND = { # Deprecated as of the Culture Update, nomadic cultures now try to hybridize aggressively
+						#	OR = {
+						#		scope:councillor_liege.culture = { has_cultural_pillar = heritage_mongolic }
+						#		scope:councillor_liege.culture = { has_cultural_pillar = heritage_turkic }
+						#	}
+						#	scope:county.title_province = {
+						#		OR = {
+						#			geographical_region = world_asia_minor
+						#			geographical_region = world_steppe
+						#		}
+						#	}
+						#}
 						AND = { # The English want to convert the Anglo Saxons and Cumbrians
 							scope:councillor_liege.culture = culture:english
 							OR = {
@@ -397,26 +326,28 @@
 							}
 							scope:county.culture = culture:norse
 						}
-						##### Change from Vanilla vvvvv
-						#Remove Goidelic/Brythonic Group
-						AND = { # The vikings want to culture convert the Brits
-							OR = {
-								scope:councillor_liege.culture = culture:norse
-								scope:councillor_liege.culture = culture:norwegian
-							}
-							scope:county = { any_county_province = { is_coastal = yes } }
-							OR = {
-								scope:county.culture_group = culture_group:west_germanic_group
-								scope:county.culture_group = culture_group:celtic_group
-							}
-						}
-						##### Change from Vanilla ^^^^^
+						#AND = { # The vikings want to culture convert the Brits, OBSOLETE as of the Hybrid Culture update - they want to create hybrids instead!
+						#	OR = {
+						#		scope:councillor_liege.culture = culture:norse
+						#		scope:councillor_liege.culture = culture:norwegian
+						#	}
+						#	scope:county = {
+						#		any_county_province = {
+						#			is_coastal = yes
+						#		}
+						#	}
+						#	OR = {
+						#		scope:county.culture = { has_cultural_pillar = heritage_west_germanic }
+						#		scope:county.culture = { has_cultural_pillar = heritage_goidelic }
+						#		scope:county.culture = { has_cultural_pillar = heritage_brythonic }
+						#	}
+						#}
 						AND = { # The Portuguese should want to convert Suebi
 							scope:councillor_liege.culture = culture:portuguese
 							scope:county.culture = culture:suebi
 						}
 						AND = { # The Iberians want to convert Visigothic
-							scope:councillor_liege.culture_group = culture_group:iberian_group
+							scope:councillor_liege.culture = { has_cultural_pillar = heritage_iberian }
 							NOT = { scope:councillor_liege.culture = culture:portuguese }
 							scope:county.culture = culture:visigothic
 						}
@@ -425,59 +356,65 @@
 			}
 		}
 	}
-	##### Changed from Vanilla ^^^^^
 
 	on_finish_task_county = {
+		scope:councillor_liege = {
+			if = {
+				limit = {	
+					NOT = {
+						culture = {
+							is_hybrid_culture = yes
+							any_parent_culture = {
+								this = scope:county.culture
+							}
+						}
+					}
+				}
+				if = {
+					limit = {
+						is_independent_ruler = no
+					}
+					add_character_flag = {
+						flag = no_ai_culture_convert
+						years = 60
+					}
+				}
+				else = {
+					add_character_flag = {
+						flag = no_ai_culture_convert
+						years = 30
+					}
+				}
+			}
+		}
 		scope:county = {
+			if = {
+				limit = {
+					NOT = {
+						scope:councillor_liege.culture = {
+							is_hybrid_culture = yes
+							any_parent_culture = {
+								this = scope:county.culture
+							}
+						}
+					}
+				}
+				culture = {
+					change_cultural_acceptance = {
+						target = scope:councillor_liege.culture
+						value = culture_conversion_acceptance_impact
+						desc = cultural_acceptance_loss_promote_culture
+					}
+				}
+			}
 			set_county_culture = scope:councillor_liege.culture
 		}
 		scope:councillor = {
 			start_default_task = yes
 		}
-		scope:councillor_liege = {
-			if = {
-				limit = {
-					is_independent_ruler = no
-				}
-				add_character_flag = {
-					flag = no_ai_culture_convert
-					years = 50
-				}
-			}
-			else = {
-				add_character_flag = {
-					flag = no_ai_culture_convert
-					years = 20
-				}
-			}
-		}
 	}
 
-	on_start_task = {
-		liege = {
-			add_character_flag = {
-				flag = no_steward_side_effects_first_month
-				days = 30
-			}
-		}
-	}
-
-	on_monthly_county = {
-		scope:councillor_liege = {
-			if = {
-				limit = {
-					has_character_flag = no_steward_side_effects_first_month
-				}
-				remove_character_flag = no_steward_side_effects_first_month
-			}
-			else = {
-				trigger_event = {
-					on_action = task_promote_culture_side_effects
-					days = { 1 30 }
-				}
-			}
-		}
-	}
+	monthly_on_action = task_promote_culture_side_effects
 
 	ai_will_do = {
 		value = 0
@@ -491,7 +428,9 @@
 		}
 		else_if = {
 			limit = {
-				scope:councillor_liege.culture = culture:outremer
+				scope:councillor_liege.culture = {
+					has_innovation = innovation_desert_tactics #Best way to check if the culture is Outremer
+				}
 				scope:councillor_liege = {
 					gold >= steward_convert_culture_value
 				}
@@ -501,24 +440,54 @@
 		else_if = {
 			limit = {
 				scope:councillor_liege = {
-					gold >= steward_convert_culture_value
+					OR = {
+						gold >= steward_convert_culture_value
+						AND = {
+							gold > 0
+							culture = {
+								OR = {
+									is_hybrid_culture = yes
+									is_divergent_culture = yes
+								}
+							}
+							any_realm_county = {
+								culture = {
+									save_temporary_scope_as = culture_check
+									scope:councillor_liege.culture = {
+										any_parent_culture = {
+											this = scope:culture_check
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 			add = 200
 		}
 		if = {
-			# The Czechs are welcome in the HRE
 			limit = {
-				OR = {
-					scope:councillor_liege.culture = culture:czech
-					scope:councillor_liege.culture_group = culture_group:central_germanic_group
-				}
-				OR = {
-					scope:councillor_liege.culture = culture:czech
-					scope:councillor_liege.culture_group = culture_group:central_germanic_group
+				scope:councillor_liege = {
+					culture = {
+						OR = {
+							is_hybrid_culture = yes
+							is_divergent_culture = yes
+						}
+					}
+					any_sub_realm_county = {
+						culture = {
+							save_temporary_scope_as = culture_check
+							scope:councillor_liege.culture = {
+								any_parent_culture = {
+									this = scope:culture_check
+								}
+							}
+						}
+					}
 				}
 			}
-			multiply = 0
+			add = 200
 		}
 		if = {
 			# Don't do this too often
