@@ -202,39 +202,107 @@ temple_01 = {
 	province_modifier = {
 		monthly_income = normal_building_tax_tier_2
 	}
+	province_terrain_modifier = {
+		parameter = coastal_holding_bonuses
+		is_coastal = yes
+		build_speed = -0.1
+	}
+
+	province_terrain_modifier = {
+		parameter = maritime_mercantilism_coastal_holdings
+		is_coastal = yes
+		tax_mult = maritime_mercantilism_coastal_holdings_value
+	}
+
+	province_terrain_modifier = {
+		parameter = coastal_holdings_give_defensive_bonus
+		is_coastal = yes
+		defender_holding_advantage = 2
+	}
 
 	flag = temple
 
 	type_icon = "icon_building_monastic_schools.dds"
 
 	on_complete = {
-		county.holder = { add_piety = massive_piety_gain }
-		county.holder.faith = { change_fervor = 1 }
+		if = {
+			limit = {
+				county.holder.culture = { has_cultural_parameter = renown_from_temple_construction }
+				exists = county.holder.dynasty
+			}
+			county.holder.dynasty = { add_dynasty_prestige = major_dynasty_prestige_value }
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = extra_piety_from_temple_construction } }
+			county.holder = { add_piety = omega_piety_gain }
+		}
+		else = { county.holder = { add_piety = massive_piety_gain } }
+		save_scope_as = temple_location
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = more_fervor_on_church_construction } }
+			county.holder.faith = {
+				change_fervor = {
+					value = 5
+					desc = fervor_gain_built_temple_holding
+				}
+			}
+		}
+		else = {
+			county.holder.faith = {
+				change_fervor = {
+					value = 1
+					desc = fervor_gain_built_temple_holding
+				}
+			}
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = prestige_from_temple_construction } }
+			county.holder = { add_prestige = massive_prestige_gain }
+		}
 
 		#to give follow-up to the vassal.1001 event
 		hidden_effect = {
-			province_owner = {
-				save_scope_as = owner_of_province
-				
-				scope:owner_of_province = {
-					if = { #Religious liege asked me to build a temple
-						limit = {
-							exists = var:promised_to_build_temple
-							has_character_flag = promised_liege_temple
+			if = {
+				limit = {
+					exists = province_owner
+				}
+				province_owner = {
+					save_scope_as = owner_of_province
+					
+					scope:owner_of_province = {
+						if = { #Religious liege asked me to build a temple
+							limit = {
+								exists = var:promised_to_build_temple
+								var:promised_to_build_temple = {
+									is_alive = yes
+									faith = scope:owner_of_province.faith
+								}
+								has_character_flag = promised_liege_temple
+							}
+							trigger_event = vassal.1010
 						}
-						trigger_event = {
-							id = vassal.1010
-							days = 3
+						if = { #Religious vassal asked me to build a temple
+							limit = {
+								exists = var:promised_to_build_temple
+								var:promised_to_build_temple = {
+									is_alive = yes
+									faith = scope:owner_of_province.faith
+								}
+								has_character_flag = promised_vassal_temple
+							}
+							trigger_event = vassal.1110
 						}
-					}
-					if = { #Religious vassal asked me to build a temple
-						limit = {
-							exists = var:promised_to_build_temple
-							has_character_flag = promised_vassal_temple
-						}
-						trigger_event = {
-							id = vassal.1110
-							days = 3
+
+						#To remove the variables if the character has died or someone has changed their faith
+						if = {
+							limit = {
+								exists = var:promised_to_build_temple
+								OR = {
+									var:promised_to_build_temple = { is_alive = no }
+									NOT = { faith = scope:owner_of_province.faith }
+								}
+							}
+							remove_variable = promised_to_build_temple
 						}
 					}
 				}
@@ -265,7 +333,6 @@ temple_01 = {
 
 temple_02 = {
 	construction_time = slow_construction_time
-	
 	
 	### GENERIC ###
 	asset = {
@@ -458,10 +525,113 @@ temple_02 = {
 	province_modifier = {
 		monthly_income = 0.3
 	}
+	province_terrain_modifier = {
+		parameter = coastal_holding_bonuses
+		is_coastal = yes
+		build_speed = -0.1
+	}
+
+	province_terrain_modifier = {
+		parameter = maritime_mercantilism_coastal_holdings
+		is_coastal = yes
+		tax_mult = maritime_mercantilism_coastal_holdings_value
+	}
+
+	province_terrain_modifier = {
+		parameter = coastal_holdings_give_defensive_bonus
+		is_coastal = yes
+		defender_holding_advantage = 2
+	}
 
 	flag = temple
 
 	type_icon = "icon_building_monastic_schools.dds"
+
+	on_complete = {
+		if = {
+			limit = {
+				county.holder.culture = { has_cultural_parameter = renown_from_temple_construction }
+				exists = county.holder.dynasty
+			}
+			county.holder.dynasty = { add_dynasty_prestige = major_dynasty_prestige_value }
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = extra_piety_from_temple_construction } }
+			county.holder = { add_piety = omega_piety_gain }
+		}
+		else = { county.holder = { add_piety = massive_piety_gain } }
+		save_scope_as = temple_location
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = more_fervor_on_church_construction } }
+			county.holder.faith = {
+				change_fervor = {
+					value = 5
+					desc = fervor_gain_built_temple_holding
+				}
+			}
+		}
+		else = {
+			county.holder.faith = {
+				change_fervor = {
+					value = 1
+					desc = fervor_gain_built_temple_holding
+				}
+			}
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = prestige_from_temple_construction } }
+			county.holder = { add_prestige = massive_prestige_gain }
+		}
+
+		#to give follow-up to the vassal.1001 event
+		hidden_effect = {
+			if = {
+				limit = {
+					exists = province_owner
+				}
+				province_owner = {
+					save_scope_as = owner_of_province
+					
+					scope:owner_of_province = {
+						if = { #Religious liege asked me to build a temple
+							limit = {
+								exists = var:promised_to_build_temple
+								var:promised_to_build_temple = {
+									is_alive = yes
+									faith = scope:owner_of_province.faith
+								}
+								has_character_flag = promised_liege_temple
+							}
+							trigger_event = vassal.1010
+						}
+						if = { #Religious vassal asked me to build a temple
+							limit = {
+								exists = var:promised_to_build_temple
+								var:promised_to_build_temple = {
+									is_alive = yes
+									faith = scope:owner_of_province.faith
+								}
+								has_character_flag = promised_vassal_temple
+							}
+							trigger_event = vassal.1110
+						}
+
+						#To remove the variables if the character has died or someone has changed their faith
+						if = {
+							limit = {
+								exists = var:promised_to_build_temple
+								OR = {
+									var:promised_to_build_temple = { is_alive = no }
+									NOT = { faith = scope:owner_of_province.faith }
+								}
+							}
+							remove_variable = promised_to_build_temple
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	ai_value = {
 		base = 100
@@ -486,7 +656,6 @@ temple_02 = {
 
 temple_03 = {
 	construction_time = slow_construction_time
-	
 	
 	### GENERIC ###
 	asset = {
@@ -657,31 +826,128 @@ temple_03 = {
 		graphical_regions = { "graphical_mena" }
 	}
 	
-	can_construct_potential = {
-		building_requirement_tribal = no
-		barony_cannot_construct_holding = no
-	}
+	can_construct_potential = { building_requirement_tribal = no }
 	
-	can_construct = {
-		culture = { has_innovation = innovation_scriptural_cannon }
-	}
+	can_construct = { culture = { has_innovation = innovation_scriptural_cannon } }
 	
-	can_construct_showing_failures_only = {
-		building_requirement_tribal_holding_in_county = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal_holding_in_county = no }
+	
 	cost_gold = main_building_tier_1_cost
-	next_building = temple_04
+	next_building = temple_02
 	
 	levy = small_building_levy_tier_2
 	max_garrison = normal_building_max_garrison_tier_1
+	garrison_reinforcement_factor = building_garrison_reinforcement_factor_tier_1
 	province_modifier = {
 		monthly_income = normal_building_tax_tier_2
+	}
+	province_terrain_modifier = {
+		parameter = coastal_holding_bonuses
+		is_coastal = yes
+		build_speed = -0.1
+	}
+
+	province_terrain_modifier = {
+		parameter = maritime_mercantilism_coastal_holdings
+		is_coastal = yes
+		tax_mult = maritime_mercantilism_coastal_holdings_value
+	}
+
+	province_terrain_modifier = {
+		parameter = coastal_holdings_give_defensive_bonus
+		is_coastal = yes
+		defender_holding_advantage = 2
 	}
 
 	flag = temple
 
 	type_icon = "icon_building_monastic_schools.dds"
 
+	on_complete = {
+		if = {
+			limit = {
+				county.holder.culture = { has_cultural_parameter = renown_from_temple_construction }
+				exists = county.holder.dynasty
+			}
+			county.holder.dynasty = { add_dynasty_prestige = major_dynasty_prestige_value }
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = extra_piety_from_temple_construction } }
+			county.holder = { add_piety = omega_piety_gain }
+		}
+		else = { county.holder = { add_piety = massive_piety_gain } }
+		save_scope_as = temple_location
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = more_fervor_on_church_construction } }
+			county.holder.faith = {
+				change_fervor = {
+					value = 5
+					desc = fervor_gain_built_temple_holding
+				}
+			}
+		}
+		else = {
+			county.holder.faith = {
+				change_fervor = {
+					value = 1
+					desc = fervor_gain_built_temple_holding
+				}
+			}
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = prestige_from_temple_construction } }
+			county.holder = { add_prestige = massive_prestige_gain }
+		}
+
+		#to give follow-up to the vassal.1001 event
+		hidden_effect = {
+			if = {
+				limit = {
+					exists = province_owner
+				}
+				province_owner = {
+					save_scope_as = owner_of_province
+					
+					scope:owner_of_province = {
+						if = { #Religious liege asked me to build a temple
+							limit = {
+								exists = var:promised_to_build_temple
+								var:promised_to_build_temple = {
+									is_alive = yes
+									faith = scope:owner_of_province.faith
+								}
+								has_character_flag = promised_liege_temple
+							}
+							trigger_event = vassal.1010
+						}
+						if = { #Religious vassal asked me to build a temple
+							limit = {
+								exists = var:promised_to_build_temple
+								var:promised_to_build_temple = {
+									is_alive = yes
+									faith = scope:owner_of_province.faith
+								}
+								has_character_flag = promised_vassal_temple
+							}
+							trigger_event = vassal.1110
+						}
+
+						#To remove the variables if the character has died or someone has changed their faith
+						if = {
+							limit = {
+								exists = var:promised_to_build_temple
+								OR = {
+									var:promised_to_build_temple = { is_alive = no }
+									NOT = { faith = scope:owner_of_province.faith }
+								}
+							}
+							remove_variable = promised_to_build_temple
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	ai_value = {
 		base = 100
@@ -876,28 +1142,57 @@ temple_04 = {
 		graphical_regions = { "graphical_mena" }
 	}
 
-	can_construct_potential = {
-		building_requirement_tribal = no
-	}
-	can_construct = {
-		culture = {
-			has_innovation = innovation_manorialism
-		}
-	}
+	can_construct_potential = { building_requirement_tribal = no }
+	can_construct = { culture = { has_innovation = innovation_manorialism } }
 	cost_gold = main_building_tier_2_cost
-	next_building = temple_05
+	next_building = temple_03
 	
 	levy = small_building_levy_tier_4
 	max_garrison = normal_building_max_garrison_tier_3
 	garrison_reinforcement_factor = building_garrison_reinforcement_factor_tier_2
-	province_modifier = {
-		monthly_income = normal_building_tax_tier_4
+	province_modifier = { monthly_income = normal_building_tax_tier_4 }
+	
+	province_terrain_modifier = {
+		parameter = coastal_holding_bonuses
+		is_coastal = yes
+		build_speed = -0.1
 	}
 
+	province_terrain_modifier = {
+		parameter = maritime_mercantilism_coastal_holdings
+		is_coastal = yes
+		tax_mult = maritime_mercantilism_coastal_holdings_value
+	}
+
+	province_terrain_modifier = {
+		parameter = coastal_holdings_give_defensive_bonus
+		is_coastal = yes
+		defender_holding_advantage = 3
+	}
+	
 	flag = temple
 	
+	on_complete = {
+		if = {
+			limit = {
+				county.holder.culture = { has_cultural_parameter = renown_from_temple_construction }
+				exists = county.holder.dynasty
+			}
+			county.holder.dynasty = { add_dynasty_prestige = medium_dynasty_prestige_value }
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = more_fervor_on_church_construction } }
+			county.holder.faith = {
+				change_fervor = {
+					value = 2
+					desc = fervor_gain_upgraded_temple_holding_culture_parameter
+				}
+			}
+		}
+	}
+	
 	ai_value = {
-		base = 6		
+		base = 6
 		modifier = {
 			factor = 2
 			scope:holder.capital_province = this
@@ -1077,30 +1372,56 @@ temple_05 = {
 		graphical_regions = { "graphical_mena" }
 	}
 	
-	
-
-	can_construct_potential = {
-		building_requirement_tribal = no
-	}
-	can_construct = {
-		culture = {
-			has_innovation = innovation_windmills
-		}
-	}
+	can_construct_potential = { building_requirement_tribal = no }
+	can_construct = { culture = { has_innovation = innovation_windmills } }
 	cost_gold = main_building_tier_3_cost
 	next_building = temple_06
 	
 	levy = small_building_levy_tier_6
 	max_garrison = normal_building_max_garrison_tier_5
 	garrison_reinforcement_factor = building_garrison_reinforcement_factor_tier_3
-	province_modifier = {
-		monthly_income = normal_building_tax_tier_6
+	province_modifier = { monthly_income = normal_building_tax_tier_6 }
+	province_terrain_modifier = {
+		parameter = coastal_holding_bonuses
+		is_coastal = yes
+		build_speed = -0.1
 	}
-
+	
+	province_terrain_modifier = {
+		parameter = maritime_mercantilism_coastal_holdings
+		is_coastal = yes
+		tax_mult = maritime_mercantilism_coastal_holdings_value
+	}
+	
+	province_terrain_modifier = {
+		parameter = coastal_holdings_give_defensive_bonus
+		is_coastal = yes
+		defender_holding_advantage = 4
+	}
+	
 	flag = temple
 	
+	on_complete = {
+		if = {
+			limit = {
+				county.holder.culture = { has_cultural_parameter = renown_from_temple_construction }
+				exists = county.holder.dynasty
+			}
+			county.holder.dynasty = { add_dynasty_prestige = medium_dynasty_prestige_value }
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = more_fervor_on_church_construction } }
+			county.holder.faith = {
+				change_fervor = {
+					value = 2
+					desc = fervor_gain_upgraded_temple_holding_culture_parameter
+				}
+			}
+		}
+	}
+	
 	ai_value = {
-		base = 5		
+		base = 5
 		modifier = {
 			factor = 2
 			scope:holder.capital_province = this
@@ -1280,7 +1601,6 @@ temple_06 = {
 		graphical_regions = { "graphical_mena" }
 	}
 	
-	
 	can_construct_potential = {
 		building_requirement_tribal = no
 	}
@@ -1297,11 +1617,47 @@ temple_06 = {
 	province_modifier = {
 		monthly_income = normal_building_tax_tier_8
 	}
+	province_terrain_modifier = {
+		parameter = coastal_holding_bonuses
+		is_coastal = yes
+		build_speed = -0.1
+	}
+
+	province_terrain_modifier = {
+		parameter = maritime_mercantilism_coastal_holdings
+		is_coastal = yes
+		tax_mult = maritime_mercantilism_coastal_holdings_value
+	}
+
+	province_terrain_modifier = {
+		parameter = coastal_holdings_give_defensive_bonus
+		is_coastal = yes
+		defender_holding_advantage = 5
+	}
 
 	flag = temple
 	
+	on_complete = {
+		if = {
+			limit = {
+				county.holder.culture = { has_cultural_parameter = renown_from_temple_construction }
+				exists = county.holder.dynasty
+			}
+			county.holder.dynasty = { add_dynasty_prestige = medium_dynasty_prestige_value }
+		}
+		if = {
+			limit = { county.holder.culture = { has_cultural_parameter = more_fervor_on_church_construction } }
+			county.holder.faith = {
+				change_fervor = {
+					value = 2
+					desc = fervor_gain_upgraded_temple_holding_culture_parameter
+				}
+			}
+		}
+	}
+	
 	ai_value = {
-		base = 4		
+		base = 4
 		modifier = {
 			factor = 2
 			scope:holder.capital_province = this
@@ -1325,9 +1681,7 @@ monastic_schools_00 = {
 		culture = { has_innovation = innovation_state_religion }
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_1_cost
 	
@@ -1371,9 +1725,7 @@ monastic_schools_01 = {
 		culture = { has_innovation = innovation_doctrine_and_dogma }
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_1_cost
 	
@@ -1417,9 +1769,7 @@ monastic_schools_02 = {
 		culture = { has_innovation = innovation_scriptural_cannon }
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_2_cost
 	
@@ -1449,9 +1799,7 @@ monastic_schools_03 = {
 		}
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_3_cost
 	
@@ -1481,9 +1829,7 @@ monastic_schools_04 = {
 		}
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_4_cost
 	
@@ -1513,9 +1859,7 @@ monastic_schools_05 = {
 		}
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_5_cost
 	
@@ -1545,9 +1889,7 @@ monastic_schools_06 = {
 		}
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_6_cost
 	
@@ -1577,9 +1919,7 @@ monastic_schools_07 = {
 		}
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 
 	cost_gold = normal_building_tier_7_cost
 	
@@ -1609,9 +1949,7 @@ monastic_schools_08 = {
 		}
 	}
 
-	can_construct_showing_failures_only = {
-		building_requirement_tribal = no
-	}
+	can_construct_showing_failures_only = { building_requirement_tribal = no }
 	
 	cost_gold = normal_building_tier_8_cost
 	
