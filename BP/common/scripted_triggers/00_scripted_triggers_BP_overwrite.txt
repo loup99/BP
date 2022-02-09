@@ -1,0 +1,72 @@
+﻿# Requires local_var:<obligation_type> to be set for feudal obligations
+# WHO = Who's contract levels are being checked
+has_changed_contract_obligation_trigger = {
+	$WHO$ = { save_temporary_scope_as = obligation_check }
+	$LIEGE$ = { save_temporary_scope_as = the_liege_check }
+	custom_description = {
+		text = "modify_vassal_contract_select_different_obligation_level"
+		OR = {
+			trigger_if = {
+				limit = { scope:obligation_check = { has_government = feudal_government } }
+				OR = {
+					local_var:feudal_government_taxes != scope:obligation_check.vassal_contract_obligation_level:feudal_government_taxes
+					local_var:feudal_government_levies != scope:obligation_check.vassal_contract_obligation_level:feudal_government_levies
+					local_var:special_contract != scope:obligation_check.vassal_contract_obligation_level:special_contract
+				}
+			}
+			trigger_if = {
+				limit = { scope:obligation_check = { valid_government_rights_general_trigger = yes } }
+				OR = {
+					local_var:religious_rights != scope:obligation_check.vassal_contract_obligation_level:religious_rights
+					local_var:fortification_rights != scope:obligation_check.vassal_contract_obligation_level:fortification_rights
+					local_var:coinage_rights != scope:obligation_check.vassal_contract_obligation_level:coinage_rights
+					local_var:succession_rights != scope:obligation_check.vassal_contract_obligation_level:succession_rights
+					local_var:war_declaration_rights != scope:obligation_check.vassal_contract_obligation_level:war_declaration_rights
+					local_var:council_rights != scope:obligation_check.vassal_contract_obligation_level:council_rights
+					local_var:title_revocation_rights != scope:obligation_check.vassal_contract_obligation_level:title_revocation_rights
+				}
+			}
+			trigger_if = {
+				limit = { scope:obligation_check = { has_government = prefeudal_government } }
+				local_var:prefeudal_government_obligation != scope:obligation_check.vassal_contract_obligation_level:prefeudal_government_obligation
+			}
+			trigger_if = {
+				limit = { scope:obligation_check = { has_government = subroman_government } }
+				OR = {
+					local_var:subroman_government_taxes != scope:obligation_check.vassal_contract_obligation_level:subroman_government_taxes
+					local_var:subroman_government_levies != scope:obligation_check.vassal_contract_obligation_level:subroman_government_levies
+				}
+			}
+			trigger_if = {
+				limit = { scope:obligation_check = { has_government = gubernatorial_government } }
+				local_var:gubernatorial_taxes != scope:obligation_check.vassal_contract_obligation_level:gubernatorial_taxes
+			}
+			trigger_if = {
+				limit = { scope:obligation_check = { has_government = eranshar_government } }
+				OR = {
+					local_var:eranshar_government_taxes != scope:obligation_check.vassal_contract_obligation_level:eranshar_government_taxes
+					local_var:eranshar_marzban_contract != scope:obligation_check.vassal_contract_obligation_level:eranshar_marzban_contract
+				}
+			}
+			trigger_if = {
+				limit = { scope:obligation_check = { valid_government_bureaucratic_special_trigger = yes } }
+				local_var:bureaucratic_special_contract != scope:obligation_check.vassal_contract_obligation_level:bureaucratic_special_contract
+			}
+			trigger_if = {
+				limit = { scope:obligation_check = { valid_government_foederatus_special_trigger = yes } }
+				local_var:foederatus_special_contract != scope:obligation_check.vassal_contract_obligation_level:foederatus_special_contract
+			}
+			trigger_if = {
+				limit = { vassal_contract_has_flag = tributary_installed_flag }
+				local_var:tributary_special_contract != scope:obligation_check.vassal_contract_obligation_level:tributary_special_contract
+			}
+			trigger_if = {
+				limit = {
+					scope:obligation_check = { valid_bureacratic_vassal_governance_vassal_gov_trigger = yes }
+					scope:the_liege_check = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes }
+				}
+				local_var:bureaucratic_vassal_governance != scope:obligation_check.vassal_contract_obligation_level:bureaucratic_vassal_governance
+			}
+		}
+	}
+}

@@ -1,0 +1,157 @@
+﻿is_preferred_heresy = {
+	is_valid_heresy = {
+		ORIGIN_FAITH = $ORIGIN_FAITH$
+		HERETICAL_FAITH = $HERETICAL_FAITH$
+	}
+
+	OR = {
+		#If we're Chistian, pick a heretical faiths which is in the same regional group as our origin faith (i.e., Lollards for Catholics, Iconoclasts for Orthodox, etc.)
+		AND = {
+			religion_tag = christianity_religion
+			OR = {
+				faiths_are_in_western_christianity_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$ }
+				faiths_are_in_orthodox_christianity_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$ }
+				faiths_are_in_eastern_christianity_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$ }
+			}
+		}
+
+		#If we're Muslim, we want to stay within our 'branch' of Islam:
+		AND = {
+			religion_tag = islam_religion
+			OR = {
+				faiths_are_in_sunni_islam_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
+				faiths_are_in_shia_islam_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
+				faiths_are_in_muhakkima_islam_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
+			}
+		}
+
+		#Otherwise, we don't have any special preferences.
+		AND = {
+			NOT = {
+				religion_tag = islam_religion
+				religion_tag = christianity_religion
+			}
+		}
+	}
+}
+
+is_valid_heresy = {
+	#The origin faith can never be its own heresy.
+	NOT = { $ORIGIN_FAITH$ = $HERETICAL_FAITH$}
+
+	#Depending on the origin faith's religion/religion group, there may have additional requirements for a heresy to be considered valid.
+	OR = {
+		#For Christian Faiths, the origin and heretical faiths must not both be Ecumenical (excepting the faiths which aren't technically ecumenical).
+		AND = {
+			religion_tag = christianity_religion
+			NAND = {
+				$ORIGIN_FAITH$ = {
+					has_doctrine = special_doctrine_ecumenical_christian
+					this = faith:insular_celtic
+				}
+				$HERETICAL_FAITH$ = {
+					has_doctrine = special_doctrine_ecumenical_christian
+					this = faith:insular_celtic
+				}
+			}
+		}
+		#No special requirements for Muslims, Jews, Yazidis, or Zoroastrians.
+		religion_tag = islam_religion
+		religion_tag = judaism_religion
+		religion_tag = zoroastrianism_religion
+		#Eastern Faiths can shift and spread amongst each other.
+		AND = {
+			OR = {
+				religion_tag = buddhism_religion
+				religion_tag = hinduism_religion
+				religion_tag = jainism_religion
+				religion_tag = dualism_religion
+			}
+		}
+		#No special requirements for Pagan religions.
+		has_doctrine = pagan_hostility_doctrine
+	}
+}
+
+#Christian Heresy Groups
+faiths_are_in_western_christianity_group = {
+	OR = {
+		$FAITH_1$ = faith:catholic
+		$FAITH_1$ = faith:nicene
+		$FAITH_1$ = faith:insular_celtic
+	}
+	OR = {
+		$FAITH_2$ = faith:catholic
+		$FAITH_2$ = faith:nicene
+		$FAITH_2$ = faith:priscillianism
+		$FAITH_2$ = faith:insular_celtic
+	}
+}
+
+faiths_are_in_orthodox_christianity_group = {
+	OR = {
+		$FAITH_1$ = faith:orthodox
+		$FAITH_1$ = faith:nicene
+		$FAITH_1$ = faith:iconoclast
+		$FAITH_1$ = faith:georgian_orthodox
+		$FAITH_1$ = faith:paulician
+	}
+	OR = {
+		$FAITH_2$ = faith:orthodox
+		$FAITH_2$ = faith:nicene
+		$FAITH_2$ = faith:iconoclast
+		$FAITH_2$ = faith:georgian_orthodox
+		$FAITH_2$ = faith:paulician
+	}
+}
+
+faiths_are_in_eastern_christianity_group = {
+	OR = {
+		$FAITH_1$ = faith:miaphysitism
+		$FAITH_1$ = faith:armenian_apostolic
+		$FAITH_1$ = faith:nestorian
+		$FAITH_1$ = faith:messalian
+		$FAITH_1$ = faith:paulician
+		$FAITH_1$ = faith:syrian_orthodox
+	}
+	OR = {
+		$FAITH_2$ = faith:miaphysitism
+		$FAITH_2$ = faith:armenian_apostolic
+		$FAITH_2$ = faith:nestorian
+		$FAITH_2$ = faith:messalian
+		$FAITH_2$ = faith:paulician
+		$FAITH_2$ = faith:syrian_orthodox
+	}
+}
+
+valid_demand_conversion_conditions_trigger = {
+	scope:recipient = { is_diplomatically_available = yes }
+	scope:recipient = { NOT = { has_strong_hook = scope:actor } }
+	scope:recipient = { NOT = { has_trait = devoted } }
+	scope:recipient = { NOT = { has_trait = order_member } }
+
+	custom_description = {
+		text = "is_head_of_religion"
+		subject = scope:recipient
+		NOT = { scope:recipient.faith.religious_head = scope:recipient }
+	}
+
+	custom_description = {
+		text = "is_protected_via_contract"
+		subject = scope:recipient
+		NAND = { # Vassal Contract forbids meddling by liege
+			exists = scope:recipient.liege
+			scope:recipient.liege = scope:actor
+			scope:recipient = { #Now supports more than feudal government type
+				is_ruler = yes
+				vassal_contract_has_flag = religiously_protected
+			}
+		}
+	}
+	
+	custom_description = {
+		text = "is_a_pentarch"
+		subject = scope:recipient
+		scope:recipient = { pentarch_titles = yes }
+	}
+}

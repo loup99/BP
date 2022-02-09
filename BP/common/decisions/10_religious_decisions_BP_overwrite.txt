@@ -1,0 +1,65 @@
+﻿##### Changed from Vanilla vvvvv
+revoke_false_conversion_decision = {	#Reveal yourself as a crypto-religionist.
+	ai_check_interval = 60
+	picture = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
+
+	desc = revoke_false_conversion_decision.desc
+	selection_tooltip = revoke_false_conversion_decision.tt
+
+	is_shown = {
+		has_variable = false_convert
+		NOR = {
+			this = faith.religious_head
+			var:false_convert = faith
+		}
+	}
+
+	is_valid = {
+		is_adult = yes
+		NOT = { has_trait = zealous }
+	}
+
+##### Changed from Vanilla: some references to "cannot_be_atoned_krstjani_leader_flag"
+
+	cost = {
+		piety = major_piety_value
+	}
+
+	cooldown = { years = 20 }
+
+	effect = {
+		trigger_event = false_conversion.0020
+		custom_tooltip = revoke_false_conversion_decision.desc.tt
+		custom_tooltip = revoke_false_conversion_decision.desc.tt_own_faith_counties
+	}
+
+	ai_potential = {
+		has_variable = false_convert
+		save_temporary_scope_as = current_character
+		liege.faith = {
+			faith_hostility_level_comparison = { scope:current_character.var:false_convert <= root.faith }
+		}
+	}
+
+	ai_will_do = {
+		base = 25
+
+		modifier = {	#Having a tolerant liege helps.
+			add = 25
+			liege.faith = { has_doctrine = doctrine_pluralism_pluralistic }
+		}
+		modifier = {	#If no one is fussed, and your old faith waxes while your current one wanes, then that seems like a good reason to jump ship.
+			add = 35
+			NOT = {
+				liege.faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+			}
+			var:false_convert = {
+				fervor >= medium_fervor_value
+			}
+			faith = {
+				fervor <= medium_fervor_value
+			}
+		}
+	}
+}
+##### Changed from Vanilla ^^^^^
