@@ -1,0 +1,230 @@
+﻿##### Changed from Vanilla: Support new BP innovations/traditions/effects
+steward_promote_culture_contextual_bonuses = {
+	# Relation Bonuses/Penalties
+	if = { # Friend
+		limit = {
+			scope:councillor_liege = {
+				has_relation_friend = scope:councillor
+				NOT = { has_relation_best_friend = scope:councillor }
+			}
+		}
+		add = {
+			value = scope:councillor.steward_promote_culture_monthly_increase_friend_bonus
+			desc = COUNCILLOR_IS_YOUR_FRIEND
+		}
+	}
+	if = { # Best Friend
+		limit = {
+			scope:councillor_liege = {
+				has_relation_best_friend = scope:councillor
+			}
+		}
+		add = {
+			value = scope:councillor.steward_promote_culture_monthly_increase_best_friend_bonus
+			desc = COUNCILLOR_IS_YOUR_BEST_FRIEND
+		}
+	}
+	if = { # Rival
+		limit = {
+			scope:councillor_liege = {
+				has_relation_rival = scope:councillor
+				NOT = { has_relation_nemesis = scope:councillor }
+			}
+		}
+		add = {
+			value = scope:councillor.steward_promote_culture_monthly_increase_rival_bonus
+			desc = COUNCILLOR_IS_YOUR_RIVAL
+		}
+	}
+	if = { # Nemesis
+		limit = {
+			scope:councillor_liege = {
+				has_relation_nemesis = scope:councillor
+			}
+		}
+		add = {
+			value = scope:councillor.steward_promote_culture_monthly_increase_nemesis_bonus
+			desc = COUNCILLOR_IS_YOUR_NEMESIS
+		}
+	}
+	if = {
+		limit = {
+			councillor_liege_has_erudition_legacy_5_perk = yes
+		}
+		add = {
+			value = steward_promote_culture_erudition_bonus
+			desc = ERUDITION_DYNASTY_PERK_BONUS_VALUE
+		}
+	}
+	if = {
+		limit = {
+			councillor_liege_has_family_business_bonus = yes
+		}
+		add = {
+			value = scope:councillor.steward_promote_culture_family_business_bonus
+			desc = FAMILY_BUSINESS_BONUS_VALUE
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:councillor_liege.culture = {
+				is_hybrid_culture = yes
+				culture_age < culture_hybrid_cooldown
+				any_parent_culture = {
+					this = scope:county.culture
+				}
+			}
+		}
+		add = {
+			value = scope:councillor.promote_culture_hybrid_culture_vs_parents_bonus
+			desc = STEWARD_PROMOTE_CULTURE_HYBRID_VS_PARENTS_BONUS_MODIFIER
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:councillor_liege.faith = {
+				has_doctrine_parameter = same_faith_promote_culture_bonus_active
+			}
+			scope:county.faith = scope:councillor_liege.faith
+		}
+		add = {
+			value = scope:councillor.promote_culture_communal_identity_bonus
+			desc = STEWARD_PROMOTE_CULTURE_COMMUNAL_IDENTITY_BONUS_MODIFIER
+		}
+	}
+	if = {
+		limit = {
+			scope:councillor_liege.culture = {
+				has_innovation = innovation_east_settling
+			}
+		}
+		add = {
+			value = scope:councillor.promote_culture_east_settling_bonus
+			desc = STEWARD_PROMOTE_CULTURE_INNOVATION_BONUS_EAST_SETTLING
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county = { has_county_modifier = 6210_architect_county_modifier }
+		}
+		add = {
+			value = scope:councillor.6210_architect_promote_culture_bonus
+			desc = COURT_CHAPLAIN_CONVERSION_LOCAL_COUNTY_MODIFIERS
+		}
+	}
+	##### Changed from Vanilla vvvvv
+	if = { #Recent Emmigration
+		limit = {
+			exists = scope:county
+			scope:county = { has_county_modifier = county_modifier_migration_recent_emigration }
+		}
+		add = {
+			value = scope:councillor.promote_culture_recent_emigration_bonus
+			desc = STEWARD_PROMOTE_CULTURE_RECENTLY_MIGRATED_AWAY
+		}
+	}
+	if = { #Hellenization
+		limit = { scope:councillor_liege.culture = { has_cultural_parameter = improved_promote_culture_speed_hellenization } }
+		add = {
+			value = scope:councillor.promote_culture_east_settling_bonus
+			desc = STEWARD_PROMOTE_CULTURE_TRADITION_HELLENIZATION
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	#Reduce for various county modifiers.
+	if = { #Reduced conversion speed if the county has protected traditions.
+		limit = {
+			exists = scope:county
+			scope:county = {
+				has_county_modifier = governance_1073_conversion_resistance_modifier
+			}
+		}
+		add = {
+			value = scope:councillor.promote_culture_local_traditions_respected_penalty
+			desc = STEWARD_PROMOTE_CULTURE_LOCAL_TRADITIONS_RESPECTED
+		}
+	}
+	if = {
+		limit  = {
+			exists = scope:county
+			scope:county = {
+				has_county_modifier = county_shuubiyya_modifier
+			}
+		}
+		add = {
+			value = scope:councillor.promote_culture_shuubiyya_penalty
+			desc = STEWARD_PROMOTE_CULTURE_SHUUBIYYA
+		}
+	}
+	if = {
+		limit = {
+			OR = {
+				scope:councillor_liege.culture = { has_cultural_pillar = heritage_goidelic }
+				scope:councillor_liege.culture = { has_cultural_pillar = heritage_brythonic }
+			}
+			exists = scope:county
+			scope:county = {
+				has_county_modifier = reclaim_britannia_culture_modifier
+				NOR= {
+					culture = { has_cultural_pillar = heritage_goidelic }
+					culture = { has_cultural_pillar = heritage_brythonic }
+				}
+			}
+		}
+		add = {
+			value = promote_culture_reclaimed_brittania_bonus
+			desc = STEWARD_PROMOTE_CULTURE_RECLAIMING_BRITANNIA
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county = {
+				OR = {
+					has_county_modifier = enthusiastic_nomad_settlement_saharan_modifier
+					has_county_modifier = nomad_settlement_saharan_modifier
+				}
+			}
+		}
+		add = {
+			value = scope:councillor.promote_culture_allowed_nomad_settlement_penalty
+			desc = STEWARD_PROMOTE_CULTURE_ALLOWED_NOMAD_SETTLEMENT
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county = { has_county_modifier = hold_court_8190_vassal_modifier }
+		}
+		add = {
+			value = scope:councillor.court_8190_vassal_modifier_value
+			desc = COURT_CHAPLAIN_CONVERSION_LOCAL_COUNTY_MODIFIERS
+		}
+	}
+	##### Changed from Vanilla vvvvv
+	if = { #Minor Migration Effects
+		limit = {
+			exists = scope:county
+			scope:county = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy }
+		}
+		add = {
+			value = scope:councillor.promote_culture_minor_migration_minor_aristocracy_penalty
+			desc = STEWARD_PROMOTE_CULTURE_MINOR_ARISTOCRACY
+		}
+	}
+	if = { #Recent Immigration
+		limit = {
+			exists = scope:county
+			scope:county = { has_county_modifier = county_modifier_migration_recent_immigration }
+		}
+		add = {
+			value = scope:councillor.promote_culture_recent_immigration_bonus
+			desc = STEWARD_PROMOTE_CULTURE_RECENTLY_MIGRATED_TO
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+}
