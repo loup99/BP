@@ -1,0 +1,53 @@
+﻿##### Changed from Vanilla: coptic -> miaphysitism
+christian_saint_bone_creation_effect = { # Create a bone of a random saint in a box
+	if = {
+		limit = {
+			has_royal_court = yes
+			OR = {
+				faith = faith:catholic
+				faith = faith:orthodox
+				faith = faith:nestorian
+				faith = faith:miaphysitism
+				faith = faith:armenian_apostolic
+				faith = faith:insular_celtic
+			}
+		}
+		hidden_effect = {
+			random = {
+				chance = 10 # 10% base chance
+				modifier = {
+					add = 10 # 20% chance for medium
+					scope:activity.var:pilgrimage_distance = medium_pilgrimage_var
+				}
+				modifier = {
+					add = 20 # 30% chance for long
+					scope:activity.var:pilgrimage_distance = long_pilgrimage_var
+				}
+				modifier = {
+					add = 30 # 40% chance for very long
+					scope:activity.var:pilgrimage_distance = very_long_pilgrimage_var
+				}
+				modifier = { # half as likely for AI
+					factor = 0.5
+					is_ai = yes
+				}
+				save_scope_as = saint_bone_owner
+				create_artifact = {
+					name = christian_saint_bone_name
+					description = christian_saint_bone_description
+					type = pedestal
+					visuals = bone
+					template = saintly_bones_template
+					modifier = artifact_monthly_piety_1_modifier
+					save_scope_as = christian_saint_bone_scope
+				}
+				scope:christian_saint_bone_scope = {
+					set_variable = { # required to track usability for template
+						name = saint_bone_faith
+						value = root.faith
+					}
+				}
+			}
+		}
+	}
+}
