@@ -1,164 +1,165 @@
-﻿#namespace = dharma_culture
-#
-############################################
-##										  #
-## 	  Hindustani Melting Pot Events       #
-##                                         #
-############################################
-#
-#scripted_trigger dharma_culture_100_valid_for_hindustani_culture_trigger = {
-#	tier = tier_county
-#	exists = holder
-#	NOT = { exists = var:had_hindustani_county_conversion }
-#	title_province = {
-#		geographical_region = world_india
-#	}
-#	OR = {
-#		AND = {# Turkic Ruling over Awadi or Braji
-#			holder.culture_group = culture_group:turkic_group
-#			OR = {
-#				culture = culture:braj
-#				culture = culture:awadhi
-#			}
-#		}
-#		AND = {# Persian Ruling over Awadi or Braji
-#		holder.culture_group = culture_group:iranian_group
-#		OR = {
-#				culture = culture:braj
-#				culture = culture:awadhi
-#			}
-#		}
-#	}
-#}
-#
-#dharma_culture.100 = {
-#	type = character_event
-#	title = dharma_culture.100.t
-#	desc = dharma_culture.100.desc
-#	theme = culture_change
-#	left_portrait = root
-#	
-#	trigger = {
-#		OR = {# Need to be of the Iranian or Turkic Culture Group
-#			culture_group = culture_group:turkic_group
-#			culture_group = culture_group:iranian_group
-#		}
-#		any_held_title = {# Make sure you are ruling over the right provinces
-#			dharma_culture_100_valid_for_hindustani_culture_trigger = yes
-#		}
-#		capital_province = {# You have to be based in India
-#			geographical_region = world_india
-#		}	
-#		current_date >= 1200.1.1 # Old Hindi came about during the 13th century
-#	}
-#
-#	weight_multiplier = {
-#		base = 1
-#		modifier = {# Historical Cultures gets priority
-#			add = 2
-#			culture = culture:persian
-#		}
-#		modifier = {# Historical Cultures gets priority
-#			add = 2
-#			culture = culture:turkish
-#		}
-#	}
-#
-#	immediate = {
-#		random_held_title = {
-#			limit = {
-#				dharma_culture_100_valid_for_hindustani_culture_trigger = yes
-#			}
-#			weight = { # Try to approximate organic spread
-#				base = 1
-#				modifier = {
-#					add = 4
-#					any_neighboring_county = {
-#						culture = culture:hindustani
-#					}
-#				}
-#			}
-#			save_scope_as = county_to_change
-#			culture = {
-#				save_scope_as = old_culture
-#			}
-#			set_variable = {
-#				name = had_hindustani_county_conversion
-#				value = yes
-#			}
-#		}
-#		culture:hindustani = {
-#			save_scope_as = hindustani # For loc
-#		}
-#		debug_log = "Converted a province to hindustani from dharma_culture.3011"
-#	}
-#
-#	option = {
-#		name = dharma_culture.100.a
-#		scope:county_to_change = {
-#			set_county_culture = culture:hindustani
-#		}
-#	}
-#}
-#
-###################################################
-## Organic Spread of Sicilian for Sicilian Rulers
-###################################################
-#scripted_trigger dharma_culture_101_valid_for_hindustani_culture_trigger = {
-#	tier = tier_county
-#	exists = holder
-#	title_province = {
-#		geographical_region = world_india
-#	}
-#	NOT = { exists = var:had_hindustani_county_conversion }
-#	NOT = { culture = holder.culture } # No conversion for counties who match their holder's culture
-#	OR = {
-#		culture = culture:braj
-#		culture = culture:awadhi
-#	}
-#	any_neighboring_county = {
-#		culture = culture:hindustani
-#	}
-#}
-#
-#dharma_culture.101 = {
-#	type = character_event
-#	title = dharma_culture.100.t
-#	desc = dharma_culture.100.desc
-#	theme = culture_change
-#	left_portrait = root
-#	
-#	trigger = {
-#		culture = culture:hindustani
-#		any_held_title = {
-#			dharma_culture_101_valid_for_hindustani_culture_trigger = yes
-#		}
-#	}
-#
-#	immediate = {
-#		random_held_title = {
-#			limit = { dharma_culture_101_valid_for_hindustani_culture_trigger = yes }
-#			save_scope_as = county_to_change
-#			culture = {
-#				save_scope_as = old_culture
-#			}
-#			set_variable = {
-#				name = had_hindustani_county_conversion
-#				value = yes
-#			}
-#		}
-#		culture:hindustani = {
-#			save_scope_as = hindustani # For loc
-#		}
-#		debug_log = "Converted a province to hindustani from global_culture.3012"
-#	}
-#
-#	option = {
-#		name = dharma_culture.101.a
-#		scope:county_to_change = {
-#			set_county_culture = culture:hindustani
-#		}
-#	}
-#}
-#
-#
+﻿namespace = dharma_culture
+
+###########################################
+#										  #
+# 	  Hindustani Melting Pot Events       #
+#                                         #
+###########################################
+
+scripted_trigger dharma_culture_100_valid_for_hindustani_culture_trigger = {
+	tier = tier_county
+	exists = holder
+	NOT = { exists = var:had_hindustani_county_conversion }
+	title_province = {
+		geographical_region = world_india
+	}
+	OR = {
+		AND = {# Turkic Ruling over Awadi or Braji
+			holder.culture = { has_cultural_pillar = heritage_turkic }
+			OR = {
+				culture = culture:braj
+				culture = culture:awadhi
+			}
+		}
+		AND = {# Persian Ruling over Awadi or Braji
+		holder.culture = { has_cultural_pillar = heritage_iranian }
+		OR = {
+				culture = culture:braj
+				culture = culture:awadhi
+			}
+		}
+	}
+}
+
+dharma_culture.100 = {
+	type = character_event
+	title = dharma_culture.100.t
+	desc = dharma_culture.100.desc
+	theme = culture_change
+	left_portrait = root
+	
+	trigger = {
+		culture = {# Need to be of the Iranian or Turkic Culture Group
+			OR = {
+				has_cultural_pillar = heritage_turkic
+				has_cultural_pillar = heritage_iranian
+			}
+		}
+		any_held_title = {# Make sure you are ruling over the right provinces
+			dharma_culture_100_valid_for_hindustani_culture_trigger = yes
+		}
+		capital_province = {# You have to be based in India
+			geographical_region = world_india
+		}	
+		current_date >= 1200.1.1 # Old Hindi came about during the 13th century
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {# Historical Cultures gets priority
+			add = 2
+			culture = culture:persian
+		}
+		modifier = {# Historical Cultures gets priority
+			add = 2
+			culture = culture:turkish
+		}
+	}
+
+	immediate = {
+		random_held_title = {
+			limit = {
+				dharma_culture_100_valid_for_hindustani_culture_trigger = yes
+			}
+			weight = { # Try to approximate organic spread
+				base = 1
+				modifier = {
+					add = 4
+					any_neighboring_county = {
+						culture = culture:hindustani
+					}
+				}
+			}
+			save_scope_as = county_to_change
+			culture = {
+				save_scope_as = old_culture
+			}
+			set_variable = {
+				name = had_hindustani_county_conversion
+				value = yes
+			}
+		}
+		culture:hindustani = {
+			save_scope_as = hindustani # For loc
+		}
+		debug_log = "Converted a province to hindustani from dharma_culture.3011"
+	}
+
+	option = {
+		name = dharma_culture.100.a
+		scope:county_to_change = {
+			set_county_culture = culture:hindustani
+		}
+	}
+}
+
+##################################################
+# Organic Spread of Sicilian for Sicilian Rulers
+##################################################
+scripted_trigger dharma_culture_101_valid_for_hindustani_culture_trigger = {
+	tier = tier_county
+	exists = holder
+	title_province = {
+		geographical_region = world_india
+	}
+	NOT = { exists = var:had_hindustani_county_conversion }
+	NOT = { culture = holder.culture } # No conversion for counties who match their holder's culture
+	OR = {
+		culture = culture:braj
+		culture = culture:awadhi
+	}
+	any_neighboring_county = {
+		culture = culture:hindustani
+	}
+}
+
+dharma_culture.101 = {
+	type = character_event
+	title = dharma_culture.100.t
+	desc = dharma_culture.100.desc
+	theme = culture_change
+	left_portrait = root
+	
+	trigger = {
+		culture = culture:hindustani
+		any_held_title = {
+			dharma_culture_101_valid_for_hindustani_culture_trigger = yes
+		}
+	}
+
+	immediate = {
+		random_held_title = {
+			limit = { dharma_culture_101_valid_for_hindustani_culture_trigger = yes }
+			save_scope_as = county_to_change
+			culture = {
+				save_scope_as = old_culture
+			}
+			set_variable = {
+				name = had_hindustani_county_conversion
+				value = yes
+			}
+		}
+		culture:hindustani = {
+			save_scope_as = hindustani # For loc
+		}
+		debug_log = "Converted a province to hindustani from global_culture.3012"
+	}
+
+	option = {
+		name = dharma_culture.101.a
+		scope:county_to_change = {
+			set_county_culture = culture:hindustani
+		}
+	}
+}
+
