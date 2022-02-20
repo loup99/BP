@@ -1,0 +1,126 @@
+﻿namespace = bp_historical_flavor
+
+#bp_historical_flavor.0001 - Vandals get a bunch of Roman Slaves
+
+# Roman prisoners of the Vandals, Genseric took countless Romans back to Carthage as slaves during his sack of Rome
+bp_historical_flavor.0001 = { #WTWSMS id: zusk_event.50
+	type = character_event
+	title = bp_historical_flavor.0001.name
+	desc = bp_historical_flavor.0001.desc
+
+	theme = dungeon
+
+	trigger = { scope:geneseric = character:93 }
+
+	immediate = {
+		create_character = {
+			location = scope:geneseric.location
+			name = "Gaudentius"
+			random_traits = no
+			age = 36
+			gender  = male
+			faith = faith:hellenic_pagan
+			culture = culture:roman
+			dynasty = none
+			trait = "zealous"
+			trait = "ambitious"
+			trait = "diligent"
+			save_scope_as = gaudentius
+			after_creation = { add_to_list = slave_list }
+		}
+
+		#Ratio of ages in zusk_event.50 list: 5 kids, 11 under 40, 4 over 40
+		#Age: Was as high as 60, in zusk_event.50, but uniform distribution can yield strong biases in
+		#one side or the other, so break up into 16-40, and 40-60
+
+		#Design note: can't pass something like {6 15} as an argument for $STUFF$ syntax, so duplicating
+		#code here is mostly unavoidable
+
+		#Child characters
+		set_while_counter_variable_effect = yes
+		while = {
+			limit = { var:while_counter < 5 }
+			create_character = {
+				location = scope:geneseric.location
+				template = bp_random_roman_slave_child
+				dynasty = none
+				#Ratio of zusk_event.50 list:
+				#	16 Nicene : 3 Manichean : 1 Hellenic Pagan
+				#so revisited values:
+				#	16 Nicene : 3 Hellenic Pagan : 1 Manichean
+				random_faith = {
+					faith:nicene = { weight = 16 }
+					faith:hellenic_pagan = { weight = 3 }
+					faith:manichean = { weight = 1 }
+				}
+				after_creation = { add_to_list = slave_list }
+			}
+			increase_while_counter_variable_effect = yes
+		}
+		remove_while_counter_variable_effect = yes
+		#Adults
+		set_while_counter_variable_effect = yes
+		while = {
+			limit = { var:while_counter < 11 }
+			create_character = {
+				location = scope:geneseric.location
+				age = { 16 40 }
+				template = bp_random_roman_slave_adult_no_age
+				dynasty = none
+				#Ratio of zusk_event.50 list: 5 kids, 11 under 40, 4 over 40
+				#Ratio of zusk_event.50 list:
+				#	16 Nicene : 3 Manichean : 1 Hellenic Pagan
+				#so revisited values
+				random_faith = {
+					faith:nicene = { weight = 16 }
+					faith:hellenic_pagan = { weight = 3 }
+					faith:manichean = { weight = 1 }
+				}
+				after_creation = { add_to_list = slave_list }
+			}
+			increase_while_counter_variable_effect = yes
+		}
+		remove_while_counter_variable_effect = yes
+		#Middle Aged
+		set_while_counter_variable_effect = yes
+		while = {
+			limit = { var:while_counter < 4 }
+			create_character = {
+				location = scope:geneseric.location
+				age = { 16 40 }
+				template = bp_random_roman_slave_adult_no_age
+				dynasty = none
+				#Ratio of zusk_event.50 list: 5 kids, 11 under 40, 4 over 40
+				#Ratio of zusk_event.50 list:
+				#	16 Nicene : 3 Manichean : 1 Hellenic Pagan
+				#so revisited values
+				random_faith = {
+					faith:nicene = { weight = 16 }
+					faith:hellenic_pagan = { weight = 3 }
+					faith:manichean = { weight = 1 }
+				}
+				after_creation = { add_to_list = slave_list }
+			}
+			increase_while_counter_variable_effect = yes
+		}
+		remove_while_counter_variable_effect = yes
+	}
+
+	left_portrait = {
+		character = scope:gaudentius
+		animation = sadness
+	}
+	right_portrait = {
+		character = scope:geneseric
+		animation = personality_callous
+	}
+
+	option = {
+		name = bp_historical_flavor.0001.a
+		every_in_list = {
+			list = slave_list
+			save_scope_as = the_slave
+			scope:geneseric = { imprison = { target = scope:the_slave type = dungeon } }
+		}
+	}
+}
