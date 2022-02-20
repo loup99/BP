@@ -1,5 +1,4 @@
-﻿
-namespace = BP_char_interaction
+﻿namespace = BP_char_interaction
 
 # Offer Foederatus Response: Accepted
 BP_char_interaction.0001 = {
@@ -34,49 +33,5 @@ BP_char_interaction.0002 = {
 
 	option = {
 		name = BP_char_interaction.0002.a
-	}
-}
-
-#Replace Pentarch Accepted
-
-#LT-Rascek:
-#Known issue: If you attempt to replace multiple pentarchs within one day of each other, the new_pentarch scope
-#will not set correctly and throw errors. I've left it as is because the odds of end users tripping those conditions
-#is slim-to-none.
-BP_char_interaction.0003 = {
-	type = letter_event
-	opening = { desc = BP_char_interaction.0003.opening }
-	desc = BP_char_interaction.0003.desc
-		
-	sender = {
-		character = scope:recipient
-		animation = dismissal
-	}
-
-	option = {
-		name = BP_char_interaction.0003.a
-		
-		create_title_and_vassal_change = {
-			type = granted
-			save_scope_as = change_grant_titles_to_new_pentarch
-			add_claim_on_loss = no
-		}
-		scope:recipient = {
-			every_held_title = {
-			if = {
-				limit = { NOT = { this = scope:recipient.faith.religious_head_title } }
-				add_to_temporary_list = pentarchs_titles }
-			}
-		}
-		#Give the title to your current realm priest
-		scope:actor = { realm_priest = { save_scope_as = new_pentarch } }
-		every_in_list = {
-			list = pentarchs_titles
-			change_title_holder = {
-				holder = scope:new_pentarch
-				change = scope:change_grant_titles_to_new_pentarch
-			}
-		}
-		resolve_title_and_vassal_change = scope:change_grant_titles_to_new_pentarch
 	}
 }
