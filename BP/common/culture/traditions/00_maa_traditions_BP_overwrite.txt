@@ -1,4 +1,5 @@
-﻿tradition_caucasian_wolves = {
+﻿##### Changed from Vanilla: Made available to colchiscan descendents
+tradition_caucasian_wolves = {
 	category = regional
 
 	layers = {
@@ -103,6 +104,113 @@
 								OR = {
 									terrain = mountains
 									terrain = desert_mountains
+								}
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Made available to central semitics
+tradition_mubarizuns = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = soldiers.dds
+	}
+	
+	#Can pick this if you have arabic heritage.
+	is_shown = { #Replaces Warriors of the Dry
+		has_cultural_pillar = heritage_central_semitic
+	}
+	can_pick = {
+		culture_not_pacifistic_trigger = yes
+		trigger_if = {
+			limit = {
+				OR = {
+					NOT = { exists = scope:replacing }
+					NOT = { scope:replacing = flag:tradition_warriors_of_the_dry }
+				}
+			}
+			NOT = { has_cultural_tradition = tradition_warriors_of_the_dry } #To prevent stacking after hybridization
+		}
+	}
+	
+	parameters = {
+		unlock_maa_mubarizun = yes
+		desert_warrior_trait_more_common = yes
+		dry_trait_bonuses = yes
+		can_recruit_dry_specialist = yes
+	}
+	character_modifier = {
+		drylands_levy_size = 0.1
+		desert_levy_size = 0.1
+		drylands_supply_limit_mult = 0.25
+		desert_supply_limit_mult = 0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							percent >= 0.3
+							any_county_province = {
+								OR = {
+									terrain = drylands
+									terrain = desert
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = dry_percentage_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							culture = scope:character.culture
+							any_county_province = {
+								OR = {
+									terrain = drylands
+									terrain = desert
 								}
 							}
 						}
