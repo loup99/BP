@@ -72,6 +72,46 @@
 		}
 		
 		##### Changed from Vanilla vvvvv
+		
+		#At low levels of power, Eranshar rulers must give titles to landed chars or powerful families
+		trigger_if = {
+			limit = {
+				scope:actor = {
+					primary_title.tier >= tier_kingdom
+					has_government = eranshar_government
+					has_realm_law_flag = must_give_titles_to_powerful_families_or_landed_chars_if_possible
+					#Have to actually have a vassal or courtier that fits the bill
+					OR = {
+						#Any (county+) landed vassal or courtier have
+						any_vassal = {
+							primary_title.tier >= tier_county
+							dynasty = {
+								exists = this
+								dynasty_prestige_level >= low_dynasty_prestige_level
+							}
+						}
+						any_courtier = {
+							dynasty = {
+								exists = this #This is false for lowborn
+								dynasty_prestige_level >= low_dynasty_prestige_level
+							}
+						}
+					}
+				}
+			}
+			scope:recipient = {
+				custom_description = {
+					text = must_already_be_landed_or_from_a_powerful_family
+					AND = {
+						exists = dynasty
+						dynasty = { dynasty_prestige_level >= low_dynasty_prestige_level }
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		
+		##### Changed from Vanilla vvvvv
 		trigger_if = {
 			limit = {
 				scope:actor = {
@@ -106,6 +146,7 @@
 	}
 	##### Changed from Vanilla ^^^^^
 	
+	##### Changed from Vanilla vvvvv
 	can_be_picked_title = {
 		scope:target = {
 			is_leased_out = no
@@ -154,7 +195,29 @@
 				}
 			}
 		}
+		
+		##### Changed from Vanilla vvvvv
+		
+		#Eranshar can only give "Eran" counties to followers of Ahura Mazda
+		trigger_if = {
+			limit = {
+				scope:actor = { has_government = eranshar_government }
+				scope:target = {
+					tier = tier_county
+					religion = religion:zoroastrianism_religion
+				}
+			}
+			scope:recipient = {
+				religion = religion:zoroastrianism_religion
+				custom_description = {
+					text = must_be_asavan
+					faith = { considers_astray_trigger = { TARGET_FAITH = scope:actor.faith } }
+				}
+			}
+		}
+		##### Changed from Vanilla ^^^^^
 	}
+	##### Changed from Vanilla ^^^^^
 
 	auto_accept = yes
 
