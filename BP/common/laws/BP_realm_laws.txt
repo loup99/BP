@@ -1,6 +1,169 @@
-﻿@crown_authority_cooldown_years = 20
-@tribal_authority_cooldown_years = 10
+﻿@high_tribal_organization_cooldown_years = 10
 
+high_tribal_organization = {
+	default = high_tribal_organization_0
+	cumulative = yes
+	flag = realm_law
+
+	high_tribal_organization_0 = {
+		modifier = {
+			direct_vassal_opinion = 10
+			development_growth_factor = -0.40
+		}
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+	}
+
+	high_tribal_organization_1 = {
+		modifier = { 
+			direct_vassal_opinion = -20
+			development_growth_factor = 0.10
+		}
+		flag = title_revocation_allowed
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = high_tribal_organization_0 }
+				custom_description = {
+					subject = root
+					text = "has_high_tribal_organization_cooldown"
+					NOT = { has_variable = high_tribal_organization_cooldown }
+				}
+			}
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = high_tribal_organization_2
+							has_realm_law = high_tribal_organization_3
+						}
+					}
+					add = increase_tribal_authority_prestige_cost
+				}
+			}
+		}
+
+		on_pass = {
+			if = {
+				limit = {
+					NOR = {
+						has_realm_law = high_tribal_organization_2
+						has_realm_law = high_tribal_organization_3
+					}
+				}
+			}
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_0 }
+				value = 1
+			}
+		}
+	}
+
+	high_tribal_organization_2 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			development_growth_factor = 0.10
+		}
+		flag = vassal_retraction_allowed
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = {
+					NOT = { has_realm_law = high_tribal_organization_3 }
+				}
+				has_realm_law = high_tribal_organization_1
+				custom_description = {
+					subject = root
+					text = "has_high_tribal_organization_cooldown"
+					NOT = { has_variable = high_tribal_organization_cooldown }
+				}
+			}
+			root.culture = { has_innovation = innovation_leges_barbarorum }
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOT = { has_realm_law = high_tribal_organization_3 }
+					}
+					add = increase_tribal_authority_prestige_cost
+				}
+			}
+		}
+
+		on_pass = {
+			if = {
+				limit = {
+					NOT = { has_realm_law = high_tribal_organization_3 }
+				}
+			}
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_1 }
+				value = 1
+			}
+		}
+	}
+
+	high_tribal_organization_3 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			development_growth_factor = 0.10
+		}
+		flag = vassal_internal_wars_banned
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+
+		can_pass = {
+			has_realm_law = high_tribal_organization_2
+			custom_description = {
+				subject = root
+				text = "has_high_tribal_organization_cooldown"
+				NOT = { has_variable = high_tribal_organization_cooldown }
+			}
+			root.culture = { has_innovation = innovation_mundium }
+		}
+
+		pass_cost = { prestige = increase_tribal_authority_prestige_cost }
+
+		on_pass = {
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_2 }
+				value = 1
+			}
+		}
+	}
+}
+
+### Not done yet vvvvv
 prefeudal_authority = {
 	default = prefeudal_authority_0
 	cumulative = yes
@@ -165,172 +328,6 @@ prefeudal_authority = {
 			set_variable = {
 				name = crown_authority_cooldown
 				years = @crown_authority_cooldown_years
-			}
-		}
-	}
-}
-
-#TODO: Implement interactions script-side
-high_tribal_authority = {
-	default = high_tribal_authority_0
-	cumulative = yes
-	flag = realm_law
-	
-	high_tribal_authority_0 = {
-		modifier = {
-			direct_vassal_opinion = 5
-			development_growth_factor = -0.40
-		}
-
-		can_keep = { realm_law_use_high_tribal_authority = yes }
-		#Imprisonment is disabled if you have this law. Script is in the interaction, currently in 00_prison_interactions.
-	}
-	
-	high_tribal_authority_1 = {
-		modifier = { 
-			direct_vassal_opinion = -10
-			development_growth_factor = 0.10
-		}
-		
-		can_keep = { realm_law_use_high_tribal_authority = yes }
-
-		can_pass = {
-			trigger_if = {
-				limit = { has_realm_law = high_tribal_authority_0 }
-				custom_description = {
-					subject = root
-					text = "text_has_high_tribal_authority_cooldown"
-					NOT = { has_variable = high_tribal_authority_cooldown }
-				}
-			}
-		}
-		
-		pass_cost = {
-			prestige = {
-				if = {
-					limit = {
-						NOR = {
-							has_realm_law = high_tribal_authority_2
-							has_realm_law = high_tribal_authority_3
-						}
-					}
-					add = increase_tribal_authority_prestige_cost
-				}
-			}
-		}
-		
-		on_pass = {
-			if = {
-				limit = {
-					NOR = {
-						has_realm_law = high_tribal_authority_2
-						has_realm_law = high_tribal_authority_3
-					}
-				}
-			}
-			set_variable = {
-				name = high_tribal_authority_cooldown
-				years = @tribal_authority_cooldown_years
-			}
-		}
-
-		ai_will_do = {
-			if = {
-				limit = { has_realm_law = high_tribal_authority_0 }
-				value = 1
-			}
-		}
-	}
-	
-	high_tribal_authority_2 = {
-		modifier = {
-			direct_vassal_opinion = -10
-			development_growth_factor = 0.10
-		}
-		flag = title_revocation_allowed
-		flag = vassal_retraction_allowed
-		
-		can_keep = { realm_law_use_high_tribal_authority = yes }
-		
-		can_pass = {
-			trigger_if = {
-				limit = {
-					NOT = { has_realm_law = high_tribal_authority_3 }
-				}
-				has_realm_law = high_tribal_authority_1
-				custom_description = {
-					subject = root
-					text = "text_has_high_tribal_authority_cooldown"
-					NOT = { has_variable = high_tribal_authority_cooldown }
-				}
-			}
-			root.culture = { has_innovation = innovation_leges_barbarorum }
-		}
-
-		pass_cost = {
-			prestige = {
-				if = {
-					limit = {
-						NOT = { has_realm_law = high_tribal_authority_3 }
-					}
-					add = increase_tribal_authority_prestige_cost
-				}
-			}
-		}
-		
-		on_pass = {
-			if = {
-				limit = {
-					NOT = { has_realm_law = high_tribal_authority_3 }
-				}
-			}
-			set_variable = {
-				name = high_tribal_authority_cooldown
-				years = @tribal_authority_cooldown_years
-			}
-		}
-
-		ai_will_do = {
-			if = {
-				limit = { has_realm_law = high_tribal_authority_1 }
-				value = 1
-			}
-		}
-	}
-	
-	high_tribal_authority_3 = {
-		modifier = {
-			direct_vassal_opinion = -20
-			development_growth_factor = 0.10
-		}
-		#Settling is disabled unless you have this law. Script is in the decisions, currently in 80_major_decisions.
-		#Reforming pagan religions (but not creating other faiths) is disabled unless you have this law. Script is in the reformation prereqs, currently in 00_rules.
-		
-		can_keep = { realm_law_use_high_tribal_authority = yes }
-		
-		can_pass = {
-			has_realm_law = high_tribal_authority_2
-			custom_description = {
-				subject = root
-				text = "text_has_high_tribal_authority_cooldown"
-				NOT = { has_variable = high_tribal_authority_cooldown }
-			}
-			root.culture = { has_innovation = innovation_mundium }
-		}
-		
-		pass_cost = { prestige = increase_tribal_authority_prestige_cost }
-		
-		on_pass = {
-			set_variable = {
-				name = high_tribal_authority_cooldown
-				years = @tribal_authority_cooldown_years
-			}
-		}
-
-		ai_will_do = {
-			if = {
-				limit = { has_realm_law = high_tribal_authority_2 }
-				value = 1
 			}
 		}
 	}
