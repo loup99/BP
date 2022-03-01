@@ -224,3 +224,102 @@ tradition_mubarizuns = {
 		}
 	}
 }
+
+##### Changed from Vanilla: Made available to gaelic/pictish cultures and descendents
+tradition_strong_kinship = { #There can be only one!
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = western
+		4 = conversation.dds
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		OR = {
+			this = culture:gaelic
+			this = culture:pictish
+			any_parent_culture_or_above = {
+				OR = {
+					this = culture:gaelic
+					this = culture:pictish
+				}
+			}
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		OR = {
+			this = culture:gaelic
+			this = culture:pictish
+			any_parent_culture_or_above = {
+				OR = {
+					this = culture:gaelic
+					this = culture:pictish
+				}
+			}
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		unlock_schiltron_innovation = yes
+		bonuses_from_patriarch_matriarch_trait = yes
+		cultural_house_personal_scheme_success_chance = yes
+		landing_house_members_give_prestige = yes
+		penalty_for_revoking_titles_from_house_members = yes
+	}
+	character_modifier = {
+		dynasty_house_opinion = 15
+		opinion_of_liege = -10
+	}
+
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+						any_in_list = { list = traits this = flag:ethos_bureaucratic }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_bureaucratic_desc
+				}
+			}
+			if = {
+				limit = {
+					exists = scope:character.house
+					NOT = {
+						scope:character.house = {
+							any_house_member = {
+								count >= 3
+								has_relation_friend = scope:character
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = house_friends_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+	}
+}
