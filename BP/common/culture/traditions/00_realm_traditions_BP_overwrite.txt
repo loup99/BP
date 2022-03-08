@@ -1,0 +1,235 @@
+﻿##### Changed from Vanilla: Not available to south semitics anymore
+tradition_mountain_homes = {
+	category = realm
+
+	layers = {
+		0 = steward
+		1 = mena
+		4 = mountain.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		NOR = { #This is replaced by Himalayan Settlers, and Mountain Herding. 
+			has_cultural_tradition = tradition_himalayan_settlers
+			has_cultural_pillar = heritage_arabic
+			has_cultural_pillar = heritage_berber
+			has_cultural_pillar = heritage_tibetan
+			has_cultural_pillar = heritage_qiangic
+			has_cultural_pillar = heritage_south_semitic
+			any_culture_county = { title_province = { geographical_region = world_himalaya } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	can_pick = {
+		custom_description = {
+			text = culture_in_mountains_desc
+			any_culture_county = {
+				any_county_province = {
+					OR = {
+						terrain = mountains
+						terrain = desert_mountains
+					}
+				}
+			}
+		}
+	}
+
+	parameters = {
+		quarries_building_bonuses = yes
+		prestige_gain_on_building_complete_in_mountains = yes
+	}
+	character_modifier = {
+	}
+	county_modifier = {
+		mountains_development_growth_factor = 0.2
+		desert_mountains_development_growth_factor = 0.35
+	}
+	province_modifier = {
+		mountains_construction_gold_cost = -0.15
+		desert_mountains_construction_gold_cost = -0.15
+		mountains_holding_construction_gold_cost = -0.15
+		desert_mountains_holding_construction_gold_cost = -0.15
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					any_in_list = { list = traits this = flag:ethos_bellicose }
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = culture_not_bellicose
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							percent >= 0.3
+							any_county_province = {
+								OR = {
+									terrain = mountains
+									terrain = desert_mountains
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = mountain_percentage_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							percent >= 0.2
+							culture = scope:character.culture
+							any_county_province = {
+								OR = {
+									terrain = mountains
+									terrain = desert_mountains
+								}
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Not pickable if you have roman legacy
+tradition_republican_legacy = {
+	category = realm
+
+	layers = {
+		0 = steward
+		1 = mediterranean
+		4 = laurel.dds
+	}
+
+	is_shown = {
+		OR ={
+			this = culture:roman
+			any_parent_culture_or_above = { this = culture:roman }
+		}
+		NOT = { has_cultural_tradition = tradition_parochialism }
+	}
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		NOR = { has_cultural_tradition = tradition_western_roman_legacy }
+		OR ={
+			this = culture:roman
+			any_parent_culture_or_above = { this = culture:roman }
+		}
+		NOT = { has_cultural_tradition = tradition_parochialism }
+	}
+	##### Changed from Vanilla ^^^^^
+	parameters = {
+		can_make_republican_vassals = yes
+		unlock_innovation_pike_columns = yes
+		city_buildings_more_powerful = yes
+		city_buildings_less_control = yes
+		republican_vassals_pay_more = yes
+	}
+	character_modifier = {
+		city_holding_build_gold_cost = -0.1
+		city_holding_holding_build_gold_cost = -0.1
+		republic_government_vassal_opinion = -20
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_courtly_communal_or_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							any_sub_realm_county = {
+								percent >= 0.9
+								culture = scope:character.culture
+								any_county_province = {
+									has_holding_type = city_holding
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = 90_percent_cities_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							percent >= 0.15
+							culture = scope:character.culture
+							any_county_province = {
+								has_holding_type = city_holding
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_vassal = {
+							primary_title.tier > tier_county
+							has_government = republic_government
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
