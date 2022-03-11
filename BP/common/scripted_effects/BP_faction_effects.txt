@@ -54,3 +54,40 @@ reduce_crown_authority_effect = {
 		reduce_crown_authority_level_effect = { TO_LEVEL = 2 }
 	}
 }
+
+﻿bp_tax_revolt_faction_demands_enforced = {
+	#Control loss
+	$FACTION$ = {
+		every_faction_county_member = {
+			custom = peasant_faction_every_county
+			change_county_control = peasant_war_victory_county_control_loss
+			add_county_modifier = {
+				modifier = peasant_war_lost_county_modifier
+				years = 10
+			}
+		}
+		hidden_effect = { destroy_faction = yes }
+	}
+	#And taxes go down
+	$TOP_LEVEL_LIEGE$ = {
+		if = {
+			limit = { has_realm_law = bureaucratic_taxation_4 }
+			add_realm_law = bureaucratic_taxation_3
+		}
+		else_if = {
+			limit = { has_realm_law = bureaucratic_taxation_3 }
+			add_realm_law = bureaucratic_taxation_2
+		}
+		else_if = {
+			limit = { has_realm_law = bureaucratic_taxation_2 }
+			add_realm_law = bureaucratic_taxation_1
+		}
+		else_if = {
+			limit = { has_realm_law = bureaucratic_taxation_1 }
+			add_realm_law = bureaucratic_taxation_0
+		}
+		#Cause you lost to a lot of filthy peasants
+		add_prestige = -500
+		add_prestige_level = -1
+	}
+}
