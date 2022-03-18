@@ -344,3 +344,70 @@ tradition_hellenizers = { #Byzantine Hellenizaiton
 	
 	ai_will_do = { value = 0 }
 }
+
+tradition_east_germanic_warfare = {
+	category = regional
+	
+	layers = {
+		0 = martial
+		1 = western
+		4 = battle.dds
+	}
+	
+	is_shown = { has_cultural_pillar = heritage_east_germanic }
+	can_pick = {
+		has_cultural_pillar = heritage_east_germanic
+		custom_tooltip = {
+			text = cannot_have_tradition_battlefield_looters
+			NOT = { any_in_list = { list = traits this = flag:tradition_battlefield_looters } }
+		}
+	}
+	
+	parameters = {
+		gain_gold_from_battles = yes
+		culture_can_raid_even_if_feudal = yes
+	}
+	county_modifier = {
+		monthly_county_control_change_factor = -0.25
+	}
+	character_modifier = {
+		levy_size = -0.25
+		archers_max_size_add = -2
+		light_cavalry_max_size_add = -2
+		heavy_cavalry_max_size_add = 1
+		heavy_infantry_max_size_add = 2
+		men_at_arms_cap = 1
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_or_spiritual_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { NOT = { any_in_list = { list = traits this = flag:ethos_bellicose } } }
+			multiply = 0.5
+		}
+	}
+}
