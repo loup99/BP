@@ -66,3 +66,88 @@
 		value = 100
 	}
 }
+
+tradition_tribal_hierarchy = { #Varient of tradition_hereditary_hierarchy for tribals
+	category = realm
+
+	layers = {
+		0 = diplo
+		1 = western
+		4 = king.dds
+	}
+	
+	can_pick = {
+		scope:character = {
+			OR = {
+				has_government = tribal_goverment
+				has_government = high_tribal_goverment
+			}
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_hereditary_hierarchy
+			NOT = { any_in_list = { list = traits this = flag:tradition_hereditary_hierarchy } }
+		}
+	}
+	
+	parameters = { poorly_educated_leaders_distrusted = yes }
+	character_modifier = {
+		tribal_government_tax_contribution_mult = 0.1
+		tribal_government_levy_contribution_mult = 0.1
+		long_reign_bonus_mult = 0.25
+		tyranny_loss_mult = -0.75
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_courtly_or_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							primary_title.tier >= tier_kingdom
+							any_vassal = {
+								count >= 10
+								primary_title.tier >= tier_county
+								has_government = tribal_government
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = king_with_vassals_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character.primary_title.tier >= tier_kingdom
+				}
+			}
+			multiply = 0
+		}
+	}
+}
