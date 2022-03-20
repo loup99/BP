@@ -553,3 +553,104 @@ tradition_mountain_herding = {
 		}
 	}
 }
+
+##### Changed from Vanilla: Made available to East Iranians as well (like Sogdian)
+tradition_futuwaa = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = soldiers.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		##### Changed from Vanilla vvvvv
+		OR = {
+			has_cultural_pillar = heritage_iranian
+			has_cultural_pillar = heritage_east_iranian
+		}
+		##### Changed from Vanilla ^^^^^
+		NOR = { #Replaces Martial Admiration
+			has_cultural_tradition = tradition_chanson_de_geste
+			has_cultural_tradition = tradition_druzhina
+			has_cultural_tradition = tradition_martial_admiration
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		##### Changed from Vanilla vvvvv
+		OR = {
+			has_cultural_pillar = heritage_iranian
+			has_cultural_pillar = heritage_east_iranian
+		}
+		##### Changed from Vanilla ^^^^^
+		NOR = { #Replaces Martial Admiration
+			has_cultural_tradition = tradition_chanson_de_geste
+			has_cultural_tradition = tradition_druzhina
+			has_cultural_tradition = tradition_martial_admiration
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		unlock_maa_ayyar = yes
+		can_use_sparring_duel = yes
+		martial_education_more_valued = yes
+		prowess_traits_more_valued = yes
+		blademaster_trait_bonuses = yes
+		craven_and_content_traits_looked_down_upon = yes
+		knights_slightly_more_prone_to_injury = yes
+	}
+	character_modifier = {
+		knight_limit = 2
+		negate_prowess_penalty_add = 5
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_courtly_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							any_knight = {
+								count >= 6
+								prowess >= 12
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = knights_with_prowess_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+
+	ai_will_do = { value = 100 }
+}
+
