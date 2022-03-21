@@ -1,0 +1,82 @@
+﻿on_game_start = {
+	on_actions = { ccu_startup }
+}
+
+ccu_startup = {	
+	effect = { every_culture_global = { ccu_initialize_culture = yes } }
+	on_actions = { ccu_startup_debug }
+}
+
+on_culture_created = {
+	on_actions = { ccu_culture_created }
+}
+
+ccu_culture_created = {
+	effect = { 
+		every_parent_culture = {
+			limit = { has_same_culture_language = prev }
+			prev = { 
+				set_variable = { name = language_group value = prev.var:language_group } 
+				set_variable = { name = language_family value = prev.var:language_family }
+			}			
+		}
+		every_parent_culture = {
+			limit = { has_same_culture_heritage = prev }
+			prev = { 
+				set_variable = { name = heritage_group value = prev.var:heritage_group } 
+				set_variable = { name = heritage_family value = prev.var:heritage_family }
+			}
+		}
+	}
+}
+
+ccu_startup_debug = {
+	effect = {
+		every_culture_global = {
+			if = {
+				limit = { NOT = { has_variable = heritage_group } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_heritage_group
+						desc = ccu_debug_culture_heritage_group_desc
+					}
+				}
+			}
+			if = {
+				limit = { NOT = { has_variable = heritage_family } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_heritage_family
+						desc = ccu_debug_culture_heritage_family_desc
+					}
+				}
+			}
+			if = {
+				limit = { NOT = { has_variable = language_group } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_group
+						desc = ccu_debug_culture_language_group_desc
+					}
+				}
+			}
+			if = {
+				limit = { NOT = { has_variable = language_family } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_family
+						desc = ccu_debug_culture_language_family_desc
+					}
+				}
+			}
+		}
+	}
+}
