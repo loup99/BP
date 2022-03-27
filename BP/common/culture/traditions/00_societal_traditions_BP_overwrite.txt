@@ -1,0 +1,362 @@
+﻿##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_practiced_pirates = {
+	category = societal
+
+	layers = {
+		0 = intrigue
+		1 = mediterranean
+		4 = battle.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_description = {
+			text = percentage_of_culture_on_coast_desc
+			any_culture_county = {
+				percent >= 0.5
+				any_county_province = {
+					is_coastal = yes
+				}
+			}
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_vandalic_warfare
+			NOT = { any_in_list = { list = traits this = flag:tradition_gothic_warfare } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		culture_can_raid_at_sea_even_if_feudal = yes
+		not_tribal_raiding_malus = yes
+	}
+
+	character_modifier = {
+		max_loot_mult = 0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			# Ethos requirement.
+			if = {
+				limit = {
+					NOT = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_desc
+				}
+			}
+			# Coastal requirement.
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							percent >= 0.7
+							any_county_province = {
+								is_coastal = yes
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = high_coastal_percentage_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 50
+		if = {
+			limit = { # Should be fairly rare for cultures outside of a Berber heritage
+				has_cultural_pillar = heritage_berber
+			}
+			multiply = 5
+		}
+	}
+}
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_xenophilic = {
+	category = societal
+
+	layers = {
+		0 = learning
+		1 = mena
+		4 = conversation.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = culture_acceptance_trigger_desc
+			any_culture_global = {
+				count >= xenophilic_nr_of_cultures_value
+				NOT = { this = prev }
+				cultural_acceptance = { target = prev value >= xenophilic_acceptance_value }
+			}
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_hellenizers
+			NOT = { any_in_list = { list = traits this = flag:tradition_hellenizers } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	culture_modifier = {
+		cultural_acceptance_gain_mult = 0.25
+	}
+	character_modifier = {
+		different_culture_opinion = 10
+		ignore_negative_opinion_of_culture = yes
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_egalitarian }
+						#any_in_list = { list = traits this = flag:ethos_bureaucratic }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_or_egalitarian_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_global = {
+							count >= xenophilic_nr_of_cultures_cost_value
+							NOT = { this = prev }
+							cultural_acceptance = { target = prev value >= xenophilic_acceptance_cost_value }
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = culture_acceptance_cost_desc
+				}
+			}
+
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { # Avoid stacking similar traditions
+				any_in_list = { list = traits this = flag:tradition_culture_blending }
+			}
+			multiply = 0.25
+		}
+		if = {
+			limit = { # If you like to invade people, don't pick this tradition
+				any_in_list = { list = traits this = flag:tradition_malleable_invaders }
+			}
+			multiply = 0
+		}
+	
+	}
+}
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_music_theory = {
+	category = societal
+	
+	layers = {
+		0 = intrigue
+		1 = western
+		4 = musician.dds
+	}
+	
+	is_shown = {
+		has_ep1_court_positions_dlc_trigger = yes
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_tamil_thai
+			NOT = { any_in_list = { list = traits this = flag:tradition_tamil_thai } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		gregarious_trait_gives_bonuses = yes
+		characters_are_better_court_musicians = yes # Also hooked in to increase the Feast opinion bonus
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_courtly_communal_or_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					trigger_if = {
+						limit = {
+							scope:character = {
+								is_ai = no
+							}
+						}
+						NOT = {
+							any_ruler = {
+								count >= 3
+								culture = prev
+								primary_title.tier >= tier_county
+								has_trait = poet
+							}
+						}
+					}
+					trigger_else = {
+						always = no
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = rulers_with_poet_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { # AI should avoid stacking traditions for court positions
+				any_in_list = { list = traits this = flag:tradition_poetry }
+			}
+			multiply = 0.25
+		}
+	}
+}
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_poetry = {
+	category = societal
+
+	layers = {
+		0 = diplo
+		1 = western
+		4 = quill.dds
+	}
+
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_fp1_northern_stories
+			NOT = { any_in_list = { list = traits this = flag:tradition_fp1_northern_stories } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_tamil_thai
+			NOT = { any_in_list = { list = traits this = flag:tradition_tamil_thai } }
+		}
+	}
+	
+	parameters = {
+		poet_trait_gives_bonuses = yes
+		poet_trait_more_common = yes
+		characters_are_better_court_poets = yes
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_courtly_communal_or_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					trigger_if = {
+						limit = {
+							scope:character = {
+								is_ai = no
+							}
+						}
+						NOT = {
+							any_ruler = {
+								count >= 3
+								culture = prev
+								primary_title.tier >= tier_county
+								has_trait = poet
+							}
+						}
+					}
+					trigger_else = {
+						always = no
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = rulers_with_poet_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { # AI should avoid stacking traditions for courtly court positions
+				any_in_list = { list = traits this = flag:tradition_music_theory }
+			}
+			multiply = 0.25
+		}
+	}
+}

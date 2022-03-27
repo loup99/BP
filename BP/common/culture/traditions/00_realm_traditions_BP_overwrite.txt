@@ -311,3 +311,264 @@ tradition_roman_legacy = {
 		value = 100
 	}
 }
+
+##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_hereditary_hierarchy = {
+	category = realm
+
+	layers = {
+		0 = diplo
+		1 = western
+		4 = king.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		scope:character = { has_government = feudal_government }
+		custom_tooltip = {
+			text = cannot_have_tradition_tribal_hierarchy
+			NOT = { any_in_list = { list = traits this = flag:tradition_tribal_hierarchy } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		poorly_educated_leaders_distrusted = yes
+	}
+	character_modifier = {
+		castle_holding_holding_build_gold_cost = -0.15
+		feudal_government_tax_contribution_mult = 0.1
+		long_reign_bonus_mult = 0.25
+		tyranny_loss_mult = -0.75
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_courtly_or_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							primary_title.tier >= tier_kingdom
+							any_vassal = {
+								count >= 10
+								primary_title.tier >= tier_county
+								has_government = feudal_government
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = king_with_vassals_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character.primary_title.tier >= tier_kingdom
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_culture_blending = {
+	category = realm
+	
+	layers = {
+		0 = learning
+		1 = indian
+		4 = conversation.dds
+	}
+	
+	is_shown = {
+		has_dlc_feature = hybridize_culture
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_colonizers
+			NOT = { any_in_list = { list = traits this = flag:tradition_colonizers } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		cheaper_to_hybridize = yes
+		learns_more_languages = yes
+	}
+	culture_modifier = {
+		cultural_acceptance_gain_mult = 0.25
+	}
+	character_modifier = {
+		max_learn_language_schemes_add = 1
+		learn_language_scheme_power_mult = 0.3
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_egalitarian }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_or_egalitarian_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							any_sub_realm_county = {
+								percent >= 0.3
+								NOT = { culture = root }
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = multiple_cultures_in_realm_percentage_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				is_divergent_culture = no
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_ruling_caste = {
+	category = realm
+
+	layers = {
+		0 = intrigue
+		1 = mediterranean
+		4 = king.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_hellenizers
+			NOT = { any_in_list = { list = traits this = flag:tradition_hellenizers } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		peasant_and_populist_factions_less_common = yes
+	}
+	culture_modifier = {
+		cultural_acceptance_gain_mult = -0.25
+	}
+	character_modifier = {
+		dread_per_tyranny_add = 0.3
+		dread_decay_mult = -0.3
+		revolting_siege_morale_loss_mult = 0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_spiritual_or_courtly_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						any_councillor = {
+							NOR = {
+								culture = scope:character.culture
+								is_spouse_of = scope:character # Might be hard to have the right culture for the Spouse; but we can remove this helper if needed
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_council_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = { 
+		value = 100
+		if = {
+			limit = {
+				scope:character.dread < 25
+			}
+			multiply = 0.5
+		}
+		if = {
+			limit = {
+				scope:character.tyranny < 25
+			}
+			multiply = 0.5
+		}
+	}
+}
