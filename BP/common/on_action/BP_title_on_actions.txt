@@ -1,0 +1,156 @@
+﻿on_title_gain = {
+	on_actions = {
+		BP_handle_bureaucratic_succession
+		BP_prevent_title_boostrapping
+		BP_fall_of_rome
+	}
+}
+
+#Handle Bureaucratic succession for landed chars
+BP_handle_bureaucratic_succession = {
+	effect = {
+		if = {
+			limit = {
+				is_independent_ruler = yes
+				OR = {
+					has_government = subroman_government
+					has_government = gubernatorial_government
+					has_government = bureaucratic_government
+					has_government = prefeudal_government
+				}
+				scope:previous_holder = {
+					OR = {
+						has_government = bureaucratic_government #dead bureacrats
+						has_character_flag = bureacratic_ruler #Living bureacrats with no titles
+					}
+				}
+			}
+			change_government = bureaucratic_government
+			add_character_flag = bureacratic_ruler
+		}
+	}
+}
+
+#Prevent government boostraping effect
+BP_prevent_title_boostrapping = {
+	effect = {
+		if = {
+			limit = {
+				AND = {
+					scope:transfer_type = flag:granted #Only for title grants
+					scope:title = { tier >= tier_county } #Which was a county or better
+					#Who wasn't getting upgraded (from baron to county) *or* who already _had_ counties
+					root.capital_county = { NOT = { this = scope:title } }
+				}
+			}
+			#Unplayable Governments: Should not change whenever gaining titles
+			if = {
+				limit = {
+					root = {
+						OR = {
+							has_government = republic_government
+							has_government = mercenary_government
+							has_government = holy_order_government
+						}
+					}
+				}
+			}
+			#Theocracy (special)
+			else_if = {
+				limit = { scope:previous_holder = { has_government = theocracy_government } }
+				change_government = theocracy_government
+			}
+			#Primitive Governments (can hold tribal_holding)
+			else_if = {
+				limit = { scope:previous_holder = { has_government = tribal_government } }
+				change_government = tribal_government
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = nomad_government } }
+				change_government = nomad_government
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = high_tribal_government } }
+				change_government = high_tribal_government
+			}
+			#Advanced Governments (Cannot hold tribal_holding)
+			else_if = {
+				limit = { scope:previous_holder = { has_government = prefeudal_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = prefeudal_government }
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = subroman_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = subroman_government } #Occasional errors
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = eranshar_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = eranshar_government }
+			}
+			else_if = {
+				limit = { scope:previous_holder = { has_government = gupta_government } }
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = gupta_government } #Occasional errors
+			}
+			else_if = {
+				limit = {
+					scope:previous_holder = {
+						OR = {
+							has_government = gubernatorial_government
+							has_government = bureaucratic_government
+						}
+					}
+				}
+				if = {
+					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
+					change_government = high_tribal_government
+				}
+				else = { change_government = gubernatorial_government } #Occasional errors
+			}
+		}
+		else_if = {
+			limit = {
+				scope:transfer_type = flag:granted
+				scope:previous_holder = { has_government = bureaucratic_government }
+				scope:title = { tier = tier_barony }
+				scope:title.title_province = { has_holding_type = castle_holding }
+			}
+			change_government = gubernatorial_government
+		}
+	}
+}
+
+BP_fall_of_rome = {
+	effect = {
+		if = {
+			limit = {
+				#Only shocking the first time...
+				NOT = { has_global_variable = fall_of_rome }
+				title:c_roma.holder = {
+					OR = {
+						fall_of_rome_trigger = yes
+						any_liege_or_above = { fall_of_rome_trigger = yes }
+					}
+				}
+			}
+			every_ruler = { #Inform all playable characters
+				limit = { primary_title.tier >= tier_county }
+				trigger_event = { id = bp_narrative_events.0001 }
+			}
+		}
+	}
+}
