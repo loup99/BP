@@ -1,0 +1,155 @@
+﻿end_war_attacker_victory_interaction = {
+	special_interaction = end_war_attacker_victory_interaction
+	hidden = yes
+	use_diplomatic_range = no
+
+	ai_targets = {
+		ai_recipients = primary_war_enemies
+	}
+	
+	ai_frequency = 1
+	
+	# Depending on who was the attacker, we need to send a different notification message to the recipient.
+	notification_text = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:recipient = {
+						any_character_war = {
+							casus_belli = {
+								primary_attacker = scope:actor
+							}
+						}
+					}				}
+				desc = end_war_attacker_victory_attacker_desc
+			}
+			desc = end_war_attacker_victory_defender_desc
+		}
+	}
+
+	on_accept = {
+		casus_belli = {
+			primary_attacker = {
+				save_scope_as = attacker_winner
+			}
+			primary_defender = {
+				save_scope_as = defender_loser
+			}
+		}
+
+		release_prisoners_of_war_effect = yes
+
+		#Send notification to vassals
+		scope:attacker_winner = {
+			if = {
+				limit = {
+					any_vassal = {
+						NOT = { this = scope:defender_loser }
+					}
+				}
+				every_vassal = {
+					limit = { NOT = { this = scope:defender_loser } }
+					send_interface_toast = {
+						title = war_event.notification_liege_win.t
+						left_icon = scope:attacker_winner
+						custom_tooltip = war_event.1901
+					}
+				}
+			}
+		}
+		scope:defender_loser = {
+			if = {
+				limit = {
+					any_vassal = { NOT = { this = scope:attacker_winner } }
+				}
+				every_vassal = {
+					limit = {
+						NOT = { this = scope:attacker_winner }
+					}
+					send_interface_toast = {
+						title = war_event.notification_liege_loss.t
+						left_icon = scope:defender_loser
+						custom_tooltip = war_event.1902
+					}
+				}
+			}
+		}
+
+		##### Changed from Vanilla: Removed special 867 bookmark event
+
+		end_war = attacker
+	}
+	
+	on_decline = {
+	}
+	
+	ai_potential = {
+		is_at_war = yes
+		any_character_war = {
+			is_war_leader = root
+			attacker_war_score >= 100
+		}
+	}
+
+	ai_will_do = {
+		base = 0
+		
+		modifier = {
+			scope:war = {
+				primary_attacker = scope:actor
+				attacker_war_score >= 100				
+			}			
+			add = 100
+		}
+		modifier = {
+			scope:war = {
+				primary_defender = scope:actor
+				attacker_war_score >= 100
+				days_since_max_war_score >= 180			
+			}			
+			add = 100
+		}
+	}
+	
+	ai_accept = {
+		base = -99
+
+		compare_modifier = {
+			target = scope:war
+			value = attacker_war_score
+			desc = "WARSCORE_MODIFIER"
+		}
+		modifier = {
+			scope:war.casus_belli = {
+				primary_attacker = {
+					has_perk = peacemaker_perk
+					NOT = { this = scope:recipient }
+				}
+			}
+			
+			add = peacemaker_value
+			
+			desc = "PEACEMAKER_PERK_MODIFIER"
+		}
+	}
+	
+	auto_accept = {
+		OR = {
+			scope:war = {
+				attacker_war_score >= 100
+			}
+			AND = {
+				scope:recipient = { is_ai = yes }
+				primary_attacker = scope:recipient
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		scope:war = {
+			has_valid_casus_belli = yes
+		}
+	}
+	
+	show_answer_notification = no
+}
