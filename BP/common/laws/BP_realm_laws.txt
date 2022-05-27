@@ -1,0 +1,1445 @@
+﻿@high_tribal_organization_cooldown_years = 10
+@prefeudal_authority_cooldown_years = 20
+@gupta_authority_cooldown_years = 10
+@eranshar_authority_cooldown_years = 10
+@clerical_influence_cooldown_years = 25
+@bureaucracy_cooldown_years = 10
+@subroman_taxation_cooldown_years = 50
+
+high_tribal_organization = {
+	default = high_tribal_organization_0
+	cumulative = yes
+	flag = realm_law
+
+	high_tribal_organization_0 = {
+		modifier = {
+			direct_vassal_opinion = 10
+			development_growth_factor = -0.40
+		}
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+	}
+
+	high_tribal_organization_1 = {
+		modifier = { 
+			direct_vassal_opinion = -20
+			development_growth_factor = 0.10
+		}
+		flag = title_revocation_allowed
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = high_tribal_organization_0 }
+				custom_description = {
+					subject = root
+					text = "has_high_tribal_organization_cooldown"
+					NOT = { has_variable = high_tribal_organization_cooldown }
+				}
+			}
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = high_tribal_organization_2
+							has_realm_law = high_tribal_organization_3
+						}
+					}
+					add = increase_tribal_authority_prestige_cost
+				}
+			}
+		}
+
+		on_pass = {
+			if = {
+				limit = {
+					NOR = {
+						has_realm_law = high_tribal_organization_2
+						has_realm_law = high_tribal_organization_3
+					}
+				}
+			}
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_0 }
+				value = 1
+			}
+		}
+	}
+
+	high_tribal_organization_2 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			development_growth_factor = 0.10
+		}
+		flag = vassal_retraction_allowed
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = {
+					NOT = { has_realm_law = high_tribal_organization_3 }
+				}
+				has_realm_law = high_tribal_organization_1
+				custom_description = {
+					subject = root
+					text = "has_high_tribal_organization_cooldown"
+					NOT = { has_variable = high_tribal_organization_cooldown }
+				}
+			}
+			root.culture = { has_innovation = innovation_leges_barbarorum }
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOT = { has_realm_law = high_tribal_organization_3 }
+					}
+					add = increase_tribal_authority_prestige_cost
+				}
+			}
+		}
+
+		on_pass = {
+			if = {
+				limit = {
+					NOT = { has_realm_law = high_tribal_organization_3 }
+				}
+			}
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_1 }
+				value = 1
+			}
+		}
+	}
+
+	high_tribal_organization_3 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			development_growth_factor = 0.10
+		}
+		flag = vassal_internal_wars_banned
+
+		can_keep = { realm_law_use_high_tribal_organization = yes }
+
+		can_pass = {
+			has_realm_law = high_tribal_organization_2
+			custom_description = {
+				subject = root
+				text = "has_high_tribal_organization_cooldown"
+				NOT = { has_variable = high_tribal_organization_cooldown }
+			}
+			root.culture = { has_innovation = innovation_mundium }
+		}
+
+		pass_cost = { prestige = increase_tribal_authority_prestige_cost }
+
+		on_pass = {
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_2 }
+				value = 1
+			}
+		}
+	}
+}
+
+prefeudal_authority = {
+	default = prefeudal_authority_0
+	cumulative = yes
+	flag = realm_law
+	
+	prefeudal_authority_0 = {
+		modifier = {
+			direct_vassal_opinion = 10
+			vassal_tax_contribution_mult = -0.20
+			vassal_levy_contribution_mult = -0.20
+		}
+		can_keep = { realm_law_use_prefeudal_authority = yes }
+	}
+	
+	prefeudal_authority_1 = {
+		modifier = {
+			direct_vassal_opinion = -5
+			vassal_tax_contribution_mult = 0.10
+			vassal_levy_contribution_mult = 0.10
+			development_growth_factor = 0.05
+		}
+		flag = title_revocation_allowed
+		
+		can_keep = { realm_law_use_prefeudal_authority = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = prefeudal_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_prefeudal_authority_cooldown"
+					NOT = { has_variable = prefeudal_authority_cooldown }
+				}
+				root.culture = { has_innovation = innovation_writing }
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = prefeudal_authority_2
+							has_realm_law = prefeudal_authority_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = {
+					NOT = { has_realm_law = prefeudal_authority_2 }
+				}
+			}
+			set_variable = {
+				name = prefeudal_authority_cooldown
+				years = @prefeudal_authority_cooldown_years
+			}
+		}
+		
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = prefeudal_authority_0 }
+				value = 1
+			}
+		}
+	}
+	
+	prefeudal_authority_2 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			vassal_tax_contribution_mult = 0.10
+			vassal_levy_contribution_mult = 0.10
+			development_growth_factor = 0.05
+		}
+		flag = can_change_partition_succession_laws
+		flag = vassal_retraction_allowed
+		
+		can_keep = { realm_law_use_prefeudal_authority = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
+				has_realm_law = prefeudal_authority_1
+				custom_description = {
+					subject = root
+					text = "has_prefeudal_authority_cooldown"
+					NOT = { has_variable = prefeudal_authority_cooldown }
+				}
+			}
+			root.culture = { has_innovation = innovation_mundium }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
+			}
+			set_variable = {
+				name = prefeudal_authority_cooldown
+				years = @prefeudal_authority_cooldown_years
+			}
+		}
+		
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = prefeudal_authority_1 }
+				value = 1
+			}
+		}
+	}
+	
+	prefeudal_authority_3 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			vassal_tax_contribution_mult = 0.10
+			vassal_levy_contribution_mult = 0.10
+			development_growth_factor = 0.05
+		}
+		flag = can_change_succession_laws
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = { realm_law_use_prefeudal_authority = yes }
+
+		can_pass = {
+			has_realm_law = prefeudal_authority_2
+			custom_description = {
+				subject = root
+				text = "has_prefeudal_authority_cooldown"
+				NOT = { has_variable = prefeudal_authority_cooldown }
+			}
+			root.culture = { has_innovation = innovation_plenary_assemblies }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = prefeudal_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = prefeudal_authority_cooldown
+				years = @prefeudal_authority_cooldown_years
+			}
+		}
+	}
+}
+
+gupta_authority = {
+	default = gupta_authority_0
+	cumulative = yes
+	flag = realm_law
+	
+	gupta_authority_0 = {
+		modifier = {}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+
+		can_keep = { realm_law_use_gupta_authority = yes }
+	}
+	
+	gupta_authority_1 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			feudal_government_tax_contribution_add = 0.1
+			vassal_levy_contribution_add = 0.1
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+
+		can_keep = { realm_law_use_gupta_authority = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = gupta_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_gupta_authority_cooldown"
+					NOT = { has_variable = gupta_authority_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = gupta_authority_2
+							has_realm_law = gupta_authority_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = gupta_authority_cooldown
+				years = @gupta_authority_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = gupta_authority_0 }
+				value = 1
+			}
+		}
+	}
+	
+	gupta_authority_2 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			feudal_government_tax_contribution_add = 0.1
+			vassal_levy_contribution_add = 0.1
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = vassal_internal_wars_banned
+		flag = vassal_refusal_is_treason
+		
+		can_keep = { realm_law_use_gupta_authority = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = gupta_authority_3 } }
+				has_realm_law = gupta_authority_1
+				custom_description = {
+					subject = root
+					text = "has_gupta_authority_cooldown"
+					NOT = { has_variable = gupta_authority_cooldown }
+				}
+			}
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = gupta_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = gupta_authority_cooldown
+				years = @gupta_authority_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = gupta_authority_1 }
+				value = 1
+			}
+		}
+	}
+	
+	gupta_authority_3 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			feudal_government_tax_contribution_add = 0.1
+			vassal_levy_contribution_add = 0.1
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = vassal_all_wars_banned
+		
+		can_keep = { realm_law_use_gupta_authority = yes }
+
+		can_pass = {
+			has_realm_law = gupta_authority_2
+			custom_description = {
+				subject = root
+				text = "has_gupta_authority_cooldown"
+				NOT = { has_variable = gupta_authority_cooldown }
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = gupta_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = gupta_authority_cooldown
+				years = @gupta_authority_cooldown_years
+			}
+		}
+	}
+}
+
+#Eranshar Governmnet Secular Authority
+eranshar_authority = {
+	default = eranshar_authority_0
+	cumulative = no
+	flag = realm_law
+	
+	eranshar_authority_0 = {
+		modifier = {}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = must_give_titles_to_powerful_families_or_landed_chars_if_possible
+		
+		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {}
+		
+		pass_cost = {}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
+	}
+	eranshar_authority_1 = {
+		modifier = {
+			direct_vassal_opinion = -5
+			powerful_vassal_opinion = -5
+			domain_limit = 1
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_change_succession_laws
+		flag = must_give_titles_to_powerful_families_or_landed_chars_if_possible
+		
+		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = eranshar_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_eranshar_authority_cooldown"
+					NOT = { has_variable = crown_authority_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = eranshar_authority_2
+							has_realm_law = eranshar_authority_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
+	}
+	eranshar_authority_2 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			powerful_vassal_opinion = -10
+			domain_limit = 2
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_change_succession_laws
+		flag = vassal_internal_wars_banned
+		
+		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = eranshar_authority_3 } }
+				has_realm_law = eranshar_authority_1
+				custom_description = {
+					subject = root
+					text = "has_crown_authority_cooldown"
+					NOT = { has_variable = eranshar_authority_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = eranshar_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
+	}
+	eranshar_authority_3 = {
+		modifier = {
+			direct_vassal_opinion = -15
+			powerful_vassal_opinion = -15
+			domain_limit = 3
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = can_change_succession_laws
+		flag = vassal_all_wars_banned
+		
+		can_keep = { realm_law_use_eranshar_authority = yes }
+		
+		can_pass = {
+			has_realm_law = eranshar_authority_2
+			custom_description = {
+				subject = root
+				text = "has_crown_authority_cooldown"
+				NOT = { has_variable = eranshar_authority_cooldown }
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = eranshar_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = eranshar_authority_cooldown
+				years = @eranshar_authority_cooldown_years
+			}
+		}
+	}
+}
+#Eranshar Government Religious Authority
+#Directly influences Zoroastrian doctrines for Asavan faiths
+clerical_influence = {
+	default = clerical_influence_0
+	cumulative = no
+	flag = realm_law
+	
+	#Temporal Revocable
+	clerical_influence_0 = {
+		modifier = {
+			clergy_opinion = -10
+			religious_head_opinion = -20
+			theocracy_government_tax_contribution_add = 0.25 #i.e., 25%-80%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.25 #i.e., 25%-75%, depending on devotion
+			different_faith_county_opinion_mult = -0.25 #Like adaptive
+		}
+		
+		can_keep = { realm_law_use_clerical_influence = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = clerical_influence_1 }
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					text = must_change_adjacent
+					always = no
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = clerical_influence_1 }
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+			piety = {
+				if = {
+					limit = { has_realm_law = clerical_influence_1 }
+					add = decrease_clerical_influence_piety_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			religion:zoroastrianism_religion = {
+				every_faith = {
+					limit = {
+						this = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+						NOT = { has_doctrine = doctrine_clerical_succession_temporal_appointment }
+					}
+					replace_current_clerical_succession = { THE_NEW_DOCTRINE = doctrine_clerical_succession_temporal_appointment }
+				}
+			}
+			if = {
+				limit = { has_realm_law = clerical_influence_1 }
+				save_scope_as = ruler
+				#All priests are pissed you lowered their influence
+				every_vassal_or_below = {
+					limit = {
+						has_government = theocracy_government
+						faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+					}
+					if = {
+						limit = { this = scope:ruler.faith.religious_head }
+						add_opinion = {
+							modifier = hof_vassal_reduced_influence_modifier
+							target = root
+							years = 25
+						}
+					}
+					else = {
+						add_opinion = {
+							modifier = clerical_vassal_reduced_influence_modifier
+							target = root
+							years = 25
+						}
+					}
+				}
+			}
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+		}
+	}
+	#Spiritual Revocable
+	clerical_influence_1 = {
+		modifier = {
+			religious_head_opinion = -10
+			religious_head_opinion = 0
+			theocracy_government_tax_contribution_add = 0.15 #i.e., 15%-70%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.15 #i.e., 15%-70%, depending on devotion
+			domain_limit = 1
+		}
+		
+		can_keep = { realm_law_use_clerical_influence = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = {
+					OR = {
+						has_realm_law = clerical_influence_0
+						has_realm_law = clerical_influence_2
+					}
+				}
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					text = must_change_adjacent
+					always = no
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						OR = {
+							has_realm_law = clerical_influence_0
+							has_realm_law = clerical_influence_2
+						}
+					}
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+			piety = {
+				if = {
+					limit = { has_realm_law = clerical_influence_2 }
+					add = decrease_clerical_influence_piety_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			religion:zoroastrianism_religion = {
+				every_faith = {
+					limit = {
+						this = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+						NOT = { has_doctrine = doctrine_clerical_succession_spiritual_appointment }
+					}
+					replace_current_clerical_succession = { THE_NEW_DOCTRINE = doctrine_clerical_succession_spiritual_appointment }
+				}
+			}
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+			if = {
+				limit = { has_realm_law = clerical_influence_2 }
+				save_scope_as = ruler
+				#All priests are pissed you lowered their influence
+				every_vassal_or_below = {
+					limit = {
+						has_government = theocracy_government
+						faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+					}
+					if = {
+						limit = { this = scope:ruler.faith.religious_head }
+						add_opinion = {
+							modifier = hof_vassal_reduced_influence_modifier
+							target = root
+							years = 25
+						}
+					}
+					else = {
+						add_opinion = {
+							modifier = clerical_vassal_reduced_influence_modifier
+							target = root
+							years = 25
+						}
+					}
+				}
+			}
+		}
+	}
+	#Spiritual Revocable
+	clerical_influence_2 = {
+		modifier = {
+			clergy_opinion = 10
+			religious_head_opinion = 5
+			theocracy_government_tax_contribution_add = 0.05 #i.e., 5%-60%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.05 #i.e., 5%-55%, depending on devotion
+			different_faith_county_opinion_mult = 0.25 #Inverse of adaptive
+			domain_limit = 2
+		}
+		flag = enables_temporal_condemnation
+		
+		can_keep = { realm_law_use_clerical_influence = yes }
+		
+		can_pass = {
+			trigger_if = {
+				limit = {
+					OR = {
+						has_realm_law = clerical_influence_1
+						has_realm_law = clerical_influence_3
+					}
+				}
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					text = must_change_adjacent
+					always = no
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						OR = {
+							has_realm_law = clerical_influence_1
+							has_realm_law = clerical_influence_3
+						}
+					}
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+			piety = {
+				if = {
+					limit = { has_realm_law = clerical_influence_3 }
+					add = decrease_clerical_influence_piety_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			religion:zoroastrianism_religion = {
+				every_faith = {
+					limit = {
+						this = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+						NOT = { has_doctrine = doctrine_clerical_succession_spiritual_appointment }
+					}
+					replace_current_clerical_succession = { THE_NEW_DOCTRINE = doctrine_clerical_succession_spiritual_appointment }
+				}
+			}
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+			if = {
+				limit = { has_realm_law = clerical_influence_3 }
+				save_scope_as = ruler
+				#All priests are pissed you lowered their influence
+				every_vassal_or_below = {
+					limit = {
+						has_government = theocracy_government
+						faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+					}
+					if = {
+						limit = { this = scope:ruler.faith.religious_head }
+						add_opinion = {
+							modifier = hof_vassal_reduced_influence_modifier
+							target = root
+							years = 25
+						}
+					}
+					else = {
+						add_opinion = {
+							modifier = clerical_vassal_reduced_influence_modifier
+							target = root
+							years = 25
+						}
+					}
+				}
+			}
+		}
+	}
+	#Spiritual for life
+	clerical_influence_3 = {
+		modifier = {
+			clergy_opinion = 20
+			religious_head_opinion = 10
+			theocracy_government_tax_contribution_add = 0.00 #i.e., 00%-55%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.00 #i.e., 00%-50%, depending on devotion
+			different_faith_county_opinion_mult = 0.50 #4x Adaptive
+			domain_limit = 3
+		}
+		flag = enables_temporal_condemnation
+		
+		can_keep = { realm_law_use_clerical_influence = yes }
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = clerical_influence_3 }
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = clerical_influence_2 }
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					text = must_change_adjacent
+					always = no
+				}
+			}
+		}
+		
+		on_pass = {
+			religion:zoroastrianism_religion = {
+				every_faith = {
+					limit = {
+						this = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+						NOT = { has_doctrine = doctrine_clerical_succession_spiritual_fixed_appointment }
+					}
+					replace_current_clerical_succession = { THE_NEW_DOCTRINE = doctrine_clerical_succession_spiritual_fixed_appointment }
+				}
+			}
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+		}
+	}
+}
+
+#Subromain taxation effects
+#Replaces *_roman_taxation_infrastructure in WtWSMS
+subroman_taxation = {
+	default = subroman_taxation_0
+	cumulative = no
+	flag = realm_law
+	
+	subroman_taxation_0 = { #Non-Existent Roman Taxation Infrastructure Equivalent
+		modifier = { domain_tax_mult = -0.20 }
+		
+		can_keep = { realm_law_use_subroman_taxation = yes }
+		
+		can_pass = {
+			custom_description = {
+			text = "cannot_dynamically_control_subroman_taxation"
+				always = no
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = subroman_taxation_cooldown
+				years = @subroman_taxation_cooldown_years
+			}
+		}
+	}
+	subroman_taxation_1 = { #Abandoned Roman Taxation Infrastructure Equivalent
+		modifier = { domain_tax_mult = -0.15 }
+		
+		can_keep = { realm_law_use_subroman_taxation = yes }
+		
+		can_pass = {
+			custom_description = {
+			text = "cannot_dynamically_control_subroman_taxation"
+				always = no
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = subroman_taxation_cooldown
+				years = @subroman_taxation_cooldown_years
+			}
+		}
+	}
+	subroman_taxation_2 = { #Neglected Roman Taxation Infrastructure Equivalent
+		modifier = { domain_tax_mult = -0.10 }
+		
+		can_keep = { realm_law_use_subroman_taxation = yes }
+		
+		can_pass = {
+			custom_description = {
+			text = "cannot_dynamically_control_subroman_taxation"
+				always = no
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = subroman_taxation_cooldown
+				years = @subroman_taxation_cooldown_years
+			}
+		}
+	}
+	subroman_taxation_3 = { #Default Roman Taxation Infrastructure
+		modifier = {}
+		
+		can_keep = { realm_law_use_subroman_taxation = yes }
+		
+		can_pass = {
+			custom_description = {
+			text = "cannot_dynamically_control_subroman_taxation"
+				always = no
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = subroman_taxation_cooldown
+				years = @subroman_taxation_cooldown_years
+			}
+		}
+	}
+}
+
+subroman_popular_opinion = {
+	default = subroman_popular_opinion_0
+	cumulative = no
+	flag = realm_law
+	
+	subroman_popular_opinion_0 = {
+		modifier = {}
+		can_keep = { realm_law_use_subroman_taxation = yes }
+		can_pass = {
+			custom_description = {
+			text = "cannot_dynamically_control_subroman_opinion"
+				always = no
+			}
+		}
+	}
+	subroman_popular_opinion_1 = {
+		modifier = { county_opinion_add = -10 }
+		can_keep = { realm_law_use_subroman_taxation = yes }
+		can_pass = {
+			custom_description = {
+			text = "cannot_dynamically_control_subroman_opinion"
+				always = no
+			}
+		}
+	}
+}
+
+#Hidden "Feudal Transtion" Laws; replaces feudal_transition variables in CK2
+subroman_fedual_transition = {
+	default = subroman_fedual_transition_0
+	cumulative = no
+	flag = realm_law
+	flag = hidden_law #aka, not a true "Realm Law"; just used to track feudal transition stuff
+	
+	#These have no "real" meaning except for better tracking fo feudal_transition variables
+	#The above "hidden_law" flag means it won't be shown in the GUI, in keeping with variable
+	#mechanics in CK2
+	subroman_fedual_transition_0 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_1 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_2 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_3 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_4 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_5 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_6 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_7 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_8 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+	subroman_fedual_transition_9 = {
+		can_keep = { realm_law_use_feudal_transition = yes }
+		can_pass = { always = no }
+	}
+}
+
+#Roman government special effects
+bureaucratic_taxation = {
+	default = bureaucratic_taxation_2
+	cumulative = no
+	flag = realm_law
+	
+	bureaucratic_taxation_0 = {
+		modifier = {
+			domain_tax_mult = 0.0
+			county_opinion_add = 10
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
+		
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+		
+		on_pass = {
+			custom_description = {
+				text = all_gubernatorials_get_law_0
+				apply_taxation_down_tree = { VALUE = 0 }
+			}
+		}
+	}
+	
+	bureaucratic_taxation_1 = {
+		modifier = {
+			domain_tax_mult = 0.05
+			county_opinion_add = 5
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
+
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law_1
+				apply_taxation_down_tree = { VALUE = 1 }
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = bureaucratic_taxation_0 }
+				value = 1
+			}
+		}
+	}
+	
+	bureaucratic_taxation_2 = {
+		modifier = { domain_tax_mult = 0.10 }
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
+
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law_2
+				apply_taxation_down_tree = { VALUE = 2 }
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = bureaucratic_taxation_1 }
+				value = 1
+			}
+		}
+	}
+	
+	bureaucratic_taxation_3 = {
+		modifier = {
+			domain_tax_mult = 0.15
+			county_opinion_add = -10
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
+
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law_3
+				apply_taxation_down_tree = { VALUE = 3 }
+			}
+		}
+	}
+	
+	bureaucratic_taxation_4 = {
+		modifier = {
+			domain_tax_mult = 0.25
+			county_opinion_add = -20
+		}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = { realm_law_use_bureaucratic_taxation = yes }
+
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_3 }
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+					add = increase_taxation_bureaucratic_prestige_cost
+				}
+			}
+			gold = {
+				if = {
+					limit = { has_realm_law = bureaucratic_taxation_3 }
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_2 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_1 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+				else_if = {
+					limit = { has_realm_law = bureaucratic_taxation_0 }
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+					add = increase_taxation_bureaucratic_gold_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law_4
+				apply_taxation_down_tree = { VALUE = 4 }
+			}
+		}
+	}
+}

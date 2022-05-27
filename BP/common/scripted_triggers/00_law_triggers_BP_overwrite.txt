@@ -1,22 +1,24 @@
 ﻿### Authorities
-realm_law_use_crown_authority = {
-	uses_crown_law_trigger = yes
-}
+realm_law_use_crown_authority = { uses_crown_law_trigger = yes }
 
+### Successions
+
+#AKA, not theocracies, mercenaries, &c.
 can_have_confederate_partition_succession_law_trigger = {
 	OR = {
-		has_advanced_government_trigger = yes
+		valid_government_can_change_always_succession_trigger = yes
 		has_a_feudal_type_of_government_trigger = yes
+		has_a_primitive_type_of_government_trigger = yes
 	}
 }
 
 can_have_partition_succession_law_trigger = {
-	OR = {
-		has_advanced_government_trigger = yes
-		AND = {
-			culture = { has_innovation = innovation_hereditary_rule }
-			custom_description = {
-				text = succession_laws_must_have_organised_government_tooltip
+	custom_description = {
+		text = must_have_government_succession_or_be_organized_and_have_hereditary_rule
+		OR = {
+				valid_government_can_change_always_succession_trigger = yes
+			AND = {
+				culture = { has_innovation = innovation_hereditary_rule }
 				has_a_feudal_type_of_government_trigger = yes
 			}
 		}
@@ -24,26 +26,31 @@ can_have_partition_succession_law_trigger = {
 }
 
 can_have_high_partition_succession_law_trigger = {
-	trigger_if = {
-		limit = { NOT = { culture = { has_cultural_parameter = can_enact_high_partition_succession_law } } }
-		culture = { has_innovation = innovation_heraldry }
-	}
-	OR = {
-		has_advanced_government_trigger = yes
-		custom_description = {
-			text = succession_laws_must_have_organised_government_tooltip
-			has_a_feudal_type_of_government_trigger = yes
+	custom_description = {
+		text = must_have_government_succession_or_be_organized_and_have_heraldry
+		OR = {
+			valid_government_can_change_always_succession_trigger = yes
+			AND = {
+				trigger_if = {
+					limit = { NOT = { culture = { has_cultural_parameter = can_enact_high_partition_succession_law } } }
+					culture = { has_innovation = innovation_heraldry }
+				}
+				custom_description = {
+					text = succession_laws_must_have_organised_government_tooltip
+					has_a_feudal_type_of_government_trigger = yes
+				}
+			}
 		}
 	}
 }
+
 can_have_single_heir_succession_law_trigger = {
-	OR = {
-		has_advanced_government_trigger = yes
-		AND = {
-			culture = { has_innovation = innovation_primogeniture }
-			# Non-tribals only
-			custom_description = {
-				text = succession_laws_must_have_organised_government_tooltip
+	custom_description = {
+		text = must_have_government_succession_or_be_organized_and_have_primogeniture
+		OR = {
+			valid_government_can_change_always_succession_trigger = yes
+			AND = {
+				culture = { has_innovation = innovation_primogeniture }
 				has_a_feudal_type_of_government_trigger = yes
 			}
 		}
@@ -51,13 +58,12 @@ can_have_single_heir_succession_law_trigger = {
 }
 
 can_have_single_heir_youngest_succession_law_trigger = {
-	OR = {
-		has_advanced_government_trigger = yes
-		AND = {
-			culture = { has_innovation = innovation_primogeniture }
-			# Non-tribals only
-			custom_description = {
-				text = succession_laws_must_have_organised_government_tooltip
+	custom_description = {
+		text = must_have_government_succession_or_be_organized_and_have_primogeniture
+		OR = {
+			valid_government_can_change_always_succession_trigger = yes
+			AND = {
+				culture = { has_innovation = innovation_primogeniture }
 				has_a_feudal_type_of_government_trigger = yes
 			}
 		}
@@ -66,29 +72,28 @@ can_have_single_heir_youngest_succession_law_trigger = {
 
 can_have_single_heir_dynasty_house_trigger = {
 	exists = house
-	trigger_if = {
-		limit = {
-			culture = {
-				OR = {
-					has_cultural_pillar = heritage_west_slavic
-					NOT = {	has_innovation = innovation_heraldry }
+	custom_description = {
+		text = must_have_government_succession_or_be_organized_and_have_heraldry
+		OR = {
+			valid_government_can_change_always_succession_trigger = yes
+			AND = {
+				trigger_if = { #TODO: This isn't covered by localization
+					limit = {
+						culture = {
+							OR = {
+								has_cultural_pillar = heritage_west_slavic
+								NOT = {	has_innovation = innovation_heraldry }
+							}
+						}
+					}
+					culture = { has_innovation = innovation_table_of_princes }
+				}
+				trigger_else = { culture = { has_innovation = innovation_heraldry } }
+				custom_description = {
+					text = succession_laws_must_have_organised_government_tooltip
+					has_a_feudal_type_of_government_trigger = yes
 				}
 			}
 		}
-		culture = { has_innovation = innovation_table_of_princes }
-	}
-	trigger_else_if = {
-		limit = { has_advanced_government_trigger = yes }
-		always = yes
-	}
-	trigger_else = { culture = { has_innovation = innovation_heraldry } }
-	custom_description = {
-		text = succession_laws_must_have_organised_government_tooltip
-		has_a_feudal_type_of_government_trigger = yes
 	}
 }
-
-
-
-
-

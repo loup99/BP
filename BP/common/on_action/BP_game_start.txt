@@ -3,9 +3,570 @@
 }
 
 bp_game_start = {
+	on_actions = {
+		BP_character_events
+		game_start_fix_barony_government
+		create_BP_artifacts
+		setup_realm_laws
+		setup_realm_succession_laws
+		setup_administrative_languages
+	}
+}
+
+#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
+#in through the back door
+game_start_fix_barony_government = {
 	effect = {
-		BP_character_events = yes
-		game_start_fix_barony_government = yes
-		create_BP_artifacts = yes
+		every_barony = {
+			#Which isn't a capital
+			limit = { is_capital_barony = no }
+			#All castle holders should have the government of the county holder
+			if = {
+				limit = { this.title_province = { has_holding_type = castle_holding } }
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = { #NB: Causes singular "illegal_government" error in 476 start
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = theocracy_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = high_tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = prefeudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = nomad_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_government } }
+					this.holder = { change_government = subroman_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = eranshar_government } }
+					this.holder = { change_government = eranshar_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = gupta_government } }
+					this.holder = { change_government = gupta_government }
+				}
+				else_if = {
+					limit = {
+						this.county.holder = {
+							OR = {
+								has_government = gubernatorial_government
+								has_government = bureaucratic_government
+							}
+						}
+					}
+					this.holder = { change_government = gubernatorial_government }
+				}
+			}
+			#Handle cases of lay clergy faiths holding temples as well
+			else_if = {
+				limit = {
+					this.title_province = { has_holding_type = church_holding }
+					this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+				}
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = theocracy_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = high_tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = prefeudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = nomad_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_government } }
+					this.holder = { change_government = subroman_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = eranshar_government } }
+					this.holder = { change_government = eranshar_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = gupta_government } }
+					this.holder = { change_government = gupta_government }
+				}
+				else_if = { #NB: Causes singular "illegal_government" error in 476 start
+					limit = {
+						this.county.holder = {
+							OR = {
+								has_government = gubernatorial_government
+								has_government = bureaucratic_government
+							}
+						}
+					}
+					this.holder = { change_government = gubernatorial_government }
+				}
+			}
+		}
+	}
+}
+
+BP_character_events = {
+	effect = {
+		character:93 = { #Genseric of the Vandals
+			if = {
+				limit = {
+					is_alive = yes
+					is_landed = yes
+				}
+				save_scope_as = geneseric
+				trigger_event = { id = bp_historical_flavor.0001 days = 1 } #Vandals have lots of Roman slaves at start
+			}
+		}
+	}
+}
+
+create_BP_artifacts = {
+	effect = {
+		#Tooth of the Buddha
+		title:k_lanka.holder = {
+			save_scope_as = the_holder
+			create_artifact = {
+				name = tooth_of_the_buddha
+				description = tooth_of_the_buddha_desc
+				history = { type = created_before_history }
+				type = pedestal
+				template = buddhism_artifact_template
+				quality = 999
+				decaying = no
+				modifier = tooth_of_the_buddha_modifier
+				visuals = bone
+				save_scope_as = tooth_of_the_buddha_scope
+			}
+			scope:tooth_of_the_buddha_scope = {
+				set_variable = { # required to track usability for template
+					name = saint_bone_faith
+					value = scope:the_holder.faith
+				}
+			}
+		}
+		title:e_byzantium.holder = {
+			create_artifact = {
+				name = nail_of_the_true_cross
+				description = nail_of_the_true_cross_desc
+				history = { type = created_before_history }
+				type = pedestal
+				template = christian_relic_template
+				quality = 999
+				decaying = no
+				modifier = nail_of_the_true_cross_modifier
+				visuals = reliquary
+			}
+		}
+		title:e_persia.holder = {
+			create_artifact = {
+				name = branch_of_the_keshmar_cypress
+				description = branch_of_the_keshmar_cypress_desc
+				history = { type = created_before_history }
+				type = pedestal
+				template = zoroastrian_relic_template
+				quality = 999
+				decaying = no
+				modifier = branch_of_the_keshmar_cypress_modifier
+				visuals = flowers
+			}
+		}
+	}
+}
+
+setup_realm_laws = {
+	effect = {
+		#Set-up Subroman Taxation
+		every_ruler = {
+			limit = { has_government = subroman_government }
+			add_realm_law_skip_effects = subroman_taxation_3
+		}
+		#Setup Bureaucratic Taxation
+		every_ruler = {
+			limit = { has_government = bureaucratic_government }
+			add_realm_law_skip_effects = bureaucratic_taxation_2
+			apply_taxation_down_tree = { VALUE = 2 }
+		}
+		#Setup Bureaucratic Governance
+		every_ruler = {
+			limit = { has_government = gubernatorial_government }
+			vassal_contract_set_obligation_level = {
+				type = bureaucratic_vassal_governance
+				level = 1
+			}
+		}
+		#Setup e_persia's clerical/shah authority
+		#Initally strong Clerical Influence and weak Secular Authority
+		if = {
+			limit = { current_date >= 476.2.2 }
+			every_ruler = {
+				limit = { has_title = title:e_persia }
+				if = {
+					limit = { NOT = { has_realm_law = eranshar_authority_0 } }
+					add_realm_law = eranshar_authority_0
+					remove_variable = eranshar_authority_cooldown
+				}
+				if = {
+					limit = { NOT = { has_realm_law = clerical_influence_2 } }
+					add_realm_law = clerical_influence_2
+					remove_variable = clerical_influence_cooldown
+				}
+			}
+		}
+	}
+}
+
+#Sets up special succession laws
+
+#These follow the following pattern:
+# By culture, by government, then by specific titles, finally specific title overwrites after 476.2.2
+# To make it so we can systematically add specific laws, then overwrite for exceptions
+setup_realm_succession_laws = {
+	effect = {
+		### Cultures
+		every_ruler = { #Cultures/Religions with male_only_law effects
+			limit = {
+				OR = {
+					OR = {
+						has_culture = culture:old_frankish
+						has_culture = culture:frankish
+					}
+					has_religion = religion:islam_religion
+				}
+			}
+			add_realm_law_skip_effects = male_only_law
+		}
+		every_ruler = { #Cultures/Religions with female_preference_law effects
+			limit = { has_culture = culture:astures }
+			if = {
+				limit = { NOT = { has_realm_law = female_preference_law } }
+				add_realm_law_skip_effects = female_preference_law
+			}
+		}
+		
+		### Governments
+		every_ruler = { #Bureaucratic
+			limit = { has_government = bureaucratic_government }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_succession_law } }
+				add_realm_law_skip_effects = single_heir_succession_law
+			}
+		}
+		every_ruler = { #Gubernatorial
+			limit = { has_government = gubernatorial_government }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_succession_law } }
+				add_realm_law_skip_effects = single_heir_succession_law
+			}
+			every_held_title = {
+				limit = { tier >= tier_duchy }
+				add_title_law = gubernatorial_elective_succession_law
+			}
+		}
+		every_ruler = { #Eranshar
+			limit = { has_government = gubernatorial_government }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
+				add_realm_law_skip_effects = single_heir_dynasty_house
+			}
+		}
+		### Specific Title Overwrites
+		#TODO: remove those that are meaningless based on the above
+		
+		#Title Succession Laws
+		
+		#Eranshar Elective
+		every_ruler = {
+			every_held_title = {
+				limit = { this = title:e_persia }
+				add_title_law = eranshar_elective_succession_law
+			}
+		}
+		#Imperial Elective
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						this = title:e_byzantium
+						this = title:e_wre
+					}
+				}
+				add_title_law = imperial_elective_succession_law
+			}
+		}
+		#Feudal Elective
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						this = title:k_gallaecia
+						this = title:k_lombardia
+						
+						this = title:k_suebia
+						#Tarim Basin/Central Asia
+						this = title:k_kucha
+						this = title:d_bukhara
+						this = title:d_chah
+						this = title:d_ferghana
+						this = title:d_khotan
+						this = title:d_khuttal
+						this = title:d_merv
+						this = title:d_osrushana
+						this = title:d_samarkand
+					}
+				}
+				add_title_law = feudal_elective_succession_law
+			}
+		}
+		#Gaelic Elective Succession
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						this = title:k_brittany
+						this = title:k_dal_riata
+						this = title:d_aileach
+						this = title:d_astures
+						this = title:d_brittany
+						this = title:d_broerec
+						this = title:d_cait
+						this = title:d_ce
+						this = title:d_connacht
+						this = title:d_creones
+						this = title:d_deasmhumhain
+						this = title:d_domnonia
+						this = title:d_fortriu
+						this = title:d_fotla
+						this = title:d_kernev
+						this = title:d_leinster
+						this = title:d_meath
+						this = title:d_munster
+						this = title:d_ulster
+					}
+				}
+				add_title_law = gaelic_elective_succession_law
+			}
+		}
+		#Tribal Elective Succession
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						this = title:k_masmuda
+						#Turkic Succession
+						this = title:e_hunnic_empire #TODO: Implement succ_turkish_succession law
+						this = title:k_al_hirah #TODO: Implement succ_turkish_succession law
+						this = title:k_arabia_petraea #TODO: Implement succ_turkish_succession law
+						this = title:k_qaryat_dhat_kahil #TODO: Implement succ_turkish_succession law
+					}
+				}
+				add_title_law = tribal_elective_succession_law
+			}
+		}
+		
+		#Realm Succession Laws: Sex
+		
+		#Male Only
+		every_ruler = {
+			limit = {
+				OR = {
+					has_title = title:e_axum
+					has_title = title:k_england
+					has_title = title:k_gallaecia
+					#Persians
+					has_title = title:e_persia
+					has_title = title:k_persia
+					has_title = title:d_fars
+					#Romans/Byzantines
+					has_title = title:e_byzantium
+					has_title = title:e_wre
+					has_title = title:k_dalmatia
+					has_title = title:k_italia
+					has_title = title:k_soissons
+					has_title = title:d_constantinopolitan_prefect
+					has_title = title:d_gaul_prefect
+					has_title = title:d_isauria
+					has_title = title:d_roman_prefect
+					has_title = title:d_tangiers
+					has_title = title:d_triveria
+					#Germans
+					has_title = title:k_alamannia
+					has_title = title:k_geatland
+					has_title = title:k_italy
+					has_title = title:k_lombardia
+					has_title = title:k_ostrogoths
+					has_title = title:k_suebia
+					has_title = title:k_thuringia
+					has_title = title:k_vandalica
+					has_title = title:d_germanii
+					has_title = title:d_thracian_goths
+					#Franks
+					has_title = title:k_franks
+					#Celts
+					has_title = title:d_aileach
+					has_title = title:d_connacht
+					has_title = title:d_deasmhumhain
+					has_title = title:d_leinster
+					has_title = title:d_meath
+					has_title = title:d_munster
+					has_title = title:d_ulster
+					#Semites
+					has_title = title:k_al_hirah
+					has_title = title:k_arabia_petraea
+					has_title = title:k_qaryat_dhat_kahil
+					has_title = title:k_yemen
+					#Berbers
+					has_title = title:k_gaetulia
+					has_title = title:k_garamantes
+					has_title = title:k_masmuda
+					has_title = title:k_mauretania
+					has_title = title:k_mauri
+					#Altaics
+					has_title = title:e_rouran
+					has_title = title:e_turkestan
+				}
+			}
+			add_realm_law_skip_effects = male_only_law
+		}
+		
+		#Equal Succession
+		every_ruler = {
+			limit = {
+				OR = {
+					has_title = title:k_angloland
+					has_title = title:k_frisia
+					has_title = title:d_ripuria
+				}
+			}
+			add_realm_law_skip_effects = equal_law
+		}
+		
+		#Realm Succession Laws: Order
+		
+		#Primogeniture Succession
+		every_ruler = {
+			limit = {
+				OR = {
+					#Romans/Byzantines
+					has_title = title:k_soissons
+					has_title = title:d_isauria
+					has_title = title:d_tangiers
+					has_title = title:d_thracian_goths
+					has_title = title:d_triveria
+					#Persians
+					has_title = title:e_persia
+					has_title = title:k_persia
+					has_title = title:d_fars
+					has_title = title:d_khorezm
+					#Altaics
+					has_title = title:e_rouran
+					has_title = title:e_turkestan
+					#Berbers
+					has_title = title:k_mauretania
+					has_title = title:k_mauri
+					#Semites
+					has_title = title:k_yemen
+					#Germans
+					has_title = title:k_italy
+					has_title = title:k_ostrogoths
+				}
+			}
+			add_realm_law_skip_effects = single_heir_succession_law
+		}
+		#Seniority Succession
+		every_ruler = {
+			limit = {
+				OR = {
+					#East Africans
+					has_title = title:e_axum
+					#Romans/Byzantines
+					has_title = title:k_england
+					#Persians
+					has_title = title:d_exilarch
+					#Berbers
+					has_title = title:k_gaetulia
+					has_title = title:k_garamantes
+					#Germans
+					has_title = title:k_vandalica
+					has_title = title:k_geatland
+				}
+			}
+			add_realm_law_skip_effects = single_heir_dynasty_house
+		}
+		#Remove specific title laws
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = { #These were listed as house seniority in CK2 so don't overwrite
+						this = title:k_italy_prefect
+						this = title:d_constantinopolitan_prefect
+						this = title:d_gaul_prefect
+						this = title:d_italy_prefect
+						this = title:d_roman_prefect
+					}
+				}
+				remove_title_law = gubernatorial_elective_succession_law
+			}
+		}
+		### Specific History Overwrites
+		if = {
+			limit = { current_date >= 531.1.1 }
+			title:k_visigoths = { add_title_law = feudal_elective_succession_law }
+		}
+	}
+}
+
+setup_administrative_languages = {
+	effect = {
+		#Byzantines use latin before Justin II's reign
+		every_ruler = {
+			limit = { has_title = title:e_byzantium }
+			every_vassal_or_below = {
+				limit = {
+					primary_title = { tier >= tier_kingdom }
+					has_government = gubernatorial_government
+				}
+				if = {
+					limit = { current_date < 565.11.14 }
+					setup_the_court_language = {
+						CHAR = this
+						LANGUAGE = language_latin
+					}
+				}
+				else = {
+					setup_the_court_language = {
+						CHAR = this
+						LANGUAGE = language_greek
+					}
+				}
+			}
+		}
 	}
 }

@@ -1,56 +1,10 @@
-﻿high_tribal_government = {
-	rulers_should_have_dynasty = yes
+﻿prefeudal_government = {
 	create_cadet_branches = no
-	always_use_patronym = yes
-	
+	rulers_should_have_dynasty = yes
 	royal_court = yes
 	
 	primary_holding = castle_holding
-	valid_holdings = { castle_holding tribal_holding }
-	required_county_holdings = { castle_holding city_holding church_holding }
-	
-	regiments_prestige_as_gold = yes
-	
-	prestige_opinion_override = { -10 0 3 5 10 20 }
-	
-	vassal_contract = {
-		high_tribal_government_obligations
-		religious_rights
-		fortification_rights
-		coinage_rights
-		succession_rights
-		war_declaration_rights
-		council_rights
-		title_revocation_rights
-		#Other special contracts
-		foederatus_special_contract
-		tributary_special_contract
-	}
-	
-	character_modifier = {
-		title_creation_cost_mult = -0.25
-		army_maintenance_mult = -0.25
-		
-		feudal_government_vassal_opinion = -10
-		clan_government_vassal_opinion = -10
-		republic_government_vassal_opinion = -10
-		#subroman_government_vassal_opinion = -10
-		#prefeudal_government_vassal_opinion = -10
-		
-		ai_war_chance = 0.25
-	}
-	
-	color = rgb{ 0.00 0.392 0.00 }
-}
-
-prefeudal_government = {
-	create_cadet_branches = no
-	rulers_should_have_dynasty = yes
-	
-	royal_court = yes
-	
-	primary_holding = castle_holding
-	valid_holdings = { castle_holding tribal_holding }
+	valid_holdings = { castle_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
 	
 	prestige_opinion_override = { -10 0 3 5 10 20 }
@@ -69,60 +23,114 @@ prefeudal_government = {
 		#These are bureaucratic-government locked
 		bureaucratic_special_contract
 		tributary_special_contract
+		tributary_state_special_contract
 		bureaucratic_vassal_governance
 	}
 	
 	character_modifier = {
-		development_growth_factor = -0.30
+		development_growth_factor = -0.15
 	}
 	
-	color = {0.913 0.722 0.988}
+	flag = can_hold_castles_and_tribes
+	flag = cannot_advance_beyond_early_medieval_era
+	flag = prefeudal_character_modifiers
+	
+	color = hsv{ 0.67 0.50 0.78 } #Feudal Color, 50% Saturation
 }
 
-#Nomad Government Types
-#LT-Rascek: Duplicate of Tribal; brought in for easy integration if/when Paradox implements Nomadic Governance
-nomad_government = {
+#Indian Government Types
+gupta_government = {
+	create_cadet_branches = no
 	rulers_should_have_dynasty = yes
-	affected_by_development = no
-	regiments_prestige_as_gold = yes
-	supply_limit_mult_for_others = -0.5
-	primary_holding = tribal_holding
-	required_county_holdings = { tribal_holding }
-
+	dynasty_named_realms = yes
+	royal_court = yes
+	
+	primary_holding = castle_holding
 	valid_holdings = { castle_holding }
-
-	prestige_opinion_override = { -10 0 3 5 10 20 }
-	always_use_patronym = yes
+	required_county_holdings = { castle_holding city_holding church_holding }
 	
 	vassal_contract = {
-		tribal_government_obligations
-		foederatus_special_contract
+		gupta_government_taxes
+		gupta_government_levies
+		fortification_rights
+		coinage_rights
+		succession_rights
+		war_declaration_rights
+		title_revocation_rights
 		tributary_special_contract
+		tributary_state_special_contract
 	}
 	
 	character_modifier = {
-		title_creation_cost_mult = -0.5
-		army_maintenance_mult = -0.5
-
-		feudal_government_vassal_opinion = -20
-		clan_government_vassal_opinion = -20
-		republic_government_vassal_opinion = -20
-		#subroman_government_vassal_opinion = -20
-		#prefeudal_government_vassal_opinion = -20
-		#high_tribal_government_vassal_opinion = -10
+		development_growth_factor = 0.25
+		monthly_county_control_change_add = 0.1
+	}
 	
-		ai_war_chance = 0.25
+	flag = vassals_must_give_titles_to_dynasty_members
+	flag = government_titles_cannot_leave_realm_on_succession #Realm Law hardcoded, so mostly for show
+	flag = government_can_change_succession_laws
+	flag = government_can_designate_heirs
+	flag = gupta_government_character_modifier
+	
+	color = {0.250 0.250 0.250}
+}
+
+#Iranian Government Types
+eranshar_government = {
+	create_cadet_branches = yes
+	rulers_should_have_dynasty = yes
+	dynasty_named_realms = yes
+	royal_court = yes
+	
+	primary_holding = castle_holding
+	valid_holdings = { castle_holding }
+	required_county_holdings = { castle_holding city_holding church_holding }
+	
+	vassal_contract = {
+		eranshar_government_obligations
+		fortification_rights
+		coinage_rights
+		succession_rights
+		war_declaration_rights
+		council_rights
+		title_revocation_rights
+		tributary_special_contract
+		tributary_state_special_contract
+		#special
+		eranshar_marzban_contract
+	}
+	
+	character_modifier = {
+		#Gives eranshar_government characters an extra 2-5 domain, depending on their secular
+		#authority
+		domain_limit = 2
+		#From WtWSMS-CK2
+		men_at_arms_maintenance = -0.5
+		#Artisans/merchants/manufacturing cities were important to Iranian economy, so apply 
+		#appropriate shifts. Also note that Merchants/Artisans were at the bottom of the hierarchy
+		#so give same opinion modifer as if religion was hostile (because... it was).
+		republic_government_tax_contribution_add = 0.30
+		republic_government_levy_contribution_add = 0.15
+		republic_government_vassal_opinion = -20
 	}
 	
 	flag = government_can_raid_rule
-	color ={ 201 179 36 }
+	flag = can_only_give_zoroastrian_counties_to_zoroastrian_characters
+	flag = considers_persia_always_a_rightful_liege
+	flag = government_title_revocation_allowed
+	flag = government_vassal_retraction_allowed
+	flag = government_vassal_refusal_is_treason
+	flag = government_titles_cannot_leave_realm_on_succession #Realm Law hardcoded, so mostly for show
+	flag = government_can_designate_heirs
+	flag = eranshar_government_character_modifier
+	
+	color = {1.000 0.500 0.000}
 }
 
 #Degenerate Roman Institutions
 subroman_government = {
 	create_cadet_branches = yes
 	rulers_should_have_dynasty = yes
-	
 	royal_court = yes
 	
 	primary_holding = castle_holding
@@ -142,6 +150,7 @@ subroman_government = {
 		#These are bureaucratic-government locked
 		bureaucratic_special_contract
 		tributary_special_contract
+		tributary_state_special_contract
 		bureaucratic_vassal_governance
 	}
 	
@@ -152,100 +161,22 @@ subroman_government = {
 		vassal_levy_contribution_mult = -0.25
 	}
 	
-	color = {0.750 0.000 0.000}
-}
-
-#Iranian Government Types
-eranshar_government = {
-	create_cadet_branches = no
-	rulers_should_have_dynasty = yes
-	dynasty_named_realms = yes
+	flag = government_title_revocation_allowed
+	flag = subroman_government_character_modifier
+	flag = government_can_change_succession_laws
 	
-	royal_court = yes
-	
-	primary_holding = castle_holding
-	valid_holdings = { castle_holding city_holding }
-	required_county_holdings = { castle_holding city_holding church_holding }
-	
-	#dynasty_named_realms = yes
-	
-	vassal_contract = {
-		eranshar_government_taxes
-		religious_rights
-		fortification_rights
-		coinage_rights
-		succession_rights
-		war_declaration_rights
-		council_rights
-		title_revocation_rights
-		tributary_special_contract
-		#special
-		eranshar_marzban_contract
-	}
-	
-	character_modifier = {
-		levy_size = -0.30
-		direct_vassal_opinion = -25
-		vassal_limit = 20 #Replaces vassals of certain types not being included
-		men_at_arms_maintenance = -0.5
-		vassal_levy_contribution_add = 0.35 #Let's not get too crazy here...
-	}
-	
-	flag = government_can_raid_rule
-	
-	color = {1.000 0.500 0.000}
-}
-
-#Indian Government Types
-#Default access to primogeniture in 00_succession_triggers.txt
-gupta_government = {
-	create_cadet_branches = no
-	rulers_should_have_dynasty = yes
-	dynasty_named_realms = yes
-	
-	royal_court = yes
-	
-	primary_holding = castle_holding
-	valid_holdings = { castle_holding }
-	required_county_holdings = { castle_holding city_holding church_holding }
-	
-	#dynasty_named_realms = yes
-	
-	vassal_contract = {
-		feudal_government_taxes
-		feudal_government_levies
-		religious_rights
-		fortification_rights
-		coinage_rights
-		succession_rights
-		war_declaration_rights
-		council_rights
-		title_revocation_rights
-		tributary_special_contract
-	}
-	
-	character_modifier = {}
-	
-	color = {0.250 0.250 0.250}
+	color = hsv{0.000 1.000 0.630 } #Roman culture color
 }
 
 #Roman-centric governments
 gubernatorial_government = {
 	create_cadet_branches = no
 	rulers_should_have_dynasty = yes
+	royal_court = yes
 	
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding city_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
-	
-	#Not for independent rulers
-	can_get_government = {
-		is_independent_ruler = no
-		OR = {
-			vassal_contract_has_flag = gubernatorial_government_flag
-			any_liege_or_above = { has_government = bureaucratic_government }
-		}
-	}
 	
 	vassal_contract = {
 		gubernatorial_taxes
@@ -255,18 +186,21 @@ gubernatorial_government = {
 	}
 	
 	character_modifier = {
-		domain_tax_mult = 0.25
-		vassal_tax_contribution_mult = 0.25
-		levy_size = -0.50
+		levy_size = -0.25
 	}
 	
-	color = {0.750 0.500 0.500}
+	flag = government_title_revocation_allowed
+	flag = government_vassal_retraction_allowed
+	flag = government_vassal_refusal_is_treason
+	flag = government_titles_cannot_leave_realm_on_succession #Realm Law hardcoded, so mostly for show
+	flag = gubernatorial_government_character_modifier
+	
+	color = hsv{ 0.902 0.500 0.650 } #Tyrian Purple - Desaturated 50%, Brightened 25%
 }
 
 bureaucratic_government = {
 	create_cadet_branches = yes
 	rulers_should_have_dynasty = yes
-	
 	royal_court = yes
 	
 	primary_holding = castle_holding
@@ -274,36 +208,22 @@ bureaucratic_government = {
 	
 	required_county_holdings = { castle_holding city_holding church_holding }
 	
-	#Only empires can be bureaucratic_government
-	can_get_government = {
-		is_independent_ruler = yes
-		primary_title.tier = tier_empire
-		OR = {
-			OR = {
-				#Valid Successor Governments
-				has_government = subroman_government
-				has_government = prefeudal_government
-				has_government = gubernatorial_government
-				#so the administration doesnt disappear if emperor somehow changes culture
-				has_government = bureaucratic_government
-			}
-			#has_character_flag = bureacratic_government_temp_override
-			culture = { has_innovation = innovation_roman_administration }
-		}
-	}
-	
 	#Can never be a vassal, so no vassal contracts applicable
 	vassal_contract = {}
 	
 	character_modifier = {
-		domain_tax_mult = 0.15
 		domain_limit = 5
 		vassal_limit = 10
-		vassal_tax_contribution_mult = 0.15
 		levy_size = -0.25
-		vassal_levy_contribution_mult = -0.25
 		men_at_arms_cap = 5 #i.e., double total number of maa in innovations
 	}
 	
-	color = {0.500 0.000 0.000}
+	flag = government_title_revocation_allowed
+	flag = government_vassal_retraction_allowed
+	flag = government_vassal_refusal_is_treason
+	flag = government_titles_cannot_leave_realm_on_succession #Realm Law hardcoded, so mostly for show
+	flag = government_can_designate_heirs
+	flag = bureacratic_government_character_modifier
+	
+	color = hsv{ 0.902 0.980 0.400 } #Tyrian Purple
 }

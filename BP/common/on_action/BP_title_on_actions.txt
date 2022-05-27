@@ -10,23 +10,65 @@
 BP_handle_bureaucratic_succession = {
 	effect = {
 		if = {
-			limit = {
-				is_independent_ruler = yes
-				OR = {
-					has_government = subroman_government
-					has_government = gubernatorial_government
-					has_government = bureaucratic_government
-					has_government = prefeudal_government
-				}
-				scope:previous_holder = {
-					OR = {
-						has_government = bureaucratic_government #dead bureacrats
-						has_character_flag = bureacratic_ruler #Living bureacrats with no titles
+			limit = { scope:title.tier = tier_empire } #Avoids a whole slew of related errors
+			#If the previous holder was bureaucratic, I become bureauctic (if having correct government)
+			if = {
+				limit = {
+					scope:previous_holder = { has_government = bureaucratic_government }
+					root = {
+						OR = { #Valid precursor governments
+							has_government = subroman_government
+							has_government = gubernatorial_government
+							has_government = bureaucratic_government
+							has_government = prefeudal_government
+							has_government = feudal_government
+						}
 					}
 				}
+				#In the case of an external/non-bureaucratic_taxation ruler,
+				#Update taxation rules after switching government
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = bureaucratic_taxation_0
+							has_realm_law = bureaucratic_taxation_1
+							has_realm_law = bureaucratic_taxation_2
+							has_realm_law = bureaucratic_taxation_3
+							has_realm_law = bureaucratic_taxation_4
+						}
+					}
+					change_government = bureaucratic_government
+					apply_taxation_down_tree = { VALUE = 2 }
+				}
+				#Otherwise, just switch government
+				else = {
+					change_government = bureaucratic_government
+					
+				}
 			}
-			change_government = bureaucratic_government
-			add_character_flag = bureacratic_ruler
+			else = {
+				change_government = subroman_government
+				inherit_correct_subroman_taxation_law_effect = { TITLE_BEQUEATHER = scope:previous_holder }
+			}
+			#Then, change the previous holder's government
+			scope:previous_holder = {
+				if = { #If not independent and under bureaucracy, adopt gubernatorial_government
+					limit = {
+						any_liege_or_above = {
+							OR = {
+								has_government = bureaucratic_government
+								has_government = gubernatorial_government
+							}
+						}
+					}
+					change_government = gubernatorial_government
+					get_and_apply_previous_taxation_effect = { LIEGE = root.liege } #Ensure proper taxation inherited
+				}
+				else = {
+					change_government = subroman_government
+					inherit_correct_subroman_taxation_law_effect = { TITLE_BEQUEATHER = scope:previous_holder }
+				}
+			}
 		}
 	}
 }
@@ -88,7 +130,10 @@ BP_prevent_title_boostrapping = {
 					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
 					change_government = high_tribal_government
 				}
-				else = { change_government = subroman_government } #Occasional errors
+				else = {
+					change_government = subroman_government
+					inherit_correct_subroman_taxation_law_effect = { TITLE_BEQUEATHER = scope:previous_holder }
+				}
 			}
 			else_if = {
 				limit = { scope:previous_holder = { has_government = eranshar_government } }
@@ -119,7 +164,10 @@ BP_prevent_title_boostrapping = {
 					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
 					change_government = high_tribal_government
 				}
-				else = { change_government = gubernatorial_government } #Occasional errors
+				else = {
+					change_government = gubernatorial_government
+					get_and_apply_previous_taxation_effect = { LIEGE = root.liege } #Ensure proper taxation inherited
+				}
 			}
 		}
 		else_if = {
@@ -130,10 +178,12 @@ BP_prevent_title_boostrapping = {
 				scope:title.title_province = { has_holding_type = castle_holding }
 			}
 			change_government = gubernatorial_government
+			get_and_apply_previous_taxation_effect = { LIEGE = root.liege } #Ensure proper taxation inherited
 		}
 	}
 }
 
+#Fires when Rome falls
 BP_fall_of_rome = {
 	effect = {
 		if = {

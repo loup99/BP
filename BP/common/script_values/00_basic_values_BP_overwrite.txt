@@ -35,6 +35,26 @@ count_obligation_improvements_for_vassal = {
 	}
 	if = {
 		limit = {
+			has_government = gupta_government
+			local_var:gupta_government_taxes != vassal_contract_obligation_level:gupta_government_taxes
+		}
+		add = {
+			value = vassal_contract_obligation_level:gupta_government_taxes
+			subtract = local_var:gupta_government_taxes
+		}
+	}
+	if = {
+		limit = {
+			has_government = gupta_government
+			local_var:gupta_government_levies != vassal_contract_obligation_level:gupta_government_levies
+		}
+		add = {
+			value = vassal_contract_obligation_level:gupta_government_levies
+			subtract = local_var:gupta_government_levies
+		}
+	}
+	if = {
+		limit = {
 			has_government = subroman_government
 			local_var:subroman_government_taxes != vassal_contract_obligation_level:subroman_government_taxes
 		}
@@ -63,21 +83,11 @@ count_obligation_improvements_for_vassal = {
 			subtract = local_var:gubernatorial_taxes
 		}
 	}
-	if = {
-		limit = {
-			has_government = eranshar_government
-			local_var:eranshar_government_taxes != vassal_contract_obligation_level:eranshar_government_taxes
-		}
-		add = {
-			value = vassal_contract_obligation_level:eranshar_government_taxes
-			subtract = local_var:eranshar_government_taxes
-		}
-	}
 	# Any non-default fine print contract takes subtracts one
 	# special_contract intentionally has no effect
 	if = {
 		limit = {
-			valid_government_rights_general_trigger = yes
+			valid_government_religious_rights_trigger = yes
 			local_var:religious_rights != vassal_contract_obligation_level:religious_rights
 		}
 		if = {
@@ -142,7 +152,7 @@ count_obligation_improvements_for_vassal = {
 	}
 	if = {
 		limit = {
-			valid_government_rights_general_trigger = yes
+			valid_government_rights_council_trigger = yes
 			local_var:council_rights != vassal_contract_obligation_level:council_rights
 		}
 		if = {
@@ -216,15 +226,22 @@ count_total_obligation_changes = {
 	}
 	if = {
 		limit = {
-			has_government = eranshar_government
-			local_var:eranshar_government_taxes != vassal_contract_obligation_level:eranshar_government_taxes
+			has_government = gupta_government
+			local_var:gupta_government_taxes != vassal_contract_obligation_level:gupta_government_taxes
+		}
+		add = 1
+	}
+	if = {
+		limit = {
+			has_government = gupta_government
+			local_var:gupta_government_levies != vassal_contract_obligation_level:gupta_government_levies
 		}
 		add = 1
 	}
 	#Other General Rights
 	if = {
 		limit = {
-			valid_government_rights_general_trigger = yes
+			valid_government_religious_rights_trigger = yes
 			local_var:religious_rights != vassal_contract_obligation_level:religious_rights
 		}
 		add = 1
@@ -259,7 +276,7 @@ count_total_obligation_changes = {
 	}
 	if = {
 		limit = {
-			valid_government_rights_general_trigger = yes
+			valid_government_rights_council_trigger = yes
 			local_var:council_rights != vassal_contract_obligation_level:council_rights
 		}
 		add = 1
@@ -295,6 +312,16 @@ count_total_obligation_changes = {
 		}
 		add = 1
 	}
+	#Governance Contracts
+	if = {
+		limit = {
+			liege = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes }
+			valid_bureacratic_vassal_governance_vassal_gov_trigger = yes
+			local_var:bureaucratic_vassal_governance != vassal_contract_obligation_level:bureaucratic_vassal_governance
+		}
+		add = 1
+	}
+	#Foederatus
 	if = {
 		limit = {
 			valid_government_foederatus_special_trigger = yes
@@ -302,16 +329,18 @@ count_total_obligation_changes = {
 		}
 		add = 1
 	}
-	if = {
-		limit = { local_var:tributary_special_contract != vassal_contract_obligation_level:tributary_special_contract }
-		add = 1
-	}
-	#Governance Contracts
+	#Tributaries
 	if = {
 		limit = {
-			liege = { valid_bureacratic_vassal_governance_liege_gov_trigger = yes }
-			valid_bureacratic_vassal_governance_vassal_gov_trigger = yes
-			local_var:bureaucratic_vassal_governance != vassal_contract_obligation_level:bureaucratic_vassal_governance
+			can_have_tributary_contract_trigger = yes
+			local_var:tributary_special_contract != vassal_contract_obligation_level:tributary_special_contract
+		}
+		add = 1
+	}
+	if = {
+		limit = {
+			can_have_tributary_state_contract_trigger = yes
+			local_var:tributary_state_special_contract != vassal_contract_obligation_level:tributary_state_special_contract
 		}
 		add = 1
 	}

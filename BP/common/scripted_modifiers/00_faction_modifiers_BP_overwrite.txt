@@ -1,0 +1,452 @@
+﻿##### Changed from Vanilla: Modified to support more than crown_authority
+liberty_faction_modifiers = {
+	modifier = {
+		add = 10 # AI won't join at +10 Opinion
+		$FACTION_TARGET$ = { has_crown_authority_equivalent_level_trigger = { LEVEL = 1 } }
+	}
+	modifier = {
+		add = 20 # AI won't join at +20 Opinion
+		$FACTION_TARGET$ = { has_crown_authority_equivalent_level_trigger = { LEVEL = 2 } }
+	}
+	modifier = {
+		add = 40 # AI won't join at +40 Opinion
+		$FACTION_TARGET$ = { has_crown_authority_equivalent_level_trigger = { LEVEL = 3 } }
+	}
+
+	# Legacy
+	modifier = {
+		add = -20
+		$FACTION_TARGET$ = {
+			exists = dynasty
+			dynasty = {
+				has_dynasty_perk = glory_legacy_4
+			}
+		}
+	}
+}
+
+##### Changed from Vanilla: Modified to support more than crown_authority
+claimant_faction_modifiers = {
+	# Gender concerns (general)
+	modifier = {
+		add = -50
+		NOT = { $FACTION_CLAIMANT$ = root }
+		OR = {
+			AND = {
+				faith = { has_doctrine = doctrine_gender_female_dominated }
+				$FACTION_CLAIMANT$ = {
+					is_male = yes
+				}
+			}
+			AND = {
+				faith = { has_doctrine = doctrine_gender_male_dominated }
+				$FACTION_CLAIMANT$ = {
+					is_female = yes
+				}
+			}
+		}
+	}
+
+	# Gender concerns (target of wrong gender)
+	modifier = {
+		add = 25
+		OR = {
+			AND = {
+				faith = { has_doctrine = doctrine_gender_female_dominated }
+				$FACTION_TARGET$ = { is_male = yes }
+				$FACTION_CLAIMANT$ = {
+					is_female = yes
+					faith = root.faith
+				}
+			}
+			AND = {
+				faith = { has_doctrine = doctrine_gender_male_dominated }
+				$FACTION_TARGET$ = { is_female = yes }
+				$FACTION_CLAIMANT$ = {
+					is_male = yes
+					faith = root.faith
+				}
+			}
+		}
+	}
+
+	# Powerful vassals will be even more motivated to create claimant if unhappy with liege, if they like the claimant more than their liege
+	opinion_modifier = {
+		trigger = {
+			is_powerful_vassal_of = $FACTION_TARGET$
+			save_temporary_opinion_value_as = { name = opinion_of_current_liege target = $FACTION_TARGET$ }
+			opinion = { target = $FACTION_CLAIMANT$ value > scope:opinion_of_current_liege }
+		}
+		who = root
+		opinion_target = $FACTION_TARGET$
+		multiplier = -1.5
+		min = 0
+	}
+
+	# They do not like the claimant more than their liege, unless its a claimant of their own culture
+	modifier = {
+		add = -50
+		NOT = {	$FACTION_CLAIMANT$ = root }
+		NAND = {
+			culture = $FACTION_CLAIMANT$.culture
+			NOT = {
+				culture = $FACTION_TARGET$.culture
+			}
+		}
+		save_temporary_opinion_value_as = { name = opinion_of_current_liege target = $FACTION_TARGET$ }
+		opinion = { target = $FACTION_CLAIMANT$ value < scope:opinion_of_current_liege }
+	}
+	
+	modifier = { # If you like the Claimant better than your liege, increase the score
+		NOT = {	$FACTION_CLAIMANT$ = root }
+		save_temporary_opinion_value_as = { name = opinion_of_current_liege target = $FACTION_TARGET$ }
+		save_temporary_opinion_value_as = { name = opinion_of_claimant target = $FACTION_CLAIMANT$ }
+		scope:opinion_of_claimant > liege_opinion_value
+		scope:opinion_of_claimant > 0
+		add = {
+			value = scope:opinion_of_claimant
+			multiply = 1.5
+			subtract = scope:opinion_of_current_liege
+		}
+	}
+	
+	opinion_modifier = { # Reduce likelihood of joining if you have positive opinion of your liege
+		who = root
+		opinion_target = $FACTION_TARGET$
+		multiplier = -0.5
+		max = 0
+	}
+	
+	modifier = {
+		add = { # Claimant is too old
+			value = $FACTION_CLAIMANT$.age
+			subtract = 45
+			multiply = -2
+		}
+		AND = {
+			NOT = {	$FACTION_CLAIMANT$ = root }
+			$FACTION_CLAIMANT$.age > 45
+		}
+	}
+	modifier = { # Claimant is too young
+		add = -25
+		$FACTION_CLAIMANT$ = { is_adult = no }
+	}
+	modifier = {
+		add = { # Claimant is dying
+			value = 1.5
+			subtract = $FACTION_CLAIMANT$.health
+			multiply = -20
+		}
+		AND = {
+			NOT = {	$FACTION_CLAIMANT$ = root }
+			$FACTION_CLAIMANT$.health < 1.5
+		}
+	}
+	modifier = {
+		add = -50
+		AND = { # Claimant does not have children and is unlikely to have any.
+			$FACTION_CLAIMANT$.fertility <= 0.1
+			NOT = {	$FACTION_CLAIMANT$ = root }
+			NOT = {
+				$FACTION_CLAIMANT$ = {
+					any_child = {
+						count >= 1
+					}
+				}
+			}
+		}
+	}
+
+	# Infirmity of claimant
+	modifier = {
+		add = -50
+		$FACTION_CLAIMANT$ = {
+			has_trait = infirm
+		}
+	}
+
+	# I am the claimant!
+	modifier = {
+		add = {
+			value = 50 # Basic 'self-love' bonus
+			add = { 
+				value = ai_greed
+				multiply = 1.5
+				min = 0
+			}
+		}
+		AND = {
+			$FACTION_CLAIMANT$  = root
+			NOT = { has_trait = content } # Not opposed to acquiring more power/wealth
+		}
+	}
+
+	# Legacy
+	modifier = {
+		add = -20
+		$FACTION_TARGET$ = {
+			exists = dynasty
+			dynasty = {
+				has_dynasty_perk = glory_legacy_4
+			}
+		}
+	}
+
+	# Friends & Lovers don't want to join
+	modifier = {
+		add = -500
+		OR = {
+			has_secret_relation_lover = $FACTION_TARGET$
+			has_relation_lover = $FACTION_TARGET$
+			has_relation_soulmate = $FACTION_TARGET$ 
+			has_relation_friend = $FACTION_TARGET$
+			has_relation_best_friend = $FACTION_TARGET$
+		}
+	}
+	# Friends & Lovers want to support their claimants!
+	modifier = {
+		add = 25
+		OR = {
+			has_secret_relation_lover = $FACTION_CLAIMANT$
+			has_relation_lover = $FACTION_CLAIMANT$
+			has_relation_soulmate = $FACTION_CLAIMANT$
+			has_relation_friend = $FACTION_CLAIMANT$
+			has_relation_best_friend = $FACTION_CLAIMANT$
+		}
+	}
+	# Best Friends & Soulmates really want to support their claimants!
+	modifier = {
+		add = 100
+		OR = {
+			has_relation_soulmate = $FACTION_CLAIMANT$
+			has_relation_best_friend = $FACTION_CLAIMANT$
+		}
+	}
+
+	# Liege is too young to rule
+	modifier = {
+		add = 25
+		$FACTION_TARGET$ = { is_adult = no }
+	}
+
+	# Cultural reasons
+	modifier = {
+		culture = {
+			NOR = {
+				this = $FACTION_TARGET$.culture
+				cultural_acceptance = { target = $FACTION_TARGET$.culture value >= 90 } # Essentially the same culture
+				has_cultural_parameter = doesnt_care_about_culture_faith_in_factions
+			}
+			OR = {
+				this = $FACTION_CLAIMANT$.culture
+				cultural_acceptance = { target = $FACTION_CLAIMANT$.culture value >= 90 } # Essentially the same culture
+			}
+		}
+		add = {
+			value = 50
+			if = {
+				limit = {
+					culture = $FACTION_CLAIMANT$.culture
+				}
+				add = 50
+			}
+			if = {
+				limit = {
+					culture = {
+						cultural_acceptance = { target = $FACTION_TARGET$.culture value <= 20 }
+					}
+				}
+				add = 25
+			}
+			if = {
+				limit = {
+					culture = {
+						cultural_acceptance = { target = $FACTION_TARGET$.culture value <= 35 }
+					}
+				}
+				add = 15
+			}
+			if = {
+				limit = {
+					culture = {
+						cultural_acceptance = { target = $FACTION_TARGET$.culture value <= 50 }
+					}
+				}
+				add = 10
+			}
+			if = {
+				limit = {
+					culture = {
+						cultural_acceptance = { target = $FACTION_TARGET$.culture value <= 70 }
+					}
+				}
+				add = 5
+			}
+			if = {
+				limit = {
+					culture = {
+						cultural_acceptance = { target = $FACTION_TARGET$.culture value <= 80 }
+					}
+				}
+				add = 5
+			}
+			if = { # The liege knowing your language cuts this penalty in half
+				limit = {
+					$FACTION_TARGET$ = {
+						knows_language_of_culture = prev.culture
+					}
+				}
+				multiply = 0.5
+			}
+			if = { # Cultural reasons matter less in the HRE
+				limit = {
+					$FACTION_TITLE$ = {
+						has_title_law = princely_elective_succession_law
+					}
+				}
+				multiply = 0.25
+			}
+		}
+	}
+
+	modifier = {
+		add = 100
+		NOT = { faith = $FACTION_TARGET$.faith }
+		faith = $FACTION_CLAIMANT$.faith
+		NOT = {
+			culture = {
+				has_cultural_parameter = doesnt_care_about_culture_faith_in_factions
+			}
+		}
+	}
+
+	modifier = {
+		add = -25
+		NOT = { faith = $FACTION_CLAIMANT$.faith }
+		faith = {
+			faith_hostility_level = {
+				target = $FACTION_CLAIMANT$.faith
+				value = faith_astray_level
+			}
+		}
+		NOT = {
+			culture = {
+				has_cultural_parameter = doesnt_care_about_culture_faith_in_factions
+			}
+		}
+	}
+
+	modifier = {
+		add = -250
+		NOT = { faith = $FACTION_CLAIMANT$.faith }
+		faith = {
+			faith_hostility_level = {
+				target = $FACTION_CLAIMANT$.faith
+				value = faith_hostile_level
+			}
+		}
+		NOT = {
+			culture = {
+				has_cultural_parameter = doesnt_care_about_culture_faith_in_factions
+			}
+		}
+	}
+
+	modifier = {
+		add = -1000
+		NOT = { faith = $FACTION_CLAIMANT$.faith }
+		faith = {
+			faith_hostility_level = {
+				target = $FACTION_CLAIMANT$.faith
+				value = faith_evil_level
+			}
+		}
+		NOT = {
+			culture = {
+				has_cultural_parameter = doesnt_care_about_culture_faith_in_factions
+			}
+		}
+	}
+
+	# Don't support claims against the liege's lower tier titles
+	modifier = {
+		add = -500
+		$FACTION_TITLE$.tier < $FACTION_TARGET$.primary_title.tier
+		$FACTION_TITLE$.tier < tier_kingdom
+	}
+
+	# If I'm de jure of the Claimant, I want to support them
+	modifier = {
+		add = 100
+		is_rightful_liege_of_trigger = {
+			VASSAL = root
+			LIEGE = $FACTION_CLAIMANT$
+		}
+	}
+
+	# When creating a Faction, primarily care about Claims on Titles de jure above my primary title
+	modifier = {
+		add = -100
+		NOT = {
+			$FACTION_TITLE$ = {
+				is_de_jure_liege_or_above_target = root.primary_title
+			}
+		}
+		
+	}
+
+	# If I'm not a de jure vassal of my liege, and my liege is independent, prefer to create an independence faction
+	modifier = {
+		add = -200
+		liege = { is_independent_ruler = yes }
+		NOT = {
+			is_rightful_liege_of_trigger = {
+				VASSAL = root
+				LIEGE = $FACTION_TARGET$
+			}
+	
+		}
+	}
+
+	# All else being equal, the AI might support a claimant over their current liege just to get better feudal obligations.
+	modifier = {
+		add = 10
+		AND = {
+			$FACTION_TARGET$ = { has_crown_authority_equivalent_level_trigger = { LEVEL = 1 } }
+			$FACTION_CLAIMANT$ = { has_crown_authority_equivalent_level_trigger = { LEVEL = 0 } }
+		}
+	}
+	modifier = {
+		add = 15
+		AND = {
+			$FACTION_TARGET$ = { has_crown_authority_equivalent_level_trigger = { LEVEL = 2 } }
+			$FACTION_CLAIMANT$ = {
+				OR = {
+					has_crown_authority_equivalent_level_trigger = { LEVEL = 0 }
+					has_crown_authority_equivalent_level_trigger = { LEVEL = 1 }
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 15
+		AND = {
+			$FACTION_TARGET$ = { has_crown_authority_equivalent_level_trigger = { LEVEL = 3 } }
+			$FACTION_CLAIMANT$ = {
+				OR = {
+					has_crown_authority_equivalent_level_trigger = { LEVEL = 0 }
+					has_crown_authority_equivalent_level_trigger = { LEVEL = 1 }
+					has_crown_authority_equivalent_level_trigger = { LEVEL = 2 }
+				}
+			}
+		}
+	}
+
+	#More likely to create a claimant faction against a Ruler below their CGLevel
+	modifier = {
+		add = 50
+		$FACTION_TARGET$.court_grandeur_current_level < $FACTION_TARGET$.court_grandeur_minimum_expected_level
+	}
+
+}

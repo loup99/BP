@@ -1,4 +1,5 @@
-﻿# Added support for new vassal contracts for eranshar and roman govs
+﻿##### Changed from Vanilla: Added support for new vassal contracts
+##### Changed from Vanilla: Created additional logic to hide cases with unmodifiable vassal contracts
 liege_modify_vassal_contract_interaction = {
 	special_interaction = modify_vassal_contract
 	interface = modify_vassal_contract
@@ -11,21 +12,39 @@ liege_modify_vassal_contract_interaction = {
 	force_notification = yes
 	notification_text = MODIFY_VASSAL_CONTRACT_NOTIFICATION_TO_VASSAL
 	
+	##### Changed from Vanilla vvvvv
 	is_shown = {
 		scope:recipient = {
 			NOT = { this = scope:actor }
 			exists = liege
 			liege = scope:actor
 			is_ruler = yes
-			vassal_contract_has_modifiable_obligations = yes
+			##### Changed from Vanilla vvvvv
+			OR = {
+				#Unmodifiable contracts combined with modifiable contracts weirdness needs to be covered
+				AND = {
+					OR = {
+						vassal_contract_has_flag = tributary_installed_flag
+						vassal_contract_has_flag = tributary_state_installed_flag
+						vassal_contract_has_flag = foederatus_contract_installed
+					}
+					has_government_without_modifiable_contracts_excluding_uniques = yes
+				}
+				AND = {
+					vassal_contract_has_modifiable_obligations = yes
+					has_government_without_modifiable_contracts_excluding_uniques = no
+				}
+			}
+			##### Changed from Vanilla ^^^^^
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	is_valid_showing_failures_only = {
 		scope:recipient = { 
 			is_diplomatically_available = yes
 		} 
-		NOT = { scope:actor = { is_at_war_with = scope:recipient } } 
+		NOT = { scope:actor = { is_at_war_with = scope:recipient } }
 	}
 
 	can_send = {
@@ -43,7 +62,7 @@ liege_modify_vassal_contract_interaction = {
 			scope:actor = {
 				has_changed_contract_obligation_trigger = {
 					WHO = scope:recipient
-					LIEGE = scope:actor
+					LIEGE = this
 				}
 				
 				custom_description = {
@@ -124,13 +143,19 @@ liege_modify_vassal_contract_interaction = {
 					}
 					if = {
 						limit = { valid_government_rights_general_trigger = yes }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = fortification_rights }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = coinage_rights }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = succession_rights }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = war_declaration_rights }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = title_revocation_rights }
+					}
+					if = {
+						limit = { valid_government_rights_council_trigger = yes }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
+					}
+					if = {
+						limit = { valid_government_religious_rights_trigger = yes }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
 					}
 					if = {
 						limit = { has_government = prefeudal_government }
@@ -146,8 +171,12 @@ liege_modify_vassal_contract_interaction = {
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = gubernatorial_taxes }
 					}
 					if = {
+						limit = { has_government = gupta_government }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = gupta_government_taxes }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = gupta_government_levies }
+					}
+					if = {
 						limit = { has_government = eranshar_government }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_government_taxes }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_marzban_contract }
 					}
 					if = {
@@ -191,6 +220,8 @@ liege_modify_vassal_contract_interaction = {
 	send_options_exclusive = no
 }
 
+##### Changed from Vanilla: Added support for new vassal contracts
+##### Changed from Vanilla: Created additional logic to hide cases with unmodifiable vassal contracts
 vassal_modify_vassal_contract_interaction = {
 	special_interaction = modify_vassal_contract
 	interface = modify_vassal_contract
@@ -203,14 +234,32 @@ vassal_modify_vassal_contract_interaction = {
 	force_notification = yes
 	notification_text = MODIFY_VASSAL_CONTRACT_NOTIFICATION_TO_LIEGE
 
+	##### Changed from Vanilla vvvvv
 	is_shown = {
 		scope:actor = {
 			is_independent_ruler = no
 			NOT = { this = scope:recipient }
 			liege = scope:recipient
-			vassal_contract_has_modifiable_obligations = yes
+			##### Changed from Vanilla vvvvv
+			OR = {
+				#Unmodifiable contracts combined with modifiable contracts weirdness needs to be covered
+				AND = {
+					OR = {
+						vassal_contract_has_flag = tributary_installed_flag
+						vassal_contract_has_flag = tributary_state_installed_flag
+						vassal_contract_has_flag = foederatus_contract_installed
+					}
+					has_government_without_modifiable_contracts_excluding_uniques = yes
+				}
+				AND = {
+					vassal_contract_has_modifiable_obligations = yes
+					has_government_without_modifiable_contracts_excluding_uniques = no
+				}
+			}
+			##### Changed from Vanilla ^^^^^
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	is_valid_showing_failures_only = {
 		scope:recipient = { is_diplomatically_available = yes }
@@ -225,7 +274,7 @@ vassal_modify_vassal_contract_interaction = {
 		trigger_else = {
 			scope:actor = {
 				has_changed_contract_obligation_trigger = {
-					WHO = scope:actor
+					WHO = this
 					LIEGE = scope:recipient
 				}
 				
@@ -271,13 +320,19 @@ vassal_modify_vassal_contract_interaction = {
 				}
 				if = {
 					limit = { valid_government_rights_general_trigger = yes }
-					set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = fortification_rights }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = coinage_rights }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = succession_rights }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = war_declaration_rights }
-					set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = title_revocation_rights }
+				}
+				if = {
+					limit = { valid_government_religious_rights_trigger = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
+				}
+				if = {
+					limit = { valid_government_rights_council_trigger = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
 				}
 				if = {
 					limit = { has_government = prefeudal_government }
@@ -293,8 +348,12 @@ vassal_modify_vassal_contract_interaction = {
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = gubernatorial_taxes }
 				}
 				if = {
+					limit = { has_government = gupta_government }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = gupta_government_taxes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = gupta_government_levies }
+				}
+				if = {
 					limit = { has_government = eranshar_government }
-					set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_government_taxes }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_marzban_contract }
 				}
 				if = {
@@ -306,8 +365,12 @@ vassal_modify_vassal_contract_interaction = {
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = foederatus_special_contract }
 				}
 				if = {
-					limit = { vassal_contract_has_flag = tributary_installed_flag }
+					limit = { can_have_tributary_contract_trigger = yes }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = tributary_special_contract }
+				}
+				if = {
+					limit = { can_have_tributary_state_contract_trigger = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = tributary_state_special_contract }
 				}
 				if = {
 					limit = {

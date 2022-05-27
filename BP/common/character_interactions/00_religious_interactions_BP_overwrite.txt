@@ -374,3 +374,117 @@ demand_conversion_player_ruler_interaction = {
 		}
 	}
 }
+
+temporal_condemnation_interaction = {
+	category = interaction_category_religion
+	desc = temporal_condemnation_interaction_desc
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		NOT = { scope:actor = scope:recipient }
+		##### Changed from Vanilla vvvvv
+		can_use_temporal_condemnation = { ACTOR = scope:actor }
+		##### Changed from Vanilla ^^^^^
+		scope:recipient = {
+			liege = scope:actor
+		}
+		scope:recipient = {
+			is_landed = yes
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+
+	cooldown = { years = 5 }
+
+	is_valid = {
+		scope:actor = {
+			piety >= medium_piety_value
+		}
+		custom_description = {
+			text = temporal_condemnation_learning_requirement
+			subject = scope:actor
+			object = scope:recipient
+			value = religious_legal_pronouncement_learning_requirement
+			religious_legal_pronouncement_requirements >= 0
+			scope:actor = { learning >= 1 }
+		}
+	}
+
+	is_valid_showing_failures_only = {		
+		scope:recipient.religion = scope:actor.religion
+		custom_description = {
+			text = temporal_condemnation_is_not_sinful
+			object = scope:recipient
+			scope:recipient = {
+				num_sinful_traits = { value > 0 faith = scope:actor.faith }
+			}
+		}
+		trigger_if = {
+			limit = {
+				scope:recipient.num_sinful_traits > 0
+				scope:actor.num_sinful_traits > 0
+			}
+			custom_description = {
+				text = temporal_condemnation_less_sinful_than_me
+				object = scope:recipient
+				scope:actor.num_sinful_traits < scope:recipient.num_sinful_traits
+			}
+		}
+		custom_description = {
+			text = temporal_condemnation_has_been_condemned
+			object = scope:recipient
+			scope:recipient = {
+				NOT = {
+					has_character_modifier = temporal_condemnation_modifier
+				}
+			}
+		}
+		NAND = {
+			exists = scope:actor.faith.great_holy_war
+			scope:actor.faith.great_holy_war = {
+				has_pledged_attacker = scope:recipient
+			}
+		}
+		scope:recipient = {
+			is_adult = yes
+		}
+		scope:recipient = { NOT = { has_strong_hook = scope:actor } }
+		scope:recipient = { is_diplomatically_available = yes }
+	}
+
+	auto_accept = yes
+	force_notification = yes
+	notification_text = temporal_condemnation_interaction.notification
+
+	on_accept = {
+		scope:actor = {
+			add_piety = medium_piety_loss
+			add_opinion = {
+				target = scope:recipient
+				modifier = temporal_condemnation_opinion
+				years = 10
+			}
+			custom_tooltip = temporal_condemnation_revoke_reason
+			hidden_effect = {
+				send_interface_toast = {	
+					title = temporal_condemnation_interaction.tt
+					left_icon = scope:recipient
+					show_as_tooltip = { custom_tooltip = temporal_condemnation_got_revoke_reason }
+				}
+			}
+			stress_impact = {
+				cynical = minor_stress_impact_gain
+			}
+		}
+		scope:recipient = {
+			add_character_modifier = {
+				modifier = temporal_condemnation_modifier
+				years = 15
+			}
+			add_opinion = {
+				target = scope:actor
+				modifier = temporal_condemnation_condemned_me_opinion
+			}
+		}
+	}
+}
