@@ -1,102 +1,6 @@
 ﻿#faith scope
 has_ecumenical_doctrine_trigger = { has_doctrine_parameter = is_special_doctrine_christian_ecumenism }
 
-#Only tenets for which the pentarchy matters
-valid_pentarch_doctrines = {
-	OR = {
-		has_doctrine = tenet_pentarchy
-		has_doctrine = tenet_apostolic_succession
-		has_doctrine = tenet_autocephaly
-	}
-}
-
-is_a_pentarch_trigger = {
-	custom_description = {
-		text = "is_a_pentarch"
-		subject = scope:recipient
-		scope:recipient = { has_a_pentarch_title = yes }
-	}
-}
-
-has_a_pentarch_title = {
-	OR = {
-		has_title = title:d_patriarch_antioch
-		has_title = title:d_patriarch_jerusalem
-		has_title = title:d_patriarch_alexandria
-		has_title = title:d_patriarch_rome
-		has_title = title:d_orthodox
-	}
-}
-
-pentarch_titles = {
-	has_title = title:d_patriarch_antioch
-	has_title = title:d_patriarch_jerusalem
-	has_title = title:d_patriarch_alexandria
-	has_title = title:d_patriarch_rome
-	has_title = title:d_orthodox
-}
-
-#Triggers for seizing pentarch baronies
-missing_pentarch_seat_trigger = {
-	AND = {
-		#Basic requirements
-		has_title = $PENTARCH_DUCHY$
-		NOT = { has_title = $PENTARCH_BAORNY$ }
-		OR = {
-			#Title holder must be in line with our views to gracefully step aside
-			custom_description = {
-				text = coreligionist_barony_holder
-				AND = {
-					$PENTARCH_BAORNY$.holder.faith = { valid_pentarch_doctrines = yes }
-					$PENTARCH_BAORNY$.holder.faith = { faith_hostility_level = { target = $PENTARCH_BAORNY$.holder.faith value < 2 } }
-				}
-			}
-			#or, the county holder in question agrees with us
-			custom_description = {
-				text = coreligionist_county_holder
-				AND = {
-					$PENTARCH_COUNTY$.holder.faith = { valid_pentarch_doctrines = yes }
-					$PENTARCH_COUNTY$.holder.faith = { faith_hostility_level = { target = $PENTARCH_DUCHY$.holder.faith value < 2 } }
-				}
-			}
-		}
-	}
-}
-missing_pentarch_barony = {
-	trigger_if = {
-		limit = { has_title = title:d_patriarch_antioch }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_antioch
-			PENTARCH_COUNTY = title:c_antiocheia
-			PENTARCH_BAORNY = title:b_jabala
-		}
-	}
-	trigger_if = {
-		limit = { has_title = title:d_patriarch_jerusalem }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_jerusalem
-			PENTARCH_COUNTY = title:c_jerusalem
-			PENTARCH_BAORNY = title:b_nablus
-		}
-	}
-	trigger_if = {
-		limit = { has_title = title:d_patriarch_alexandria }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_alexandria
-			PENTARCH_COUNTY = title:c_alexandria
-			PENTARCH_BAORNY = title:b_wadi_natrun
-		}
-	}
-	trigger_if = {
-		limit = { has_title = title:d_patriarch_rome }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_rome
-			PENTARCH_COUNTY = title:c_roma
-			PENTARCH_BAORNY = title:b_vatican
-		}
-	}
-}
-
 considers_astray_trigger = {
 	faith_hostility_level = {
 		target = $TARGET_FAITH$
@@ -113,5 +17,163 @@ truly_hellenic_faith = {
 		faith = faith:pythagoreanism
 		faith = faith:stoicism
 		faith = faith:cybelian
+	}
+}
+
+# Uncommon Faiths : Steadily declined after Vth century
+is_uncommon_faith = {
+	OR = {
+		#Christians
+		this = faith:audianism
+		this = faith:montanism
+		this = faith:patripassianism
+		#Dualist
+		this = faith:valentinianism
+	}
+}
+
+#Rare Faiths: Declined rapidly after 476 or fairly rare anyway
+is_rare_faith = {
+	OR = {
+		#Christians
+		this = faith:antinomianism
+		this = faith:apollinarism
+		this = faith:doceticism
+		this = faith:melchisdechianism
+		this = faith:monarchianism
+		this = faith:pelagianism
+		this = faith:pneumatomachianism
+		#Dualists
+		this = faith:sethianism
+	}
+}
+
+#Exceptionally Rare Faiths ; Dead by 476 or were not well attested after, but **might** be revivable...
+is_exceptionally_rare_faith = {
+	OR = {
+		#Christians
+		this = faith:binitarianism
+		this = faith:marcionism
+		this = faith:messalian
+		this = faith:total_depravity
+		#Dualists
+		this = faith:cainitism
+		this = faith:marcosianism
+		this = faith:sabianism
+		this = faith:sethianism
+	}
+}
+
+#Faiths with extremely localized spawning; given larger than normal location bonuses to compensate
+is_localized_faith = {
+	OR = {
+		#Christians
+		this = faith:ebionite
+		#Jews
+		this = faith:samaritan
+		this = faith:tzadikite
+		#Dualists
+		this = faith:mandeaism
+		#Mazdans
+		this = faith:urartuism
+	}
+}
+
+is_blocked_faith = {
+	OR = {
+		#Islam hasn't risen
+		scope:new_faith.religion = religion:islam_religion
+		scope:new_faith.religion = religion:yazidi_religion
+		scope:new_faith = faith:gayomarthianism
+		scope:new_faith = faith:khurramism
+		#No Schism of the 3 Chapters
+		scope:new_faith = faith:aquileianism
+		#No Iconoclast Controversy
+		scope:new_faith = faith:iconoclast
+		#No Syrian Orthodoxy
+		scope:new_faith = faith:syrian_orthodox
+		#No Western Schism
+		scope:new_faith = faith:catholic
+		scope:new_faith = faith:orthodox
+		#No Paulicianism
+		scope:new_faith = faith:paulician
+		#No Kabarism
+		scope:new_faith = faith:kabarism
+		#No Mazdakism
+		scope:new_faith = faith:mazdakism
+		#No Burmese
+		scope:new_faith = faith:ari
+		#No Buddhism in Tibet
+		scope:new_faith = faith:lamaism
+		scope:new_faith = faith:bon
+		#No Norse Paganism
+		scope:new_faith = faith:norse_pagan
+	}
+}
+
+#Faiths whose rising is blocked mechanically
+is_blocked_faith_gamerule = {
+	#Faiths locked from creation/conversion
+	#Make sure to tie to events/religion_events/heresy_events.txt: # Locked faiths
+	#Islam
+	custom_description = {
+		text = islam_has_not_risen
+		NOR = {
+			scope:new_faith.religion = religion:islam_religion
+			scope:new_faith.religion = religion:yazidi_religion
+			scope:new_faith = faith:gayomarthianism
+			scope:new_faith = faith:khurramism
+		}
+	}
+	#Christianity
+	custom_description = {
+		text = schism_of_the_three_chapters_inactive
+		NOT = { scope:new_faith = faith:aquileianism }
+	}
+	custom_description = {
+		text = iconoclast_controversy_has_not_occured
+		NOT = { scope:new_faith = faith:iconoclast }
+	}
+	custom_description = {
+		text = syriac_orthodoxy_has_not_formed
+		NOT = { scope:new_faith = faith:syrian_orthodox }
+	}
+	custom_description = {
+		text = western_schism_has_not_yet_occured
+		NOR = {
+			scope:new_faith = faith:catholic
+			scope:new_faith = faith:orthodox
+		}
+	}
+	custom_description = {
+		text = paulicianism_has_not_risen
+		NOT = { scope:new_faith = faith:paulician }
+	}
+	#Judaism
+	custom_description = {
+		text = kabarism_not_yet_available
+		NOT = { scope:new_faith = faith:kabarism }
+	}
+	#Mazdan
+	custom_description = {
+		text = mazdakism_has_not_yet_risen
+		NOT = { scope:new_faith = faith:mazdakism }
+	}
+	#Eastern
+	custom_description = {
+		text = burmese_invasion_has_not_happened
+		NOT = { scope:new_faith = faith:ari }
+	}
+	custom_description = {
+		text = buddhism_has_not_reached_tibet
+		NOR = {
+			scope:new_faith = faith:lamaism
+			scope:new_faith = faith:bon
+		}
+	}
+	#Paganism
+	custom_description = {
+		text = norse_pagan_not_split
+		NOT = { scope:new_faith = faith:norse_pagan }
 	}
 }
