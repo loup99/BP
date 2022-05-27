@@ -3,6 +3,8 @@
 	create_cadet_branches = no
 	always_use_patronym = yes
 	
+	royal_court = yes
+	
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding tribal_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
@@ -44,6 +46,8 @@
 prefeudal_government = {
 	create_cadet_branches = no
 	rulers_should_have_dynasty = yes
+	
+	royal_court = yes
 	
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding tribal_holding }
@@ -119,6 +123,8 @@ subroman_government = {
 	create_cadet_branches = yes
 	rulers_should_have_dynasty = yes
 	
+	royal_court = yes
+	
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding city_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
@@ -153,6 +159,9 @@ subroman_government = {
 eranshar_government = {
 	create_cadet_branches = no
 	rulers_should_have_dynasty = yes
+	dynasty_named_realms = yes
+	
+	royal_court = yes
 	
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding city_holding }
@@ -192,6 +201,9 @@ eranshar_government = {
 gupta_government = {
 	create_cadet_branches = no
 	rulers_should_have_dynasty = yes
+	dynasty_named_realms = yes
+	
+	royal_court = yes
 	
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding }
@@ -226,6 +238,15 @@ gubernatorial_government = {
 	valid_holdings = { castle_holding city_holding }
 	required_county_holdings = { castle_holding city_holding church_holding }
 	
+	#Not for independent rulers
+	can_get_government = {
+		is_independent_ruler = no
+		OR = {
+			vassal_contract_has_flag = gubernatorial_government_flag
+			any_liege_or_above = { has_government = bureaucratic_government }
+		}
+	}
+	
 	vassal_contract = {
 		gubernatorial_taxes
 		#These are bureaucratic-government locked
@@ -246,10 +267,30 @@ bureaucratic_government = {
 	create_cadet_branches = yes
 	rulers_should_have_dynasty = yes
 	
+	royal_court = yes
+	
 	primary_holding = castle_holding
 	valid_holdings = { castle_holding city_holding }
 	
 	required_county_holdings = { castle_holding city_holding church_holding }
+	
+	#Only empires can be bureaucratic_government
+	can_get_government = {
+		is_independent_ruler = yes
+		primary_title.tier = tier_empire
+		OR = {
+			OR = {
+				#Valid Successor Governments
+				has_government = subroman_government
+				has_government = prefeudal_government
+				has_government = gubernatorial_government
+				#so the administration doesnt disappear if emperor somehow changes culture
+				has_government = bureaucratic_government
+			}
+			#has_character_flag = bureacratic_government_temp_override
+			culture = { has_innovation = innovation_roman_administration }
+		}
+	}
 	
 	#Can never be a vassal, so no vassal contracts applicable
 	vassal_contract = {}
