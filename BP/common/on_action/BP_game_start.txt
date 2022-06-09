@@ -11,126 +11,8 @@ bp_game_start = {
 		setup_realm_succession_laws
 		setup_administrative_languages
 		convert_nicene_to_rites
-	}
-}
-
-#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
-#in through the back door
-game_start_fix_barony_government = {
-	effect = {
-		every_barony = {
-			#Which isn't a capital
-			limit = { is_capital_barony = no }
-			#All castle holders should have the government of the county holder
-			if = {
-				limit = { this.title_province = { has_holding_type = castle_holding } }
-				#Vanilla Governments
-				if = {
-					limit = { this.county.holder = { has_government = tribal_government } }
-					this.holder = { change_government = tribal_government }
-				}
-				else_if = { #NB: Causes singular "illegal_government" error in 476 start
-					limit = { this.county.holder = { has_government = republic_government } }
-					this.holder = { change_government = republic_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = theocracy_government } }
-					this.holder = { change_government = theocracy_government }
-				}
-				#BP Governments
-				else_if = {
-					limit = { this.county.holder = { has_government = high_tribal_government } }
-					this.holder = { change_government = high_tribal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = prefeudal_government } }
-					this.holder = { change_government = prefeudal_government }
-				}
-				#else_if = {
-				#	limit = { this.county.holder = { has_government = nomad_government } }
-				#	this.holder = { change_government = nomad_government }
-				#}
-				else_if = {
-					limit = { this.county.holder = { has_government = subroman_government } }
-					this.holder = { change_government = subroman_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = eranshar_government } }
-					this.holder = { change_government = eranshar_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = gupta_government } }
-					this.holder = { change_government = gupta_government }
-				}
-				else_if = {
-					limit = {
-						this.county.holder = {
-							OR = {
-								has_government = gubernatorial_government
-								has_government = bureaucratic_government
-							}
-						}
-					}
-					this.holder = { change_government = gubernatorial_government }
-				}
-			}
-			#Handle cases of lay clergy faiths holding temples as well
-			else_if = {
-				limit = {
-					this.title_province = { has_holding_type = church_holding }
-					this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
-				}
-				#Vanilla Governments
-				if = {
-					limit = { this.county.holder = { has_government = tribal_government } }
-					this.holder = { change_government = tribal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = republic_government } }
-					this.holder = { change_government = republic_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = theocracy_government } }
-					this.holder = { change_government = theocracy_government }
-				}
-				#BP Governments
-				else_if = {
-					limit = { this.county.holder = { has_government = high_tribal_government } }
-					this.holder = { change_government = high_tribal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = prefeudal_government } }
-					this.holder = { change_government = prefeudal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = nomad_government } }
-					this.holder = { change_government = nomad_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = subroman_government } }
-					this.holder = { change_government = subroman_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = eranshar_government } }
-					this.holder = { change_government = eranshar_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = gupta_government } }
-					this.holder = { change_government = gupta_government }
-				}
-				else_if = { #NB: Causes singular "illegal_government" error in 476 start
-					limit = {
-						this.county.holder = {
-							OR = {
-								has_government = gubernatorial_government
-								has_government = bureaucratic_government
-							}
-						}
-					}
-					this.holder = { change_government = gubernatorial_government }
-				}
-			}
-		}
+		setup_vassal_contracts
+		set_autocephalous_church_flags
 	}
 }
 
@@ -202,6 +84,7 @@ create_BP_artifacts = {
 	}
 }
 
+## Legal Stuff
 setup_realm_laws = {
 	effect = {
 		#Set-up Subroman Taxation
@@ -243,9 +126,6 @@ setup_realm_laws = {
 		}
 	}
 }
-
-#Sets up special succession laws
-
 #These follow the following pattern:
 # By culture, by government, then by specific titles, finally specific title overwrites after 476.2.2
 # To make it so we can systematically add specific laws, then overwrite for exceptions
@@ -307,7 +187,7 @@ setup_realm_succession_laws = {
 		every_ruler = {
 			every_held_title = {
 				limit = { this = title:e_persia }
-				add_title_law = eranshar_elective_succession_law
+				add_title_law = mahestan_elective_succession_law
 			}
 		}
 		#Imperial Elective
@@ -543,34 +423,387 @@ setup_realm_succession_laws = {
 		}
 	}
 }
-
 setup_administrative_languages = {
 	effect = {
-		#Byzantines use latin before Justin II's reign
+		#Byzantines use Latin before Hearclius' reign
+		#Source: Davis, Leo Donald (1990). The First Seven Ecumenical Councils (325–787): Their History and Theology. Liturgical Press. p. 260. 
 		every_ruler = {
 			limit = { has_title = title:e_byzantium }
-			every_vassal_or_below = {
-				limit = {
-					primary_title = { tier >= tier_kingdom }
-					has_government = gubernatorial_government
-				}
-				if = {
-					limit = { current_date < 565.11.14 }
+			if = {
+					limit = { current_date < 610.10.5 }
 					setup_the_court_language = {
 						CHAR = this
 						LANGUAGE = language_latin
 					}
 				}
-				else = {
+				else = { #Otherwise, learn Greek
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+							setup_the_court_language = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+					else = {
+						setup_learnt_language = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+				}
+			every_vassal_or_below = {
+				limit = { has_government = gubernatorial_government }
+				if = {
+					limit = { current_date < 610.10.5 }
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+							setup_the_court_language = {
+							CHAR = this
+							LANGUAGE = language_latin
+						}
+					}
+					else = {
+						setup_learnt_language = {
+							CHAR = this
+							LANGUAGE = language_latin
+						}
+					}
+				}
+				else = { #Otherwise, learn Greek
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+							setup_the_court_language = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+					else = {
+						setup_learnt_language = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+				}
+			}
+		}
+		#Gupta Governments use Sanskrit
+		every_ruler = {
+			limit = { has_government = gupta_government }
+			if = {
+				limit = { primary_title = { tier >= tier_kingdom } }
+				setup_the_court_language = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+			}
+			else = { #Ensure every Gupta ruler knows Sanskrit
+				setup_learnt_language = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+			}
+		}
+		#Sub-Romans (in 476 at least) use Latin
+		every_ruler = {
+			limit = { has_government = subroman_government }
+			if = {
+				limit = { primary_title = { tier >= tier_kingdom } }
+				setup_the_court_language = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+			else = { #Ensure every Sub-Roman ruler knows Latin
+				setup_learnt_language = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+		}
+		#Standardize use of Persian under e_persia
+		every_ruler = {
+			limit = { has_title = title:e_persia }
+			every_vassal_or_below = {
+				if = {
+					limit = { #Eranshar Zoroastrian Vassals Under Persia (only) should adopt Persian
+						primary_title = { tier >= tier_kingdom }
+						AND = {
+							has_government = eranshar_government
+							has_religion = religion:zoroastrianism_religion
+						}
+					}
 					setup_the_court_language = {
 						CHAR = this
-						LANGUAGE = language_greek
+						LANGUAGE = language_iranian
 					}
+				}
+				else = {
+					setup_learnt_language = {
+						CHAR = this
+						LANGUAGE = language_iranian
+					}
+				}
+			}
+		}
+		#All learned Jewish rulers should know Hebrew
+		every_ruler = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_israelite }
+					religion = religion:judaism_religion
+				}
+			}
+			setup_learnt_language = {
+				CHAR = this
+				LANGUAGE = language_israelite
+			}
+		}
+	}
+}
+#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
+#in through the back door
+game_start_fix_barony_government = {
+	effect = {
+		every_barony = {
+			#Which isn't a capital
+			limit = { is_capital_barony = no }
+			#All castle holders should have the government of the county holder
+			if = {
+				limit = { this.title_province = { has_holding_type = castle_holding } }
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = { #NB: Causes singular "illegal_government" error in 476 start
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = theocracy_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = high_tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = prefeudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = nomad_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_government } }
+					this.holder = { change_government = subroman_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = eranshar_government } }
+					this.holder = { change_government = eranshar_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = gupta_government } }
+					this.holder = { change_government = gupta_government }
+				}
+				else_if = {
+					limit = {
+						this.county.holder = {
+							OR = {
+								has_government = gubernatorial_government
+								has_government = bureaucratic_government
+							}
+						}
+					}
+					this.holder = { change_government = gubernatorial_government }
+				}
+			}
+			#Handle cases of lay clergy faiths holding temples as well
+			else_if = {
+				limit = {
+					this.title_province = { has_holding_type = church_holding }
+					this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+				}
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = theocracy_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = high_tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = prefeudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = nomad_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_government } }
+					this.holder = { change_government = subroman_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = eranshar_government } }
+					this.holder = { change_government = eranshar_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = gupta_government } }
+					this.holder = { change_government = gupta_government }
+				}
+				else_if = { #NB: Causes singular "illegal_government" error in 476 start
+					limit = {
+						this.county.holder = {
+							OR = {
+								has_government = gubernatorial_government
+								has_government = bureaucratic_government
+							}
+						}
+					}
+					this.holder = { change_government = gubernatorial_government }
 				}
 			}
 		}
 	}
 }
+setup_vassal_contracts = {
+	effect = {
+		every_ruler = {
+			if = { #k_mazandaran always has great rights
+				limit = { primary_title = title:k_mazandaran }
+				vassal_contract_set_obligation_level = {
+					type = religious_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = title_revocation_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = war_declaration_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = prefeudal_government_obligation
+					level = 0
+				}
+			}
+			if = { #Thracian Goths are always foederati
+				limit = { primary_title = title:d_thracian_goths }
+				vassal_contract_set_obligation_level = {
+					type = foederatus_special_contract
+					level = 1
+				}
+			}
+			if = { #Ghasanids are always foederati
+				limit = { primary_title = title:k_arabia_petraea }
+				vassal_contract_set_obligation_level = {
+					type = foederatus_special_contract
+					level = 1
+				}
+			}
+			if = { #Sarir is always a Byzantine Tributary
+				limit = { primary_title = title:k_sarir }
+				vassal_contract_set_obligation_level = {
+					type = tributary_state_special_contract
+					level = 1
+				}
+			}
+			if = { #Lazica is always a Byzantine Tributary
+				limit = { primary_title = title:k_lazica }
+				vassal_contract_set_obligation_level = {
+					type = tributary_state_special_contract
+					level = 1
+				}
+			}
+			if = { #Albania is always a Persian Tributary
+				limit = {
+					OR = {
+						primary_title = title:k_caucasian_albania
+						primary_title = title:d_caucasian_albania
+					}
+				}
+				vassal_contract_set_obligation_level = {
+					type = tributary_state_special_contract
+					level = 1
+				}
+			}
+			if = { #Iberia is always a Persian Tributary
+				limit = { primary_title = title:k_iberia }
+				vassal_contract_set_obligation_level = {
+					type = tributary_state_special_contract
+					level = 1
+				}
+			}
+			if = { #Lakhmids are always presian tributary
+				limit = { primary_title = title:k_al_hirah }
+				vassal_contract_set_obligation_level = {
+					type = tributary_state_special_contract
+					level = 1
+				}
+			}
+			#Everyone under e_xiongnu is a tributary... except d_chach
+			if = {
+				limit = {
+					this.liege.primary_title = title:e_xiongnu
+					this.primary_title.tier >= tier_duchy
+					NOT = { this.primary_title = title:d_chah }
+				}
+				vassal_contract_set_obligation_level = {
+					type = tributary_special_contract
+					level = 1
+				}
+			}
+			if = { #Vassals of the Gupta Empire are militarily oriented
+				limit = {
+					liege.primary_title = title:e_rajastan
+					primary_title.tier >= tier_duchy
+					has_government = gupta_government
+				}
+				vassal_contract_set_obligation_level = {
+					type = gupta_government_taxes
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = gupta_government_levies
+					level = 3
+				}
+			}
+			if = { #Non-Tributary Prefeudal Christian Vassals of Persia have religious freedom
+				limit = {
+					OR = {
+						faith = { has_doctrine = special_doctrine_legalized_faith_persia }
+						faith = faith:rabbinism
+					}
+					any_liege_or_above = { this.primary_title = title:e_persia }
+					AND = {
+						valid_government_religious_rights_trigger = yes
+						NOT = { bp_special_contract_protects_religion = { VASSAL = this } }
+					}
+				}
+				vassal_contract_set_obligation_level = {
+					type = religious_rights
+					level = 1
+				}
+			}
+		}
+	}
+}
+
+## Religion Stuff
 
 #Flips Nicene Chars to adopt the appropriate rites
 convert_nicene_to_rites = {
@@ -632,6 +865,34 @@ convert_nicene_to_rites = {
 		change_ruler_and_court_rite_by_kingdom = {
 			NEW_RITE = gallican_church
 			KINGDOM = k_belgica
+		}
+	}
+}
+set_autocephalous_church_flags = {
+	effect = {
+		culture:armenian = {
+			set_variable = {
+				name = autocephalous_church
+				value = faith:armenian_apostolic
+			}
+		}
+		culture:aramean = {
+			set_variable = {
+				name = autocephalous_church
+				value = faith:syrian_orthodox
+			}
+		}
+		culture:caucasian_albanian = {
+			set_variable = {
+				name = autocephalous_church
+				value = faith:albanian_apostolic
+			}
+		}
+		culture:georgian = {
+			set_variable = {
+				name = autocephalous_church
+				value = faith:georgian_orthodox
+			}
 		}
 	}
 }

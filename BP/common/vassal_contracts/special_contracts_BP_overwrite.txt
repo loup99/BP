@@ -1,0 +1,121 @@
+﻿@ai_standard_liege_desire = 2
+@ai_standard_vassal_desire = 1
+# Everything below this line is 'Fine Print'
+
+##### Changed from Vanilla: Changed is_shown condition
+religious_rights = {
+	display_mode = checkbox
+	is_shown = {
+		NOT = {
+			scope:vassal.faith = scope:liege.faith
+			scope:liege.faith = { has_doctrine = tenet_tax_nonbelievers }
+		}
+		valid_religious_rights_trigger = { VASSAL = scope:vassal }
+	}
+	obligation_levels = {
+		religious_rights_none = {
+			default = yes
+			position = { 0 0 }
+			
+			ai_liege_desire = @ai_standard_liege_desire
+			ai_vassal_desire = 0
+		}
+		religious_rights_protected = {
+			is_valid = {
+				NOT = {
+					scope:vassal.faith = scope:liege.faith
+				}
+			}
+			parent = religious_rights_none
+			position = { 1 0 }
+			
+			vassal_opinion = 5
+			
+			vassal_modifier = {
+				county_opinion_add = 5
+			}
+			
+			flag = religiously_protected
+			
+			ai_liege_desire = 0
+			ai_vassal_desire = 10
+		}
+	}
+}
+
+##### Changed from Vanilla: Changed is_shown condition
+council_rights = {
+	display_mode = checkbox
+	is_shown = { valid_rights_council_trigger = { VASSAL = scope:vassal } }
+	obligation_levels = {
+		council_rights_none = {
+			default = yes
+			position = { 0 0 }
+			
+			ai_liege_desire = @ai_standard_liege_desire
+			ai_vassal_desire = 0
+		}
+		council_rights_guaranteed = {
+			parent = council_rights_none
+			position = { 1 0 }
+			
+			vassal_opinion = 5
+			
+			flag = can_demand_council_seat
+			
+			liege_modifier = {
+				powerful_vassal_opinion = -2
+			}
+			
+			ai_liege_desire = 0
+			ai_vassal_desire = @ai_standard_vassal_desire
+		}
+	}
+}
+
+##### Changed from Vanilla: Changed is_shown condition
+title_revocation_rights = {
+	display_mode = checkbox
+	is_shown = {
+		OR = {
+			scope:vassal.faith = scope:liege.faith
+			NOR = {
+				scope:vassal.faith = scope:liege.faith
+				scope:liege.faith = { has_doctrine_parameter = unlock_jizya_contract }
+			}
+		}
+		valid_title_revocation_rights_trigger = { VASSAL = scope:vassal }
+	}
+	obligation_levels = {
+		title_revocation_rights_default = {
+			default = yes
+			position = { 0 0 }
+			
+			ai_liege_desire = 1
+			ai_vassal_desire = 0
+		}
+		title_revocation_rights_protected = {
+			is_valid = {
+				OR = {
+					scope:vassal.faith = scope:liege.faith
+					NOR = {
+						scope:vassal.faith = scope:liege.faith
+						scope:liege.faith = {
+							has_doctrine_parameter = unlock_jizya_contract
+						}
+					}
+				}
+			}
+
+			parent = title_revocation_rights_default
+			position = { 1 0 }
+			
+			vassal_opinion = 5
+			
+			flag = vassal_contract_cannot_revoke_titles
+			
+			ai_liege_desire = 0
+			ai_vassal_desire = @ai_standard_vassal_desire
+		}
+	}
+}

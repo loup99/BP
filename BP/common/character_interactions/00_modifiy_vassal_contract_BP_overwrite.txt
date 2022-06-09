@@ -109,6 +109,7 @@ liege_modify_vassal_contract_interaction = {
 
 	auto_accept = yes
 
+	##### Changed from Vanilla vvvvv
 	on_accept = {
 		scope:actor = {
 			send_interface_message = {
@@ -124,14 +125,7 @@ liege_modify_vassal_contract_interaction = {
 						generous = medium_stress_impact_gain
 					}
 				}
-				if = {
-					limit = {
-						always = scope:hook
-					}
-					use_hook = scope:recipient
-					add_achievement_flag_effect = { FLAG = achievement_fine_print_flag }
-				}
-
+				
 				scope:recipient = {
 					hidden_effect = { set_vassal_contract_modification_blocked = yes }
 					
@@ -147,16 +141,30 @@ liege_modify_vassal_contract_interaction = {
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = coinage_rights }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = succession_rights }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = war_declaration_rights }
+					}
+					if = {
+						limit = { valid_government_jizya_rights = yes }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = jizya_special_rights }
+					}
+					if = {
+						limit = { valid_government_muslim_related_special_rights = yes }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = iqta_special_rights }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = ghazi_special_rights }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = marriage_favor_rights }
+					}
+					if = {
+						limit = { valid_title_revocation_rights_trigger = { VASSAL = scope:recipient } }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = title_revocation_rights }
 					}
 					if = {
-						limit = { valid_government_rights_council_trigger = yes }
-						set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
-					}
-					if = {
-						limit = { valid_government_religious_rights_trigger = yes }
+						limit = { valid_religious_rights_trigger = { VASSAL = scope:recipient } }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
 					}
+					if = {
+						limit = { valid_rights_council_trigger = { VASSAL = scope:recipient } }
+						set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
+					}
+					#New government obligations
 					if = {
 						limit = { has_government = prefeudal_government }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = prefeudal_government_obligation }
@@ -179,10 +187,12 @@ liege_modify_vassal_contract_interaction = {
 						limit = { has_government = eranshar_government }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = eranshar_marzban_contract }
 					}
+					#Special Contracts
 					if = {
 						limit = { valid_government_bureaucratic_special_trigger = yes }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = bureaucratic_special_contract }
 					}
+					#Tributary-Type Contracts
 					if = {
 						limit = { valid_government_foederatus_special_trigger = yes }
 						set_obligation_if_changed_effect_tributaries_foederati = { OBLIGATION_TYPE = foederatus_special_contract }
@@ -190,6 +200,10 @@ liege_modify_vassal_contract_interaction = {
 					if = {
 						limit = { vassal_contract_has_flag = tributary_installed_flag }
 						set_obligation_if_changed_effect_tributaries_foederati = { OBLIGATION_TYPE = tributary_special_contract }
+					}
+					if = {
+						limit = { vassal_contract_has_flag = tributary_state_installed_flag }
+						set_obligation_if_changed_effect_tributaries_foederati = { OBLIGATION_TYPE = tributary_state_special_contract }
 					}
 					if = {
 						limit = {
@@ -202,6 +216,7 @@ liege_modify_vassal_contract_interaction = {
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	send_option = {
 		is_valid = {
@@ -263,9 +278,10 @@ vassal_modify_vassal_contract_interaction = {
 
 	is_valid_showing_failures_only = {
 		scope:recipient = { is_diplomatically_available = yes }
-		NOT = { scope:actor = { is_at_war_with = scope:recipient } } 
+		NOT = { scope:actor = { is_at_war_with = scope:recipient } }
 	}
 
+	##### Changed from Vanilla vvvvv
 	can_send = {
 		trigger_if = { #If you're blocked we don't want to show anything else
 			limit = { scope:actor = { vassal_contract_is_blocked_from_modification = yes } }
@@ -294,10 +310,35 @@ vassal_modify_vassal_contract_interaction = {
 				}
 			}
 		}
+		#Vassals with tributary-like contracts can't just free themselves via negotiation.
+		trigger_if = {
+			limit = { scope:actor = { vassal_contract_has_flag = vassal_cant_modify_this_contract } }
+			scope:actor = {
+				custom_description = {
+					text = vassal_cannot_voluntarily_modify_this_contract
+					NOR = {
+						AND = {
+							vassal_contract_has_flag = foederatus_contract_installed
+							local_var:foederatus_special_contract != vassal_contract_obligation_level:foederatus_special_contract
+						}
+						AND = {
+							vassal_contract_has_flag = tributary_installed_flag
+							local_var:tributary_special_contract != vassal_contract_obligation_level:tributary_special_contract
+						}
+						AND = {
+							vassal_contract_has_flag = tributary_state_installed_flag
+							local_var:tributary_state_special_contract != vassal_contract_obligation_level:tributary_state_special_contract
+						}
+					}
+				}
+			}
+		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	auto_accept = yes
 
+	##### Changed from Vanilla vvvvv
 	on_accept = {
 		scope:actor = {
 			send_interface_message = {
@@ -324,14 +365,30 @@ vassal_modify_vassal_contract_interaction = {
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = coinage_rights }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = succession_rights }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = war_declaration_rights }
+				}
+				if = {
+					limit = { valid_government_jizya_rights = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = jizya_special_rights }
+				}
+				if = {
+					limit = { valid_government_muslim_related_special_rights = yes }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = iqta_special_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = ghazi_special_rights }
+					set_obligation_if_changed_effect = { OBLIGATION_TYPE = marriage_favor_rights }
+				}
+				if = {
+					limit = { valid_title_revocation_rights_trigger = { VASSAL = scope:recipient } }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = title_revocation_rights }
 				}
 				if = {
-					limit = { valid_government_religious_rights_trigger = yes }
+					limit = {
+						exists = local_var:religious_rights
+						valid_religious_rights_trigger = { VASSAL = scope:recipient }
+					}
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = religious_rights }
 				}
 				if = {
-					limit = { valid_government_rights_council_trigger = yes }
+					limit = { valid_rights_council_trigger = { VASSAL = scope:recipient } }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = council_rights }
 				}
 				if = {
@@ -382,6 +439,7 @@ vassal_modify_vassal_contract_interaction = {
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	send_option = {
 		is_valid = {

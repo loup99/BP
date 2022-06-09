@@ -110,12 +110,6 @@ imperial_elective_potential_landed_candidate_trigger = {
 		has_unelectable_trait_trigger = no
 		has_unelectable_government_trigger = no
 		byzantine_elective_deformed_candidate_trigger = no
-		faith = {
-			faith_hostility_level = {
-				target = scope:holder.faith
-				value <= faith_astray_level
-			}
-		}
 	}
 }
 
@@ -175,18 +169,27 @@ imperial_elective_potential_landless_dynastic_candidate_trigger = {
 	byzantine_elective_deformed_candidate_trigger = no
 }
 
-#Eranshar Triggers
-eranshar_elective_potential_landless_dynastic_candidate_trigger = {
+#Mahestan Triggers
+mahestan_elective_shared_faith_trigger = {
+	AND = {
+		religion = $TARGET_CHAR$.religion
+		faith = { considers_astray_trigger = { TARGET_FAITH = $TARGET_CHAR$.faith } }
+	}
+}
+
+mahestan_elective_potential_landless_dynastic_candidate_trigger = {
 	save_temporary_scope_as = potential_candidate
-	#Either the candidate is in the realm, or is landless, or the realm of the title does NOT have protected inheritance.
-	OR = { 
+	#Either the candidate is in the realm, or is landless, or the title is independent,
+	#or the realm of the title does NOT have protected inheritance.
+	OR = {
 		any_liege_or_above = { this = scope:holder }
 		is_ruler = no
+		scope:holder = { is_independent_ruler = yes }
 		scope:holder = {
 			exists = liege
 			NOT = {
 				any_liege_or_above = {
-					has_realm_law_flag = titles_cannot_leave_realm_on_succession
+					cannot_leave_realm_trigger = yes
 					NOR = {
 						this = scope:potential_candidate
 						target_is_vassal_or_below = scope:potential_candidate
@@ -195,82 +198,79 @@ eranshar_elective_potential_landless_dynastic_candidate_trigger = {
 			}
 		}
 	}
-	NOT = { #Landless characters should not be heirs to Theocracies/Republics.
+	#Landless characters should not be heirs to Theocracies/Republics.
+	NOT = {
 		any_heir_title = {
 			exists = holder
 			holder = { has_unelectable_government_trigger = yes }
 		}
 	}
-	OR = { #If the title controls the faith, candidates must be of the same faith.
+	#If the title controls the faith, candidates must be of the same faith.
+	OR = {
 		scope:holder = {
 			NAND = {
 				exists = faith.religious_head
-				this = scope:holder.faith.religious_head #TODO_CD:It might need to be changed to check only for the title rather than the holder. (controlled_faith = scope:holder.faith)
+				#TODO_CD:It might need to be changed to check only for the title rather than the#
+				#holder. (controlled_faith = scope:holder.faith)
+				this = scope:holder.faith.religious_head
 			}
 		}
-		faith = scope:holder.faith
+		mahestan_elective_shared_faith_trigger = { TARGET_CHAR = scope:holder }
 	}
-	NOR = {
-		AND = {
-			exists = mother
-			mother = {
-				is_alive = yes
-				parent_for_elective_succession_trigger = yes
+	
+	#Grandkid block
+	trigger_if = {
+		limit = {
+			NOR = {
+				#Check to see that you're not the product of incest
+				AND = {
+					exists = mother
+					exists = father
+					mother = { relation_with_character_is_incestuous_in_my_or_lieges_faith_trigger = { CHARACTER = prev.father } }
+				}
+				#Let's make the incredibly bold assumption that if incest is completely allowed we'll
+				#just default to check the child instead of parents
+				scope:holder.faith = { has_doctrine_parameter = consanguinity_unrestricted_incest }
 			}
 		}
-		AND = {
-			exists = father
-			father = {
-				is_alive = yes
-				parent_for_elective_succession_trigger = yes
+		# We don't want grandkids to show as candidates if their parent is eligable and still alive
+		NOR = {
+			AND = {
+				exists = mother
+				mother = {
+					is_alive = yes
+					parent_for_elective_succession_trigger = yes
+				}
 			}
-		}
-	}
-	has_unelectable_trait_trigger = no
-	has_unelectable_government_trigger = no
-}
-
-eranshar_elective_potential_landed_candidate_trigger = {
-	save_temporary_scope_as = potential_candidate
-	#Either the candidate is in the realm, or the realm of the title does NOT have protected inheritance.
-	OR = {
-		any_liege_or_above = { this = scope:holder }
-		scope:holder = {
-			exists = liege
-			NOT = {
-				any_liege_or_above = {
-					has_realm_law_flag = titles_cannot_leave_realm_on_succession
-					NOR = {
-						this = scope:potential_candidate
-						target_is_vassal_or_below = scope:potential_candidate
-					}
+			AND = {
+				exists = father
+				father = {
+					is_alive = yes
+					parent_for_elective_succession_trigger = yes
 				}
 			}
 		}
 	}
-	OR = {
-		highest_held_title_tier > 2 #Or Duke-tier... (if title is King or Emperor tier)
-		AND = {
-			scope:holder = { highest_held_title_tier = 3 }
-			highest_held_title_tier > 1 #...Or Count-tier under a Duchy...
-		}
-		AND = {
-			scope:holder = { highest_held_title_tier < 3 }
-			is_ruler = yes #...Or Baron-tier under a County.
-			is_landed = yes
-		}
-	}
-	OR = { #If the title controls the faith, candidates must be of the same faith.
-		scope:holder = {
-			NAND = {
-				exists = faith.religious_head
-				this = faith.religious_head #TODO_CD:It might need to be changed to check only for the title rather than the holder. (controlled_faith = scope:holder.faith)
+	#if incest is allowed, check if you're the child of the holder since you can be both
+	#their kid and grandkid at the same time... 
+	trigger_else_if = {
+		limit = {
+			OR = {
+				AND = {
+					exists = mother
+					mother = { is_alive = yes }
+				}
+				AND = {
+					exists = father
+					father = { is_alive = yes }
+				}
 			}
 		}
-		this.faith = scope:holder.faith
+		parent_for_elective_succession_trigger = yes 
 	}
-	scope:potential_candidate = {
-		has_unelectable_trait_trigger = no
-		has_unelectable_government_trigger = no
-	}
+	#Your parents are dead and you're eligible for title inheritance. Congrats.
+	trigger_else = {}
+	
+	has_unelectable_trait_trigger = no
+	has_unelectable_government_trigger = no
 }

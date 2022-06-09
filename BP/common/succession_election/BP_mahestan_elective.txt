@@ -1,0 +1,289 @@
+﻿# The entry should be named in the same way that the elective succession law is named to define it's voter's logic.
+# Root scope - Elector, the character voting in the election.
+# scope:candidate scope - Candidate, Character considered for the title.
+# scope:title scope - Title, The title the nomination is for.
+# scope:holder scope - Ruler, The ruler currently holding the title.
+# scope:holder_candidate scope - Favored Candidate, The title owner's candidate.
+# The voter will vote for the top score candidate calculated from this script.
+
+ mahestan_elective = {
+	elector_vote_strength = {
+		base = 1
+		modifier = { #Imperial Dignity
+			desc = tooltip_feudal_vote_strength_emperor_tier
+			add = 3
+			highest_held_title_tier = 5
+		}
+		modifier = { #Royal Dignity
+			desc = tooltip_feudal_vote_strength_king_tier
+			add = 2
+			highest_held_title_tier = 4
+		}
+		modifier = { #Princely Dignity
+			desc = tooltip_feudal_vote_strength_duke_tier
+			add = 1
+			highest_held_title_tier = 3
+		}
+		modifier = { #Powerful Vassal
+			desc = tooltip_feudal_vote_strength_powerful_vassal
+			add = {
+				value = 1
+				#Additional point if the vassal is more powerful than the current ruler
+				#(Vassal King who meets this condition will have more voting power than
+				#the Emperor himself (1+1+1+2 = 5))
+				if = {
+					limit = { max_military_strength > scope:holder.max_military_strength }
+					add = 1
+				}
+			}
+			NOT = { this = scope:holder }
+			is_powerful_vassal = yes
+		}
+		modifier = { #Clerical Influence
+			desc = tooltip_feudal_vote_strength_theocrat
+			add = 3
+			NOT = { this = scope:holder }
+			OR = {
+				has_government = theocracy_government
+				
+				has_council_position = councillor_court_chaplain
+				}
+			mahestan_elective_shared_faith_trigger = { TARGET_CHAR = scope:holder }
+			NOT = { faith = { has_doctrine = doctrine_theocracy_lay_clergy } }
+			#TODO_CD:Possible trigger checking for investiture succession?
+		}
+		modifier = { #Current Shah gets an additional 2 votes.
+			desc = tooltip_elective_current_ruler
+			add = 2
+			this = scope:holder
+		}
+		modifier = { #Close Family
+			desc = tooltip_close_family_vote_strength
+			add = 2
+			AND = {
+				is_close_family_of = scope:holder
+				NOT = { this = scope:holder }
+			}
+		}
+		modifier = { #Extended Family
+			desc = tooltip_extended_family_vote_stength
+			add = 1
+			AND = {
+				is_extended_family_of = scope:holder
+				NOT = { this = scope:holder }
+			}
+		}
+		modifier = { #Clerical Influence through Vassals
+			desc = tooltip_vote_strength_clergy_influence_through_vassal
+			add = 1
+			any_learning_councillor = { opinion = { target = root value > 0 } }
+			NOT = { this = scope:holder }
+		}
+		#Heads of important dynasties get more votes
+		modifier = {
+			desc = tooltip_eranshar_vote_strength_dynasty_head
+			add = {
+				value = 1
+				if = {
+					limit = { this.dynasty = { dynasty_prestige_level >= medium_dynasty_prestige_level } }
+					add = 1
+				}
+				if = {
+					limit = { this.dynasty = { dynasty_prestige_level >= high_dynasty_prestige_level } }
+					add = 1
+				}
+				if = {
+					limit = { this.dynasty = { dynasty_prestige_level >= max_dynasty_prestige_level } }
+					add = 1
+				}
+			}
+			this = this.dynasty.dynast
+			this.dynasty = { dynasty_prestige_level >= low_dynasty_prestige_level }
+		}
+		#Clergy Vote Strength Multiplier
+		modifier = {
+			desc = tooltip_mahestan_theocratic_vote_strength_add
+			add = {
+				value = 1
+				#Increasing clerical influence increases the weight of the clergy's vote
+				if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_3 } }
+					multiply = 4
+				}
+				else_if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_2 } }
+					multiply = 2
+				}
+				else_if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_1 } }
+					multiply = 1
+				}
+				else_if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_1 } }
+					multiply = 0
+				}
+			}
+			AND = {
+				NOT = { this = scope:holder.faith.religious_head }
+				OR = {
+					has_government = theocracy_government
+					has_council_position = councillor_court_chaplain
+				}
+			}
+		}
+		#HOF get's even more votes
+		modifier = {
+			desc = tooltip_mahestan_hof_vote_strength_add
+			add = {
+				value = 2
+				#Increasing clerical influence increases the weight of the clergy's vote
+				if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_3 } }
+					multiply = 4
+				}
+				else_if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_2 } }
+					multiply = 2
+				}
+				else_if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_1 } }
+					multiply = 1
+				}
+				else_if = {
+					limit = { scope:holder = { has_realm_law = clerical_influence_1 } }
+					multiply = 0
+				}
+			}
+			this = scope:holder.faith.religious_head
+		}
+	}
+	
+	electors = {
+		add = holder
+		add = {
+			type = title_dejure_vassals
+			limit = {
+				OR = { #1 or 2 tiers of difference for Electors.
+					scope:title = { tier = tier_county }
+					AND = {
+						scope:title = { tier = tier_duchy }
+						highest_held_title_tier >= tier_county
+					}
+					AND = {
+						scope:title = { tier = tier_kingdom }
+						highest_held_title_tier >= tier_county
+					}
+					AND = {
+						scope:title = { tier = tier_empire }
+						highest_held_title_tier >= tier_duchy
+					}
+				}
+				#Elector title must be a de jure vassal of the title being voted on; multi-Dukes
+				#(or similar) might have two duchies in multiple electoral domains, which they should
+				#be able to vote on. This is only valid for the highest-tier title (so a Duke-Elector
+				#who also owns a County which is an electoral title for another title does not get a
+				#vote from that county).
+				any_held_title = {
+					tier = root.highest_held_title_tier
+					exists = de_jure_liege
+					target_is_de_jure_liege_or_above = scope:title
+				}
+				is_vassal_of = scope:holder
+				#Vassals don't vote
+				NOT = { vassal_is_tributary_trigger = yes }
+				#Barbarians don't vote
+				eranshar_barbaric_government_trigger = no
+				#Must be of the faith
+				mahestan_elective_shared_faith_trigger = { TARGET_CHAR = scope:holder }
+			}
+		}
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				OR = { #1 or 2 tiers of difference for Electors.
+					scope:title = { tier = tier_county }
+					AND = {
+						scope:title = { tier = tier_duchy }
+						highest_held_title_tier >= 1
+					}
+					AND = {
+						scope:title = { tier = tier_kingdom }
+						highest_held_title_tier >= 2
+					}
+					AND = {
+						scope:title = { tier = tier_empire }
+						highest_held_title_tier >= 3
+					}
+				}
+				NOT = {
+					AND = {
+						scope:title = { tier = tier_duchy }
+						exists = primary_title.de_jure_liege.holder
+						primary_title.de_jure_liege.holder = scope:holder
+					}
+					AND = {
+						scope:title = { tier = tier_kingdom }
+						highest_held_title_tier = tier_duchy
+						exists = primary_title.de_jure_liege.holder
+						primary_title.de_jure_liege.holder = scope:holder
+					}
+					AND = {
+						scope:title = { tier = tier_kingdom }
+						highest_held_title_tier = tier_county
+						exists = primary_title.de_jure_liege.de_jure_liege.holder
+						primary_title.de_jure_liege.de_jure_liege.holder = scope:holder
+					}
+					AND = {
+						scope:title = { tier = tier_empire }
+						highest_held_title_tier = tier_duchy
+						exists = primary_title.de_jure_liege.de_jure_liege.holder
+						primary_title.de_jure_liege.de_jure_liege.holder = scope:holder
+					}
+					AND = {
+						scope:title = { tier = tier_empire }
+						highest_held_title_tier = tier_kingdom
+						exists = primary_title.de_jure_liege.holder
+						primary_title.de_jure_liege.holder = scope:holder
+					}
+				}
+				is_incapable = no
+				is_adult = yes
+				#Vassals don't vote
+				NOT = { vassal_is_tributary_trigger = yes }
+				#Barbarians don't vote
+				eranshar_barbaric_government_trigger = no
+				#Must be of the faith
+				mahestan_elective_shared_faith_trigger = { TARGET_CHAR = scope:holder }
+			}
+		}
+	}
+	
+	candidate_score = {
+		base = 0
+		######################	Elector self-voting pattern	##########################
+		elector_self_voting_pattern_feudal_elective_modifier = yes
+		
+		##########################	Holder voting pattern	##########################
+		holder_voting_pattern_feudal_elective_modifier = yes
+		
+		##########################	Elector voting patterns (circumstances)	##########################
+		elector_voting_pattern_circumstances_mahestan_elective_modifier = yes
+		
+		##########################	Elector voting patterns (prestige/piety)	##########################
+		elector_voting_pattern_prestige_piety_mahestan_elective_modifier = yes
+		
+		##########################	Elector voting patterns (traits)	##########################
+		elector_voting_pattern_traits_feudal_elective_modifier = yes
+		
+		##########################	Elector voting patterns (opinion)	##########################
+		elector_voting_pattern_opinion_feudal_elective_modifier = yes
+	}
+	
+	#scope:candidate = Candidate, scope:title = Title, scope:holder_candidate = Candidate currently selected by ruler.
+	candidates = {
+		add = {
+			type = holder_dynasty
+			limit = { mahestan_elective_potential_landless_dynastic_candidate_trigger = yes }
+		}
+	}
+}
