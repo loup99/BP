@@ -1,4 +1,5 @@
-﻿imprison_interaction = {
+﻿##### Changed from Vanilla: Generalized "refusal is treason" trigger
+imprison_interaction = {
 	interface_priority = 120
 	common_interaction = yes
 	icon = prison
@@ -476,7 +477,7 @@
 	##### Changed from Vanilla vvvvv
 	ai_accept = {
 		base = 0 # Try to make it 0 for most interactions
-
+		
 		modifier = {
 			add = {
 				value = scope:actor.intrigue
@@ -491,7 +492,6 @@
 			}
 			desc = IMPRISON_INTRIGUE_RECIPIENT
 		}
-
 		modifier = {
 			add = 30
 			scope:hook = yes
@@ -503,6 +503,7 @@
 			multiplier = 0.5
 			desc = AI_OPINION_REASON
 		}
+		##### Changed from Vanilla vvvvv
 		ai_value_modifier = {
 			who = scope:recipient
 			ai_boldness = {
@@ -530,6 +531,8 @@
 			}
 			##### Changed from Vanilla ^^^^^
 		}
+		##### Changed from Vanilla ^^^^^
+		
 		##### Changed from Vanilla vvvvv
 		modifier = {
 			add = 20
@@ -924,5 +927,36 @@
 			exists = scope:recipient.primary_title
 			add = scope:recipient.primary_title.tier
 		}
-	}	
+
+		# Agenda impact
+		modifier = {
+			any_character_struggle = {
+				involvement = involved
+			}
+			add = {
+				value = 0
+				if = {
+					limit = {
+						scope:actor = {
+							any_character_struggle = {
+								phase_has_catalyst = catalyst_imprison_important
+							}
+							has_character_flag = agenda_towards_escalation
+						}
+					}
+					add = 200
+				}
+				else_if = {
+					limit = {
+						scope:actor = {
+							any_character_struggle = {
+								phase_has_catalyst = catalyst_imprison_important
+							}
+						}
+					}
+					add = -100
+				}
+			}
+		}
+	}
 }

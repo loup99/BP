@@ -2,6 +2,7 @@
 	on_actions = {
 		BP_handle_bureaucratic_succession
 		BP_prevent_title_boostrapping
+		BP_apply_title_laws
 		BP_fall_of_rome
 	}
 }
@@ -71,6 +72,69 @@ BP_handle_bureaucratic_succession = {
 					inherit_correct_subroman_taxation_law_effect = { TITLE_BEQUEATHER = scope:previous_holder }
 				}
 			}
+		}
+	}
+}
+
+#Give gubernatorial_government the correct title succession law
+BP_apply_title_laws = {
+	effect = {
+		if = {
+			limit = {
+				scope:transfer_type = flag:granted
+				root = { has_government = gubernatorial_government }
+				NOT = { scope:title = { has_title_law = gubernatorial_elective_succession_law } }
+				scope:title.tier >= tier_duchy
+			}
+			#Remove old laws and add the gubernatorial_elective_succession_law
+			scope:title = {
+				if = {
+					limit = { has_title_law = feudal_elective_succession_law }
+					remove_title_law = feudal_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = princely_elective_succession_law }
+					remove_title_law = princely_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = saxon_elective_succession_law }
+					remove_title_law = saxon_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = scandinavian_elective_succession_law }
+					remove_title_law = scandinavian_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = gaelic_elective_succession_law }
+					remove_title_law = gaelic_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = mahestan_elective_succession_law }
+					remove_title_law = mahestan_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = kurultai_elective_succession_law }
+					remove_title_law = kurultai_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = eldership_elective_succession_law }
+					remove_title_law = eldership_elective_succession_law
+				}
+				if = {
+					limit = { has_title_law = tribal_elective_succession_law }
+					remove_title_law = tribal_elective_succession_law
+				}
+				add_title_law = gubernatorial_elective_succession_law
+			}
+		}
+		#If it has a gubernatorial_elective_succession_law but I'm not gubernatorial_government
+		#remove the law
+		if = {
+			limit = {
+				root = { NOT = { has_government = gubernatorial_government } }
+				scope:title = { has_title_law = gubernatorial_elective_succession_law }
+			}
+			remove_title_law = gubernatorial_elective_succession_law
 		}
 	}
 }

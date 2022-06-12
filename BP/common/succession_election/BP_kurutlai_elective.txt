@@ -1,0 +1,55 @@
+﻿#Taken from "Successions Expanded" and modified
+
+kurultai_elective = {
+	candidates = {
+		add = {
+			type = holder_close_or_extended_family
+			limit = { feudal_elective_potential_landless_dynastic_candidate_trigger = yes }
+		}
+		add = {
+			type = title_claimants
+			limit = { feudal_elective_potential_landless_claimant_candidate_trigger = yes }
+		}
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				feudal_elective_potential_landed_candidate_trigger = yes
+				NOT = { scope:holder = { any_close_or_extended_family_member = { exists = this } } }
+			} 
+		}
+	}
+	electors = {
+		add = holder
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				OR = {
+					culture = { has_same_heritage_group_as = { TARGET = scope:holder.culture } }
+					AND = {
+						this.religion = scope:holder.religion
+						OR = {
+							has_government = tribal_government
+							has_government = nomad_government
+						}
+					}
+				}
+			}
+		}
+	}
+	elector_vote_strength = {
+		base = 1
+		modifier = {
+			add = 9
+			desc = kurultai_word_is_divine
+			this = scope:holder
+		}
+	}
+	candidate_score = {
+		elector_self_voting_pattern_feudal_elective_modifier = yes
+		holder_voting_pattern_feudal_elective_modifier = yes
+		elector_voting_pattern_circumstances_kurultai_elective_modifier = yes
+		elector_voting_pattern_prestige_piety_feudal_elective_modifier = yes
+		elector_voting_pattern_traits_kurultai_elective_modifier = yes
+		elector_voting_pattern_opinion_feudal_elective_modifier = yes
+	}
+}

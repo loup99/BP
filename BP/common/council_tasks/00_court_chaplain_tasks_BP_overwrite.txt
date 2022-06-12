@@ -1,4 +1,5 @@
-﻿task_conversion = {
+﻿##### Changed from Vanilla: Updated progress with various modifiers for BP
+task_conversion = {
 	position = councillor_court_chaplain
 
 	task_type = task_type_county
@@ -255,9 +256,18 @@
 	}
 	##### Changed from Vanilla ^^^^^
 
-	potential_county = {
+	potential_county = { 
 		scope:county = {
 			NOT = { faith = scope:councillor.faith }
+			trigger_if = {
+				limit = {
+					scope:councillor_liege = { has_variable = hold_court_8120_religion_block }
+				}
+				custom_tooltip = {
+					text = hold_court_8120_conversion_tt
+					NOT = { faith = scope:councillor_liege.var:hold_court_8120_religion_block }
+				}
+			}
 			custom_description = {
 				text = "is_protected_via_contract_self_or_liege"
 				subject = holder
@@ -282,6 +292,213 @@
 					}
 				}
 			}
+			# Unreformed Pagans do not tend to even try conversion of non-unreformed faiths unless zealous
+			trigger_if = {
+				limit = {
+					scope:councillor_liege = {
+						is_ai = yes
+						faith = {
+							has_doctrine = unreformed_faith_doctrine
+						}
+					}
+				}
+				OR = {
+					scope:councillor_liege = { ai_zeal >= 50 }
+					scope:county.faith = { has_doctrine = unreformed_faith_doctrine }
+					scope:county = { # Always convert holy sites
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:councillor_liege.faith
+							}
+						}
+					}
+				}
+			}
+			# Do not convert Righteous faiths, unless disturbingly zealous
+			trigger_if = {
+				limit = {
+					scope:councillor_liege = {
+						is_ai = yes
+						faith = {
+							faith_hostility_level = {
+								target = scope:county.faith
+								value <= faith_fully_accepted_level
+							}
+						}
+					}
+				}
+				OR = {
+					scope:councillor_liege = { ai_zeal >= 100 }
+					scope:county = { # Always convert holy sites
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:councillor_liege.faith
+							}
+						}
+					}
+				}
+			}
+			# Converting Astray faiths only happens during certain circumstances
+			trigger_if = {
+				limit = {
+					scope:councillor_liege = {
+						is_ai = yes
+						faith = {
+							faith_hostility_level = {
+								target = scope:county.faith
+								value <= faith_astray_level
+							}
+						}
+					}
+				}
+				trigger_if = {
+					limit = {
+						scope:councillor_liege = {
+							has_tolerant_faith_or_culture_trigger = yes
+						}
+					}
+					OR = {
+						scope:councillor_liege = { ai_zeal >= 50 }
+						scope:county = { county_opinion <= -20 }
+						scope:county = { # Always convert holy sites
+							any_county_province = {
+								barony = {
+									is_holy_site_of = scope:councillor_liege.faith
+								}
+							}
+						}
+					}
+				}
+				trigger_else_if = {
+					limit = {
+						scope:councillor_liege = {
+							faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+						}
+					}
+					OR = {
+						scope:councillor_liege = { ai_zeal >= 0 }
+						scope:county = { county_opinion <= -10 }
+						scope:county = { # Always convert holy sites
+							any_county_province = {
+								barony = {
+									is_holy_site_of = scope:councillor_liege.faith
+								}
+							}
+						}
+					}
+				}
+				trigger_else = {
+					OR = {
+						scope:councillor_liege = { ai_zeal >= 10 }
+						scope:county = { county_opinion <= -15 }
+						scope:county = { # Always convert holy sites
+							any_county_province = {
+								barony = {
+									is_holy_site_of = scope:councillor_liege.faith
+								}
+							}
+						}
+					}
+				}
+			}
+			# Ash'ari in Spain tend to not convert Muwhalladi often
+			trigger_if = {
+				limit = {
+					scope:councillor_liege = {
+						is_ai = yes
+						faith = faith:ashari
+						capital_province = { geographical_region = world_europe_west_iberia }
+						scope:county.faith = faith:muwalladi
+					}
+					scope:county = {
+						title_province = { geographical_region = world_europe_west_iberia }
+					}
+				}
+				OR = {
+					scope:councillor_liege = { ai_zeal >= 50 }
+					scope:county = { county_opinion <= -20 }
+					scope:county = { # Always convert holy sites
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:councillor_liege.faith
+							}
+						}
+					}
+				}
+			}
+			# If a ruler has Jizya tax, they'll only convert the same *religious family* when ai_zeal is really high, they're converting unreformed pagans, counties in a kingdom with a Holy Site, or others of the same religion
+			trigger_if = {
+				limit = {
+					scope:councillor_liege = {
+						is_ai = yes
+						faith = {
+							has_doctrine = tenet_tax_nonbelievers
+						}
+					}
+					OR = {
+						AND = {
+							scope:councillor_liege.religion = { is_in_family = rf_pagan }
+							scope:county.religion = { is_in_family = rf_pagan }
+						}
+						AND = {
+							scope:councillor_liege.religion = { is_in_family = rf_eastern }
+							scope:county.religion = { is_in_family = rf_eastern }
+						}
+						AND = {
+							scope:councillor_liege.religion = { is_in_family = rf_abrahamic }
+							scope:county.religion = { is_in_family = rf_abrahamic }
+						}
+					}
+				}
+				OR = {
+					scope:councillor_liege = { ai_zeal >= 50 }
+					scope:county.faith = { has_doctrine = unreformed_faith_doctrine }
+					scope:councillor_liege.faith = {
+						any_holy_site = {
+							county = {
+								kingdom = scope:county.kingdom
+							}
+						}
+					}
+					scope:county.religion = scope:councillor_liege.religion
+					AND = { # Islamic heartlands, to help fend off encroaching faiths
+						scope:councillor_liege.religion = religion:islam_religion
+						scope:county.title_province = {
+							OR = {
+								geographical_region = ghw_region_holy_land
+								geographical_region = ghw_region_arabia
+								geographical_region = ghw_region_near_east
+								geographical_region = ghw_region_egypt
+								geographical_region = ghw_region_persia
+								geographical_region = ghw_region_north_africa
+							}
+						}
+					}
+				}
+			}
+			# Struggle phases may sometimes restrict targets for involved characters.
+			trigger_if = {
+				# Give an exception for pre-existing conversions: these can take a while and it's not fair to lose years or decades of progress to a phase change.
+				limit = {
+					NOT = {
+						scope:county = { is_target_of_council_task = task_conversion }
+					}
+				}
+				NOT = {
+					scope:councillor_liege = {
+						custom_tooltip = {
+							text = task_conversion.tt.forbidden.due_to_struggle_phase
+							any_character_struggle = {
+								involvement = involved
+								is_struggle_parameter_active_secondary_county_trigger = {
+									PARAMETER = county_conversion_disabled_for_involved_faiths_within_region
+									COUNTY = scope:county
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -301,29 +518,7 @@
 		}
 	}
 
-	on_start_task = {
-		liege = {
-			add_character_flag = {
-				flag = no_court_chaplain_side_effects_first_month
-				days = 30
-			}
-		}
-	}
-
-	on_monthly_county = {
-		scope:councillor_liege = {
-			if = {
-				limit = { has_character_flag = no_court_chaplain_side_effects_first_month }
-				remove_character_flag = no_court_chaplain_side_effects_first_month
-			}
-			else = {
-				trigger_event = {
-					on_action = task_convert_side_effects
-					days = { 1 30 }
-				}
-			}
-		}
-	}
+	monthly_on_action = task_convert_side_effects
 
 	ai_will_do = {
 		value = 1000 # Always convert if possible
@@ -332,7 +527,7 @@
 			limit = {
 				scope:councillor_liege = { has_variable = false_convert }
 			}
-			add = -1000
+			multiply = 0
 		}
 	}
 }

@@ -7,7 +7,7 @@
 			text = "court_chaplain_cant_fire_doctrines"
 			faith = {
 				NOT = {
-					has_doctrine_parameter = clerical_appointment_fixed
+					has_doctrine = doctrine_clerical_succession_spiritual_fixed_appointment
 				}
 			}
 		}
@@ -49,13 +49,23 @@
 		first_valid = {
 			triggered_desc = {
 				trigger = {
-					scope:councillor_liege.faith = { has_doctrine = doctrine_theocracy_temporal }
+					scope:councillor_liege.faith = {
+						OR = {
+							has_doctrine = doctrine_theocracy_temporal
+							religion = { is_in_family = rf_pagan }
+						}
+					}
 				}
 				desc = actual_bishop_title
 			}
 			triggered_desc = {
 				trigger = {
-					NOT = { scope:councillor_liege.faith = { has_doctrine = doctrine_theocracy_temporal } }
+					scope:councillor_liege.faith = {
+						NOR = {
+							has_doctrine = doctrine_theocracy_temporal
+							religion = { is_in_family = rf_pagan }
+						}
+					}
 				}
 				desc = {
 					first_valid = {
@@ -142,6 +152,12 @@
 		scale = court_chaplain_learn_on_the_job_scale
 	}
 
+	council_owner_modifier = {
+		name = reliable_house_modifier
+		learning = 1
+		scale = court_chaplain_reliable_house_scale
+	}
+
 	pool_character_config = pool_court_chaplain
 	
 	valid_character = {
@@ -150,10 +166,11 @@
 	}
 
 	##### Changed from Vanilla vvvvv
-	#Make Buddhist, Jain monks/nuns bald
+	##### Changed from Vanilla: Make Buddhist, Jain monks/nuns bald, Cybellians Eunuchs
 	on_get_position = {
 		got_council_position_effect = yes
 		
+		##### Changed from Vanilla vvvvv
 		if = { #Buddhists and Jains are always monastic holders
 			limit = {
 				NOT = { has_trait = devoted }
@@ -174,6 +191,7 @@
 		}
 		##### Changed from Vanilla ^^^^^
 	}
+	##### Changed from Vanilla ^^^^^
 
 	on_fired_from_position = {
 		fired_from_council_position_effect = yes

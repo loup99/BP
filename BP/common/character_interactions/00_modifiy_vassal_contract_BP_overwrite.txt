@@ -1,14 +1,15 @@
 ﻿##### Changed from Vanilla: Added support for new vassal contracts
 ##### Changed from Vanilla: Created additional logic to hide cases with unmodifiable vassal contracts
+##### Changed from Vanilla: Added liege check for "has_changed_contract_obligation_trigger"
 liege_modify_vassal_contract_interaction = {
 	special_interaction = modify_vassal_contract
 	interface = modify_vassal_contract
 	category = interaction_category_vassal
 	common_interaction = yes
-
+	
 	send_name = "modify_vassal_contract_interaction_SEND"
 	desc = liege_modify_vassal_contract_interaction_desc
-
+	
 	force_notification = yes
 	notification_text = MODIFY_VASSAL_CONTRACT_NOTIFICATION_TO_VASSAL
 	
@@ -39,14 +40,15 @@ liege_modify_vassal_contract_interaction = {
 		}
 	}
 	##### Changed from Vanilla ^^^^^
-
+	
 	is_valid_showing_failures_only = {
 		scope:recipient = { 
 			is_diplomatically_available = yes
 		} 
-		NOT = { scope:actor = { is_at_war_with = scope:recipient } }
+		NOT = { scope:actor = { is_at_war_with = scope:recipient } } 
 	}
-
+	
+	##### Changed from Vanilla vvvvv
 	can_send = {
 		trigger_if = { #If they're blocked we don't want to show anything else
 			limit = {
@@ -62,7 +64,7 @@ liege_modify_vassal_contract_interaction = {
 			scope:actor = {
 				has_changed_contract_obligation_trigger = {
 					WHO = scope:recipient
-					LIEGE = this
+					LIEGE = scope:actor
 				}
 				
 				custom_description = {
@@ -72,7 +74,7 @@ liege_modify_vassal_contract_interaction = {
 						vassal_obligation_increase_tyranny_gain_multiplier > 1
 					}
 				}
-
+				
 				# If the trade without the hook usage is already in the vassal's favour or fair then don't waste your hook
 				save_temporary_scope_value_as = {
 					name = obligations_favoring_vassal
@@ -97,7 +99,7 @@ liege_modify_vassal_contract_interaction = {
 				}
 				trigger_else = {} # Otherwise we're fine!
 			}
-			
+				
 			# Cannot change more than three things at once
 			custom_description = {
 				text = "vassal_modify_vassal_contract_obligation_change_limit"
@@ -106,11 +108,111 @@ liege_modify_vassal_contract_interaction = {
 			}
 		}
 	}
-
+	##### Changed from Vanilla ^^^^^
+	
 	auto_accept = yes
-
+	
 	##### Changed from Vanilla vvvvv
 	on_accept = {
+		hidden_effect = {
+			# Struggle Catalysts
+			## We work these out first so they're not invalidated by the actual effect block.
+			if = {
+				limit = {
+					catalyst_granted_powerful_diff_faith_vassal_religious_protection_preliminary_trigger = { CHAR = scope:recipient }
+					scope:actor = {
+						any_character_struggle = {
+							involvement = involved
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_granted_powerful_diff_faith_vassal_religious_protection
+								CHAR = scope:recipient
+							}
+						}
+					}
+				}
+				scope:actor = {
+					every_character_struggle = {
+						involvement = involved
+						limit = {
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_granted_powerful_diff_faith_vassal_religious_protection
+								CHAR = scope:recipient
+							}
+						}
+						activate_struggle_catalyst = {
+							catalyst = catalyst_granted_powerful_diff_faith_vassal_religious_protection
+							character = scope:actor
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					catalyst_revoked_powerful_diff_faith_vassal_religious_protection_preliminary_trigger = { CHAR = scope:recipient }
+					scope:actor = {
+						any_character_struggle = {
+							involvement = involved
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_revoked_powerful_diff_faith_vassal_religious_protection
+								CHAR = scope:recipient
+							}
+						}
+					}
+				}
+				scope:actor = {
+					every_character_struggle = {
+						involvement = involved
+						limit = {
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_revoked_powerful_diff_faith_vassal_religious_protection
+								CHAR = scope:recipient
+							}
+						}
+						activate_struggle_catalyst = {
+							catalyst = catalyst_revoked_powerful_diff_faith_vassal_religious_protection
+							character = scope:actor
+						}
+					}
+				}
+			}
+
+			# Improving contract catalyst
+			if = {
+				limit = {
+					scope:recipient.count_obligation_improvements_for_vassal > 0
+					is_diff_faith_or_culture_trigger = {
+						CHAR = scope:recipient
+						STATUS = involved
+						STRUGGLE_TYPE = iberian_struggle
+					}
+					scope:actor = {
+						any_character_struggle = {
+							involvement = involved
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_grant_privilege_to_diff_faith_culture_vassal
+								CHAR = scope:recipient
+							}
+						}
+					}
+				}
+				scope:actor = {
+					every_character_struggle = {
+						involvement = involved
+						limit = {
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_grant_privilege_to_diff_faith_culture_vassal
+								CHAR = scope:recipient
+							}
+						}
+						activate_struggle_catalyst = {
+							catalyst = catalyst_grant_privilege_to_diff_faith_culture_vassal
+							character = scope:actor
+						}
+					}
+				}
+			}
+		}
+		
 		scope:actor = {
 			send_interface_message = {
 				type = msg_vassal_contract_change
@@ -217,7 +319,7 @@ liege_modify_vassal_contract_interaction = {
 		}
 	}
 	##### Changed from Vanilla ^^^^^
-
+	
 	send_option = {
 		is_valid = {
 			scope:actor = {
@@ -231,7 +333,7 @@ liege_modify_vassal_contract_interaction = {
 		scope:actor = { has_usable_hook = scope:recipient }
 	}
 	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
-
+	
 	send_options_exclusive = no
 }
 
@@ -242,19 +344,33 @@ vassal_modify_vassal_contract_interaction = {
 	interface = modify_vassal_contract
 	category = interaction_category_vassal
 	common_interaction = yes
-
+	
 	send_name = "modify_vassal_contract_interaction_SEND"
 	desc = vassal_modify_vassal_contract_interaction_desc
-
+	
 	force_notification = yes
 	notification_text = MODIFY_VASSAL_CONTRACT_NOTIFICATION_TO_LIEGE
+	
+	redirect = {
+		# need to reverse the role for the UI to work properly
+		scope:recipient = {
+			save_scope_as = secondary_recipient
+		}
+		scope:actor = {
+			save_scope_as = recipient
+		}
 
+		scope:secondary_recipient = {
+			save_scope_as = actor
+		}
+	}
+	
 	##### Changed from Vanilla vvvvv
 	is_shown = {
-		scope:actor = {
+		scope:recipient = {
 			is_independent_ruler = no
-			NOT = { this = scope:recipient }
-			liege = scope:recipient
+			NOT = { this = scope:actor }
+			liege = scope:actor
 			##### Changed from Vanilla vvvvv
 			OR = {
 				#Unmodifiable contracts combined with modifiable contracts weirdness needs to be covered
@@ -275,29 +391,29 @@ vassal_modify_vassal_contract_interaction = {
 		}
 	}
 	##### Changed from Vanilla ^^^^^
-
+	
 	is_valid_showing_failures_only = {
-		scope:recipient = { is_diplomatically_available = yes }
-		NOT = { scope:actor = { is_at_war_with = scope:recipient } }
+		scope:actor = { is_diplomatically_available = yes }
+		NOT = { scope:recipient = { is_at_war_with = scope:actor } }
 	}
-
+	
 	##### Changed from Vanilla vvvvv
 	can_send = {
 		trigger_if = { #If you're blocked we don't want to show anything else
-			limit = { scope:actor = { vassal_contract_is_blocked_from_modification = yes } }
-			scope:actor = { vassal_contract_is_blocked_from_modification = no }
+			limit = { scope:recipient = { vassal_contract_is_blocked_from_modification = yes } }
+			scope:recipient = { vassal_contract_is_blocked_from_modification = no }
 		}
 		trigger_else = {
-			scope:actor = {
+			scope:recipient = {
 				has_changed_contract_obligation_trigger = {
-					WHO = this
-					LIEGE = scope:recipient
+					WHO = scope:recipient
+					LIEGE = scope:actor
 				}
 				
 				# Must be an even trade overall
 				custom_description = {
 					text = "vassal_modify_vassal_contract_cannot_increase_obligation_level"
-					object = scope:recipient
+					object = scope:actor
 					value = count_obligation_improvements_for_vassal_include_hook
 					count_obligation_improvements_for_vassal_include_hook = 0
 				}
@@ -312,8 +428,8 @@ vassal_modify_vassal_contract_interaction = {
 		}
 		#Vassals with tributary-like contracts can't just free themselves via negotiation.
 		trigger_if = {
-			limit = { scope:actor = { vassal_contract_has_flag = vassal_cant_modify_this_contract } }
-			scope:actor = {
+			limit = { scope:recipient = { vassal_contract_has_flag = vassal_cant_modify_this_contract } }
+			scope:recipient = {
 				custom_description = {
 					text = vassal_cannot_voluntarily_modify_this_contract
 					NOR = {
@@ -335,24 +451,24 @@ vassal_modify_vassal_contract_interaction = {
 		}
 	}
 	##### Changed from Vanilla ^^^^^
-
+	
 	auto_accept = yes
-
+	
 	##### Changed from Vanilla vvvvv
 	on_accept = {
-		scope:actor = {
+		scope:recipient = {
 			send_interface_message = {
 				type = msg_vassal_contract_change
 				title = modify_vassal_contract_interaction_notification
-				right_icon = scope:recipient
+				right_icon = scope:actor
 				if = {
 					limit = { always = scope:hook }
-					use_hook = scope:recipient
+					use_hook = scope:actor
 					add_achievement_flag_effect = { FLAG = achievement_fine_print_flag }
 				}
 				
 				hidden_effect = { set_vassal_contract_modification_blocked = yes }
-
+				
 				if = {
 					limit = { has_government = feudal_government }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = feudal_government_taxes }
@@ -440,18 +556,18 @@ vassal_modify_vassal_contract_interaction = {
 		}
 	}
 	##### Changed from Vanilla ^^^^^
-
+	
 	send_option = {
 		is_valid = {
-			scope:actor = {
-				has_usable_hook = scope:recipient
+			scope:recipient = {
+				has_usable_hook = scope:actor
 			}
 		}
 		flag = hook
 		localization = SCHEME_HOOK
 	}
 	should_use_extra_icon = {
-		scope:actor = { has_usable_hook = scope:recipient }
+		scope:recipient = { has_usable_hook = scope:actor }
 	}
 	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
 	send_options_exclusive = no

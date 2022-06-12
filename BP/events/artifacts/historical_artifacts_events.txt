@@ -1,0 +1,308 @@
+﻿namespace = historical_artifacts
+# Generation of historical artifacts #
+
+#Historical artifacts generator at game start
+historical_artifacts.0023 = {
+	type = empty
+	hidden = yes
+
+	immediate = {
+		# Seeded Court Artifacts
+		if = {
+			limit = { has_dlc_feature = royal_court }
+			# All starting courts will have a dynasty banner
+			every_character_with_royal_court = {
+				save_scope_as = banner_ruler
+				# House Banner
+				set_variable = banner_from_house
+				set_variable = startup_banner
+				create_artifact_wall_banner_effect = {
+					OWNER = scope:banner_ruler
+					CREATOR = scope:banner_ruler
+					TARGET = scope:banner_ruler.house
+				}
+				# Dynasty Banner
+				If = { 
+					limit = {
+						OR = {
+							this = dynasty.dynast # Dynasty Head
+							any_parent = { # Parent landless Dynasty Head
+								employer = prev
+								dynasty = prev.dynasty
+								this = dynasty.dynast
+							}
+						}
+					}
+					set_variable = banner_from_dynasty
+					set_variable = startup_banner
+					create_artifact_wall_banner_effect = {
+						OWNER = scope:banner_ruler
+						CREATOR = scope:banner_ruler
+						TARGET = scope:banner_ruler.dynasty
+					}
+				}
+			}
+			# Court Artifacts: Christianity
+			while = {
+				count = 6
+				random_character_with_royal_court = {
+					limit = {
+						faith.religion = religion:christianity_religion
+						NOT = { has_character_flag = seeded_relic }
+					}
+					create_artifact_pedestal_christian_relic_effect_hist = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+			# Court Artifacts: Islam
+			while = {
+				count = 6
+				random_character_with_royal_court = {
+					limit = {
+						faith.religion = religion:islam_religion
+						NOT = { has_character_flag = seeded_relic }
+					}
+					create_artifact_pedestal_islamic_relic_effect_hist = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+			# Court Artifacts: Buddhism
+			while = {
+				count = 6
+				random_character_with_royal_court = {
+					limit = {
+						faith.religion = religion:buddhism_religion
+						NOT = { has_character_flag = seeded_relic }
+					}
+					create_artifact_pedestal_buddhism_relic_effect_hist = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+			# Court Artifacts: Hinduism
+			while = {
+				count = 2
+				random_character_with_royal_court = {
+					limit = {
+						faith.religion = religion:hinduism_religion
+						NOT = { has_character_flag = seeded_relic }
+					}
+					create_artifact_pedestal_branch_relic_hinduism_effect = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+			# Court Artifacts: Norse Paganism
+			faith:norse_pagan = {
+				while = {
+					count = 2
+					random_faith_ruler = {
+						limit = {
+							highest_held_title_tier >= tier_county
+							NOT = { has_character_flag = seeded_relic }
+						}
+						create_artifact_pedestal_branch_relic_germanic_effect = { OWNER = this }
+						add_character_flag = {
+							flag = seeded_relic
+							days = 1
+						}
+					}
+				}
+			}
+			# Court Artifacts: Roog Sene
+			faith:west_african_roog_pagan = {
+				random_faith_ruler = {
+					limit = { highest_held_title_tier >= tier_county }
+					create_artifact_pedestal_branch_relic_boog_effect = { OWNER = this }
+				}
+			}
+			# Court Artifacts: Slavic
+			faith:slavic_pagan = {
+				random_faith_ruler = {
+					limit = { highest_held_title_tier >= tier_county }
+					create_artifact_pedestal_branch_relic_slavic_effect = { OWNER = this }
+				}
+			}
+		}
+		# Historical Artifacts
+		
+		## We do these per-artefact rather than per-title so that they can be easily reshuffled if desired.
+		
+		## Weapons
+		### Sword of Atilla 
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
+				exists = title:e_hunnic_empire.holder
+			}
+			title:e_hunnic_empire.holder = { create_artifact_wall_sword_attila_effect = { OWNER = this } }
+		}
+		
+		## Books, Scrolls, & Other Recorded Nerdery
+		### Konagamana
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
+				exists = title:k_himalaya.holder
+			}
+			title:k_himalaya.holder = { create_artifact_konagamana_effect = { OWNER = this } }
+		}
+		### Vinaya Pitaka
+		random_character_with_royal_court = {
+			limit = { faith = faith:theravada }
+			create_artifact_vinaya_pitaka_effect = { OWNER = this }
+		}
+		### Sutta Pitaka
+		random_character_with_royal_court = {
+			limit = { faith = faith:theravada }
+			create_artifact_sutta_pitaka_effect = { OWNER = this }
+		}
+		### Abhidhamma Pitaka
+		random_character_with_royal_court = {
+			limit = { faith = faith:theravada }
+			create_artifact_abhidhamma_pitaka_effect = { OWNER = this }
+		}
+		
+		## Banners
+		### Banner of Edessa
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
+				exists = title:e_byzantium.holder
+			}
+			title:e_byzantium.holder = { create_artifact_wall_banner_edessa_effect = { OWNER = this } }
+		}
+		
+		#TODO: Crown of Justinian (wearable)
+		#TODO: Papal Tiara
+		#TODO: Visigothic votive crowns(?)
+		#TODO: Excalibur...
+		
+		# Crowns
+		##### Changed from Vanilla: Removed Iron Crown of Lombardy
+		##### Changed from Vanilla: Removed Reichskrone
+		##### Changed from Vanilla: Removed Essen Crown
+		##### Changed from Vanilla: Removed Nikephoros' Crown
+		##### Changed from Vanilla: Removed Monomachus Crown
+		##### Changed from Vanilla: Removed Crown of Justinian (Pedestal)
+		##### Changed from Vanilla: Removed al-Taj
+		##### Changed from Vanilla: Removed Papal Tiara
+		##### Changed from Vanilla: Removed Visigothic Votive Crowns
+		
+		# Clothes
+		##### Changed from Vanilla: Removed Robe of Kassapa
+		##### Changed from Vanilla: Removed Mantle of the Prophet
+		
+		# Regalia
+		##### Changed from Vanilla: Removed Qadib al-Mulk
+		##### Changed from Vanilla: Removed Chalice of Dona Urraca
+		
+		# Thrones
+		##### Changed from Vanilla: Removed Throne of Charlemagne
+		##### Changed from Vanilla: Removed Throne of Scone (featuring Stone)
+		
+		# Furniture
+		##### Changed from Vanilla: Removed Pentapyrgion (ca. 830s)
+		##### Changed from Vanilla: Removed Bells of Santiago
+		##### Changed from Vanilla: Removed (Former) Bells of Santiago
+		
+		# Weapons
+		##### Changed from Vanilla: Removed Curtana
+		##### Changed from Vanilla: Removed al-Sayf al-Khass
+		##### Changed from Vanilla: Removed Staff of Kakusandha
+		##### Changed from Vanilla: Removed Excalibur
+		##### Changed from Vanilla: Removed Spear of the Prophet
+		
+		# Banners
+		##### Changed from Vanilla: Removed Banner of Thankfulness
+		##### Changed from Vanilla: Removed Banner of Kaviani
+		
+		# Misc
+		##### Changed from Vanilla: Removed Head of St. Edmund
+		##### Changed from Vanilla: Removed al-Dawat
+		##### Changed from Vanilla: Removed al-Hafir
+		##### Changed from Vanilla: Skull Cap of Charlemagne
+	}
+}
+
+
+#Save a memorable battle as potential topic for artifacts
+historical_artifacts.0100 = {
+	hidden = yes
+	scope = combat_side
+
+	trigger = {
+		# Check to ensure all needed scopes are valid
+		exists = combat.location
+		exists = side_primary_participant
+		exists = enemy_side.side_primary_participant
+
+		# Check if this battle was important enough to be memorialized
+		calc_true_if = {
+			amount >= 2
+			any_in_list = {
+				list = slain_combatants
+				OR = {
+					this = enemy_side.side_primary_participant
+					is_heir_of = enemy_side.side_primary_participant
+				}
+			}
+			any_in_list = {
+				list = prisoners_of_war
+				OR = {
+					this = enemy_side.side_primary_participant
+					is_heir_of = enemy_side.side_primary_participant
+				}
+			}
+			troops_ratio <= 0.5
+			num_enemies_killed >= 10000
+			AND = {
+				percent_enemies_killed >= 75
+				combat = {
+					num_total_troops >= 20000
+				}
+			}
+			combat = {
+				OR = {
+					num_total_troops >= 30000
+					warscore_value >= 25
+				}
+			}
+		}
+	}
+
+	immediate = {
+		side_primary_participant = {
+			if = {
+				limit = {
+					exists = var:epic_battle_location
+				}
+				remove_variable = epic_battle_location
+			}
+			if = {
+				limit = {
+					exists = var:epic_loser
+				}
+				remove_variable = epic_loser
+			}
+			set_variable = {
+				name = epic_battle_location
+				value = root.combat.location
+			}
+			set_variable = {
+				name = epic_loser
+				value = root.enemy_side.side_primary_participant
+			}
+		}
+	}
+}

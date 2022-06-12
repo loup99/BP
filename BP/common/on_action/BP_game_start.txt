@@ -1,20 +1,61 @@
-﻿on_game_start = {
+﻿#Some of this taken from "Successions Expanded" and modified
+
+on_game_start = {
 	on_actions = { bp_game_start }
 }
 
 bp_game_start = {
+	effect = { every_culture_global = { ccu_initialize_culture = yes } }
 	on_actions = {
+		#Needs to be done first to avoid some errors
+		ccu_startup_debug
+		#Other BP Stuff
 		BP_character_events
 		game_start_fix_barony_government
 		create_BP_artifacts
 		setup_realm_laws
-		setup_realm_succession_laws
+		setup_realm_and_title_succession_laws
 		setup_administrative_languages
 		convert_nicene_to_rites
 		setup_vassal_contracts
 		set_autocephalous_church_flags
+		set_dead_dynasty_renown
 	}
 }
+
+## CCU Stuff
+ccu_startup_debug = {
+	effect = {
+		every_culture_global = {
+			if = {
+				limit = { NOT = { has_variable = heritage_group } }
+				save_scope_as = problem_culture
+				debug_log_scopes = yes
+				debug_log = "ccu_debug_culture_heritage_group_desc"
+			}
+			if = {
+				limit = { NOT = { has_variable = heritage_family } }
+				save_scope_as = problem_culture
+				debug_log_scopes = yes
+				debug_log = "ccu_debug_culture_heritage_family_desc"
+			}
+			if = {
+				limit = { NOT = { has_variable = language_group } }
+				save_scope_as = problem_culture
+				debug_log_scopes = yes
+				debug_log = "ccu_debug_culture_language_group_desc"
+			}
+			if = {
+				limit = { NOT = { has_variable = language_family } }
+				save_scope_as = problem_culture
+				debug_log_scopes = yes
+				debug_log = "ccu_debug_culture_language_family_desc"
+			}
+		}
+	}
+}
+
+## Other BP Stuff
 
 BP_character_events = {
 	effect = {
@@ -129,7 +170,7 @@ setup_realm_laws = {
 #These follow the following pattern:
 # By culture, by government, then by specific titles, finally specific title overwrites after 476.2.2
 # To make it so we can systematically add specific laws, then overwrite for exceptions
-setup_realm_succession_laws = {
+setup_realm_and_title_succession_laws = {
 	effect = {
 		### Cultures
 		every_ruler = { #Cultures/Religions with male_only_law effects
@@ -172,16 +213,83 @@ setup_realm_succession_laws = {
 			}
 		}
 		every_ruler = { #Eranshar
-			limit = { has_government = gubernatorial_government }
+			limit = { has_government = eranshar_government }
 			if = {
 				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
 				add_realm_law_skip_effects = single_heir_dynasty_house
 			}
 		}
+		
 		### Specific Title Overwrites
 		#TODO: remove those that are meaningless based on the above
 		
 		#Title Succession Laws
+		
+		#General Title Succession Laws (not tied to a specific title
+		
+		#Kurultai Elective Succession
+		every_independent_ruler = {
+			limit = {
+				culture = {
+					OR = {
+						has_cultural_pillar = heritage_mongolic
+						has_cultural_pillar = heritage_turkic
+					}
+					NOT = { this = culture:tuyuhun }
+				}
+				has_a_primitive_type_of_government_trigger = yes
+			}
+			every_held_title = {
+				limit = { tier >= tier_kingdom }
+				add_title_law = kurultai_elective_succession_law
+			}
+		}
+		#Eldership Elective Succession
+		every_independent_ruler = {
+			limit = {
+				OR = {
+					has_a_feudal_type_of_government_trigger = yes
+					has_government = tribal_government
+				}
+				OR = {
+					this.religion = religion:baltic_religion
+					this.religion = religion:west_african_religion
+					this.religion = religion:akom_religion
+					this.religion = religion:west_african_roog_religion
+					this.religion = religion:west_african_orisha_religion
+				}
+			}
+			every_held_title = {
+				limit = { tier >= tier_duchy }
+				add_title_law = eldership_elective_succession_law
+			}
+		}
+		#Scandinavian Elective
+		every_independent_ruler = {
+			limit = {
+				culture = { has_cultural_parameter = scandinavian_elective_enabled }
+				highest_held_title_tier >= tier_duchy
+				OR = {
+					has_a_feudal_type_of_government_trigger = yes
+					has_government = tribal_government
+				}
+			}
+			this.primary_title = { add_title_law = scandinavian_elective_succession_law }
+		}
+		#Witangamot
+		every_independent_ruler = {
+			limit = {
+				culture = { has_cultural_parameter = witenagemot_succession_enabled }
+				highest_held_title_tier >= tier_kingdom
+				OR = {
+					has_a_feudal_type_of_government_trigger = yes
+					has_government = tribal_government
+				}
+			}
+			this.primary_title = { add_title_law = saxon_elective_succession_law }
+		}
+		
+		#Title Elective Laws Tied to Specific Titles
 		
 		#Eranshar Elective
 		every_ruler = {
@@ -197,6 +305,7 @@ setup_realm_succession_laws = {
 					OR = {
 						this = title:e_byzantium
 						this = title:e_wre
+						this = title:e_roman_empire
 					}
 				}
 				add_title_law = imperial_elective_succession_law
@@ -262,7 +371,6 @@ setup_realm_succession_laws = {
 					OR = {
 						this = title:k_masmuda
 						#Turkic Succession
-						this = title:e_hunnic_empire #TODO: Implement succ_turkish_succession law
 						this = title:k_al_hirah #TODO: Implement succ_turkish_succession law
 						this = title:k_arabia_petraea #TODO: Implement succ_turkish_succession law
 						this = title:k_qaryat_dhat_kahil #TODO: Implement succ_turkish_succession law
@@ -378,6 +486,7 @@ setup_realm_succession_laws = {
 					has_title = title:k_italy
 					has_title = title:k_ostrogoths
 				}
+				NOT = { has_realm_law = single_heir_succession_law }
 			}
 			add_realm_law_skip_effects = single_heir_succession_law
 		}
@@ -761,7 +870,9 @@ setup_vassal_contracts = {
 					this.liege.primary_title = title:e_xiongnu
 					this.primary_title.tier >= tier_duchy
 					NOT = { this.primary_title = title:d_chah }
+					NOT = { this.primary_title = title:e_xiongnu } #Excluded the holder of e_xiongnu (not a vassal)
 				}
+				debug_log_scopes = no
 				vassal_contract_set_obligation_level = {
 					type = tributary_special_contract
 					level = 1
@@ -771,8 +882,10 @@ setup_vassal_contracts = {
 				limit = {
 					liege.primary_title = title:e_rajastan
 					primary_title.tier >= tier_duchy
+					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
 					has_government = gupta_government
 				}
+				debug_log_scopes = no
 				vassal_contract_set_obligation_level = {
 					type = gupta_government_taxes
 					level = 1
@@ -894,5 +1007,17 @@ set_autocephalous_church_flags = {
 				value = faith:georgian_orthodox
 			}
 		}
+	}
+}
+
+## Other stuff
+set_dead_dynasty_renown = {
+	effect = {
+		#Re-evaluate all of these as dynasty tree is filled out for increased accuracy
+		dynasty:israelite_dynn_herodian = { add_dynasty_prestige_level = 1 }
+		dynasty:iranian_dynn_achaemenid = { add_dynasty_prestige_level = 4 }
+		dynasty:bactrian_dynn_orontid = { add_dynasty_prestige_level = 4 }
+		dynasty:104246212 = { add_dynasty_prestige_level = 3 } #Seleucid
+		dynasty:macedonian_dynn_Argead = { add_dynasty_prestige_level = 10 } #Alexander the Great
 	}
 }

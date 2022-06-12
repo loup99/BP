@@ -1,6 +1,5 @@
 ﻿@base_peasant_discontent_progress = 2
 
-##### Changed from Vanilla: Made NOT available to gubernatorial_government/bureaucratic_government (they get tax revolts instead)
 peasant_faction = {
 	casus_belli = peasant_war
 
@@ -64,6 +63,18 @@ peasant_faction = {
 	}
 
 	on_creation = {
+		random_faction_county_member = {
+			save_scope_as = founding_county
+		}
+
+		set_variable = {
+			name = faction_culture
+			value = scope:founding_county.culture
+		}
+		set_variable = {
+			name = faction_faith
+			value = scope:founding_county.faith
+		}
 	}
 
 	on_destroy = {
@@ -77,7 +88,10 @@ peasant_faction = {
 			special_character = {
 				if = {
 					#Verify that the title exists before trying to destroy it
-					limit = { has_variable = peasant_title }
+					limit = {
+						has_variable = peasant_title
+						exists = this.var:peasant_title
+					}
 					destroy_title = this.var:peasant_title
 				}
 
@@ -181,6 +195,15 @@ peasant_faction = {
 			add = -100
 			has_game_rule = extreme_realm_stability
 		}
+
+		# stay if at war with the target
+		modifier = {
+			add = 1000
+			exists = joined_faction
+			joined_faction = {
+				faction_is_at_war = yes
+			}
+		}
 	}
 
 	county_create_score = {
@@ -272,22 +295,13 @@ peasant_faction = {
 
 	can_character_join = {
 		joined_faction = scope:faction
-		NOR = {
-			has_government = gubernatorial_government
-			has_government = bureaucratic_government
-		}
 	}
 
 	##### Changed from Vanilla vvvvv
 	can_county_join = {
 		# Peasants can only join a faction against their direct liege.
 		holder = scope:faction.faction_target
-		holder = {
-			NOR = {
-				has_government = gubernatorial_government
-				has_government = bureaucratic_government
-			}
-		}
+		holder = { invalid_government_for_peasant_revolt_trigger = no }
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -296,12 +310,7 @@ peasant_faction = {
 		# Peasants can only join a faction against their direct liege.
 		holder = scope:target
 		
-		holder = {
-			NOR = {
-				has_government = gubernatorial_government
-				has_government = bureaucratic_government
-			}
-		}
+		holder = { invalid_government_for_peasant_revolt_trigger = no }
 		
 		####
 		# BLOCKERS

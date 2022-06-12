@@ -1,4 +1,5 @@
-﻿demand_conversion_vassal_ruler_interaction = {
+﻿##### Changed from Vanilla: Tied interaction to innovations
+demand_conversion_vassal_ruler_interaction = {
 	category = interaction_category_religion
 
 	ai_maybe = yes
@@ -50,23 +51,20 @@
 
 	cooldown_against_recipient = { years = 15 }
 
+	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
 		valid_demand_conversion_conditions_trigger = yes
-		#### Changed from Vanilla ####
 		scope:actor.culture = { has_innovation = innovation_state_religion }
-		#### Changed from Vanilla ####
 	}
+	##### Changed from Vanilla ^^^^^
 
 	auto_accept = {
-		OR = {
-			scope:recipient = { is_imprisoned_by = scope:actor }
-			custom_description = {
-				text = "spending_hook"
-				subject = scope:actor
-				object = scope:recipient
-				scope:hook = yes
-				scope:actor = { has_strong_hook = scope:recipient }
-			}
+		custom_description = {
+			text = "spending_hook"
+			subject = scope:actor
+			object = scope:recipient
+			scope:hook = yes
+			scope:actor = { has_strong_hook = scope:recipient }
 		}
 	}
 
@@ -242,6 +240,133 @@
 				gold < demand_conversion_bribe_size
 			}
 		}
+
+		modifier = {
+			factor = 0
+			scope:recipient.demand_conversion_likelihood_calculation < 90
+			scope:actor = {
+				culture = {
+					has_cultural_parameter = less_likely_to_force_conversion
+				}
+			}
+		}
+
+		modifier = { # Do not convert Righteous faith subjects, unless disturbingly zealous
+			factor = 0
+			scope:actor = {
+				ai_zeal < 100
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_fully_accepted_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				has_tolerant_faith_or_culture_trigger = yes
+				ai_zeal < 50
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+				ai_zeal < -10
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				NOR = {
+					faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+					has_tolerant_faith_or_culture_trigger = yes
+				}
+				ai_zeal < 0
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	ai_accept = {
 		base = 0
@@ -254,6 +379,7 @@
 	}
 }
 
+##### Changed from Vanilla: Tied interaction to innovations
 demand_conversion_player_ruler_interaction = {
 	category = interaction_category_religion
 	desc = ask_for_conversion_interaction_desc
@@ -277,12 +403,12 @@ demand_conversion_player_ruler_interaction = {
 		}
 	}
 
+	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
 		valid_demand_conversion_conditions_trigger = yes
-		#### Changed from Vanilla ####
 		scope:actor.culture = { has_innovation = innovation_state_religion }
-		#### Changed from Vanilla ####
 	}
+	##### Changed from Vanilla ^^^^^
 
 	send_option = {
 		is_valid = {
@@ -372,9 +498,132 @@ demand_conversion_player_ruler_interaction = {
 			factor = 0
 			scope:recipient.demand_conversion_likelihood_calculation < 10
 		}
+		
+		modifier = { # Do not convert Righteous faith subjects, unless disturbingly zealous
+			factor = 0
+			scope:actor = {
+				ai_zeal < 100
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_fully_accepted_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				has_tolerant_faith_or_culture_trigger = yes
+				ai_zeal < 50
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+				ai_zeal < -10
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				NOR = {
+					faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+					has_tolerant_faith_or_culture_trigger = yes
+				}
+				ai_zeal < 0
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = { # If the subject has one of your holy sites, always try to convert
+				scope:recipient = {
+					any_sub_realm_county = {
+						any_county_province = {
+							barony = {
+								is_holy_site_of = scope:actor.faith
+							}
+						}
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
 	}
 }
 
+##### Changd from Vanilla: Enabled Temporal Condemnation via "Clerical Influence" Realm Law
 temporal_condemnation_interaction = {
 	category = interaction_category_religion
 	desc = temporal_condemnation_interaction_desc
@@ -385,12 +634,8 @@ temporal_condemnation_interaction = {
 		##### Changed from Vanilla vvvvv
 		can_use_temporal_condemnation = { ACTOR = scope:actor }
 		##### Changed from Vanilla ^^^^^
-		scope:recipient = {
-			liege = scope:actor
-		}
-		scope:recipient = {
-			is_landed = yes
-		}
+		scope:recipient = { liege = scope:actor }
+		scope:recipient = { is_landed = yes }
 	}
 	##### Changed from Vanilla ^^^^^
 

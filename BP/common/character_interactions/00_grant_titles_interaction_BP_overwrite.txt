@@ -195,7 +195,13 @@
 				}
 			}
 		}
-		
+
+		custom_description = {
+			text = grant_titles_interaction_title_being_wagered
+			NOT = {
+				scope:target = { has_variable = wagered_county }
+			}
+		}
 		##### Changed from Vanilla vvvvv
 		
 		#Eranshar can only give "Eran" counties to followers of Ahura Mazda
@@ -233,6 +239,35 @@
 				limit = {
 					is_independent_ruler = yes
 					save_temporary_scope_as = recipient_is_independent
+				}
+			}
+			if = {
+				limit = {
+					NAND = {
+						has_relation_friend = scope:actor
+						has_relation_lover = scope:actor
+						has_relation_soulmate = scope:actor
+						has_relation_best_friend = scope:actor
+					}
+				}
+				if = {
+					# then verify the right struggle phase
+					limit = {
+						is_diff_faith_or_culture_trigger = {
+							CHAR = scope:actor
+							STATUS = involved
+							STRUGGLE_TYPE = iberian_struggle
+						}
+						any_character_struggle = {
+							involvement = involved
+							is_struggle_type = iberian_struggle
+							has_struggle_phase_parameter = struggle_grant_titles_diff_faith_culture_to_leads_to_friendship
+						}
+					}
+					progress_towards_friend_effect = {
+						CHARACTER = scope:actor
+						OPINION = no
+					}
 				}
 			}
 		}
@@ -818,6 +853,26 @@
 						right_icon = scope:recipient
 					
 						custom_tooltip = grant_titles_interaction_notification_effect_2
+						if = {
+							limit = {
+								exists = dynasty
+								is_diff_faith_or_culture_trigger = {
+									CHAR = scope:recipient
+									STATUS = involved
+									STRUGGLE_TYPE = iberian_struggle
+								}
+								any_character_struggle = {
+									involvement = involved
+									is_struggle_type = iberian_struggle
+									has_struggle_phase_parameter = struggle_grant_titles_diff_faith_culture_gives_prestige
+
+								}
+							}
+							dynasty = {
+								add_dynasty_prestige = minor_dynasty_prestige_gain
+							}
+
+						}
 					}
 				}
 				else_if = {
@@ -917,25 +972,42 @@
 				}
 			}
 		}
-	}
-}
 
-#This interaction is referenced in code! If it's renamed you have to ping a coder
-grant_title_to_new_random_character_interaction = {
-	hidden = yes
-	auto_accept = yes
-	special_interaction = grant_titles_interaction
-	use_diplomatic_range = no
-
-	is_valid_showing_failures_only = {
-		scope:actor = {
-			NOT = {
-				this = scope:recipient
-			}
-			any_held_title = {
-				count > 1
+		hidden_effect = {
+			# Struggle Catalyst
+			if = {
+				limit = {
+					scope:actor = {
+						is_diff_faith_or_culture_trigger = {
+							CHAR = scope:recipient
+							STATUS = involved
+							STRUGGLE_TYPE = iberian_struggle
+						}
+						any_character_struggle = {
+							involvement = involved
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_grant_privilege_to_diff_faith_culture_vassal
+								CHAR = scope:recipient
+							}
+						}
+					}
+				}
+				scope:actor = {
+					every_character_struggle = {
+						involvement = involved
+						limit = {
+							activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+								CATALYST = catalyst_grant_privilege_to_diff_faith_culture_vassal
+								CHAR = scope:recipient
+							}
+						}
+						activate_struggle_catalyst = {
+							catalyst = catalyst_grant_privilege_to_diff_faith_culture_vassal
+							character = scope:actor
+						}
+					}
+				}
 			}
 		}
-		scope:recipient = { is_diplomatically_available = yes }
 	}
 }
