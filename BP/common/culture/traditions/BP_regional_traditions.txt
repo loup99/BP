@@ -276,6 +276,61 @@ tradition_colonizers = { #Roman Colonization
 	ai_will_do = { value = 0 }
 }
 
+tradition_colonizers_non_dlc = { #Roman Colonization (no DLC version)
+	category = regional
+
+	layers = {
+		0 = steward
+		1 = mediterranean
+		4 = city.dds
+	}
+	
+	is_shown = { always = no } #Never selectable even with DLC (have to get it from extant cultures)
+	can_pick = { has_cultural_pillar = heritage_latin }
+	
+	parameters = {}
+	culture_modifier = {
+		cultural_acceptance_gain_mult = -0.75
+	}
+	county_modifier = {
+		development_growth_factor = 0.1
+		monthly_county_control_change_add = 0.1
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bureaucratic }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bureaucratic_or_communal_desc
+				}
+			}
+			if = {
+				limit = { NOT = { any_in_list = { list = traits this = flag:heritage_latin } } }
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = not_latin_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = { value = 0 }
+}
+
 tradition_hellenizers = { #Byzantine Hellenizaiton
 	category = regional
 
@@ -342,4 +397,227 @@ tradition_hellenizers = { #Byzantine Hellenizaiton
 	}
 	
 	ai_will_do = { value = 0 }
+}
+
+tradition_hellenizers_non_dlc = { #Byzantine Hellenizaiton
+	category = regional
+
+	layers = {
+		0 = steward
+		1 = mediterranean
+		4 = conversation.dds
+	}
+	
+	is_shown = { always = no }
+	can_pick = {
+		has_cultural_pillar = heritage_byzantine
+		custom_tooltip = {
+			text = cannot_have_tradition_xenophilic
+			NOT = { any_in_list = { list = traits this = flag:tradition_xenophilic } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_ruling_caste
+			NOT = { any_in_list = { list = traits this = flag:tradition_ruling_caste } }
+		}
+	}
+	
+	parameters = {
+		peasant_and_populist_factions_less_common = yes
+		improved_promote_culture_speed_hellenization = yes
+	}
+	culture_modifier = {
+		cultural_acceptance_gain_mult = 0.25
+	}
+	county_modifier = {
+		development_growth_factor = 0.1
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bureaucratic }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bureaucratic_or_communal_desc
+				}
+			}
+			if = {
+				limit = { NOT = { any_in_list = { list = traits this = flag:heritage_byzantine } } }
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = not_byzantine_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = { value = 0 }
+}
+
+#Tradition to prevent culture splitting
+tradition_civilization_craddle = {
+	category = regional
+
+	layers = {
+		0 = intrigue
+		1 = mena
+		4 = king.dds
+	}
+	
+	is_shown = { always = no } #Never selectable even with DLC (have to get it from extant cultures)
+	can_pick = {
+		#Only for specific cultures to maintain homogenity and city construction, like Coptic and Punic
+		this = culture:coptic
+		this = culture:old_nubian
+		this = culture:assyrian
+		this = culture:aramean
+		this = culture:hebrew
+		this = culture:punic
+	}
+	
+	parameters = {
+		expensive_convert_to_local_culture = yes
+		harder_to_hybridize = yes
+		increased_divergence_hybrid_cost_hellenization = yes
+		can_build_cities_in_late_antiquity = yes
+	}
+	
+	character_modifier = {
+		monthly_county_control_change_add = 0.1
+		monthly_prestige_gain_mult = 0.1
+		same_culture_opinion = 5
+		opinion_of_different_culture = -5
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_spiritual_or_stoic_desc
+				}
+			}
+			if = {
+				limit = { scope:character = { any_sub_realm_county = { NOT = { culture = scope:character.culture } } } }
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_realm_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { NOT = { is_divergent_culture = yes } }
+			multiply = 0
+		}
+		if = {
+			limit = { any_in_list = { list = traits this = flag:ethos_egalitarian } }
+			multiply = 0
+		}
+	}
+}
+
+tradition_civilization_craddle_non_dlc = {
+	category = regional
+
+	layers = {
+		0 = intrigue
+		1 = mena
+		4 = king.dds
+	}
+	
+	is_shown = { always = no }
+	can_pick = {
+		#Only for specific cultures to maintain homogenity and city construction, like Coptic and Punic
+		this = culture:coptic
+		this = culture:old_nubian
+		this = culture:assyrian
+		this = culture:aramean
+		this = culture:hebrew
+		this = culture:punic
+	}
+	
+	parameters = {
+		can_build_cities_in_late_antiquity = yes
+	}
+	
+	character_modifier = {
+		monthly_county_control_change_add = 0.1
+		monthly_prestige_gain_mult = 0.1
+		same_culture_opinion = 5
+		opinion_of_different_culture = -5
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_spiritual_or_stoic_desc
+				}
+			}
+			if = {
+				limit = { scope:character = { any_sub_realm_county = { NOT = { culture = scope:character.culture } } } }
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_realm_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { NOT = { is_divergent_culture = yes } }
+			multiply = 0
+		}
+		if = {
+			limit = { any_in_list = { list = traits this = flag:ethos_egalitarian } }
+			multiply = 0
+		}
+	}
 }

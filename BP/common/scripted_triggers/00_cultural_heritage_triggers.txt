@@ -1,4 +1,50 @@
-﻿
+﻿##### Changed from Vanilla: Worked in hybridization trigger
+
+# Checks if you could Hybridise with the culture without checking for acceptance
+is_valid_for_hybridising_trigger = {
+	$CHARACTER$ = {
+		culture = {
+			NOT = { has_same_culture_heritage = $CULTURE$ }
+			culture_age >= culture_hybrid_cooldown
+		}
+		custom_description = {
+			text = culture_present_in_realm_for_hybridization
+			any_sub_realm_county = {
+				culture = $CULTURE$
+			}
+		}
+		custom_description = {
+			text = culture_is_not_parent_culture
+			culture = {
+				NOT = {
+					any_parent_culture = {
+						this = $CULTURE$
+					}
+				}
+			}
+		}
+		custom_description = {
+			text = culture_is_not_child_culture
+			$CULTURE$ = {
+				NOT = {
+					any_parent_culture = {
+						this = $CHARACTER$.culture
+					}
+				}
+			}
+		}
+	}
+	##### Changed from Vanilla vvvvv
+	trigger_if = {
+		limit = { $CHARACTER$.culture = { has_cultural_parameter = increased_divergence_hybrid_cost_hellenization } }
+		custom_description = {
+			text = hellenizers_must_not_be_under_culture_head
+			NOT = { $CHARACTER$ = { any_liege_or_above = { this = $CHARACTER$.culture.culture_head } } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+}
+
 ### Cultural heritage triggers
 # By their nature these triggers will be a bit lose and inaccurate, so keep that in mind when using them!
 

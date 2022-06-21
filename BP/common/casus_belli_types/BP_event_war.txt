@@ -167,8 +167,6 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				value = massive_prestige_value
 				multiply = -1.0
 			}
-			#Destroy the Kingdom of Italy
-			destroy_title = title:k_italy
 			#Imprison Odacer
 			hard_imprison_character_effect = {
 				TARGET = this
@@ -181,6 +179,41 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				}
 			}
 		}
+		
+		create_title_and_vassal_change = {
+			type = conquest
+			save_scope_as = change
+			add_claim_on_loss = yes
+		}
+		scope:attacker = {
+			#Parse out what to do with Odoacer's titles
+			every_held_title = {
+				if = {
+					limit = { this.tier > tier_county }
+					this = { add_to_temporary_list = titles_destroyed }
+				}
+				else_if = {
+					limit = { this.tier = tier_county }
+					this = { add_to_temporary_list = titles_taken }
+				}
+			}
+		}
+		
+		#Destroy invalid titles
+		every_in_list = {
+			list = titles_destroyed
+			scope:attacker = { destroy_title = prev }
+		}
+		#Transfer Counties
+		every_in_list = {
+			list = titles_taken
+			change_title_holder = {
+				holder = scope:defender
+				change = scope:change
+				take_baronies = yes
+			}
+		}
+		resolve_title_and_vassal_change = scope:change
 
 		# Attacker loses Prestige, all other war participants gain Prestige (Defender gains full prestige, all allies on both sides gain based on war contribution).
 		modify_all_participants_fame_values = {

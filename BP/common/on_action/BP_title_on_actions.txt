@@ -1,8 +1,11 @@
 ﻿on_title_gain = {
 	on_actions = {
+		#Government Handling stuff
 		BP_handle_bureaucratic_succession
 		BP_prevent_title_boostrapping
 		BP_apply_title_laws
+		BP_check_gubernatorial_status
+		#Other On Actions
 		BP_fall_of_rome
 	}
 }
@@ -12,6 +15,7 @@ BP_handle_bureaucratic_succession = {
 	effect = {
 		if = {
 			limit = { #Avoids a whole slew of related errors
+				exists = scope:title.holder
 				scope:title.tier = tier_empire
 				scope:previous_holder = { has_government = bureaucratic_government }
 			}
@@ -51,7 +55,10 @@ BP_handle_bureaucratic_succession = {
 			}
 			else = {
 				change_government = subroman_government
-				inherit_correct_subroman_taxation_law_effect = { TITLE_BEQUEATHER = scope:previous_holder }
+				inherit_correct_subroman_taxation_law_effect = {
+					TITLE_BEQUEATHER = scope:previous_holder
+					TARGET = root
+				}
 			}
 			#Then, change the previous holder's government
 			scope:previous_holder = {
@@ -69,7 +76,10 @@ BP_handle_bureaucratic_succession = {
 				}
 				else = {
 					change_government = subroman_government
-					inherit_correct_subroman_taxation_law_effect = { TITLE_BEQUEATHER = scope:previous_holder }
+					inherit_correct_subroman_taxation_law_effect = {
+						TITLE_BEQUEATHER = scope:previous_holder
+						TARGET = root
+					}
 				}
 			}
 		}
@@ -134,7 +144,7 @@ BP_apply_title_laws = {
 				root = { NOT = { has_government = gubernatorial_government } }
 				scope:title = { has_title_law = gubernatorial_elective_succession_law }
 			}
-			remove_title_law = gubernatorial_elective_succession_law
+			scope:title = { remove_title_law = gubernatorial_elective_succession_law }
 		}
 	}
 }
@@ -146,9 +156,13 @@ BP_prevent_title_boostrapping = {
 			limit = {
 				AND = {
 					scope:transfer_type = flag:granted #Only for title grants
-					scope:title = { tier >= tier_county } #Which was a county or better
-					#Who wasn't getting upgraded (from baron to county) *or* who already _had_ counties
-					root.capital_county = { NOT = { this = scope:title } }
+					root = { #Only check if target has baronies/counties
+						any_held_title = {
+							count >= 1
+							tier <= tier_county
+						}
+					}
+					scope:title.tier <= tier_county
 				}
 			}
 			#Unplayable Governments: Should not change whenever gaining titles
@@ -198,7 +212,10 @@ BP_prevent_title_boostrapping = {
 				}
 				else = {
 					change_government = subroman_government
-					inherit_correct_subroman_taxation_law_effect = { TITLE_BEQUEATHER = scope:previous_holder }
+					inherit_correct_subroman_taxation_law_effect = {
+						TITLE_BEQUEATHER = scope:previous_holder
+						TARGET = root
+					}
 				}
 			}
 			else_if = {
@@ -215,7 +232,7 @@ BP_prevent_title_boostrapping = {
 					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
 					change_government = high_tribal_government
 				}
-				else = { change_government = gupta_government } #Occasional errors
+				else = { change_government = gupta_government } 
 			}
 			else_if = {
 				limit = {
@@ -231,8 +248,8 @@ BP_prevent_title_boostrapping = {
 					change_government = high_tribal_government
 				}
 				else = {
-					change_government = gubernatorial_government
-					get_and_apply_previous_taxation_effect = { LIEGE = root.liege } #Ensure proper taxation inherited
+					change_government = gubernatorial_government #Errors
+					get_and_apply_previous_taxation_effect = { LIEGE = root.liege }
 				}
 			}
 		}
@@ -244,7 +261,22 @@ BP_prevent_title_boostrapping = {
 				scope:title.title_province = { has_holding_type = castle_holding }
 			}
 			change_government = gubernatorial_government
-			get_and_apply_previous_taxation_effect = { LIEGE = root.liege } #Ensure proper taxation inherited
+			get_and_apply_previous_taxation_effect = { LIEGE = root.liege }
+		}
+	}
+}
+
+#When someone rules over a gubernatorial but doesn't have an appropriate government
+BP_check_gubernatorial_status = {
+	effect = {
+		if = {
+			limit = {
+				NOR = {
+					has_government = bureaucratic_government
+					has_government = gubernatorial_government
+				}
+			}
+			root = { change_vassal_gubernatorial_governments = yes }
 		}
 	}
 }
@@ -263,9 +295,32 @@ BP_fall_of_rome = {
 					}
 				}
 			}
+			#Prevent from firing twice
+			set_global_variable = {
+				name = fall_of_rome
+				value = title:c_roma.holder
+			}
 			every_ruler = { #Inform all playable characters
 				limit = { primary_title.tier >= tier_county }
 				trigger_event = { id = bp_narrative_events.0001 }
+			}
+		}
+	}
+}
+
+on_title_destroyed = {
+	on_actions = {
+		BP_set_all_gubernatorials_to_subroman
+	}
+}
+
+#On the off chance a bureaucratic title goes ka-pow, change all the independent gubernatorials
+BP_set_all_gubernatorials_to_subroman = {
+	effect = {
+		every_independent_ruler = {
+			if = {
+				limit = { has_government = gubernatorial_government }
+				this = { change_vassal_gubernatorial_governments = yes }
 			}
 		}
 	}

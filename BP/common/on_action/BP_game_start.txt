@@ -4,6 +4,10 @@ on_game_start = {
 	on_actions = { bp_game_start }
 }
 
+on_game_start_after_lobby = {
+	on_actions = { bp_game_start_after_lobby }
+}
+
 bp_game_start = {
 	effect = { every_culture_global = { ccu_initialize_culture = yes } }
 	on_actions = {
@@ -11,15 +15,25 @@ bp_game_start = {
 		ccu_startup_debug
 		#Other BP Stuff
 		BP_character_events
-		game_start_fix_barony_government
 		create_BP_artifacts
+		#Legal Stuff
+		game_start_fix_barony_government
 		setup_realm_laws
 		setup_realm_and_title_succession_laws
 		setup_administrative_languages
-		convert_nicene_to_rites
 		setup_vassal_contracts
+		#Religious Stuff
 		set_autocephalous_church_flags
+		convert_christian_chars_to_rites
+		#Family Stuff
 		set_dead_dynasty_renown
+	}
+}
+
+bp_game_start_after_lobby = {
+	on_actions = {
+		# Culture stuff
+		set_starting_culture_acceptance
 	}
 }
 
@@ -71,55 +85,57 @@ BP_character_events = {
 		}
 	}
 }
-
 create_BP_artifacts = {
 	effect = {
-		#Tooth of the Buddha
-		title:k_lanka.holder = {
-			save_scope_as = the_holder
-			create_artifact = {
-				name = tooth_of_the_buddha
-				description = tooth_of_the_buddha_desc
-				history = { type = created_before_history }
-				type = pedestal
-				template = buddhism_artifact_template
-				quality = 999
-				decaying = no
-				modifier = tooth_of_the_buddha_modifier
-				visuals = bone
-				save_scope_as = tooth_of_the_buddha_scope
-			}
-			scope:tooth_of_the_buddha_scope = {
-				set_variable = { # required to track usability for template
-					name = saint_bone_faith
-					value = scope:the_holder.faith
+		if = {
+			limit = { has_dlc_feature = royal_court }
+			#Tooth of the Buddha
+			title:k_lanka.holder = {
+				save_scope_as = the_holder
+				create_artifact = {
+					name = tooth_of_the_buddha
+					description = tooth_of_the_buddha_desc
+					history = { type = created_before_history }
+					type = pedestal
+					template = buddhism_artifact_template
+					quality = 999
+					decaying = no
+					modifier = tooth_of_the_buddha_modifier
+					visuals = bone
+					save_scope_as = tooth_of_the_buddha_scope
+				}
+				scope:tooth_of_the_buddha_scope = {
+					set_variable = { # required to track usability for template
+						name = saint_bone_faith
+						value = scope:the_holder.faith
+					}
 				}
 			}
-		}
-		title:e_byzantium.holder = {
-			create_artifact = {
-				name = nail_of_the_true_cross
-				description = nail_of_the_true_cross_desc
-				history = { type = created_before_history }
-				type = pedestal
-				template = christian_relic_template
-				quality = 999
-				decaying = no
-				modifier = nail_of_the_true_cross_modifier
-				visuals = reliquary
+			title:e_byzantium.holder = {
+				create_artifact = {
+					name = nail_of_the_true_cross
+					description = nail_of_the_true_cross_desc
+					history = { type = created_before_history }
+					type = pedestal
+					template = christian_relic_template
+					quality = 999
+					decaying = no
+					modifier = nail_of_the_true_cross_modifier
+					visuals = reliquary
+				}
 			}
-		}
-		title:e_persia.holder = {
-			create_artifact = {
-				name = branch_of_the_keshmar_cypress
-				description = branch_of_the_keshmar_cypress_desc
-				history = { type = created_before_history }
-				type = pedestal
-				template = zoroastrian_relic_template
-				quality = 999
-				decaying = no
-				modifier = branch_of_the_keshmar_cypress_modifier
-				visuals = flowers
+			title:e_persia.holder = {
+				create_artifact = {
+					name = branch_of_the_keshmar_cypress
+					description = branch_of_the_keshmar_cypress_desc
+					history = { type = created_before_history }
+					type = pedestal
+					template = zoroastrian_relic_template
+					quality = 999
+					decaying = no
+					modifier = branch_of_the_keshmar_cypress_modifier
+					visuals = flowers
+				}
 			}
 		}
 	}
@@ -919,65 +935,92 @@ setup_vassal_contracts = {
 ## Religion Stuff
 
 #Flips Nicene Chars to adopt the appropriate rites
-convert_nicene_to_rites = {
+convert_christian_chars_to_rites = {
 	effect = {
 		#Hispanic Rite
-		change_ruler_and_court_rite_by_county_faith = { NEW_RITE = mozarabic_church }
+		change_ruler_and_court_rite_by_county_faith = {
+			OLD_RITE = nicene
+			NEW_RITE = mozarabic_church
+		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = mozarabic_church
 			KINGDOM = k_lusitania
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = mozarabic_church
 			KINGDOM = k_baetica
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = mozarabic_church
 			KINGDOM = k_gallaecia
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = mozarabic_church
 			KINGDOM = k_tarraconensis
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = mozarabic_church
 			KINGDOM = k_cartaginensis
 		}
 		#African Rite
-		change_ruler_and_court_rite_by_county_faith = { NEW_RITE = african_church }
+		change_ruler_and_court_rite_by_county_faith = {
+			OLD_RITE = nicene
+			NEW_RITE = african_church
+		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = african_church
 			KINGDOM = k_mauretania
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = african_church
 			KINGDOM = k_africa
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = african_church
 			KINGDOM = k_tripolitania
 		}
 		#Gallican Rite
-		change_ruler_and_court_rite_by_county_faith = { NEW_RITE = gallican_church }
+		change_ruler_and_court_rite_by_county_faith = {
+			OLD_RITE = nicene
+			NEW_RITE = gallican_church
+		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = gallican_church
 			KINGDOM = k_septem_provincae
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = gallican_church
 			KINGDOM = k_lugdunensis
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = gallican_church
 			KINGDOM = k_brittany
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = gallican_church
 			KINGDOM = k_maxima_sequanorum
 		}
 		change_ruler_and_court_rite_by_kingdom = {
+			OLD_RITE = nicene
 			NEW_RITE = gallican_church
 			KINGDOM = k_belgica
+		}
+		#Ethiopian Orthodox
+		change_ruler_and_court_rite_by_county_faith = {
+			OLD_RITE = miaphysitism
+			NEW_RITE = ethiopian_orthodox
 		}
 	}
 }
@@ -1010,7 +1053,7 @@ set_autocephalous_church_flags = {
 	}
 }
 
-## Other stuff
+## Family Stuff
 set_dead_dynasty_renown = {
 	effect = {
 		#Re-evaluate all of these as dynasty tree is filled out for increased accuracy
@@ -1019,5 +1062,85 @@ set_dead_dynasty_renown = {
 		dynasty:bactrian_dynn_orontid = { add_dynasty_prestige_level = 4 }
 		dynasty:104246212 = { add_dynasty_prestige_level = 3 } #Seleucid
 		dynasty:macedonian_dynn_Argead = { add_dynasty_prestige_level = 10 } #Alexander the Great
+	}
+}
+
+## Culture Stuff
+set_starting_culture_acceptance = {
+	effect = {
+		#Will help keep popular revolts suppressed for a while
+		
+		#Sassanid Persia: 50% acceptance
+		culture:persian = {
+			change_cultural_acceptance = {
+				target = culture:aramean
+				value = 35
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:assyrian
+				value = 35
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:adhari
+				value = 15
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:cyrtian
+				value = 15
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:daylamite
+				value = 10
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:amardian
+				value = 5
+				desc = cultural_acceptance_historical_relations
+			}
+		}
+		#Visigothic Kingdom: 50% acceptance
+		culture:visigothic = {
+			change_cultural_acceptance = {
+				target = culture:romano_hispanic
+				value = 37.5
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:romano_gallic
+				value = 37.5
+				desc = cultural_acceptance_historical_relations
+			}
+		}
+		#Burgundian Kingdom 40% acceptance
+		culture:burgundian = {
+			change_cultural_acceptance = {
+				target = culture:romano_gallic
+				value = 27.5
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:romano_raetian
+				value = 37.5
+				desc = cultural_acceptance_historical_relations
+			}
+		}
+		#Suebian Kingdom: 40% acceptance
+		culture:suebi = {
+			change_cultural_acceptance = {
+				target = culture:romano_hispanic
+				value = 22.5
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:galician
+				value = 32.5
+				desc = cultural_acceptance_historical_relations
+			}
+		}
 	}
 }
