@@ -273,6 +273,10 @@
 
 		piety_cost = {
 			if = {
+				limit = { has_doctrine = tenet_sacrificial_ceremonies }
+				value = faith_tenet_cost_low
+			}
+			else_if = {
 				limit = {
 					OR = {
 						religion_tag = dualism_religion
@@ -298,10 +302,13 @@
 				religion_tag = islam_religion
 				religion_tag = judaism_religion
 				religion_tag = zoroastrianism_religion
-				#AND = {
-				#	has_doctrine = pagan_hostility_doctrine
-				#	NOT = { religion_tag = kushitism_religion }
-				#}
+			}
+		}
+
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_sacrificial_ceremonies_trigger
+				NOT = { flag:tenet_sacrificial_ceremonies = { is_in_list = selected_doctrines } }
 			}
 		}
 
@@ -1001,7 +1008,9 @@
 			maintains_head_of_faith_on_creation = yes
 			# For loc:
 			ecumenical_christians_keep_ecumenism = yes
-			# TIT-32195: same-HoF hostility override to be added later, potentially.
+			# And finally, you and your old faith see each other as astray.
+			## Please note, unlike other hostility overrides, this is _bilateral_, not unilateral.
+			same_hof_hostility_override = 1
 		}
 
 		character_modifier = {
@@ -1963,6 +1972,10 @@
 		icon = core_tenet_flagellant
 		piety_cost = {
 			if = {
+				limit = { has_doctrine = tenet_sacrificial_ceremonies }
+				value = faith_tenet_cost_low
+			}
+			else_if = {
 				limit = {
 					has_doctrine = pagan_hostility_doctrine
 				}
@@ -2007,6 +2020,12 @@
 				text = incompatible_tenet_gruesome_festivals_trigger
 				NOT = {
 					flag:tenet_gruesome_festivals = { is_in_list = selected_doctrines }
+				}
+			}
+			custom_description = {
+				text = incompatible_tenet_sacrificial_ceremonies_trigger
+				NOT = {
+					flag:tenet_sacrificial_ceremonies = { is_in_list = selected_doctrines }
 				}
 			}
 		}
@@ -2363,6 +2382,12 @@
 					flag:tenet_human_sacrifice = { is_in_list = selected_doctrines }
 				}
 			}
+			custom_description = {
+				text = incompatible_tenet_sacrificial_ceremonies_trigger
+				NOT = {
+					flag:tenet_sacrificial_ceremonies = { is_in_list = selected_doctrines }
+				}
+			}
 		}
 
 		parameters = {
@@ -2373,6 +2398,26 @@
 
 	tenet_cthonic_redoubts = {
 		icon = core_tenet_birdofprey
+
+		name = {
+			first_valid = {
+				triggered_desc = {
+					trigger = { this = faith:north_african_acham_pagan }
+					desc = tenet_volcanic_veneration_name
+				}
+				desc = tenet_cthonic_redoubts_name
+			}
+		}
+
+		desc = {
+			first_valid = {
+				triggered_desc = {
+					trigger = { this = faith:north_african_acham_pagan }
+					desc = tenet_volcanic_veneration_desc
+				}
+				desc = tenet_cthonic_redoubts_desc
+			}
+		}
 
 		piety_cost = {
 			value = faith_tenet_cost_mid
@@ -2763,6 +2808,135 @@
 		}
 	}
 
+	tenet_sacrificial_ceremonies = {
+		icon = core_tenet_flagellant
+
+		name = {
+			first_valid = {
+				desc = tenet_sacrificial_ceremonies_name
+			}
+		}
+
+		piety_cost = {
+			if = {
+				limit = {
+					has_doctrine = tenet_human_sacrifice
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					has_doctrine = pagan_hostility_doctrine
+				}
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_massive
+			}
+			
+			#We already practice sacrificial ceremonies
+			if = {
+				limit = { has_doctrine = tenet_sacrificial_ceremonies }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			this = faith:north_african_acham_pagan
+		}
+
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_pacifism_trigger
+				NOT = { flag:tenet_pacifism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_dharmic_pacifism_trigger
+				NOT = { flag:tenet_dharmic_pacifism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_gruesome_festivals_trigger
+				NOT = {
+					flag:tenet_gruesome_festivals = { is_in_list = selected_doctrines }
+				}
+			}
+			custom_description = {
+				text = incompatible_tenet_human_sacrifice_trigger
+				NOT = {
+					flag:tenet_human_sacrifice = { is_in_list = selected_doctrines }
+				}
+			}
+			custom_description = {
+				text = incompatible_tenet_consolamentum_trigger
+				NOT = { flag:tenet_consolamentum = { is_in_list = selected_doctrines } }
+			}
+		}
+
+		parameters = {
+			human_sacrifice_active = yes
+			consolamentum_active = yes
+		}
+
+		character_modifier = {
+			short_reign_duration_mult = -0.5
+			ai_war_chance = 1
+			ai_war_cooldown = -0.5
+		}
+	}
+	
+	tenet_megaliths = {
+		icon = core_tenet_runestone
+
+		name = {
+			first_valid = {
+				desc = tenet_megaliths_name
+			}
+		}
+
+		piety_cost = {
+			if = {
+				limit = {
+					has_doctrine = tenet_natural_primitivism
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = { #Reduction in cost for Celtic Christianity because of stone circle shenanigans
+					this = faith:insular_celtic
+				}
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_high
+			}
+			
+			#We already practice megaliths
+			if = {
+				limit = { has_doctrine = tenet_megaliths }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			
+		}
+
+		can_pick = {
+			
+		}
+
+		parameters = {
+			can_build_megaliths = yes
+		}
+
+		character_modifier = {
+			hills_development_growth_factor = 0.15
+			hills_tax_mult = 0.1
+			hills_levy_size = 0.3
+			hills_advantage = 5
+		}
+	}
+
 	#############################
 	# Syncretic Faith Tenets	#
 	#############################
@@ -2872,6 +3046,7 @@
 		}
 		parameters = {
 			hostility_override_unreformed_faith_doctrine = 2
+			hostility_override_west_african_unreformed_faith_doctrine = 2
 			unreformed_syncretic_actor_opinion_active = yes
 			opinion_of_unreformed_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
 			unreformed_syncretic_conversion_malus_active = yes
