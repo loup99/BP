@@ -312,10 +312,181 @@ tradition_roman_legacy = {
 	}
 }
 
+##### Changed from Vanilla: Made available to non-settled governments (i.e., not to nomads, tribals)
+tradition_castle_keepers = {
+	category = realm
+
+	layers = {
+		0 = martial
+		1 = western
+		4 = city.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = must_be_a_settled_government
+			scope:character = { settled_government_trigger = yes }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_city_keepers
+			NOT = { any_in_list = { list = traits this = flag:tradition_city_keepers } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		castle_fortifications_increase = yes
+		castle_grant_prestige = yes
+		architect_trait_prestige = yes
+		ai_more_likely_to_castle = yes
+		ai_more_likely_to_fortify = yes
+	}
+	character_modifier = {
+		castle_holding_holding_build_speed = 0.1
+		castle_holding_holding_build_gold_cost = 0.2
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			# Ethos requirements.
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+						any_in_list = { list = traits this = flag:ethos_bureaucratic }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_bureaucratic_desc
+				}
+			}
+			# Requires battlements innovation.
+			if = {
+				limit = {
+					NOT = { has_innovation = innovation_battlements }
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = lacks_battlements_innovation_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = { 
+		value = 100 
+		if = {
+			limit = {
+				NOT = { has_innovation = innovation_battlements }
+			}
+			multiply = 0
+		}
+		if = {
+			limit = {
+				scope:character = { ai_boldness >= 0 }
+			}
+			multiply = 0.25
+		}
+	}
+}
+
+##### Changed from Vanilla: Made available to non-settled governments (i.e., not to nomads, tribals)
+tradition_city_keepers = {
+	category = realm
+
+	layers = {
+		0 = steward
+		1 = mediterranean
+		4 = city.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = must_be_a_settled_government
+			scope:character = { settled_government_trigger = yes }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_castle_keepers
+			NOT = { any_in_list = { list = traits this = flag:tradition_castle_keepers } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		next_level_guild_halls = yes
+		city_buildings_more_county_opinion = yes
+		ai_more_likely_to_city = yes
+		architect_trait_prestige = yes
+	}
+	character_modifier = {
+		city_holding_build_speed = -0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			# Ethos requirements.
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bureaucratic }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_egalitarian }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bureaucratic_courtly_or_egalitarian_desc
+				}
+			}
+			# Requires communal government innovation.
+			if = {
+				limit = {
+					NOT = { has_innovation = innovation_development_02 }
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = lacks_development_02_innovation_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = { 
+		value = 25
+		add = {
+			value = scope:character.ai_sociability
+			divide = 2
+		}
+		if = {
+			limit = {
+				NOT = { has_innovation = innovation_development_02 }
+			}
+			multiply = 0
+		}
+	}
+}
+
 ##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
 
-##### Changed from Vanilla: Made transitively unselectable with new traditions
-##### Changed from Vanilla: Extended to other government types
+##### Changed from Vanilla: Made transitively unselectable with new traditions, Extended to other government types
 tradition_hereditary_hierarchy = {
 	category = realm
 
@@ -327,7 +498,12 @@ tradition_hereditary_hierarchy = {
 	
 	##### Changed from Vanilla vvvvv
 	can_pick = {
-		scope:character = { has_government = feudal_government }
+		scope:character = {
+			OR = {
+				has_government = feudal_government
+				has_government = prefeudal_government
+			}
+		}
 		custom_tooltip = {
 			text = cannot_have_tradition_tribal_hierarchy
 			NOT = { any_in_list = { list = traits this = flag:tradition_tribal_hierarchy } }
@@ -397,6 +573,107 @@ tradition_hereditary_hierarchy = {
 			limit = {
 				NOT = {
 					scope:character.primary_title.tier >= tier_kingdom
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Made available to high tribals, nomads
+tradition_tribe_unity = {
+	category = realm
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = crown.dds
+	}
+	
+	is_shown = { #Replaced by Strong Kinship
+		NOR = {
+			this = culture:pictish
+			any_parent_culture_or_above = { this = culture:pictish }
+		}
+	}
+	can_pick = {
+		custom_tooltip = {
+			text = requires_clannish_tribalish_government_trigger
+			scope:character = {
+				OR = {
+					has_government = clan_government
+					has_government = tribal_government
+					has_government = nomad_government
+					has_government = high_tribal_government
+				}
+			}
+		}
+	}
+	
+	parameters = {
+		bonuses_from_patriarch_matriarch_trait = yes
+		cultural_house_personal_scheme_success_chance = yes
+		landing_house_members_give_prestige = yes
+		penalty_for_revoking_titles_from_house_members = yes
+	}
+	character_modifier = {
+		dynasty_house_opinion = 10
+		opinion_of_liege = -5
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_spiritual_or_stoic_desc
+				}
+			}
+			if = {
+				limit = {
+					exists = scope:character.house
+					NOT = {
+						scope:character.house = {
+							any_house_member = {
+								count >= 3
+								has_relation_friend = scope:character
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = house_friends_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						OR = {
+							has_government = clan_government
+							has_government = tribal_government
+						}
+					}
 				}
 			}
 			multiply = 0
@@ -574,6 +851,98 @@ tradition_ruling_caste = {
 				scope:character.tyranny < 25
 			}
 			multiply = 0.5
+		}
+	}
+}
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_staunch_traditionalists = {
+	category = realm
+
+	layers = {
+		0 = intrigue
+		1 = western
+		4 = king.dds
+	}
+	
+	is_shown = {
+		has_dlc_feature = hybridize_culture
+	}
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_persian_culture
+			NOT = { any_in_list = { list = traits this = flag:tradition_persian_culture } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		stubborn_trait_more_common = yes
+		expensive_convert_to_local_culture = yes
+		harder_to_hybridize = yes
+	}
+	character_modifier = {
+		controlled_province_advantage = 5
+		monthly_county_control_change_add = 0.3
+		cultural_head_fascination_mult = -0.1
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_communal }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_spiritual_or_stoic_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						any_sub_realm_county = {
+							NOT = {
+								culture = scope:character.culture
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_realm_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					is_divergent_culture = yes
+				}
+			}
+			multiply = 0
+		}
+		if = {
+			limit = {
+				any_in_list = { list = traits this = flag:ethos_egalitarian }
+			}
+			multiply = 0
 		}
 	}
 }

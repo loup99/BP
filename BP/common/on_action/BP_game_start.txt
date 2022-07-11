@@ -44,30 +44,62 @@ ccu_startup_debug = {
 			if = {
 				limit = { NOT = { has_variable = heritage_group } }
 				save_scope_as = problem_culture
-				debug_log_scopes = yes
-				debug_log = "ccu_debug_culture_heritage_group_desc"
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_heritage_group
+						desc = ccu_debug_culture_heritage_group_desc
+					}
+				}
 			}
-			if = {
+			else_if = {
 				limit = { NOT = { has_variable = heritage_family } }
 				save_scope_as = problem_culture
-				debug_log_scopes = yes
-				debug_log = "ccu_debug_culture_heritage_family_desc"
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_heritage_family
+						desc = ccu_debug_culture_heritage_family_desc
+					}
+				}
 			}
 			if = {
 				limit = { NOT = { has_variable = language_group } }
 				save_scope_as = problem_culture
-				debug_log_scopes = yes
-				debug_log = "ccu_debug_culture_language_group_desc"
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_group
+						desc = ccu_debug_culture_language_group_desc
+					}
+				}
 			}
-			if = {
+			else_if = {
 				limit = { NOT = { has_variable = language_family } }
 				save_scope_as = problem_culture
-				debug_log_scopes = yes
-				debug_log = "ccu_debug_culture_language_family_desc"
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_family
+						desc = ccu_debug_culture_language_family_desc
+					}
+				}
+			}
+			else_if = {
+				limit = { NOT = { has_variable = language_union } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_union
+						desc = ccu_debug_culture_language_union_desc
+					}
+				}
 			}
 		}
 	}
 }
+
 
 ## Other BP Stuff
 
@@ -522,7 +554,10 @@ setup_realm_and_title_succession_laws = {
 					#Germans
 					has_title = title:k_vandalica
 					has_title = title:k_geatland
+					#Armenians
+					has_title = title:d_syunik
 				}
+				NOT = { has_realm_law = single_heir_dynasty_house }
 			}
 			add_realm_law_skip_effects = single_heir_dynasty_house
 		}
@@ -880,6 +915,22 @@ setup_vassal_contracts = {
 					level = 1
 				}
 			}
+			if = { #d_sophanene, d_sophene have some nice rights
+				limit = {
+					OR = {
+						primary_title = title:d_sophene
+						primary_title = title:d_sophanene
+					}
+				}
+				vassal_contract_set_obligation_level = {
+					type = religious_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = title_revocation_rights
+					level = 1
+				}
+			}
 			#Everyone under e_xiongnu is a tributary... except d_chach
 			if = {
 				limit = {
@@ -1045,12 +1096,6 @@ set_autocephalous_church_flags = {
 			set_variable = {
 				name = autocephalous_church
 				value = faith:syrian_orthodox
-			}
-		}
-		culture:caucasian_albanian = {
-			set_variable = {
-				name = autocephalous_church
-				value = faith:albanian_apostolic
 			}
 		}
 		culture:georgian = {
