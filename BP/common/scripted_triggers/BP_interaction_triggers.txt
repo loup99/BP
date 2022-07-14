@@ -1,0 +1,49 @@
+﻿#Under what conditions is permissible to revoke a title without tyranny for bureaucrats?
+bp_title_revocation_is_tyrannical_bureaucratic_trigger = {
+	NOR = {
+		#Bureaucratic Conditions (depending on title tier
+		trigger_if = { #Kingdoms are always fair game
+			limit = { scope:target.tier = tier_kingdom }
+			always = yes
+		}
+		#Duchies are fair game under these conditions:
+		#	OR:
+		#		* Is not a titular duchy
+		#		* Is not a capital duchy
+		trigger_if = {
+			limit = { scope:target.tier = tier_duchy }
+			NOR = {
+				scope:recipient.capital_barony.county = scope:target.title_capital_county
+				is_titular = no
+			}
+		}
+		#Counties are fair game under these conditions:
+		# * Is not in the same duchy as your capital
+		trigger_if = {
+			limit = { scope:target.tier = tier_county }
+			NOT = { scope:recipient.capital_barony.county.duchy = scope:target.title_capital_county.duchy }
+		}
+		#Vanilla Conditions (always valid)
+		has_claim_on = scope:target
+		has_revoke_title_reason = scope:recipient
+		faith = {
+			scope:recipient = { NOT = { vassal_contract_has_flag = religiously_protected } }
+			OR = {
+				AND = {
+					has_doctrine_parameter = pluralism_righteous_revocation_tyranny_reduced
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value = faith_evil_level
+					}
+				}
+				AND = {
+					has_doctrine_parameter = pluralism_fundamentalist_revocation_tyranny_minimal
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value >= faith_hostile_level
+					}
+				}
+			}
+		}
+	}
+}

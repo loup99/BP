@@ -58,42 +58,30 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+		
 		create_title_and_vassal_change = {
 			type = conquest
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
-		
-		#Go through all the titles and mark them for handling
 		scope:defender = {
-			primary_title = {
-				every_in_de_facto_hierarchy = {
-					limit = { tier >= tier_county }
-					
-					#Seize all counties from the Emperor
-					if = {
-						limit = {
-							tier = tier_county
-							holder = { this = scope:defender }
-						}
-						add_to_temporary_list = titles_taken
-					}
-					#Destroy all the Emperor's duchies, kingdoms, and Empires
-					else_if = {
-						limit = {
-							tier >= tier_duchy
-							holder = { this = scope:defender }
-						}
-						add_to_temporary_list = titles_destroyed
-					}
-					#Transfer all direct vassal to the new king
-					else_if = {
-						limit = { NOT = { holder = scope:defender } }
-						holder = { add_to_temporary_list = vassals_taken }
-					}
+			#Parse out what to do with Odoacer's titles
+			every_held_title = {
+				if = {
+					limit = { this.tier > tier_county }
+					this = { add_to_temporary_list = titles_destroyed }
+				}
+				else_if = {
+					limit = { this.tier = tier_county }
+					this = { add_to_temporary_list = titles_taken }
 				}
 			}
+			every_vassal = {
+				limit = { this.primary_title.tier >= tier_county }
+				this = { add_to_temporary_list = vassals_taken }
+			}
 		}
+		
 		#Destroy invalid titles
 		every_in_list = {
 			list = titles_destroyed
@@ -376,6 +364,8 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 		scope:attacker = {
 			create_zeno_army = { LOCATION = 759 } #c_lycanonia
 			create_zeno_army = { LOCATION = 5672 } #c_isauria
+			create_zeno_army = { LOCATION = 5672 } #c_isauria
+			create_zeno_army = { LOCATION = 758 } #c_seleucia
 			create_zeno_army = { LOCATION = 758 } #c_seleucia
 			create_zeno_army = { LOCATION = 5637 } #c_pamphylia
 		}

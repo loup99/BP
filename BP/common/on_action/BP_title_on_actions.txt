@@ -5,6 +5,7 @@
 		BP_prevent_title_boostrapping
 		BP_apply_title_laws
 		BP_check_gubernatorial_status
+		BP_apply_government_succession_laws
 		#Other On Actions
 		BP_fall_of_rome
 	}
@@ -93,10 +94,9 @@ BP_apply_title_laws = {
 			limit = {
 				scope:transfer_type = flag:granted
 				root = { has_government = gubernatorial_government }
-				NOT = { scope:title = { has_title_law = gubernatorial_elective_succession_law } }
 				scope:title.tier >= tier_duchy
 			}
-			#Remove old laws and add the gubernatorial_elective_succession_law
+			#Remove old laws
 			scope:title = {
 				if = {
 					limit = { has_title_law = feudal_elective_succession_law }
@@ -134,17 +134,7 @@ BP_apply_title_laws = {
 					limit = { has_title_law = tribal_elective_succession_law }
 					remove_title_law = tribal_elective_succession_law
 				}
-				add_title_law = gubernatorial_elective_succession_law
 			}
-		}
-		#If it has a gubernatorial_elective_succession_law but I'm not gubernatorial_government
-		#remove the law
-		if = {
-			limit = {
-				root = { NOT = { has_government = gubernatorial_government } }
-				scope:title = { has_title_law = gubernatorial_elective_succession_law }
-			}
-			scope:title = { remove_title_law = gubernatorial_elective_succession_law }
 		}
 	}
 }
@@ -277,6 +267,26 @@ BP_check_gubernatorial_status = {
 				}
 			}
 			root = { change_vassal_gubernatorial_governments = yes }
+		}
+	}
+}
+
+#update succesion laws for Eranshar, Bureaucratic Empire titles
+BP_apply_government_succession_laws = {
+	effect = {
+		if = {
+			limit = {
+				root = { has_government = bureaucratic_government }
+				scope:title.tier = tier_empire
+			}
+			scope:title = { add_title_law = imperial_elective_succession_law }
+		}
+		else_if = {
+			limit = {
+				root = { has_government = eranshar_government }
+				scope:title.tier = tier_empire
+			}
+			scope:title = { add_title_law = mahestan_elective_succession_law }
 		}
 	}
 }

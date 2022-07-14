@@ -1,4 +1,4 @@
-﻿##### Changed from Vanilla: Generalized Title Revocation Trigger
+﻿##### Changed from Vanilla: Generalized Title Revocation Trigger, Added notion of unrevokable titles
 revoke_title_interaction = {
 
 	category = interaction_category_vassal
@@ -26,6 +26,7 @@ revoke_title_interaction = {
 	# actor character giving the titles
 	# recipient character receiving the titles
 
+	##### Changed from Vanilla vvvvv
 	is_shown = {
 		scope:recipient = {
 			is_landed = yes
@@ -43,7 +44,15 @@ revoke_title_interaction = {
 				scope:recipient.primary_title.tier >= tier_county
 			}
 		}
+		#Bureaucratic/Gubernatorials use their own title revocation interactions
+		scope:recipient = {
+			NOR = {
+				has_government = bureaucratic_government
+				has_government = gubernatorial_government
+			}
+		}
 	}
+	##### Changed from Vanilla ^^^^^
 	
 	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
@@ -129,9 +138,19 @@ revoke_title_interaction = {
 			}
 		}
 	}
-		
+	
+	##### Changed from Vanilla vvvvv
 	can_be_picked_title = {
 		scope:target = {
+			#Unrevokable titles
+			custom_description = {
+				text = unrevokable_title
+				NOT = { has_variable = unrevokable } #The title itself
+				NOT = { #The last county of an unrevokable title
+					this.holder = { any_held_title = { has_variable = unrevokable } }
+					this = this.holder.capital_province.county
+				}
+			}
 			is_contested = no
 			NOT = {
 				recent_history = {
@@ -145,6 +164,7 @@ revoke_title_interaction = {
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	#Use hook
 	send_option = {
@@ -234,9 +254,7 @@ revoke_title_interaction = {
 			}
 		}
 		if = {
-			limit = {
-				scope:actor = { has_realm_law_flag = vassal_refusal_is_treason }
-			}
+			limit = { scope:actor = { can_revoke_title_trigger = yes } }
 			scope:actor = {
 				add_opinion = {
 					target = scope:recipient
@@ -307,9 +325,7 @@ revoke_title_interaction = {
 		
 		modifier = {
 			add = 20
-			scope:actor = {
-				has_realm_law_flag = vassal_refusal_is_treason
-			}
+			scope:actor = { can_revoke_title_trigger = yes }
 			desc = AI_REFUSAL_IS_TREASON
 		}
 		modifier = {
@@ -345,9 +361,7 @@ revoke_title_interaction = {
 						scope:recipient = { #If AI is honorable and the law compels to obey the liege, AI will be more likely to obey.
 							ai_honor > 0
 						}
-						scope:actor = {
-							has_realm_law_flag = vassal_refusal_is_treason
-						}
+						scope:actor = { can_revoke_title_trigger = yes }
 					}
 					value = 0.5
 				}
@@ -419,7 +433,7 @@ revoke_title_interaction = {
 	ai_frequency = 0 # This is handled via code instead; see REVOKE_TITLE_TICK in the AI defines. All the logic for *if* to send a revoke though is scripted below
 
 	ai_potential = {
-		has_realm_law_flag = title_revocation_allowed
+		can_revoke_title_trigger = yes
 		primary_title.tier > tier_county
 	}
 

@@ -1,0 +1,88 @@
+﻿#At what development do we not pay extra for increasing taxation
+bureaucratic_court_language_minimal_development_required = 20
+#How much gold does 0 development cost to implement
+bureaucratic_court_language_lack_of_development_scaling = 5
+bureaucratic_court_language_county_development_modifier = {
+	value = bureaucratic_court_language_minimal_development_required
+	subtract = this.development_level
+	min = 0
+}
+bureaucratic_court_language_realm_development_modifier = {
+	value = 0
+	every_realm_county = { add = bureaucratic_court_language_county_development_modifier }
+	divide = bureaucratic_court_language_minimal_development_required #Put value between 0 and 1 for lack of development
+	multiply = bureaucratic_court_language_lack_of_development_scaling
+}
+
+#How much gold does each county cost, regardless of development
+bureaucratic_court_language_county_realm_size_scaling = 1
+bureaucratic_court_langauge_realm_size_modifier = {
+	value = 0
+	every_realm_county = { add = 1 }
+	multiply = bureaucratic_court_language_county_realm_size_scaling
+}
+
+change_court_language_bureaucratic_gold_base = 1000
+change_court_language_bureaucratic_gold_cost = {
+	add = {
+		desc = "BASE_VALUE"
+		value = change_court_language_bureaucratic_gold_base
+		format = "BASE_VALUE_FORMAT"
+	}
+	
+	# Each county adds 10
+	add = {
+		desc = "realm_size"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
+		value = bureaucratic_court_langauge_realm_size_modifier
+	}
+	
+	# The lack of development of every county contributes
+	add = {
+		desc = "realm_development"
+		format = "BREAKDOWN_FORMAT_REALM_DEVELOPMENT_GOLD_COST"
+		value = bureaucratic_court_language_realm_development_modifier
+	}
+}
+
+### Bureaucatric and Gubernatorial values
+change_court_language_bureaucratic_cost_prestige_base = 100
+change_court_language_bureaucratic_cost_prestige_cost = {
+	add = {
+		desc = "BASE_VALUE"
+		value = change_court_language_bureaucratic_cost_prestige_base
+		format = "BASE_VALUE_FORMAT"
+	}
+	
+	# +10 Prestige cost per county controlled by you(r vassals)
+	add = {
+		desc = "realm_size"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_PRESTIGE_COST"
+		value = subrealm_size_modifier
+		multiply = 10
+	}
+	
+	# Learning Modifier (2% more expensive for each skill point below 8 Learning)
+	if = {
+		limit = { learning < 8 }
+		add = {
+			desc = "poor_learning_law_cost_tooltip"
+			value = {
+				add = change_court_language_bureaucratic_cost_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	else_if = { # (2% less expensive for each skill point below 8 Learning)
+		limit = { learning > 8 }
+		add = {
+			desc = "learning_law_cost_tooltip"
+			value = {
+				add = change_court_language_bureaucratic_cost_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+}

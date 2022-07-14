@@ -1,11 +1,6 @@
 ﻿#Roman Reconquest Triggers
 valid_reconquest_culture_trigger = {
-	$CULTURE$ = {
-		OR = {
-			has_cultural_pillar = heritage_latin
-			has_cultural_pillar = heritage_byzantine
-		}
-	}
+	$CULTURE$ = { has_cultural_parameter = can_restore_roman_empire }
 }
 roman_reconquest_title_ownership_restrictions = {
 	AND = {
@@ -26,6 +21,23 @@ roman_reconquest_valid_target_region = {
 		}
 	}
 }
+roman_reconquest_valid_target_region_with_claim = {
+	AND = {
+		scope:attacker = {
+			OR = {
+				has_title = $ATTACKER_TITLE$
+				has_claim_on = $ATTACKER_TITLE$
+			}
+		}
+		scope:target = {
+			tier = tier_kingdom
+			any_in_de_jure_hierarchy = {
+				tier = tier_county
+				title_province = { geographical_region = $ATTACKER_REGION$ }
+			}
+		}
+	}
+}
 #Migration Triggers
 migration_cb_valid_religion_triggers = {
 	OR = {
@@ -35,7 +47,7 @@ migration_cb_valid_religion_triggers = {
 		culture = culture:alan
 	}
 }
-#Valid migration counties (aka aource counties)
+#Valid migration counties (aka source counties)
 major_migration_valid_source_counties = {
 	AND = {
 		this.culture = $ATTACKER$.culture
