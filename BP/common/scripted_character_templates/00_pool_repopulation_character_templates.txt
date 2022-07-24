@@ -642,25 +642,18 @@ pool_repopulate_local_flavor = {
 	random_culture = {
 		culture:ashkenazi = {
 			trigger = {
-				NOT = {
-					root.faith = { religion = { is_in_family = rf_pagan } }
-				}
+				NOT = { root.faith = { religion = { is_in_family = rf_pagan } } }
 				root.capital_province = {
 					OR = {
 						geographical_region = world_europe
 						geographical_region = world_asia_minor
 					}
-					NOT = {
-						geographical_region = world_europe_west_iberia
-					}
+					NOT = { geographical_region = world_caucasus }
+					NOT = { geographical_region = world_europe_west_iberia }
 				}
 			}
 		}
-		root.culture = {
-			trigger = {
-				root.faith = { religion = { is_in_family = rf_pagan } }
-			}
-		}
+		root.culture = { trigger = { root.faith = { religion = { is_in_family = rf_pagan } } } }
 		culture:sephardi = {
 			trigger = {
 				root.capital_province = {
@@ -693,44 +686,14 @@ pool_repopulate_local_flavor = {
 		##### Changed from Vanilla: Removed hindustani
 		##### Changed from Vanilla: Removed gujarati
 		##### Changed from Vanilla: Removed marathi
-		culture:tamil = {
-			trigger = {
-				root.capital_province = {
-					geographical_region = world_india_deccan
-				}
-			}
-		}
-		culture:telugu = {
-			trigger = {
-				root.capital_province = {
-					geographical_region = world_india_deccan
-				}
-			}
-		}
-		culture:kannada = {
-			trigger = {
-				root.capital_province = {
-					geographical_region = world_india_deccan
-				}
-			}
-		}
+		culture:tamil = { trigger = { root.capital_province = { geographical_region = world_india_deccan } } }
+		culture:telugu = { trigger = { root.capital_province = { geographical_region = world_india_deccan } } }
+		culture:kannada = { trigger = { root.capital_province = { geographical_region = world_india_deccan } } }
 		##### Changed from Vanilla: Removed bengali
 		##### Changed from Vanilla: Removed burmese
 		##### Changed from Vanilla: Removed butr
-		culture:zaghawa = {
-			trigger = {
-				root.capital_province = {
-					geographical_region = world_africa
-				}
-			}
-		}
-		culture:bolghar = {
-			trigger = {
-				root.capital_province = {
-					geographical_region = world_steppe_west
-				}
-			}
-		}
+		culture:zaghawa = { trigger = { root.capital_province = { geographical_region = world_africa } } }
+		culture:bolghar = { trigger = { root.capital_province = { geographical_region = world_steppe_west } } }
 		culture:assyrian = {
 			trigger = {
 				root.capital_province = {
@@ -755,13 +718,7 @@ pool_repopulate_local_flavor = {
 			}
 		}
 		##### Changed from Vanilla: Removed cuman
-		culture:bodpa = {
-			trigger = {
-				root.capital_province = {
-					geographical_region = world_tibet
-				}
-			}
-		}
+		culture:bodpa = { trigger = { root.capital_province = { geographical_region = world_tibet } } }
 		culture:somali = {
 			trigger = {
 				root.capital_province = {
@@ -771,32 +728,37 @@ pool_repopulate_local_flavor = {
 						geographical_region = world_africa_north_east
 						AND = {
 							geographical_region = world_india
-							county.holder.faith = {
-								religion_tag = islam_religion
-							}
+							county.holder.faith = { religion_tag = islam_religion }
 						}
 					}
 				}
 			}
 		}
 		##### Changed from Vanilla vvvvv
-		culture:juhuro = { trigger = { root.capital_province = { geographical_region = world_caucasus } } }
-		root.culture = { trigger = { always = yes} } #Catches handle culture errors because of new culture types
+		
+		#Mountain Jews are in Dagestan/Derbent/Azerbaijan region
+		culture:juhuro = {
+			trigger = {
+				OR = {
+					root.capital_province.county.duchy = title:d_ciscaucasia
+					root.capital_province.county.duchy = title:d_balasagan
+					any_sub_realm_county = { this.duchy = title:d_ciscaucasia }
+					any_sub_realm_county = { this.duchy = title:d_balasagan }
+				}
+			}
+		}
+		#Georgian Jews in the Caucuses
+		culture:gruzinim = { trigger = { root.capital_province = { geographical_region = world_caucasus } } }
+		root.culture = { trigger = { always = yes } } #Catches handle culture errors because of new culture types
 		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 	
-	learning = {
-		min_guest_template_skill max_guest_template_skill
-	}
+	learning = { min_guest_template_skill max_guest_template_skill }
 	
-	stewardship = {
-		min_guest_template_skill max_guest_template_skill
-	}
+	stewardship = { min_guest_template_skill max_guest_template_skill }
 	
-	diplomacy = {
-		min_guest_template_skill max_guest_template_skill
-	}
+	diplomacy = { min_guest_template_skill max_guest_template_skill }
 	
 	random_traits_list = {
 		education_learning_3 = { weight = { base = 10 } }
@@ -822,17 +784,21 @@ pool_repopulate_local_flavor = {
 	dynasty = none
 	
 	after_creation = {
-		if = {
+		##### Changed from Vanilla vvvvv
+		if = { #Jews
 			limit = {
 				OR = {
 					culture = culture:ashkenazi
 					culture = culture:sephardi
 					culture = culture:radhanite
 					culture = culture:kochinim
+					culture = culture:juhuro
+					culture = culture:gruzinim
 				}
 			}
 			random_list = {
 				10 = {
+					trigger = { NOT = { culture = culture:juhuro } }
 					set_character_faith = faith:rabbinism
 				}
 				##### Changed from Vanilla: Removed conversos
@@ -859,159 +825,133 @@ pool_repopulate_local_flavor = {
 					set_character_faith = faith:karaism
 				}
 				90 = {
-					trigger = {
-						root.capital_province = {
-							geographical_region = world_india
-						}
-					}
+					trigger = { root.capital_province = { geographical_region = world_india } }
 					set_character_faith = faith:malabarism
+				}
+				90 = {
+					trigger = { culture = culture:juhuro }
+					set_character_faith = faith:tzadikite
 				}
 			}
 			if = {
-				limit = {
-					NOT = {
-						knows_language_of_culture = root.capital_province.culture
-					}
-				}
+				limit = { NOT = { knows_language_of_culture = root.capital_province.culture } }
 				learn_language_of_culture = root.capital_province.culture
 			}
 		}
-		else_if = {
-			limit = {
-				culture = culture:greek
-			}
+		else_if = { #Greek minority faiths
+			limit = { culture = culture:greek }
 			random_list = {
 				10 = {
+					trigger = { BP_iconoclasm_trigger = yes }
 					set_character_faith = faith:iconoclast
 				}
 				10 = {
+					trigger = { BP_paulicianism_trigger = yes }
 					set_character_faith = faith:paulician
 				}
 				##### Changed from Vanilla: Removed bogomilist
 			}
 		}
-		else_if = {
+		##### Changed from Vanilla ^^^^^
+		else_if = { #Indian Sphere Cultures
 			limit = {
 				OR = {
-					culture = culture:rajput
-					culture = culture:marathi
-					culture = culture:gujarati
-					culture = culture:tamil
-					culture = culture:telugu
-					culture = culture:hindustani
-					culture = culture:kannada
-					culture = culture:bengali
-					culture = culture:burmese
+					#Indo-Aryan
+					culture = { any_parent_culture_or_above = { this = culture:eastern_indo_aryan } }
+					culture = { any_parent_culture_or_above = { this = culture:southern_indo_aryan } }
+					culture = { any_parent_culture_or_above = { this = culture:western_indo_aryan } }
+					culture = { any_parent_culture_or_above = { this = culture:malavas } }
+					#Dravidian
+					culture = { any_parent_culture_or_above = { this = culture:tamil } }
+					culture = { any_parent_culture_or_above = { this = culture:telugu } }
+					culture = { any_parent_culture_or_above = { this = culture:gond } }
+					culture = { any_parent_culture_or_above = { this = culture:kannada } }
+					#South-East Asian
+					culture = { any_parent_culture_or_above = { this = culture:pyu } }
 				}
 			}
 			random_list = {
-				10 = {
-					set_character_faith = faith:digambara
-				}
-				10 = {
-					set_character_faith = faith:svetambara
-				}
-				20 = {
-					set_character_faith = faith:yapaniya
-				}
+				#Jains
+				10 = { set_character_faith = faith:digambara }
+				10 = { set_character_faith = faith:svetambara }
+				20 = { set_character_faith = faith:yapaniya }
+				#Mazdans
 				35 = {
 					trigger = {
-						culture = culture:gujarati
+						culture = { any_parent_culture_or_above = { this = culture:western_indo_aryan } }
+						root.capital_province.county = title:c_kutch
 					}
 					set_character_faith = faith:zurvanism
 				}
-				100 = {
+				100 = { #Burmese Ari
 					trigger = {
-						culture = culture:burmese
+						culture = { any_parent_culture_or_above = { this = culture:pyu } }
+						BP_burmese_trigger = yes
 					}
 					set_character_faith = faith:ari
 				}
-				5 = {
-					set_character_faith = faith:nestorian
-				}
-				25 = {
+				5 = { set_character_faith = faith:nestorian }
+				25 = { #Dravidian Jews
 					trigger = {
 						OR = {
-							culture = culture:kannada
-							culture = culture:telugu
-							culture = culture:tamil
+							culture = { any_parent_culture_or_above = { this = culture:tamil } }
+							culture = { any_parent_culture_or_above = { this = culture:telugu } }
+							culture = { any_parent_culture_or_above = { this = culture:gond } }
+							culture = { any_parent_culture_or_above = { this = culture:kannada } }
 						}
 					}
 					set_character_faith = faith:malabarism
 				}
 			}
 		}
-		else_if = {
+		else_if = { #Islamic Saharan Nomads
 			limit = {
 				OR = {
-					culture = culture:butr
-					culture = culture:zaghawa
+					culture = { any_parent_culture_or_above = { this = culture:tuareg } }
+					culture = { any_parent_culture_or_above = { this = culture:western_berber } }
+					culture = { any_parent_culture_or_above = { this = culture:zaghawa } }
 				}
 			}
 			random_list = {
 				10 = {
+					trigger = { BP_rise_of_islam_trigger = yes }
 					set_character_faith = faith:ibadi
 				}
 				10 = {
+					trigger = { BP_rise_of_islam_trigger = yes }
 					set_character_faith = faith:sufri
 				}
 			}
 		}
-		else_if = {
+		else_if = { #Yazidi Kurds
 			limit = {
 				culture = culture:kurdish
+				BP_rise_of_islam_trigger = yes
 			}
 			set_character_faith = faith:yazidi
 		}
-		else_if = {
-			limit = {
-				OR = {
-					culture = culture:bolghar
-					culture = culture:somali
-				}
-			}
-			set_character_faith = faith:ashari
-			if = {
-				limit = {
-					root.capital_county.faith = {
-						religion_tag = islam_religion
-					}
-				}
-				set_character_faith = root.capital_county.faith
-			}
-		}
-		else_if = {
+		##### Changed from Vanilla: Removed Ashari Bolghars & Somalis
+		else_if = { #Khazar Jews
 			limit = {
 				culture = culture:khazar
+				BP_kabarism_trigger = yes
 			}
 			set_character_faith = faith:kabarism
 		}
-		else_if = {
-			limit = {
-				culture = culture:assyrian
-			}
+		else_if = { #Nestorian Assyrians
+			limit = { culture = culture:assyrian }
 			set_character_faith = faith:nestorian
 		}
-		else_if = {
-			limit = {
-				culture = culture:khitan
-			}
+		else_if = { #Khitan faiths
+			limit = { culture = culture:khitan }
 			random_list = {
-				15 = {
-					set_character_faith = faith:vajrayana
-				}
-				10 = {
-					set_character_faith = faith:tengri_pagan
-				}
-				5 = {
-					set_character_faith = faith:quanzhen
-				}
+				15 = { set_character_faith = faith:vajrayana }
+				10 = { set_character_faith = faith:tengri_pagan }
+				5 = { set_character_faith = faith:quanzhen }
 			}
 		}
-		else_if = {
-			limit = {
-				culture = culture:han
-			}
+		else_if = { #Han Chinese Faiths
+			limit = { culture = culture:han }
 			random_list = {
 				50 = {
 					set_character_faith = faith:shangqing
@@ -1022,81 +962,43 @@ pool_repopulate_local_flavor = {
 						}
 					}
 				}
-				15 = {
-					set_character_faith = faith:mahayana
-				}
-				5 = {
-					set_character_faith = faith:zhengyi
-				}
+				15 = { set_character_faith = faith:dharmaguptaka }
+				15 = { set_character_faith = faith:mahayana }
+				5 = { set_character_faith = faith:zhengyi }
 			}
 		}
-		else_if = {
-			limit = {
-				culture = culture:bodpa
-			}
+		else_if = { #Bon Faiths
+			limit = { culture = culture:bodpa }
 			random_list = {
 				10 = {
+					trigger = { BP_tibetan_buddhism_trigger = yes }
 					set_character_faith = faith:bon
 				}
-				10 = {
-					set_character_faith = faith:old_bon
-				}
+				10 = { set_character_faith = faith:old_bon }
 			}
 		}
-		else_if = {
-			limit = {
-				religion = { is_in_family = rf_pagan }
-			}
+		else_if = { #General Paganism
+			limit = { religion = { is_in_family = rf_pagan } }
 			random_list = {
-				10 = {
-					add_trait = one_eyed
-				}
-				10 = {
-					add_trait = albino
-				}
-				10 = {
-					add_trait = scaly
-				}
-				10 = {
-					add_trait = torturer
-				}
-				10 = {
-					add_trait = whole_of_body
-				}
-				10 = {
-					add_trait = flagellant
-				}
-				10 = {
-					add_trait = scarred
-				}
-				10 = {
-					add_trait = blind
-				}
-				10 = {
-					add_trait = shrewd
-				}
-				10 = {
-					add_trait = strong
-				}
-				10 = {
-					add_trait = giant
-				}
-				10 = {
-					add_trait = poet
-				}
+				10 = { add_trait = one_eyed }
+				10 = { add_trait = albino }
+				10 = { add_trait = scaly }
+				10 = { add_trait = torturer }
+				10 = { add_trait = whole_of_body }
+				10 = { add_trait = flagellant }
+				10 = { add_trait = scarred }
+				10 = { add_trait = blind }
+				10 = { add_trait = shrewd }
+				10 = { add_trait = strong }
+				10 = { add_trait = giant }
+				10 = { add_trait = poet }
 				450 = {
-					trigger = {
-						NOT = {
-							trait_is_criminal_in_faith_trigger = { TRAIT = witch FAITH = this.faith GENDER_CHARACTER = this }
-						}
-					}
+					trigger = { NOT = { trait_is_criminal_in_faith_trigger = { TRAIT = witch FAITH = this.faith GENDER_CHARACTER = this } } }
 					add_trait = witch
 				}
 				150 = {
 					trigger = {
-						faith = {
-							has_doctrine = tenet_warmonger
-						}
+						faith = { has_doctrine = tenet_warmonger }
 						OR = {
 							culture = { has_cultural_pillar = heritage_north_germanic }
 							religion = religion:germanic_religion
@@ -1111,22 +1013,21 @@ pool_repopulate_local_flavor = {
 				}
 			}
 		}
-		
 		# Learn flavorful & appropriate languages
-		if = {
+		if = { #Saharan Nomads, Kurds, and Somalis learn Arabic
 			limit = {
 				OR = {
-					culture = culture:butr
-					culture = culture:kurdish
-					culture = culture:somali
+					culture = { any_parent_culture_or_above = { this = culture:western_berber } }
+					culture = { any_parent_culture_or_above = { this = culture:tuareg } }
+					culture = { any_parent_culture_or_above = { this = culture:kurdish } }
+					culture = { any_parent_culture_or_above = { this = culture:somali } }
 				}
 			}
 			
 			if = {
 				limit = {
-					NOT = {
-						knows_language = language_arabic
-					}
+					BP_rise_of_islam_trigger = yes
+					NOT = { knows_language = language_arabic }
 				}
 				random = {
 					chance = 70
@@ -1134,32 +1035,34 @@ pool_repopulate_local_flavor = {
 				}
 			}
 		}
-		
-		if = {
+		if = { #Assyrians & Arameans learn greek
 			limit = {
-				culture = culture:assyrian
+				culture = { any_parent_culture_or_above = { this = culture:assyrian } }
+				culture = { any_parent_culture_or_above = { this = culture:aramean } }
 			}
 			
 			if = {
-				limit = {
-					NOT = {
-						knows_language = language_greek
-					}
-				}
+				limit = { NOT = { knows_language = language_greek } }
 				random = {
 					chance = 70
 					learn_language = language_greek
 				}
 			}
 		}
-		
-		if = { # Guaranteed warriors
+		if = { # Guaranteed warriors; Generalized
 			limit = {
 				OR = {
-					culture = culture:butr
-					culture = culture:zaghawa
-					culture = culture:khitan
-					culture = culture:somali
+					AND = { #Tribals that are bellicose or have traditions supporting it
+						root = { settled_government_trigger = no }
+						culture = {
+							has_cultural_pillar = ethos_bellicose
+							the_culture_has_a_warlike_tradition_trigger = yes
+						}
+					}
+					AND = { #Non-Tribals that are bellicose must have a tradition for it
+						root = { settled_government_trigger = yes }
+						culture = { the_culture_has_a_warlike_tradition_trigger = yes }
+					}
 				}
 			}
 			remove_trait = education_learning_3
@@ -1182,90 +1085,17 @@ pool_repopulate_local_flavor = {
 			add_martial_skill = 4
 			add_prowess_skill = 6
 			random_list = {
-				50 = {
-					add_trait = education_martial_3
-				}
-				50 = {
-					add_trait = education_martial_4
-				}
+				50 = { add_trait = education_martial_3 }
+				50 = { add_trait = education_martial_4 }
 			}
 			random_list = {
-				10 = {
-					add_trait = strategist
-				}
-				10 = {
-					add_trait = blademaster_1
-				}
-				10 = {
-					add_trait = blademaster_2
-				}
-				10 = {
-					add_trait = blademaster_3
-				}
-				10 = {
-					add_trait = overseer
-				}
+				10 = { add_trait = strategist }
+				10 = { add_trait = blademaster_1 }
+				10 = { add_trait = blademaster_2 }
+				10 = { add_trait = blademaster_3 }
+				10 = { add_trait = overseer }
 			}
 			give_random_commander_trait_effect = yes
-		}
-		else_if = {
-			limit = {
-				OR = {
-					religion = { is_in_family = rf_pagan }
-					culture = culture:bolghar
-					culture = culture:cuman
-				}
-			}
-			random_list = {
-				50 = {}
-				50 = {
-					remove_trait = education_learning_3
-					remove_trait = education_learning_4
-					remove_trait = education_stewardship_3
-					remove_trait = education_stewardship_4
-					remove_trait = education_diplomacy_3
-					remove_trait = education_diplomacy_4
-					remove_trait = physician_1
-					remove_trait = physician_2
-					remove_trait = physician_3
-					remove_trait = mystic_1
-					remove_trait = mystic_2
-					remove_trait = theologian
-					remove_trait = lifestyle_herbalist
-					remove_trait = diplomat
-					remove_trait = administrator
-					remove_trait = architect
-					remove_trait = scholar
-					add_martial_skill = 4
-					add_prowess_skill = 6
-					random_list = {
-						50 = {
-							add_trait = education_martial_3
-						}
-						50 = {
-							add_trait = education_martial_4
-						}
-					}
-					random_list = {
-						10 = {
-							add_trait = strategist
-						}
-						10 = {
-							add_trait = blademaster_1
-						}
-						10 = {
-							add_trait = blademaster_2
-						}
-						10 = {
-							add_trait = blademaster_3
-						}
-						10 = {
-							add_trait = overseer
-						}
-					}
-					give_random_commander_trait_effect = yes
-				}
-			}
 		}
 	}
 }

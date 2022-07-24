@@ -79,31 +79,59 @@ is_localized_faith = {
 is_blocked_faith = {
 	OR = {
 		#Islam hasn't risen
-		scope:new_faith.religion = religion:islam_religion
-		scope:new_faith.religion = religion:yazidi_religion
-		scope:new_faith = faith:khurramism
+		AND = {
+			BP_rise_of_islam_trigger = yes
+			scope:new_faith.religion = religion:islam_religion
+			scope:new_faith.religion = religion:yazidi_religion
+			scope:new_faith = faith:khurramism
+		}
 		#No Schism of the 3 Chapters
-		scope:new_faith = faith:aquileianism
+		AND = {
+			BP_three_chapters_trigger = yes
+			scope:new_faith = faith:aquileianism
+		}
 		#No Iconoclast Controversy
-		scope:new_faith = faith:iconoclast
-		#No Syrian Orthodoxy
-		scope:new_faith = faith:syrian_orthodox
+		AND = {
+			BP_iconoclasm_trigger = yes
+			scope:new_faith = faith:iconoclast
+		}
 		#No Western Schism
-		scope:new_faith = faith:catholic
-		scope:new_faith = faith:orthodox
+		AND = {
+			BP_western_schism_trigger = yes
+			scope:new_faith = faith:catholic
+			scope:new_faith = faith:orthodox
+		}
 		#No Paulicianism
-		scope:new_faith = faith:paulician
+		AND = {
+			BP_paulicianism_trigger = yes
+			scope:new_faith = faith:paulician
+		}
 		#No Kabarism
-		scope:new_faith = faith:kabarism
+		AND = {
+			BP_kabarism_trigger = yes
+			scope:new_faith = faith:kabarism
+		}
 		#No Mazdakism
-		scope:new_faith = faith:mazdakism
+		AND = {
+			BP_mazdakism_trigger = yes
+			scope:new_faith = faith:mazdakism
+		}
 		#No Burmese
-		scope:new_faith = faith:ari
+		AND = {
+			BP_burmese_trigger = yes
+			scope:new_faith = faith:ari
+		}
 		#No Buddhism in Tibet
-		scope:new_faith = faith:lamaism
-		scope:new_faith = faith:bon
+		AND = {
+			BP_tibetan_buddhism_trigger = yes
+			scope:new_faith = faith:lamaism
+			scope:new_faith = faith:bon
+		}
 		#No Norse Paganism
-		scope:new_faith = faith:norse_pagan
+		AND = {
+			BP_norse_paganism_trigger = yes
+			scope:new_faith = faith:norse_pagan
+		}
 	}
 }
 
@@ -112,64 +140,66 @@ is_blocked_faith_gamerule = {
 	#Faiths locked from creation/conversion
 	#Make sure to tie to events/religion_events/heresy_events.txt: # Locked faiths
 	#Islam
-	custom_description = {
-		text = islam_has_not_risen
-		NOR = {
-			scope:new_faith.religion = religion:islam_religion
-			scope:new_faith.religion = religion:yazidi_religion
-			scope:new_faith = faith:khurramism
+	trigger_if = {
+		limit = {
+			OR = {
+				scope:new_faith.religion = religion:islam_religion
+				scope:new_faith.religion = religion:yazidi_religion
+				scope:new_faith = faith:khurramism
+			}
 		}
+		BP_rise_of_islam_trigger = yes
 	}
 	#Christianity
-	custom_description = {
-		text = schism_of_the_three_chapters_inactive
-		NOT = { scope:new_faith = faith:aquileianism }
+	trigger_if = {
+		limit = { scope:new_faith = faith:aquileianism }
+		BP_three_chapters_trigger = yes
 	}
-	custom_description = {
-		text = iconoclast_controversy_has_not_occured
-		NOT = { scope:new_faith = faith:iconoclast }
+	trigger_if = {
+		limit = { scope:new_faith = faith:iconoclast }
+		BP_iconoclasm_trigger = yes
 	}
-	custom_description = {
-		text = syriac_orthodoxy_has_not_formed
-		NOT = { scope:new_faith = faith:syrian_orthodox }
-	}
-	custom_description = {
-		text = western_schism_has_not_yet_occured
-		NOR = {
-			scope:new_faith = faith:catholic
-			scope:new_faith = faith:orthodox
+	trigger_if = {
+		limit = {
+			OR = {
+				scope:new_faith = faith:catholic
+				scope:new_faith = faith:orthodox
+			}
 		}
+		BP_western_schism_trigger = yes
 	}
-	custom_description = {
-		text = paulicianism_has_not_risen
-		NOT = { scope:new_faith = faith:paulician }
+	trigger_if = {
+		limit = { scope:new_faith = faith:paulician }
+		BP_paulicianism_trigger = yes
 	}
 	#Judaism
-	custom_description = {
-		text = kabarism_not_yet_available
-		NOT = { scope:new_faith = faith:kabarism }
+	trigger_if = {
+		limit = { scope:new_faith = faith:kabarism }
+		BP_kabarism_trigger = yes
 	}
 	#Mazdan
-	custom_description = {
-		text = mazdakism_has_not_yet_risen
-		NOT = { scope:new_faith = faith:mazdakism }
+	trigger_if = {
+		limit = { scope:new_faith = faith:mazdakism }
+		BP_mazdakism_trigger = yes
 	}
 	#Eastern
-	custom_description = {
-		text = burmese_invasion_has_not_happened
-		NOT = { scope:new_faith = faith:ari }
+	trigger_if = {
+		limit = { scope:new_faith = faith:ari }
+		BP_burmese_trigger = yes
 	}
-	custom_description = {
-		text = buddhism_has_not_reached_tibet
-		NOR = {
-			scope:new_faith = faith:lamaism
-			scope:new_faith = faith:bon
+	trigger_if = {
+		limit = {
+			OR = {
+				scope:new_faith = faith:lamaism
+				scope:new_faith = faith:bon
+			}
 		}
+		BP_tibetan_buddhism_trigger = yes
 	}
 	#Paganism
-	custom_description = {
-		text = norse_pagan_not_split
-		NOT = { scope:new_faith = faith:norse_pagan }
+	trigger_if = {
+		limit = { scope:new_faith = faith:norse_pagan }
+		BP_norse_paganism_trigger = yes
 	}
 }
 
@@ -343,19 +373,56 @@ has_any_ecumenical_doctrine_trigger = {
 	}
 }
 
-#Checks that given target controls a sufficient number of all the counties meeting some criteria
-#H/T @Tobbzn from CK3 Modding discord (based on his proposal)
-#https://discord.com/channels/735413460439007241/824697749991325747/981692834098843679
-#TODO: For better localization, probably want to compare scripted_lists though
-check_if_control_percentage_of_all_counties_with_condition_trigger = {
-	any_realm_county = {
-		count >= { every_county = { limit = { $FEATURE$ = $CHARACTER$.$FEATURE$ } add = $PERCENTAGE$ } }
-		$FEATURE$ = $CHARACTER$.$FEATURE$
-		holder = {
-			OR = {
-				this = $CHARACTER$
-				any_liege_or_above = { this = $CHARACTER$ }
-			}
+#Various triggers for cultural religions (Autocephaly and Ethnic Religion)
+#Probably could simplify this block of code's logic, but left intact for simplicity
+actor_is_faith_culture_for_cultural_religions_trigger = {
+	$ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$
+}
+actor_is_faith_child_culture_for_cultural_religions_trigger = {
+	AND = {
+		NOT = { $ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$ }
+		AND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+	}
+}
+actor_is_same_heritage_for_cultural_religions_trigger = {
+	AND = {
+		NOT = { $ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$ }
+		NAND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+		$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+	}
+}
+actor_is_different_heritage_for_cultural_religions_trigger = {
+	AND = {
+		NOT = { $ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$ }
+		NAND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+		NOT = { $ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ } }
+	}
+}
+actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+	OR = {
+		$ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$
+		AND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+	}
+}
+#Copy of the above, but for context where we access faith directly
+actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+	OR = {
+		$ACTOR$.culture = $TARGET_FAITH$.var:$VARIABLE$
+		AND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET_FAITH$.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET_FAITH$.var:$VARIABLE$ }
 		}
 	}
 }

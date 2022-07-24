@@ -486,113 +486,6 @@ tradition_the_witenagemot = {
 	}
 }
 
-##### Changed from Vanilla: made available to tibeto-burmans as well
-tradition_himalayan_settlers = {
-	category = regional
-
-	layers = {
-		0 = learning
-		1 = indian
-		4 = mountain.dds
-	}
-	
-	##### Changed from Vanilla vvvvv
-	is_shown = { #Replaces Mountain Homes
-		OR = {
-			has_cultural_pillar = heritage_tibetan
-			has_cultural_pillar = heritage_tibeto_burman
-			has_cultural_pillar = heritage_qiangic
-			any_culture_county = { title_province = { geographical_region = world_himalaya } }
-		}
-	}
-	##### Changed from Vanilla ^^^^^
-	
-	##### Changed from Vanilla vvvvv
-	can_pick = {
-		OR = {
-			has_cultural_pillar = heritage_tibetan
-			has_cultural_pillar = heritage_tibeto_burman
-			has_cultural_pillar = heritage_qiangic
-			any_culture_county = { title_province = { geographical_region = world_himalaya } }
-		}
-	}
-	##### Changed from Vanilla ^^^^^
-
-	parameters = {
-		unlock_maa_mountaineer = yes
-		rough_terrain_expert_trait_more_common = yes
-		mountain_trait_bonuses = yes
-		can_recruit_mountain_specialist = yes
-	}
-
-	character_modifier = {
-		mountains_development_growth_factor = 0.2
-	}
-	province_modifier = {
-		mountains_construction_gold_cost = -0.15
-		mountains_holding_construction_gold_cost = -0.15
-	}
-	
-	cost = {
-		prestige = {
-			add = {
-				value = tradition_base_cost
-				desc = BASE
-				format = "BASE_VALUE_FORMAT"
-			}
-			if = {
-				limit = {
-					NOR = {
-						any_in_list = { list = traits this = flag:ethos_spiritual }
-						any_in_list = { list = traits this = flag:ethos_communal }
-					}
-				}
-				add = {
-					value = tradition_incompatible_ethos_penalty
-					desc = not_communal_or_spiritual_desc
-				}
-			}
-			if = {
-				limit = {
-					NOT = {
-						any_culture_county = {
-							percent >= 0.3
-							title_province = {
-								geographical_region = world_himalaya
-							}
-						}
-					}
-				}
-				add = {
-					value = tradition_unfulfilled_criteria_penalty
-					desc = culture_in_himalaya_desc
-				}
-			}
-			
-			multiply = tradition_replacement_cost_if_relevant
-		}
-	}
-	
-	ai_will_do = {
-		value = 100
-		if = {
-			limit = {
-				NOT = {
-					scope:character = {
-						any_sub_realm_county = {
-							percent >= 0.4
-							title_province = {
-								geographical_region = world_himalaya
-							}
-						}
-					}
-				}
-			}
-			multiply = 0
-		}
-	}
-}
-
 ##### Changed from Vanilla: Supports some new innovations as well, can't combine with roman succession, supports chariot races
 tradition_byzantine_succession = {
 	category = regional
@@ -619,41 +512,54 @@ tradition_byzantine_succession = {
 	
 	##### Changed from Vanilla vvvvv
 	can_pick = {
-		has_cultural_pillar = heritage_byzantine
-		scope:character = {
-			has_title = title:e_byzantium
+		custom_description = {
+			text = has_heritage_byzantine
+			scope:character.culture = { has_cultural_pillar = heritage_byzantine }
+		}
+		custom_description = {
+			text = has_ere_or_roman_empire
+			subject = title:e_byzantium
+			object = title:e_roman_empire
+			scope:character = {
+				OR = {
+					has_title = title:e_byzantium
+					has_title = title:e_roman_empire
+				}
+			}
 		}
 		##### Changed from Vanilla vvvvv
-		custom_tooltip = {
-			text = cannot_have_tradition_tradition_roman_succession
-			NOT = { any_in_list = { list = traits this = flag:tradition_roman_succession } }
+		traditions_cultural_tradition_is_in_list_trigger = no
+		traditions_body_status_type_is_in_list = no
+		traditions_eunuch_status_type_is_in_list = no
+	}
+	can_pick_for_hybridization = {
+		custom_description = {
+			text = has_heritage_byzantine
+			scope:character.culture = { has_cultural_pillar = heritage_byzantine }
 		}
-		custom_tooltip = {
-			text = cannot_have_tradition_tradition_greek_succession
-			NOT = { any_in_list = { list = traits this = flag:tradition_greek_succession } }
+		custom_description = {
+			text = has_ere_or_roman_empire
+			subject = title:e_byzantium
+			object = title:e_roman_empire
+			scope:character = {
+				OR = {
+					has_title = title:e_byzantium
+					has_title = title:e_roman_empire
+				}
+			}
 		}
-		custom_tooltip = {
-			text = cannot_have_tradition_tradition_latin_succession
-			NOT = { any_in_list = { list = traits this = flag:tradition_latin_succession } }
-		}
-		custom_tooltip = {
-			text = cannot_have_tradition_tradition_unblemished_rulership
-			NOT = { any_in_list = { list = traits this = flag:tradition_unblemished_rulership } }
-		}
-		##### Changed from Vanilla ^^^^^
-		custom_tooltip = {
-			text = cannot_have_tradition_court_eunuchs
-			NOT = { any_in_list = { list = traits this = flag:tradition_court_eunuchs } }
-		}
-		custom_tooltip = {
-			text = cannot_have_tradition_merciful_blindings
-			NOT = { any_in_list = { list = traits this = flag:tradition_merciful_blindings } }
-		}
+		##### Changed from Vanilla vvvvv
+		traditions_cultural_tradition_is_in_list_trigger = no
+		traditions_body_status_type_is_in_list = no
+		traditions_eunuch_status_type_is_in_list = no
 	}
 	##### Changed from Vanilla ^^^^^
 	
 	##### Changed from Vanilla vvvvv
 	parameters = {
+		##### Changed from Vanilla vvvvv
+		is_a_heritage_tradition = yes
+		##### Changed from Vanilla ^^^^^
 		can_blind_prisoners = yes
 		can_castrate_prisoners = yes
 		eunuch_trait_bonuses = yes

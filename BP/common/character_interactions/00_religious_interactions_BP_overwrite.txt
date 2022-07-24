@@ -1,4 +1,399 @@
-﻿##### Changed from Vanilla: Tied interaction to innovations
+﻿##### Changed from Vanilla: Tied interaction to BP requirements
+ask_for_conversion_courtier_interaction = {
+	category = interaction_category_religion
+
+	special_interaction = request_conversion_interaction
+	
+	desc = {
+		desc = ask_for_conversion_interaction_desc
+		triggered_desc = {
+			trigger = {
+				scope:actor = {
+					refusing_conversion_is_crime_trigger = {
+						CHARACTER = scope:recipient
+					}
+				}
+				scope:recipient = {
+					target_is_liege_or_above = scope:actor
+				}
+			}
+			desc = demand_conversion_vassal_ruler_is_crime
+		}
+	}
+	
+	ai_targets = {
+		ai_recipients = courtiers
+		chance = 0.25
+	}
+	ai_target_quick_trigger = {
+		adult = yes
+	}
+	ai_frequency = 12
+	
+	is_shown = {
+		NOT = { scope:actor.faith = scope:recipient.faith }
+		scope:recipient = { is_courtier_of = scope:actor }
+		scope:recipient = { is_ruler = no }
+		scope:recipient = { is_imprisoned = no }
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_valid_showing_failures_only = {
+		valid_demand_conversion_conditions_trigger = yes
+		BP_demand_conversion_trigger = yes
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	ai_accept = {
+		base = 0
+		religion_demand_conversion_default_modifier = yes
+	}
+	
+	auto_accept = {
+		custom_description = {
+			text = "spending_hook"
+			subject = scope:actor
+			object = scope:recipient
+			scope:hook = yes
+			scope:actor = { has_strong_hook = scope:recipient }
+		}
+	}
+	
+	ai_min_reply_days = 1
+	ai_max_reply_days = 5
+	
+	on_accept = {
+		demand_conversion_interaction_effect = yes
+		hidden_effect = {
+			scope:actor = {
+				send_interface_message = {	
+					title = ask_for_conversion_courtier_interaction.tt
+					left_icon = scope:recipient
+					scope:recipient = {
+						show_as_tooltip = { demand_conversion_interaction_effect = yes }
+					}
+				}
+			}
+		}
+		if = {
+			limit = { scope:hook = yes }
+			scope:actor = {
+				if = {
+					limit = {
+						has_usable_hook = scope:recipient
+					}
+					use_hook = scope:recipient
+				}
+			}
+			scope:recipient = {
+				trigger_event = char_interaction.0180
+			}
+		}
+		if = {
+			limit = { scope:recipient = { is_imprisoned_by = scope:actor } }
+			scope:recipient = { release_from_prison = yes }
+			scope:recipient = {
+				trigger_event = char_interaction.0180
+			}
+		}
+	}
+
+	on_decline = {
+		send_interface_toast = {
+			title = ask_for_conversion_decline_notification
+			left_icon = scope:recipient
+		}
+	}
+
+	# Use hook
+	send_option = {
+		is_valid = {
+			scope:actor = {
+				has_usable_hook = scope:recipient
+			}
+			NOT = {
+				scope:recipient = { is_imprisoned_by = scope:actor }
+			}
+		}
+		flag = hook
+		localization = SCHEME_HOOK
+	}
+	should_use_extra_icon = {
+		scope:actor = { has_usable_hook = scope:recipient }
+	}
+	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+	send_options_exclusive = no
+
+	
+	ai_potential = {
+		is_adult = yes
+	}
+	
+	ai_will_do = {
+		base = 100
+		
+		modifier = { # The AI will only use a Hook if they couldn't otherwise do this
+			scope:hook = yes
+			add = -1
+		}
+		
+		modifier = { # The AI doesn't really want to convert Diasporic culture courtiers
+			scope:recipient = {
+				faith.religion = religion:judaism_religion
+				culture = {
+					has_cultural_tradition = tradition_diasporic
+				}
+			}
+			factor = 0
+		}
+
+		modifier = { # Do not convert Righteous faith subjects, unless disturbingly zealous
+			factor = 0
+			scope:actor = {
+				ai_zeal < 100
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_fully_accepted_level
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				has_tolerant_faith_or_culture_trigger = yes
+				ai_zeal < 50
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+				ai_zeal < -10
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+
+		modifier = { # Astray faiths require specific circumstances to demand conversion of
+			factor = 0
+			scope:actor = {
+				NOR = {
+					faith = { has_doctrine = doctrine_pluralism_fundamentalist }
+					has_tolerant_faith_or_culture_trigger = yes
+				}
+				ai_zeal < 0
+				faith = {
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value <= faith_astray_level
+					}
+				}
+			}
+			NOT = {
+				scope:recipient = {
+					is_close_family_of = scope:actor
+				}
+			}
+		}
+	}
+}
+
+##### Changed from Vanilla: Tied interaction to BP requirements
+demand_conversion_interaction = { # House head demand conversion
+	category = interaction_category_religion
+	popup_on_receive = yes
+	pause_on_receive = yes
+
+	notification_text = HOUSE_HEAD_DEMAND_CONVERSION
+
+	is_shown = {
+		NOT = { scope:recipient = scope:actor }
+		scope:actor = {
+			is_house_head = yes
+			NOT = { faith = scope:recipient.faith }
+			house = scope:recipient.house
+		}
+		NOT = {
+			scope:recipient = { # Use the vassal-liege interaction instead.
+				is_ruler = yes
+				target_is_liege_or_above = scope:actor
+			}
+		}
+		scope:recipient = { # To avoid you converting someone's entire family, and then asking them. Restricting it to landed rulers at least gives them a chance to create their own cadet house.
+			is_ruler = yes
+		}
+	}
+	desc = {
+		desc = demand_conversion_interaction_desc
+		triggered_desc = {
+			trigger = {
+				scope:actor = {
+					refusing_conversion_is_crime_trigger = {
+						CHARACTER = scope:recipient
+					}
+				}
+				scope:recipient = {
+					target_is_liege_or_above = scope:actor
+				}
+			}
+			desc = demand_conversion_vassal_ruler_is_crime
+		}
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_valid_showing_failures_only = {
+		valid_demand_conversion_conditions_trigger = yes
+		BP_demand_conversion_trigger = yes
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	on_accept = {
+		demand_conversion_interaction_effect = yes
+		if = {
+			limit = { scope:hook = yes }
+			scope:actor = {
+				use_hook = scope:recipient
+			}
+			scope:recipient = {
+				trigger_event = char_interaction.0180
+			}
+		}
+		if = {
+			limit = { scope:recipient = { is_imprisoned_by = scope:actor } }
+			scope:recipient = { release_from_prison = yes }
+			scope:recipient = {
+				trigger_event = char_interaction.0180
+			}
+		}
+		else = {
+			scope:actor = {
+				trigger_event = char_interaction.0181
+			}
+		}
+	}
+
+	on_decline = {
+		scope:recipient = {
+			execute_decision = create_cadet_branch_decision
+			show_as_tooltip = { create_cadet_branch = yes }
+		}
+		#Negative opinions
+		scope:recipient = {
+			if = {
+				limit = {
+					scope:actor = {
+						refusing_conversion_is_crime_trigger = {
+							CHARACTER = scope:recipient
+						}
+					}
+					scope:recipient = {
+						target_is_liege_or_above = scope:actor
+					}
+				}
+				add_opinion = {
+					target = scope:recipient
+					modifier = illegal_resisted_conversion_opinion
+					years = 10
+				}
+			}
+			else = {
+				add_opinion = {
+					modifier = demanded_my_conversion_opinion
+					target = scope:actor
+					opinion = -10
+				}
+			}
+		}
+		scope:actor = {
+			trigger_event = char_interaction.0182
+		}
+	}
+
+	auto_accept = {
+		custom_description = {
+			text = "spending_hook"
+			subject = scope:actor
+			object = scope:recipient
+			scope:hook = yes
+			scope:actor = { has_strong_hook = scope:recipient }
+		}
+	}
+	
+	ai_accept = {
+		base = 0
+		modifier = {
+			add = 100
+			NOT = {
+				scope:recipient = {
+					can_execute_decision = create_cadet_branch_decision
+				}
+			}
+			desc = ASK_FOR_CONVERSION_CAN_NOT_CREATE_CADET_BRANCH
+		}
+		modifier = {
+			add = -10
+			scope:recipient = {
+				can_execute_decision = create_cadet_branch_decision
+			}
+			desc = ASK_FOR_CONVERSION_CAN_CREATE_CADET_BRANCH
+		}
+		religion_demand_conversion_default_modifier = yes
+	}
+	
+	can_send_despite_rejection = yes
+	force_notification = yes
+
+	#Use hook
+	send_option = {
+		is_valid = {
+			scope:actor = {
+				has_usable_hook = scope:recipient
+			}
+			NOT = {
+				scope:recipient = { is_imprisoned_by = scope:actor }
+			}
+		}
+		flag = hook
+		localization = SCHEME_HOOK
+	}
+	should_use_extra_icon = {
+		scope:actor = { has_usable_hook = scope:recipient }
+	}
+	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+
+	send_options_exclusive = no
+}
+
+##### Changed from Vanilla: Tied interaction to BP requirements
 demand_conversion_vassal_ruler_interaction = {
 	category = interaction_category_religion
 
@@ -54,7 +449,7 @@ demand_conversion_vassal_ruler_interaction = {
 	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
 		valid_demand_conversion_conditions_trigger = yes
-		scope:actor.culture = { has_innovation = innovation_state_religion }
+		BP_demand_conversion_trigger = yes
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -379,7 +774,7 @@ demand_conversion_vassal_ruler_interaction = {
 	}
 }
 
-##### Changed from Vanilla: Tied interaction to innovations
+##### Changed from Vanilla: Tied interaction to BP requirements
 demand_conversion_player_ruler_interaction = {
 	category = interaction_category_religion
 	desc = ask_for_conversion_interaction_desc
@@ -406,7 +801,7 @@ demand_conversion_player_ruler_interaction = {
 	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
 		valid_demand_conversion_conditions_trigger = yes
-		scope:actor.culture = { has_innovation = innovation_state_religion }
+		BP_demand_conversion_trigger = yes
 	}
 	##### Changed from Vanilla ^^^^^
 

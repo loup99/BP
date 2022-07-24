@@ -38,65 +38,142 @@ regional_heresy_factor_localized = {
 
 # Faith Tenet Values
 
-#Ethnic religions
+### Ethnic religions
 conversion_tenet_ethnic_religion_conversion_resistance = {
 	value = 0
 	if = {
 		limit = {
 			exists = scope:county
-			scope:county.faith = { has_doctrine = tenet_ethnic_religion }
+			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_conversion_resistance_active }
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.75
+		multiply = 0.80
 	}
 }
-conversion_tenet_ethnic_religion_convertor_resistance = {
+conversion_tenet_ethnic_religion_converting_foreigners_resistance = {
 	value = 0
 	if = {
 		limit = {
-			scope:councillor.faith = { has_doctrine = tenet_ethnic_religion }
-			NOT = { scope:county.culture = scope:councillor.liege.culture }
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.75
-	}
-}
-#Autocephaly Values
-conversion_tenet_autocephaly_not_culture_group = {
-	value = 0
-	if = {
-		limit = {
-				scope:councillor.liege.faith = { has_doctrine_parameter = other_culture_group_conversion_penalty_active }
-				exists = scope:county
-				NOT = { scope:councillor.liege.culture = { has_same_culture_heritage = scope:county.culture } }
+			scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_other_culture_conversion_penalty_active }
+			exists = scope:county
+			NOR = {
+				scope:councillor_liege.culture = scope:county.faith.var:ethnic_religion_culture
+				scope:councillor_liege.culture = { any_parent_culture_or_above = { this = scope:county.faith.var:ethnic_religion_culture } }
 			}
+		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.30
+		multiply = 1.00
 	}
 }
-conversion_tenet_autocephaly_resist_infidel_conversion = {
+conversion_tenet_ethnic_religion_same_culture_conversion_bonus = {
 	value = 0
 	if = {
 		limit = {
 			exists = scope:county
-			scope:county.faith = { has_doctrine_parameter = autocephaly_resist_infidel_conversions }
+			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
+			scope:councillor_liege.culture = scope:county.faith.var:ethnic_religion_culture
 		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.30
+		add = court_chaplain_conversion_base_total
+		multiply = 1.00
 	}
 }
-conversion_tenet_autocephaly_of_culture_group = {
+conversion_tenet_ethnic_religion_child_culture_conversion_bonus = {
 	value = 0
 	if = {
 		limit = {
-				scope:councillor.liege.faith = { has_doctrine_parameter = same_culture_group_conversion_bonus_active }
-				exists = scope:county
-				scope:councillor.liege.culture = { has_same_culture_heritage = scope:county.culture }
+			exists = scope:county
+			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
+			scope:councillor_liege.culture = { any_parent_culture_or_above = { this = scope:county.faith.var:ethnic_religion_culture } }
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.50
+	}
+}
+
+### Autocephaly Values
+conversion_tenet_autocephaly_same_culture_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			scope:county.culture = scope:councillor_liege.faith.var:church_culture
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.60
+	}
+}
+conversion_tenet_autocephaly_child_culture_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			NOT = { scope:county.culture = scope:councillor_liege.faith.var:church_culture }
+			AND = {
+				scope:county.culture = { any_parent_culture_or_above = { this = scope:councillor_liege.faith.var:church_culture } }
+				scope:county.culture = { has_same_culture_heritage = scope:councillor_liege.faith.var:church_culture }
 			}
+		}
 		add = court_chaplain_conversion_base_total
 		multiply = 0.30
 	}
 }
+conversion_tenet_autocephaly_same_heritage_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			NOT = { scope:county.culture = scope:councillor_liege.faith.var:church_culture }
+			NAND = {
+				scope:county.culture = { any_parent_culture_or_above = { this = scope:councillor_liege.faith.var:church_culture } }
+				scope:county.culture = { has_same_culture_heritage = scope:councillor_liege.faith.var:church_culture }
+			}
+			scope:county.culture = { has_same_culture_heritage = scope:councillor_liege.faith.var:church_culture }
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.15
+	}
+}
+conversion_tenet_autocephaly_different_heritage_conversion_malus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_different_heritage_conversion_malus_active }
+			exists = scope:county
+			NOT = { scope:county.culture = scope:councillor_liege.faith.var:church_culture }
+			NAND = {
+				scope:county.culture = { any_parent_culture_or_above = { this = scope:councillor_liege.faith.var:church_culture } }
+				scope:county.culture = { has_same_culture_heritage = scope:councillor_liege.faith.var:church_culture }
+			}
+			NOT = { scope:county.culture = { has_same_culture_heritage = scope:councillor_liege.faith.var:church_culture } }
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.60
+	}
+}
+conversion_tenet_autocephaly_different_heritage_conversion_resistance = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_conversion_resistance_active }
+			exists = scope:county
+			scope:councillor_liege.culture = { has_same_culture_heritage = scope:county.culture }
+			#Has to still be a related culture
+			OR = {
+				scope:county.culture = scope:county.faith.var:church_culture
+				AND = {
+					scope:county.culture = { any_parent_culture_or_above = { this = scope:county.faith.var:church_culture } }
+					scope:county.culture = { has_same_culture_heritage = scope:county.faith.var:church_culture }
+				}
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.20
+	}
+}
+
 #Rigorism Values
 conversion_tenet_rigorism_conversion_resistance_both_ways = {
 	value = 0
@@ -116,7 +193,7 @@ conversion_tenet_rigorism_conversion_resistance_both_ways = {
 			exists = scope:county
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.33
+		multiply = 0.50
 	}
 }
 # Ecumenism effects
@@ -125,12 +202,12 @@ conversion_ecumenical_resistance = {
 	if = {
 		limit = {
 			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion } }
-			scope:county.faith.religion = scope:councillor.faith.religion
 			exists = scope:county
+			scope:county.faith.religion = scope:councillor.faith.religion
 			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.30
+		multiply = 0.50
 	}
 }
 # Interpratio Romana Tenet Values
@@ -160,8 +237,12 @@ conversion_recent_immigration_bonus = {
 	multiply = 0.50
 }
 
-#Value for each innovation not had
-conversion_not_have_innovation = 0.70
-
 #Malus for converting ecumentical targets
 conversion_ecumenical_target_weight = 0.50
+
+#Legal Faith Protection
+conversion_doctrine_legalized_faith_malus = {
+	value = 0
+	add = court_chaplain_conversion_base_total
+	multiply = 0.50
+}

@@ -171,47 +171,41 @@ court_chaplain_conversion_contextual_bonuses = {
 			desc = COURT_CHAPLAIN_CONVERSION_COMMUNAL_IDENTITY_PENALTY_MODIFIER
 		}
 	}
+	
 	##### Changed from Vanilla vvvvv
+	
+	### Ethnic Religions
 	if = { #Ethnic Religions are **very** hard to convert
 		limit = {
 			exists = scope:county
-			scope:county.faith = { has_doctrine = tenet_ethnic_religion }
+			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_conversion_resistance_active }
+			#Make sure culture and faith align
+			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:county
+				VARIABLE = ethnic_religion_culture
+			}
 		}
 		add = {
 			value = scope:councillor.conversion_tenet_ethnic_religion_conversion_resistance
-			desc = COURT_CHAPLAIN_CONVERSION_TENET_ETHNIC_RELIGION_FOREIGNERS_CONVERTING_US_MODIFIER
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_ETHNIC_RELIGION_FOREIGNERS_CONVERSION_RESISTANCE
 		}
 	}
-	if = { #It's hard to convince foreigners to embrace ethnic religions
+	### Autocephaly
+	if = { #Cultural Resistance to Conversion
 		limit = {
-			scope:councillor.liege.faith = { has_doctrine = tenet_ethnic_religion }
+			scope:county.faith = { has_doctrine_parameter = tenet_autocephaly_conversion_resistance_active }
 			exists = scope:county
-			NOT = { scope:county.culture = scope:councillor.liege.culture }
+			#Make sure culture and faith align
+			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:county
+				VARIABLE = church_culture
+			}
 		}
 		add = {
-			value = scope:councillor.conversion_tenet_ethnic_religion_convertor_resistance
-			desc = COURT_CHAPLAIN_CONVERSION_TENET_ETHNIC_RELIGION_US_CONVERTING_FOREIGNERS_MODIFIER
-		}
-	}
-	if = { #Autocephalous Churches only apply to culture groups
-		limit = {
-			scope:councillor.liege.faith = { has_doctrine_parameter = other_culture_group_conversion_penalty_active }
-			exists = scope:county
-			NOT = { scope:county.culture = { has_same_culture_heritage = scope:councillor.liege.culture } }
-		}
-		add = {
-			value = scope:councillor.conversion_tenet_autocephaly_not_culture_group
-			desc = COURT_CHAPLAIN_CONVERSION_OTHER_CULTURE_GROUP_CONVERSION_PENALTY
-		}
-	}
-	if = { #Autocephalous Churches are harder for infidels to convert
-		limit = {
-			exists = scope:county
-			scope:county.faith = { has_doctrine_parameter = autocephaly_resist_infidel_conversions }
-		}
-		add = {
-			value = scope:councillor.conversion_tenet_autocephaly_resist_infidel_conversion
-			desc = COURT_CHAPLAIN_CONVERSION_AUTOCEPHALY_RESIST_INFIDEL_CONVERSIONS
+			value = scope:councillor.conversion_tenet_autocephaly_different_heritage_conversion_resistance
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_AUTOCEPHALY_CONVERSION_RESISTANCE
 		}
 	}
 	if = { #Rigorism resists conversion both ways, unless county faith and liege faith are both rigorists
@@ -229,16 +223,26 @@ court_chaplain_conversion_contextual_bonuses = {
 				}
 			}
 		}
-		add = {
-			value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
-			desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_RESISTANCE_BOTH_WAYS
+		if = {
+			limit = { scope:councillor_liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways } }
+			add = {
+				value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
+				desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_LIEGE_IMPACT
+			}
+		}
+		else = {
+			add = {
+				value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
+				desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_COUNTY_IMPACT
+			}
 		}
 	}
 	if = { #Having an creed makes you more protected against conversion from creedless faiths
 		limit = {
 			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion } }
-			scope:county.faith.religion = scope:councillor.faith.religion
+			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ignores_creed_impact } }
 			exists = scope:county
+			scope:county.faith.religion = scope:councillor.faith.religion
 			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
 		}
 		add = {
@@ -263,15 +267,129 @@ court_chaplain_conversion_contextual_bonuses = {
 		}
 	}
 	##### Changed from Vanilla vvvvv
-	if = { #Autocephalous Churches apply to whole heritage
+	if = { #Ethnic Religion Bonus
 		limit = {
 			exists = scope:county
-			scope:councillor.faith = { has_doctrine_parameter = same_culture_group_conversion_bonus_active }
-			scope:county.culture = { has_same_culture_heritage = scope:councillor.liege.culture }
+			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
+			actor_is_faith_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = ethnic_religion_culture
+			}
 		}
 		add = {
-			value = scope:councillor.conversion_tenet_autocephaly_of_culture_group
-			desc = COURT_CHAPLAIN_CONVERSION_SAME_CULTURE_GROUP_CONVERSION_BONUS_ACTIVE
+			value = scope:councillor.conversion_tenet_ethnic_religion_same_culture_conversion_bonus
+			desc = COURT_CHAPLAIN_CONVERSION_SAME_CULTURE_ETHNIC_RELIGION_CONVERSION_BONUS_ACTIVE
+		}
+	}
+	if = { #Lesser Ethnic Religion Bonus
+		limit = {
+			exists = scope:county
+			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
+			actor_is_faith_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:councillor_liege
+				TARGET = scope:county
+				VARIABLE = ethnic_religion_culture
+			}
+		}
+		add = {
+			value = scope:councillor.conversion_tenet_ethnic_religion_child_culture_conversion_bonus
+			desc = COURT_CHAPLAIN_CONVERSION_CHILD_CULTURE_ETHNIC_RELIGION_CONVERSION_BONUS_ACTIVE
+		}
+	}
+	if = { #It's hard to convince foreigners to embrace ethnic religions
+		limit = {
+			scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_other_culture_conversion_penalty_active }
+			exists = scope:county
+			NAND = {
+				actor_is_faith_culture_for_cultural_religions_trigger = {
+					ACTOR = scope:councillor_liege
+					TARGET = scope:county
+					VARIABLE = ethnic_religion_culture
+				}
+				actor_is_faith_child_culture_for_cultural_religions_trigger = {
+					ACTOR = scope:councillor_liege
+					TARGET = scope:county
+					VARIABLE = ethnic_religion_culture
+				}
+			}
+		}
+		add = {
+			value = scope:councillor.conversion_tenet_ethnic_religion_converting_foreigners_resistance
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_ETHNIC_RELIGION_CONVERTING_FOREIGNERS
+		}
+	}
+	### Autocephaly
+	if = { #Same Culture Target County Bonus
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			actor_is_faith_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		add = {
+			value = scope:councillor.conversion_tenet_autocephaly_same_culture_bonus
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_AUTOCEPHALY_SAME_CULTURE
+		}
+	}
+	if = { #Child Culture Target County Bonus
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			actor_is_faith_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		add = {
+			value = scope:councillor.conversion_tenet_autocephaly_child_culture_bonus
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_AUTOCEPHALY_CHILD_CULTURE
+		}
+	}
+	if = { #Same Heritage Culture Target County Bonus
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			actor_is_same_heritage_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		add = {
+			value = scope:councillor.conversion_tenet_autocephaly_same_heritage_bonus
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_AUTOCEPHALY_SAME_HERITAGE
+		}
+	}
+	if = { #Different Heritage Culture Target County Malus
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_different_heritage_conversion_malus_active }
+			exists = scope:county
+			actor_is_different_heritage_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		add = {
+			value = scope:councillor.conversion_tenet_autocephaly_different_heritage_conversion_malus
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_AUTOCEPHALY_DIFFERENT_HERITAGE
+		}
+	}
+	### Legal Faith doctrine
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = general_religious_protection_from_zoroastrian_cults }
+		}
+		subtract = {
+			value = scope:councillor.conversion_doctrine_legalized_faith_malus
+			desc = COURT_CHAPLAIN_CONVERSION_DOCTRINE_LEGAL_FAITH_MALUS
 		}
 	}
 	##### Changed from Vanilla ^^^^^

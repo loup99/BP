@@ -47,7 +47,7 @@ for item1 in name_data:
             merged_data[index][2].update(name_list1)
     if ( already_in_set == False ):
         merged_data.append([header1,sex1,set(sorted(name_list1))])
-#Finally sor tthe whole merged_data list
+#Finally sort the whole merged_data list
 for index in range(len(merged_data)):
     merged_data[index][2] = sorted(merged_data[index][2])
 

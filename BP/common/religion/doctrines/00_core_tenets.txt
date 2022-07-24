@@ -408,7 +408,6 @@
 			if = {
 				limit = {
 					OR = {
-						religion_tag = dualism_religion
 						religion_tag = zoroastrianism_religion
 					}
 				}
@@ -454,7 +453,7 @@
 
 		parameters = {
 			hostility_override_tenet_gnosticism = 0
-			hostility_override_special_doctrine_is_dualist_faith = 0
+			hostility_override_special_doctrine_is_gnostic_faith = 0
 			granting_titles_gives_stress = yes
 		}
 
@@ -516,6 +515,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: No longer valid for Buddhists, Jains
 	tenet_monasticism = {
 		icon = core_tenet_meditation
 		piety_cost = {
@@ -550,9 +550,9 @@
 			}
 		}
 
-		#No longer Valid for Buddhists with the Teaching of the Buddha doctrine
 		is_shown = {
 			NOT = { religion_tag = buddhism_religion }
+			NOT = { religion_tag = jainism_religion }
 		}
 
 		can_pick = {
@@ -806,6 +806,9 @@
 		}
 
 		parameters = {
+			hostility_override_special_doctrine_is_christian_faith = 0
+			#For loc:
+			is_christian_faith_pastoral_isolation_loc_override = 0
 			sanctioned_false_conversion = yes
 			unattractive_for_character_conversions = yes
 		}
@@ -820,6 +823,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: Applied Christian doctrine effects to can_pick
 	tenet_rite = {
 		icon = core_tenet_bigbook
 
@@ -1278,6 +1282,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: No longer available to Dharmics (it's implicit)
 	tenet_reincarnation = {
 		icon = core_tenet_adorcism
 		piety_cost = {
@@ -1316,6 +1321,9 @@
 				religion_tag = christianity_religion
 				religion_tag = judaism_religion
 				religion_tag = zoroastrianism_religion
+				religion_tag = buddhism_religion
+				religion_tag = hinduism_religion
+				religion_tag = jainism_religion
 			}
 		}
 
@@ -2050,7 +2058,7 @@
 		}
 
 		is_shown = {
-			always = no #TODO: reevaluate condition
+			always = no ##### TODO (Alpha): Re-evaluate Mystical Birthright conditions
 		}
 
 		parameters = {
@@ -2941,6 +2949,8 @@
 	# Syncretic Faith Tenets	#
 	#############################
 
+	##### Changed from Vanilla: All Syncretics are mutually unselectable
+
 	tenet_eastern_syncretism = {
 		icon = core_tenet_dharmawheel
 		piety_cost = {
@@ -2974,7 +2984,7 @@
 			OR = {
 				has_doctrine = abrahamic_hostility_doctrine
 				has_doctrine = pagan_hostility_doctrine
-				NOT = { has_doctrine = special_doctrine_is_dualist_faith }
+				NOT = { has_doctrine = special_doctrine_is_gnostic_faith }
 			}
 		}
 		can_pick = {
@@ -2998,6 +3008,7 @@
 		}
 		parameters = {
 			hostility_override_eastern_hostility_doctrine = 2
+			hostility_override_eastern_pagan_hostility_doctrine = 2
 		}
 		traits = {
 			virtues = { honest }
@@ -3169,6 +3180,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: Not available to Christians (new doctrines apply)
 	tenet_jewish_syncretism = {
 		icon = core_tenet_jewish_syncretism
 
@@ -3342,10 +3354,11 @@
 		piety_cost = { value = 0 }
 
 		parameters = {
-			#TODO: Add Call Great Council, Create Sects decision
+			##### TODO (Beta): Implement Apostolic Succession Religious Decisions
 			excommunication_active = yes
 			seek_indulgences_active = yes
 			seek_indulgences_active_2 = yes
+			enables_formation_of_autocephalous_churches = yes
 		}
 
 		character_modifier = {
@@ -3370,15 +3383,15 @@
 			}
 		}
 		
-		#Because we can't reference culture variables, autocephaly should be driven
-		#by a decision
+		#Because we can't reference culture variables, autocephaly should be driven by a decision
 		is_shown = { always = no}
 		can_pick = { always = no }
 		
 		parameters = {
-			same_culture_group_conversion_bonus_active = yes
-			other_culture_group_conversion_penalty_active = yes
-			autocephaly_resist_infidel_conversions = yes
+			tenet_autocephaly_same_culture_conversion_bonus_active = yes
+			tenet_autocephaly_different_heritage_conversion_malus_active = yes
+			tenet_autocephaly_conversion_resistance_active = yes
+			enables_formation_of_autocephalous_churches = yes
 			#For Localization:
 			ecumenical_christians_keep_ecumenism = yes
 			creates_a_new_hof = yes
@@ -3474,6 +3487,7 @@
 			legalism_reduced_faction_virtues = yes
 			legalism_increased_faction_sins = yes
 			rigorism_conversion_resitance_both_ways = yes
+			tenet_ignores_creed_impact = yes
 		}
 		
 		#They like each other more
@@ -3511,6 +3525,7 @@
 		
 		parameters = {
 			pluralism_fundamentalist_vulnerable_to_heresy = yes
+			tenet_ignores_creed_impact = yes
 		}
 		
 		character_modifier = {
@@ -3759,6 +3774,7 @@
 		parameters = {
 			hostility_override_special_doctrine_is_pagan_faith = 1
 			hostility_override_eastern_hostility_doctrine = 1
+			hostility_override_eastern_pagan_hostility_doctrine = 1
 		}
 		
 		character_modifier = { different_faith_county_opinion_mult = 1 }
@@ -3817,6 +3833,7 @@
 			holy_wars_forbidden = yes
 			hostility_override_abrahamic_hostility_doctrine = 1
 			hostility_override_pagan_hostility_doctrine = 1
+			hostility_override_eastern_pagan_hostility_doctrine = 1
 			hostility_override_eastern_hostility_doctrine = 1
 			hostility_override_mazdan_hostility_doctrine = 1
 		}
@@ -3874,33 +3891,36 @@
 		}
 
 		is_shown = { # Not for universalist faiths
-			NOR = { #TODO: The logic here shouldn't work!
-				religion_tag = christianity_religion
-				religion_tag = islam_religion
-				religion_tag = zoroastrianism_religion
-				religion_tag = buddhism_religion
-			}
+			flag:tenet_ethnic_religion = { is_in_list = selected_doctrines }
+			#NOR = { ##### TODO (Beta): Fix this (supposedly) broken logic of tenet_ethnic_religion
+			#	religion_tag = christianity_religion
+			#	religion_tag = islam_religion
+			#	religion_tag = zoroastrianism_religion
+			#	religion_tag = buddhism_religion
+			#}
 		}
 
-		can_pick = { 
-			custom_description = { #Should not use communal identity with this; they overlap
-				text = incompatible_tenet_communal_identity_trigger
-				NOT = { flag:tenet_communal_identity = { is_in_list = selected_doctrines } }
-			}
-			custom_description = { #Can't use Interpratio Romana; it contradicts
-				text = incompatible_tenet_interpretatio_romana_trigger
-				NOT = { flag:tenet_interpretatio_romana = { is_in_list = selected_doctrines } }
-			}
-			custom_description = { #Can't use Cosmopolitanism; it contradicts
-				text = incompatible_tenet_cosmopolitanism_trigger
-				NOT = { flag:tenet_cosmopolitanism = { is_in_list = selected_doctrines } }
-			}
+		can_pick = { ##### TODO (Beta): Re-enable selection of tenet_ethnic_religion
+			flag:tenet_ethnic_religion = { is_in_list = selected_doctrines }
+			# custom_description = { #Should not use communal identity with this; they overlap
+			# 	text = incompatible_tenet_communal_identity_trigger
+			# 	NOT = { flag:tenet_communal_identity = { is_in_list = selected_doctrines } }
+			# }
+			# custom_description = { #Can't use Interpratio Romana; it contradicts
+			# 	text = incompatible_tenet_interpretatio_romana_trigger
+			# 	NOT = { flag:tenet_interpretatio_romana = { is_in_list = selected_doctrines } }
+			# }
+			# custom_description = { #Can't use Cosmopolitanism; it contradicts
+			# 	text = incompatible_tenet_cosmopolitanism_trigger
+			# 	NOT = { flag:tenet_cosmopolitanism = { is_in_list = selected_doctrines } }
+			# }
 		}
 
 		parameters = {
-			same_culture_conversion_bonus_active = yes
+			tenet_ethnic_religion_same_culture_conversion_bonus_active = yes
 			tenet_ethnic_religion_other_culture_conversion_penalty_active = yes
 			tenet_ethnic_religion_conversion_resistance_active = yes
+			can_only_demand_conversion_of_same_culture = yes
 			can_return_to_old_faith = yes
 		}
 

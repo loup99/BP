@@ -1,4 +1,4 @@
-﻿#Christian Decisions
+﻿### Christian Decisions
 peregrinition_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
 
@@ -103,26 +103,40 @@ establish_autocephalous_church_decision = {
 			has_doctrine = tenet_rite
 			religion = religion:christianity_religion
 		}
-		faith.religious_head.faith = {
-			OR = {
-				has_doctrine = tenet_apostolic_succession
-				has_doctrine = tenet_autocephaly
-			}
-		}
+		faith.religious_head.faith = { has_doctrine_parameter = enables_formation_of_autocephalous_churches }
 	}
 	
 	is_valid = {
-		is_independent_ruler = yes
 		highest_held_title_tier >= tier_kingdom
-		#Culture doesn't have an autocephalous church already
+		
 		custom_description = {
 			text = the_culture_does_not_have_an_autocephalous_church
-			culture = { NOT = { has_variable = autocephalous_church } }
+			NOT = {
+				#Go through all Christian faiths. If root.culture is a Faith Culture or a Faith Child
+				#Culture, note that it exists
+				religion:christianity_religion = {
+					any_faith = {
+						exists = this.var:church_culture
+						trigger_if = {
+							limit = { exists = this.var:church_culture }
+							this.var:church_culture = { save_temporary_scope_as = the_culture }
+							OR = {
+								root.culture = scope:the_culture
+								AND = {
+									root.culture = { any_parent_culture_or_above = { this = scope:the_culture } }
+									root.culture = { has_same_culture_heritage = scope:the_culture }
+								}
+							}
+						}
+					}
+				}
+			}
 		}
+		
 		#Must have 75% of the realm following your rite
 		custom_description = {
 			text = at_least_three_fourths_of_realm_follows_faith
-			any_realm_county = {
+			any_sub_realm_county = {
 				percent >= 0.75
 				faith = root.faith
 			}
@@ -137,16 +151,47 @@ establish_autocephalous_church_decision = {
 			}
 		}
 		#Must control 75% of your culture's counties
-		custom_description = {
-			text = controls_least_three_fourths_of_counties_with_culture
-			check_if_control_percentage_of_all_counties_with_condition_trigger = {
-				FEATURE = culture
-				CHARACTER = root
-				PERCENTAGE = 0.75
+		AND = {
+			custom_description = {
+				text = controls_least_three_fourths_of_counties_with_culture
+				check_if_control_percentage_of_all_counties_with_condition_trigger = {
+					FEATURE = culture
+					CHARACTER = root
+					PERCENTAGE = 0.75
+				}
 			}
 		}
-		#Need to have a strong hook on your religious head, or he won't approve it
-		has_strong_hook = faith.religious_head
+		#Need to have enough pull with the HOF to get him to approve it
+		OR = {
+			AND = {
+				is_independent_ruler = no #If you're not independent, you'll need to have enough pull
+				OR = {
+					custom_description = { #3 Holy Sites, he can't politically defend granting you autocephaly
+						text = controls_three_holy_sites
+						root = { any_sub_realm_county = { count >= 3 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+					}
+					AND = { #2 Holy Sites, and at least some weak pull
+						custom_description = {
+							text = controls_two_holy_sites
+							root = { any_sub_realm_county = { count >= 2 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+						}
+						has_hook = faith.religious_head
+					}
+					AND = {
+						custom_description = { #1 Holy Sites, but you have some strong pull on him
+							text = controls_one_holy_site
+							root = { any_sub_realm_county = { count >= 1 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+						}
+						has_strong_hook = faith.religious_head
+					}
+				}
+			}
+			is_independent_ruler = yes #If you're independent and a King, you have too much political pull
+		}
+		custom_description = {
+			text = hof_is_not_a_vassal
+			NOT = { root = { is_liege_or_above_of = faith.religious_head } }
+		}
 	}
 	
 	is_valid_showing_failures_only = {
@@ -159,39 +204,134 @@ establish_autocephalous_church_decision = {
 			remove_doctrine = tenet_rite
 			add_doctrine = tenet_autocephaly
 		}
-		root = { bp_set_up_dynamic_spiritual_hof_title_effect = { CREATOR = root } }
 		if = { #Need conditional to prevent some weirdness in localization
 			limit = { has_hook = faith.religious_head }
 			remove_hook = { target = faith.religious_head }
 		}
-		#Set the Autocephalous Church flag
-		root.culture = {
-			set_variable = {
-				name = autocephalous_church
-				value = root.faith
+		faith.religious_head = { save_scope_as = old_hof } #Done here because we're about to change religious heads
+		root = { bp_set_up_dynamic_spiritual_hof_title_effect = { CREATOR = root } }
+		custom_description = {
+			text = new_hof_becomes_your_vassal
+			subject = root.faith
+			create_title_and_vassal_change = {
+				type = swear_fealty
+				save_scope_as = change
 			}
+			faith.religious_head = {
+				change_liege = {
+					liege = root
+					change = scope:change
+				}
+			}
+			resolve_title_and_vassal_change = scope:change
 		}
+		custom_description = {
+			text = rite_is_associated_with_your_culture
+			#Set the Autocephalous Church flag
+			faith = { set_variable = { name = church_culture value = root.culture } }
+		}
+		#Apply appropriate laws
+		hidden_effect = {
+			faith.religious_head = {
+				add_realm_law_skip_effects = same_faith_theocratic_succession_law
+				add_realm_law_skip_effects = bishop_theocratic_succession_law
+			}
+			#Prevent ruler from creating another faith while he lives
+			root = { set_variable = { name = has_created_a_faith } }
+		}
+		#Cribbed these scopes from faith_creation.1000 (which we borrow text from liberally)
+		root = { save_scope_as = reformer }
+		root.faith = { save_scope_as = reformed_faith }
+		root.faith.religious_head = { save_scope_as = reformed_hof }
+		#Inform players of a new Christian Church
+		every_ruler = { trigger_event = { id = BP_religious_decisions.0001 } }
 	}
 	
 	ai_check_interval = 60
 	
 	ai_potential = {
-		exists = primary_heir
-		primary_heir = { dynasty = root.dynasty }
 		is_at_war = no
 	}
-
-	#Cribbed from Consolateum
+	
 	ai_will_do = {
-		base = 0
-		# 100% chance at 50 zeal
-		ai_value_modifier = {
-			ai_zeal = 2
+		base = 100 #100% chance (why wouldn't they, zealous or not?)
+		
+		modifier = { #AI Ethiopian Orthodox Chars will never pursue autocephaly, as per history
+			factor = 0
+			faith = faith:ethiopian_orthodox
 		}
 	}
 }
 
-#Pagan Decisions
+### Arian Creed decision
+proclaim_creed_of_arius_decision = {
+	picture = "gfx/interface/illustrations/decisions/ecumenical_council.dds"
+	desc = proclaim_creed_of_arius_decision_desc
+	selection_tooltip = proclaim_creed_of_arius_decision_tooltip
+	major = yes
+	
+	is_shown = {
+		has_a_primitive_type_of_government_trigger = no
+		faith = faith:arian
+		NOT = { faith = { has_doctrine = special_doctrine_adoptionism_ecumenism } }
+		is_independent_ruler = yes
+	}
+	
+	is_valid = {
+		completely_controls = title:c_roma
+		OR = {
+			AND = {
+				faith = { holy_sites_controlled >= 3 }
+				completely_controls = title:c_jerusalem
+				piety_level >= 3
+			}
+			AND = {
+				faith = { holy_sites_controlled >= 2 }
+				custom_description = {
+					text = has_an_empire
+					primary_title.tier = tier_empire
+				}
+				piety_level >= 4
+			}
+			AND = {
+				faith = { holy_sites_controlled >= 1 }
+				has_title = title:e_goths
+				piety_level >= 5
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		piety >= 0
+		is_imprisoned = no
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {
+		piety = 1000
+		gold = medium_gold_max_value
+	}
+	
+	effect = {
+		show_as_tooltip = { proclaim_creed_of_arius_effect = yes }
+		root = { save_scope_as = convoker }
+		trigger_event = { id = BP_religious_decisions.0002 }
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {
+		is_at_war = no
+	}
+	
+	ai_will_do = {
+		base = 100
+	}
+}
+
+
+### Pagan Decisions
 automutiliation_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
 
@@ -274,7 +414,7 @@ automutiliation_decision = {
 	}
 }
 
-#Hindu Decisions
+### Hindu Decisions
 
 #Philosophies
 # Orthodox Schools: Samkhya, Yoga, Vedanta, Vaiśeṣika, Nyaya, Mīmāṃsā

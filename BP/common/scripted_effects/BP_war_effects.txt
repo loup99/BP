@@ -71,6 +71,77 @@ create_zeno_army = {
 	}
 }
 
+### Unification CB Code
+unification_cb_title_management = {
+	create_title_and_vassal_change = {
+		type = conquest
+		save_scope_as = change_titles_taken
+		add_claim_on_loss = yes
+	}
+	create_title_and_vassal_change = {
+		type = swear_fealty
+		save_scope_as = change_vassal_status
+		add_claim_on_loss = no
+	}
+	#Mark all counties controlled by the top liege for seizure
+	every_in_list = {
+		list = $TARGET_TITLES$
+		
+		this = { save_scope_as = the_target_title }
+		
+		#Go over counties to seize and vassals to transfer
+		every_in_de_jure_hierarchy = {
+			limit = { tier = tier_county }
+			#Seize a county iff it is owned by the defender OR the holders capital is de jure part of target title
+			if = {
+				limit = {
+					holder = {
+						OR = {
+							this = $DEFENDER$
+							AND = {
+								target_is_liege_or_above = $DEFENDER$
+								NOT = { this.capital_county = { target_is_de_jure_liege_or_above = scope:the_target_title } }
+							}
+						}
+					}
+				}
+				add_to_temporary_list = titles_taken
+			}
+			#Transfer a vassal iff his capital is part of the de jare of the target title
+			else_if = {
+				limit = {
+					holder = {
+						target_is_liege_or_above = $DEFENDER$
+						this.capital_county = { target_is_de_jure_liege_or_above = scope:the_target_title }
+					}
+				}
+				holder = { add_to_temporary_list = vassals_to_transfer }
+			}
+		}
+	}
+	#Seize titles
+	every_in_list = {
+		list = titles_taken
+		change_title_holder = {
+			holder = $ATTACKER$
+			change = scope:change_titles_taken
+			take_baronies = yes
+		}
+	}
+	#Transfer Vassals
+	every_in_list = {
+		list = vassals_to_transfer
+		this = {
+			change_liege = {
+				liege = $ATTACKER$
+				change = scope:change_vassal_status
+			}
+		}
+	}
+	resolve_title_and_vassal_change = scope:change_titles_taken
+	resolve_title_and_vassal_change = scope:change_vassal_status
+}
+
 ### General Migration CB Code
 
 #Migration CB Title Shenanigans
@@ -158,14 +229,16 @@ migration_cb_title_management = {
 				location = $ATTACKER$.location
 				culture = this.culture
 				faith = this.faith
-				gender_female_chance = { #TODO: Make more-religion/culture dynamic
+				gender_female_chance = {
 					if = {
-						limit = { $ATTACKER$ = { is_male = yes } }
+						limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
 						value = 0
 					}
-					else = {
+					else_if = {
+						limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
 						value = 100
 					}
+					else = { value = 50 }
 				}
 				save_scope_as = new_char
 			}
@@ -510,15 +583,17 @@ major_migration_cb_title_management = {
 			location = $ATTACKER$.location
 			culture = this.culture
 			faith = this.faith
-			gender_female_chance = { #TODO: Make more-religion/culture dynamic
-				if = {
-					limit = { $ATTACKER$ = { is_male = yes } }
-					value = 0
+			gender_female_chance = {
+					if = {
+						limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
+						value = 0
+					}
+					else_if = {
+						limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
+						value = 100
+					}
+					else = { value = 50 }
 				}
-				else = {
-					value = 100
-				}
-			}
 			save_scope_as = new_char
 		}
 		change_title_holder = {

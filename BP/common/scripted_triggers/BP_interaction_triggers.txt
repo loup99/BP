@@ -47,3 +47,61 @@ bp_title_revocation_is_tyrannical_bureaucratic_trigger = {
 		}
 	}
 }
+
+#Additional BP conversion demand trigger
+BP_demand_conversion_trigger = {
+	trigger_if = { #Ethnic Religion has additional restrictions
+		limit = { scope:actor.faith = { has_doctrine_parameter = can_only_demand_conversion_of_same_culture } }
+		#Correct Actor+Recipient Culture
+		custom_description = {
+			text = actor_culture_is_aligned_with_ethnic_religion
+			subject = scope:actor
+			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:actor
+				TARGET = scope:actor
+				VARIABLE = ethnic_religion_culture
+			}
+		}
+		custom_description = {
+			text = recipient_culture_is_aligned_with_ethnic_religion
+			subject = scope:recipient
+			object = scope:actor
+			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:recipient
+				TARGET = scope:actor
+				VARIABLE = ethnic_religion_culture
+			}
+		}
+	}
+	trigger_if = { #State Religion Required
+		limit = { scope:recipient = { is_landed = yes } }
+		custom_description = {
+			text = actor_does_not_has_innovation_state_religion
+			subject = scope:actor
+			object = scope:recipient
+			OR = {
+				AND = {
+					scope:actor.culture = { has_innovation = innovation_state_religion }
+					NOT = { scope:recipient.faith = { has_doctrine_parameter = unreformed } }
+					scope:recipient = { settled_government_trigger = no }
+				}
+				OR = {
+					scope:recipient.faith = { has_doctrine_parameter = unreformed }
+					scope:recipient = { settled_government_trigger = no }
+				}
+			}
+		}
+	}
+	trigger_if = { #Eranshar Faith protection
+		limit = { scope:recipient.faith = { has_doctrine_parameter = general_religious_protection_from_zoroastrian_cults } }
+		custom_description = {
+			text = actor_cannot_demand_conversion_of_protected_faiths
+			subject = scope:actor
+			object = scope:recipient
+			NOR = {
+				scope:actor.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+				scope:actor = { any_liege_or_above = { this.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult } } }
+			}
+		}
+	}
+}
