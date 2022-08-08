@@ -6,6 +6,9 @@
 
 import sys
 
+#To Use: Takes an input/output file with special characters (like CK2 Šahrux) and makes a CK3 equivalent
+#(like S_ahrux).
+
 #Converts an invalid UTF-8 char to a CK3 ASCII format
 def get_appropriate_char(raw):
     retval = []

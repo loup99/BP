@@ -1,4 +1,32 @@
-﻿on_title_gain = {
+﻿# All on-actions in this file provide scope:transfer_type unless otherwise noted
+# scope:transfer_type has the following permutations:
+# flag:conquest
+# flag:conquest_holy_war
+# flag:conquest_claim
+# flag:conquest_populist
+# flag:inheritance
+# flag:abdication
+# flag:destroyed
+# flag:created
+# flag:usurped
+# flag:granted
+# flag:revoked
+# flag:election
+# flag:independency
+# flag:returned
+# flag:leased_out
+# flag:lease_revoked
+# flag:faction_demand
+# flag:swear_fealty
+
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	events = {
+		delay = { days = 1 }
+		BP_roman_government_events.0001
+	}
 	on_actions = {
 		#Government Handling stuff
 		BP_handle_bureaucratic_succession
@@ -8,6 +36,7 @@
 		BP_apply_government_succession_laws
 		#Other On Actions
 		BP_fall_of_rome
+		BP_remove_migration_modifiers
 	}
 }
 
@@ -17,70 +46,49 @@ BP_handle_bureaucratic_succession = {
 		if = {
 			limit = { #Avoids a whole slew of related errors
 				exists = scope:title.holder
+				exists = scope:previous_holder
 				scope:title.tier = tier_empire
 				scope:previous_holder = { has_government = bureaucratic_government }
 			}
 			#If the previous holder was bureaucratic, I become bureauctic (if having correct government)
 			if = {
-				limit = {
-					root = {
-						OR = { #Valid precursor governments
-							has_government = subroman_government
-							has_government = gubernatorial_government
-							has_government = bureaucratic_government
-							has_government = prefeudal_government
-							has_government = feudal_government
-						}
-					}
-				}
+				limit = { valid_bureaucratic_election_precursor_governments = yes }
 				#In the case of an external/non-bureaucratic_taxation ruler,
 				#Update taxation rules after switching government
 				if = {
-					limit = {
-						NOR = {
-							has_realm_law = bureaucratic_taxation_0
-							has_realm_law = bureaucratic_taxation_1
-							has_realm_law = bureaucratic_taxation_2
-							has_realm_law = bureaucratic_taxation_3
-							has_realm_law = bureaucratic_taxation_4
-						}
-					}
-					change_government = bureaucratic_government
-					apply_taxation_down_tree = { VALUE = 2 }
+					limit = { has_bureaucratic_taxation = no }
+					convert_to_bureaucratic_effect = yes
 				}
-				#Otherwise, just switch government
-				else = {
-					change_government = bureaucratic_government
-					
-				}
+				#Otherwise, just switch government if you don't have it already (somehow)
+				else = { convert_to_bureaucratic_effect = yes }
 			}
-			else = {
-				change_government = subroman_government
-				inherit_correct_subroman_taxation_law_effect = {
-					TITLE_BEQUEATHER = scope:previous_holder
-					TARGET = root
-				}
-			}
-			#Then, change the previous holder's government
+			#If an invalid government arises, then the bureaucratic edifice must collapse
+			else = { change_government = subroman_government }
+			
+			#Then, change the previous holder's government if required
 			scope:previous_holder = {
-				if = { #If not independent and under bureaucracy, adopt gubernatorial_government
-					limit = {
-						any_liege_or_above = {
-							OR = {
-								has_government = bureaucratic_government
-								has_government = gubernatorial_government
-							}
+				if = {
+					limit = { is_landed = yes } #Total usurpation &c.
+					#If he's still a valid bureaucrat, apply the correct laws
+					if = { #Is a gubernatorial
+						limit = {
+							has_bureaucratic_government_type_trigger = yes
+							valid_bureaucratic_government_type_status_trigger = yes
+							is_independent_ruler = no
 						}
+						change_government = gubernatorial_government
+						get_and_apply_previous_taxation_effect = { LIEGE = scope:previous_holder.liege }
 					}
-					change_government = gubernatorial_government
-					get_and_apply_previous_taxation_effect = { LIEGE = root.liege } #Ensure proper taxation inherited
-				}
-				else = {
-					change_government = subroman_government
-					inherit_correct_subroman_taxation_law_effect = {
-						TITLE_BEQUEATHER = scope:previous_holder
-						TARGET = root
+					else_if = { #He's still an independent bureaucrat (somehow)
+						limit = {
+							has_bureaucratic_government_type_trigger = yes
+							valid_bureaucratic_government_type_status_trigger = yes
+							is_independent_ruler = yes
+						}
+						convert_to_bureaucratic_effect = yes
 					}
+					#Otherwise, turn him to subroman government
+					else = { change_government = subroman_government }
 				}
 			}
 		}
@@ -96,44 +104,18 @@ BP_apply_title_laws = {
 				root = { has_government = gubernatorial_government }
 				scope:title.tier >= tier_duchy
 			}
-			#Remove old laws
-			scope:title = {
-				if = {
-					limit = { has_title_law = feudal_elective_succession_law }
-					remove_title_law = feudal_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = princely_elective_succession_law }
-					remove_title_law = princely_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = saxon_elective_succession_law }
-					remove_title_law = saxon_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = scandinavian_elective_succession_law }
-					remove_title_law = scandinavian_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = gaelic_elective_succession_law }
-					remove_title_law = gaelic_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = mahestan_elective_succession_law }
-					remove_title_law = mahestan_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = kurultai_elective_succession_law }
-					remove_title_law = kurultai_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = eldership_elective_succession_law }
-					remove_title_law = eldership_elective_succession_law
-				}
-				if = {
-					limit = { has_title_law = tribal_elective_succession_law }
-					remove_title_law = tribal_elective_succession_law
-				}
+			scope:title = { remove_all_title_laws = yes }
+		}
+		#Apply Title Specific Laws for specific governments
+		if = {
+			limit = { scope:title.tier = tier_empire }
+			if = {
+				limit = { has_government = bureaucratic_government }
+				scope:title = { add_title_law = imperial_elective_succession_law }
+			}
+			else_if = {
+				limit = { has_government = eranshar_government }
+				scope:title = { add_title_law = mahestan_elective_succession_law }
 			}
 		}
 	}
@@ -144,114 +126,16 @@ BP_prevent_title_boostrapping = {
 	effect = {
 		if = {
 			limit = {
-				AND = {
-					scope:transfer_type = flag:granted #Only for title grants
-					root = { #Only check if target has baronies/counties
-						any_held_title = {
-							count >= 1
-							tier <= tier_county
-						}
-					}
-					scope:title.tier <= tier_county
-				}
+				scope:transfer_type = flag:granted #Only for title grants
+				#Only check if granting baronies/counties
+				scope:title.tier = tier_county
+				#Only run this check the first time a char get a county
+				any_held_title = { count = 1 this.tier = tier_county }
 			}
-			#Unplayable Governments: Should not change whenever gaining titles
-			if = {
-				limit = {
-					root = {
-						OR = {
-							has_government = republic_government
-							has_government = mercenary_government
-							has_government = holy_order_government
-						}
-					}
-				}
+			boostrap_prevention_effect = {
+				THE_COUNTY = scope:title
+				THE_PREVIOUS_HOLDER = scope:previous_holder
 			}
-			#Theocracy (special)
-			else_if = {
-				limit = { scope:previous_holder = { has_government = theocracy_government } }
-				change_government = theocracy_government
-			}
-			#Primitive Governments (can hold tribal_holding)
-			else_if = {
-				limit = { scope:previous_holder = { has_government = tribal_government } }
-				change_government = tribal_government
-			}
-			else_if = {
-				limit = { scope:previous_holder = { has_government = nomad_government } }
-				change_government = nomad_government
-			}
-			else_if = {
-				limit = { scope:previous_holder = { has_government = high_tribal_government } }
-				change_government = high_tribal_government
-			}
-			#Advanced Governments (Cannot hold tribal_holding)
-			else_if = {
-				limit = { scope:previous_holder = { has_government = prefeudal_government } }
-				if = {
-					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
-					change_government = high_tribal_government
-				}
-				else = { change_government = prefeudal_government }
-			}
-			else_if = {
-				limit = { scope:previous_holder = { has_government = subroman_government } }
-				if = {
-					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
-					change_government = high_tribal_government
-				}
-				else = {
-					change_government = subroman_government
-					inherit_correct_subroman_taxation_law_effect = {
-						TITLE_BEQUEATHER = scope:previous_holder
-						TARGET = root
-					}
-				}
-			}
-			else_if = {
-				limit = { scope:previous_holder = { has_government = eranshar_government } }
-				if = {
-					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
-					change_government = high_tribal_government
-				}
-				else = { change_government = eranshar_government }
-			}
-			else_if = {
-				limit = { scope:previous_holder = { has_government = gupta_government } }
-				if = {
-					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
-					change_government = high_tribal_government
-				}
-				else = { change_government = gupta_government } 
-			}
-			else_if = {
-				limit = {
-					scope:previous_holder = {
-						OR = {
-							has_government = gubernatorial_government
-							has_government = bureaucratic_government
-						}
-					}
-				}
-				if = {
-					limit = { scope:title.title_province = { has_holding_type = tribal_holding } }
-					change_government = high_tribal_government
-				}
-				else = {
-					change_government = gubernatorial_government #Errors
-					get_and_apply_previous_taxation_effect = { LIEGE = root.liege }
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				scope:transfer_type = flag:granted
-				scope:previous_holder = { has_government = bureaucratic_government }
-				scope:title = { tier = tier_barony }
-				scope:title.title_province = { has_holding_type = castle_holding }
-			}
-			change_government = gubernatorial_government
-			get_and_apply_previous_taxation_effect = { LIEGE = root.liege }
 		}
 	}
 }
@@ -261,12 +145,15 @@ BP_check_gubernatorial_status = {
 	effect = {
 		if = {
 			limit = {
-				NOR = {
-					has_government = bureaucratic_government
-					has_government = gubernatorial_government
+				root = {
+					is_independent_ruler = yes
+					NOR = {
+						has_government = gubernatorial_government
+						has_government = bureaucratic_government
+					}
 				}
 			}
-			root = { change_vassal_gubernatorial_governments = yes }
+			change_vassal_gubernatorial_governments_if_needed = yes
 		}
 	}
 }
@@ -318,9 +205,59 @@ BP_fall_of_rome = {
 	}
 }
 
+#Cleanup migration modifiers on certain transfers
+BP_remove_migration_modifiers = {
+	effect = {
+		if = {
+			limit = {
+				#Only cleanup for conquests
+				OR = {
+					scope:transfer_type = flag:conquest
+					scope:transfer_type = flag:conquest_holy_war
+					scope:transfer_type = flag:conquest_claim
+					scope:transfer_type = flag:conquest_populist
+				}
+			}
+			if = {
+				limit = { scope:title.tier >= tier_county }
+				every_county = {
+					limit = { #Cleanup counties under the entire hierarchy
+						OR = {
+							this = scope:title
+							this.duchy = scope:title
+							this.kingdom = scope:title
+							this.empire = scope:title
+							holder = { target_is_liege_or_above = root } #Catch vassal
+						}
+					}
+					#If counties under aristocracy/recent immigration modifiers are conquered by others,
+					#remove the modifiers
+					if = {
+						limit = { this = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy } }
+						this = { remove_county_modifier = county_modifier_minor_migration_minor_aristocracy }
+					}
+					else_if = {
+						limit = { this = { has_county_modifier = county_modifier_migration_recent_emigration } }
+						this = { remove_county_modifier = county_modifier_migration_recent_emigration }
+					}
+					else_if = {
+						limit = { this = { has_county_modifier = county_modifier_migration_recent_immigration } }
+						this = { remove_county_modifier = county_modifier_migration_recent_immigration }
+					}
+				}
+			}
+		}
+	}
+}
+
+# A title is destroyed
+# root = the holder before destruction
+# scope:landed_title = the title that is being destroyed
+# Does *not* provide scope:transfer_type
 on_title_destroyed = {
 	on_actions = {
-		BP_set_all_gubernatorials_to_subroman
+		#BP_set_all_gubernatorials_to_subroman
+		BP_swap_wre_for_italy
 	}
 }
 
@@ -330,7 +267,79 @@ BP_set_all_gubernatorials_to_subroman = {
 		every_independent_ruler = {
 			if = {
 				limit = { has_government = gubernatorial_government }
-				this = { change_vassal_gubernatorial_governments = yes }
+				this = {
+					change_gubernatorial_government = yes
+					change_vassal_gubernatorial_governments_if_needed = yes
+				}
+			}
+		}
+	}
+}
+
+#Change every e_wre kingdom to e_italy if WRE falls (i.e., has only 1 kingdom title)
+BP_swap_wre_for_italy = {
+	effect = {
+		if = {
+			limit = {
+				any_kingdom = {
+					count <= 1
+					de_jure_liege = title:e_wre
+				}
+			}
+			every_kingdom = {
+				limit = { this.de_jure_liege = title:e_wre }
+				set_de_jure_liege_title = title:e_italy
+			}
+		}
+	}
+}
+
+# A title change makes the character rank down in the landed tiers (eg King -> Duke)
+# root = character ranking down
+# scope:title = old primary title
+on_rank_down = {
+	on_actions = {
+		BP_bureaucratic_demotion
+	}
+}
+
+BP_bureaucratic_demotion = {
+	effect = {
+		if = { #If we were demoted but not independent, just swap governments
+			limit = {
+				has_government = bureaucratic_government
+				valid_bureaucratic_status_trigger = no
+				valid_gubernatorial_status_trigger = yes
+			}
+			change_government = gubernatorial_government
+		}
+	}
+}
+
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
+on_title_lost = {
+	on_actions = { BP_remove_title_related_character_modifiers }
+}
+
+#If you're no longer the head honcho, remove Senate approval
+BP_remove_title_related_character_modifiers = {
+	effect = {
+		if = {
+			limit = { NOT = { root = title:d_senate.holder.top_liege } }
+			if = {
+				limit = { has_character_modifier = approved_by_the_senate }
+				remove_character_modifier = approved_by_the_senate
+			}
+			if = {
+				limit = { has_character_modifier = rejected_by_the_senate }
+				remove_character_modifier = rejected_by_the_senate
+			}
+			if = {
+				limit = { has_character_modifier = ignored_the_senate }
+				remove_character_modifier = ignored_the_senate
 			}
 		}
 	}

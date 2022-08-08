@@ -1,4 +1,5 @@
-﻿reform_caucasian_albania_effect = {
+﻿### Secular Decisions
+reform_caucasian_albania_effect = {
 	create_title_and_vassal_change = {
 		type = created
 		save_scope_as = change
@@ -14,6 +15,23 @@
 }
 
 form_frankish_kingdom_effect = {
+	#If you have a titular Frankish Duchy, replace the COA with your kingdom title
+	if = {
+		limit = { primary_title = title:d_salia }
+		title:k_franks = { set_coa = title:d_salia }
+	}
+	else_if = {
+		limit = { primary_title = title:d_mosania }
+		title:k_franks = { set_coa = title:d_mosania }
+	}
+	else_if = {
+		limit = { primary_title = title:d_baroia }
+		title:k_franks = { set_coa = title:d_baroia }
+	}
+	else_if = {
+		limit = { primary_title = title:d_ripuria }
+		title:k_franks = { set_coa = title:d_ripuria }
+	}
 	create_title_and_vassal_change = {
 		type = created
 		save_scope_as = change
@@ -55,6 +73,15 @@ form_frankish_kingdom_effect = {
 }
 
 form_gothic_empire_effect = {
+	#If you have the Visigoths or Ostrogoths, replace the COA with your kingdom title
+	if = {
+		limit = { primary_title = title:k_visigoths }
+		title:e_goths = { set_coa = title:k_visigoths }
+	}
+	else_if = {
+		limit = { primary_title = title:k_ostrogoths }
+		title:e_goths = { set_coa = title:k_ostrogoths }
+	}
 	every_held_title = { #Should shift all dejure of all Empires owned at the time.
 		limit = { tier = tier_empire }
 		every_in_de_jure_hierarchy = {
@@ -90,6 +117,8 @@ form_gothic_empire_effect = {
 		root = { destroy_title = prev }
 	}
 }
+
+### Religious Decisions
 
 #cribbed from faith_creation.0012
 create_arian_hof_effect = {
@@ -146,3 +175,95 @@ proclaim_creed_of_arius_effect = {
 		add_doctrine = special_doctrine_adoptionism_ecumenism
 	}
 }
+
+### Zoroastrian Events
+legalize_caucasian_christianity_global_effects = {
+	faith:armenian_apostolic = { add_doctrine = special_doctrine_legalized_faith_persia }
+	faith:georgian_orthodox = { add_doctrine = special_doctrine_legalized_faith_persia }
+	faith:albanian_apostolic = { add_doctrine = special_doctrine_legalized_faith_persia }
+}
+caucasian_christian_legalization_local_effect = {
+	legalize_caucasian_christianity_global_effects = yes
+	add_piety_level = -1
+	#The clerics are angry
+	every_vassal_or_below = {
+		limit = {
+			religion = religion:zoroastrianism_religion
+			faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+		}
+		if = {
+			limit = { has_government = theocracy_government }
+			add_opinion = {
+				modifier = angry_opinion
+				target = root
+				opinion = -20
+			}
+		}
+	}
+	custom_description = {
+		text = every_court_chaplain_is_angry
+		every_vassal_or_below = {
+			limit = {
+				religion = religion:zoroastrianism_religion
+				faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+			}
+			every_councillor = {
+				limit = { has_council_position = councillor_court_chaplain }
+				add_opinion = {
+					modifier = angry_opinion
+					target = root
+					opinion = -20
+				}
+			}
+		}
+	}
+	#All the Christians in the Empire are relieved
+	custom_description = {
+		text = every_christian_in_the_country_is_relieved
+		every_courtier_or_guest = {
+			limit = {
+				OR = {
+					faith = faith:armenian_apostolic
+					faith = faith:georgian_orthodox
+					faith = faith:albanian_apostolic
+				}
+			}
+			add_opinion = {
+				modifier = legalized_my_faith
+				years = 50
+				target = root
+			}
+		}
+		every_vassal_or_below = {
+			if = {
+				limit = {
+					OR = {
+						faith = faith:armenian_apostolic
+						faith = faith:georgian_orthodox
+						faith = faith:albanian_apostolic
+					}
+				}
+				add_opinion = {
+					modifier = legalized_my_faith
+					years = 50
+					target = root
+				}
+			}
+			every_courtier_or_guest = {
+				limit = {
+					OR = {
+						faith = faith:armenian_apostolic
+						faith = faith:georgian_orthodox
+						faith = faith:albanian_apostolic
+					}
+				}
+				add_opinion = {
+					modifier = legalized_my_faith
+					years = 50
+					target = root
+				}
+			}
+		}
+	}
+}
+

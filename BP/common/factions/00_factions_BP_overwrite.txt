@@ -1,4 +1,225 @@
-﻿##### Changed from Vanilla: Made available to all govts except gubernatorial_government/bureaucratic_government
+﻿##### Changed from Vanilla: Added additional blocks to joining this faction
+independence_faction = {
+	casus_belli = independence_faction_war
+	
+	short_effect_desc = independence_faction_short_effect_desc
+
+	sort_order = 2
+
+	discontent_progress = {
+		base = 0
+
+		common_discontent_progress_modifier = yes
+	}
+
+	power_threshold = {
+		base = 80
+
+		modifier = {
+			add = 20
+			faction_target = {
+				has_perk = hard_rule_perk
+			}
+			desc = "FACTION_POWER_HARD_RULE"
+		}
+
+		dynamic_power_threshold_scripted_modifier = {
+			FACTION_TYPE1 = claimant_faction
+			FACTION_TYPE2 = liberty_faction
+			FACTION_TYPE3 = populist_faction
+		}
+	}	
+	
+	demand = {
+		save_scope_as = faction
+
+		faction_leader = {
+			save_scope_as = faction_leader
+		}
+
+		faction_target = {
+			save_scope_as = faction_target
+		}
+
+		# Let the human players in the faction know that the demand will be sent
+		every_faction_member = {
+			limit = {
+				is_ai = no
+				NOT = { this = scope:faction.faction_leader }
+			}
+			trigger_event = faction_demand.0005
+		}
+
+		# Send the actual demand in 5 days
+		faction_target = {
+			trigger_event = {
+				id = faction_demand.0001
+				days = 5
+			}
+		}
+	}
+
+	ai_demand_chance = {
+		base = 0
+
+		# 40% base chance at minimum power (80%), increasing linearly
+		compare_modifier = {
+			value = faction_power
+			multiplier = 0.5
+		}
+
+		# Once the faction has a good chance to win (10% stronger than liege) demand chance increases much more rapidly.
+		compare_modifier = {
+			trigger = {	faction_power > 110 }
+			value = faction_power
+			multiplier = 1
+		}
+
+		modifier = {
+			add = 100
+			faction_target = {
+				is_at_war = yes # Independence Factions are opportunistic bastards!
+			}
+		}
+	}
+
+	ai_create_score = {
+		base = -175 # Base reluctance value we must overcome to start an Independence Faction.
+
+		############
+		# BLOCKERS #
+		common_create_faction_blockers = {
+			FACTION_TARGET = scope:target
+			FLAG = recent_independence_faction_war
+		}
+
+		independence_faction_create_blockers  = {
+			FACTION_TARGET = scope:target
+		}
+
+		#######################
+		# Standard AI Weights #
+
+		common_faction_modifiers = {
+			FACTION_TARGET = scope:target
+			OPINION_MULTIPLIER = -0.4
+			MAX_OPINION = 100
+			POWER = 0
+			THRESHOLD = 80
+		}
+
+		independence_faction_modifiers = {
+			FACTION_TARGET = scope:target
+		}
+	}
+
+	ai_join_score = {
+		base = -150 # Base reluctance value we must overcome to join an Independence Faction.
+
+		############
+		# BLOCKERS #
+
+		common_join_faction_blockers = {
+			FACTION_TARGET = scope:faction.faction_target
+		}
+
+		#######################
+		# Standard AI Weights #
+
+		common_faction_modifiers = {
+			FACTION_TARGET = scope:faction.faction_target
+			OPINION_MULTIPLIER = -0.4
+			MAX_OPINION = 100
+			POWER = scope:faction.faction_power
+			THRESHOLD = scope:faction.faction_power_threshold
+		}
+
+		independence_faction_modifiers = {
+			FACTION_TARGET = scope:faction.faction_target
+		}
+
+		# Small multiplier for my neighbors already in the Faction
+		modifier = {
+			factor = {
+				value = 1
+		    	every_faction_member = {
+		    		if = {
+		    			limit = {
+			    			any_neighboring_realm_same_rank_owner = {
+			    				this = root
+			    			}
+						}
+		    			add = 0.25
+		    		}		
+		    	}
+	    	}
+	    }
+
+	    modifier = {
+	    	factor = 2
+			is_powerful_vassal_of = scope:faction.faction_target
+	    }
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_character_valid = {
+		common_character_validity_trigger = { FACTION_TARGET = scope:faction.faction_target }
+		character_is_valid_independence_faction_trigger = yes
+	}
+	##### Changed from Vanilla ^^^^^
+
+	##### Changed from Vanilla vvvvv
+	can_character_create = {
+		common_character_validity_trigger = {
+			FACTION_TARGET = scope:target
+		}
+
+		common_can_character_join_trigger = {
+			FACTION_TARGET = scope:target
+		}
+
+		common_can_character_create_trigger = {
+			FACTION_TARGET = scope:target
+		}
+		
+		liege = {
+			is_independent_ruler = yes
+		}
+
+	    OR = {
+	        is_ai = no
+	        NOT = { culture = scope:target.culture }
+	        NOT = { faith = scope:target.faith }
+	        NOT = {
+	            is_rightful_liege_of_trigger = {
+	                VASSAL = root
+	                LIEGE = scope:target
+	            }
+	        }
+	        any_sub_realm_county = {
+	            percent <= 0.5
+	            save_temporary_scope_as = current_county
+	            scope:target.primary_title = {
+	                any_in_de_jure_hierarchy = { this = scope:current_county }
+	            }
+	        }
+    	}
+		
+		character_is_valid_independence_faction_trigger = yes
+	}
+	##### Changed from Vanilla ^^^^^
+
+	##### Changed from Vanilla vvvvv
+	can_character_join = {
+		common_can_character_join_trigger = { FACTION_TARGET = scope:faction.faction_target }
+	}
+	##### Changed from Vanilla ^^^^^
+
+	county_allow_join = no
+	county_allow_create = no
+}
+
+##### Changed from Vanilla: Made available to all govts except gubernatorial_government/bureaucratic_government
 liberty_faction = {
 	casus_belli = liberty_faction_war
 

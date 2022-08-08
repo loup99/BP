@@ -1,0 +1,226 @@
+﻿#Mostly cribbed from task_integrate_title
+task_establish_title = {
+	position = councillor_chancellor
+	task_type = task_type_county
+	county_target = realm
+	task_progress = task_progress_value
+	task_current_value = scope:councillor_liege.chancellor_establish_title_current_progress
+
+	task_max_value = define:NTitle|DRIFT_PROGRESS_LIMIT
+
+	effect_desc = { desc = task_establish_title_effect_desc }
+
+	is_shown = {
+		liege = {
+			primary_title = { is_titular = yes }
+			highest_held_title_tier >= tier_kingdom
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		trigger_if = {
+			limit = { liege.primary_title.tier = tier_kingdom }
+			liege = { completely_controls = liege.capital_county.duchy }
+		}
+		trigger_if = {
+			limit = { liege.primary_title.tier = tier_empire }
+			liege = { completely_controls = liege.capital_county.kingdom }
+		}
+	}
+
+	on_finish_task_county = {
+		#Actually set up the results
+		if = {
+			limit = { scope:county.var:task_establish_title_target.tier = tier_kingdom }
+			scope:county.duchy = { set_de_jure_liege_title = scope:councillor_liege.primary_title }
+		}
+		if = {
+			limit = { scope:county.var:task_establish_title_target.tier = tier_empire }
+			scope:county.kingdom = { set_de_jure_liege_title = scope:councillor_liege.primary_title }
+		}
+		#Remove the variables
+		scope:county = {
+			remove_variable = task_establish_title_progress
+			remove_variable = task_establish_title_target
+		}
+		start_default_task = yes
+	}
+
+	potential_county = {
+		custom_description = {
+			text = only_valid_in_the_capital
+			scope:county = scope:councillor_liege.capital_county
+		}
+		trigger_if = {
+			limit = { scope:councillor_liege.primary_title.tier = tier_kingdom }
+			NOT = { scope:county.duchy.de_jure_liege = scope:councillor_liege.primary_title }
+		}
+		trigger_if = {
+			limit = { scope:councillor_liege.primary_title.tier = tier_empire }
+			NOT = { scope:county.kingdom.de_jure_liege = scope:councillor_liege.primary_title }
+		}
+	}
+
+	progress = {
+		value = 0
+		add = {
+			value = establish_title_base_value
+			desc = BASE_ESTABLISH_TITLE_PROGRESS_VALUE
+		}
+		add = {
+			value = scope:councillor.chancellor_establish_title_progress_gain
+			desc = SCALED_COUNCILLOR_DIPLOMACY_VALUE
+		}
+		# Relation Bonuses/Penalties
+		if = { # Friend
+			limit = {
+				scope:councillor_liege = {
+					has_relation_friend = scope:councillor
+					NOT = { has_relation_best_friend = scope:councillor }
+				}
+			}
+			add = {
+				value = scope:councillor.chancellor_establish_title_monthly_increase_friend_bonus
+				desc = COUNCILLOR_IS_YOUR_FRIEND
+			}
+		}
+		if = { # Best Friend
+			limit = { scope:councillor_liege = { has_relation_best_friend = scope:councillor } }
+			add = {
+				value = scope:councillor.chancellor_establish_title_monthly_increase_best_friend_bonus
+				desc = COUNCILLOR_IS_YOUR_BEST_FRIEND
+			}
+		}
+		if = { # Rival
+			limit = {
+				scope:councillor_liege = {
+					has_relation_rival = scope:councillor
+					NOT = { has_relation_nemesis = scope:councillor }
+				}
+			}
+			add = {
+				value = scope:councillor.chancellor_establish_title_monthly_increase_rival_bonus
+				desc = COUNCILLOR_IS_YOUR_RIVAL
+			}
+		}
+		if = { # Nemesis
+			limit = { scope:councillor_liege = { has_relation_nemesis = scope:councillor } }
+			add = {
+				value = scope:councillor.chancellor_establish_title_monthly_increase_nemesis_bonus
+				desc = COUNCILLOR_IS_YOUR_NEMESIS
+			}
+		}
+		if = {
+			limit = { councillor_liege_has_erudition_legacy_5_perk = yes }
+			add = {
+				value = scope:councillor.chancellor_establish_title_erudition_bonus
+				desc = INTEGRATE_TITLE_DYNASTY_PERK_BONUS_VALUE
+			}
+		}
+		if = {
+			limit = { councillor_liege_has_family_business_bonus = yes }
+			add = {
+				value = scope:councillor.chancellor_establish_title_family_business_bonus
+				desc = FAMILY_BUSINESS_BONUS_VALUE
+			}
+		}
+	}
+
+	on_cancel_task_county = { #Garbage Collect
+		scope:county = {
+			remove_variable = task_establish_title_progress
+			remove_variable = task_establish_title_target
+		}
+	}
+
+	on_start_task_county = {
+		#Garbage Collect
+		if = {
+			limit = { scope:county = { has_variable = task_establish_title_progress } }
+			remove_variable = task_establish_title_progress
+		}
+		if = {
+			limit = { scope:county = { has_variable = task_establish_title_target } }
+			remove_variable = task_establish_title_target
+		}
+		#And initialize the progress
+		scope:county = {
+			set_variable = {
+				name = task_establish_title_progress
+				value = establish_title_base_value
+			}
+			set_variable = {
+				name = task_establish_title_target
+				value = scope:councillor_liege.primary_title
+			}
+		}
+	}
+
+	on_monthly_county = {
+		scope:county = {
+			change_variable = {
+				name = task_establish_title_progress
+				add = establish_title_base_value
+			}
+			change_variable = {
+				name = task_establish_title_progress
+				add = scope:councillor.chancellor_establish_title_progress_gain
+			}
+			# Relation Bonuses/Penalties
+			if = { # Friend
+				limit = {
+					scope:councillor_liege = {
+						has_relation_friend = scope:councillor
+						NOT = { has_relation_best_friend = scope:councillor }
+					}
+				}
+				change_variable = {
+					name = task_establish_title_progress
+					add = scope:councillor.chancellor_establish_title_monthly_increase_friend_bonus
+				}
+			}
+			if = { # Best Friend
+				limit = { scope:councillor_liege = { has_relation_best_friend = scope:councillor } }
+				change_variable = {
+					name = task_establish_title_progress
+					add = scope:councillor.chancellor_establish_title_monthly_increase_best_friend_bonus
+				}
+			}
+			if = { # Rival
+				limit = {
+					scope:councillor_liege = {
+						has_relation_rival = scope:councillor
+						NOT = { has_relation_nemesis = scope:councillor }
+					}
+				}
+				change_variable = {
+					name = task_establish_title_progress
+					add = scope:councillor.chancellor_establish_title_monthly_increase_rival_bonus
+				}
+			}
+			if = { # Nemesis
+				limit = { scope:councillor_liege = { has_relation_nemesis = scope:councillor } }
+				change_variable = {
+					name = task_establish_title_progress
+					add = scope:councillor.chancellor_establish_title_monthly_increase_nemesis_bonus
+				}
+			}
+			if = { # Nemesis
+				limit = { councillor_liege_has_erudition_legacy_5_perk = yes }
+				change_variable = {
+					name = task_establish_title_progress
+					add = scope:councillor.chancellor_establish_title_erudition_bonus
+				}
+			}
+			if = { # Nemesis
+				limit = { councillor_liege_has_family_business_bonus = yes }
+				change_variable = {
+					name = task_establish_title_progress
+					add = scope:councillor.chancellor_establish_title_family_business_bonus
+				}
+			}
+		}
+	}
+
+	ai_will_do = { value = 10 } #AIs should want to do this
+}

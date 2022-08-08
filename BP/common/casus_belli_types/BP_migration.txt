@@ -15,8 +15,11 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 	allowed_for_character = { primary_title.tier >= tier_duchy }
 
 	allowed_for_character_display_regardless = {
-		prestige_level >= medium_prestige_level
-		NOT = { has_character_flag = launched_migration_war_recently }
+		prestige_level >= minor_migration_war_prestige_level
+		custom_description = {
+			text = has_launched_migration_war_recently
+			NOT = { has_character_flag = launched_migration_war_recently }
+		}
 	}
 	
 	allowed_against_character = {
@@ -32,6 +35,19 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 	target_title_tier = duchy
 	target_de_jure_regions_above = yes
 	ignore_effect = change_title_holder
+	
+	max_ai_diplo_distance_to_title = 250 #Roughly one Ireland away
+	
+	ai_score_mult = {
+		value = 1
+		# Prefer (strongly) to target non-tribal locations if they are at least non-tribal
+		add = {
+			every_in_list = {
+				list = target_titles
+				if = { limit = { minor_migration_constraints = yes } add = -1000 }
+			}
+		}
+	}
 
 	valid_to_start = {
 		scope:target = {
@@ -44,7 +60,10 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 
 	cost = { prestige = minor_migration_war_prestige_cost }
 	
-	on_declaration = { on_declared_war = yes }
+	on_declaration = {
+		on_declared_war = yes
+		hidden_effect = { scope:attacker = { update_number_of_migrations = yes } }
+	}
 	
 	should_invalidate = {
 		NOT = {
@@ -119,7 +138,10 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = minor_migration_wait_time
+		}
 	}
 
 	on_white_peace_desc = {
@@ -167,7 +189,10 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = minor_migration_wait_time
+		}
 	}
 
 	on_defeat_desc = {
@@ -226,7 +251,10 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = minor_migration_wait_time
+		}
 	}
 	
 	transfer_behavior = transfer
@@ -257,11 +285,14 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 	should_show_war_goal_subview = yes
 	mutually_exclusive_titles = { always = yes }
 
-	allowed_for_character = { primary_title.tier >= tier_duchy }
+	allowed_for_character = { primary_title.tier >= tier_kingdom }
 
 	allowed_for_character_display_regardless = {
-		prestige_level >= very_high_prestige_level
-		NOT = { has_character_flag = launched_migration_war_recently }
+		prestige_level >= minor_migration_war_kingdom_prestige_level
+		custom_description = {
+			text = has_launched_migration_war_recently
+			NOT = { has_character_flag = launched_migration_war_recently }
+		}
 	}
 	
 	allowed_against_character = {
@@ -277,6 +308,20 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 	target_title_tier = kingdom
 	target_de_jure_regions_above = yes
 	ignore_effect = change_title_holder
+	
+	max_ai_diplo_distance_to_title = 250 #Roughly one Ireland away
+	
+	ai_score_mult = {
+		value = 1
+		# Prefer (strongly) to target non-tribal locations if they are at least non-tribal
+		add = {
+			every_in_list = {
+				list = target_titles
+				if = { limit = { minor_migration_constraints = yes } add = -1000 }
+			}
+		}
+	}
+
 
 	valid_to_start = {
 		scope:target = {
@@ -289,7 +334,10 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 
 	cost = { prestige = minor_migration_war_kingdom_prestige_cost }
 
-	on_declaration = { on_declared_war = yes }
+	on_declaration = {
+		on_declared_war = yes
+		hidden_effect = { scope:attacker = { update_number_of_migrations = yes } }
+	}
 	
 	should_invalidate = {
 		NOT = {
@@ -364,7 +412,10 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = minor_migration_kingdom_wait_time
+		}
 	}
 
 	on_white_peace_desc = {
@@ -412,7 +463,10 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = minor_migration_kingdom_wait_time
+		}
 	}
 
 	on_defeat_desc = {
@@ -471,7 +525,10 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = minor_migration_kingdom_wait_time
+		}
 	}
 	
 	transfer_behavior = transfer
@@ -505,8 +562,11 @@ major_migration_war = {
 	}
 
 	allowed_for_character_display_regardless = {
-		prestige_level >= very_high_prestige_level
-		NOT = { has_character_flag = launched_migration_war_recently }
+		prestige_level >= major_migration_prestige_level
+		custom_description = {
+			text = has_launched_migration_war_recently
+			NOT = { has_character_flag = launched_migration_war_recently }
+		}
 	}
 	
 	allowed_against_character = {
@@ -522,6 +582,19 @@ major_migration_war = {
 	target_title_tier = kingdom
 	target_de_jure_regions_above = yes
 	ignore_effect = change_title_holder
+	
+	max_ai_diplo_distance_to_title = 250 #Roughly one Ireland away
+	
+	ai_score_mult = {
+		value = 1
+		# Prefer (strongly) to target non-tribal locations if they are at least non-tribal
+		add = {
+			every_in_list = {
+				list = target_titles
+				if = { limit = { general_migration_constraints = yes } add = -1000 }
+			}
+		}
+	}
 
 	valid_to_start = {
 		scope:target = {
@@ -544,6 +617,7 @@ major_migration_war = {
 		add_attackers_and_liberate_non_particpants = yes
 		hidden_effect = { scope:attacker = { spawn_armies_from_development = { ATTACKER = scope:attacker } } }
 		custom_description = { text = text_some_vassals_may_join }
+		hidden_effect = { scope:attacker = { update_number_of_migrations = yes } }
 	}
 	
 	should_invalidate = {
@@ -613,7 +687,10 @@ major_migration_war = {
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = major_migration_wait_time
+		}
 	}
 	
 	on_white_peace_desc = {
@@ -688,7 +765,10 @@ major_migration_war = {
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = major_migration_wait_time
+		}
 	}
 	
 	on_defeat_desc = {
@@ -774,7 +854,10 @@ major_migration_war = {
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		add_migration_flag = { ATTACKER = scope:attacker }
+		add_migration_flag = {
+			ATTACKER = scope:attacker
+			YEARS = major_migration_wait_time
+		}
 	}
 	
 	transfer_behavior = transfer

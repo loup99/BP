@@ -28,6 +28,7 @@ bp_game_start = {
 		set_autocephalous_church_flags
 		convert_christian_chars_to_rites
 		set_ethnic_religion_flags
+		other_religion_effects
 		#Family Stuff
 		set_dead_dynasty_renown
 	}
@@ -37,6 +38,10 @@ bp_game_start_after_lobby = {
 	on_actions = {
 		# Culture stuff
 		set_starting_culture_acceptance
+		#Other Events
+		trigger_needed_events
+		#Set Global Variables
+		set_global_variables
 	}
 }
 
@@ -208,8 +213,8 @@ setup_realm_laws = {
 					remove_variable = eranshar_authority_cooldown
 				}
 				if = {
-					limit = { NOT = { has_realm_law = clerical_influence_2 } }
-					add_realm_law = clerical_influence_2
+					limit = { NOT = { has_realm_law = clerical_influence_1 } }
+					add_realm_law = clerical_influence_1
 					remove_variable = clerical_influence_cooldown
 				}
 			}
@@ -225,18 +230,43 @@ setup_realm_and_title_succession_laws = {
 		every_ruler = { #Cultures/Religions with male_only_law effects
 			limit = {
 				OR = {
-					has_culture = culture:frankish
+					culture = { has_cultural_parameter = male_only_inheritance }
 					has_religion = religion:islam_religion
 				}
+				NOT = { has_realm_law = male_only_law }
 			}
 			add_realm_law_skip_effects = male_only_law
 		}
 		every_ruler = { #Cultures/Religions with female_preference_law effects
-			limit = { has_culture = culture:astures }
-			if = {
-				limit = { NOT = { has_realm_law = female_preference_law } }
-				add_realm_law_skip_effects = female_preference_law
+			limit = {
+				culture = {
+					has_cultural_parameter = female_only_inheritance
+					has_cultural_parameter = not_male_succession
+				}
+				NOT = { has_realm_law = female_preference_law }
 			}
+			add_realm_law_skip_effects = female_preference_law
+		}
+		every_ruler = { #Confederate Partition
+			limit = {
+				culture = { has_cultural_parameter = gender_equal_inheritance }
+				NOT = { has_realm_law = equal_law }
+			}
+			add_realm_law_skip_effects = equal_law
+		}
+		every_ruler = { #High Partition
+			limit = {
+				culture = { has_cultural_parameter = can_enact_high_partition_succession_law }
+				NOT = { has_realm_law = high_partition_succession_law }
+			}
+			add_realm_law_skip_effects = high_partition_succession_law
+		}
+		every_ruler = { #Equal Succession
+			limit = {
+				culture = { has_cultural_parameter = must_use_confederate_partition }
+				NOT = { has_realm_law = confederate_partition_succession_law }
+			}
+			add_realm_law_skip_effects = confederate_partition_succession_law
 		}
 		
 		### Governments
@@ -259,6 +289,19 @@ setup_realm_and_title_succession_laws = {
 			if = {
 				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
 				add_realm_law_skip_effects = single_heir_dynasty_house
+			}
+		}
+		
+		### Other Special Cases
+		every_ruler = { #The Senate should be male-only republic succession
+			limit = { has_title = title:d_senate }
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
+			if = {
+				limit = { NOT = { has_realm_law = city_succession_law } }
+				add_realm_law_skip_effects = city_succession_law
 			}
 		}
 		
@@ -554,7 +597,7 @@ setup_realm_and_title_succession_laws = {
 			add_realm_law_skip_effects = single_heir_dynasty_house
 		}
 		### Specific History Overwrites
-		if = {
+		if = { #Visigoths adopt elective
 			limit = { current_date >= 531.1.1 }
 			title:k_visigoths = { add_title_law = feudal_elective_succession_law }
 		}
@@ -852,6 +895,13 @@ setup_vassal_contracts = {
 					level = 1
 				}
 			}
+			if = { #Salihids are always foederati
+				limit = { primary_title = title:k_salihid }
+				vassal_contract_set_obligation_level = {
+					type = foederatus_special_contract
+					level = 1
+				}
+			}
 			if = { #Sarir is always a Byzantine Tributary
 				limit = { primary_title = title:k_sarir }
 				vassal_contract_set_obligation_level = {
@@ -977,10 +1027,63 @@ other_title_effects = {
 			this = { set_variable = unrevokable }
 		}
 		#Capital changes for specific time periods
-		if = {
-			limit = { current_date <= 493.2.25 } #Odoacer's death/Theodoric's conquest of Italy
+		if = { #Odoacer's death/Theodoric's conquest of Italy
+			limit = { current_date <= 493.2.25 }
 			title:k_ostrogoths.holder = { set_realm_capital = title:c_szerem } #Most fitting capital
 		}
+		if = { #Songtsen Gampo builds Lhasa
+			limit = { current_date < 637.1.1 }
+			title:k_yarlung.holder = { set_realm_capital = title:c_zetang }
+		}
+		#Make some titular titles align with specific lieges
+		if = {
+			limit = { current_date = 476.2.2 }
+			#k_armenia
+			title:d_gugark = { set_de_jure_liege_title = title:k_armenia }
+			title:d_gardman = { set_de_jure_liege_title = title:k_armenia }
+			title:d_tayk = { set_de_jure_liege_title = title:k_armenia }
+			#e_peria
+			title:d_gortyene = { set_de_jure_liege_title = title:k_asoristan }
+			title:d_kwrtstan = { set_de_jure_liege_title = title:k_persia }
+			title:d_exilarch = { set_de_jure_liege_title = title:k_asoristan }
+			title:k_mazandaran = { set_de_jure_liege_title = title:e_persia }
+		}
+		#Put specific kingdoms within specific empires where it makes sense
+		if = {
+			limit = { current_date = 476.2.2 }
+			#Britannia
+			title:k_rheged = { set_de_jure_liege_title = title:e_britannia }
+			#African
+			title:k_abyssinia = { set_de_jure_liege_title = title:e_axum }
+			#Persia
+			title:k_mazandaran = { set_de_jure_liege_title = title:e_persia }
+		}
+		#Before the Fall of Rome, k_annonaria title should be under the WRE (to give Romulus *some* hope)
+		#and to enable de jure drift
+		if = {
+			limit = { current_date < 476.9.4 }
+			title:k_annonaria = { set_de_jure_liege_title = title:e_wre }
+		}
+		#Note specific kingdoms that are cultural titles
+		
+		#Goths
+		title:k_visigoths = { set_variable = { name = title_culture value = culture:visigothic } }
+		title:k_ostrogoths = { set_variable = { name = title_culture value = culture:ostrogothic } }
+		#Other Germans
+		title:k_vandalica = { set_variable = { name = title_culture value = culture:vandalic } }
+		title:k_suebia = { set_variable = { name = title_culture value = culture:suebi } }
+		title:k_burgundians = { set_variable = { name = title_culture value = culture:burgundian } }
+		title:k_alamannia = { set_variable = { name = title_culture value = culture:alamannian } }
+		title:k_gepidia = { set_variable = { name = title_culture value = culture:gepid } }
+		title:k_herul = { set_variable = { name = title_culture value = culture:heruli } }
+		title:k_rugiland = { set_variable = { name = title_culture value = culture:rygir } }
+		title:k_thuringia = { set_variable = { name = title_culture value = culture:thuringian } }
+		title:k_geatland = { set_variable = { name = title_culture value = culture:geatish } }
+		title:k_saxony = { set_variable = { name = title_culture value = culture:old_saxon } }
+		#Turco-Mongol-Magyar
+		title:k_chuban = { set_variable = { name = title_culture value = culture:xiongnu } }
+		title:k_tuyuhun = { set_variable = { name = title_culture value = culture:tuyuhun } }
+		title:k_magyar = { set_variable = { name = title_culture value = culture:mogyer } }
 	}
 }
 
@@ -1074,6 +1177,8 @@ convert_christian_chars_to_rites = {
 			OLD_RITE = miaphysitism
 			NEW_RITE = ethiopian_orthodox
 		}
+		#Handle edge cases:
+		character:109769 = { set_character_faith_history = faith:nicene } #Make Erikos the Massalian Nicene
 	}
 }
 set_autocephalous_church_flags = {
@@ -1093,6 +1198,7 @@ set_ethnic_religion_flags = {
 		faith:bathouism = { set_variable = { name = ethnic_religion_culture value = culture:kachari } }
 		faith:munda_pagan = { set_variable = { name = ethnic_religion_culture value = culture:munda } }
 		#Other Pagans
+		faith:magyar_pagan = { set_variable = { name = ethnic_religion_culture value = culture:mogyer } }
 		faith:hepthalitism = { set_variable = { name = ethnic_religion_culture value = culture:hunas } }
 		faith:illyrian_pagan = { set_variable = { name = ethnic_religion_culture value = culture:illyrian } }
 		faith:mandeaism = { set_variable = { name = ethnic_religion_culture value = culture:aramean } }
@@ -1102,6 +1208,14 @@ set_ethnic_religion_flags = {
 		#Hindus
 		faith:kalashism = { set_variable = { name = ethnic_religion_culture value = culture:kalash } }
 		faith:nuristanism = { set_variable = { name = ethnic_religion_culture value = culture:nuristani } }
+	}
+}
+other_religion_effects = {
+	effect = {
+		if = { #Treaty of Nvarsak
+			limit = { current_date >= 484.1.1 }
+			legalize_caucasian_christianity_global_effects = yes
+		}
 	}
 }
 
@@ -1121,117 +1235,218 @@ set_dead_dynasty_renown = {
 set_starting_culture_acceptance = {
 	effect = {
 		#Will help keep popular revolts suppressed for a while
+		#Target Value: >=+0.00 without going below
+		#Mostly done for top level cultures, plus a few others
 		
 		if = { #476 Acceptance
 			limit = { current_date <= 476.2.2 }
-			#Sassanid Persia: 50% acceptance
+			#Persian Empire
 			culture:persian = {
 				set_cultural_acceptance = {
-					target = culture:aramean
-					value = 50
+					target = culture:parthian
+					value = 100
 				}
 				set_cultural_acceptance = {
-					target = culture:assyrian
-					value = 50
+					target = culture:bactrian
+					value = 100
 				}
 				set_cultural_acceptance = {
-					target = culture:adhari
-					value = 50
-				}
-				set_cultural_acceptance = {
-					target = culture:cyrtian
-					value = 50
-				}
-				set_cultural_acceptance = {
-					target = culture:daylamite
-					value = 50
+					target = culture:indo_parthian
+					value = 90
 				}
 				set_cultural_acceptance = {
 					target = culture:amardian
-					value = 50
-				}
-			}
-			#Byzantines: 40% for admixed cultures, excluding Anatolians, Tsakonians, Hebrews, Persians
-			#Nabateans (30%), Copts (30%), Khalans (30%)
-			culture:greek = {
-				#Shared Heritage in ERE: 50% Group
-				set_cultural_acceptance = {
-					target = culture:helleno_aramean
-					value = 50
+					value = 83
 				}
 				set_cultural_acceptance = {
-					target = culture:helleno_libyan
-					value = 50
+					target = culture:median
+					value = 72
 				}
 				set_cultural_acceptance = {
-					target = culture:helleno_coptic
-					value = 50
+					target = culture:cyrtian
+					value = 60
 				}
 				set_cultural_acceptance = {
-					target = culture:pontic
-					value = 50
+					target = culture:caucasian_albanian
+					value = 60
 				}
 				set_cultural_acceptance = {
-					target = culture:aeolian
-					value = 50
-				}
-				#Present in ERE: 40% Group
-				set_cultural_acceptance = {
-					target = culture:illyrian
-					value = 40
+					target = culture:daylamite
+					value = 57
 				}
 				set_cultural_acceptance = {
-					target = culture:thracian
-					value = 40
+					target = culture:adnanite
+					value = 48
 				}
 				set_cultural_acceptance = {
-					target = culture:romano_thracian
-					value = 40
+					target = culture:aramean
+					value = 47
 				}
 				set_cultural_acceptance = {
-					target = culture:phrygian
-					value = 40
+					target = culture:corduenian
+					value = 42
 				}
 				set_cultural_acceptance = {
-					target = culture:galatian
-					value = 40
+					target = culture:georgian
+					value = 42
 				}
 				set_cultural_acceptance = {
 					target = culture:armenian
-					value = 40
+					value = 35
 				}
 				set_cultural_acceptance = {
-					target = culture:romano_aramean
-					value = 40
+					target = culture:adhari
+					value = 35
 				}
-				#Present in ERE: 30% group
 				set_cultural_acceptance = {
-					target = culture:nabatean
-					value = 30
+					target = culture:afghan
+					value = 31
 				}
 				set_cultural_acceptance = {
 					target = culture:khalan
-					value = 30
+					value = 29
 				}
 				set_cultural_acceptance = {
-					target = culture:coptic
-					value = 30
-				}
-				#Present in ERE: 20% group
-				set_cultural_acceptance = {
-					target = culture:aramean
-					value = 20
+					target = culture:romano_aramean
+					value = 24
 				}
 				set_cultural_acceptance = {
 					target = culture:assyrian
-					value = 20
-				}
-				#Shared Heritage in ERE: 20% Group
-				set_cultural_acceptance = {
-					target = culture:tsakonian
-					value = 20
+					value = 17
 				}
 			}
+			#ERE
+			culture:greek = {
+				set_cultural_acceptance = {
+					target = culture:aeolian
+					value = 100
+				}
+				set_cultural_acceptance = {
+					target = culture:helleno_thracian
+					value = 100
+				}
+				set_cultural_acceptance = {
+					target = culture:phrygian
+					value = 92
+				}
+				set_cultural_acceptance = {
+					target = culture:pontic
+					value = 90
+				}
+				set_cultural_acceptance = {
+					target = culture:illyrian
+					value = 88
+				}
+				set_cultural_acceptance = {
+					target = culture:macronian
+					value = 84
+				}
+				set_cultural_acceptance = {
+					target = culture:cappadocian
+					value = 80
+				}
+				set_cultural_acceptance = {
+					target = culture:helleno_aramean
+					value = 79
+				}
+				set_cultural_acceptance = {
+					target = culture:armenian
+					value = 77
+				}
+				set_cultural_acceptance = {
+					target = culture:thracian
+					value = 73
+				}
+				set_cultural_acceptance = {
+					target = culture:helleno_coptic
+					value = 72
+				}
+				set_cultural_acceptance = {
+					target = culture:tsakonian
+					value = 71
+				}
+				set_cultural_acceptance = {
+					target = culture:galatian
+					value = 73
+				}
+				set_cultural_acceptance = {
+					target = culture:romano_thracian
+					value = 70
+				}
+				set_cultural_acceptance = {
+					target = culture:helleno_libyan
+					value = 64
+				}
+				set_cultural_acceptance = {
+					target = culture:khalan
+					value = 62
+				}
+				set_cultural_acceptance = {
+					target = culture:nabatean
+					value = 60
+				}
+				set_cultural_acceptance = {
+					target = culture:isaurian
+					value = 40
+				}
+				set_cultural_acceptance = {
+					target = culture:romano_illyrian
+					value = 40
+				}
+				set_cultural_acceptance = {
+					target = culture:adnanite
+					value = 36
+				}
+				set_cultural_acceptance = {
+					target = culture:romano_aramean
+					value = 23
+				}
+				set_cultural_acceptance = {
+					target = culture:aramean
+					value = 23
+				}
+				set_cultural_acceptance = {
+					target = culture:persian
+					value = 23
+				}
+				set_cultural_acceptance = {
+					target = culture:coptic
+					value = 15
+				}
+			}
+		}
+	}
+}
+
+trigger_needed_events = {
+	effect = {
+		#Inform all the players
+		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
+	}
+}
+
+set_global_variables = {
+	#Historically unset variables: rome_restored
+	effect = {
+		if = { #The Fall of Rome
+			limit = { current_date >= 476.9.4 }
+			set_global_variable = fall_of_rome
+		}
+		if = { #Clovis ascends the throne
+			limit = { current_date >= 482.1.1 }
+			set_global_variable = formed_frankish_kingdom
+		}
+		if = { #Treaty of Nvarsak
+			limit = { current_date >= 484.1.1 }
+			set_global_variable = persia_legalizes_caucasian_christianity
+		}
+		if = { #Vachagan III re-establishes Albania as a kingdom
+			limit = { current_date >= 485.1.1 }
+			set_global_variable = reestablished_albania
+		}
+		if = { #Justinian Ascends the Throne (enabling reconquests)
+			limit = { current_date >= 527.4.1 }
+			set_global_variable = sole_roman_empire
 		}
 	}
 }

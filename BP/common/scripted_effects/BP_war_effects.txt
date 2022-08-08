@@ -37,7 +37,7 @@ create_odoacer_army = {
 		}
 		location = province:2497 #Mantua
 		war = scope:war
-		war_keep_on_attacker_victory = yes #Otherwise Italy is toast in like 5 years
+		war_keep_on_attacker_victory = $KEEP_AFTER_VICTORY$ #Otherwise Italy is toast in like 5 years
 		inheritable = no #But his son doesn't get to keep them
 	}
 }
@@ -143,6 +143,15 @@ unification_cb_title_management = {
 }
 
 ### General Migration CB Code
+
+#Scopes to character
+update_number_of_migrations = {
+	if = {
+		limit = { has_variable = number_of_migrations_attempted }
+		change_variable = { name = number_of_migrations_attempted add = 1 }
+	}
+	else = { set_variable = { name = number_of_migrations_attempted value = 1 } }
+}
 
 #Migration CB Title Shenanigans
 migration_cb_title_management = {
@@ -265,6 +274,16 @@ migration_cb_title_management = {
 	resolve_title_and_vassal_change = scope:change_titles_taken
 	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars
 	resolve_title_and_vassal_change = scope:change_vassal_status
+	#Prevent title bootstrapping
+	every_in_list = {
+		list = attackers_counties
+		this.holder = {
+			boostrap_prevention_effect = {
+				THE_COUNTY = this.capital_county
+				THE_PREVIOUS_HOLDER = $ATTACKER$
+			}
+		}
+	}
 	#Apply county effects
 	hidden_effect = { #apply county modifiers to new counties
 		#text = "minor_migration_apply_modifiers_to_new_counties"
@@ -349,12 +368,8 @@ improve_government_form = {
 		limit = { 
 			$DEFENDER$ = {
 				OR = {
-					has_government = subroman_government
-					has_government = eranshar_government
-					has_government = gupta_government
-					has_government = gubernatorial_government
-					has_government = bureaucratic_government
-					has_government = feudal_government
+					has_a_feudal_type_of_government_trigger = yes
+					has_advanced_government_trigger = yes
 				}
 			}
 		}
@@ -366,7 +381,7 @@ add_migration_flag = {
 	$ATTACKER$ = {
 		add_character_flag = {
 			flag = launched_migration_war_recently
-			years = 10
+			years = $YEARS$
 		}
 	}
 }
@@ -602,6 +617,16 @@ major_migration_cb_title_management = {
 			take_baronies = yes
 		}
 		scope:new_char = { becomes_independent = { change = scope:change_vassal_status } }
+	}
+	#Prevent title bootstrapping
+	every_in_list = {
+		list = former_counties
+		this.holder = {
+			boostrap_prevention_effect = {
+				THE_COUNTY = this.capital_county
+				THE_PREVIOUS_HOLDER = $ATTACKER$
+			}
+		}
 	}
 	resolve_title_and_vassal_change = scope:change_titles_taken
 	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars

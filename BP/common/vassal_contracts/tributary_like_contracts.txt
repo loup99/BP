@@ -1,4 +1,7 @@
-﻿#Free's itself on death of liege
+﻿@ai_standard_liege_desire = 2
+@ai_standard_vassal_desire = 1
+
+#Free's itself on death of liege
 tributary_special_contract = {
 	display_mode = radiobutton
 	is_shown = { scope:vassal = { vassal_contract_has_flag = tributary_installed_flag } }
@@ -7,12 +10,19 @@ tributary_special_contract = {
 			default = yes
 			position = { 0 0 }
 			
-			ai_liege_desire = {}
-			ai_vassal_desire = {}
+			ai_liege_desire = 0 
+			ai_vassal_desire = 10 #FREEDOM!
 		}
 		tributary_installed = {
 			parent = tributary_released
 			position = { 1 0 }
+			
+			is_valid = {
+				NOR = {
+					scope:vassal = { vassal_contract_has_flag = tributary_state_installed_flag }
+					scope:vassal = { vassal_contract_has_flag = foederatus_contract_installed }
+				}
+			}
 			
 			min_tax = 0.50
 			levies_factor = -1.00
@@ -25,8 +35,8 @@ tributary_special_contract = {
 			flag = tributary_installed_flag
 			flag = vassal_cant_modify_this_contract
 			
-			ai_liege_desire = {}
-			ai_vassal_desire = {}
+			ai_liege_desire = 10
+			ai_vassal_desire = 0
 		}
 	}
 }
@@ -40,12 +50,19 @@ tributary_state_special_contract = {
 			default = yes
 			position = { 0 0 }
 			
-			ai_liege_desire = {}
-			ai_vassal_desire = {}
+			ai_liege_desire = 0
+			ai_vassal_desire = 10 #FREEDOM!
 		}
 		tributary_state_installed = {
 			parent = tributary_state_released
 			position = { 1 0 }
+			
+			is_valid = {
+				NOR = {
+					scope:vassal = { vassal_contract_has_flag = tributary_installed_flag }
+					scope:vassal = { vassal_contract_has_flag = foederatus_contract_installed }
+				}
+			}
 			
 			min_tax = 0.50
 			
@@ -57,8 +74,8 @@ tributary_state_special_contract = {
 			flag = tributary_state_installed_flag
 			flag = vassal_cant_modify_this_contract
 			
-			ai_liege_desire = {}
-			ai_vassal_desire = {}
+			ai_liege_desire = 10
+			ai_vassal_desire = 0
 		}
 	}
 }
@@ -76,11 +93,23 @@ foederatus_special_contract = {
 			default = yes
 			position = { 0 0 }
 			
-			ai_liege_desire = {}
-			ai_vassal_desire = {}
+			ai_liege_desire = 0
+			ai_vassal_desire = { #Only wants to break free if strong enough to overpower the liege
+				value = 0
+				if = {
+					limit = { scope:vassal.max_military_strength > scope:liege.max_military_strength }
+					add = @ai_standard_vassal_desire
+				}
+			}
 		}
 		foederatus_installed = {
-			is_valid = { scope:vassal = { valid_government_foederatus_special_trigger = yes } }
+			is_valid = {
+				scope:vassal = { valid_government_foederatus_special_trigger = yes }
+				NOR = {
+					scope:vassal = { vassal_contract_has_flag = tributary_installed_flag }
+					scope:vassal = { vassal_contract_has_flag = tributary_state_installed_flag }
+				}
+			}
 			parent = foederatus_none
 			position = { 1 0 }
 			
@@ -102,8 +131,8 @@ foederatus_special_contract = {
 			flag = foederatus_contract_installed
 			flag = vassal_cant_modify_this_contract
 			
-			ai_liege_desire = {}
-			ai_vassal_desire = {}
+			ai_liege_desire = 1
+			ai_vassal_desire = 0
 		}
 	}
 }

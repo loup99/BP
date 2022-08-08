@@ -350,3 +350,288 @@ offer_foederatus_interaction = {
 		}
 	}
 }
+
+##### TODO (Beta): Convert request_foederatus_interaction to an actual negotiation
+request_foederatus_interaction = {
+	category = interaction_category_vassal
+	desc = request_foederatus_interaction_desc
+
+	is_shown = {
+		scope:recipient = {
+			NOT = { this = scope:actor }
+			culture = { has_innovation = innovation_foederati }
+		}
+		scope:actor = { valid_government_foederatus_special_trigger = yes }
+		scope:actor.highest_held_title_tier < scope:recipient.highest_held_title_tier
+		scope:actor.liege = scope:actor
+		scope:recipient = {
+			liege = this
+			is_landed = yes
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			is_imprisoned = no
+			is_at_war = no
+		}
+		scope:recipient = {
+			custom_description = {
+				text = "offer_fealty_neighboring_condition"
+				subject = scope:recipient
+				OR = {
+					any_neighboring_and_across_water_top_liege_realm_owner = { this = scope:actor }
+					any_held_title = {
+						is_de_jure_liege_or_above_target = scope:actor.capital_barony
+					}
+				}
+			}
+		}
+	}
+
+	greeting = positive
+	notification_text = OFFER_FEALTY_INTERACTION_NOTIFICATION
+	
+	ai_min_reply_days = 5
+	ai_max_reply_days = 10
+
+	ai_accept = {
+		base = 50
+		#MAIN
+		#Heretic/Infidel modifier.
+		#Tier difference modifier.
+		#Dejure modifier.
+		#Distant/Remote Realm modifier.
+
+		#MINOR
+		#Rivalry modifier.
+		#Same Dynasty modifier.
+		#Cultural/Cultural Group modifiers.
+		#Claimant modifier.
+
+		#OPINION SCALES
+		#Personality modifier.
+		#Compare Opinion modifier.
+		#MAIN
+		modifier = { #Different faith, no pluralism.
+			desc = offer_vassalization_interaction_aibehavior_differentfaith_tt
+			trigger = {
+				scope:actor = {
+					NOR = { #Of two different faiths AND the potential vassal's faith is not pluralistic.
+						faith = scope:recipient.faith
+						faith = { has_doctrine = doctrine_pluralism_pluralistic }
+					}
+				}
+			}
+			add = {
+				value = -25
+				if = {
+					limit = {
+						scope:actor.faith = {
+							faith_hostility_level = {
+								target = scope:recipient.faith
+								value >= faith_hostile_level
+							}
+						}
+					}
+					add = -10
+				}
+				if = {
+					limit = {
+						scope:actor.faith = {
+							faith_hostility_level = {
+								target = scope:recipient.faith
+								value >= faith_evil_level
+							}
+						}
+					}
+					add = -25
+				}
+			}
+		}
+
+		modifier = { #I am a King!
+			desc = offer_fealty_interaction_aibehavior_amkingtier_tt
+			trigger = {
+				scope:actor = { highest_held_title_tier = tier_kingdom }
+			}
+			add = -10
+		}
+		modifier = { #Wide difference in rank
+			desc = offer_vassalization_interaction_aibehavior_widetitletier_tt
+			trigger = {
+				scope:actor = {
+					tier_difference = {
+						target = scope:recipient
+						value > 1
+					}
+				}
+			}
+			add = 20
+		}
+		modifier = { # They are my Rightful Liege
+			desc = offer_vassalization_interaction_aibehavior_rightfulvassaltitleholder_tt
+			trigger = {
+				is_rightful_liege_of_trigger = {
+					VASSAL = scope:actor
+					LIEGE = scope:recipient
+				}
+			}
+			add = 25
+		}
+		modifier = { #Distant Realm.
+			desc = offer_vassalization_interaction_aibehavior_distantrealm_tt
+			trigger = {
+				scope:actor = {
+					NOT = {
+						any_neighboring_top_liege_realm_owner = { this = scope:recipient }
+					}
+				}
+				scope:actor.capital_province = { squared_distance = { target = scope:recipient.capital_province value < 200000 } }
+			}
+			add = -15
+		}
+		modifier = { #Remote Realm.
+			desc = offer_vassalization_interaction_aibehavior_remoterealm_tt
+			trigger = {
+				scope:actor = {
+					NOT = {
+						any_neighboring_top_liege_realm_owner = { this = scope:recipient }
+					}
+				}
+				scope:actor.capital_province = { squared_distance = { target = scope:recipient.capital_province value >= 200000 } }
+			}
+			add = -25
+		}
+
+		#MINOR
+		modifier = { #Rivalry modifier.
+			desc = offer_vassalization_interaction_aibehavior_rival_tt
+			trigger = {
+				scope:recipient = {
+					has_relation_rival = scope:actor
+					NOT = { has_relation_nemesis = scope:actor }
+				}
+			}
+			add = -10
+		}
+		modifier = { #Nemesis modifier.
+			desc = offer_vassalization_interaction_aibehavior_nemesis_tt
+			trigger = {
+				scope:recipient = {
+					has_relation_nemesis = scope:actor
+				}
+			}
+			add = -30
+		}
+		modifier = { #Same Dynasty modifier.
+			desc = offer_vassalization_interaction_aibehavior_dynasty_tt
+			trigger = {
+				scope:recipient = {
+					dynasty = scope:actor.dynasty
+				}
+			}
+			add = 10
+		}
+		
+		modifier = { # Cultural Acceptance
+			add = -5
+			desc = cultural_acceptance_interaction_reason
+			trigger = {
+				scope:actor = {
+					NOT = { has_same_culture_as = scope:recipient }
+					culture = {
+						cultural_acceptance = { target = scope:recipient.culture value < 50 }
+					}
+				}
+			}
+		}
+		
+		modifier = { # Same language
+			add = 5
+			desc = speaks_same_language_interaction_reason
+			trigger = {
+				scope:actor = {
+					knows_language_of_culture = scope:recipient.culture
+				}
+			}
+		}
+
+		modifier = { #Claimant modifier.
+			desc = offer_vassalization_interaction_aibehavior_claimant_tt
+			trigger = {
+				scope:actor.primary_title = {
+					scope:recipient = {
+						has_claim_on = prev
+					}
+				}
+			}
+			add = -15
+		}
+
+		#PERSONALITY
+		ai_value_modifier = {
+			ai_greed = 0.75
+			min = 0
+		}
+
+		#OPINION INFLUENCE
+		opinion_modifier = { #Compare Opinion modifier.
+			who = scope:recipient
+			opinion_target = scope:actor
+			multiplier = 0.5
+		}
+
+		#Historical Religion Values
+		modifier = { #Historically inclined foederatus groups
+			desc = request_foederatus_historical_foederatus
+			
+			trigger = {
+				OR = {
+					scope:actor.faith.religion = religion:germanic_religion
+					scope:actor.faith.religion = religion:slavic_religion
+					scope:actor.faith.religion = religion:tengrism_religion
+					scope:actor.faith.religion = religion:semitic_religion
+					scope:actor.faith = faith:arian
+				}
+			}
+			
+			add = 30
+		}
+	}
+
+	#send_options_exclusive = yes
+
+	on_accept = {
+		create_title_and_vassal_change = {
+			type = swear_fealty
+			save_scope_as = change
+		}
+		scope:actor = {
+			change_liege = {
+				liege = scope:recipient
+				change = scope:change
+			}
+			
+			stress_impact = {
+				ambitious = medium_stress_impact_gain
+				arrogant = medium_stress_impact_gain
+			}
+		}
+		resolve_title_and_vassal_change = scope:change
+		scope:actor = {
+			hidden_effect = {
+				if = {
+					limit = { is_independent_ruler = no }
+					vassal_contract_set_obligation_level = { type = foederatus_special_contract level = 1 }
+				}
+			}
+		}
+		
+		scope:actor = { trigger_event = BP_char_interaction.0003 }
+	}
+
+	on_decline = {
+		scope:actor = { trigger_event = BP_char_interaction.0004 }
+	}
+}

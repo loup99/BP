@@ -1,7 +1,11 @@
-﻿on_death = {
+﻿# character just about to die in root scope
+# if a killer is know, it's set as scope:killer
+#Triggered by code
+on_death = {
 	on_actions = {
 		bp_release_tributaries
 		bp_return_gubernatorial_duchies_and_kingdoms_to_liege
+		bp_shatter_tribal_peoples_without_leges_barbarorum
 	}
 }
 
@@ -42,18 +46,24 @@ bp_return_gubernatorial_duchies_and_kingdoms_to_liege = {
 						limit = { this = { is_titular = yes } }
 						always = no
 					}
-					#Non-Titular Kingdoms always go up
+					#Non-Titular Duchies/Kingdoms shouldn't be sent upwards if you properly control them
 					trigger_else_if = {
 						limit = {
-							this.tier = tier_kingdom
-							is_titular = no
+							OR = {
+								this.tier = tier_kingdom
+								this.tier = tier_duchy
+							}
+							NOT = {
+								#You must completely control the capital (duh)
+								root = { completely_controls = prev.title_capital_county }
+								#The title's capital should be de jure under your primary title OR be your capital
+								OR = {
+									this.title_capital_county = { is_de_jure_liege_or_above_target = root.primary_title }
+									this.title_capital_county = root.capital_county
+								}
+							}
 						}
 						always = yes
-					}
-					#Duchies shouldn't be sent upwards if it contains the capital
-					trigger_else_if = {
-						limit = { this.tier = tier_duchy }
-						NOT = { root.capital_county = this.title_capital_county }
 					}
 					trigger_else = { always = no }
 				}
@@ -63,6 +73,23 @@ bp_return_gubernatorial_duchies_and_kingdoms_to_liege = {
 				}
 			}
 			resolve_title_and_vassal_change = scope:change
+		}
+	}
+}
+
+bp_shatter_tribal_peoples_without_leges_barbarorum = {
+	effect = {
+		if = {
+			limit = {
+				has_game_rule = tribal_shatter_mechanic_enabled
+				root = { has_government = tribal_government }
+				NOT = { root.culture = { has_innovation = innovation_social_stratification } }
+				root.primary_title.tier >= tier_kingdom
+			}
+			every_held_title = {
+				limit = { this.tier >= tier_kingdom }
+				root = { destroy_title = prev }
+			}
 		}
 	}
 }

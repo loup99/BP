@@ -40,22 +40,22 @@ is_preferred_heresy = {
 is_valid_heresy = {
 	#The origin faith can never be its own heresy.
 	NOT = { $ORIGIN_FAITH$ = $HERETICAL_FAITH$}
-
+	
+	#Be very careful selecting ethnic religion types
+	valid_heretic_culture_cultural_religion_pair_trigger = {
+		HERESIARCH = scope:heretic_ruler
+		FAITH = $HERETICAL_FAITH$
+	}
+	
+	#Don't pick rites for Heresies, please
+	NOT = { $HERETICAL_FAITH$ = { has_doctrine = tenet_rite } }
+	
 	#Depending on the origin faith's religion/religion group, there may have additional requirements for a heresy to be considered valid.
 	OR = {
 		#For Christian Faiths, the origin and heretical faiths must not both be Ecumenical (excepting the faiths which aren't technically ecumenical).
 		AND = {
 			religion_tag = christianity_religion
-			NAND = {
-				$ORIGIN_FAITH$ = {
-					has_doctrine = special_doctrine_ecumenical_christian
-					this = faith:insular_celtic
-				}
-				$HERETICAL_FAITH$ = {
-					has_doctrine = special_doctrine_ecumenical_christian
-					this = faith:insular_celtic
-				}
-			}
+			has_compatible_chrisitian_ecumenism = no
 		}
 		#No special requirements for Muslims, Jews, Yazidis, or Zoroastrians.
 		religion_tag = islam_religion

@@ -403,94 +403,16 @@ successful_popular_revolt_outcome_effect = {
 
 	##### Changed from Vanilla vvvvv
 
-	#Set up government type.
+	#Set up government type for all the new holders
 	hidden_effect = {
-		$FACTION_LEADER$ = {
-			#If sourced from tribal, make tribal.
-			if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = tribal_government } }
-				change_government = tribal_government
-			}
-			#If sourced from clan, make clan.
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = clan_government } }
-				change_government = clan_government
-			}
-			#If sourced from feudal, make feudal.
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = feudal_government } }
-				change_government = feudal_government
-			}
-			#If sourced from prefeudal, make prefeudal.
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = prefeudal_government } }
-				change_government = prefeudal_government
-			}
-			#If sourced from gupta, make gupta
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = gupta_government } }
-				change_government = gupta_government
-			}
-			#If sourced from nomad, make nomad
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = nomad_government } }
-				change_government = nomad_government
-			}
-			#More Complicated Cases
+		every_in_list = {
+			list = siezed_counties
 			
-			#If sourced from eranshar, make eranshar iff zoroastrian
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = eranshar_government } }
-				if = {
-					limit = { $FACTION_LEADER$ = { has_religion = religion:zoroastrianism_religion } }
-					change_government = eranshar_government
+			holder = {
+				bp_update_popular_revolt_governments = {
+					SOURCE_GOVERNMENT = $SOURCE_GOVERNMENT$
+					CHARACTER = this
 				}
-				else = { change_government = feudal_government } ##### TODO (Beta): Change feudal fallback condition
-			}
-			#If sourced from bureaucratic types, make subroman
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_bureaucratic_or_gubernatorial_government_trigger =yes } }
-				change_government = subroman_government
-				inherit_correct_subroman_taxation_law_effect = {
-					TITLE_BEQUEATHER = $TARGET_TITLE$.holder
-					TARGET = this
-				}
-			}
-			#If sourced from subroman, make subroman
-			else_if = {
-				limit = { $SOURCE_GOVERNMENT$ = { has_government = subroman_government } }
-				change_government = subroman_government
-			}
-			
-			# Fail-safes
-			
-			#If sourced elsewhere, and Islamic, make clan.
-			else_if = {
-				limit = {
-					$SOURCE_GOVERNMENT$ = {
-						NOR = {
-							has_government = tribal_government
-							has_government = clan_government
-							has_government = feudal_government
-						}
-					}
-					has_religion = religion:islam_religion
-				}
-				change_government = clan_government
-			}
-			#If sourced elsewhere, and not Islamic, make feudal.
-			else_if = {
-				limit = {
-					$SOURCE_GOVERNMENT$ = {
-						NOR = {
-							has_government = tribal_government
-							has_government = clan_government
-							has_government = feudal_government
-						}
-					}
-					NOT = { has_religion = religion:islam_religion }
-				}
-				change_government = feudal_government
 			}
 		}
 	}

@@ -177,8 +177,8 @@ court_chaplain_conversion_contextual_bonuses = {
 	### Ethnic Religions
 	if = { #Ethnic Religions are **very** hard to convert
 		limit = {
-			exists = scope:county
 			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_conversion_resistance_active }
+			exists = scope:county
 			#Make sure culture and faith align
 			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
 				ACTOR = scope:county
@@ -210,7 +210,6 @@ court_chaplain_conversion_contextual_bonuses = {
 	}
 	if = { #Rigorism resists conversion both ways, unless county faith and liege faith are both rigorists
 		limit = {
-			exists = scope:county
 			#XOR condition; other rigorist faiths have no impediment like say Khawarijis...
 			AND = {
 				OR = {
@@ -222,6 +221,7 @@ court_chaplain_conversion_contextual_bonuses = {
 					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
 				}
 			}
+			exists = scope:county
 		}
 		if = {
 			limit = { scope:councillor_liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways } }
@@ -269,8 +269,8 @@ court_chaplain_conversion_contextual_bonuses = {
 	##### Changed from Vanilla vvvvv
 	if = { #Ethnic Religion Bonus
 		limit = {
-			exists = scope:county
 			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
+			exists = scope:county
 			actor_is_faith_culture_for_cultural_religions_trigger = {
 				ACTOR = scope:county
 				TARGET = scope:councillor_liege
@@ -284,8 +284,8 @@ court_chaplain_conversion_contextual_bonuses = {
 	}
 	if = { #Lesser Ethnic Religion Bonus
 		limit = {
+			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
 			exists = scope:county
-			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
 			actor_is_faith_child_culture_for_cultural_religions_trigger = {
 				ACTOR = scope:councillor_liege
 				TARGET = scope:county
@@ -299,7 +299,7 @@ court_chaplain_conversion_contextual_bonuses = {
 	}
 	if = { #It's hard to convince foreigners to embrace ethnic religions
 		limit = {
-			scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_other_culture_conversion_penalty_active }
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_other_culture_conversion_penalty_active }
 			exists = scope:county
 			NAND = {
 				actor_is_faith_culture_for_cultural_religions_trigger = {
@@ -390,6 +390,29 @@ court_chaplain_conversion_contextual_bonuses = {
 		subtract = {
 			value = scope:councillor.conversion_doctrine_legalized_faith_malus
 			desc = COURT_CHAPLAIN_CONVERSION_DOCTRINE_LEGAL_FAITH_MALUS
+		}
+	}
+	### Zoroastrian Approved Cult
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = zoroastrian_approved_cult_conversion_malus }
+		}
+		subtract = {
+			value = scope:councillor.conversion_doctrine_approved_cult_malus
+			desc = COURT_CHAPLAIN_CONVERSION_DOCTRINE_APPROVED_CULT_MALUS
+		}
+	}
+	### Ecstatic Prophecy Protection
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = tenet_ecstatic_prophecy_conversion_resistance_active }
+		}
+		subtract = {
+			value = scope:councillor.conversion_resistance_ecstatic_prophecy
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_ECSTATIC_PROPHECY_MALUS
 		}
 	}
 	##### Changed from Vanilla ^^^^^

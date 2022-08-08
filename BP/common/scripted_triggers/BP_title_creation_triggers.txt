@@ -1,0 +1,673 @@
+﻿# root: the character trying to create the title
+
+#General triggers
+standard_claimant_status_trigger = {
+	is_independent_ruler = yes
+	is_available_adult = yes
+}
+has_a_roman_empire = {
+	OR = {
+		you_or_a_liege_has_title = { TITLE = title:e_roman_empire }
+		you_or_a_liege_has_title = { TITLE = title:e_wre }
+		you_or_a_liege_has_title = { TITLE = title:e_byzantium }
+	}
+}
+#Byzantium
+creation_trigger_k_galatia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:galatian } }
+	}
+}
+#Dacia
+creation_trigger_e_dacia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:dacian } }
+	}
+}
+creation_trigger_e_dacia_kingdoms = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { has_cultural_pillar = heritage_proto_carpathian }
+	}
+}
+creation_trigger_k_dacia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_proto_carpathian }
+			has_a_roman_empire = yes
+		}
+	}
+}
+creation_trigger_k_moesia_inferior = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_proto_carpathian }
+			has_a_roman_empire = yes
+		}
+	}
+}
+#Italy
+creation_trigger_italian_kingdoms = {
+	OR = {
+		#Keeps the Ostrogoths and Skirians and other East Germans from changing from k_italy
+		NAND = {
+			OR = {
+				culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:gothic } }
+				culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:skirian } }
+				culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:heruli } }
+			}
+			primary_title.tier < tier_empire
+		}
+		has_a_roman_empire = yes
+	}
+	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+	custom_description = {
+		text = has_a_blocking_title
+		NOR = {
+			has_title = title:k_italy
+			has_title = title:k_ostrogoths
+			has_title = title:k_visigoths
+		}
+	}
+}
+#Balto-Finnish Kingdoms
+creation_trigger_e_finland_kingdoms = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { has_cultural_pillar = heritage_balto_finnic }
+	}
+}
+#Gaul
+creation_trigger_e_gaul = {
+	is_ai = no
+	custom_description = {
+		text = required_cultures_for_e_gaul
+		culture:roman = { save_temporary_scope_as = roman_cul }
+		OR = {
+			culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:roman } }
+			culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:gallic } }
+			culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:briton } }
+			culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:armorican } }
+		}
+	}
+	highest_held_title_tier >= tier_kingdom
+}
+creation_trigger_e_gaul_kingdoms = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		has_a_roman_empire = yes
+	}
+	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+	custom_description = {
+		text = has_a_blocking_title
+		NOR = {
+			has_title = title:k_burgundians
+			has_title = title:k_franks
+			has_title = title:k_alamannia
+		}
+	}
+}
+creation_trigger_k_septem_provincae = {
+	OR = {
+		trigger_if = {
+			limit = { is_ai = yes }
+			culture = { has_cultural_pillar = heritage_vasconic }
+		}
+	}
+	creation_trigger_e_gaul_kingdoms = yes
+	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+	custom_description = {
+		text = has_a_blocking_title
+		NOT = { has_title = title:k_visigoths }
+	}
+}
+creation_trigger_k_brittany = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { has_cultural_pillar = heritage_celtic }
+	}
+}
+#Germania Magna
+creation_trigger_e_germania_magna = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_west_germanic }
+			culture = { has_cultural_pillar = heritage_east_germanic }
+			culture = { has_cultural_pillar = heritage_north_germanic }
+		}
+		primary_title.tier = tier_empire
+		NAND = {
+			has_title = title:k_danubia
+			has_title = title:k_cimrii
+			has_title = title:k_germania_slavica_prima
+			has_title = title:k_germania_slavica_secunda
+			has_title = title:k_vindelicia
+			has_title = title:k_germania
+		}
+	}
+}
+creation_trigger_k_frisia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:old_frisian } }
+	}
+}
+creation_trigger_e_germania_magna_kingdoms = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		always = no
+	}
+}
+#North Africa
+creation_trigger_k_africa = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			has_a_roman_empire = yes
+			culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:punic } }
+		}
+	}
+	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+	custom_description = {
+		text = has_a_blocking_title
+		NOT = { has_title = title:k_vandalica }
+	}
+}
+creation_trigger_k_mauretania = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			has_a_roman_empire = yes
+			OR = {
+				culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:punic } }
+				culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:numidian } }
+			}
+		}
+	}
+	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+	custom_description = {
+		text = has_a_blocking_title
+		NOT = { has_title = title:k_vandalica }
+	}
+}
+creation_trigger_k_tripolitania = {
+	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+	custom_description = {
+		text = has_a_blocking_title
+		NOT = { has_title = title:k_vandalica }
+	}
+}
+#Persia
+creation_trigger_e_persia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { has_cultural_pillar = heritage_iranian }
+	}
+}
+#Russia
+creation_trigger_e_russia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_north_germanic }
+			culture = { has_cultural_pillar = heritage_volga_finnic }
+			culture = { has_cultural_pillar = heritage_east_slavic }
+		}
+	}
+}
+creation_trigger_e_russia_kingdoms = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_north_germanic }
+			culture = { has_cultural_pillar = heritage_volga_finnic }
+			culture = { has_cultural_pillar = heritage_east_slavic }
+		}
+	}
+}
+#Scandinavia
+creation_trigger_e_scandinavia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_north_germanic }
+			culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:finnish } }
+		}
+	}
+}
+#Scythia
+creation_trigger_e_scythia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_turkic }
+			culture = { has_cultural_pillar = heritage_mongolic }
+		}
+	}
+}
+creation_trigger_e_scythia_kingdoms = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_turkic }
+			culture = { has_cultural_pillar = heritage_mongolic }
+		}
+	}
+}
+#Spain
+creation_trigger_e_spain_kingdoms = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		has_a_roman_empire = yes
+	}
+	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+	custom_description = {
+		text = has_a_blocking_title
+		NOR = {
+			has_title = title:k_visigoths
+			has_title = title:k_suebia
+		}
+	}
+}
+#Tamil
+creation_trigger_e_tamil = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:tamil } }
+	}
+}
+#Wendish Empire
+creation_trigger_e_wendish_empire = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = { has_cultural_pillar = heritage_baltic }
+			culture = { has_cultural_pillar = heritage_west_slavic }
+		}
+	}
+}
+#Roman-Related Titles
+creation_trigger_k_italy = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		faith = { religion_tag = christianity_religion }
+	}
+}
+creation_trigger_k_romagna = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		faith = { religion_tag = christianity_religion }
+	}
+}
+creation_trigger_k_soissons = {
+	prestige_level > medium_prestige_level
+	culture = culture:romano_gallic
+	faith = faith:nicene
+}
+#ErikW Titles
+creation_trigger_k_athens = {
+	#Realm Aspects
+	has_title = title:c_attica
+	realm_size >= 15
+	primary_title.tier < tier_empire
+	prestige_level >= high_prestige_level
+	culture = culture:greek
+	OR = {
+		religion = religion:christianity_religion
+		truly_hellenic_faith = yes
+	}
+}
+creation_trigger_k_sparta = {
+	#Realm Aspects
+	has_title = title:c_attica
+	realm_size >= 10
+	primary_title.tier < tier_empire
+	#Personal Aspects
+	prestige_level >= max_prestige_level
+	culture = culture:tsakonian
+	truly_hellenic_faith = yes
+}
+creation_trigger_k_thracia = {
+	#Realm Aspects
+	has_title = title:c_turnovo
+	realm_size >= 25
+	primary_title.tier < tier_empire
+	#Personal Aspects
+	prestige_level >= high_prestige_level
+	OR = {
+		culture = culture:thracian
+		culture = culture:romano_thracian
+		culture = culture:helleno_thracian
+	}
+	OR = {
+		religion = religion:christianity_religion
+		truly_hellenic_faith = yes
+	}
+}
+creation_trigger_k_illyria = {
+	#Realm Aspects
+	has_title = title:c_travunia
+	realm_size >= 20
+	primary_title.tier < tier_empire
+	#Personal Aspects
+	
+	prestige_level >= very_high_prestige_level
+	OR = {
+		culture = culture:illyrian
+		culture = culture:romano_illyrian
+	}
+	OR = {
+		religion = religion:christianity_religion
+		truly_hellenic_faith = yes
+	}
+}
+creation_trigger_k_cyrenica = {
+	#Realm Aspects
+	has_title = title:c_barqa
+	primary_title = title:d_cyrenaica
+	realm_size >= 20
+	has_government = republic_government
+	primary_title.tier < tier_empire
+	#Personal Aspects
+	prestige_level >= very_high_prestige_level
+	culture = culture:greek
+	OR = {
+		religion = religion:christianity_religion
+		truly_hellenic_faith = yes
+	}
+}
+creation_trigger_k_crete = {
+	#Realm Aspects
+	has_title = title:c_chandax
+	primary_title = title:d_krete
+	completely_controls = title:d_krete
+	primary_title.tier < tier_empire
+	#Personal Aspects
+	prestige_level >= very_high_prestige_level
+	culture = culture:greek
+	OR = {
+		religion = religion:christianity_religion
+		truly_hellenic_faith = yes
+	}
+}
+creation_trigger_k_helling = {
+	#Realm Aspects
+	primary_title.tier < tier_kingdom
+	OR = {
+		completely_controls = title:k_macedonia
+		completely_controls = title:k_achaia
+	}
+	#Personal Aspects
+	prestige_level >= high_prestige_level
+	culture = { has_cultural_pillar = heritage_north_germanic }
+}
+creation_trigger_e_helling = {
+	#Realm Aspects
+		primary_title = title:k_helling
+		primary_title.tier < tier_empire
+		#Personal Aspects
+		prestige_level >= very_high_prestige_level
+		culture = { has_cultural_pillar = heritage_north_germanic }
+}
+creation_trigger_e_egypt = {
+	#Realm Aspects
+	primary_title = title:k_egypt
+	completely_controls = title:k_egypt
+	primary_title.tier < tier_empire
+	#Personal Aspects
+	prestige_level >= max_prestige_level
+	OR = {
+		culture = culture:greek
+		culture = culture:coptic
+	}
+	OR = {
+		religion = religion:christianity_religion
+		faith = faith:egyptian_pagan
+	}
+}
+creation_trigger_e_macedon = {
+	#Realm Aspects
+	primary_title = title:k_macedonia
+	has_title = title:c_baghdad
+	realm_size >= 250
+	primary_title.tier < tier_empire
+	#Personal Aspects
+	
+	prestige_level >= max_prestige_level
+	culture = culture:greek
+	OR = {
+		religion = religion:christianity_religion
+		truly_hellenic_faith = yes
+	}
+}
+creation_trigger_e_palmyra = {
+	#Realm Aspects
+	this.capital_county = title:c_palmyra
+	#Personal Aspects
+	prestige_level >= max_prestige_level
+	OR = {
+		culture = culture:aramean
+		culture = culture:helleno_aramean
+		culture = culture:romano_aramean
+		culture = culture:corduenian
+	}
+	OR = {
+		religion = religion:christianity_religion
+		religion = religion:assyrian_religion
+		religion = religion:semitic_religion
+	}
+}
+creation_trigger_e_seleucid = {
+	#Realm Aspects
+	completely_controls = title:d_syria
+	primary_title.tier < tier_empire
+	realm_size >= 200
+	#Personal Aspects
+	prestige_level >= max_prestige_level
+	dynasty = dynasty:104246212 # Seleucid
+	culture = { has_cultural_pillar = heritage_byzantine }
+	OR = {
+		faith = faith:mithraic_pagan
+		truly_hellenic_faith = yes
+	}
+}
+
+#CK3 Dynamic De Jure Titles
+creation_trigger_k_andalusia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { has_cultural_pillar = heritage_arabic }
+	}
+}
+creation_trigger_iberian_christian_kingdom = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		faith = { religion_tag = christianity_religion }
+	}
+}
+creation_trigger_k_wales = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { has_cultural_pillar = heritage_celtic }
+	}
+	prestige >= 5000
+	OR = {
+		faith = faith:catholic
+		faith = faith:insular_celtic
+		faith = faith:pelagianism
+	}
+}
+creation_trigger_k_jerusalem = {
+	faith = { religion_tag = christianity_religion }
+}
+creation_trigger_k_cyprus = {
+	faith = {
+		OR = {
+			religion_tag = christianity_religion
+			religion_tag = hellenism_religion
+		}
+	}
+	culture = {
+		culture = culture:greek
+		culture = culture:helleno_aramean
+	}
+	prestige >= 5000
+	has_primary_title = title:d_krete
+	is_independent_ruler = yes
+	highest_held_title_tier <= tier_kingdom
+}
+creation_trigger_k_krete = {
+	faith = {
+		OR = {
+			religion_tag = christianity_religion
+			religion_tag = hellenism_religion
+		}
+	}
+	culture = culture:greek
+	prestige >= 5000
+	has_primary_title = title:d_krete
+	is_independent_ruler = yes
+	highest_held_title_tier <= tier_kingdom
+}
+creation_trigger_k_east_francia = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		NOT = { exists = title:e_hre }
+	}
+}
+creation_trigger_k_pommerania = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = culture:pommeranian
+	}
+}
+creation_trigger_k_aquitaine = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		NOT = { has_title = title:k_france }
+	}
+}
+
+#Cultural Titles
+creation_trigger_k_alamannia = {
+	has_culture = culture:alamannian
+	is_independent_ruler = yes
+	age >= 25
+	prestige >= 1000
+	realm_size >= 35
+}
+creation_trigger_k_suebia = {
+	has_culture = culture:suebi
+	is_independent_ruler = yes
+	age >= 25
+	prestige >= 1000
+	realm_size >= 35
+}
+creation_trigger_k_saxony = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		OR = {
+			culture = culture:old_saxon
+			culture = culture:anglo_saxon
+		}
+	}
+}
+creation_trigger_e_goths = {
+	culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:gothic } }
+}
+creation_trigger_k_franks = {
+	OR = {
+		this = culture:old_frankish
+		AND = {
+			any_parent_culture_or_above = { this = culture:old_frankish }
+			OR = {
+				has_cultural_pillar = heritage_west_germanic
+				has_cultural_pillar = heritage_frankish
+			}
+		}
+	}
+}
+creation_trigger_k_thaton = {
+	prestige >= 1000
+	culture = culture:mon
+}
+creation_trigger_e_hunnic_empire = {
+	prestige >= 5000
+	culture = culture:hunnic
+}
+creation_trigger_k_cornwall = {
+	trigger_if = {
+		limit = { is_ai = yes }
+		culture = { has_cultural_pillar = heritage_celtic }
+	}
+}
+creation_trigger_k_khazaria = {
+	OR = {
+		culture = culture:khazar
+		faith = { religion_tag = judaism_religion }
+	}
+}
+
+#General triggers
+possesses_a_primary_titular_cultural_title = {
+	custom_description = {
+		text = has_a_valid_culture_title
+		subject = root
+		any_held_title = {
+			is_titular = yes
+			has_variable = title_culture
+			save_temporary_scope_as = the_title
+			OR = {
+				root.culture = scope:the_title.var:title_culture
+				AND = {
+					root.culture = { any_parent_culture = { this = scope:the_title.var:title_culture } }
+					root.culture = { has_same_culture_heritage = scope:the_title.var:title_culture }
+				}
+			}
+		}
+	}
+}
+general_kingdom_title_creation_trigger = {
+	standard_claimant_status_trigger = yes
+	possesses_a_primary_titular_cultural_title = no
+	custom_description = {
+		text = general_kingdom_title_creation_text
+		subject = root.culture
+		OR = {
+			has_advanced_government_trigger = yes
+			culture = { has_innovation = innovation_leges_barbarorum }
+		}
+	}
+}
+general_empire_title_creation_trigger = {
+	standard_claimant_status_trigger = yes
+	custom_description = { #Can't if I already have an empire
+		text = already_have_an_empire
+		NOT = { any_held_title = { tier = tier_empire } }
+	}
+	custom_description = { #Roman Empire cultures can only create Rome
+		text = can_only_create_rome
+		culture = { has_ability_to_reform_rome_directly_trigger = no }
+	}
+	trigger_if = { #Goths Gotta make Gothica if available
+		limit = { culture = { the_culture_or_parent_is_with_heritage = { CULTURE = culture:gothic } } }
+		custom_description = {
+			text = goths_should_try_to_make_e_goths
+			object = title:e_goths
+			exists = title:e_goths.holder
+		}
+	}
+	custom_description = {
+		text = general_empire_title_creation_text
+		subject = root.culture
+		OR = {
+			has_advanced_government_trigger = yes
+			culture = { has_innovation = innovation_mundium }
+		}
+	}
+}

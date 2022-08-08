@@ -161,32 +161,29 @@ establish_autocephalous_church_decision = {
 				}
 			}
 		}
-		#Need to have enough pull with the HOF to get him to approve it
-		OR = {
-			AND = {
-				is_independent_ruler = no #If you're not independent, you'll need to have enough pull
-				OR = {
-					custom_description = { #3 Holy Sites, he can't politically defend granting you autocephaly
-						text = controls_three_holy_sites
-						root = { any_sub_realm_county = { count >= 3 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+		#Need to have enough pull with the HOF to get him to approve it if you aren't an independent king
+		trigger_if = {
+			limit = { is_independent_ruler = no }
+			OR = {
+				custom_description = { #3 Holy Sites, he can't politically defend granting you autocephaly
+					text = controls_three_holy_sites
+					root = { any_sub_realm_county = { count >= 3 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+				}
+				AND = { #2 Holy Sites, and at least some weak pull
+					custom_description = {
+						text = controls_two_holy_sites
+						root = { any_sub_realm_county = { count >= 2 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
 					}
-					AND = { #2 Holy Sites, and at least some weak pull
-						custom_description = {
-							text = controls_two_holy_sites
-							root = { any_sub_realm_county = { count >= 2 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
-						}
-						has_hook = faith.religious_head
+					has_hook = faith.religious_head
+				}
+				AND = {
+					custom_description = { #1 Holy Sites, but you have some strong pull on him
+						text = controls_one_holy_site
+						root = { any_sub_realm_county = { count >= 1 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
 					}
-					AND = {
-						custom_description = { #1 Holy Sites, but you have some strong pull on him
-							text = controls_one_holy_site
-							root = { any_sub_realm_county = { count >= 1 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
-						}
-						has_strong_hook = faith.religious_head
-					}
+					has_strong_hook = faith.religious_head
 				}
 			}
-			is_independent_ruler = yes #If you're independent and a King, you have too much political pull
 		}
 		custom_description = {
 			text = hof_is_not_a_vassal
@@ -263,7 +260,7 @@ establish_autocephalous_church_decision = {
 	}
 }
 
-### Arian Creed decision
+#Arian Creed decision
 proclaim_creed_of_arius_decision = {
 	picture = "gfx/interface/illustrations/decisions/ecumenical_council.dds"
 	desc = proclaim_creed_of_arius_decision_desc
@@ -330,8 +327,8 @@ proclaim_creed_of_arius_decision = {
 	}
 }
 
-
 ### Pagan Decisions
+
 automutiliation_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
 
@@ -514,5 +511,93 @@ select_hindu_philosophy_decision = {
 
 	ai_will_do = {
 		base = 100
+	}
+}
+
+### Zoroastrian Decisions
+
+#Legalize Caucasian Christianity
+legalize_caucasian_christianity = {
+	picture = "gfx/interface/illustrations/decisions/the_return_to_the_homeland.dds"
+	desc = legalize_caucasian_christianity_desc
+	selection_tooltip = legalize_caucasian_christianity_tooltip
+	major = yes
+	
+	is_shown = {
+		has_title = title:e_persia
+		has_religion = religion:zoroastrianism_religion
+		NOT = { has_global_variable = persia_legalizes_caucasian_christianity }
+		NAND = {
+			faith:armenian_apostolic = { has_doctrine = special_doctrine_legalized_faith_persia }
+			faith:georgian_orthodox = { has_doctrine = special_doctrine_legalized_faith_persia }
+			faith:albanian_apostolic = { has_doctrine = special_doctrine_legalized_faith_persia }
+		}
+	}
+	
+	is_valid = {
+		NOR = {
+			has_realm_law = clerical_influence_2
+			has_realm_law = clerical_influence_3
+		}
+		prestige_level >= 2
+		piety_level >= 1
+	}
+	
+	is_valid_showing_failures_only = {
+		piety >= 0
+		is_imprisoned = no
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {
+		piety = 250
+		gold = tiny_gold_max_value
+	}
+	
+	effect = {
+		show_as_tooltip = { caucasian_christian_legalization_local_effect = yes }
+		hidden_effect = {
+			root = { save_scope_as = legalizing_emperor }
+			trigger_event = { id = BP_religious_decisions.0101 }
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {
+		is_at_war = no
+	}
+	
+		ai_will_do = {
+		base = 80 # 80% Chance in general (we want it to be likely to happen if conditions are right)
+		#Zealous and Ambitious required, also needs enough gold
+		
+		#Won't do if they can't pay
+		modifier = {
+			factor = 0
+			NOT = { gold >= tiny_gold_max_value }
+			NOT = { piety >= 250 }
+		}
+		#Won't do if zealous
+		modifier = {
+			factor = 0
+			has_trait = zealous
+		}
+		#Arrogant halves the chance (Who do they think they are?!)
+		modifier = {
+			factor = 0.5
+			has_trait = arrogant
+		}
+		#Likely to do if Cynical/Ambitious (it'll keep them in the Empire and all that)
+		#Will do if both cynical and ambitious, even if arrogant
+		modifier = {
+			factor = 1.59 #sqrt(2.5) rounded up
+			has_trait = cynical
+		}
+		modifier = {
+			factor = 1.59 #sqrt(2.5) rounded up
+			has_trait = ambitious
+		}
 	}
 }

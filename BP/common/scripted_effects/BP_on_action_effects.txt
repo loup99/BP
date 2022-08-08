@@ -12,10 +12,14 @@
 		limit = { scope:old_faith = { has_doctrine = special_doctrine_nestorian_ecumenism } }
 		add_doctrine = special_doctrine_nestorian_ecumenism
 	}
+	else_if = {
+		limit = { scope:old_faith = { has_doctrine = special_doctrine_nestorian_ecumenism } }
+		add_doctrine = special_doctrine_nestorian_ecumenism
+	}
 	#Legalized Faiths under Persian Aegis
 	else_if = {
-		limit = { scope:old_faith = { has_doctrine = special_doctrine_legalized_faith_persia } }
-		add_doctrine = special_doctrine_legalized_faith_persia
+		limit = { scope:old_faith = { has_doctrine = special_doctrine_adoptionism_ecumenism } }
+		add_doctrine = special_doctrine_adoptionism_ecumenism
 	}
 	#Zoroastrian Faiths
 	else_if = {
@@ -224,3 +228,181 @@ match_court_languages = {
 	### Fallback
 	else = { debug_log = "MISSING A LANGUAGE?" }
 }
+
+#NB: For cities, it only applies to counties with city capitals
+match_government_type = {
+	if = {
+		limit = { $THE_COUNTY$.title_province = { has_holding_type = tribal_holding } }
+		change_government = $TRIBAL_HOLDING_GOVERNMENT$
+	}
+	else_if = {
+		limit = { $THE_COUNTY$.title_province = { has_holding_type = castle_holding } }
+		change_government = $CASTLE_HOLDING_GOVERNMENT$
+	}
+	else_if = {
+		limit = { $THE_COUNTY$.title_province = { has_holding_type = city_holding } }
+		if = {
+			limit = { $THE_COUNTY$.tier = tier_county }
+			change_government = $CITY_COUNTY_HOLDING_GOVERNMENT$
+		}
+		else = { change_government = $CITY_BARONY_HOLDING_GOVERNMENT$ }
+	}
+	else_if = {
+		limit = { $THE_COUNTY$.title_province = { has_holding_type = church_holding } }
+		if = {
+			limit = { $THE_COUNTY$.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy } }
+			change_government = $CASTLE_HOLDING_GOVERNMENT$
+		}
+		else = { change_government = theocracy_government }
+	}
+}
+
+#General Bootstrap Prevention code
+boostrap_prevention_effect = {
+	#Unplayable Governments: Should not change whenever gaining titles
+	if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = republic_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = tribal_government
+			CASTLE_HOLDING_GOVERNMENT = republic_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = holy_order_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = tribal_government
+			CASTLE_HOLDING_GOVERNMENT = holy_order_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = holy_order_government
+			CITY_BARONY_HOLDING_GOVERNMENT = holy_order_government
+		}
+	}
+	#Theocracy
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = theocracy_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = tribal_government
+			CASTLE_HOLDING_GOVERNMENT = theocracy_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	#Primitive Governments (can hold tribal_holding)
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = tribal_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = tribal_government
+			CASTLE_HOLDING_GOVERNMENT = tribal_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = nomad_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = nomad_government
+			CASTLE_HOLDING_GOVERNMENT = tribal_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = high_tribal_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = high_tribal_government
+			CASTLE_HOLDING_GOVERNMENT = high_tribal_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	#Intermediate Governments (prefeudal/feudal/clan)
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = prefeudal_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = tribal_government
+			CASTLE_HOLDING_GOVERNMENT = prefeudal_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = feudal_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = feudal_government
+			CASTLE_HOLDING_GOVERNMENT = feudal_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = clan_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = clan_government
+			CASTLE_HOLDING_GOVERNMENT = clan_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	#Advanced Governments
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = subroman_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = high_tribal_government
+			CASTLE_HOLDING_GOVERNMENT = subroman_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = eranshar_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = high_tribal_government
+			CASTLE_HOLDING_GOVERNMENT = eranshar_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = gupta_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = high_tribal_government
+			CASTLE_HOLDING_GOVERNMENT = gupta_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = republic_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = bureaucratic_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = high_tribal_government
+			CASTLE_HOLDING_GOVERNMENT = gubernatorial_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = gubernatorial_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+	else_if = {
+		limit = { $THE_PREVIOUS_HOLDER$ = { has_government = gubernatorial_government } }
+		match_government_type = {
+			THE_COUNTY = $THE_COUNTY$
+			TRIBAL_HOLDING_GOVERNMENT = high_tribal_government
+			CASTLE_HOLDING_GOVERNMENT = gubernatorial_government
+			CITY_COUNTY_HOLDING_GOVERNMENT = gubernatorial_government
+			CITY_BARONY_HOLDING_GOVERNMENT = republic_government
+		}
+	}
+}
+

@@ -1,5 +1,8 @@
 ﻿import sys
 
+#To Use: Takes a list of CK2 name equivalents (like Adamos_Adam) and converts them
+#to CK3 scheme equivalence files. Requires the sex (male, female) as a command line input
+
 #Inputs
 sex = sys.argv[1]
 #Open the file

@@ -1,7 +1,8 @@
 ﻿#!/usr/bin/python
 import re
 
-#To be run in the name equivalencies folder
+#To use: put all name equivalencies in the BP_TEST.txt files and this code will merge them all
+#into a single 00_names.txt file.
 name_data = []
 file_text = []
 with open('BP_TEST.txt','r') as f:
