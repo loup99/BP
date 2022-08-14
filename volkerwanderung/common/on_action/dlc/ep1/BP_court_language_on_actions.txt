@@ -1,0 +1,48 @@
+﻿# Fired when a character's court grandeur level changes
+# root = character observing the change
+# scope:target_character = character changing language
+on_court_language_changed = {
+	on_actions = { bp_court_language_on_actions }
+}
+
+bp_court_language_on_actions = {
+	effect = {
+		scope:target_character = {
+			if = {
+				limit = { has_government = bureaucratic_government }
+				#Update all imperial titles court languages
+				every_held_title = {
+					limit = { tier = tier_empire }
+					if = {
+						limit = { has_variable = court_language }
+						remove_variable = court_language
+						set_variable = {
+							name = court_language
+							value = scope:target_character.culture
+						}
+					}
+					else = { #A new empire
+						set_variable = {
+							name = court_language
+							value = scope:target_character.culture
+						}
+					}
+				}
+				#And all the vassals
+				every_vassal_or_below = {
+					limit = {
+						has_government = gubernatorial_government
+						has_royal_court = yes
+					}
+					if = {
+						limit = { NOT = { has_same_court_language = this.top_liege } }
+						match_court_languages_effect = {
+							TOP_COURT = this.top_liege
+							CURRENT_COURT = this
+						}
+					}
+				}
+			}
+		}
+	}
+}

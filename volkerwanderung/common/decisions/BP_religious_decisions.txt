@@ -1,0 +1,536 @@
+﻿### Christian Decisions
+peregrinition_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+
+	desc = peregrinition_decision_desc
+	selection_tooltip = peregrinition_decision_tooltip
+	major = yes
+
+	is_shown = {
+		faith = { has_doctrine_parameter = peregrinition_active }
+	}
+
+	is_valid = {
+		has_trait = zealous
+		NOT = { has_trait = ambitious }
+		#You can't leave without your heir being of age
+		trigger_if = {
+			limit = { is_ruler = yes }
+			custom_description = {
+				text = text_is_a_ruler_and_has_a_valid_player_heir
+				exists = player_heir
+				player_heir = { age >= 16 }
+			}
+		}
+	}
+
+	effect = {
+		save_scope_as = actor
+		hidden_effect = { add_piety_level = 1 }
+		show_as_tooltip = { add_piety_level = 1 }
+		add_trait = devoted
+		if = {
+			limit = { is_ruler = yes }
+			depose = yes
+		}
+		#Remove spouses and spouse adjacent
+		if = {
+			limit = { is_married = yes }
+			every_spouse = { divorce = scope:actor }
+		}
+		if = {
+			limit = { exists = betrothed }
+			break_betrothal = betrothed
+		}
+		if = {
+			limit = { is_concubine = yes }
+			this.concubinist = { remove_concubine = scope:actor }
+		}
+		if = {
+			limit = { number_of_concubines > 0 }
+			every_concubine = { scope:actor = { remove_concubine = prev } }
+		}
+		#Remove wards
+		if = {
+			limit = { any_courtier = { has_relation_ward = scope:actor } }
+			every_courtier = {
+				limit = { has_relation_ward = scope:actor }
+				remove_relation_ward = scope:actor
+				return_to_court = yes
+			}
+		}
+		#Remove all claims
+		every_claim = {
+			scope:actor = { remove_claim = prev }
+		}
+		#Go into the wilderness
+		select_and_move_to_pool_effect = yes
+	}
+
+	ai_check_interval = 60
+	
+	ai_potential = {
+		exists = primary_heir
+		primary_heir = { dynasty = root.dynasty }
+		is_at_war = no
+	}
+
+	#Cribbed from Consolateum
+	ai_will_do = {
+		base = 0
+
+		# 100% chance at 50 zeal
+		ai_value_modifier = {
+			ai_zeal = 2
+		}
+
+		modifier = {
+			add = 40
+			is_close_family_of = primary_heir
+		}
+	}
+}
+
+#Converting a Rite to an independent Church
+establish_autocephalous_church_decision = {
+	picture = "gfx/interface/illustrations/decisions/cathedral_soa_day.dds"
+	desc = establish_autocephalous_church_decision_desc
+	selection_tooltip = establish_autocephalous_church_decision_tooltip
+	major = yes
+	
+	is_shown = {
+		faith = {
+			has_doctrine = tenet_rite
+			religion = religion:christianity_religion
+		}
+		faith.religious_head.faith = { has_doctrine_parameter = enables_formation_of_autocephalous_churches }
+	}
+	
+	is_valid = {
+		highest_held_title_tier >= tier_kingdom
+		
+		custom_description = {
+			text = the_culture_does_not_have_an_autocephalous_church
+			NOT = {
+				#Go through all Christian faiths. If root.culture is a Faith Culture or a Faith Child
+				#Culture, note that it exists
+				religion:christianity_religion = {
+					any_faith = {
+						exists = this.var:church_culture
+						trigger_if = {
+							limit = { exists = this.var:church_culture }
+							this.var:church_culture = { save_temporary_scope_as = the_culture }
+							OR = {
+								root.culture = scope:the_culture
+								AND = {
+									root.culture = { any_parent_culture_or_above = { this = scope:the_culture } }
+									root.culture = { has_same_culture_heritage = scope:the_culture }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		#Must have 75% of the realm following your rite
+		custom_description = {
+			text = at_least_three_fourths_of_realm_follows_faith
+			any_sub_realm_county = {
+				percent >= 0.75
+				faith = root.faith
+			}
+		}
+		#Must control 75% of the rites' counties
+		custom_description = {
+			text = controls_least_three_fourths_of_counties_follows_faith
+			check_if_control_percentage_of_all_counties_with_condition_trigger = {
+				FEATURE = faith
+				CHARACTER = root
+				PERCENTAGE = 0.75
+			}
+		}
+		#Must control 75% of your culture's counties
+		AND = {
+			custom_description = {
+				text = controls_least_three_fourths_of_counties_with_culture
+				check_if_control_percentage_of_all_counties_with_condition_trigger = {
+					FEATURE = culture
+					CHARACTER = root
+					PERCENTAGE = 0.75
+				}
+			}
+		}
+		#Need to have enough pull with the HOF to get him to approve it if you aren't an independent king
+		trigger_if = {
+			limit = { is_independent_ruler = no }
+			OR = {
+				custom_description = { #3 Holy Sites, he can't politically defend granting you autocephaly
+					text = controls_three_holy_sites
+					root = { any_sub_realm_county = { count >= 3 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+				}
+				AND = { #2 Holy Sites, and at least some weak pull
+					custom_description = {
+						text = controls_two_holy_sites
+						root = { any_sub_realm_county = { count >= 2 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+					}
+					has_hook = faith.religious_head
+				}
+				AND = {
+					custom_description = { #1 Holy Sites, but you have some strong pull on him
+						text = controls_one_holy_site
+						root = { any_sub_realm_county = { count >= 1 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+					}
+					has_strong_hook = faith.religious_head
+				}
+			}
+		}
+		custom_description = {
+			text = hof_is_not_a_vassal
+			NOT = { root = { is_liege_or_above_of = faith.religious_head } }
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		piety >= 0
+		is_imprisoned = no
+	}
+	
+	effect = {
+		faith = {
+			remove_doctrine = tenet_rite
+			add_doctrine = tenet_autocephaly
+		}
+		if = { #Need conditional to prevent some weirdness in localization
+			limit = { has_hook = faith.religious_head }
+			remove_hook = { target = faith.religious_head }
+		}
+		faith.religious_head = { save_scope_as = old_hof } #Done here because we're about to change religious heads
+		root = { bp_set_up_dynamic_spiritual_hof_title_effect = { CREATOR = root } }
+		custom_description = {
+			text = new_hof_becomes_your_vassal
+			subject = root.faith
+			create_title_and_vassal_change = {
+				type = swear_fealty
+				save_scope_as = change
+			}
+			faith.religious_head = {
+				change_liege = {
+					liege = root
+					change = scope:change
+				}
+			}
+			resolve_title_and_vassal_change = scope:change
+		}
+		custom_description = {
+			text = rite_is_associated_with_your_culture
+			#Set the Autocephalous Church flag
+			faith = { set_variable = { name = church_culture value = root.culture } }
+		}
+		#Apply appropriate laws
+		hidden_effect = {
+			faith.religious_head = {
+				add_realm_law_skip_effects = same_faith_theocratic_succession_law
+				add_realm_law_skip_effects = bishop_theocratic_succession_law
+			}
+			#Prevent ruler from creating another faith while he lives
+			root = { set_variable = { name = has_created_a_faith } }
+		}
+		#Cribbed these scopes from faith_creation.1000 (which we borrow text from liberally)
+		root = { save_scope_as = reformer }
+		root.faith = { save_scope_as = reformed_faith }
+		root.faith.religious_head = { save_scope_as = reformed_hof }
+		#Inform players of a new Christian Church
+		every_ruler = { trigger_event = { id = BP_religious_decisions.0001 } }
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {
+		is_at_war = no
+	}
+	
+	ai_will_do = {
+		base = 100 #100% chance (why wouldn't they, zealous or not?)
+		
+		modifier = { #AI Ethiopian Orthodox Chars will never pursue autocephaly, as per history
+			factor = 0
+			faith = faith:ethiopian_orthodox
+		}
+	}
+}
+
+### Pagan Decisions
+
+automutiliation_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+
+	desc = automutiliation_decision_desc
+	selection_tooltip = automutiliation_decision_tooltip
+	major = yes
+
+	is_shown = {
+		faith = { has_doctrine = special_doctrine_sacred_eunuchs }
+	}
+
+	is_valid = {
+		has_trait = zealous
+		#You can't hurt yourself without at least an heir
+		trigger_if = {
+			limit = { is_ruler = yes }
+			custom_description = {
+				text = text_is_a_ruler_and_has_a_player_heir
+				exists = player_heir
+			}
+		}
+	}
+
+	effect = {
+		save_scope_as = actor
+		hidden_effect = { add_piety_level = 1 }
+		show_as_tooltip = { add_piety_level = 1 }
+		add_trait = devoted
+		add_trait = eunuch
+		
+		#Remove spouses and spouse adjacent
+		if = {
+			limit = { is_married = yes }
+			every_spouse = { divorce = scope:actor }
+		}
+		if = {
+			limit = { exists = betrothed }
+			break_betrothal = betrothed
+		}
+		if = {
+			limit = { is_concubine = yes }
+			this.concubinist = { remove_concubine = scope:actor }
+		}
+		if = {
+			limit = { number_of_concubines > 0 }
+			every_concubine = { scope:actor = { remove_concubine = prev } }
+		}
+		show_as_tooltip = {
+			random_list = {
+				90 = {}
+				4 = { add_trait = ill }
+				3 = { add_trait = wounded_1 }
+				2 = { add_trait = wounded_2 }
+				1 = { add_trait = wounded_3 }
+			}
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {
+		exists = primary_heir
+		primary_heir = { dynasty = root.dynasty }
+		is_at_war = no
+	}
+
+	#Cribbed from Consolateum
+	ai_will_do = {
+		base = 0
+
+		# 100% chance at 50 zeal
+		ai_value_modifier = {
+			ai_zeal = 2
+		}
+
+		modifier = {
+			add = 40
+			is_close_family_of = primary_heir
+		}
+	}
+}
+
+### Hindu Decisions
+
+#Philosophies
+# Orthodox Schools: Samkhya, Yoga, Vedanta, Vaiśeṣika, Nyaya, Mīmāṃsā
+# Hetrodox Schools: Sramana, Carvaka, Ajivika
+
+select_hindu_philosophy_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+
+	desc = select_hindu_philosophy_decision_desc
+	selection_tooltip = select_hindu_philosophy_decision_tooltip
+
+	is_shown = {
+		religion = religion:hinduism_religion
+		is_adult = yes
+	}
+
+	is_valid = {
+		has_trait = scholar
+	}
+
+	is_valid_showing_failures_only = {
+		# Have to at _least_ not be in piety debt.
+		piety >= 0
+		is_imprisoned = no
+	}
+
+	cooldown = { years = 2 }
+
+	#Link triggers to BP_hindu_decisions.txt
+	effect = {
+		show_as_tooltip = {
+			random_list = {
+				desc = select_hindu_philosophy_decision_tt
+				100 = {
+					show_chance = no
+					desc = select_hindu_philosophy_decision.samkhya
+					add_trait = hindu_philosophy_samkhya
+				}
+				100 = {
+					trigger = { NOT = { has_trait = cynical } }
+					show_chance = no
+					desc = select_hindu_philosophy_decision.yoga
+					add_trait = hindu_philosophy_yoga
+				}
+				100 = {
+					show_chance = no
+					desc = select_hindu_philosophy_decision.nyaya
+					add_trait = hindu_philosophy_nyaya
+				}
+				100 = {
+					show_chance = no
+					desc = select_hindu_philosophy_decision.vaisheshika
+					add_trait = hindu_philosophy_vaisheshika
+				}
+				100 = {
+					show_chance = no
+					desc = select_hindu_philosophy_decision.mimamsa
+					add_trait = hindu_philosophy_mimamsa
+				}
+				100 = {
+					show_chance = no
+					desc = select_hindu_philosophy_decision.vedanta
+					add_trait = hindu_philosophy_vedanta
+				}
+				100 = {
+					trigger = { NOT = { has_trait = zealous } }
+					show_chance = no
+					desc = select_hindu_philosophy_decision.charvaka
+					add_trait = hindu_philosophy_charvaka
+				}
+				100 = {
+					trigger = { NOT = { has_trait = zealous } }
+					show_chance = no
+					desc = select_hindu_philosophy_decision.ajivika
+					add_trait = hindu_philosophy_ajivika
+				}
+			}
+		}
+		trigger_event = hindu_decision.0101
+	}
+
+	ai_check_interval = 96
+	
+	ai_potential = {
+		piety >= minor_piety_value
+		NOR = {
+			has_trait = hindu_philosophy_samkhya
+			has_trait = hindu_philosophy_yoga
+			has_trait = hindu_philosophy_nyaya
+			has_trait = hindu_philosophy_vaisheshika
+			has_trait = hindu_philosophy_mimamsa
+			has_trait = hindu_philosophy_vedanta
+			has_trait = hindu_philosophy_charvaka
+			has_trait = hindu_philosophy_ajivika
+		}
+	}
+
+	ai_will_do = {
+		base = 100
+	}
+}
+
+### Zoroastrian Decisions
+
+#Legalize Caucasian Christianity
+legalize_caucasian_christianity = {
+	picture = "gfx/interface/illustrations/decisions/the_return_to_the_homeland.dds"
+	desc = legalize_caucasian_christianity_desc
+	selection_tooltip = legalize_caucasian_christianity_tooltip
+	major = yes
+	
+	is_shown = {
+		has_title = title:e_persia
+		has_religion = religion:zoroastrianism_religion
+		NOT = { has_global_variable = persia_legalizes_caucasian_christianity }
+		NAND = {
+			faith:armenian_apostolic = { has_doctrine = special_doctrine_legalized_faith_persia }
+			faith:georgian_orthodox = { has_doctrine = special_doctrine_legalized_faith_persia }
+			faith:albanian_apostolic = { has_doctrine = special_doctrine_legalized_faith_persia }
+		}
+	}
+	
+	is_valid = {
+		NOR = {
+			has_realm_law = clerical_influence_2
+			has_realm_law = clerical_influence_3
+		}
+		prestige_level >= 2
+		piety_level >= 1
+	}
+	
+	is_valid_showing_failures_only = {
+		piety >= 0
+		is_imprisoned = no
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {
+		piety = 250
+		gold = tiny_gold_max_value
+	}
+	
+	effect = {
+		show_as_tooltip = { caucasian_christian_legalization_local_effect = yes }
+		hidden_effect = {
+			root = { save_scope_as = legalizing_emperor }
+			trigger_event = { id = BP_religious_decisions.0101 }
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {
+		is_at_war = no
+	}
+	
+		ai_will_do = {
+		base = 80 # 80% Chance in general (we want it to be likely to happen if conditions are right)
+		#Zealous and Ambitious required, also needs enough gold
+		
+		#Won't do if they can't pay
+		modifier = {
+			factor = 0
+			NOT = { gold >= tiny_gold_max_value }
+			NOT = { piety >= 250 }
+		}
+		#Won't do if zealous
+		modifier = {
+			factor = 0
+			has_trait = zealous
+		}
+		#Arrogant halves the chance (Who do they think they are?!)
+		modifier = {
+			factor = 0.5
+			has_trait = arrogant
+		}
+		#Likely to do if Cynical/Ambitious (it'll keep them in the Empire and all that)
+		#Will do if both cynical and ambitious, even if arrogant
+		modifier = {
+			factor = 1.59 #sqrt(2.5) rounded up
+			has_trait = cynical
+		}
+		modifier = {
+			factor = 1.59 #sqrt(2.5) rounded up
+			has_trait = ambitious
+		}
+	}
+}

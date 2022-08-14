@@ -1,0 +1,95 @@
+﻿#Roman Reconquest Triggers
+valid_reconquest_culture_trigger = {
+	$CULTURE$ = { has_cultural_parameter = can_restore_roman_empire }
+}
+roman_reconquest_title_ownership_restrictions_trigger = {
+	AND = {
+		has_title = $VALID$
+		NOT = { has_title = $INVALID$ }
+		NOT = { has_claim_on = title:e_roman_empire }
+	}
+}
+roman_reconquest_valid_target_region_trigger = {
+	AND = {
+		scope:attacker = { has_title = $ATTACKER_TITLE$ }
+		scope:target = {
+			tier = tier_kingdom
+			any_in_de_jure_hierarchy = {
+				tier = tier_county
+				title_province = { geographical_region = $ATTACKER_REGION$ }
+			}
+		}
+	}
+}
+roman_reconquest_valid_with_claim_target_region_trigger = {
+	AND = {
+		scope:attacker = {
+			OR = {
+				has_title = $ATTACKER_TITLE$
+				has_claim_on = $ATTACKER_TITLE$
+			}
+		}
+		scope:target = {
+			tier = tier_kingdom
+			any_in_de_jure_hierarchy = {
+				tier = tier_county
+				title_province = { geographical_region = $ATTACKER_REGION$ }
+			}
+		}
+	}
+}
+#Migration Triggers
+migration_cb_valid_culture_religion_trigger = { #For whether or not this is shown
+	#Governmental trigger
+	migratory_government_trigger = yes
+	#Ethno-Religious trigger
+	OR = {
+		faith.religion = religion:tengrism_religion
+		faith.religion = religion:slavic_religion
+		faith.religion = religion:germanic_religion
+		culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:sarmatian } }
+	}
+	#We want AI Franks to conquer, not migrate
+	trigger_if = {
+		limit = { is_ai = yes }
+		NOT = { culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:old_frankish } } }
+	}
+}
+migration_cb_valid_government_rank_trigger = {
+	OR = {
+		primary_title.tier = tier_duchy
+		primary_title.tier = tier_kingdom
+	}
+}
+#Varangian Conquest Trigger: Only available after migrations are over
+varangrian_conquest_trigger = { current_date >= 800.1.1 }
+#Valid migration counties (aka source counties)
+major_migration_valid_source_counties_trigger = {
+	AND = {
+		this.culture = $ATTACKER$.culture
+		this.faith = $ATTACKER$.faith
+	}
+}
+#Migraiton War AI constraints
+general_migration_constraints_trigger = {
+	#Pass on targets who have less total development than what we currently have
+	this.total_target_development <= scope:defender.total_realm_development
+	#Pass on targets smaller than our current realm size
+	this.target_size <= scope:attacker.realm_size
+}
+minor_migration_constraints_trigger = {
+	OR = {
+		AND = { #Pass on minor migrations to even partly tribal duchies
+			tier = tier_duchy
+			any_county = {
+				scope:defender = { completely_controls = prev }
+				any_county_province = { has_holding_type = tribal_holding }
+			}
+		}
+		AND = { #We need there to be enough non-tribals to make a kingdom worthwhile
+			tier = tier_kingdom
+			minor_migration_number_of_tribal_holdings > minor_migration_number_of_nontribals
+		}
+		general_migration_constraints_trigger = yes
+	}
+}

@@ -1,0 +1,144 @@
+﻿namespace = bp_narrative_events
+
+#bp_narrative_events.0001 - Fall of Rome to Barbarians
+#bp_narrative_events.0002 - Julius Nepos becomes WRE
+
+#Fall of Rome
+bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
+	title = bp_narrative_events.0001.name
+	desc = bp_narrative_events.0001.desc
+	type = character_event
+	theme = battle
+	override_background = { event_background = burning_building }
+
+	immediate = {
+		#Find our barbarian ruler
+		title:c_roma.holder = {
+			if = {
+				limit = { fall_of_rome_trigger = yes }
+				save_scope_as = barbarian_ruler
+			}
+			else = {
+				every_liege_or_above = {
+					limit = { is_independent_ruler = yes }
+					save_scope_as = barbarian_ruler
+				}
+			}
+		}
+	}
+
+	right_portrait = {
+		character = scope:barbarian_ruler
+		animation = war_over_win
+	}
+
+	option = { #General Response
+		name = bp_narrative_events.0001.general_response
+		trigger = {
+			NOT = { has_title = title:e_byzantium }
+			NOT = { religion = religion:germanic_religion }
+			NOT = { this = scope:barbarian_ruler }
+			NOT = { this = character:93 }
+			NOT = { this = character:175110 }
+			NAND = {
+				religion = religion:christianity_religion
+				this.faith = { considers_astray_trigger = { TARGET_FAITH = faith:nicene } }
+			}
+		}
+	}
+	option = { #Germanic Pagans
+		name = bp_narrative_events.0001.germanic_religion_response
+		trigger = {
+			NOT = { has_title = title:e_byzantium }
+			NOT = { faith = faith:nicene }
+			NOT = { this = scope:barbarian_ruler }
+			NOT = { this = character:93 }
+			NOT = { this = character:175110 }
+			religion = religion:germanic_religion
+		}
+		add_piety = 100
+	}
+	option = { #Christians harmonized with the Imperial church
+		name = bp_narrative_events.0001.imperial_christian_response
+		trigger = {
+			NOT = { has_title = title:e_byzantium }
+			NOT = { faith = faith:nicene }
+			NOT = { this = scope:barbarian_ruler }
+			NOT = { this = character:93 }
+			NOT = { this = character:175110 }
+			AND = {
+				religion = religion:christianity_religion
+				this.faith = { considers_astray_trigger = { TARGET_FAITH = faith:nicene } }
+			}
+		}
+		add_piety = -100
+	}
+	option = { #Odoacer
+		name = bp_narrative_events.0001.odoacer_response
+		trigger = { this = scope:barbarian_ruler }
+		add_piety = 1000
+		add_prestige = 1000
+	}
+	option = { #Genseric
+		name = bp_narrative_events.0001.genseric_response
+		trigger = { this = character:93 }
+	}
+	option = { #Julius Nepos
+		name = bp_narrative_events.0001.nepos_response
+		trigger = { this = character:175110 }
+		if = {
+			limit = { NOT = { exists = title:e_wre.holder } }
+			trigger_event = { id = bp_narrative_events.0002 days = 0 }
+		}
+	}
+	option = { #Byzantine Option
+		name = bp_narrative_events.0001.byzantine_response
+		trigger = {
+			has_title = title:e_byzantium
+			NOT = { this = scope:barbarian_ruler }
+			NOT = { this = character:93 }
+			NOT = { this = character:175110 }
+		}
+		#Drop everyone's fervor who's in agreement with the Imperial Church
+		faith:nicene = {
+			change_fervor = {
+					value = -25
+					desc = loss_of_rome_imperial_church
+				}
+		}
+		religion:christianity_religion = {
+			every_faith = {
+				limit = {
+					this = { considers_astray_trigger = { TARGET_FAITH = faith:nicene } }
+					NOT = { this = faith:nicene }
+				}
+				change_fervor = {
+					value = -10
+					desc = loss_of_rome_astray_churches
+				}
+			}
+		}
+		add_piety = -1000
+		add_prestige = -1000
+	}
+}
+
+#Nepos becomes Western Emperor
+bp_narrative_events.0002 = { #WTWSMS id: zusk_event.26
+	title = bp_narrative_events.0002.name
+	desc = bp_narrative_events.0002.desc
+	type = character_event
+	theme = realm
+	
+	right_portrait = {
+		character = root
+		animation = personality_honorable
+	}
+	
+	option = {
+		name = bp_narrative_events.0002.a
+		convert_realm_to_bureaucratic_effect = yes
+		get_title = title:e_wre
+	}
+}
+

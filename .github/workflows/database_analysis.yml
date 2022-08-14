@@ -1,0 +1,24 @@
+name: Check Database Items
+on:
+  push:
+    branches:
+      - main
+      - master
+jobs:
+  check_database_items:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+          submodules: recursive
+      - name: "Setup Dotnet for use with actions"
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.*'
+      - name: "Install dotnet-script"
+        run: |
+          dotnet tool install --global dotnet-script
+      - name: "Run Script"
+        run: |
+          python3 .test_scripts/check_database.py

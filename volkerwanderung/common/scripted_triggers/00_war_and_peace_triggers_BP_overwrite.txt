@@ -1,0 +1,94 @@
+﻿##### Changed from Vanilla: Removed:
+# * norman_conquest_cb
+# * dismantle_byz_pretender_cb
+# * dismantle_holy_pretender_cb
+# * norwegian_invasion_cb
+# Added:
+# * the_roman_empires_imperial_reconquest_cb
+using_de_jure_cb_trigger = {
+	OR = {
+		using_cb = claim_cb
+		using_cb = de_jure_cb
+		using_cb = individual_county_de_jure_cb
+		using_cb = individual_duchy_de_jure_cb
+		using_cb = imperial_reconquest_cb
+		using_cb = the_roman_empires_imperial_reconquest_cb
+	}
+}
+
+##### Changed from Vanilla: Generalized Triggers
+war_declarer_needs_hook_on_liege_trigger = {
+	scope:actor = {
+		##### Changed from Vanilla vvvvv
+		trigger_if = {
+			limit = {
+				is_independent_ruler = no
+				liege = scope:recipient.liege
+				NOT = { liege = scope:recipient }
+				##### Changed from Vanilla vvvvv
+				liege = { banned_war_trigger = yes }
+				##### Changed from Vanilla ^^^^^
+				NOT = {
+					vassal_contract_has_flag = vassal_contract_war_override
+				}
+			}
+			always = yes
+		}
+		##### Changed from Vanilla ^^^^^
+		
+		##### Changed from Vanilla vvvvv
+		trigger_else_if = {
+			limit = {
+				is_independent_ruler = no
+				NOT = { liege = scope:recipient }
+				##### Changed from Vanilla vvvvv
+				liege = { banned_war_trigger = yes }
+				##### Changed from Vanilla ^^^^^
+				NOT = {
+					vassal_contract_has_flag = vassal_contract_war_override
+				}
+			}
+			always = yes
+		}
+		##### Changed from Vanilla ^^^^^
+		trigger_else = {
+			always = no
+		}
+	}
+}
+
+##### Changed from Vanilla: Tributaries can't be knights
+can_be_knight_trigger = {
+	trigger_if = {
+		limit = { $ARMY_OWNER$.culture = { has_cultural_parameter = minimum_prowess_for_knights } }
+		prowess >= 12
+	}
+	can_be_warrior_trigger = { ARMY_OWNER = $ARMY_OWNER$ }
+	OR = {
+		AND = {
+			$ARMY_OWNER$.culture = { has_cultural_parameter = high_prowess_ignores_knight_restrictions }
+			prowess >= 10
+		}
+		NOR = {
+			AND = {
+				has_trait = devoted
+				OR = {
+					faith = { NOT = { has_doctrine_parameter = clergy_can_fight } }
+					culture = { NOT = { has_cultural_parameter = culture_clergy_can_fight } }
+				}
+			}
+			AND = {
+				is_clergy = yes
+				OR = {
+					faith = { NOT = { has_doctrine_parameter = clergy_can_fight } }
+					culture = { NOT = { has_cultural_parameter = culture_clergy_can_fight } }
+				}
+			}
+			has_trait = blind
+			##### Changed from Vanilla vvvvv
+			vassal_contract_has_flag = tributary_installed_flag
+			##### Changed from Vanilla ^^^^^
+		}
+	}
+	is_ai = yes
+}

@@ -1,0 +1,331 @@
+﻿conversion_holy_site_vaspurakan = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.faith = {
+				controls_holy_site = vaspurakan
+			}
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.50
+	}
+}
+
+conversion_holy_site_vannes = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.faith = {
+				controls_holy_site = vannes
+			}
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.2
+	}
+}
+
+conversion_holy_site_second_vannes = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.faith = {
+				controls_holy_site = vannes
+			}
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.2
+	}
+}
+
+conversion_holy_site_mt_tondrak = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.faith = {
+				controls_holy_site = mt_tondrak
+				has_doctrine_parameter = sanctioned_false_conversion
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.3
+		
+	}
+}
+
+conversion_holy_site_amida = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.faith = { controls_holy_site = amida }
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.3
+	}
+}
+
+# Faith Tenet Values
+
+### Ethnic religions
+conversion_tenet_ethnic_religion_conversion_resistance = {
+	value = 0
+	if = {
+		limit = {
+			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_conversion_resistance_active }
+			exists = scope:county
+			#Make sure culture and faith align
+			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:county
+				VARIABLE = ethnic_religion_culture
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.80
+	}
+}
+conversion_tenet_ethnic_religion_converting_foreigners_resistance = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_other_culture_conversion_penalty_active }
+			exists = scope:county
+			NAND = {
+				actor_is_faith_culture_for_cultural_religions_trigger = {
+					ACTOR = scope:county
+					TARGET = scope:councillor_liege
+					VARIABLE = ethnic_religion_culture
+				}
+				actor_is_faith_child_culture_for_cultural_religions_trigger = {
+					ACTOR = scope:county
+					TARGET = scope:councillor_liege
+					VARIABLE = ethnic_religion_culture
+				}
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 1.00
+	}
+}
+conversion_tenet_ethnic_religion_same_culture_conversion_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
+			exists = scope:county
+			actor_is_faith_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:councillor_liege
+				TARGET = scope:county
+				VARIABLE = ethnic_religion_culture
+			}
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 1.00
+	}
+}
+conversion_tenet_ethnic_religion_child_culture_conversion_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
+			exists = scope:county
+			scope:councillor_liege.culture = { any_parent_culture_or_above = { this = scope:county.faith.var:ethnic_religion_culture } }
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.50
+	}
+}
+
+### Autocephaly Values
+conversion_tenet_autocephaly_same_culture_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			actor_is_faith_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.60
+	}
+}
+conversion_tenet_autocephaly_child_culture_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			actor_is_faith_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.30
+	}
+}
+conversion_tenet_autocephaly_same_heritage_bonus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
+			exists = scope:county
+			actor_is_same_heritage_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.15
+	}
+}
+conversion_tenet_autocephaly_different_heritage_conversion_malus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_different_heritage_conversion_malus_active }
+			exists = scope:county
+			actor_is_different_heritage_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:councillor_liege
+				VARIABLE = church_culture
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.60
+	}
+}
+conversion_tenet_autocephaly_different_heritage_conversion_resistance = {
+	value = 0
+	if = {
+		limit = {
+			scope:county.faith = { has_doctrine_parameter = tenet_autocephaly_conversion_resistance_active }
+			exists = scope:county
+			#Make sure culture and faith align
+			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+				ACTOR = scope:county
+				TARGET = scope:county
+				VARIABLE = church_culture
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.20
+	}
+}
+
+#Rigorism Values
+conversion_tenet_rigorism_conversion_resistance_both_ways = {
+	value = 0
+	if = {
+		limit = {
+			#XOR condition; other rigorist faiths have no impediment like say Khawarijis...
+			AND = {
+				OR = {
+					scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+				}
+				NAND = {
+					scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
+				}
+			}
+			exists = scope:county
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.50
+	}
+}
+#Ecumenism effects
+conversion_ecumenical_resistance = {
+	value = 0
+	if = {
+		limit = {
+			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion } }
+			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ignores_creed_impact } }
+			exists = scope:county
+			scope:county.faith.religion = scope:councillor.faith.religion
+			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.60
+	}
+}
+conversion_partial_ecumenical_resistance = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion }
+			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ignores_creed_impact } }
+			exists = scope:county
+			scope:county.faith.religion = scope:councillor.faith.religion
+			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
+			have_different_creeds_trigger = {
+				FAITH_1 = scope:councillor.liege.faith
+				FAITH_2 = scope:county.faith
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = 0.30
+	}
+}
+#Ecstatic Prophecy
+conversion_resistance_ecstatic_prophecy = {
+	value = 0
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = tenet_ecstatic_prophecy_conversion_resistance_active }
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.50
+	}
+}
+
+#Legal Faith Protection
+conversion_doctrine_legalized_faith_malus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = general_religious_protection_from_zoroastrian_cults }
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.50
+	}
+}
+conversion_doctrine_approved_cult_malus = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = zoroastrian_approved_cult_conversion_malus }
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = 0.90
+	}
+}
+
+### Effect of Elite migration
+conversion_minor_migration_minor_aristocracy_penalty = {
+	value = 0
+	add = court_chaplain_conversion_base_total
+	multiply = -1.25
+}
+conversion_recent_emigration_bonus= {
+	value = 0
+	add = court_chaplain_conversion_base_total
+	multiply = 0.25
+}
+conversion_recent_immigration_bonus = {
+	value = 0
+	add = court_chaplain_conversion_base_total
+	multiply = 0.50
+}
+

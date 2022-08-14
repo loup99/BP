@@ -1,0 +1,159 @@
+﻿##### Changed from Vanilla: Adapted government preservation mechanic
+on_claimant_faction_war_win_common_effect = {
+	##### Changed from Vanilla vvvvv
+	save_government_type_effect = {
+		THE_NEW_HOLDER = $CLAIMANT$
+		THE_PREVIOUS_HOLDER = $DEFENDER$
+	}
+	##### Changed from Vanilla ^^^^^
+
+	# If the claimant is the prisoner of the defender, free the claimant (it doesn't make much sense to leave the new king in the old king's dungeon)
+	$CLAIMANT$ = {
+		if = {
+			limit = {
+				is_imprisoned_by = $DEFENDER$
+			}
+			release_from_prison = yes
+		}
+	}
+
+	# Add mutual opinion bonuses between claimant and faction members, as well as a hook on the claimant if possible.
+	$ATTACKER$.joined_faction = {
+		every_faction_member = {
+			custom = FACTION_CLAIMANT_EVERY_FACTION_MEMBER
+			limit = {
+				NOT = { this = $ATTACKER$.joined_faction.special_character }	
+			}
+			hidden_effect = {
+				add_opinion = {
+					modifier = claimant_faction_member_opinion
+					target = $ATTACKER$.joined_faction.special_character
+				}
+				reverse_add_opinion = {
+					modifier = claimant_faction_claimant_opinion
+					target = $ATTACKER$.joined_faction.special_character
+				}
+			}
+			if = {
+				limit = {
+					can_add_hook = {
+						type = favor_hook
+						target = $ATTACKER$.joined_faction.special_character
+					}
+				}
+				add_hook = {
+					type = favor_hook
+					target = $ATTACKER$.joined_faction.special_character
+				}
+			}	
+		}
+	}
+
+	# Give the claimant their new title.
+	create_title_and_vassal_change = {
+		type = faction_demand
+		save_scope_as = change
+		add_claim_on_loss = yes
+	}
+
+	every_in_list = {
+		list = $TARGET_TITLES$
+		add_to_list = faction_titles
+		holder = {
+			save_scope_as = target_holder
+		}
+	}
+	ordered_in_list = {
+		list = $TARGET_TITLES$
+		position = 0
+		order_by = tier
+		save_scope_as = target_title
+	}
+	$ATTACKER$.joined_faction = {
+		every_faction_county_member = {
+			limit = {
+				NOT = { is_in_list = faction_titles }
+			}
+			add_to_list = faction_titles
+		}
+	}
+
+	setup_claim_cb = {
+		titles = faction_titles
+		attacker = $ATTACKER$
+		defender = $DEFENDER$
+		claimant = $CLAIMANT$
+		change = scope:change
+		civil_war = yes
+	}
+
+	# Ensure that the liege structure is preserved
+	if = {
+		limit = {
+			scope:target_title.holder = { is_independent_ruler = no }
+			$CLAIMANT$.primary_title.tier < scope:target_title.tier
+		}
+		$CLAIMANT$ = {
+			change_liege = {
+				liege = scope:target_title.holder.liege
+				change = scope:change
+			}
+		}
+	}
+	
+	# Preserve Grandeur
+	if = {
+		limit = {
+			scope:target_title.holder = {
+				has_royal_court = yes
+			}
+			$CLAIMANT$ = {
+				has_royal_court = no
+			}
+		}
+		$CLAIMANT$ = {
+			set_variable = {
+				name = previous_holder_grandeur_value
+				value = scope:target_title.holder.court_grandeur_current
+			}
+			save_scope_as = claimant_scope
+		}
+	}
+	
+	# The CLAIMANT scope is lost after the next step, so have to save the scope here
+	# BP: Because we need the claimant scope elsewhere, we've move this out of the if statement
+	$CLAIMANT$ = { save_scope_as = BP_claimant_scope }
+	
+
+	resolve_title_and_vassal_change = scope:change
+	
+	# Add Appropriate Grandeur
+	if = {
+		limit = { exists = scope:claimant_scope }
+		scope:claimant_scope = {
+			if = {
+				limit = {
+					exists = var:previous_holder_grandeur_value
+					has_royal_court = yes
+				}
+				hidden_effect = {
+					change_current_court_grandeur = -100 # Reset to 0
+					change_current_court_grandeur = var:previous_holder_grandeur_value
+					remove_variable = previous_holder_grandeur_value
+				}
+				change_current_court_grandeur = massive_court_grandeur_gain # Gain a bonus to Grandeur for winning a claim faction
+			}
+		}
+	}
+	
+	# TODO Add prestige effects based on $ATTACKER_PRESTIGE$ and $DEFENDER_PRESTIGE$
+	
+	##### Changed from Vanilla vvvvv
+	convert_government_type_effect = {
+		THE_PREVIOUS_HOLDER = $DEFENDER$
+		THE_NEW_HOLDER = scope:BP_claimant_scope
+	}
+	scope:BP_claimant_scope = { government_transition_garbage_collect_effect = yes }
+	$DEFENDER$ = { government_transition_garbage_collect_effect = yes }
+	##### Changed from Vanilla ^^^^^
+}
