@@ -1,4 +1,30 @@
-﻿##### Changed from Vanilla: Applied various BP effects
+﻿##### Changed from Vanilla: Added game rule effect
+conversion_culture_harder_to_convert_default_value = 30#%; integer for localization
+conversion_culture_harder_to_convert_BP_value = 50#%; integer for localization
+conversion_culture_harder_to_convert_game_value = {
+	value = 0
+	if = {
+		limit = { has_game_rule = bp_strong_believers_conversion_resistance }
+		add = conversion_culture_harder_to_convert_BP_value
+	}
+	else = { add = conversion_culture_harder_to_convert_default_value }
+}
+conversion_culture_harder_to_convert = {
+	value = 0
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county.culture = {
+				has_cultural_parameter = harder_to_convert_county_faith
+			}
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = conversion_culture_harder_to_convert_game_value
+		divide = 100
+	}
+}
+
+##### Changed from Vanilla: Applied various BP effects
 court_chaplain_conversion_contextual_bonuses = {
 	#Perk Bonus
 	if = {
@@ -224,49 +250,26 @@ court_chaplain_conversion_contextual_bonuses = {
 			}
 			exists = scope:county
 		}
-		if = {
-			limit = { scope:councillor_liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways } }
-			add = {
-				value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
-				desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_LIEGE_IMPACT
-			}
-		}
-		else = {
-			add = {
-				value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
-				desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_COUNTY_IMPACT
-			}
+		add = {
+			value = scope:councillor.conversion_tenet_rigorism_conversion_resistance_both_ways
+			desc = COURT_CHAPLAIN_CONVERSION_TENET_RIGORISM_CONVERSION_IMPACT
 		}
 	}
 	### Creeds
-	if = { #Having an creed makes you more protected against conversion from creedless faiths
+	if = { #Having an creed makes you more protected against conversion from related creed faiths
 		limit = {
-			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion } }
-			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ignores_creed_impact } }
+			scope:councillor_liege.faith = { has_doctrine_parameter = resists_same_religion_conversion }
 			exists = scope:county
 			scope:county.faith.religion = scope:councillor.faith.religion
 			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
-		}
-		add = {
-			value = scope:councillor.conversion_ecumenical_resistance
-			desc = COURT_CHAPLAIN_CONVERSION_ECUMENICAL_MODIFIER
-		}
-	}
-	if = { #Having an creed makes you more protected against conversion from other creed faiths
-		limit = {
-			scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion }
-			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ignores_creed_impact } }
-			exists = scope:county
-			scope:county.faith.religion = scope:councillor.faith.religion
-			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
-			have_different_creeds_trigger = {
-				FAITH_1 = scope:councillor.liege.faith
+			have_compatible_christian_creeds_trigger = {
+				FAITH_1 = scope:councillor_liege.faith
 				FAITH_2 = scope:county.faith
 			}
 		}
 		add = {
-			value = scope:councillor.conversion_partial_ecumenical_resistance
-			desc = COURT_CHAPLAIN_CONVERSION_ECUMENICAL_PARTIAL_MODIFIER
+			value = scope:councillor.conversion_ecumenical_resistance
+			desc = COURT_CHAPLAIN_CONVERSION_ECUMENICAL_MODIFIER
 		}
 	}
 	##### Changed from Vanilla ^^^^^

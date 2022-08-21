@@ -66,6 +66,7 @@ conversion_holy_site_amida = {
 # Faith Tenet Values
 
 ### Ethnic religions
+conversion_tenet_ethnic_religion_conversion_resistance_value = 80#%; integer for localization
 conversion_tenet_ethnic_religion_conversion_resistance = {
 	value = 0
 	if = {
@@ -80,9 +81,11 @@ conversion_tenet_ethnic_religion_conversion_resistance = {
 			}
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.80
+		multiply = conversion_tenet_ethnic_religion_conversion_resistance_value
+		divide = 100
 	}
 }
+conversion_tenet_ethnic_religion_converting_foreigners_resistance_value = 100#%; integer for localization
 conversion_tenet_ethnic_religion_converting_foreigners_resistance = {
 	value = 0
 	if = {
@@ -103,9 +106,11 @@ conversion_tenet_ethnic_religion_converting_foreigners_resistance = {
 			}
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 1.00
+		multiply = conversion_tenet_ethnic_religion_converting_foreigners_resistance_value
+		divide = 100
 	}
 }
+conversion_tenet_ethnic_religion_same_culture_conversion_bonus_value = 100#%; integer for localization
 conversion_tenet_ethnic_religion_same_culture_conversion_bonus = {
 	value = 0
 	if = {
@@ -119,9 +124,11 @@ conversion_tenet_ethnic_religion_same_culture_conversion_bonus = {
 			}
 		}
 		add = court_chaplain_conversion_base_total
-		multiply = 1.00
+		multiply = conversion_tenet_ethnic_religion_same_culture_conversion_bonus_value
+		divide = 100
 	}
 }
+conversion_tenet_ethnic_religion_child_culture_conversion_bonus_value = 50#%; integer for localization
 conversion_tenet_ethnic_religion_child_culture_conversion_bonus = {
 	value = 0
 	if = {
@@ -131,11 +138,13 @@ conversion_tenet_ethnic_religion_child_culture_conversion_bonus = {
 			scope:councillor_liege.culture = { any_parent_culture_or_above = { this = scope:county.faith.var:ethnic_religion_culture } }
 		}
 		add = court_chaplain_conversion_base_total
-		multiply = 0.50
+		multiply = conversion_tenet_ethnic_religion_child_culture_conversion_bonus_value
+		divide = 100
 	}
 }
 
 ### Autocephaly Values
+conversion_tenet_autocephaly_same_culture_bonus_value = 60#%; integer for localization
 conversion_tenet_autocephaly_same_culture_bonus = {
 	value = 0
 	if = {
@@ -149,9 +158,11 @@ conversion_tenet_autocephaly_same_culture_bonus = {
 			}
 		}
 		add = court_chaplain_conversion_base_total
-		multiply = 0.60
+		multiply = conversion_tenet_autocephaly_same_culture_bonus_value
+		divide = 100
 	}
 }
+conversion_tenet_autocephaly_child_culture_bonus_value = 30#%; integer for localization
 conversion_tenet_autocephaly_child_culture_bonus = {
 	value = 0
 	if = {
@@ -165,9 +176,11 @@ conversion_tenet_autocephaly_child_culture_bonus = {
 			}
 		}
 		add = court_chaplain_conversion_base_total
-		multiply = 0.30
+		multiply = conversion_tenet_autocephaly_child_culture_bonus_value
+		divide = 100
 	}
 }
+conversion_tenet_autocephaly_same_heritage_bonus_value = 15#%; integer for localization
 conversion_tenet_autocephaly_same_heritage_bonus = {
 	value = 0
 	if = {
@@ -181,9 +194,11 @@ conversion_tenet_autocephaly_same_heritage_bonus = {
 			}
 		}
 		add = court_chaplain_conversion_base_total
-		multiply = 0.15
+		multiply = conversion_tenet_autocephaly_same_heritage_bonus_value
+		divide = 100
 	}
 }
+conversion_tenet_autocephaly_different_heritage_conversion_malus_value = 60#%; integer for localization
 conversion_tenet_autocephaly_different_heritage_conversion_malus = {
 	value = 0
 	if = {
@@ -197,9 +212,11 @@ conversion_tenet_autocephaly_different_heritage_conversion_malus = {
 			}
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.60
+		multiply = conversion_tenet_autocephaly_different_heritage_conversion_malus_value
+		divide = 100
 	}
 }
+conversion_tenet_autocephaly_different_heritage_conversion_resistance_value = 20#%; integer for localization
 conversion_tenet_autocephaly_different_heritage_conversion_resistance = {
 	value = 0
 	if = {
@@ -214,11 +231,14 @@ conversion_tenet_autocephaly_different_heritage_conversion_resistance = {
 			}
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.20
+		multiply = conversion_tenet_autocephaly_different_heritage_conversion_resistance_value
+		divide = 100
 	}
 }
 
 #Rigorism Values
+conversion_tenet_rigorism_conversion_resistor_value = 30#% for localization
+conversion_tenet_rigorism_conversion_convertor_value = 50#% for localization
 conversion_tenet_rigorism_conversion_resistance_both_ways = {
 	value = 0
 	if = {
@@ -236,44 +256,42 @@ conversion_tenet_rigorism_conversion_resistance_both_ways = {
 			}
 			exists = scope:county
 		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.50
+		#If we're the rigorist and the county is not, apply the convertor value
+		if = {
+			limit = { scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways } }
+			subtract = court_chaplain_conversion_base_total
+			multiply = conversion_tenet_rigorism_conversion_convertor_value
+		}
+		#Otherwise, the county is rigorist and we're not, apply the resistor value
+		else = {
+			subtract = court_chaplain_conversion_base_total
+			multiply = conversion_tenet_rigorism_conversion_resistor_value
+		}
+		divide = 100
 	}
 }
 #Ecumenism effects
+conversion_ecumenical_resistance_value = 30#%; need percent value for localization
 conversion_ecumenical_resistance = {
 	value = 0
 	if = {
 		limit = {
-			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion } }
-			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ignores_creed_impact } }
+			scope:councillor_liege.faith = { has_doctrine_parameter = resists_same_religion_conversion }
 			exists = scope:county
 			scope:county.faith.religion = scope:councillor.faith.religion
 			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.60
-	}
-}
-conversion_partial_ecumenical_resistance = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor.liege.faith = { has_doctrine_parameter = resists_same_religion_conversion }
-			NOT = { scope:councillor.liege.faith = { has_doctrine_parameter = tenet_ignores_creed_impact } }
-			exists = scope:county
-			scope:county.faith.religion = scope:councillor.faith.religion
-			scope:county.faith = { has_doctrine_parameter = resists_same_religion_conversion }
-			have_different_creeds_trigger = {
-				FAITH_1 = scope:councillor.liege.faith
+			have_compatible_christian_creeds_trigger = {
+				FAITH_1 = scope:councillor_liege.faith
 				FAITH_2 = scope:county.faith
 			}
 		}
 		subtract = court_chaplain_conversion_base_total
-		multiply = 0.30
+		multiply = conversion_ecumenical_resistance_value
+		divide = 100
 	}
 }
 #Ecstatic Prophecy
+conversion_resistance_ecstatic_prophecy_value = 30#%; need percent value for localization
 conversion_resistance_ecstatic_prophecy = {
 	value = 0
 	if = {
@@ -282,7 +300,8 @@ conversion_resistance_ecstatic_prophecy = {
 			scope:county.faith = { has_doctrine_parameter = tenet_ecstatic_prophecy_conversion_resistance_active }
 		}
 		add = court_chaplain_conversion_base_total
-		multiply = 0.50
+		multiply = conversion_resistance_ecstatic_prophecy_value
+		divide = 100
 	}
 }
 
@@ -328,4 +347,3 @@ conversion_recent_immigration_bonus = {
 	add = court_chaplain_conversion_base_total
 	multiply = 0.50
 }
-
