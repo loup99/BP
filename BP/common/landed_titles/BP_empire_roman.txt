@@ -2,8 +2,6 @@
 @better_than_the_alternatives_score = 50
 @always_primary_score = 1000
 
-#TODO: Fixed commented out capitals
-
 #### Titular Empires #####
 e_roman_empire = {
 	color = { 167 10 100 }
@@ -17,8 +15,8 @@ e_roman_empire = {
 		if = {
 			limit = {
 				OR = {
-					culture_group = culture_group:latin_group
-					culture_group = culture_group:byzantine_group
+					culture = { has_cultural_pillar = heritage_byzantine }
+					culture = { has_cultural_pillar = heritage_latin }
 				}
 			}
 			add = @always_primary_score
@@ -27,39 +25,45 @@ e_roman_empire = {
 	
 	cultural_names = {
 		#Roman Cultures
-		roman = cn_imperium_romanum
-		romano_gallic = cn_imperium_romanum
-		romano_hispanic = cn_imperium_romanum
-		romano_british = cn_imperium_romanum
-		african_romance = cn_imperium_romanum
-		raetoroman = cn_imperium_romanum
-		thraco_roman = cn_imperium_romanum
-		illyro_roman = cn_imperium_romanum
-		pannonian = cn_imperium_romanum
-		dalmatian = cn_imperium_romanum
-		noricroman = cn_imperium_romanum
-		romano_gothic = cn_imperium_romanum
-		romano_dacian = cn_imperium_romanum
-		romano_frank = cn_imperium_romanum
-		romano_aramean = cn_imperium_romanum
-		romano_vandalic = cn_imperium_romanum
+		name_list_roman = cn_imperium_romanum
+		name_list_romano_gallic = cn_imperium_romanum
+		name_list_romano_hispanic = cn_imperium_romanum
+		name_list_romano_british = cn_imperium_romanum
+		name_list_romano_african = cn_imperium_romanum
+		name_list_romano_raetian = cn_imperium_romanum
+		name_list_romano_thracian = cn_imperium_romanum
+		name_list_romano_illyrian = cn_imperium_romanum
+		name_list_romano_pannonian = cn_imperium_romanum
+		name_list_dalmatian = cn_imperium_romanum
+		name_list_romano_noric = cn_imperium_romanum
+		name_list_romano_gothic = cn_imperium_romanum
+		name_list_romano_dacian = cn_imperium_romanum
+		name_list_romano_frank = cn_imperium_romanum
+		name_list_romano_aramean = cn_imperium_romanum
+		name_list_romano_vandalic = cn_imperium_romanum
 		#Byzantine Cultures
-		greek = cn_basileia_rhomaion
-		aeolian = cn_basileia_rhomaion
-		helleno_aramean = cn_basileia_rhomaion
-		greek_gothic = cn_basileia_rhomaion
-		greek_persian = cn_basileia_rhomaion
-		isaurian_persian = cn_basileia_rhomaion
-		grecco_axumite = cn_basileia_rhomaion
-		bosporan = cn_basileia_rhomaion
-		pontic = cn_basileia_rhomaion
-		tsakonian = cn_basileia_rhomaion
-		massalian = cn_basileia_rhomaion
-		helleno_thracian = cn_basileia_rhomaion
+		name_list_greek = cn_basileia_rhomaion
+		name_list_aeolian = cn_basileia_rhomaion
+		name_list_helleno_aramean = cn_basileia_rhomaion
+		name_list_greek_gothic = cn_basileia_rhomaion
+		name_list_greek_persian = cn_basileia_rhomaion
+		name_list_isaurian_persian = cn_basileia_rhomaion
+		name_list_grecco_axumite = cn_basileia_rhomaion
+		name_list_bosporan = cn_basileia_rhomaion
+		name_list_pontic = cn_basileia_rhomaion
+		name_list_tsakonian = cn_basileia_rhomaion
+		name_list_massalian = cn_basileia_rhomaion
+		name_list_helleno_thracian = cn_basileia_rhomaion
+		name_list_helleno_libyan = cn_basileia_rhomaion
 	}
 	
 	#Should be creatable by decision
-	can_create = { always = no }
+	can_create = {
+		custom_description = {
+			text = only_creatable_by_decision
+			always = no
+		}
+	}
 }
 
 e_wre = {
@@ -72,17 +76,19 @@ e_wre = {
 	#Correct Title for Latins
 	ai_primary_priority = {
 		if = {
-			limit = { culture_group = culture_group:latin_group }
+			limit = { culture = { has_cultural_pillar = heritage_latin } }
 			add = @correct_culture_primary_score
 		}
 	}
 	
 	#Should be creatable by decision
-	can_create = { always = no }
+	can_create = {
+		custom_description = {
+			text = only_creatable_by_decision
+			always = no
+		}
+	}
 }
-
-#Naming localization order: e_italy, e_gaul, e_spain, e_britannia, e_north_africa, e_byzantium
-#LT-Rascek stopped localization in Novempopulana in e_gaul
 
 #### Other Roman-associated Titles ####
 k_italy = {
@@ -91,11 +97,10 @@ k_italy = {
 	capital = c_lombardia # Pavia
 	
 	can_create = {
-		trigger_if = {
-			limit = { is_ai = yes }
-			faith = { religion_tag = christianity_religion }
-		}
+		creation_trigger_k_italy_trigger = yes
+		general_kingdom_title_creation_trigger = yes
 	}
+	can_create_on_partition = { creation_trigger_k_italy_trigger = yes }
 	
 	ai_primary_priority = {
 		if = {
@@ -121,7 +126,12 @@ d_italy_prefect = {
 		}
 	}
 	
-	can_create = { always = no }
+	can_create = {
+		custom_description = {
+			text = cannot_create_title
+			always = no
+		}
+	}
 }
 
 k_italy_prefect = {
@@ -140,7 +150,7 @@ k_italy_prefect = {
 		}
 	}
 	
-	can_create = { always = no }
+	can_create = { general_kingdom_title_creation_trigger = yes }
 }
 
 k_illyria_prefect = {
@@ -158,14 +168,14 @@ k_illyria_prefect = {
 			add = @correct_culture_primary_score
 		}
 	}
-	can_create = { always = no }
+	can_create = { general_kingdom_title_creation_trigger = yes }
 }
 
 k_africa_prefect = {
 	color = { 183 180 143 }
 	color2 = { 0 128 128 }
 	capital = c_tunis # Tunis
-	can_create = { always = no }
+	can_create = { general_kingdom_title_creation_trigger = yes }
 }
 
 d_gaul_prefect = {
@@ -183,7 +193,12 @@ d_gaul_prefect = {
 			add = @correct_culture_primary_score
 		}
 	}
-	can_create = { always = no }
+	can_create = {
+		custom_description = {
+			text = cannot_create_title
+			always = no
+		}
+	}
 }
 
 d_senate = {
@@ -199,7 +214,12 @@ d_senate = {
 	}
 	
 	#Should be creatable by decision
-	can_create = { always = no }
+	can_create = {
+		custom_description = {
+			text = cannot_create_title
+			always = no
+		}
+	}
 }
 
 k_republic = {
@@ -237,7 +257,12 @@ d_roman_prefect = {
 		}
 	}
 	
-	can_create = { always = no }
+	can_create = {
+		custom_description = {
+			text = cannot_create_title
+			always = no
+		}
+	}
 }
 
 d_constantinopolitan_prefect = {
@@ -256,7 +281,12 @@ d_constantinopolitan_prefect = {
 		}
 	}
 	
-	can_create = { always = no }
+	can_create = {
+		custom_description = {
+			text = cannot_create_title
+			always = no
+		}
+	}
 }
 
 k_romagna = {
@@ -265,13 +295,10 @@ k_romagna = {
 	capital = c_roma # Rome
 	
 	can_create = {
-		trigger_if = {
-			limit = { is_ai = yes }
-			faith = { religion_tag = christianity_religion }
-		}
+		creation_trigger_k_romagna_trigger = yes
+		general_kingdom_title_creation_trigger = yes
 	}
+	can_create_on_partition = { creation_trigger_k_romagna_trigger = yes }
 	
-	cultural_names = {
-		greek = cn_ravenna
-	}
+	cultural_names = { name_list_greek = cn_ravenna }
 }

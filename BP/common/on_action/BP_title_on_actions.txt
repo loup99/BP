@@ -1,0 +1,355 @@
+﻿# All on-actions in this file provide scope:transfer_type unless otherwise noted
+# scope:transfer_type has the following permutations:
+# flag:conquest
+# flag:conquest_holy_war
+# flag:conquest_claim
+# flag:conquest_populist
+# flag:inheritance
+# flag:abdication
+# flag:destroyed
+# flag:created
+# flag:usurped
+# flag:granted
+# flag:revoked
+# flag:election
+# flag:independency
+# flag:returned
+# flag:leased_out
+# flag:lease_revoked
+# flag:faction_demand
+# flag:swear_fealty
+
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	events = {
+		delay = { days = 1 }
+		BP_roman_government_events.0001
+	}
+	on_actions = {
+		#Government Handling stuff
+		BP_set_government_id_effect_on_title_gain
+		BP_handle_bureaucratic_succession
+		BP_prevent_title_grant_boostrapping
+		BP_apply_title_laws
+		BP_degrade_roman_government
+		BP_set_court_langauge
+		#Other On Actions
+		BP_fall_of_rome
+		BP_remove_migration_modifiers
+		BP_other_title_effects
+	}
+}
+
+BP_set_government_id_effect_on_title_gain = {
+	effect = {
+		set_government_id_effect = { THE_RULER = root }
+	}
+}
+
+#Handle Bureaucratic succession for landed chars
+BP_handle_bureaucratic_succession = {
+	effect = {
+		if = {
+			limit = {
+				exists = scope:title.holder
+				exists = scope:previous_holder
+				scope:title.tier = tier_empire
+				scope:previous_holder = { has_government = bureaucratic_government }
+			}
+			#If the previous holder was bureaucratic, I become bureauctic (if having correct government)
+			if = {
+				limit = { valid_bureaucratic_election_precursor_governments_trigger = yes }
+				#In the case of an external/non-bureaucratic_taxation ruler,
+				#Update taxation rules after switching government
+				if = {
+					limit = { has_bureaucratic_taxation_trigger = no }
+					convert_realm_to_bureaucratic_effect = yes
+				}
+				#Otherwise, just switch government if you don't have it already (somehow)
+				else = { convert_realm_to_bureaucratic_effect = yes }
+			}
+			#If an invalid government arises, then the bureaucratic edifice must collapse
+			else = { convert_realm_to_subroman_direct_effect = yes }
+			
+			#Then, change the previous holder's government if required
+			scope:previous_holder = {
+				if = {
+					limit = { is_landed = yes } #Total usurpation &c.
+					#If he's still a valid bureaucrat-type government, apply the correct laws
+					if = { #Is a gubernatorial
+						limit = {
+							has_bureaucratic_government_type_trigger = yes
+							valid_bureaucratic_government_type_status_trigger = yes
+							is_independent_ruler = no
+						}
+						convert_realm_to_gubernatorial_effect = yes
+					}
+					else_if = { #He's still an independent bureaucrat (somehow)
+						limit = {
+							has_bureaucratic_government_type_trigger = yes
+							valid_bureaucratic_government_type_status_trigger = yes
+							is_independent_ruler = yes
+						}
+						convert_realm_to_bureaucratic_effect = yes
+					}
+					#Otherwise, turn him to subroman government
+					else = { convert_realm_to_subroman_direct_effect = yes }
+				}
+			}
+		}
+	}
+}
+
+#Give gubernatorial_government the correct title succession law
+BP_apply_title_laws = {
+	effect = {
+		if = {
+			limit = {
+				scope:transfer_type = flag:granted
+				root = { has_government = gubernatorial_government }
+				scope:title.tier >= tier_duchy
+			}
+			scope:title = { remove_all_title_laws_effect = yes }
+		}
+		#Apply Title Specific Laws for specific governments
+		if = {
+			limit = { scope:title.tier = tier_empire }
+			if = {
+				limit = { has_government = bureaucratic_government }
+				scope:title = { add_title_law = imperial_elective_succession_law }
+			}
+			else_if = {
+				limit = { has_government = eranshar_government }
+				scope:title = { add_title_law = mahestan_elective_succession_law }
+			}
+		}
+	}
+}
+
+#Prevent government boostraping effect
+BP_prevent_title_grant_boostrapping = {
+	effect = {
+		if = {
+			limit = {
+				OR = {
+					scope:transfer_type = flag:granted
+					scope:transfer_type = flag:usurpation
+					scope:transfer_type = flag:abdication
+					scope:transfer_type = flag:inheritance
+					scope:transfer_type = flag:independency
+				}
+				#Only check if getting baronies/counties
+				scope:title.tier <= tier_county
+				#Only run this check the first time a char get a county or barony
+				OR = {
+					AND = {
+						primary_title.tier = tier_county
+						any_held_title = { count = 1 this.tier = tier_county }
+					}
+					AND = {
+						primary_title.tier = tier_barony
+						any_held_title = { count = 1 this.tier = tier_barony }
+					}
+				}
+			}
+			boostrap_prevention_effect = {
+				THE_LANDED_TITLE = scope:title
+				THE_PREVIOUS_HOLDER = scope:previous_holder
+			}
+		}
+	}
+}
+
+#If we have an invalid state for Roman governance, degrade it.
+BP_degrade_roman_government = {
+	effect = { degrade_roman_government_effect = yes }
+}
+
+#Keep Gupta and Bureaucratic Cout Languages
+BP_set_court_langauge = {
+	effect = {
+		if = {
+			limit = {
+				has_royal_court = yes
+				has_government = bureaucratic_government
+				scope:title.tier >= tier_kingdom
+				scope:title = root.primary_title #Fire only once per succession
+				primary_title = { has_variable = court_language }
+			}
+			set_court_language_from_effect = {
+				CULTURE = primary_title.var:court_language
+				CHARACTER = root
+			}
+		}
+		else_if = {
+			limit = {
+				has_royal_court = yes
+				scope:title.tier >= tier_kingdom
+				has_government = gupta_government
+				scope:title = root.primary_title #Fire only once per succession
+			}
+			set_court_language = language_sanskrit
+		}
+	}
+}
+
+#Fires when Rome falls
+BP_fall_of_rome = {
+	effect = {
+		if = {
+			limit = {
+				#Only shocking the first time...
+				NOT = { has_global_variable = fall_of_rome }
+				title:c_roma.holder = {
+					OR = {
+						fall_of_rome_trigger = yes
+						any_liege_or_above = { fall_of_rome_trigger = yes }
+					}
+				}
+			}
+			#Prevent from firing twice
+			set_global_variable = {
+				name = fall_of_rome
+				value = title:c_roma.holder
+			}
+			every_ruler = { #Inform all playable characters
+				limit = { primary_title.tier >= tier_county }
+				trigger_event = { id = bp_narrative_events.0001 }
+			}
+		}
+	}
+}
+
+#Cleanup migration modifiers on certain transfers
+BP_remove_migration_modifiers = {
+	effect = {
+		if = {
+			limit = {
+				#Only cleanup for conquests
+				OR = {
+					scope:transfer_type = flag:conquest
+					scope:transfer_type = flag:conquest_holy_war
+					scope:transfer_type = flag:conquest_claim
+					scope:transfer_type = flag:conquest_populist
+				}
+			}
+			if = {
+				limit = { scope:title.tier >= tier_county }
+				every_county = {
+					limit = { #Cleanup counties under the entire hierarchy
+						OR = {
+							this = scope:title
+							this.duchy = scope:title
+							this.kingdom = scope:title
+							this.empire = scope:title
+							holder = { target_is_liege_or_above = root } #Catch vassal
+						}
+					}
+					#If counties under aristocracy/recent immigration modifiers are conquered by others,
+					#remove the modifiers
+					if = {
+						limit = { this = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy } }
+						this = { remove_county_modifier = county_modifier_minor_migration_minor_aristocracy }
+					}
+					else_if = {
+						limit = { this = { has_county_modifier = county_modifier_migration_recent_emigration } }
+						this = { remove_county_modifier = county_modifier_migration_recent_emigration }
+					}
+					else_if = {
+						limit = { this = { has_county_modifier = county_modifier_migration_recent_immigration } }
+						this = { remove_county_modifier = county_modifier_migration_recent_immigration }
+					}
+				}
+			}
+		}
+	}
+}
+
+# A title is destroyed
+# root = the holder before destruction
+# scope:landed_title = the title that is being destroyed
+# Does *not* provide scope:transfer_type
+on_title_destroyed = {
+	on_actions = {
+		BP_degrade_roman_government
+		BP_swap_wre_for_italy
+	}
+}
+
+#Change every e_wre kingdom to e_italy if WRE falls (i.e., has only 1 kingdom title)
+BP_swap_wre_for_italy = {
+	effect = {
+		if = {
+			limit = {
+				any_kingdom = {
+					count <= 1
+					de_jure_liege = title:e_wre
+				}
+			}
+			every_kingdom = {
+				limit = { this.de_jure_liege = title:e_wre }
+				set_de_jure_liege_title = title:e_italy
+			}
+		}
+	}
+}
+
+# A title change makes the character rank down in the landed tiers (eg King -> Duke)
+# root = character ranking down
+# scope:title = old primary title
+on_rank_down = {
+	on_actions = {
+		BP_bureaucratic_demotion
+	}
+}
+
+BP_bureaucratic_demotion = {
+	effect = {
+		if = { #If we were demoted but not independent, just swap governments
+			limit = {
+				has_government = bureaucratic_government
+				valid_bureaucratic_status_trigger = no
+				valid_gubernatorial_status_trigger = yes
+			}
+			convert_realm_to_gubernatorial_effect = yes
+		}
+	}
+}
+
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
+on_title_lost = {
+	on_actions = { BP_remove_title_related_character_modifiers }
+}
+
+#If you're no longer the head honcho, remove Senate approval
+BP_remove_title_related_character_modifiers = {
+	effect = {
+		if = {
+			limit = { NOT = { root = title:d_senate.holder.top_liege } }
+			if = {
+				limit = { has_character_modifier = approved_by_the_senate }
+				remove_character_modifier = approved_by_the_senate
+			}
+			if = {
+				limit = { has_character_modifier = rejected_by_the_senate }
+				remove_character_modifier = rejected_by_the_senate
+			}
+			if = {
+				limit = { has_character_modifier = ignored_the_senate }
+				remove_character_modifier = ignored_the_senate
+			}
+		}
+	}
+}
+
+BP_other_title_effects = {
+	effect = {
+		#Check the state of k_vandalica's name
+		update_name_of_vandal_kingdom_effect = yes
+	}
+}

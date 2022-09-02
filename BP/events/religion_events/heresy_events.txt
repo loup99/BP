@@ -172,7 +172,7 @@ heresy.0001 = {
 				limit = {
 					has_variable = player_created_faith
 					num_county_followers > 0
-					is_valid_heresy = {
+					is_valid_heresy_trigger = {
 						ORIGIN_FAITH = root
 						HERETICAL_FAITH = this
 					}
@@ -181,7 +181,7 @@ heresy.0001 = {
 				# Priority 2: Any nearby 'preferred heresy' faith.
 				alternative_limit = {
 					num_county_followers > 0
-					is_preferred_heresy = {
+					is_preferred_heresy_trigger = {
 						ORIGIN_FAITH = root
 						HERETICAL_FAITH = this
 					}
@@ -190,14 +190,14 @@ heresy.0001 = {
 				# Priority 2.5: For the 'strict' game rule, only use preferred heresies.
 				alternative_limit = {
 					has_game_rule = strict_regional_heresy
-					is_preferred_heresy = {
+					is_preferred_heresy_trigger = {
 						ORIGIN_FAITH = root
 						HERETICAL_FAITH = this
 					}
 				}
 				# Priority 3: Any valid faith.
 				alternative_limit = {
-					is_valid_heresy = {
+					is_valid_heresy_trigger = {
 						ORIGIN_FAITH = root
 						HERETICAL_FAITH = this
 					}
@@ -211,7 +211,7 @@ heresy.0001 = {
 					# Preferred heresies get another bonus.
 					modifier = {
 						factor = 5
-						is_preferred_heresy = {
+						is_preferred_heresy_trigger = {
 							ORIGIN_FAITH = root
 							HERETICAL_FAITH = this
 						}
@@ -224,7 +224,7 @@ heresy.0001 = {
 					modifier = {
 						has_game_rule = strict_regional_heresy
 						NOT = {
-							is_preferred_heresy = {
+							is_preferred_heresy_trigger = {
 								ORIGIN_FAITH = root
 								HERETICAL_FAITH = this
 							}
@@ -237,101 +237,28 @@ heresy.0001 = {
 					# Uncommon Faiths : Steadily declined after Vth century
 					modifier = {
 						factor = 0.5
-						OR = {
-							#Christians
-							this = faith:audianism
-							this = faith:montanism
-							this = faith:patripassianism
-							#Dualist
-							this = faith:valentinianism
-						}
+						is_uncommon_faith_trigger = yes
 					}
 					#Rare Faiths: Declined rapidly after 476 or fairly rare anyway
 					modifier = {
 						factor = 0.1
-						OR = {
-							#Christians
-							this = faith:antinomianism
-							this = faith:apollinarism
-							this = faith:doceticism
-							this = faith:melchisdechianism
-							this = faith:monarchianism
-							this = faith:pelagianism
-							this = faith:pneumatomachianism
-							#Dualists
-							this = faith:sethianism
-						}
+						is_rare_faith_trigger = yes
 					}
 					#Exceptionally Rare Faiths ; Dead by 476 or were not well attested after, but **might** be revivable...
 					modifier = {
 						factor = 0.05
-						OR = {
-							#Christians
-							this = faith:binitarianism
-							this = faith:marcionism
-							this = faith:messalian
-							this = faith:total_depravity
-							#Dualists
-							this = faith:cainitism
-							this = faith:marcosianism
-							this = faith:sabianism
-							this = faith:sethianism
-						}
+						is_exceptionally_rare_faith_trigger = yes
 					}
 					#Localized Faiths
 					#Localized by region/culture; given larger than normal location bonuses to compensate
 					modifier = {
 						factor = 0.01
-						OR = {
-							#Christians
-							this = faith:ebionite
-							#Jews
-							this = faith:samaritan
-							this = faith:tzadikite
-							#Dualists
-							this = faith:mandeaism
-							#Mazdans
-							this = faith:urartuism
-						}
+						is_localized_faith_trigger = yes
 					}
 					# Disabled Faiths (never spawn as heresy)
 					modifier = {
 						factor = 0
-						OR = {
-							#Christian Religion
-							
-							this = faith:insular_celtic
-							this = faith:adamites
-							#Autocephalous Churches should never spawn as heresies
-							this = { has_doctrine = tenet_autocephaly }
-							#TODO: Reimplement after flags added for it to spawn
-							this = faith:eutychianism
-							this = faith:iconoclast
-							this = faith:paulician
-							this = faith:aquileianism
-							#TODO: Reimplement after schism implemented
-							this = faith:catholic
-							this = faith:orthodox
-							
-							#Judaism Religion
-							
-							#Reimplement after flags added for it to spawn
-							this = faith:kabarism
-							#Otherwise Rare Faiths
-							this = faith:malabarism #Cochin Jews
-							
-							#Islam Religion
-							
-							#TODO: Reimplement after ROI
-							this.religion = religion:islam_religion
-							
-							#Mazdan Religions
-							
-							#TODO: Reimplement after flags added for it to spawn
-							this = faith:gayomarthianism
-							this = faith:khurramism
-							this = faith:mazdakism
-						}
+						is_blocked_faith_trigger = yes
 					}
 
 					#### Regional weighting ####
@@ -410,25 +337,25 @@ heresy.0001 = {
 					
 					# Ebionites most likely in Syria
 					modifier = {
-						factor = regional_heresy_factor_localized
+						factor = localized_regional_heresy_factor
 						this = faith:ebionite
 						scope:heretic_capital = { title_province = { geographical_region = world_roman_empire_east_levant } }
 					}
 					# Samaritans most likely in Syria
 					modifier = {
-						factor = regional_heresy_factor_localized
+						factor = localized_regional_heresy_factor
 						this = faith:samaritan
 						scope:heretic_capital = { title_province = { geographical_region = world_roman_empire_east_levant } }
 					}
 					# Tzadikites most likely in the Caucsues
 					modifier = {
-						factor = regional_heresy_factor_localized
+						factor = localized_regional_heresy_factor
 						this = faith:tzadikite
 						scope:heretic_capital = { title_province = { geographical_region = world_caucasus } }
 					}
 					# Mandeans most likely in the Middle East
 					modifier = {
-						factor = regional_heresy_factor_localized
+						factor = localized_regional_heresy_factor
 						this = faith:mandeaism
 						scope:heretic_capital = {
 							title_province = {
@@ -441,7 +368,7 @@ heresy.0001 = {
 					}
 					# Arwordi most likely in the Caucsues
 					modifier = {
-						factor = regional_heresy_factor_localized
+						factor = localized_regional_heresy_factor
 						this = faith:urartuism
 						scope:heretic_capital = { title_province = { geographical_region = world_caucasus } }
 					}
@@ -652,7 +579,7 @@ heresy.0005 = {
 				#Priority 1: Any nearby Eastern faith.
 				limit = {
 					num_county_followers > 0
-					is_valid_heresy = {
+					is_valid_heresy_trigger = {
 						ORIGIN_FAITH = root
 						HERETICAL_FAITH = this
 					}
@@ -661,14 +588,14 @@ heresy.0005 = {
 				#Priority 2: Any non-existing Eastern Faith
 				alternative_limit = {
 					num_county_followers = 0
-					is_preferred_heresy = {
+					is_preferred_heresy_trigger = {
 						ORIGIN_FAITH = root
 						HERETICAL_FAITH = this
 					}
 				}
 				#Priority 3: Any far-away Eastern Faith
 				alternative_limit = {
-					is_valid_heresy = {
+					is_valid_heresy_trigger = {
 						ORIGIN_FAITH = root
 						HERETICAL_FAITH = this
 					}
@@ -993,10 +920,16 @@ heresy.0010 = {
 
 		#Fervor adjustments to prevent multiple heresy flip-flopping.
 		scope:heretic_faith = {
-			change_fervor = 100
+			change_fervor = {
+				value = 100
+				desc = fervor_gain_new_heresy
+			}
 		}
 		scope:origin_faith = {
-			change_fervor = heretical_defector_fervor_gain
+			change_fervor = {
+				value = heretical_defector_fervor_gain
+				desc = fervor_gain_defector_heresy
+			}
 		}
 	}
 
@@ -1135,7 +1068,7 @@ heresy.0011 = {
 				#Rulers of the same(or similar) culture are more likely to join Heresies.
 				modifier = {
 					factor = 3
-					has_same_culture_group_as = scope:heretic_ruler
+					culture = { has_same_culture_heritage = scope:heretic_ruler.culture }
 				}
 				modifier = {
 					factor = 4
@@ -1314,7 +1247,10 @@ heresy.0011 = {
 
 			#Fervor adjustments to prevent multiple heresy flip-flopping.
 			scope:origin_faith = {
-				change_fervor = heretical_defector_fervor_gain
+				change_fervor = {
+					value = heretical_defector_fervor_gain
+					desc = fervor_gain_defector_heresy
+				}
 			}
 		}
 	}

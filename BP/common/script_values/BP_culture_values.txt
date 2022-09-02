@@ -1,0 +1,50 @@
+﻿easier_to_hybridize_colonizers_value = 0.80
+easier_to_hybridize_colonizers_value_for_localization = {
+	value = 1
+	divide = easier_to_hybridize_colonizers_value
+	subtract = 1
+	multiply = 100
+}
+harder_to_hybridize_with_value = 1.25
+harder_to_hybridize_with_value_for_localization = {
+	value = 1
+	divide = harder_to_hybridize_with_value
+	subtract = 1
+	multiply = -100 #NB: if harder_to_hybridize_with_value is less than 1, this should be positive
+}
+
+bp_revoke_title_culture_acceptance_impact_bureuacratic = {
+	value = 0
+	if = {
+		limit = {
+			scope:target = {
+				tier = tier_county
+				NOT = { culture = scope:actor.culture }
+				culture = scope:recipient.culture
+				NOT = {
+					recent_history = {
+						type = revoked
+						years = 5
+					}
+				}
+			}
+		}
+		subtract = {
+			value = 1
+			divide = {
+				value = scope:target.culture.culture_number_of_counties
+				min = 1
+			}
+			multiply = 15 #Same as used in grant above
+
+			min = 0.5
+			max = 15
+		}
+	}
+	else = {
+		scope:target = {
+			subtract = tier
+			add = 1 # because tier starts at the barony level and we want to start counting at the county level
+		}
+	}
+}

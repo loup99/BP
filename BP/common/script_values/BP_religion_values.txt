@@ -1,8 +1,9 @@
 ﻿#For doctrine categories that are only chrome at this time
-christian_doctrine_cost_low = 10
-christian_doctrine_cost_mid = 20
-christian_doctrine_cost_high = 30
-christian_doctrine_cost_massive = 50
+christian_doctrine_cost_none = 00 #When adopting from Unstated positions
+christian_doctrine_cost_low = 20
+christian_doctrine_cost_mid = 40
+christian_doctrine_cost_high = 60
+christian_doctrine_cost_massive = 100
 
 #For doctrine categories that only have trait effects (aka Soteriology)
 christian_doctrine_soteriology_cost_low = 100
@@ -18,9 +19,12 @@ christian_doctrine_judaic_role_cost_massive = 2000
 
 christian_doctrine_unchanged_cost_mult = 0
 
+hellenism_syncretic_mutual_opinion_bonus_value = 10
+egyptian_syncretic_mutual_opinion_bonus_value = 10
+
 #Heresy events
 
-regional_heresy_factor_localized = {
+localized_regional_heresy_factor = {
 	if = {
 		limit = { has_game_rule = default_regional_heresy }
 		value = 10
@@ -33,119 +37,3 @@ regional_heresy_factor_localized = {
 		value = 2
 	}
 }
-
-# Faith Tenet Values
-
-#Ethnic religions
-conversion_tenet_ethnic_religion_conversion_resistance = {
-	value = 0
-	if = {
-		limit = {
-			exists = scope:county
-			scope:county.faith = { has_doctrine = tenet_ethnic_religion }
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.75
-	}
-}
-conversion_tenet_ethnic_religion_convertor_resistance = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor.faith = { has_doctrine = tenet_ethnic_religion }
-			NOT = { scope:county.culture = scope:councillor.liege.culture }
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.75
-	}
-}
-#Autocephaly Values
-conversion_tenet_autocephaly_not_culture_group = {
-	value = 0
-	if = {
-		limit = {
-				scope:councillor.liege.faith = { has_doctrine_parameter = other_culture_group_conversion_penalty_active }
-				exists = scope:county
-				NOT = { scope:county.culture_group = scope:councillor.liege.culture_group }
-			}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.33
-	}
-}
-conversion_tenet_autocephaly_resist_infidel_conversion = {
-	value = 0
-	if = {
-		limit = {
-			exists = scope:county
-			scope:county.faith = { has_doctrine_parameter = autocephaly_resist_infidel_conversions }
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.33
-	}
-}
-conversion_tenet_autocephaly_of_culture_group = {
-	value = 0
-	if = {
-		limit = {
-				scope:councillor.liege.faith = { has_doctrine_parameter = same_culture_group_conversion_bonus_active }
-				exists = scope:county
-				scope:county.culture_group = scope:councillor.liege.culture_group
-			}
-		add = court_chaplain_conversion_base_total
-		multiply = 0.33
-	}
-}
-#Rigorism Values
-conversion_tenet_rigorism_conversion_resistance_both_ways = {
-	value = 0
-	if = {
-		limit = {
-			#XOR condition; other rigorist faiths have no impediment like say Khawarijis...
-			AND = {
-				OR = {
-					scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-				}
-				NOR = {
-					scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-				}
-			}
-			exists = scope:county
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = 0.33
-	}
-}
-# Interpratio Romana Tenet Values
-conversion_interpratio_romana_malus = {
-	value = 0
-	subtract = court_chaplain_conversion_base_total
-	multiply = conversion_syncretic_with_religion_malus_efficancy_procentage 
-}
-conversion_interpratio_romana_malus_efficancy_procentage = {
-	value = 1
-	subtract = 0.50
-}
-# Effect of Elite migration
-conversion_minor_migration_minor_aristocracy_penalty = {
-	value = 0
-	add = court_chaplain_conversion_base_total
-	multiply = -1.25
-}
-conversion_recent_emigration_bonus= {
-	value = 0
-	add = court_chaplain_conversion_base_total
-	multiply = 0.25
-}
-conversion_recent_immigration_bonus = {
-	value = 0
-	add = court_chaplain_conversion_base_total
-	multiply = 0.50
-}
-
-#Value for each innovation not had
-conversion_not_have_innovation = 0.70
-
-#Malus for converting ecumentical targets
-conversion_ecumenical_target_weight = 0.50

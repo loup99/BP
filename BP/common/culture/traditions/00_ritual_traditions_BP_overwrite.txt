@@ -1,0 +1,177 @@
+﻿##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_merciful_blindings = {
+	category = ritual
+
+	layers = {
+		0 = intrigue
+		1 = mediterranean
+		4 = tools.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_byzantine_succession
+			NOT = { any_in_list = { list = traits this = flag:tradition_byzantine_succession } }
+		}
+		##### Changed from Vanilla vvvvv
+		custom_tooltip = {
+			text = cannot_have_tradition_roman_succession
+			NOT = { any_in_list = { list = traits this = flag:tradition_roman_succession } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_unblemished_rulership
+			NOT = { any_in_list = { list = traits this = flag:tradition_unblemished_rulership } }
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		can_blind_prisoners = yes
+		merciful_blinding = yes
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_spiritual_or_courtly_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						NOT = {
+							any_prisoner = {
+								scope:character = {
+									OR = {
+										has_banish_reason = prev
+										has_execute_reason = prev
+									}
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = no_prisoner_with_harsh_reason_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { # Reduce chance of picking this if the culture has another use of prisoners already
+				any_in_list = { list = traits this = flag:tradition_talent_acquisition }
+			}
+			multiply = 0.5
+		}
+	}
+}
+
+##### Changed from Vanilla: Made transitively unselectable with new traditions
+tradition_faith_bound = {
+	category = ritual
+
+	layers = {
+		0 = learning
+		1 = indian
+		4 = crown.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_persian_traditions
+			NOT = { any_in_list = { list = traits this = flag:tradition_persian_traditions } }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		same_faith_inheritance_only = yes
+	}
+	character_modifier = {
+		opinion_of_different_faith = -10
+		ai_zeal = 25
+	}
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					trigger_if = {
+						limit = {
+							scope:character = {
+								is_ai = no
+							}
+						}
+						NOT = {
+							any_ruler = {
+								percent >= 0.9
+								culture = prev
+								primary_title.tier >= tier_county
+								faith = scope:character.faith
+							}
+						}
+					}
+					trigger_else = {
+						always = no
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = rulers_with_same_faith_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	ai_will_do = {
+		value = 0
+		if = {
+			limit = {
+				scope:character = {
+					has_trait = zealous
+				}
+			}
+			add = 100
+		}
+	}
+}

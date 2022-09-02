@@ -2,11 +2,14 @@
 	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
 	major = yes
 	desc = convert_to_high_tribal_decision_desc
-
+	
 	ai_check_interval = 36
-
-	is_shown = { has_government = tribal_government }
-
+	
+	is_shown = {
+		is_independent_ruler = yes
+		has_government = tribal_government
+	}
+	
 	is_valid = {
 		has_realm_law = tribal_authority_3
 		custom_description = {
@@ -17,93 +20,71 @@
 		prestige_level >= 2
 		capital_province.county = { development_level >= convert_to_high_tribal_development_requirement }
 		
-		custom_description = { #You need to have at least enough to a full tribe
-			text = text_has_all_military_innovations_for_high_tribal
-			subject = root.culture
-			culture = {
-				#All required military tribal innovations
-				has_innovation = innovation_mustering_grounds
-				has_innovation = innovation_castrae
-			}
-		}
-		custom_description = { #You need to have at least enough to a full tribe
-			text = has_all_civic_innovations_for_high_tribal
-			subject = root.culture
-			culture = {
-				#All required civic tribal innovations
-				has_innovation = innovation_development_00
-				has_innovation = innovation_leges_barbarorum
-				has_innovation = innovation_barter
-				has_innovation = innovation_writing
-				has_innovation = innovation_oppidum
-			}
-		}
+		culture = { has_tribal_innovations_for_high_tribal_trigger = yes }
 	}
-
+	
 	cost = { prestige = 250 }
-
-	effect = { change_government = high_tribal_government }
-
+	
+	effect = {
+		trigger_event = BP_government_conversion.0001
+		save_scope_as = actor
+		show_as_tooltip = { convert_realm_to_high_tribal_effect = yes }
+	}
+	
 	ai_potential = { always = yes }
-
+	
 	ai_will_do = { base = 100 }
 }
 
-convert_to_subroman_decision = {
+convert_to_high_tribal_as_vassal_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
 	major = yes
-	desc = convert_to_subroman_decision_desc
-
+	desc = convert_to_high_tribal_as_vassal_decision_desc
+	
 	ai_check_interval = 36
-
+	
 	is_shown = {
-		OR = {
-			has_government = high_tribal_government
-			has_government = prefeudal_government
+		has_government = tribal_government
+		is_independent_ruler = no
+		liege = {
+			OR = {
+				has_advanced_government_trigger = yes
+				AND = {
+					has_a_feudal_type_of_government_trigger = yes
+					NOT = { has_government = prefeudal_government }
+				}
+			}
 		}
-		#has_cultural_era_or_later = culture_era_early_migration #TODO: Determine if trigger is broken
 	}
-
+	
 	is_valid = {
 		OR = {
-			has_realm_law = high_tribal_authority_3
-			has_realm_law = prefeudal_authority_3
+			has_realm_law = tribal_authority_1
+			has_realm_law = tribal_authority_2
+			has_realm_law = tribal_authority_3
 		}
 		custom_description = {
 			text = faith_is_reformed
 			subject = root
 			faith = { NOT = { has_doctrine_parameter = unreformed } }
 		}
-		prestige_level >= 2
-		capital_province.county = { development_level >= convert_to_subroman_development_requirement }
-		
-		custom_description = { #You need to have ALL (non-regional/unique) tribal innovations and roman heritage
-			text = text_has_entire_tribal_innovations
-			subject = root.culture
-			culture = {
-				#All valid tribal innovations
-				has_innovation = innovation_vexilium
-				has_innovation = innovation_mustering_grounds
-				has_innovation = innovation_castrae
-				has_innovation = innovation_quilted_armor
-				has_innovation = innovation_development_00
-				has_innovation = innovation_leges_barbarorum
-				has_innovation = innovation_writing
-				has_innovation = innovation_barter
-				has_innovation = innovation_oppidum
-			}
+		custom_description = {
+			text = recent_conversion_to_tribalism
+			NOT = { has_character_flag = just_converted_to_tribalism }
 		}
-		culture = { has_innovation = innovation_roman_heritage }
+		culture = { has_innovation = innovation_writing }
 	}
-
-	cost = { prestige = 250 }
-
+	
+	cost = { prestige = 150 }
+	
 	effect = {
-		change_government = subroman_government
+		trigger_event = BP_government_conversion.0011
+		save_scope_as = actor
+		show_as_tooltip = { convert_realm_to_high_tribal_effect = yes }
 	}
-
+	
 	ai_potential = { always = yes }
-
+	
 	ai_will_do = { base = 100 }
 }
 
@@ -111,14 +92,11 @@ convert_to_bureaucratic_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
 	major = yes
 	desc = convert_to_bureaucratic_decision_desc
-
+	
 	ai_check_interval = 36
-
-	is_shown = {
-		OR = { has_government = subroman_government }
-		#has_cultural_era_or_later = culture_era_late_migration #TODO: Broken Trigger
-	}
-
+	
+	is_shown = { has_government = subroman_government }
+	
 	is_valid = {
 		custom_description = {
 			text = faith_is_reformed
@@ -126,76 +104,44 @@ convert_to_bureaucratic_decision = {
 			faith = { NOT = { has_doctrine_parameter = unreformed } }
 		}
 		is_independent_ruler = yes #Must be independent
-		highest_held_title_tier = 5 #Must be an empire
+		highest_held_title_tier >= tier_kingdom #Must be a kingdom or empire
 		prestige_level >= 4
 		capital_province.county = { development_level >= convert_to_bureaucratic_development_requirement }
 		
 		#Tribal Innovations
 		custom_description = {
-			text = text_has_entire_tribal_innovations
+			text = text_has_all_tribal_innovations
 			subject = root.culture
-			culture = {
-				#All valid tribal innovations
-				has_innovation = innovation_vexilium
-				has_innovation = innovation_mustering_grounds
-				has_innovation = innovation_castrae
-				has_innovation = innovation_quilted_armor
-				has_innovation = innovation_development_00
-				has_innovation = innovation_leges_barbarorum
-				has_innovation = innovation_writing
-				has_innovation = innovation_barter
-				has_innovation = innovation_oppidum
-			}
+			culture = { has_all_necessary_tribal_inovations_trigger = yes }
 		}
 		
 		#Late Antiquity Innovations
 		custom_description = {
-			text = text_has_entire_late_antiquity_innovations
+			text = text_has_all_late_antiquity_innovations
 			subject = root.culture
-			culture = {
-				#All valid tribal innovations
-				has_innovation = innovation_standing_army
-				has_innovation = innovation_limitanei
-				has_innovation = innovation_catapult
-				has_innovation = innovation_mail_armor
-				has_innovation = innovation_muri
-				has_innovation = innovation_conscription
-				has_innovation = innovation_development_01
-				has_innovation = innovation_fora
-				has_innovation = innovation_coinage
-				has_innovation = innovation_mundium
-				has_innovation = innovation_state_religion
-			}
+			culture = { has_all_necessary_late_antiquity_inovations_trigger = yes }
 		}
 		
 		#Early Migration
-		custom_description = { #You need to have ALL (non-regional/unique) tribal innovations and roman heritage
-			text = text_has_required_early_migration_innovations
+		custom_description = {
+			text = text_has_all_early_migration_innovations
 			subject = root.culture
-			culture = {
-				#Required Early Migration Innovations
-				has_innovation = innovation_migratory_tactics
-				has_innovation = innovation_migratory_defenses
-				has_innovation = innovation_double_entry_bookkeeping
-				has_innovation = innovation_tenant_farming
-				has_innovation = innovation_development_02
-				has_innovation = innovation_doctrine_and_dogma
-			}
+			culture = { has_all_necessary_early_migration_inovations_trigger = yes }
 		}
 		#Late Migration Era Innovation
 		culture = { has_innovation = innovation_civil_service_revitalization }
 	}
-
+	
 	cost = { prestige = 250 }
-
+	
 	effect = {
-		change_government = bureaucratic_government
-		add_realm_law_skip_effects = bureaucratic_authority_2
-		add_realm_law_skip_effects = imperial_elective_succession_law
+		trigger_event = BP_government_conversion.0021
+		save_scope_as = actor
+		show_as_tooltip = { convert_realm_to_bureaucratic_effect = yes }
 	}
-
+	
 	ai_potential = { always = yes }
-
+	
 	ai_will_do = { base = 100 }
 }
 
@@ -203,23 +149,20 @@ convert_to_feudalism_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
 	major = yes
 	desc = convert_to_feudalism_decision_desc
-
+	
 	ai_check_interval = 36
-
+	
 	is_shown = {
 		OR = {
 			has_government = prefeudal_government
 			has_government = high_tribal_government
-			has_government = nomad_government
 		}
-		#has_cultural_era_or_later = culture_era_late_migration #TODO: Broken Trigger?
 	}
-
+	
 	is_valid = {
 		OR = {
 			has_realm_law = prefeudal_authority_3
-			has_realm_law = high_tribal_authority_3
-			has_realm_law = subroman_authority_0
+			has_realm_law = high_tribal_organization_3
 		}
 		custom_description = {
 			text = faith_is_reformed
@@ -231,72 +174,39 @@ convert_to_feudalism_decision = {
 		
 		#Tribal Innovations
 		custom_description = {
-			text = text_has_entire_tribal_innovations
+			text = text_has_all_tribal_innovations
 			subject = root.culture
-			culture = {
-				#All valid tribal innovations
-				has_innovation = innovation_vexilium
-				has_innovation = innovation_mustering_grounds
-				has_innovation = innovation_castrae
-				has_innovation = innovation_quilted_armor
-				has_innovation = innovation_development_00
-				has_innovation = innovation_leges_barbarorum
-				has_innovation = innovation_writing
-				has_innovation = innovation_barter
-				has_innovation = innovation_oppidum
-			}
+			culture = { has_all_necessary_tribal_inovations_trigger = yes }
 		}
 		
 		#Late Antiquity Innovations
 		custom_description = {
-			text = text_has_entire_late_antiquity_innovations
+			text = text_has_all_late_antiquity_innovations
 			subject = root.culture
-			culture = {
-				#All valid tribal innovations
-				has_innovation = innovation_standing_army
-				has_innovation = innovation_limitanei
-				has_innovation = innovation_catapult
-				has_innovation = innovation_mail_armor
-				has_innovation = innovation_muri
-				has_innovation = innovation_conscription
-				has_innovation = innovation_development_01
-				has_innovation = innovation_fora
-				has_innovation = innovation_coinage
-				has_innovation = innovation_mundium
-				has_innovation = innovation_state_religion
-			}
+			culture = { has_all_necessary_late_antiquity_inovations_trigger = yes }
 		}
 		
-		
-		
-		custom_description = { #You need to have ALL (non-regional/unique) tribal innovations and roman heritage
-			text = text_has_entire_early_migration_innovations
+		#Early Migration
+		custom_description = {
+			text = text_has_all_early_migration_innovations
 			subject = root.culture
-			culture = {
-				#The necessary early migration innovations
-				has_innovation = innovation_migratory_tactics
-				has_innovation = innovation_migratory_defenses
-				has_innovation = innovation_vassalage
-				has_innovation = innovation_tenant_farming
-				has_innovation = innovation_development_02
-				has_innovation = innovation_plenary_assemblies
-				has_innovation = innovation_doctrine_and_dogma
-			}
+			culture = { has_all_necessary_early_migration_inovations_trigger = yes }
 		}
 		
 		#Late Migration Innovation
 		culture = { has_innovation = innovation_dominium_mundi }
 	}
-
+	
 	cost = { prestige = 250 }
-
+	
 	effect = {
-		change_government = feudal_government
-		add_realm_law_skip_effects = crown_authority_0
+		trigger_event = BP_government_conversion.0031
+		save_scope_as = actor
+		show_as_tooltip = { convert_realm_to_feudal_effect = yes }
 	}
-
+	
 	ai_potential = { always = yes }
-
+	
 	ai_will_do = { base = 100 }
 }
 
@@ -304,23 +214,20 @@ convert_to_clan_decision = {
 	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
 	major = yes
 	desc = convert_to_clan_decision_desc
-
+	
 	ai_check_interval = 36
-
+	
 	is_shown = {
 		OR = {
 			has_government = prefeudal_government
 			has_government = high_tribal_government
-			has_government = nomad_government
 		}
-		#has_cultural_era_or_later = culture_era_late_migration #TODO: Broken Trigger?
 	}
-
+	
 	is_valid = {
 		OR = {
 			has_realm_law = prefeudal_authority_3
-			has_realm_law = high_tribal_authority_3
-			has_realm_law = subroman_authority_0
+			has_realm_law = high_tribal_organization_3
 		}
 		custom_description = {
 			text = faith_is_reformed
@@ -332,71 +239,88 @@ convert_to_clan_decision = {
 		
 		#Tribal Innovations
 		custom_description = {
-			text = text_has_entire_tribal_innovations
+			text = text_has_all_tribal_innovations
 			subject = root.culture
-			culture = {
-				#All valid tribal innovations
-				has_innovation = innovation_vexilium
-				has_innovation = innovation_mustering_grounds
-				has_innovation = innovation_castrae
-				has_innovation = innovation_quilted_armor
-				has_innovation = innovation_development_00
-				has_innovation = innovation_leges_barbarorum
-				has_innovation = innovation_writing
-				has_innovation = innovation_barter
-				has_innovation = innovation_oppidum
-			}
+			culture = { has_all_necessary_tribal_inovations_trigger = yes }
 		}
 		
 		#Late Antiquity Innovations
 		custom_description = {
-			text = text_has_entire_late_antiquity_innovations
+			text = text_has_all_late_antiquity_innovations
 			subject = root.culture
-			culture = {
-				#All valid tribal innovations
-				has_innovation = innovation_standing_army
-				has_innovation = innovation_limitanei
-				has_innovation = innovation_catapult
-				has_innovation = innovation_mail_armor
-				has_innovation = innovation_muri
-				has_innovation = innovation_conscription
-				has_innovation = innovation_development_01
-				has_innovation = innovation_fora
-				has_innovation = innovation_coinage
-				has_innovation = innovation_mundium
-				has_innovation = innovation_state_religion
-			}
+			culture = { has_all_necessary_late_antiquity_inovations_trigger = yes }
 		}
 		
-		
-		
-		custom_description = { #You need to have ALL (non-regional/unique) tribal innovations and roman heritage
-			text = text_has_entire_early_migration_innovations
+		#Early Migration
+		custom_description = {
+			text = text_has_all_early_migration_innovations
 			subject = root.culture
-			culture = {
-				#The necessary early migration innovations
-				has_innovation = innovation_migratory_tactics
-				has_innovation = innovation_migratory_defenses
-				has_innovation = innovation_vassalage
-				has_innovation = innovation_tenant_farming
-				has_innovation = innovation_development_02
-				has_innovation = innovation_plenary_assemblies
-				has_innovation = innovation_doctrine_and_dogma
-			}
+			culture = { has_all_necessary_early_migration_inovations_trigger = yes }
 		}
-		
 		#Late Migration Innovation
 		culture = { has_innovation = innovation_decentralization }
 	}
-
+	
 	cost = { prestige = 250 }
-
+	
 	effect = {
-		change_government = clan_government
-		add_realm_law_skip_effects = crown_authority_0
+		trigger_event = BP_government_conversion.0041
+		save_scope_as = actor
+		show_as_tooltip = { convert_realm_to_clan_effect = yes }
 	}
-
+	
 	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 100 }
+}
 
+settle_nomads_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	major = yes
+	desc = settle_nomads_decision_desc
+	
+	ai_check_interval = 36
+	
+	is_shown = { has_government = nomad_government }
+	
+	is_valid = {
+		OR = {
+			capital_province = { has_holding_type = castle_holding }
+			capital_province.county = { development_level >= settle_nomad_development_requirement }
+		}
+		custom_description = {
+			text = average_sub_realm_development_is_at_least_two
+			subject = root
+			object = average_sub_realm_development
+			average_sub_realm_development >= 2
+		}
+		#Has to be mostly **not** flatland
+		custom_description = {
+			text = has_less_than_50_percent_of_counties_with_steppe_plains_desert
+			subject = root
+			root.number_of_steppe_provinces_in_realm < root.half_number_of_realm_provinces
+		}
+	}
+	
+	cost = { prestige = 250 }
+	
+	effect = {
+		trigger_event = BP_government_conversion.0051
+		save_scope_as = actor
+		show_as_tooltip = { convert_realm_to_tribal_effect = yes }
+	}
+	
+	ai_potential = {
+		#AI Turks and Mongols will not do this unless they meet the holding/development_level requirement
+		NAND = {
+			culture = { has_cultural_pillar = heritage_mongolic }
+			culture = { has_cultural_pillar = heritage_turkic }
+			OR = {
+				capital_province = { has_holding_type = castle_holding }
+				capital_province.county = { development_level >= settle_nomad_development_requirement }
+			}
+		}
+	}
+	
 	ai_will_do = { base = 100 }
 }

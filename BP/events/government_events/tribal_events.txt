@@ -24,6 +24,17 @@
 #Can only be triggered through the decision "tribal_challenge_ruler_decision"
 
 scripted_effect tribal_1001_transfer_liege_title_effect = {
+	scope:title_being_fought_over.holder = {
+		add_to_temporary_list = transfered_vassals
+		every_vassal = {
+			limit = {
+				NOT = {
+					this = scope:challenger
+				}
+			}
+			add_to_temporary_list = transfered_vassals
+		}
+	}
 	create_title_and_vassal_change = {
 		type = usurped
 		save_scope_as = change
@@ -34,6 +45,13 @@ scripted_effect tribal_1001_transfer_liege_title_effect = {
 			holder = scope:challenger
 			change = scope:change
 		}
+	}
+	every_in_list = {
+	 	list = transfered_vassals
+	 	change_liege = {
+	 		LIEGE = scope:challenger
+	 		CHANGE = scope:change
+	 	}
 	}
 	resolve_title_and_vassal_change = scope:change
 	if = {
@@ -98,6 +116,7 @@ scripted_effect tribal_1001_challenger_lost_effect = {
 		}
 	}
 }
+
 
 scripted_effect tribal_1001_challenger_backed_out_effect = {
 	add_prestige = major_prestige_loss
@@ -188,6 +207,7 @@ scripted_trigger tribal_1001_champion_check_trigger = {
 	can_start_single_combat_trigger = yes
 }
 
+##### Changed from Vanilla: Replaced heritage_brythonic/heritage_goidelic with heritage_celtic
 tribal.1001 = {
 	type = character_event
 	title = tribal.1001.t
@@ -244,6 +264,19 @@ tribal.1001 = {
 				NAND = {
 					can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = root }
 					can_start_single_combat_trigger = yes
+				}
+			}
+			if = {
+				limit = {
+					any_court_position_holder = {
+						type = champion_court_position
+						tribal_1001_champion_check_trigger = yes
+					}
+				}
+				every_court_position_holder = {
+					type = champion_court_position
+					limit = { tribal_1001_champion_check_trigger = yes }
+					add_to_list = champion_candidates
 				}
 			}
 			if = {
@@ -312,7 +345,14 @@ tribal.1001 = {
 				}
 				random_in_list = {
 					list = champion_candidates
-					limit = { prowess > high_skill_rating }
+					limit = { #We prioritize your champions
+						has_court_position = champion_court_position
+						is_court_position_employer = {
+							court_position = champion_court_position
+							who = root
+						}
+					}
+					alternative_limit = { prowess > high_skill_rating }
 					alternative_limit = { always = yes }
 					weight = {
 						base = 1
@@ -380,20 +420,18 @@ tribal.1001 = {
 		}
 	}
 
-##### Change from Vanilla #####
-#TODO: Ties better to faiths with sacred poets
+	##### Changed from Vanilla vvvvv
 	option = { #Flyting!
 		name = tribal.1001.b
 		trigger = {
-			OR = {
-				culture_group = culture_group:north_germanic_group
-				culture_group = culture_group:west_germanic_group
-				culture_group = culture_group:celtic_group
-				culture_group = culture_group:continental_celtic_group
+			culture = {
+				OR = {
+					has_cultural_pillar = heritage_north_germanic
+					has_cultural_pillar = heritage_west_germanic
+					has_cultural_pillar = heritage_celtic
+				}
 			}
-			always = no#TODO_CD_ERCC_AZU; remove after testing
 		}
-##### Change from Vanilla #####
 		show_as_tooltip = {
 			duel = {
 				skill = learning
@@ -405,13 +443,13 @@ tribal.1001 = {
 						multiplier = 2
 					}
 					scope:challenger = {
-						tribal_1001_challenger_lost_effect = yes
+						tribal_challenger_lost_effect = yes
 					}
 				}
 				10 = {
 					desc = tribal.1001.b_failure
 					scope:challenger = {
-						tribal_1001_transfer_liege_title_effect = yes
+						tribal_transfer_liege_title_effect = yes
 					}
 				}
 			}
@@ -428,12 +466,12 @@ tribal.1001 = {
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	option = { #Ok, take it...
 		name = tribal.1001.c
-		trigger = { always = no }	#TODO_CD_ERCC_AZU; remove after testing
 		show_as_tooltip = {
-			tribal_1001_transfer_liege_title_effect = yes
+			tribal_transfer_liege_title_effect = yes
 		}
 		scope:challenger = {
 			trigger_event = tribal.1002
@@ -474,7 +512,7 @@ tribal.1002 = {
 	}
 
 	immediate = {
-		tribal_1001_transfer_liege_title_effect = yes
+		tribal_transfer_liege_title_effect = yes
 	}
 
 	option = {
@@ -584,6 +622,7 @@ tribal.1003 = {
 
 #Challenger won!
 tribal.1004 = {
+	orphan = yes
 	type = character_event
 	title = tribal.1001.t
 	desc = {
@@ -599,13 +638,14 @@ tribal.1004 = {
 	option = {
 		name = tribal.1004.a
 		scope:challenger = {
-			tribal_1001_transfer_liege_title_effect = yes
+			tribal_transfer_liege_title_effect = yes
 		}
 	}
 }
 
 #Challenger lost
 tribal.1005 = {
+	orphan = yes
 	type = character_event
 	title = tribal.1001.t
 	desc = {
@@ -622,7 +662,7 @@ tribal.1005 = {
 		name = tribal.1005.a
 		show_as_tooltip = {
 			scope:challenger = {
-				tribal_1001_challenger_lost_effect = yes
+				tribal_challenger_lost_effect = yes
 			}
 		}
 	}
@@ -630,6 +670,7 @@ tribal.1005 = {
 
 #Using champion - Challenger won!
 tribal.1014 = {
+	orphan = yes
 	type = character_event
 	title = tribal.1001.t
 	desc = {
@@ -649,13 +690,14 @@ tribal.1014 = {
 	option = {
 		name = tribal.1014.a
 		scope:challenger = {
-			tribal_1001_transfer_liege_title_effect = yes
+			tribal_transfer_liege_title_effect = yes
 		}
 	}
 }
 
 #Using champion - Challenger lost
 tribal.1015 = {
+	orphan = yes
 	type = character_event
 	title = tribal.1001.t
 	desc = {
@@ -676,7 +718,7 @@ tribal.1015 = {
 		name = tribal.1015.a
 		show_as_tooltip = {
 			scope:challenger = {
-				tribal_1001_challenger_lost_effect = yes
+				tribal_challenger_lost_effect = yes
 			}
 		}
 		scope:liege_champion = {
@@ -797,7 +839,7 @@ tribal.1006 = {
 					title = tribal.1006.a_success
 					left_icon = scope:liege_to_challenge
 					show_as_tooltip = {
-						tribal_1001_transfer_liege_title_effect = yes
+						tribal_transfer_liege_title_effect = yes
 					}
 				}
 				scope:liege_to_challenge = {
@@ -813,7 +855,7 @@ tribal.1006 = {
 				send_interface_toast = {
 					title = tribal.1006.a_failure
 					left_icon = scope:liege_to_challenge
-					tribal_1001_challenger_lost_effect = yes
+					tribal_challenger_lost_effect = yes
 				}
 				scope:liege_to_challenge = {
 					trigger_event = tribal.1008
@@ -893,7 +935,7 @@ tribal.1007 = {
 
 	immediate = {
 		scope:challenger = {
-			tribal_1001_transfer_liege_title_effect = yes
+			tribal_transfer_liege_title_effect = yes
 		}
 	}
 
@@ -965,7 +1007,7 @@ tribal.1008 = {
 	immediate = {
 		show_as_tooltip = {
 			scope:challenger = {
-				tribal_1001_challenger_lost_effect = yes
+				tribal_challenger_lost_effect = yes
 			}
 		}
 	}
@@ -1112,12 +1154,13 @@ scripted_trigger tribal_1101_victim_trigger = {
 	basic_is_available_ai = yes
 	is_in_the_same_court_as_or_guest = root
 	NOR = {
+		this = scope:rival
 		has_relation_lover = scope:rival
 		has_relation_friend = scope:rival
-	}
-	has_trait_rank = {
-		trait = wounded
-		rank <= 2
+		has_trait_rank = {
+			trait = wounded
+			rank >= 2
+		}
 	}
 }
 
@@ -1571,15 +1614,17 @@ tribal.1201 = {
 		has_government = tribal_government
 		capital_province = { geographical_region = world_steppe }
 		NOT = { has_character_flag = had_event_tribal_1201 }
-		calc_true_if = {
-			amount >= 2
+		OR = {
 			any_vassal = {
+				count >= 2
 				is_available_ai_adult = yes
 			}
 			any_courtier = {
+				count >= 2
 				is_available_ai_adult = yes
 			}
 			any_neighboring_realm_same_rank_owner = {
+				count >= 2
 				is_available_ai_adult = yes
 				has_government = tribal_government
 				capital_province = { geographical_region = world_steppe }
@@ -1677,6 +1722,9 @@ tribal.1201 = {
 				}
 			}
 			alternative_limit = {
+				has_court_position = master_of_horse_court_position
+			}
+			alternative_limit = {
 				is_of_major_interest_to_root_trigger = yes
 			}
 			alternative_limit = {
@@ -1706,6 +1754,10 @@ tribal.1201 = {
 				any_owned_story = {
 					story_type = story_cycle_martial_lifestyle_warhorse
 				}
+				NOT = { this = scope:racer }
+			}
+			alternative_limit = {
+				has_court_position = master_of_horse_court_position
 				NOT = { this = scope:racer }
 			}
 			alternative_limit = {

@@ -1,0 +1,143 @@
+﻿#Liberty faction triggers
+
+#NB: these trigger for having greater than 0 laws
+realm_law_uses_crown_authority_trigger = { #Feudal/Clan
+	OR = {
+		has_realm_law = crown_authority_1
+		has_realm_law = crown_authority_2
+		has_realm_law = crown_authority_3
+	}
+}
+realm_law_uses_high_tribal_organization_trigger = {
+	OR = {
+		has_realm_law = high_tribal_organization_1
+		has_realm_law = high_tribal_organization_2
+		has_realm_law = high_tribal_organization_3
+	}
+}
+realm_law_uses_prefeudal_authority_trigger = {
+	OR = {
+		has_realm_law = prefeudal_authority_1
+		has_realm_law = prefeudal_authority_2
+		has_realm_law = prefeudal_authority_3
+	}
+}
+realm_law_uses_gupta_authority_trigger = {
+	OR = {
+		has_realm_law = gupta_authority_1
+		has_realm_law = gupta_authority_2
+		has_realm_law = gupta_authority_3
+	}
+}
+realm_law_uses_eranshar_authority_trigger = {
+	OR = {
+		has_realm_law = eranshar_authority_1
+		has_realm_law = eranshar_authority_2
+		has_realm_law = eranshar_authority_3
+	}
+}
+#What realm laws support liberty factions
+realm_law_supports_liberty_faction_trigger = {
+	OR = {
+		#Feudal/Clan Government
+		realm_law_uses_crown_authority_trigger = yes
+		#High Tribal Government
+		realm_law_uses_high_tribal_organization_trigger = yes
+		#Prefeudal Governments
+		realm_law_uses_prefeudal_authority_trigger = yes
+		#Gupta Governments
+		realm_law_uses_gupta_authority_trigger = yes
+		#Eranshar Governments
+		realm_law_uses_eranshar_authority_trigger = yes
+	}
+}
+#liberty faction law equivalents across governments
+has_realm_law_level_1_trigger = {
+	OR = {
+		has_realm_law = crown_authority_1
+		has_realm_law = high_tribal_organization_1
+		has_realm_law = prefeudal_authority_1
+		has_realm_law = gupta_authority_1
+		has_realm_law = eranshar_authority_1
+	}
+}
+has_realm_law_level_2_trigger = {
+	OR = {
+		has_realm_law = crown_authority_2
+		has_realm_law = high_tribal_organization_2
+		has_realm_law = prefeudal_authority_2
+		has_realm_law = gupta_authority_2
+		has_realm_law = eranshar_authority_2
+	}
+}
+has_realm_law_level_3_trigger = {
+	OR = {
+		has_realm_law = crown_authority_3
+		has_realm_law = high_tribal_organization_3
+		has_realm_law = prefeudal_authority_3
+		has_realm_law = gupta_authority_3
+		has_realm_law = eranshar_authority_3
+	}
+}
+#Indpendence faction
+
+#Character scope
+character_can_create_independence_faction_trigger = {
+	#Eranshar characters won't seek independence if they are under e_persia
+	trigger_if = {
+		limit = { has_government = eranshar_government }
+		custom_description = {
+			text = invalid_for_eranshar_independence_faction
+			NAND = {
+				scope:target = { has_government = eranshar_government }
+				this.top_liege = {
+					has_title = title:e_persia
+					has_government = eranshar_government
+				}
+			}
+		}
+	}
+	#Gubernatorials don't seek independence from Gubernatorials/Bureaucratics
+	trigger_if = {
+		limit = { has_government = gubernatorial_government }
+		custom_description = {
+			text = invalid_for_gubernatorial_independence_faction
+			object = scope:target
+			NOT = {
+				scope:target = {
+					OR = {
+						has_government = bureaucratic_government
+						has_government = gubernatorial_government
+					}
+				}
+			}
+		}
+	}
+	#Sub-Romans will not try to be independent of Sub-Roman lieges
+	character_can_join_populist_faction_trigger = yes
+}
+character_can_join_populist_faction_trigger = {
+	#Sub-Romans will not try to be independent of Sub-Roman lieges
+	trigger_if = {
+		limit = {
+			OR = {
+				has_government = subroman_government
+				has_government = republic_government #Keeps the Senate + the Republics from shattering Italy
+			}
+		}
+		custom_description = {
+			text = subroman_independence_block
+			NOR = {
+				culture = { has_cultural_parameter = subroman_characters_cant_seek_independence }
+				liege = { has_government = subroman_government }
+			}
+		}
+	}
+}
+
+character_is_valid_nation_fracturing_faction_trigger = {
+	custom_description = {
+		text = nation_fracturing_faction_currently_disabled
+		always = no
+	}
+}

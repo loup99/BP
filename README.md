@@ -1,5 +1,7 @@
-# Butterfly-Project
+# volkerwanderung
+Rebuild of BP ontop of 1.6.1.2
 
-### Credits
+Note: Only push error fixes to master/main. All other features should be on their own branch prior to merge.
 
-For full credits see: https://forum.paradoxplaza.com/forum/threads/wip-when-the-world-stopped-making-sense-a-migrational-era-mod-for-ck3-476-700-ad.1414709/#post-26850337
+Fourm Thread:
+https://forum.paradoxplaza.com/forum/threads/wip-when-the-world-stopped-making-sense-a-migrational-era-mod-for-ck3-476-700-ad.1414709/

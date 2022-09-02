@@ -35,10 +35,13 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	
 	on_declaration = {
 		on_declared_war = yes
-		scope:attacker = {
-			create_odoacer_army = yes
-			create_odoacer_army = yes
-			create_odoacer_army = yes
+		scope:attacker = { #Needs a fat stack of troops
+			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = yes }
+			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = yes }
+			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = yes }
+			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = no }
+			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = no }
+			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = no }
 		}
 	}
 
@@ -58,42 +61,30 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+		
 		create_title_and_vassal_change = {
 			type = conquest
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
-		
-		#Go through all the titles and mark them for handling
 		scope:defender = {
-			primary_title = {
-				every_in_de_facto_hierarchy = {
-					limit = { tier >= tier_county }
-					
-					#Seize all counties from the Emperor
-					if = {
-						limit = {
-							tier = tier_county
-							holder = { this = scope:defender }
-						}
-						add_to_temporary_list = titles_taken
-					}
-					#Destroy all the Emperor's duchies, kingdoms, and Empires
-					else_if = {
-						limit = {
-							tier >= tier_duchy
-							holder = { this = scope:defender }
-						}
-						add_to_temporary_list = titles_destroyed
-					}
-					#Transfer all direct vassal to the new king
-					else_if = {
-						limit = { NOT = { holder = scope:defender } }
-						holder = { add_to_temporary_list = vassals_taken }
-					}
+			#Parse out what to do with Romulus' titles
+			every_held_title = {
+				if = {
+					limit = { this.tier > tier_county }
+					this = { add_to_temporary_list = titles_destroyed }
+				}
+				else_if = {
+					limit = { this.tier = tier_county }
+					this = { add_to_temporary_list = titles_taken }
 				}
 			}
+			every_vassal = {
+				limit = { this.primary_title.tier >= tier_county }
+				this = { add_to_temporary_list = vassals_taken }
+			}
 		}
+		
 		#Destroy invalid titles
 		every_in_list = {
 			list = titles_destroyed
@@ -132,6 +123,15 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		
 		# Truce
 		add_truce_attacker_victory_effect = yes
+		
+		scope:attacker.culture = {
+			change_cultural_acceptance = {
+				target = culture:roman
+				desc = odoacer_takeover_war_acceptance_effect
+				value = 20
+			}
+		}
+		scope:attacker = { set_realm_capital = title:c_ravenna }
 	}
 
 #Included only for error suppression
@@ -167,8 +167,6 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				value = massive_prestige_value
 				multiply = -1.0
 			}
-			#Destroy the Kingdom of Italy
-			destroy_title = title:k_italy
 			#Imprison Odacer
 			hard_imprison_character_effect = {
 				TARGET = this
@@ -181,6 +179,41 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				}
 			}
 		}
+		
+		create_title_and_vassal_change = {
+			type = conquest
+			save_scope_as = change
+			add_claim_on_loss = yes
+		}
+		scope:attacker = {
+			#Parse out what to do with Odoacer's titles
+			every_held_title = {
+				if = {
+					limit = { this.tier > tier_county }
+					this = { add_to_temporary_list = titles_destroyed }
+				}
+				else_if = {
+					limit = { this.tier = tier_county }
+					this = { add_to_temporary_list = titles_taken }
+				}
+			}
+		}
+		
+		#Destroy invalid titles
+		every_in_list = {
+			list = titles_destroyed
+			scope:attacker = { destroy_title = prev }
+		}
+		#Transfer Counties
+		every_in_list = {
+			list = titles_taken
+			change_title_holder = {
+				holder = scope:defender
+				change = scope:change
+				take_baronies = yes
+			}
+		}
+		resolve_title_and_vassal_change = scope:change
 
 		# Attacker loses Prestige, all other war participants gain Prestige (Defender gains full prestige, all allies on both sides gain based on war contribution).
 		modify_all_participants_fame_values = {
@@ -216,7 +249,11 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	
 	use_de_jure_wargoal_only = yes
 	
-	attacker_wargoal_percentage = 0.8
+	attacker_wargoal_percentage = 0.0
+	max_attacker_score_from_battles = 100
+	defender_score_from_occupation_scale = 0 #Occupation doesn't help the defender, only battles
+	max_defender_score_from_occupation = 0
+	full_occupation_by_defender_gives_victory = no
 }
 #Zeno's war for the empire
 zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
@@ -296,7 +333,7 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 					root = title:e_byzantium
 					root = title:e_roman_empire
 				}
-				scope:defender = { has_culture_group = culture_group:byzantine_group }
+				scope:defender.culture = { has_cultural_pillar = heritage_byzantine }
 			}
 			scope:claimant = {
 				custom_description = {
@@ -319,7 +356,7 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 		}
 		#Under Byzantine law, a ruler must be able to produce children.
 		trigger_if = {
-			limit = { scope:defender = { has_culture_group = culture_group:byzantine_group } }
+			limit = { scope:defender.culture = { has_cultural_pillar = heritage_byzantine } }
 			scope:claimant = {
 				custom_description = {
 					text = "byzantine_claimant_is_celibate"
@@ -334,6 +371,8 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 		}
 	}
 
+	allowed_for_character = { root = character:70515 } #Only for Zeno
+
 	cost = {}
 
 	target_titles = claim
@@ -341,10 +380,14 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 	on_declaration = {
 		on_declared_war = yes
 		scope:attacker = {
-			create_zeno_army = { LOCATION = 759 } #c_lycanonia
-			create_zeno_army = { LOCATION = 5672 } #c_isauria
-			create_zeno_army = { LOCATION = 758 } #c_seleucia
-			create_zeno_army = { LOCATION = 5637 } #c_pamphylia
+			create_zeno_army_effect = { LOCATION = 759 } #c_lycanonia
+			create_zeno_army_effect = { LOCATION = 759 } #c_lycanonia
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
+			create_zeno_army_effect = { LOCATION = 758 } #c_seleucia
+			create_zeno_army_effect = { LOCATION = 758 } #c_seleucia
+			create_zeno_army_effect = { LOCATION = 5637 } #c_pamphylia
+			create_zeno_army_effect = { LOCATION = 5637 } #c_pamphylia
 		}
 	}
 
@@ -609,6 +652,12 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+		scope:defender = {
+			imprison = {
+				target = scope:attacker
+				type = dungeon
+			}
+		}
 
 		# lose claims
 		every_in_list = {
@@ -687,7 +736,11 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 
 	should_show_war_goal_subview = yes
 
-	attacker_wargoal_percentage = 0.8
+	attacker_wargoal_percentage = 0.0
+	max_attacker_score_from_battles = 100
+	full_occupation_by_defender_gives_victory = no
+	defender_score_from_occupation_scale = 0 #Occupation doesn't help the defender, only battles
+	max_defender_score_from_occupation = 0 #Occupation doesn't help the defender, only battles
 
 	max_ai_diplo_distance_to_title = 1000
 }

@@ -1,0 +1,88 @@
+﻿######################
+# Cultural triggers  #
+######################
+
+##### Changed from Vanilla: Added WtWSMS historical hybrids
+##### TODO (Beta): Add WtWSMS historical hybrids
+culture_is_not_historical_hybrid_trigger = {
+	#Used to tell if a hybrid culture is one of the historical hybrids or not,
+	#mainly in checks for AI hybridization checks related to game rules.
+	#Expects to be used in culture scope
+	NOR = {
+		this = culture:norman
+		this = culture:maghrebi
+		this = culture:gaelic
+		this = culture:anglo_saxon
+		this = culture:scottish
+		this = culture:andalusian
+		this = culture:catalan
+		this = culture:english
+		this = culture:sicilian
+		this = culture:cisalpine
+	}
+}
+
+##### Changed from Vanilla: Tweaked cataphract reference
+culture_has_heavy_cavalry_maa = {
+	OR = {
+		has_cultural_parameter = unlock_maa_monaspa
+		##### Changed from Vanilla vvvvv
+		has_innovation = innovation_cataphracts
+		##### Changed from Vanilla ^^^^^
+		has_innovation = innovation_valets #Gendarme - Later Era MAA
+	}
+}
+
+##### Changed from Vanilla: Prevent hybridization between Hellenizers and Colonizers
+
+# Checks if you could Hybridise with the culture without checking for acceptance
+is_valid_for_hybridising_trigger = {
+	$CHARACTER$ = {
+		culture = {
+			NOT = { has_same_culture_heritage = $CULTURE$ }
+			culture_age >= culture_hybrid_cooldown
+		}
+		custom_description = {
+			text = culture_present_in_realm_for_hybridization
+			any_sub_realm_county = {
+				culture = $CULTURE$
+			}
+		}
+		custom_description = {
+			text = culture_is_not_parent_culture
+			culture = {
+				NOT = {
+					any_parent_culture = {
+						this = $CULTURE$
+					}
+				}
+			}
+		}
+		custom_description = {
+			text = culture_is_not_child_culture
+			$CULTURE$ = {
+				NOT = {
+					any_parent_culture = {
+						this = $CHARACTER$.culture
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		custom_description = {
+			text = cannot_combine_hybridization_blocking_tradition_cultures
+			NAND = {
+				culture = { has_cultural_parameter = blocks_certain_hybrids }
+				$CULTURE$ = { has_cultural_parameter = blocks_certain_hybrids }
+			}
+		}
+		trigger_if = {
+			limit = { culture = { has_cultural_parameter = hybridization_requires_duchy_or_better } }
+			custom_description = {
+				text = must_have_duchy_or_better_to_hybridize
+				primary_title.tier >= tier_duchy
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+}

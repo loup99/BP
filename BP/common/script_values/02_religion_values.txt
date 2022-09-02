@@ -48,6 +48,8 @@ faith_changed_doctrine_cost_mult_two_step = 1.50
 faith_changed_doctrine_cost_mult_three_step = 2.25
 faith_changed_doctrine_cost_mult_four_step = 3.50
 
+faith_tenet_discount_mountain_background_value = 0.75
+
 hostility_multiplier_pluralism = 0.5
 hostility_multiplier_righteous = 1
 hostility_multiplier_fundamentalist = 2
@@ -160,12 +162,7 @@ demand_conversion_tenet_impact = {
 	if = {
 		limit = {
 			faith = {
-				##### Change from Vanilla #####
-				OR = {
-					has_doctrine_parameter = sanctioned_false_conversion
-					has_doctrine_parameter = can_return_to_old_faith
-				}
-				##### Change from Vanilla #####
+				has_doctrine_parameter = sanctioned_false_conversion
 				NOT = { has_doctrine_parameter = unattractive_for_character_conversions }
 			}
 		}
@@ -424,7 +421,7 @@ ghw_target_stretch = 10
 ghw_target_has_holy_site = 50
 #Targets that should always be priorities if not controlled:
 ghw_target_key_religious_holding = 100
-ghw_target_religious_vengeance = 75
+ghw_target_religious_vengeance = 150
 #Distance modifiers stack:
 ghw_target_distance_01_reduction = 0.8
 ghw_target_distance_02_reduction = 0.8
@@ -433,29 +430,36 @@ ghw_target_distance_01_threshold = 722500
 ghw_target_distance_02_threshold = 1445000
 ghw_target_distance_03_threshold = 2167500
 
+##### Changed from Vanilla vvvvv
+
+##### Changed from Vanilla: Removed kushitism_religion, magyar_religion references
+
 # Referenced by code when building list of ghw targets
-#Logic reworked by Ewan Cowhig Croft
+# Logic reworked by Ewan Cowhig Croft
 great_holy_war_target_kingdom_weight = {
-	#WEIGHTING PROCESS
-	#1. Check how many individual counties within a de jure kingdom have a top-liege with an eligible faith for GHWing. Boost the count a little for kingdoms with existing same-faith monarchs.
-	#2. Modify the count by region location & relative importance to the Faith (is this kingdom in the heartlands of the faith, or one of an increasing gradiant of frontier regions?).
-	#3. Modify the count by region distance from the HoF's capital, or a fallback holy site.
-	#4. Weight up kingdoms containing holy sites directly.
-	#5. Weight up special priority targets (e.g., Jerusalem, Mecca) directly.
+	# WEIGHTING PROCESS
+	# 1. Check how many individual counties within a de jure kingdom have a top-liege with an eligible faith for GHWing. Boost the count a little for kingdoms with existing same-faith monarchs.
+	# 2. Modify the count by region location & relative importance to the Faith (is this kingdom in the heartlands of the faith, or one of an increasing gradiant of frontier regions?).
+	# 3. Modify the count by region distance from the HoF's capital, or a fallback holy site.
+	# 4. Weight up kingdoms containing holy sites directly.
+	# 5. Weight up special priority targets (e.g., Jerusalem, Mecca) directly.
 
 	### 1 ###
-	#Is the target kingdom a viable GHW target?
+	# Is the target kingdom a viable GHW target?
 	every_in_de_jure_hierarchy = {
-		continue = { tier > tier_county }	#Check individual counties within the potential target de jure kingdom.
-		limit = {	#For every county with a GHWable liege...
+		# Check individual counties within the potential target de jure kingdom.
+		continue = { tier > tier_county }
+		# For every county with a GHWable liege...
+		limit = {
 			tier = tier_county
 			scope:the_faith = {
-					is_hostile_enough_for_holy_war_trigger = { FAITH = prev.holder.top_liege.faith }
+				is_hostile_enough_for_holy_war_trigger = { FAITH = prev.holder.top_liege.faith }
 			}
 		}
-		add = 1	#... Add 1 to the weighting.
+		# ... Add 1 to the weighting.
+		add = 1
 	}
-	#Weight up the kingdom if it either has an existing same-faith holder, or at least a same-faith claimant.
+	# Weight up the kingdom if it either has an existing same-faith holder, or at least a same-faith claimant.
 	if = {
 		limit = {
 			OR = {
@@ -466,7 +470,7 @@ great_holy_war_target_kingdom_weight = {
 				any_claimant = {
 					exists = this
 					faith = scope:the_faith
-					is_available_adult = no
+					is_available_adult = yes
 				}
 			}
 		}
@@ -474,238 +478,250 @@ great_holy_war_target_kingdom_weight = {
 	}
 	
 	### 2 ###
-	###Abrahamics & Zoroastrians
-	#Documentation = {
-		#Avoid adding lots of reckless GHW stretch goals, as it'll mess up the targeting if every religion has a dozen apiece.
+	### Abrahamics & Zoroastrians
+	# Documentation = {
+		# Avoid adding lots of reckless GHW stretch goals, as it'll mess up the targeting if every religion has a dozen apiece.
 
-		#Below is an organised, prioritised list of the different target regions for each religion. Update it as you make changes.
-		#Christianity
-		#ghw_region_northern_italy					#heartlands
-		#ghw_region_thessalonika					#heartlands
-		#ghw_region_ethiopia						#heartlands
-		#ghw_region_france							#heartlands
-		#ghw_region_germany							#heartlands
-		#ghw_region_greece							#heartlands
-		#ghw_region_england							#heartlands
-		#ghw_region_caucasus						#heartlands
-		#ghw_region_anatolia						#frontier
-		#ghw_region_near_east						#frontier
-		#ghw_region_mediterranean					#frontier
-		#ghw_region_balkans							#frontier
-		#ghw_region_holy_land						#frontier
-		#ghw_region_iberia							#frontier
-		#ghw_region_celtic							#fringe
-		#ghw_region_germanic						#fringe
-		#ghw_region_central_european				#fringe
-		#ghw_region_baltic							#stretch
+		# Below is an organised, prioritised list of the different target regions for each religion. Update it as you make changes.
+		# Christianity
+		# ghw_region_northern_italy					# heartlands
+		# ghw_region_thessalonika					# heartlands
+		# ghw_region_ethiopia						# heartlands
+		# ghw_region_france							# heartlands
+		# ghw_region_germany						# heartlands
+		# ghw_region_greece							# heartlands
+		# ghw_region_england						# heartlands
+		# ghw_region_caucasus						# heartlands
+		# ghw_region_anatolia						# frontier
+		# ghw_region_near_east						# frontier
+		# ghw_region_mediterranean					# frontier
+		# ghw_region_balkans						# frontier
+		# ghw_region_holy_land						# frontier
+		# ghw_region_iberia							# frontier
+		# ghw_region_celtic							# fringe
+		# ghw_region_germanic						# fringe
+		# ghw_region_central_european				# fringe
+		# ghw_region_baltic							# stretch
 		
-		#Islam
-		#ghw_region_holy_land						#heartlands
-		#ghw_region_arabia							#heartlands
-		#ghw_region_near_east						#heartlands
-		#ghw_region_egypt							#heartlands
-		#ghw_region_persia							#heartlands
-		#ghw_region_north_africa					#heartlands
-		#ghw_region_sicily							#frontier
-		#ghw_region_iberia							#frontier
-		#ghw_region_anatolia						#frontier
-		#ghw_region_afghanistan						#frontier
-		#ghw_region_the_sahel						#fringe
-		#ghw_region_mediterranean					#fringe
-		#ghw_region_western_india					#fringe
-		#ghw_region_southern_france					#fringe
+		# Islam
+		# ghw_region_holy_land						# heartlands
+		# ghw_region_arabia							# heartlands
+		# ghw_region_near_east						# heartlands
+		# ghw_region_egypt							# heartlands
+		# ghw_region_persia							# heartlands
+		# ghw_region_north_africa					# heartlands
+		# ghw_region_sicily							# frontier
+		# ghw_region_iberia							# frontier
+		# ghw_region_anatolia						# frontier
+		# ghw_region_afghanistan					# frontier
+		# ghw_region_the_sahel						# fringe
+		# ghw_region_mediterranean					# fringe
+		# ghw_region_western_india					# fringe
+		# ghw_region_southern_france				# fringe
 
-		#Yazidism
-		#ghw_region_kurdistan						#heartlands
-		#ghw_region_southern_middle_east			#frontier
-		#ghw_region_eastern_middle_east				#frontier
-		#ghw_region_caucasus						#frontier
-		#ghw_region_caspian_steppe					#fringe
-		#ghw_region_arabia							#fringe
-		#ghw_region_holy_land						#fringe
+		# Yazidism
+		# ghw_region_kurdistan						# heartlands
+		# ghw_region_southern_middle_east			# frontier
+		# ghw_region_eastern_middle_east			# frontier
+		# ghw_region_caucasus						# frontier
+		# ghw_region_caspian_steppe					# fringe
+		# ghw_region_arabia							# fringe
+		# ghw_region_holy_land						# fringe
 
-		#Judaism
-		#ghw_region_holy_land						#heartlands
-		#ghw_region_arabia							#frontier
-		#ghw_region_near_east						#frontier
-		#ghw_region_egypt							#frontier
-		#ghw_region_anatolia						#fringe
-		#ghw_region_persia							#fringe
-		#ghw_region_ethiopia						#fringe
+		# Judaism
+		# ghw_region_holy_land						# heartlands
+		# ghw_region_arabia							# frontier
+		# ghw_region_near_east						# frontier
+		# ghw_region_egypt							# frontier
+		# ghw_region_anatolia						# fringe
+		# ghw_region_persia							# fringe
+		# ghw_region_ethiopia						# fringe
 
-		#Zoroastrianism/Dualism
-		#ghw_region_persia							#heartlands
-		#ghw_region_afghanistan						#frontier
-		#ghw_region_near_east						#frontier
-		#ghw_region_arabia							#fringe
-		#ghw_region_holy_land						#fringe
-		#ghw_region_anatolia						#fringe
-		#ghw_region_mongolia						#fringe
-		#ghw_region_western_india					#fringe
+		# Zoroastrianism/Dualism
+		# ghw_region_persia							# heartlands
+		# ghw_region_afghanistan					# frontier
+		# ghw_region_near_east						# frontier
+		# ghw_region_arabia							# fringe
+		# ghw_region_holy_land						# fringe
+		# ghw_region_anatolia						# fringe
+		# ghw_region_mongolia						# fringe
+		# ghw_region_western_india					# fringe
 
-		#Norse Paganism
-		#ghw_region_scandinavia						#heartlands
-		#ghw_region_britannia						#frontier
-		#ghw_region_saxony							#frontier
-		#ghw_region_russia							#frontier
-		#ghw_region_baltic							#fringe
-		#ghw_region_poland							#fringe
-		#ghw_region_thessalonika					#stretch
+		# Norse Paganism
+		# ghw_region_scandinavia					# heartlands
+		# ghw_region_britannia						# frontier
+		# ghw_region_saxony							# frontier
+		# ghw_region_russia							# frontier
+		# ghw_region_baltic							# fringe
+		# ghw_region_poland							# fringe
+		# ghw_region_thessalonika					# stretch
 
-		#Baltic Paganism
-		#ghw_region_baltic							#heartlands
-		#ghw_region_poland							#frontier
-		#ghw_region_russia							#frontier
-		#ghw_region_scandinavia						#fringe
-		#ghw_region_steppe							#fringe
-		#ghw_region_hungary							#fringe
+		# Baltic Paganism
+		# ghw_region_baltic							# heartlands
+		# ghw_region_poland							# frontier
+		# ghw_region_russia							# frontier
+		# ghw_region_scandinavia					# fringe
+		# ghw_region_steppe							# fringe
+		# ghw_region_hungary						# fringe
 
-		#Slavic Paganism
-		#ghw_region_wendish_lands					#heartlands
-		#ghw_region_balkans							#heartlands
-		#ghw_region_russia							#heartlands
-		#ghw_region_hungary							#frontier
-		#ghw_region_steppe							#frontier
-		#ghw_region_mainland_greece					#fringe
-		#ghw_region_germany							#fringe
-		#ghw_region_italy							#stretch
+		# Slavic Paganism
+		# ghw_region_wendish_lands					# heartlands
+		# ghw_region_balkans						# heartlands
+		# ghw_region_russia							# heartlands
+		# ghw_region_hungary						# frontier
+		# ghw_region_steppe							# frontier
+		# ghw_region_mainland_greece				# fringe
+		# ghw_region_germany						# fringe
+		# ghw_region_italy							# stretch
 
-		#Finnish Paganism
-		#ghw_region_finland_&_estonia				#heartlands
-		#ghw_region_northern_russia					#heartlands
-		#ghw_region_steppe							#heartlands
-		#ghw_region_scandinavia						#frontier
-		#ghw_region_baltic							#frontier
-		#ghw_region_southern_russia					#frontier
-		#ghw_region_siberia							#frontier
-		#ghw_region_transoxiana						#fringe
-		#ghw_region_mongolia						#fringe
+		# Finnish Paganism
+		# ghw_region_finland_&_estonia				# heartlands
+		# ghw_region_northern_russia				# heartlands
+		# ghw_region_steppe							# heartlands
+		# ghw_region_scandinavia					# frontier
+		# ghw_region_baltic							# frontier
+		# ghw_region_southern_russia				# frontier
+		# ghw_region_siberia						# frontier
+		# ghw_region_transoxiana					# fringe
+		# ghw_region_mongolia						# fringe
 
-		#Tengri Paganism
-		#ghw_region_mongolia						#heartlands
-		#ghw_region_siberia							#heartlands
-		#ghw_region_steppe							#heartlands
-		#ghw_region_russia							#frontier
-		#ghw_region_transoxiana						#frontier
-		#ghw_region_hungary							#frontier
-		#ghw_region_tibet							#fringe
-		#ghw_region_wendish_lands					#fringe
+		# Tengri Paganism
+		# ghw_region_mongolia						# heartlands
+		# ghw_region_siberia						# heartlands
+		# ghw_region_steppe							# heartlands
+		# ghw_region_russia							# frontier
+		# ghw_region_transoxiana					# frontier
+		# ghw_region_hungary						# frontier
+		# ghw_region_tibet							# fringe
+		# ghw_region_wendish_lands					# fringe
 
-		#Bon Paganism, Qiangicism, Donyipoloism, & Mundhumism
-		#ghw_region_tibet							#heartlands
-		#ghw_region_northern_india					#frontier
-		#ghw_region_khotan							#frontier
-		#ghw_region_mongolia						#fringe
-		#ghw_region_transoxiana						#fringe
-		#ghw_region_southern_india					#stretch
+		# Magyar Paganism
+		# ghw_region_hungary						# heartlands
+		# ghw_region_balkans						# frontier
+		# ghw_region_crimea							# frontier
+		# ghw_region_poland_bohemia_bavaria			# frontier
+		# ghw_region_southern_russia				# frontier
+		# ghw_region_mainland_greece				# fringe
+		# ghw_region_baltic							# fringe
 
-		#Mande Paganism & Senegambian Paganism
-		#ghw_region_the_sahel						#heartlands
-		#ghw_region_subsahelian_africa				#frontier
-		#ghw_region_north_african_interior			#frontier
-		#ghw_region_western_sahara					#frontier
-		#ghw_region_north_africa					#fringe
+		# Bon Paganism, Qiangicism, Donyipoloism, & Mundhumism
+		# ghw_region_tibet							# heartlands
+		# ghw_region_northern_india					# frontier
+		# ghw_region_khotan							# frontier
+		# ghw_region_mongolia						# fringe
+		# ghw_region_transoxiana					# fringe
+		# ghw_region_southern_india					# stretch
 
-		#Hausan Paganism
-		#ghw_region_north_african_interior			#heartlands
-		#ghw_region_the_sahel						#frontier
-		#ghw_region_subsahelian_africa				#frontier
-		#ghw_region_ethiopia						#frontier
-		#ghw_region_eastern_sahara					#frontier
-		#ghw_region_horn_of_africa					#fringe
-		#ghw_region_egypt_et_al						#fringe
-		#ghw_region_north_africa					#fringe
+		# Mande Paganism & Senegambian Paganism
+		# ghw_region_the_sahel						# heartlands
+		# ghw_region_subsahelian_africa				# frontier
+		# ghw_region_north_african_interior			# frontier
+		# ghw_region_western_sahara					# frontier
+		# ghw_region_north_africa					# fringe
 
-		#Akan Paganism & Yoruba Paganism
-		#ghw_region_subsahelian_africa				#heartlands
-		#ghw_region_the_sahel						#frontier
-		#ghw_region_north_african_interior			#frontier
-		#ghw_region_western_sahara					#frontier
-		#ghw_region_north_africa					#fringe
+		# Hausan Paganism
+		# ghw_region_north_african_interior			# heartlands
+		# ghw_region_the_sahel						# frontier
+		# ghw_region_subsahelian_africa				# frontier
+		# ghw_region_ethiopia						# frontier
+		# ghw_region_eastern_sahara					# frontier
+		# ghw_region_horn_of_africa					# fringe
+		# ghw_region_egypt_et_al					# fringe
+		# ghw_region_north_africa					# fringe
 
-		#Kushite Paganism
-		#ghw_region_egypt_et_al						#heartlands
-		#ghw_region_north_african_interior			#frontier
-		#ghw_region_ethiopia						#frontier
-		#ghw_region_horn_of_africa					#frontier
-		#ghw_region_the_sahel						#fringe
-		#ghw_region_subsahelian_africa				#fringe
-		#ghw_region_eastern_sahara					#fringe
-		#ghw_region_north_africa					#fringe
-		#ghw_region_holy_land						#stretch
-		#ghw_region_arabia							#stretch
+		# Akan Paganism & Yoruba Paganism
+		# ghw_region_subsahelian_africa				# heartlands
+		# ghw_region_the_sahel						# frontier
+		# ghw_region_north_african_interior			# frontier
+		# ghw_region_western_sahara					# frontier
+		# ghw_region_north_africa					# fringe
 
-		#Waaqi Paganism
-		#ghw_region_horn_of_africa					#heartlands
-		#ghw_region_ethiopia						#frontier
-		#ghw_region_egypt_et_al						#frontier
-		#ghw_region_arabia							#frontier
-		#ghw_region_north_african_interior			#fringe
-		#ghw_region_holy_land						#fringe
+		# Kushite Paganism
+		# ghw_region_egypt_et_al					# heartlands
+		# ghw_region_north_african_interior			# frontier
+		# ghw_region_ethiopia						# frontier
+		# ghw_region_horn_of_africa					# frontier
+		# ghw_region_the_sahel						# fringe
+		# ghw_region_subsahelian_africa				# fringe
+		# ghw_region_eastern_sahara					# fringe
+		# ghw_region_north_africa					# fringe
+		# ghw_region_holy_land						# stretch
+		# ghw_region_arabia							# stretch
 
-		#Zunist Paganism
-		#ghw_region_afghanistan						#heartlands
-		#ghw_region_western_india					#frontier
-		#ghw_region_persia							#frontier
-		#ghw_region_transoxiana						#frontier
-		#ghw_region_caucasus						#fringe
-		#ghw_region_holy_land						#fringe
-		#ghw_region_near_east						#fringe
-		#ghw_region_southwestern_india				#fringe
-		#ghw_region_egypt							#stretch
+		# Waaqi Paganism
+		# ghw_region_horn_of_africa					# heartlands
+		# ghw_region_ethiopia						# frontier
+		# ghw_region_egypt_et_al					# frontier
+		# ghw_region_arabia							# frontier
+		# ghw_region_north_african_interior			# fringe
+		# ghw_region_holy_land						# fringe
 
-		#Hellenic Paganism
-		#ghw_region_mainland_greece					#heartlands
-		#ghw_region_italy							#heartlands
-		#ghw_region_anatolia						#frontier
-		#ghw_region_balkans							#frontier
-		#ghw_region_near_east						#frontier
-		#ghw_region_holy_land						#fringe
-		#ghw_region_egypt							#fringe
-		#ghw_region_north_africa					#fringe
-		#ghw_region_southern_france					#fringe
+		# Zunist Paganism
+		# ghw_region_afghanistan					# heartlands
+		# ghw_region_western_india					# frontier
+		# ghw_region_persia							# frontier
+		# ghw_region_transoxiana					# frontier
+		# ghw_region_caucasus						# fringe
+		# ghw_region_holy_land						# fringe
+		# ghw_region_near_east						# fringe
+		# ghw_region_southwestern_india				# fringe
+		# ghw_region_egypt							# stretch
 
-		#Hinduism
-		#Hinduism prioritises the Sacred River above the rest of the sub-continent.
-		#ghw_region_the_ganges						#heartlands
-		#ghw_region_non_ganges_india				#frontier
-		#ghw_region_tibet							#fringe
-		#ghw_region_afghanistan						#fringe
-		#ghw_region_persia							#fringe
+		# Hellenic Paganism
+		# ghw_region_mainland_greece				# heartlands
+		# ghw_region_italy							# heartlands
+		# ghw_region_anatolia						# frontier
+		# ghw_region_balkans						# frontier
+		# ghw_region_near_east						# frontier
+		# ghw_region_holy_land						# fringe
+		# ghw_region_egypt							# fringe
+		# ghw_region_north_africa					# fringe
+		# ghw_region_southern_france				# fringe
 
-		#Jainism
-		#How did you even *manage* to get a game that needs this?
-		#ghw_region_gujarat_&_rajputana				#heartlands
-		#ghw_region_non_gujarat_or_rajputana_india	#frontier
-		#ghw_region_tibet							#fringe
-		#ghw_region_afghanistan						#fringe
-		#ghw_region_persia							#fringe
+		# Hinduism
+		# Hinduism prioritises the Sacred River above the rest of the sub-continent.
+		# ghw_region_the_ganges						# heartlands
+		# ghw_region_non_ganges_india				# frontier
+		# ghw_region_tibet							# fringe
+		# ghw_region_afghanistan					# fringe
+		# ghw_region_persia							# fringe
 
-		#Buddhism Theravada
-		#ghw_region_lanka_&_bengal					#heartlands
-		#ghw_region_middle_india					#frontier
-		#ghw_region_western_india					#fringe
+		# Jainism
+		# How did you even *manage* to get a game that needs this?
+		# ghw_region_gujarat_&_rajputana			# heartlands
+		# ghw_region_non_gujarat_or_rajputana_india	# frontier
+		# ghw_region_tibet							# fringe
+		# ghw_region_afghanistan					# fringe
+		# ghw_region_persia							# fringe
 
-		#Buddhism Mahayana & Vajrayana
-		#ghw_region_tibet							#heartlands
-		#ghw_region_mongolia						#heartlands
-		#ghw_region_khotan							#frontier
-		#ghw_region_siberia							#frontier
-		#ghw_region_transoxiana						#fringe
-		#ghw_region_afghanistan						#fringe
+		# Buddhism Theravada
+		# ghw_region_lanka_&_bengal					# heartlands
+		# ghw_region_middle_india					# frontier
+		# ghw_region_western_india					# fringe
 
-		#Taoism
-		#ghw_region_mongolia						#heartlands
-		#ghw_region_siberia							#frontier
-		#ghw_region_tibet							#frontier
-		#ghw_region_north_eastern_india				#fringe
-	#}
+		# Buddhism Mahayana & Vajrayana
+		# ghw_region_tibet							# heartlands
+		# ghw_region_mongolia						# heartlands
+		# ghw_region_khotan							# frontier
+		# ghw_region_siberia						# frontier
+		# ghw_region_transoxiana					# fringe
+		# ghw_region_afghanistan					# fringe
 
-	#Christian heartlands
+		# Taoism
+		# ghw_region_mongolia						# heartlands
+		# ghw_region_siberia						# frontier
+		# ghw_region_tibet							# frontier
+		# ghw_region_north_eastern_india			# fringe
+	# }
+
+	# Christian heartlands
 	if = {
 		limit = {
+			scope:the_faith.religion = religion:christianity_religion
 			OR = {
 				AND = {
+					# Catholic sphere.
+					scope:the_faith = { not_non_catholic_standard_christian_faith_trigger = yes }
 					title_capital_county.title_province = {
 						OR = {
 							geographical_region = ghw_region_northern_italy
@@ -714,1507 +730,1506 @@ great_holy_war_target_kingdom_weight = {
 							geographical_region = ghw_region_england
 						}
 					}
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:orthodox
-						scope:the_faith = faith:iconoclast
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
-					}
 				}
 				AND = {
+					# Orthodox sphere.
+					scope:the_faith = { not_non_orthodox_standard_christian_faith_trigger = yes }
 					title_capital_county.title_province = {
 						OR = {
 							geographical_region = ghw_region_thessalonika
 							geographical_region = ghw_region_greece
 						}
 					}
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:catholic
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
-					}
 				}
 				AND = {
+					# Coptic sphere.
+					scope:the_faith = { not_non_coptic_standard_christian_faith_trigger = yes }
 					title_capital_county.title_province = { geographical_region = ghw_region_ethiopia }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:catholic
-						scope:the_faith = faith:orthodox
-						scope:the_faith = faith:iconoclast
-						scope:the_faith = faith:armenian_apostolic
-					}
 				}
 				AND = {
+					# Armenian sphere.
+					scope:the_faith = { not_non_armenian_standard_christian_faith_trigger = yes }
 					title_capital_county.title_province = { geographical_region = ghw_region_caucasus }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:catholic
-						scope:the_faith = faith:orthodox
-						scope:the_faith = faith:iconoclast
-						scope:the_faith = faith:miaphysitism
-					}
 				}
 			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Christian frontier
-	if = {
+	# Christian frontier
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:christianity_religion
 			OR = {
 				AND = {
+					# Shared Orthodox/Armenian sphere.
+					scope:the_faith = {
+						OR = {
+							# Bit cack-handed to check it like this, but keeps things hygienic.
+							not_non_orthodox_standard_christian_faith_trigger = yes
+							not_non_armenian_standard_christian_faith_trigger = yes
+						}
+					}
 					title_capital_county.title_province = { geographical_region = ghw_region_anatolia }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:catholic
-						scope:the_faith = faith:miaphysitism
-					}
 				}
 				AND = {
+					# Shared Catholic/Orthodox/Armenian sphere.
+					scope:the_faith = {
+						OR = {
+							# Bit cack-handed to check it like this, but keeps things hygienic.
+							not_non_catholic_standard_christian_faith_trigger = yes
+							not_non_orthodox_standard_christian_faith_trigger = yes
+							not_non_armenian_standard_christian_faith_trigger = yes
+						}
+					}
 					title_capital_county.title_province = { geographical_region = ghw_region_near_east }
-					scope:the_faith.religion = religion:christianity_religion
-					NOT = { scope:the_faith = faith:miaphysitism }
 				}
 				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mediterranean }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
+					# Shared Catholic/Orthodox sphere.
+					scope:the_faith = {
+						OR = {
+							# Bit cack-handed to check it like this, but keeps things hygienic.
+							not_non_catholic_standard_christian_faith_trigger = yes
+							not_non_orthodox_standard_christian_faith_trigger = yes
+						}
+					}
+					title_capital_county.title_province = {
+						OR = {
+							geographical_region = ghw_region_mediterranean
+							geographical_region = ghw_region_balkans
+						}
 					}
 				}
 				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_balkans }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
+					# Shared Catholic/Orthodox/Armenian sphere.
+					scope:the_faith = {
+						OR = {
+							# Bit cack-handed to check it like this, but keeps things hygienic.
+							not_non_catholic_standard_christian_faith_trigger = yes
+							not_non_orthodox_standard_christian_faith_trigger = yes
+							not_non_armenian_standard_christian_faith_trigger = yes
+						}
 					}
-				}
-				AND = {
 					title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-					scope:the_faith.religion = religion:christianity_religion
-					NOT = { scope:the_faith = faith:miaphysitism }
 				}
 				AND = {
+					scope:the_faith = { not_non_catholic_standard_christian_faith_trigger = yes }
 					title_capital_county.title_province = { geographical_region = ghw_region_iberia }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:orthodox
-						scope:the_faith = faith:iconoclast
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
-					}
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Christian fringe
-	if = {
+	# Christian fringe
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:christianity_religion
 			OR = {
 				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_celtic }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:orthodox
-						scope:the_faith = faith:iconoclast
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
+					scope:the_faith = { not_non_catholic_standard_christian_faith_trigger = yes }
+					title_capital_county.title_province = {
+						OR = {
+							geographical_region = ghw_region_celtic
+							geographical_region = ghw_region_germanic
+						}
 					}
 				}
 				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_germanic }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:orthodox
-						scope:the_faith = faith:iconoclast
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
+					# Shared Catholic/Orthodox sphere.
+					scope:the_faith = {
+						OR = {
+							# Bit cack-handed to check it like this, but keeps things hygienic.
+							not_non_catholic_standard_christian_faith_trigger = yes
+							not_non_orthodox_standard_christian_faith_trigger = yes
+						}
 					}
-				}
-				AND = {
 					title_capital_county.title_province = { geographical_region = ghw_region_central_european }
-					scope:the_faith.religion = religion:christianity_religion
-					NOR = {
-						scope:the_faith = faith:miaphysitism
-						scope:the_faith = faith:armenian_apostolic
-					}
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Christian stretch goal
-	if = {
+	# Christian stretch goal
+	else_if = {
 		limit = {
 			AND = {
+				scope:the_faith = {
+					religion = religion:christianity_religion
+					not_non_catholic_standard_christian_faith_trigger = yes
+				}
 				title_capital_county.title_province = { geographical_region = ghw_region_baltic }
-				scope:the_faith.religion = religion:christianity_religion
-				NOR = {
-					scope:the_faith = faith:orthodox
-					scope:the_faith = faith:iconoclast
-					scope:the_faith = faith:miaphysitism
-					scope:the_faith = faith:armenian_apostolic
-				}
 			}
 		}
 		multiply = ghw_target_stretch
 	}
-	#Muslim heartlands
-	if = {
+	# Muslim heartlands
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_arabia }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_near_east }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_egypt }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_persia }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
-					scope:the_faith.religion = religion:islam_religion
+			scope:the_faith.religion = religion:islam_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_holy_land
+					geographical_region = ghw_region_arabia
+					geographical_region = ghw_region_near_east
+					geographical_region = ghw_region_egypt
+					geographical_region = ghw_region_persia
+					geographical_region = ghw_region_north_africa
 				}
 			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Muslim frontier
-	if = {
+	# Muslim frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_sicily }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_iberia }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_anatolia }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_afghanistan }
-					scope:the_faith.religion = religion:islam_religion
+			scope:the_faith.religion = religion:islam_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_sicily
+					geographical_region = ghw_region_iberia
+					geographical_region = ghw_region_anatolia
+					geographical_region = ghw_region_afghanistan
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Muslim fringe
-	if = {
+	# Muslim fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_the_sahel }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mediterranean }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_western_india }
-					scope:the_faith.religion = religion:islam_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_southern_france }
-					scope:the_faith.religion = religion:islam_religion
+			scope:the_faith.religion = religion:islam_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_the_sahel
+					geographical_region = ghw_region_mediterranean
+					geographical_region = ghw_region_western_india
+					geographical_region = ghw_region_southern_france
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Yazidi heartlands
-	if = {
+	# Yazidi heartlands
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_kurdistan }
 			scope:the_faith.religion = religion:yazidi_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_kurdistan }
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Yazidi frontier
-	if = {
+	# Yazidi frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_southern_middle_east }
-					scope:the_faith.religion = religion:yazidi_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_eastern_middle_east }
-					scope:the_faith.religion = religion:yazidi_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_caucasus }
-					scope:the_faith.religion = religion:yazidi_religion
+			scope:the_faith.religion = religion:yazidi_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_southern_middle_east
+					geographical_region = ghw_region_eastern_middle_east
+					geographical_region = ghw_region_caucasus
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Yazidi fringe
-	if = {
+	# Yazidi fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_caspian_steppe }
-					scope:the_faith.religion = religion:yazidi_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_arabia }
-					scope:the_faith.religion = religion:yazidi_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-					scope:the_faith.religion = religion:yazidi_religion
+			scope:the_faith.religion = religion:yazidi_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_caspian_steppe
+					geographical_region = ghw_region_arabia
+					geographical_region = ghw_region_holy_land
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Jewish heartlands
-	if = {
+	# Jewish heartlands
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
 			scope:the_faith.religion = religion:judaism_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Jewish frontier
-	if = {
+	# Jewish frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_arabia }
-					scope:the_faith.religion = religion:judaism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_near_east }
-					scope:the_faith.religion = religion:judaism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_egypt }
-					scope:the_faith.religion = religion:judaism_religion
+			scope:the_faith.religion = religion:judaism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_arabia
+					geographical_region = ghw_region_near_east
+					geographical_region = ghw_region_egypt
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Jewish fringe
-	if = {
+	# Jewish fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_anatolia }
-					scope:the_faith.religion = religion:judaism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_persia }
-					scope:the_faith.religion = religion:judaism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_ethiopia }
-					scope:the_faith.religion = religion:judaism_religion
+			scope:the_faith.religion = religion:judaism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_anatolia
+					geographical_region = ghw_region_persia
+					geographical_region = ghw_region_ethiopia
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Zoroastrian/Dualist heartlands
-	if = {
+	
+	### Mazdan
+	
+	### Christian-Like Dualists
+	
+	# Priscilianism heartland
+	else_if = {
 		limit = {
+			scope:the_faith = faith:priscillianism
+			title_capital_county.title_province = { geographical_region = ghw_region_iberia }
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Priscilianism frontier
+	else_if = {
+		limit = {
+			scope:the_faith = faith:priscillianism
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_southern_france
+					geographical_region = ghw_region_northern_italy
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Priscilianism fringe
+	else_if = {
+		limit = {
+			scope:the_faith = faith:priscillianism
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_northern_italy
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Marcosianism heartland
+	else_if = {
+		limit = {
+			scope:the_faith = faith:marcosianism
+			title_capital_county.title_province = { geographical_region = ghw_region_france }
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Marcosianism frontier
+	else_if = {
+		limit = {
+			scope:the_faith = faith:marcosianism
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_iberia
+					geographical_region = ghw_region_italy
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Marcosianism fringe
+	else_if = {
+		limit = {
+			scope:the_faith = faith:marcosianism
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_england
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Valentinianism heartland (Assume western school)
+	else_if = {
+		limit = {
+			scope:the_faith = faith:valentinianism
+			title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Valentinianism frontier
+	else_if = {
+		limit = {
+			scope:the_faith = faith:valentinianism
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_iberia
+					geographical_region = ghw_region_italy
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Valentinianism fringe
+	else_if = {
+		limit = {
+			scope:the_faith = faith:valentinianism
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_france
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	
+	# Zoroastrian/Dualist heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:zoroastrianism_religion
+					this = religion:dualism_religion
+					this = religion:hepthal_religion
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_persia }
-			OR = {
-				scope:the_faith.religion = religion:zoroastrianism_religion
-				scope:the_faith.religion = religion:dualism_religion
-			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Zoroastrian/Dualist frontier
-	if = {
+	# Zoroastrian/Dualist frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_afghanistan }
-					OR = {
-						scope:the_faith.religion = religion:zoroastrianism_religion
-						scope:the_faith.religion = religion:dualism_religion
-					}
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:zoroastrianism_religion
+					this = religion:dualism_religion
+					this = religion:hepthal_religion
 				}
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_near_east }
-					OR = {
-						scope:the_faith.religion = religion:zoroastrianism_religion
-						scope:the_faith.religion = religion:dualism_religion
-					}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_afghanistan
+					geographical_region = ghw_region_near_east
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Zoroastrian/Dualist fringe
-	if = {
+	# Zoroastrian/Dualist fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_arabia }
-					OR = {
-						scope:the_faith.religion = religion:zoroastrianism_religion
-						scope:the_faith.religion = religion:dualism_religion
-					}
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:zoroastrianism_religion
+					this = religion:dualism_religion
+					this = religion:hepthal_religion
 				}
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-					OR = {
-						scope:the_faith.religion = religion:zoroastrianism_religion
-						scope:the_faith.religion = religion:dualism_religion
-					}
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_anatolia }
-					OR = {
-						scope:the_faith.religion = religion:zoroastrianism_religion
-						scope:the_faith.religion = religion:dualism_religion
-					}
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mongolia }
-					OR = {
-						scope:the_faith.religion = religion:zoroastrianism_religion
-						scope:the_faith.religion = religion:dualism_religion
-					}
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_western_india }
-					OR = {
-						scope:the_faith.religion = religion:zoroastrianism_religion
-						scope:the_faith.religion = religion:dualism_religion
-					}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_arabia
+					geographical_region = ghw_region_holy_land
+					geographical_region = ghw_region_anatolia
+					geographical_region = ghw_region_mongolia
+					geographical_region = ghw_region_western_india
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
 	
-	###Pagans
-	#Norse heartlands
-	if = {
+	### Bosporan
+	
+	# Bosporan heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:bosporan_religion
+				}
+			}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_crimea
+					geographical_region = ghw_region_anatolia
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Bosporan frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:bosporan_religion
+				}
+			}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_greece
+					geographical_region = ghw_region_caucasus
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Bosporan fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:bosporan_religion
+				}
+			}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_near_east
+					geographical_region = ghw_region_balkans
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	
+	### Pagans
+	
+	# Norse heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:germanic_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_scandinavia }
-			scope:the_faith.religion = religion:germanic_religion
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Norse frontier
-	if = {
+	# Norse frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_britannia }
-					scope:the_faith.religion = religion:germanic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_saxony }
-					scope:the_faith.religion = religion:germanic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_russia }
-					scope:the_faith.religion = religion:germanic_religion
+			scope:the_faith.religion = religion:germanic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_britannia
+					geographical_region = ghw_region_saxony
+					geographical_region = ghw_region_russia
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Norse fringe
-	if = {
+	# Norse fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_baltic }
-					scope:the_faith.religion = religion:germanic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_poland }
-					scope:the_faith.religion = religion:germanic_religion
+			scope:the_faith.religion = religion:germanic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_baltic
+					geographical_region = ghw_region_poland
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Norse stretch goal
-	if = {
+	# Norse stretch goal
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:germanic_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_thessalonika }
-			scope:the_faith.religion = religion:germanic_religion
 		}
 		multiply = ghw_target_stretch
 	}
-	#Baltic heartlands
-	if = {
+	# Baltic heartlands
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_baltic }
 			scope:the_faith.religion = religion:baltic_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_baltic }
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Baltic frontier
-	if = {
+	# Baltic frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_poland }
-					scope:the_faith.religion = religion:baltic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_russia }
-					scope:the_faith.religion = religion:baltic_religion
+			scope:the_faith.religion = religion:baltic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_poland
+					geographical_region = ghw_region_russia
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Baltic fringe
-	if = {
+	# Baltic fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_scandinavia }
-					scope:the_faith.religion = religion:baltic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_steppe }
-					scope:the_faith.religion = religion:baltic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_hungary }
-					scope:the_faith.religion = religion:baltic_religion
+			scope:the_faith.religion = religion:baltic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_scandinavia
+					geographical_region = ghw_region_steppe
+					geographical_region = ghw_region_hungary
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Slavic heartlands
-	if = {
+	# Slavic heartlands
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_wendish_lands }
-					scope:the_faith.religion = religion:slavic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_balkans }
-					scope:the_faith.religion = religion:slavic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_russia }
-					scope:the_faith.religion = religion:slavic_religion
-				}
-			}
-		}
-		multiply = ghw_target_heartlands
-	}
-	#Slavic frontier
-	if = {
-		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_hungary }
-					scope:the_faith.religion = religion:slavic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_steppe }
-					scope:the_faith.religion = religion:slavic_religion
-				}
-			}
-		}
-		multiply = ghw_target_frontier
-	}
-	#Slavic fringe
-	if = {
-		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mainland_greece }
-					scope:the_faith.religion = religion:slavic_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_germany }
-					scope:the_faith.religion = religion:slavic_religion
-				}
-			}
-		}
-		multiply = ghw_target_fringe
-	}
-	#Slavic stretch goal
-	if = {
-		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_italy }
 			scope:the_faith.religion = religion:slavic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_wendish_lands
+					geographical_region = ghw_region_balkans
+					geographical_region = ghw_region_russia
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Slavic frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:slavic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_hungary
+					geographical_region = ghw_region_steppe
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Slavic fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:slavic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_mainland_greece
+					geographical_region = ghw_region_germany
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Slavic stretch goal
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:slavic_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_italy }
 		}
 		multiply = ghw_target_stretch
 	}
-	#Finnish heartlands
-	if = {
+	# Finnish & Siberian heartlands
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_finland_&_estonia }
-					scope:the_faith.religion = religion:finno_ugric_religion
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:finno_ugric_religion
+					this = religion:siberian_religion
 				}
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_northern_russia }
-					scope:the_faith.religion = religion:finno_ugric_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_steppe }
-					scope:the_faith.religion = religion:finno_ugric_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_finland_&_estonia
+					geographical_region = ghw_region_northern_russia
+					geographical_region = ghw_region_steppe
 				}
 			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Finnish frontier
-	if = {
+	# Finnish & Siberian frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_scandinavia }
-					scope:the_faith.religion = religion:finno_ugric_religion
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:finno_ugric_religion
+					this = religion:siberian_religion
 				}
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_baltic }
-					scope:the_faith.religion = religion:finno_ugric_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_southern_russia }
-					scope:the_faith.religion = religion:finno_ugric_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_siberia }
-					scope:the_faith.religion = religion:finno_ugric_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_scandinavia
+					geographical_region = ghw_region_baltic
+					geographical_region = ghw_region_southern_russia
+					geographical_region = ghw_region_siberia
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Finnish fringe
-	if = {
+	# Finnish & Siberian fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_transoxiana }
-					scope:the_faith.religion = religion:finno_ugric_religion
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:finno_ugric_religion
+					this = religion:siberian_religion
 				}
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mongolia }
-					scope:the_faith.religion = religion:finno_ugric_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_transoxiana
+					geographical_region = ghw_region_mongolia
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Tengri heartlands
-	if = {
+	# Tengri heartlands
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mongolia }
-					scope:the_faith.religion = religion:tengrism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_siberia }
-					scope:the_faith.religion = religion:tengrism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_steppe }
-					scope:the_faith.religion = religion:tengrism_religion
+			scope:the_faith.religion = religion:tengrism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_mongolia
+					geographical_region = ghw_region_siberia
+					geographical_region = ghw_region_steppe
 				}
 			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Tengri frontier
-	if = {
+	# Tengri frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_russia }
-					scope:the_faith.religion = religion:tengrism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_transoxiana }
-					scope:the_faith.religion = religion:tengrism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_hungary }
-					scope:the_faith.religion = religion:tengrism_religion
+			scope:the_faith.religion = religion:tengrism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_russia
+					geographical_region = ghw_region_transoxiana
+					geographical_region = ghw_region_hungary
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Tengri fringe
-	if = {
+	# Tengri fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_tibet }
-					scope:the_faith.religion = religion:tengrism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_wendish_lands }
-					scope:the_faith.religion = religion:tengrism_religion
+			scope:the_faith.religion = religion:tengrism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_tibet
+					geographical_region = ghw_region_wendish_lands
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Bon/Qiangicism/Donyipoloism/Mundhumism heartlands
-	if = {
+	# Bon/Qiangicism/Donyipoloism/Mundhumism heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:bon_religion
+					this = religion:tani_religion
+					this = religion:mundhum_religion
+					this = religion:qiangic_religion
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_tibet }
-			OR = {
-				scope:the_faith.religion = religion:bon_religion
-				scope:the_faith.religion = religion:tani_religion
-				scope:the_faith.religion = religion:mundhum_religion
-				scope:the_faith.religion = religion:qiangic_religion
-			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Bon/Qiangicism/Donyipoloism/Mundhumism frontier
-	if = {
+	# Bon/Qiangicism/Donyipoloism/Mundhumism frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_northern_india }
-					OR = {
-						scope:the_faith.religion = religion:bon_religion
-						scope:the_faith.religion = religion:tani_religion
-						scope:the_faith.religion = religion:mundhum_religion
-						scope:the_faith.religion = religion:qiangic_religion
-					}
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:bon_religion
+					this = religion:tani_religion
+					this = religion:mundhum_religion
+					this = religion:qiangic_religion
 				}
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_khotan }
-					OR = {
-						scope:the_faith.religion = religion:bon_religion
-						scope:the_faith.religion = religion:tani_religion
-						scope:the_faith.religion = religion:mundhum_religion
-						scope:the_faith.religion = religion:qiangic_religion
-					}
+			}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_northern_india
+					geographical_region = ghw_region_khotan
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Bon/Qiangicism/Donyipoloism/Mundhumism fringe
-	if = {
+	# Bon/Qiangicism/Donyipoloism/Mundhumism fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mongolia }
-					OR = {
-						scope:the_faith.religion = religion:bon_religion
-						scope:the_faith.religion = religion:tani_religion
-						scope:the_faith.religion = religion:mundhum_religion
-						scope:the_faith.religion = religion:qiangic_religion
-					}
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:bon_religion
+					this = religion:tani_religion
+					this = religion:mundhum_religion
+					this = religion:qiangic_religion
 				}
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_transoxiana }
-					OR = {
-						scope:the_faith.religion = religion:bon_religion
-						scope:the_faith.religion = religion:tani_religion
-						scope:the_faith.religion = religion:mundhum_religion
-						scope:the_faith.religion = religion:qiangic_religion
-					}
+			}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_mongolia
+					geographical_region = ghw_region_transoxiana
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Bon/Qiangicism/Donyipoloism/Mundhumism stretch goal
-	if = {
+	# Bon/Qiangicism/Donyipoloism/Mundhumism stretch goal
+	else_if = {
 		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:bon_religion
+					this = religion:tani_religion
+					this = religion:mundhum_religion
+					this = religion:qiangic_religion
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_southern_india }
-			OR = {
-				scope:the_faith.religion = religion:bon_religion
-				scope:the_faith.religion = religion:tani_religion
-				scope:the_faith.religion = religion:mundhum_religion
-				scope:the_faith.religion = religion:qiangic_religion
-			}
 		}
 		multiply = ghw_target_stretch
 	}
-	#Mande Paganism & Senegambian Paganism heartlands
-	if = {
+	# Mande Paganism & Senegambian Paganism heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:west_african_roog_religion
+					this = religion:west_african_religion
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_the_sahel }
-			OR = {
-				scope:the_faith.religion = religion:west_african_roog_religion
-				scope:the_faith.religion = religion:west_african_religion
-			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Mande Paganism & Senegambian Paganism frontier
-	if = {
+	# Mande Paganism & Senegambian Paganism frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_subsahelian_africa }
-					OR = {
-						scope:the_faith.religion = religion:west_african_roog_religion
-						scope:the_faith.religion = religion:west_african_religion
-					}
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:west_african_roog_religion
+					this = religion:west_african_religion
 				}
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_north_african_interior }
-					OR = {
-						scope:the_faith.religion = religion:west_african_roog_religion
-						scope:the_faith.religion = religion:west_african_religion
-					}
-				}
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_western_sahara }
-					OR = {
-						scope:the_faith.religion = religion:west_african_roog_religion
-						scope:the_faith.religion = religion:west_african_religion
-					}
+			}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_subsahelian_africa
+					geographical_region = ghw_region_north_african_interior
+					geographical_region = ghw_region_western_sahara
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Mande Paganism & Senegambian Paganism fringe
-	if = {
+	# Mande Paganism & Senegambian Paganism fringe
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
-			OR = {
-				scope:the_faith.religion = religion:west_african_roog_religion
-				scope:the_faith.religion = religion:west_african_religion
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:west_african_roog_religion
+					this = religion:west_african_religion
+				}
 			}
+			title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
 		}
 		multiply = ghw_target_fringe
 	}
-	#Hausan Paganism heartlands
-	if = {
+	# Hausan Paganism heartlands
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_north_african_interior }
 			scope:the_faith.religion = religion:west_african_bori_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_north_african_interior }
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Hausan Paganism frontier
-	if = {
+	# Hausan Paganism frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_the_sahel }
-					scope:the_faith.religion = religion:west_african_bori_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_subsahelian_africa }
-					scope:the_faith.religion = religion:west_african_bori_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_ethiopia }
-					scope:the_faith.religion = religion:west_african_bori_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_eastern_sahara }
-					scope:the_faith.religion = religion:west_african_bori_religion
+			scope:the_faith.religion = religion:west_african_bori_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_the_sahel
+					geographical_region = ghw_region_subsahelian_africa
+					geographical_region = ghw_region_ethiopia
+					geographical_region = ghw_region_eastern_sahara
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Hausan Paganism fringe
-	if = {
+	# Hausan Paganism fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_horn_of_africa }
-					scope:the_faith.religion = religion:west_african_bori_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_egypt_et_al }
-					scope:the_faith.religion = religion:west_african_bori_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
-					scope:the_faith.religion = religion:west_african_bori_religion
+			scope:the_faith.religion = religion:west_african_bori_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_horn_of_africa
+					geographical_region = ghw_region_egypt_et_al
+					geographical_region = ghw_region_north_africa
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Akan Paganism & Yoruba Paganism heartlands
-	if = {
+	# Akan Paganism & Yoruba Paganism heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:akom_religion
+					this = religion:west_african_orisha_religion
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_subsahelian_africa }
-			OR = {
-				scope:the_faith.religion = religion:akom_religion
-				scope:the_faith.religion = religion:west_african_orisha_religion
-			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Akan Paganism & Yoruba Paganism frontier
-	if = {
+	# Akan Paganism & Yoruba Paganism frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_the_sahel }
-					OR = {
-						scope:the_faith.religion = religion:akom_religion
-						scope:the_faith.religion = religion:west_african_orisha_religion
-					}
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:akom_religion
+					this = religion:west_african_orisha_religion
 				}
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_north_african_interior }
-					OR = {
-						scope:the_faith.religion = religion:akom_religion
-						scope:the_faith.religion = religion:west_african_orisha_religion
-					}
-				}
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_western_sahara }
-					OR = {
-						scope:the_faith.religion = religion:akom_religion
-						scope:the_faith.religion = religion:west_african_orisha_religion
-					}
+			}
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_the_sahel
+					geographical_region = ghw_region_north_african_interior
+					geographical_region = ghw_region_western_sahara
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Akan Paganism & Yoruba Paganism fringe
-	if = {
+	# Akan Paganism & Yoruba Paganism fringe
+	else_if = {
 		limit = {
+			scope:the_faith.religion = {
+				OR = {
+					this = religion:akom_religion
+					this = religion:west_african_orisha_religion
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
-			OR = {
-				scope:the_faith.religion = religion:akom_religion
-				scope:the_faith.religion = religion:west_african_orisha_religion
-			}
 		}
 		multiply = ghw_target_fringe
 	}
-	##Kushite Paganism heartlands
-	#if = {
-	#	limit = {
-	#		title_capital_county.title_province = { geographical_region = ghw_region_egypt_et_al }
-	#		scope:the_faith.religion = religion:kushitism_religion
-	#	}
-	#	multiply = ghw_target_heartlands
-	#}
-	##Kushite Paganism frontier
-	#if = {
-	#	limit = {
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_north_african_interior }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_ethiopia }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_ethiopia }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_horn_of_africa }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#	}
-	#	multiply = ghw_target_frontier
-	#}
-	##Kushite Paganism fringe
-	#if = {
-	#	limit = {
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_the_sahel }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_subsahelian_africa }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#	}
-	#	multiply = ghw_target_fringe
-	#}
-	##Kushite Paganism stretch goals
-	#if = {
-	#	limit = {
-	#		OR = {
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#			AND = {
-	#				title_capital_county.title_province = { geographical_region = ghw_region_arabia }
-	#				scope:the_faith.religion = religion:kushitism_religion
-	#			}
-	#		}
-	#	}
-	#	multiply = ghw_target_stretch
-	#}
-	#Waaqi Paganism heartlands
-	if = {
+	# Waaqi Paganism heartlands
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_horn_of_africa }
 			scope:the_faith.religion = religion:waaqism_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_horn_of_africa }
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Waaqi Paganism frontier
-	if = {
+	# Waaqi Paganism frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_ethiopia }
-					scope:the_faith.religion = religion:waaqism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_egypt_et_al }
-					scope:the_faith.religion = religion:waaqism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_arabia }
-					scope:the_faith.religion = religion:waaqism_religion
+			scope:the_faith.religion = religion:waaqism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_ethiopia
+					geographical_region = ghw_region_egypt_et_al
+					geographical_region = ghw_region_arabia
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Waaqi Paganism fringe
-	if = {
+	# Waaqi Paganism fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_north_african_interior }
-					scope:the_faith.religion = religion:waaqism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-					scope:the_faith.religion = religion:waaqism_religion
+			scope:the_faith.religion = religion:waaqism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_north_african_interior
+					geographical_region = ghw_region_holy_land
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Zunist heartlands
-	if = {
+	# Zunist heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:zunism_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_afghanistan }
-			scope:the_faith.religion = religion:zunism_religion
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Zunist frontier
-	if = {
+	# Zunist frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_western_india }
-					scope:the_faith.religion = religion:zunism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_persia }
-					scope:the_faith.religion = religion:zunism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_transoxiana }
-					scope:the_faith.religion = religion:zunism_religion
+			scope:the_faith.religion = religion:zunism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_western_india
+					geographical_region = ghw_region_persia
+					geographical_region = ghw_region_transoxiana
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Zunist fringe
-	if = {
+	# Zunist fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_caucasus }
-					scope:the_faith.religion = religion:zunism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-					scope:the_faith.religion = religion:zunism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_near_east }
-					scope:the_faith.religion = religion:zunism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_southwestern_india }
-					scope:the_faith.religion = religion:zunism_religion
+			scope:the_faith.religion = religion:zunism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_caucasus
+					geographical_region = ghw_region_holy_land
+					geographical_region = ghw_region_near_east
+					geographical_region = ghw_region_southwestern_india
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Zunist stretch goal
-	if = {
+	# Zunist stretch goal
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_egypt }
 			scope:the_faith.religion = religion:zunism_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_egypt }
 		}
 		multiply = ghw_target_stretch
 	}
-	#Hellenic heartlands
-	if = {
+	# Hellenic heartlands
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mainland_greece }
-					scope:the_faith.religion = religion:hellenism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_italy }
-					scope:the_faith.religion = religion:hellenism_religion
+			scope:the_faith.religion = religion:hellenism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_mainland_greece
+					geographical_region = ghw_region_italy
 				}
 			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Hellenic frontier
-	if = {
+	# Hellenic frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_anatolia }
-					scope:the_faith.religion = religion:hellenism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_balkans }
-					scope:the_faith.religion = religion:hellenism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_near_east }
-					scope:the_faith.religion = religion:hellenism_religion
+			scope:the_faith.religion = religion:hellenism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_anatolia
+					geographical_region = ghw_region_balkans
+					geographical_region = ghw_region_near_east
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Hellenic fringe
-	if = {
+	# Hellenic fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
-					scope:the_faith.religion = religion:hellenism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_egypt }
-					scope:the_faith.religion = religion:hellenism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_north_africa }
-					scope:the_faith.religion = religion:hellenism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_southern_france }
-					scope:the_faith.religion = religion:hellenism_religion
+			scope:the_faith.religion = religion:hellenism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_holy_land
+					geographical_region = ghw_region_egypt
+					geographical_region = ghw_region_north_africa
+					geographical_region = ghw_region_southern_france
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
 	
-	###Eastern
-	#Hindu heartlands
-	if = {
+	### BP Pagans
+	
+	# Arabian heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:semitic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_arabia
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Arabian frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:semitic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_southern_middle_east
+					geographical_region = ghw_region_holy_land
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Arabian fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:semitic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_egypt_et_al
+					geographical_region = ghw_region_persia
+					geographical_region = ghw_region_near_east
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Berber heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:berber_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_north_africa
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Berber frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:berber_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_western_sahara
+					geographical_region = ghw_region_eastern_sahara
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Berber fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:berber_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_egypt_et_al
+					geographical_region = ghw_region_north_african_interior
+					geographical_region = ghw_region_the_sahel
+					geographical_region = ghw_region_iberia
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Celtic heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:celtic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_celtic
+					geographical_region = ghw_region_england
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Celtic frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:celtic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_france
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Celtic fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:celtic_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_northern_italy
+					geographical_region = ghw_region_iberia
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Proto-Balkan heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:paleo_balkan_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_balkans
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Proto-Balkan frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:paleo_balkan_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_italy
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Proto-Balkan fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:paleo_balkan_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_caucasus
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Georgian heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:georgian_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_caucasus
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Georgian frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:georgian_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_anatolia
+					geographical_region = ghw_region_kurdistan
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Georgian fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:georgian_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_crimea
+					geographical_region = ghw_region_steppe
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Munda heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:munda_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_middle_india
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Munda frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:munda_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_north_eastern_india
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Munda fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:munda_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_the_ganges
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Scythian heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:scythian_pagan
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_steppe
+					geographical_region = ghw_region_transoxiana
+				}
+			}
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Scythian frontier
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:scythian_pagan
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_persia
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Scythian fringe
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:scythian_pagan
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_khotan
+					geographical_region = ghw_region_crimea
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	# Magyar heartlands
+	else_if = {
+		limit = {
+			scope:the_faith = faith:magyar_pagan
+			title_capital_county.title_province = { geographical_region = ghw_region_hungary }
+		}
+		multiply = ghw_target_heartlands
+	}
+	# Magyar frontier
+	else_if = {
+		limit = {
+			scope:the_faith = faith:magyar_pagan
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_balkans
+					geographical_region = ghw_region_crimea
+					geographical_region = ghw_region_poland_bohemia_bavaria
+					geographical_region = ghw_region_southern_russia
+				}
+			}
+		}
+		multiply = ghw_target_frontier
+	}
+	# Magyar fringe
+	else_if = {
+		limit = {
+			scope:the_faith = faith:magyar_pagan
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_mainland_greece
+					geographical_region = ghw_region_baltic
+				}
+			}
+		}
+		multiply = ghw_target_fringe
+	}
+	
+	### Eastern
+	# Hindu heartlands
+	else_if = {
+		limit = {
+			scope:the_faith.religion = religion:hinduism_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_the_ganges }
-			scope:the_faith.religion = religion:hinduism_religion
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Hindu frontier
-	if = {
+	# Hindu frontier
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:hinduism_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_non_ganges_india }
+		}
+		multiply = ghw_target_frontier
+	}
+	# Hindu fringe
+	else_if = {
+		limit = {
 			scope:the_faith.religion = religion:hinduism_religion
-		}
-		multiply = ghw_target_frontier
-	}
-	#Hindu fringe
-	if = {
-		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_tibet }
-					scope:the_faith.religion = religion:hinduism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_afghanistan }
-					scope:the_faith.religion = religion:hinduism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_persia }
-					scope:the_faith.religion = religion:hinduism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_tibet
+					geographical_region = ghw_region_afghanistan
+					geographical_region = ghw_region_persia
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Jain heartlands
-	if = {
+	# Jain heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:jainism_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_gujarat_&_rajputana }
-			scope:the_faith.religion = religion:jainism_religion
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Jain frontier
-	if = {
+	# Jain frontier
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:jainism_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_non_gujarat_or_rajputana_india }
+		}
+		multiply = ghw_target_frontier
+	}
+	# Jain fringe
+	else_if = {
+		limit = {
 			scope:the_faith.religion = religion:jainism_religion
-		}
-		multiply = ghw_target_frontier
-	}
-	#Jain fringe
-	if = {
-		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_tibet }
-					scope:the_faith.religion = religion:jainism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_afghanistan }
-					scope:the_faith.religion = religion:jainism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_persia }
-					scope:the_faith.religion = religion:jainism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_tibet
+					geographical_region = ghw_region_afghanistan
+					geographical_region = ghw_region_persia
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Theravada Buddhist heartlands
-	if = {
+	# Theravada Buddhist heartlands
+	else_if = {
 		limit = {
+			scope:the_faith = {
+				religion = religion:buddhism_religion
+				NOR = {
+					this = faith:mahayana
+					this = faith:vajrayana
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_lanka_&_bengal }
-			scope:the_faith.religion = religion:buddhism_religion
-			NOR = {
-				scope:the_faith = faith:mahayana
-				scope:the_faith = faith:vajrayana
-			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Theravada Buddhist frontier
-	if = {
+	# Theravada Buddhist frontier
+	else_if = {
 		limit = {
+			scope:the_faith = {
+				religion = religion:buddhism_religion
+				NOR = {
+					this = faith:mahayana
+					this = faith:vajrayana
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_middle_india }
-			scope:the_faith.religion = religion:buddhism_religion
-			NOR = {
-				scope:the_faith = faith:mahayana
-				scope:the_faith = faith:vajrayana
-			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Theravada Buddhist fringe
-	if = {
+	# Theravada Buddhist fringe
+	else_if = {
 		limit = {
+			scope:the_faith = {
+				religion = religion:buddhism_religion
+				NOR = {
+					this = faith:mahayana
+					this = faith:vajrayana
+				}
+			}
 			title_capital_county.title_province = { geographical_region = ghw_region_western_india }
-			scope:the_faith.religion = religion:buddhism_religion
-			NOR = {
-				scope:the_faith = faith:mahayana
-				scope:the_faith = faith:vajrayana
-			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Mahayana & Vajrayana Buddhist heartlands
-	if = {
+	# Mahayana & Vajrayana Buddhist heartlands
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_tibet }
-					scope:the_faith.religion = religion:buddhism_religion
-					NOT = { scope:the_faith = faith:theravada }
-				}
+			scope:the_faith = {
+				religion = religion:buddhism_religion
+				NOT = { this = faith:theravada }
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_mongolia }
-					scope:the_faith.religion = religion:buddhism_religion
-					NOT = { scope:the_faith = faith:theravada }
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_tibet
+					geographical_region = ghw_region_mongolia
 				}
 			}
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Mahayana & Vajrayana Buddhist frontier
-	if = {
+	# Mahayana & Vajrayana Buddhist frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_khotan }
-					scope:the_faith.religion = religion:buddhism_religion
-					NOT = { scope:the_faith = faith:theravada }
-				}
+			scope:the_faith = {
+				religion = religion:buddhism_religion
+				NOT = { this = faith:theravada }
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_siberia }
-					scope:the_faith.religion = religion:buddhism_religion
-					NOT = { scope:the_faith = faith:theravada }
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_khotan
+					geographical_region = ghw_region_siberia
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Mahayana & Vajrayana Buddhist fringe
-	if = {
+	# Mahayana & Vajrayana Buddhist fringe
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_transoxiana }
-					scope:the_faith.religion = religion:buddhism_religion
-					NOT = { scope:the_faith = faith:theravada }
-				}
+			scope:the_faith = {
+				religion = religion:buddhism_religion
+				NOT = { this = faith:theravada }
 			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_afghanistan }
-					scope:the_faith.religion = religion:buddhism_religion
-					NOT = { scope:the_faith = faith:theravada }
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_transoxiana
+					geographical_region = ghw_region_afghanistan
 				}
 			}
 		}
 		multiply = ghw_target_fringe
 	}
-	#Taoist heartlands
-	if = {
+	# Taoist heartlands
+	else_if = {
 		limit = {
+			scope:the_faith.religion = religion:taoism_religion
 			title_capital_county.title_province = { geographical_region = ghw_region_mongolia }
-			scope:the_faith.religion = religion:taoism_religion
 		}
 		multiply = ghw_target_heartlands
 	}
-	#Taoist frontier
-	if = {
+	# Taoist frontier
+	else_if = {
 		limit = {
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_siberia }
-					scope:the_faith.religion = religion:taoism_religion
-				}
-			}
-			OR = {
-				AND = {
-					title_capital_county.title_province = { geographical_region = ghw_region_tibet }
-					scope:the_faith.religion = religion:taoism_religion
+			scope:the_faith.religion = religion:taoism_religion
+			title_capital_county.title_province = {
+				OR = {
+					geographical_region = ghw_region_siberia
+					geographical_region = ghw_region_tibet
 				}
 			}
 		}
 		multiply = ghw_target_frontier
 	}
-	#Taoist fringe
-	if = {
+	# Taoist fringe
+	else_if = {
 		limit = {
-			title_capital_county.title_province = { geographical_region = ghw_region_north_eastern_india }
 			scope:the_faith.religion = religion:taoism_religion
+			title_capital_county.title_province = { geographical_region = ghw_region_north_eastern_india }
 		}
 		multiply = ghw_target_fringe
 	}
 
 	### 3 ###
-	#Factor in the potential target's distance from the faith.
-	#Distance: Rome to Jerusalem-ish
-	#If the HoF is landed, use them.
+	# Factor in the potential target's distance from the faith.
+	# Distance: Rome to Jerusalem-ish
+	# If the HoF is landed, use them.
 	if = {
 		limit = {
 			scope:the_faith.religious_head = { is_landed = yes }
@@ -2231,8 +2246,9 @@ great_holy_war_target_kingdom_weight = {
 			multiply = ghw_target_distance_01_reduction
 		}
 	}
-	#Otherwise, use a preset fallback holy site.
+	# Otherwise, use a preset fallback holy site.
 	else = {
+		# Christianity
 		if = {
 			limit = { scope:the_faith.religion = religion:christianity_religion }
 			if = {
@@ -2247,7 +2263,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Islam
+		else_if = {
 			limit = { scope:the_faith.religion = religion:islam_religion }
 			if = {
 				limit = {
@@ -2261,7 +2278,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Judaism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:judaism_religion }
 			if = {
 				limit = {
@@ -2275,11 +2293,14 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Zoroastrianism & Dualism
+		else_if = {
 			limit = {
-				OR = {
-					scope:the_faith.religion = religion:zoroastrianism_religion
-					scope:the_faith.religion = religion:dualism_religion
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:zoroastrianism_religion
+						this = religion:dualism_religion
+					}
 				}
 			}
 			if = {
@@ -2294,7 +2315,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Asatru Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:germanic_religion }
 			if = {
 				limit = {
@@ -2308,7 +2330,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Vidilist Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:baltic_religion }
 			if = {
 				limit = {
@@ -2322,7 +2345,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Slovianskan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:slavic_religion }
 			if = {
 				limit = {
@@ -2336,8 +2360,16 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
-			limit = { scope:the_faith.religion = religion:finno_ugric_religion }
+		# Ukonusko & Turumic Paganism
+		else_if = {
+			limit = {
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:finno_ugric_religion
+						this = religion:siberian_religion
+					}
+				}
+			}
 			if = {
 				limit = {
 					title_capital_county = {
@@ -2350,7 +2382,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Tengri Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:tengrism_religion }
 			if = {
 				limit = {
@@ -2364,13 +2397,31 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Taltosist Paganism
+		else_if = {
+			limit = { scope:the_faith = faith:magyar_pagan }
+			if = {
+				limit = {
+					title_capital_county = {
+						squared_distance >= {
+							target = title:c_aquincum
+							value = ghw_target_distance_01_threshold
+						}
+					}
+				}
+				multiply = ghw_target_distance_01_reduction
+			}
+		}
+		# Bon/Qiangicism/Donyipoloism/Mundhumism
+		else_if = {
 			limit = {
-				OR = {
-					scope:the_faith.religion = religion:bon_religion
-					scope:the_faith.religion = religion:tani_religion
-					scope:the_faith.religion = religion:mundhum_religion
-					scope:the_faith.religion = religion:qiangic_religion
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:bon_religion
+						this = religion:tani_religion
+						this = religion:mundhum_religion
+						this = religion:qiangic_religion
+					}
 				}
 			}
 			if = {
@@ -2385,8 +2436,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		#Mande Paganism 
-		if = {
+		# Mande Paganism 
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_religion }
 			if = {
 				limit = {
@@ -2400,8 +2451,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		#Senegambian Paganism
-		if = {
+		# Senegambian Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_roog_religion }
 			if = {
 				limit = {
@@ -2415,8 +2466,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		#Hausan Paganism
-		if = {
+		# Hausan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_bori_religion }
 			if = {
 				limit = {
@@ -2430,8 +2481,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		#Akan Paganism
-		if = {
+		# Akan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:akom_religion }
 			if = {
 				limit = {
@@ -2445,8 +2496,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		#Yoruba Paganism
-		if = {
+		# Yoruba Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_orisha_religion }
 			if = {
 				limit = {
@@ -2460,23 +2511,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		##Kushite Paganism
-		#if = {
-		#	limit = { scope:the_faith.religion = religion:kushitism_religion }
-		#	if = {
-		#		limit = {
-		#			title_capital_county = {
-		#				squared_distance >= {
-		#					target = title:c_aswan
-		#					value = ghw_target_distance_01_threshold
-		#				}
-		#			}
-		#		}
-		#		multiply = ghw_target_distance_01_reduction
-		#	}
-		#}
-		#Waaqi Paganism
-		if = {
+		# Waaqi Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:waaqism_religion }
 			if = {
 				limit = {
@@ -2490,7 +2526,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Zunist Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:zunism_religion }
 			if = {
 				limit = {
@@ -2504,7 +2541,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Hellenic Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:hellenism_religion }
 			if = {
 				limit = {
@@ -2518,7 +2556,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Hinduism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:hinduism_religion }
 			if = {
 				limit = {
@@ -2532,7 +2571,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Jainism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:jainism_religion }
 			if = {
 				limit = {
@@ -2546,7 +2586,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Buddhism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:buddhism_religion }
 			if = {
 				limit = {
@@ -2560,7 +2601,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_01_reduction
 			}
 		}
-		if = {
+		# Taoism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:taoism_religion }
 			if = {
 				limit = {
@@ -2575,8 +2617,8 @@ great_holy_war_target_kingdom_weight = {
 			}
 		}
 	}
-	#Distance: Rome to Afghanistan-ish
-	#If the HoF is landed, use them.
+	# Distance: Rome to Afghanistan-ish
+	# If the HoF is landed, use them.
 	if = {
 		limit = {
 			scope:the_faith.religious_head = { is_landed = yes }
@@ -2593,8 +2635,9 @@ great_holy_war_target_kingdom_weight = {
 			multiply = ghw_target_distance_02_reduction
 		}
 	}
-	#Otherwise, use a preset fallback holy site.
+	# Otherwise, use a preset fallback holy site.
 	else = {
+		# Christianity
 		if = {
 			limit = { scope:the_faith.religion = religion:christianity_religion }
 			if = {
@@ -2609,7 +2652,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Islam
+		else_if = {
 			limit = { scope:the_faith.religion = religion:islam_religion }
 			if = {
 				limit = {
@@ -2623,7 +2667,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Judaism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:judaism_religion }
 			if = {
 				limit = {
@@ -2637,11 +2682,14 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Zoroastrianism & Dualism
+		else_if = {
 			limit = {
-				OR = {
-					scope:the_faith.religion = religion:zoroastrianism_religion
-					scope:the_faith.religion = religion:dualism_religion
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:zoroastrianism_religion
+						this = religion:dualism_religion
+					}
 				}
 			}
 			if = {
@@ -2656,7 +2704,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Asatru Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:germanic_religion }
 			if = {
 				limit = {
@@ -2670,7 +2719,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Vidilist Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:baltic_religion }
 			if = {
 				limit = {
@@ -2684,7 +2734,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Slovianskan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:slavic_religion }
 			if = {
 				limit = {
@@ -2698,8 +2749,16 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
-			limit = { scope:the_faith.religion = religion:finno_ugric_religion }
+		# Ukonusko & Turumic Paganism
+		else_if = {
+			limit = {
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:finno_ugric_religion
+						this = religion:siberian_religion
+					}
+				}
+			}
 			if = {
 				limit = {
 					title_capital_county = {
@@ -2712,7 +2771,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Tengri Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:tengrism_religion }
 			if = {
 				limit = {
@@ -2726,13 +2786,31 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Taltosist Paganism
+		else_if = {
+			limit = { scope:the_faith = faith:magyar_pagan }
+			if = {
+				limit = {
+					title_capital_county = {
+						squared_distance >= {
+							target = title:c_aquincum
+							value = ghw_target_distance_02_threshold
+						}
+					}
+				}
+				multiply = ghw_target_distance_02_reduction
+			}
+		}
+		# Bon/Qiangicism/Donyipoloism/Mundhumism
+		else_if = {
 			limit = {
-				OR = {
-					scope:the_faith.religion = religion:bon_religion
-					scope:the_faith.religion = religion:tani_religion
-					scope:the_faith.religion = religion:mundhum_religion
-					scope:the_faith.religion = religion:qiangic_religion
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:bon_religion
+						this = religion:tani_religion
+						this = religion:mundhum_religion
+						this = religion:qiangic_religion
+					}
 				}
 			}
 			if = {
@@ -2747,8 +2825,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		#Mande Paganism 
-		if = {
+		# Mande Paganism 
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_religion }
 			if = {
 				limit = {
@@ -2762,8 +2840,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		#Senegambian Paganism
-		if = {
+		# Senegambian Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_roog_religion }
 			if = {
 				limit = {
@@ -2777,8 +2855,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		#Hausan Paganism
-		if = {
+		# Hausan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_bori_religion }
 			if = {
 				limit = {
@@ -2792,8 +2870,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		#Akan Paganism
-		if = {
+		# Akan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:akom_religion }
 			if = {
 				limit = {
@@ -2807,8 +2885,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		#Yoruba Paganism
-		if = {
+		# Yoruba Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_orisha_religion }
 			if = {
 				limit = {
@@ -2822,23 +2900,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		##Kushite Paganism
-		#if = {
-		#	limit = { scope:the_faith.religion = religion:kushitism_religion }
-		#	if = {
-		#		limit = {
-		#			title_capital_county = {
-		#				squared_distance >= {
-		#					target = title:c_aswan
-		#					value = ghw_target_distance_02_threshold
-		#				}
-		#			}
-		#		}
-		#		multiply = ghw_target_distance_02_reduction
-		#	}
-		#}
-		#Waaqi Paganism
-		if = {
+		# Waaqi Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:waaqism_religion }
 			if = {
 				limit = {
@@ -2852,7 +2915,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Zunist Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:zunism_religion }
 			if = {
 				limit = {
@@ -2866,7 +2930,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Hellenic Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:hellenism_religion }
 			if = {
 				limit = {
@@ -2880,7 +2945,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Hinduism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:hinduism_religion }
 			if = {
 				limit = {
@@ -2894,7 +2960,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Jainism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:jainism_religion }
 			if = {
 				limit = {
@@ -2908,7 +2975,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Buddhism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:buddhism_religion }
 			if = {
 				limit = {
@@ -2922,7 +2990,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_02_reduction
 			}
 		}
-		if = {
+		# Taoism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:taoism_religion }
 			if = {
 				limit = {
@@ -2937,8 +3006,8 @@ great_holy_war_target_kingdom_weight = {
 			}
 		}
 	}
-	#Distance: Rome to Bengal-ish
-	#If the HoF is landed, use them.
+	# Distance: Rome to Bengal-ish
+	# If the HoF is landed, use them.
 	if = {
 		limit = {
 			scope:the_faith.religious_head = { is_landed = yes }
@@ -2955,8 +3024,9 @@ great_holy_war_target_kingdom_weight = {
 			multiply = ghw_target_distance_03_reduction
 		}
 	}
-	#Otherwise, use a preset fallback holy site.
+	# Otherwise, use a preset fallback holy site.
 	else = {
+		# Christianity
 		if = {
 			limit = { scope:the_faith.religion = religion:christianity_religion }
 			if = {
@@ -2971,7 +3041,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Islam
+		else_if = {
 			limit = { scope:the_faith.religion = religion:islam_religion }
 			if = {
 				limit = {
@@ -2985,7 +3056,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Judaism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:judaism_religion }
 			if = {
 				limit = {
@@ -2999,11 +3071,14 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Zoroastrianism & Dualism
+		else_if = {
 			limit = {
-				OR = {
-					scope:the_faith.religion = religion:zoroastrianism_religion
-					scope:the_faith.religion = religion:dualism_religion
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:zoroastrianism_religion
+						this = religion:dualism_religion
+					}
 				}
 			}
 			if = {
@@ -3018,7 +3093,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Asatru Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:germanic_religion }
 			if = {
 				limit = {
@@ -3032,7 +3108,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Vidilist Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:baltic_religion }
 			if = {
 				limit = {
@@ -3046,7 +3123,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Slovianskan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:slavic_religion }
 			if = {
 				limit = {
@@ -3060,8 +3138,16 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
-			limit = { scope:the_faith.religion = religion:finno_ugric_religion }
+		# Ukonusko & Turumic Paganism
+		else_if = {
+			limit = {
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:finno_ugric_religion
+						this = religion:siberian_religion
+					}
+				}
+			}
 			if = {
 				limit = {
 					title_capital_county = {
@@ -3074,7 +3160,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Tengri Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:tengrism_religion }
 			if = {
 				limit = {
@@ -3088,13 +3175,31 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Taltosist Paganism
+		else_if = {
+			limit = { scope:the_faith = faith:magyar_pagan }
+			if = {
+				limit = {
+					title_capital_county = {
+						squared_distance >= {
+							target = title:c_aquincum
+							value = ghw_target_distance_03_threshold
+						}
+					}
+				}
+				multiply = ghw_target_distance_03_reduction
+			}
+		}
+		# Bon/Qiangicism/Donyipoloism/Mundhumism
+		else_if = {
 			limit = {
-				OR = {
-					scope:the_faith.religion = religion:bon_religion
-					scope:the_faith.religion = religion:tani_religion
-					scope:the_faith.religion = religion:mundhum_religion
-					scope:the_faith.religion = religion:qiangic_religion
+				scope:the_faith.religion = {
+					OR = {
+						this = religion:bon_religion
+						this = religion:tani_religion
+						this = religion:mundhum_religion
+						this = religion:qiangic_religion
+					}
 				}
 			}
 			if = {
@@ -3109,8 +3214,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		#Mande Paganism 
-		if = {
+		# Mande Paganism 
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_religion }
 			if = {
 				limit = {
@@ -3124,8 +3229,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		#Senegambian Paganism
-		if = {
+		# Senegambian Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_roog_religion }
 			if = {
 				limit = {
@@ -3139,8 +3244,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		#Hausan Paganism
-		if = {
+		# Hausan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_bori_religion }
 			if = {
 				limit = {
@@ -3154,8 +3259,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		#Akan Paganism
-		if = {
+		# Akan Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:akom_religion }
 			if = {
 				limit = {
@@ -3169,8 +3274,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		#Yoruba Paganism
-		if = {
+		# Yoruba Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:west_african_orisha_religion }
 			if = {
 				limit = {
@@ -3184,23 +3289,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		##Kushite Paganism
-		#if = {
-		#	limit = { scope:the_faith.religion = religion:kushitism_religion }
-		#	if = {
-		#		limit = {
-		#			title_capital_county = {
-		#				squared_distance >= {
-		#					target = title:c_aswan
-		#					value = ghw_target_distance_03_threshold
-		#				}
-		#			}
-		#		}
-		#		multiply = ghw_target_distance_03_reduction
-		#	}
-		#}
-		#Waaqi Paganism
-		if = {
+		# Waaqi Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:waaqism_religion }
 			if = {
 				limit = {
@@ -3214,7 +3304,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Zunist Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:zunism_religion }
 			if = {
 				limit = {
@@ -3228,7 +3319,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Hellenic Paganism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:hellenism_religion }
 			if = {
 				limit = {
@@ -3242,7 +3334,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Hinduism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:hinduism_religion }
 			if = {
 				limit = {
@@ -3256,7 +3349,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Jainism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:jainism_religion }
 			if = {
 				limit = {
@@ -3270,7 +3364,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Buddhism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:buddhism_religion }
 			if = {
 				limit = {
@@ -3284,7 +3379,8 @@ great_holy_war_target_kingdom_weight = {
 				multiply = ghw_target_distance_03_reduction
 			}
 		}
-		if = {
+		# Taoism
+		else_if = {
 			limit = { scope:the_faith.religion = religion:taoism_religion }
 			if = {
 				limit = {
@@ -3301,7 +3397,8 @@ great_holy_war_target_kingdom_weight = {
 	}
 
 	### 4 ###
-	if = {	#Always weight-up kingdoms containing holy sites.
+	# Always weight-up kingdoms containing holy sites.
+	if = {
 		limit = {
 			any_in_de_jure_hierarchy = {
 				tier = tier_barony
@@ -3313,22 +3410,17 @@ great_holy_war_target_kingdom_weight = {
 	}
 
 	### 5 ###
-	#Christian & Jewish preference for Jerusalem
+	# Christian & Jewish preference for Jerusalem
 	if = {
 		limit = {
-			#Belongs to a Christian or Jewish religion.
+			# Belongs to a Christian or Jewish religion.
 			OR = {
 				scope:the_faith.religion = religion:christianity_religion
 				scope:the_faith.religion = religion:judaism_religion
 			}
-			#Not a non-Catholic standard Christian faith.
-			NOR = {
-				scope:the_faith = faith:orthodox
-				scope:the_faith = faith:iconoclast
-				scope:the_faith = faith:miaphysitism
-				scope:the_faith = faith:armenian_apostolic
-			}
-			#Definitely actually considers Jerusalem holy.
+			# Not a non-Catholic standard Christian faith.
+			scope:the_faith = { not_non_catholic_standard_christian_faith_trigger = yes }
+			# Definitely actually considers Jerusalem holy.
 			title:c_jerusalem = {
 				any_in_de_jure_hierarchy = {
 					tier = tier_barony
@@ -3336,19 +3428,19 @@ great_holy_war_target_kingdom_weight = {
 					is_holy_site_of = scope:the_faith
 				}
 			}
-			#There's a GHWable kingdom in the area.
+			# There's a GHWable kingdom in the area.
 			title_capital_county.title_province = { geographical_region = ghw_region_holy_land }
 		}
 		multiply = ghw_target_key_religious_holding
 	}
-	#Muslim preference for Mecca & Medina
+	# Muslim preference for Mecca & Medina
 	if = {
 		limit = {
-			#Belongs to an Islamic religion.
+			# Belongs to an Islamic religion.
 			scope:the_faith.religion = religion:islam_religion
-			#Not the Qarmatians. Since they weren't exactly fans of the Holy Cities.
+			# Not the Qarmatians. Since they weren't exactly fans of the Holy Cities.
 			NOT = { scope:the_faith = faith:qarmatian }
-			#Definitely actually considers at least Mecca or Medina holy.
+			# Definitely actually considers at least Mecca or Medina holy.
 			OR = {
 				title:c_mecca = {
 					any_in_de_jure_hierarchy = {
@@ -3365,12 +3457,12 @@ great_holy_war_target_kingdom_weight = {
 					}
 				}
 			}
-			#There's a GHWable kingdom in the area.
+			# There's a GHWable kingdom in the area.
 			title_capital_county.title_province = { geographical_region = ghw_region_arabia }
 		}
 		multiply = ghw_target_key_religious_holding
 	}
-	#A defender in the region HumSac'd your HoF
+	# A defender in the region HumSac'd your HoF
 	if = {
 		limit = {
 			any_in_de_jure_hierarchy = {
@@ -3391,6 +3483,9 @@ great_holy_war_target_kingdom_weight = {
 		multiply = ghw_target_religious_vengeance
 	}
 }
+
+##### Changed from Vanilla ^^^^^
+
 
 great_holy_war_pledge_amount = {
 	value = root.yearly_character_income
@@ -3458,63 +3553,92 @@ faith_creation_cost_mult = {
 # The returned value is interpreted as a multiplicative modifier (e.g. 0.5 means +50% cost).
 # scope:character = the converting character
 # scope:new_faith = the faith the character is converting to
+# There should be no subtract equal or higher than 1
 faith_conversion_cost_mult = {
-	add = {
-		value = scope:new_faith.faith_conversion_fervor_mult
-		subtract = scope:character.faith.faith_conversion_fervor_mult
-		desc = "faith_conversion_cost_fervor_difference"
-		format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-	}
 	
+	#Adding 1 to apply properly the following multipliers
+	add = {
+		value = 1
+	}
+
+	# Try to always be cheaper than creating a new faith
 	if = {
 		limit = {
 			scope:character.learning > 0
 		}
-		subtract = {  # Try to always be cheaper than creating a new faith
-			desc = "learning_modifier"
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = scope:character.learning
-			divide = 100
+		multiply = {
+			value = 1
+			subtract = {
+				desc = "learning_modifier"
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = scope:character.learning
+				divide = 100
+			}
 		}
 	}
-	
+	if = {
+		multiply = {
+			value = 1
+			add = {
+				value = scope:new_faith.faith_conversion_fervor_mult
+				subtract = scope:character.faith.faith_conversion_fervor_mult
+				desc = "faith_conversion_cost_fervor_difference"
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+			}
+		}	
+	}
+	# Try to always be cheaper than creating a new faith
 	if = {
 		limit = {
 			scope:new_faith.religion = scope:character.faith.religion
 		}
-		subtract = {  # Try to always be cheaper than creating a new faith
-			desc = "faith_conversion_cost_existing_faith"
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 0.5
+		multiply = {
+			value = 1
+			subtract = {
+				desc = "faith_conversion_cost_existing_faith"
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.5
+			}
 		}
 	}
+	# Try to always be cheaper than creating a new faith
 	else = {
-		subtract = {  # Try to always be cheaper than creating a new faith
-			desc = "faith_conversion_cost_existing_faith"
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 0.35
+		multiply = {
+			value = 1
+			subtract = {
+				desc = "faith_conversion_cost_existing_faith"
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.35
+			}
 		}
 	}
-	
+	# Pluralistic faiths have it easier converting to each other
 	if = {
 		limit = {
 			scope:new_faith = { has_doctrine = doctrine_pluralism_pluralistic }
 			scope:character.faith = { has_doctrine = doctrine_pluralism_pluralistic }
 		}
-		subtract = {  # Pluralistic faiths have it easier converting to each other
-			desc = "faith_conversion_cost_pluralists"
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 0.25
+		multiply = {
+			value = 1
+			subtract = {
+				desc = "faith_conversion_cost_pluralists"
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.25
+			}
 		}
 	}
+	# Pluralistic faiths have it easier converting
 	else_if = {
 		limit = {
 			scope:character.faith = { has_doctrine = doctrine_pluralism_pluralistic }
 		}
-		subtract = {  # Pluralistic faiths have it easier converting
-			desc = "faith_conversion_cost_pluralist"
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 0.15
+		multiply = {
+			value = 1
+			subtract = {
+				desc = "faith_conversion_cost_pluralist"
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.15
+			}
 		}
 	}
 
@@ -3537,10 +3661,13 @@ faith_conversion_cost_mult = {
 					}
 				}
 			}
-			add = {
-				desc = "faith_conversion_cost_reformed_converting_to_unreformed"
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 5
+			multiply = {
+				value = 1
+				add = {
+					desc = "faith_conversion_cost_reformed_converting_to_unreformed"
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 5
+				}
 			}
 			
 		}
@@ -3552,10 +3679,13 @@ faith_conversion_cost_mult = {
 					has_government = clan_government
 				}
 			}
-			add = {
-				desc = "faith_conversion_cost_clan_converting_to_unreformed"
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 0.25
+			multiply = {
+				value = 1
+				add = {
+					desc = "faith_conversion_cost_clan_converting_to_unreformed"
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.25
+				}
 			}
 		}
 		else_if = {
@@ -3564,10 +3694,13 @@ faith_conversion_cost_mult = {
 					has_government = feudal_government
 				}
 			}
-			add = {
-				desc = "faith_conversion_cost_feudal_converting_to_unreformed"
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 0.5
+			multiply = {
+				value = 1
+				add = {
+					desc = "faith_conversion_cost_feudal_converting_to_unreformed"
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.5
+				}
 			}
 		}
 		else_if = {
@@ -3576,10 +3709,13 @@ faith_conversion_cost_mult = {
 					has_government = republic_government
 				}
 			}
-			add = {
-				desc = "faith_conversion_cost_republic_converting_to_unreformed"
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 0.75
+			multiply = {
+				value = 1
+				add = {
+					desc = "faith_conversion_cost_republic_converting_to_unreformed"
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.75
+				}
 			}
 		}
 	}
@@ -3587,7 +3723,8 @@ faith_conversion_cost_mult = {
 	##################################
 	# Dead Religion/Faith penalty(s) #
 	##################################
-	if = { #More expensive to convert to a dead religion
+	#More expensive to convert to a dead religion
+	if = {
 		limit = {
 			scope:new_faith = {
 				religion = {
@@ -3598,17 +3735,20 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_dead_religion
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 5
+		multiply = {
+			value = 1
+			add = {
+				desc = faith_conversion_cost_dead_religion
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 5
+			}
 		}
 	}
 
 	#######################################
 	# Switching religion/family penalties #
 	#######################################
-	#More expensive if you convert to a faith outside of your religion's family
+	# More expensive if you convert to a faith outside of your religion's family
 	if = {
 		limit = {
 			scope:new_faith = {
@@ -3622,10 +3762,13 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_other_religion_family
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 2
+		multiply = {
+			value = 1
+			add = {
+				desc = faith_conversion_cost_other_religion_family
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 2
+			}
 		}
 	}
 	if = {
@@ -3641,10 +3784,13 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_other_religion_family
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 2
+		multiply = {
+			value = 1
+			add = {
+				desc = faith_conversion_cost_other_religion_family
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 2
+			}
 		}
 	}
 	if = {
@@ -3658,10 +3804,13 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_other_religion_family
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 2
+		multiply = {
+			value = 1
+			add = {
+				desc = faith_conversion_cost_other_religion_family
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 2
+			}
 		}
 	}
 	
@@ -3679,14 +3828,17 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_unreformed_to_organized
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = -2.25
+		multiply = {
+			value = 1
+			subtract = {
+				desc = faith_conversion_cost_unreformed_to_organized
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.9
+			}
 		}
 	}
 	
-	#More expensive to convert to something inside your religion family that's not the same religion
+	# More expensive to convert to something inside your religion family that's not the same religion
 	if = {
 		limit = {
 			scope:new_faith = {
@@ -3701,10 +3853,13 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_inside_religion_family
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+		multiply = {
 			value = 1
+			add = {
+				desc = faith_conversion_cost_inside_religion_family
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 1
+			}
 		}
 	}
 	if = {
@@ -3721,10 +3876,13 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_inside_religion_family
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+		multiply = {
 			value = 1
+			add = {
+				desc = faith_conversion_cost_inside_religion_family
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 1
+			}
 		}
 	}
 	if = {
@@ -3741,17 +3899,19 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_inside_religion_family
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+		multiply = {
 			value = 1
+			add = {
+				desc = faith_conversion_cost_inside_religion_family
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 1
+			}
 		}
 	}
 
 	#######################################
 	# Misc penalties #
 	#######################################
-
 	# More expensive to convert to a faith who's HoF you HumSac'D/to a faith on good terms with one who's HoF you HumSac'd, unless they're chill with HumSac.
 	if = {
 		limit = {
@@ -3770,18 +3930,21 @@ faith_conversion_cost_mult = {
 				NOT = { has_doctrine_parameter = human_sacrifice_active }
 			}
 		}
-		add = {
-			desc = faith_conversion_cost_sacrificed_hof
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 5
+		multiply = {
+			value = 1
+			add = {
+				desc = faith_conversion_cost_sacrificed_hof
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 5
+			}
 		}
 	}
 
 	########################
 	# Conversion Discounts #
 	########################
-
-	if = { #Cheaper if you are targeted by the new Faith in a defensive Holy War
+	# Cheaper if you are targeted by the new Faith in a defensive Holy War
+	if = {
 		limit = {
 			scope:character = {
 				any_character_war = {
@@ -3801,21 +3964,28 @@ faith_conversion_cost_mult = {
 					}
 				}
 			}
-			subtract = {
-				desc = faith_conversion_cost_unreformed_holy_war
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 2.5
+			multiply = {
+				value = 1 
+				subtract = {
+					desc = faith_conversion_cost_unreformed_holy_war
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.9
+				}
 			}
 		}
 		else = { # But still a sizable discount otherwise.
-			subtract = {
-				desc = faith_conversion_cost_holy_war
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 0.5
+			multiply = {
+				value = 1 
+				subtract = {
+					desc = faith_conversion_cost_holy_war
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.5
+				}
 			}
 		}
 	}
-	if = { #Cheaper if your spouse is of the faith
+	# Cheaper if your spouse is of the faith
+	if = {
 		limit = {
 			scope:character = {
 				any_spouse = {
@@ -3834,21 +4004,28 @@ faith_conversion_cost_mult = {
 					}
 				}
 			}
-			subtract = {
-				desc = faith_conversion_cost_unreformed_spouse
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 2.5
+			multiply = {
+				value = 1 
+				subtract = {
+					desc = faith_conversion_cost_unreformed_spouse
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.9
+				}
 			}
 		}
 		else = { # But still a sizable discount otherwise.		
-			subtract = {
-				desc = faith_conversion_cost_spouse
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 0.5
+			multiply = {
+				value = 1 
+				subtract = {
+					desc = faith_conversion_cost_spouse
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.5
+				}
 			}
 		}
 	}
-	else_if = { #Does a concubine have the right religion?
+	# Does a concubine have the right religion?
+	else_if = {
 		limit = {
 			scope:character = {
 				any_concubine = {
@@ -3867,21 +4044,29 @@ faith_conversion_cost_mult = {
 					}
 				}
 			}
-			subtract = {
-				desc = faith_conversion_cost_unreformed_concubine
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 2.25
+			multiply = {
+				value = 1 
+				subtract = {
+					desc = faith_conversion_cost_unreformed_concubine
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.9
+				}
 			}
 		}
 		else = { # But still a sizable discount otherwise.
-			subtract = {
-				desc = faith_conversion_cost_concubine
-				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-				value = 0.25
+			
+			multiply = {
+				value = 1 
+				subtract = {
+					desc = faith_conversion_cost_concubine
+					format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+					value = 0.25
+				}
 			}
 		}
 	}
-	if = { #Cheaper if the religion is present near/in your borders
+	# Cheaper if the religion is present near/in your borders
+	if = {
 		limit = {
 			scope:new_faith = {
 				religion = { is_in_family = rf_abrahamic }
@@ -3919,13 +4104,17 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		subtract = {
-			desc = faith_conversion_cost_present
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 2.5
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_present
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.9
+			}
 		}
 	}
-	else_if = { #Cheaper if the religion is present near/in your borders
+	# Cheaper if the religion is present near/in your borders
+	else_if = {
 		limit = {
 			scope:new_faith = {
 				religion = { is_in_family = rf_eastern }
@@ -3963,13 +4152,17 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		subtract = {
-			desc = faith_conversion_cost_present
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 2.5
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_present
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.9
+			}
 		}
 	}
-	else_if = { #Cheaper if the religion is present near/in your borders
+	# Cheaper if the religion is present near/in your borders
+	else_if = {
 		limit = {
 			scope:new_faith = {
 				religion = { is_in_family = rf_pagan }
@@ -4007,13 +4200,17 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		subtract = {
-			desc = faith_conversion_cost_present
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 2.5
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_present
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.9
+			}
 		}
 	}
-	else_if = { #Cheaper if the religion is present near/in your borders
+	# Cheaper if the religion is present near/in your borders
+	else_if = {
 		limit = {
 			scope:new_faith = {
 				religion = { is_in_family = rf_abrahamic }
@@ -4052,13 +4249,17 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		subtract = {
-			desc = faith_conversion_cost_present
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 1.5
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_present
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.8
+			}
 		}
 	}
-	else_if = { #Cheaper if the religion is present near/in your borders
+	# Cheaper if the religion is present near/in your borders
+	else_if = {
 		limit = {
 			scope:new_faith = {
 				religion = { is_in_family = rf_eastern }
@@ -4097,13 +4298,17 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		subtract = {
-			desc = faith_conversion_cost_present
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 1.5
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_present
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.8
+			}
 		}
 	}
-	else_if = { #Cheaper if the religion is present near/in your borders
+	# Cheaper if the religion is present near/in your borders
+	else_if = {
 		limit = {
 			scope:new_faith = {
 				religion = { is_in_family = rf_pagan }
@@ -4142,10 +4347,13 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		subtract = {
-			desc = faith_conversion_cost_present
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 1.5
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_present
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.8
+			}
 		}
 	}
 	else_if = {
@@ -4178,12 +4386,70 @@ faith_conversion_cost_mult = {
 				}
 			}
 		}
-		subtract = {
-			desc = faith_conversion_cost_present
-			format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
-			value = 0.5
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_present
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.5
+			}
 		}
 	}
+	# Cheaper if you're an interloper in a struggle converting to an involved faith.
+	if = {
+		limit = {
+			scope:character = {
+				any_character_struggle = {
+					involvement = interloper
+					has_struggle_phase_parameter = cheaper_to_convert_to_struggle_faith
+					is_faith_involved_in_struggle = scope:new_faith
+				}
+			}
+		}
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = struggle_parameter_cheaper_to_convert_to_struggle_faith
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.5
+			}
+		}
+	}
+
+	########################################
+	# Conversion Discounts from Traditions #
+	########################################
+	# scope:new_faith.religion = scope:character.faith.religion
+
+	# Pacifism Tenet
+	if = {
+		limit = {
+			AND = {
+				scope:character= {
+					culture = {
+						has_cultural_parameter = reduced_cost_for_conversion_to_pacifist_faith
+					}
+				}
+				scope:new_faith = {
+					has_doctrine = tenet_pacifism 
+				}
+			}
+		}
+		multiply = {
+			value = 1 
+			subtract = {
+				desc = faith_conversion_cost_tradition
+				format = "BREAKDOWN_FORMAT_PIETY_PERCENTAGE_POSITIVE_IS_BAD"
+				value = 0.25
+			}
+		}
+	}
+
+	# Removing 1 to offset the value and present it as expected by the code
+	subtract = {
+		value = 1
+	}
+
 }
 
 reincarnation_chance = 4
@@ -4202,10 +4468,6 @@ faith_military_strength = {
 }
 
 syncretic_mutual_opinion_bonus_value = 30
-
-############ NEW CODE #################
-hellenism_syncretic_mutual_opinion_bonus_value = 10
-############ END NEW CODE #################
 
 ask_to_take_vows_piety_cost = {
 	value = {

@@ -1,0 +1,121 @@
+﻿#Taken from "Successions Expanded" and modified
+
+imperial_elective = {
+	candidates = {
+		add = {
+			type = holder_close_family
+			limit = {
+				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+				#Only dynastic family members
+				this.dynasty = scope:title.holder.dynasty
+			}
+		}
+		add = {
+			type = title_claimants
+			limit = {
+				imperial_elective_potential_landless_claimant_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+			}
+		}
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				imperial_elective_potential_landed_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+				OR = {
+					is_powerful_vassal = yes
+					is_knight = yes
+				}
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				NOT = { vassal_contract_has_flag = tributary_state_installed_flag }
+			}
+		}
+		add = {
+			type = holder_spouses
+			limit = {
+				byzantine_elective_deformed_candidate_trigger = no
+				OR = {
+					any_liege_or_above = { this = scope:holder }
+					is_ruler = no
+					scope:holder = { is_independent_ruler = yes }
+					scope:holder = {
+						exists = liege
+						NOT = {
+							any_liege_or_above = {
+								cannot_leave_realm_trigger = yes
+								NOR = {
+									this = scope:potential_candidate
+									target_is_vassal_or_below = scope:potential_candidate
+								}
+							}
+						}
+					}
+				}
+				NOT = { #Landless characters should not be heirs to Theocracies/Republics.
+					any_heir_title = {
+						exists = holder
+						holder = { has_unelectable_government_trigger = yes }
+					}
+				}
+				OR = { #If the title controls the faith, candidates must be of the same faith.
+					scope:holder = {
+						NAND = {
+							exists = faith.religious_head
+							this = scope:holder.faith.religious_head #TODO_CD:It might need to be changed to check only for the title rather than the holder. (controlled_faith = scope:holder.faith)
+						}
+					}
+					faith = scope:holder.faith
+				}
+				has_unelectable_trait_trigger = no
+				has_unelectable_government_trigger = no
+			}
+		}
+	}
+	electors = {
+		add = holder
+		#All de-facto secular vassals that are Dukes or above, regardless of religion
+		#But don't include tributaries but foederati okay (Barracks Emperors and Gallic Empire say so)
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				NOT = { has_government = theocracy_government }
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				NOT = { vassal_contract_has_flag = tributary_state_installed_flag }
+				OR = {
+					is_powerful_vassal = yes
+					is_knight = yes
+					scope:holder = { any_councillor = { this = root } }
+				}
+			}
+		}
+		#All de-facto religious vassals dukes and above, whose faith is in agreement with ours
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				has_government = theocracy_government
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				faith.religion = scope:holder.religion
+				this.faith = { save_temporary_scope_as = vassal_faith }
+				scope:holder.faith = { considers_astray_trigger = { TARGET_FAITH = scope:vassal_faith } }
+			}
+		}
+		
+		add = holder_spouses
+	}
+	elector_vote_strength = {
+		base = 0
+		elector_voting_strength_byzantine_elective_modifier = yes
+	}
+	candidate_score = {
+		base = 0
+		elector_self_voting_pattern_feudal_elective_modifier = yes
+		holder_voting_pattern_feudal_elective_modifier = yes
+		elector_voting_pattern_circumstances_feudal_elective_modifier = yes
+		elector_voting_pattern_prestige_piety_feudal_elective_modifier = yes
+		elector_voting_pattern_traits_feudal_elective_modifier = yes
+		elector_voting_pattern_opinion_feudal_elective_modifier = yes
+		elector_voting_pattern_circumstances_imperial_elective_modifier = yes
+		vote_for_dynasty_modifier = yes
+	}
+}

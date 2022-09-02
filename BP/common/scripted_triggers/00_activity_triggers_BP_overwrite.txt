@@ -1,0 +1,41 @@
+﻿##### Changed from Vanilla: Fixed petition code case when no holder exists
+##### Changed from Vanilla: Tied to having title revocation rights instead of feudal government
+petition_liege_title_vassal_trigger = {
+	trigger_if = {
+		limit = { exists = holder }
+		holder = { save_temporary_scope_as = second_temp }
+		scope:second_temp.liege = prev.liege
+		NOR = {
+			scope:second_temp = prev.liege
+			has_variable = petition_title_cooldown
+			scope:second_temp = { is_at_war = yes }
+			prev.liege = {
+				any_targeting_faction = {
+					any_faction_member = { this = scope:second_temp }
+				}
+			}
+		}
+		trigger_if = {
+			limit =  { exists = county }
+			NOT = { county = holder.capital_county }
+		}
+		##### Changed from Vanilla vvvvv
+		scope:second_temp = {
+			trigger_if = {
+				limit = { valid_government_rights_general_trigger = yes }
+				NOT = { vassal_contract_obligation_level_can_be_decreased = title_revocation_rights }
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		OR = {
+			tier > tier_county
+			scope:second_temp = {
+				any_held_title = {
+					count > 1
+					tier = tier_county
+				}
+			}
+		}
+	}
+	trigger_else = { always = no }
+}

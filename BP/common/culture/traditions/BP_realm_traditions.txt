@@ -1,0 +1,154 @@
+﻿tradition_western_roman_legacy = { #WRE military aspects
+	category = realm
+
+	layers = {
+		0 = martial
+		1 = mediterranean
+		4 = laurel.dds
+	}
+
+	is_shown = { has_cultural_pillar = heritage_latin }
+	can_pick = { traditions_cultural_combat_type_is_in_list_trigger = no }
+	can_pick_for_hybridization = { traditions_cultural_combat_type_is_in_list_trigger = no }
+	
+	parameters = {
+		unlock_innovation_roman_military = yes
+	}
+	province_modifier = {}
+	character_modifier = {
+		levy_size = -0.25
+		men_at_arms_recruitment_cost = -0.15
+		men_at_arms_maintenance = -0.15
+		levy_reinforcement_rate = -0.25
+		heavy_infantry_max_size_add = 2
+		heavy_cavalry_max_size_add = 2
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_egalitarian }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_egalitarian_or_courtly_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							count >= 50
+							any_county_province = { geographical_region = world_roman_empire_west }
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = culture_in_roman_empire_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+	}
+}
+
+tradition_tribal_hierarchy = { #Varient of tradition_hereditary_hierarchy for tribals
+	category = realm
+
+	layers = {
+		0 = diplo
+		1 = western
+		4 = king.dds
+	}
+	
+	can_pick = {
+		scope:character = {
+			OR = {
+				has_government = tribal_government
+				has_government = high_tribal_government
+			}
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_hereditary_hierarchy
+			NOT = { any_in_list = { list = traits this = flag:tradition_hereditary_hierarchy } }
+		}
+	}
+	
+	parameters = { poorly_educated_leaders_distrusted = yes }
+	character_modifier = {
+		tribal_government_tax_contribution_mult = 0.1
+		tribal_government_levy_contribution_mult = 0.1
+		high_tribal_government_tax_contribution_mult = 0.1
+		high_tribal_government_levy_contribution_mult = 0.1
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_courtly_or_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							primary_title.tier >= tier_kingdom
+							any_vassal = {
+								count >= 10
+								primary_title.tier >= tier_county
+								has_government = tribal_government
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = king_with_vassals_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character.primary_title.tier >= tier_kingdom
+				}
+			}
+			multiply = 0
+		}
+	}
+}

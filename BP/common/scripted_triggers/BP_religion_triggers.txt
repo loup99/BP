@@ -1,98 +1,502 @@
-﻿#faith scope
-has_ecumenical_doctrine_trigger = { has_doctrine_parameter = is_special_doctrine_christian_ecumenism }
-
-#Only tenets for which the pentarchy matters
-valid_pentarch_doctrines = {
-	OR = {
-		has_doctrine = tenet_pentarchy
-		has_doctrine = tenet_apostolic_succession
-		has_doctrine = tenet_autocephaly
+﻿considers_astray_trigger = {
+	faith_hostility_level = {
+		target = $TARGET_FAITH$
+		value <= 1
 	}
 }
 
-is_a_pentarch_trigger = {
+#AKA hellenism sans mithraism, sol invictus
+truly_hellenic_faith_trigger = {
 	custom_description = {
-		text = "is_a_pentarch"
-		subject = scope:recipient
-		scope:recipient = { has_a_pentarch_title = yes }
-	}
-}
-
-has_a_pentarch_title = {
-	OR = {
-		has_title = title:d_patriarch_antioch
-		has_title = title:d_patriarch_jerusalem
-		has_title = title:d_patriarch_alexandria
-		has_title = title:d_patriarch_rome
-		has_title = title:d_orthodox
-	}
-}
-
-pentarch_titles = {
-	has_title = title:d_patriarch_antioch
-	has_title = title:d_patriarch_jerusalem
-	has_title = title:d_patriarch_alexandria
-	has_title = title:d_patriarch_rome
-	has_title = title:d_orthodox
-}
-
-#Triggers for seizing pentarch baronies
-missing_pentarch_seat_trigger = {
-	AND = {
-		#Basic requirements
-		has_title = $PENTARCH_DUCHY$
-		NOT = { has_title = $PENTARCH_BAORNY$ }
+		text = truly_hellenic_faith_text
 		OR = {
-			#Title holder must be in line with our views to gracefully step aside
-			custom_description = {
-				text = coreligionist_barony_holder
-				AND = {
-					$PENTARCH_BAORNY$.holder.faith = { valid_pentarch_doctrines = yes }
-					$PENTARCH_BAORNY$.holder.faith = { faith_hostility_level = { target = $PENTARCH_BAORNY$.holder.faith value < 2 } }
-				}
-			}
-			#or, the county holder in question agrees with us
-			custom_description = {
-				text = coreligionist_county_holder
-				AND = {
-					$PENTARCH_COUNTY$.holder.faith = { valid_pentarch_doctrines = yes }
-					$PENTARCH_COUNTY$.holder.faith = { faith_hostility_level = { target = $PENTARCH_DUCHY$.holder.faith value < 2 } }
-				}
-			}
+			faith = faith:hellenic_pagan
+			faith = faith:platonism
+			faith = faith:orphism
+			faith = faith:pythagoreanism
+			faith = faith:stoicism
+			faith = faith:cybelian
 		}
 	}
 }
-missing_pentarch_barony = {
-	trigger_if = {
-		limit = { has_title = title:d_patriarch_antioch }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_antioch
-			PENTARCH_COUNTY = title:c_antiocheia
-			PENTARCH_BAORNY = title:b_jabala
+
+truly_hellenic_faith_plus_mithraism_trigger = {
+	custom_description = {
+		text = truly_hellenic_faith_plus_mithraism_text
+		OR = {
+			truly_hellenic_faith_trigger = yes
+			faith = faith:mithraic_pagan
 		}
 	}
-	trigger_if = {
-		limit = { has_title = title:d_patriarch_jerusalem }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_jerusalem
-			PENTARCH_COUNTY = title:c_jerusalem
-			PENTARCH_BAORNY = title:b_nablus
+}
+
+truly_hellenic_faith_plus_christianity_trigger = {
+	custom_description = {
+		text = truly_hellenic_faith_plus_christiantity_text
+		OR = {
+			truly_hellenic_faith_trigger = yes
+			religion = religion:christianity_religion
 		}
 	}
+}
+
+##### HERESY TRIGGERS
+
+#Prevent selection of heretic cultures unless the heresiarch is of a faith culture or faith child culture
+valid_heretic_culture_cultural_religion_pair_trigger = {
 	trigger_if = {
-		limit = { has_title = title:d_patriarch_alexandria }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_alexandria
-			PENTARCH_COUNTY = title:c_alexandria
-			PENTARCH_BAORNY = title:b_wadi_natrun
+		limit = { $FAITH$ = { has_doctrine = tenet_ethnic_religion } }
+		actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+			ACTOR = $HERESIARCH$
+			TARGET_FAITH = $FAITH$
+			VARIABLE = ethnic_religion_culture
 		}
 	}
+	trigger_else_if = {
+		limit = { $FAITH$ = { has_doctrine = tenet_autocephaly } }
+		actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+			ACTOR = $HERESIARCH$
+			TARGET_FAITH = $FAITH$
+			VARIABLE = church_culture
+		}
+	}
+	trigger_else = { always = yes }
+}
+
+#Ecumenisms that are compatible shouldn't be called
+have_compatible_christian_creeds_trigger = {
+	OR = {
+		#Orthodox Creeds
+		AND = {
+			OR = {
+				$FAITH_1$ = { has_doctrine = special_doctrine_nicene_ecumenism }
+				$FAITH_1$ = { has_doctrine = special_doctrine_alexandria_ecumenism }
+			}
+			OR = {
+				$FAITH_2$ = { has_doctrine = special_doctrine_nicene_ecumenism }
+				$FAITH_2$ = { has_doctrine = special_doctrine_alexandria_ecumenism }
+			}
+		}
+		#Heterodox Creeds
+		AND = {
+			$FAITH_1$ = { has_doctrine = special_doctrine_nestorian_ecumenism }
+			$FAITH_2$ = { has_doctrine = special_doctrine_nestorian_ecumenism }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = special_doctrine_arian_ecumenism }
+			$FAITH_2$ = { has_doctrine = special_doctrine_arian_ecumenism }
+		}
+	}
+}
+
+# Uncommon Faiths : Steadily declined after Vth century
+is_uncommon_faith_trigger = {
+	OR = {
+		#Christians
+		this = faith:audianism
+		this = faith:montanism
+		this = faith:patripassianism
+		#Dualist
+		this = faith:valentinianism
+	}
+}
+
+#Rare Faiths: Declined rapidly after 476 or fairly rare anyway
+is_rare_faith_trigger = {
+	OR = {
+		#Christians
+		this = faith:antinomianism
+		this = faith:apollinarism
+		this = faith:doceticism
+		this = faith:melchisdechianism
+		this = faith:monarchianism
+		this = faith:pelagianism
+		this = faith:pneumatomachianism
+		#Dualists
+		this = faith:sethianism
+	}
+}
+
+#Exceptionally Rare Faiths ; Dead by 476 or were not well attested after, but **might** be revivable...
+is_exceptionally_rare_faith_trigger = {
+	OR = {
+		#Christians
+		this = faith:binitarianism
+		this = faith:marcionism
+		this = faith:messalian
+		this = faith:total_depravity
+		#Dualists
+		this = faith:cainitism
+		this = faith:marcosianism
+		this = faith:sabianism
+		this = faith:sethianism
+	}
+}
+
+#Faiths with extremely localized spawning; given larger than normal location bonuses to compensate
+is_localized_faith_trigger = {
+	OR = {
+		#Christians
+		this = faith:ebionite
+		#Jews
+		this = faith:samaritan
+		this = faith:tzadikite
+		#Dualists
+		this = faith:mandeaism
+		#Mazdans
+		this = faith:urartuism
+	}
+}
+
+is_blocked_faith_trigger = {
+	OR = {
+		#Islam hasn't risen
+		AND = {
+			BP_rise_of_islam_trigger = yes
+			this.religion = religion:islam_religion
+			this.religion = religion:yazidi_religion
+			this = faith:khurramism
+		}
+		#No Schism of the 3 Chapters
+		AND = {
+			BP_three_chapters_trigger = yes
+			this = faith:aquileianism
+		}
+		#No Iconoclast Controversy
+		AND = {
+			BP_iconoclasm_trigger = yes
+			this = faith:iconoclast
+		}
+		#No Western Schism
+		AND = {
+			BP_western_schism_trigger = yes
+			this = faith:catholic
+			this = faith:orthodox
+		}
+		#No Paulicianism
+		AND = {
+			BP_paulicianism_trigger = yes
+			this = faith:paulician
+		}
+		#No Kabarism
+		AND = {
+			BP_kabarism_trigger = yes
+			this = faith:kabarism
+		}
+		#No Mazdakism
+		AND = {
+			BP_mazdakism_trigger = yes
+			this = faith:mazdakism
+		}
+		#No Burmese
+		AND = {
+			BP_burmese_trigger = yes
+			this = faith:ari
+		}
+		#No Buddhism in Tibet
+		AND = {
+			BP_tibetan_buddhism_trigger = yes
+			this = faith:lamaism
+			this = faith:bon
+		}
+		#No Norse Paganism
+		AND = {
+			BP_norse_paganism_trigger = yes
+			this = faith:norse_pagan
+		}
+	}
+}
+
+#Faiths whose rising is blocked mechanically
+is_gamerule_blocked_faith_trigger = {
+	#Faiths locked from creation/conversion
+	#Make sure to tie to events/religion_events/heresy_events.txt: # Locked faiths
+	#Islam
 	trigger_if = {
-		limit = { has_title = title:d_patriarch_rome }
-		missing_pentarch_seat_trigger = {
-			PENTARCH_DUCHY = title:d_patriarch_rome
-			PENTARCH_COUNTY = title:c_roma
-			PENTARCH_BAORNY = title:b_vatican
+		limit = {
+			OR = {
+				scope:new_faith.religion = religion:islam_religion
+				scope:new_faith.religion = religion:yazidi_religion
+				scope:new_faith = faith:khurramism
+			}
+		}
+		BP_rise_of_islam_trigger = yes
+	}
+	#Christianity
+	trigger_if = {
+		limit = { scope:new_faith = faith:aquileianism }
+		BP_three_chapters_trigger = yes
+	}
+	trigger_if = {
+		limit = { scope:new_faith = faith:iconoclast }
+		BP_iconoclasm_trigger = yes
+	}
+	trigger_if = {
+		limit = {
+			OR = {
+				scope:new_faith = faith:catholic
+				scope:new_faith = faith:orthodox
+			}
+		}
+		BP_western_schism_trigger = yes
+	}
+	trigger_if = {
+		limit = { scope:new_faith = faith:paulician }
+		BP_paulicianism_trigger = yes
+	}
+	#Judaism
+	trigger_if = {
+		limit = { scope:new_faith = faith:kabarism }
+		BP_kabarism_trigger = yes
+	}
+	#Mazdan
+	trigger_if = {
+		limit = { scope:new_faith = faith:mazdakism }
+		BP_mazdakism_trigger = yes
+	}
+	#Eastern
+	trigger_if = {
+		limit = { scope:new_faith = faith:ari }
+		BP_burmese_trigger = yes
+	}
+	trigger_if = {
+		limit = {
+			OR = {
+				scope:new_faith = faith:lamaism
+				scope:new_faith = faith:bon
+			}
+		}
+		BP_tibetan_buddhism_trigger = yes
+	}
+	#Paganism
+	trigger_if = {
+		limit = { scope:new_faith = faith:norse_pagan }
+		BP_norse_paganism_trigger = yes
+	}
+}
+
+#For Rite/Autocephaly
+kept_christian_doctrines_trigger = {
+	##Christology
+	custom_description = {
+		text = incompatible_christian_doctrine_christology_tenet_rite
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_dyophysitism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_dyophysitism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_miaphysitism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_miaphysitism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_monothelitism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_monothelitism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_nestorianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_nestorianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_eutychianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_eutychianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_apollinarism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_apollinarism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_monophysitism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_monophysitism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_modalistic_monarchianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_modalistic_monarchianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_adoptionism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_adoptionism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_christology_doceticism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_christology_doceticism }
+		}
+	}
+	##Ontology
+	custom_description = {
+		text = incompatible_christian_doctrine_ontology_tenet_rite
+		trigger_if = {
+			limit = { flag:doctrine_christian_hypostases_trinitarianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_hypostases_trinitarianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_hypostases_binitarianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_hypostases_binitarianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_hypostases_modalistic_monarchianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_hypostases_modalistic_monarchianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_hypostases_dynamic_monarchianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_hypostases_dynamic_monarchianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_hypostases_unitarianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_hypostases_unitarianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_hypostases_dualism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_hypostases_dualism }
+		}
+	}
+	##Pneumatology
+	custom_description = {
+		text = incompatible_christian_doctrine_pneumatology_tenet_rite
+		trigger_if = {
+			limit = { flag:doctrine_christian_pneumatology_consubstantial = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_pneumatology_consubstantial }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_pneumatology_pneumatomachi = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_pneumatology_pneumatomachi }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_pneumatology_melchisedechian = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_pneumatology_melchisedechian }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_pneumatology_modalism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_pneumatology_modalism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_pneumatology_subservient = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_pneumatology_subservient }
+		}
+	}
+	##Communion
+	custom_description = {
+		text = incompatible_christian_doctrine_communion_tenet_rite
+		trigger_if = {
+			limit = { flag:doctrine_christian_communion_transubstantiation = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_communion_transubstantiation }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_communion_consubstantiation = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_communion_consubstantiation }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_communion_memorialism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_communion_memorialism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_communion_repudiation = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_communion_repudiation }
+		}
+	}
+	##Soteriology
+	custom_description = {
+		text = incompatible_christian_doctrine_soteriology_tenet_rite
+		trigger_if = {
+			limit = { flag:doctrine_christian_soteriology_original_sin = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_original_sin }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_soteriology_pelagianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_pelagianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_soteriology_total_depravity = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_total_depravity }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_soteriology_antinomianism = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_antinomianism }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_soteriology_gnostic = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_gnostic }
+		}
+	}
+	##Judaic Role
+	custom_description = {
+		text = incompatible_christian_doctrine_judaic_role_tenet_rite
+		trigger_if = {
+			limit = { flag:doctrine_christian_judaic_role_forebears = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_judaic_role_forebears }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_judaic_role_judaizers = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_judaic_role_judaizers }
+		}
+		trigger_if = {
+			limit = { flag:doctrine_christian_judaic_role_demiurge = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_judaic_role_demiurge }
+		}
+	}
+}
+
+has_any_ecumenical_doctrine_trigger = {
+	OR = {
+		#Christian Creeds
+		has_doctrine = special_doctrine_ecumenical_christian
+		has_doctrine = special_doctrine_nicene_ecumenism
+		has_doctrine = special_doctrine_alexandria_ecumenism
+		has_doctrine = special_doctrine_nestorian_ecumenism
+		has_doctrine = special_doctrine_arian_ecumenism
+		#Zoroastrian Approved Cults
+		has_doctrine = special_doctrine_zoroastrian_approved_cult
+	}
+}
+#Various triggers for cultural religions (Autocephaly and Ethnic Religion)
+#Probably could simplify this block of code's logic, but left intact for simplicity
+actor_is_faith_culture_for_cultural_religions_trigger = {
+	$ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$
+}
+actor_is_faith_child_culture_for_cultural_religions_trigger = {
+	AND = {
+		NOT = { $ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$ }
+		AND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+	}
+}
+actor_is_same_heritage_for_cultural_religions_trigger = {
+	AND = {
+		NOT = { $ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$ }
+		NAND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+		$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+	}
+}
+actor_is_different_heritage_for_cultural_religions_trigger = {
+	AND = {
+		NOT = { $ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$ }
+		NAND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+		NOT = { $ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ } }
+	}
+}
+actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+	OR = {
+		$ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$
+		AND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+		}
+	}
+}
+#Copy of the above, but for context where we access faith directly
+actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+	OR = {
+		$ACTOR$.culture = $TARGET_FAITH$.var:$VARIABLE$
+		AND = {
+			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET_FAITH$.var:$VARIABLE$ } }
+			$ACTOR$.culture = { has_same_culture_heritage = $TARGET_FAITH$.var:$VARIABLE$ }
 		}
 	}
 }

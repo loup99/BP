@@ -34,9 +34,6 @@ window = {
 
 	### INSIDE WINDOW
 	vbox = {
-		layoutpolicy_horizontal = expanding
-		layoutpolicy_vertical = expanding
-
 		using = Window_Margins_Sidebar
 
 		### Header
@@ -92,8 +89,6 @@ window = {
 			}
 
 			hbox = {
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = expanding
 				datacontext = "[FaithWindow.GetFaith]"
 
 				watch_window_button = {
@@ -104,7 +99,6 @@ window = {
 				vbox = {
 					margin_top = 30
 					margin_left = 10
-					layoutpolicy_vertical = expanding
 
 					icon = {
 						name = "faith_icon"
@@ -135,81 +129,47 @@ window = {
 					hbox = {
 						layoutpolicy_horizontal = expanding
 
-						vbox = {
-							layoutpolicy_vertical = expanding
-							visible = "[Not(ObjectsEqual( GetPlayer.GetFaith, Faith.Self ))]"
-							margin_bottom = 3
-
-							expand = {}
-
-							text_single = {
-								name = "our_view"
-								layoutpolicy_horizontal = expanding
-								text = "FAITH_VIEW_OUR_VIEW"
-								align = nobaseline
-							}
-
-							text_single = {
-								name = "their_view"
-								layoutpolicy_horizontal = expanding
-								text = "FAITH_VIEW_THEIR_VIEW"
-								align = nobaseline
-							}
-						}
+						expand = {}
 
 						vbox = {
 							layoutpolicy_vertical = expanding
-							margin_bottom = 3
+							margin_bottom = 4
+							margin_left = 25
+							spacing = 1
 
 							text_single = {
 								name = "your_faith"
 								visible = "[ObjectsEqual( GetPlayer.GetFaith, Faith.Self )]"
 								text = "FAITH_VIEW_YOUR_FAITH"
-								align = nobaseline
+								align = nobaseline|center
+							}
+
+							expand = {}
+
+							text_single = {
+								name = "our_view"
+								visible = "[Not(ObjectsEqual( GetPlayer.GetFaith, Faith.Self ))]"
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_VIEW_OUR_VIEW"
+								align = nobaseline|center
+							}
+
+							text_single = {
+								name = "their_view"
+								visible = "[Not(ObjectsEqual( GetPlayer.GetFaith, Faith.Self ))]"
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_VIEW_THEIR_VIEW"
+								align = nobaseline|center
 							}
 						}
-
 
 						expand = {}
 
 						vbox = {
 							margin = { 10 0 }
-							spacing = 4
+							spacing = 2
 
-							vbox = {
-								name = "fervor_container"
-								tooltip = "FERVOR_TT"
-								spacing = -6
-
-								# Fervor
-								hbox = {
-
-									icon = {
-										texture = "gfx/interface/icons/icon_fervor.dds"
-										size = { 22 22 }
-									}
-
-									text_single = {
-										text = "FAITH_WINDOW_FERVOR"
-										default_format = "#high"
-										align = nobaseline
-									}
-								}
-								hbox = {
-									layoutpolicy_horizontal = expanding
-									margin_right = 1
-									expand = {}
-
-									text_single = {
-										name = "fervor_trend"
-										text = "[Faith.GetMonthlyFervorChange|=+2]"
-										max_width = 110
-										default_format = "#low"
-										fontsize = 13
-										size = { 0 12 }
-									}
-								}
-							}
+							fervor_container_vbox = {}
 
 							button_sidepanel_right = {
 								name = "religion_information"
@@ -223,14 +183,13 @@ window = {
 								{
 									text = "TOGGLE_RELIGION_VIEW"
 								}
-
 							}
 						}
 					}
 				}
 			}
 
-			text_label_center = {
+			text_single = {
 				visible = "[And( Not( Faith.GetReligion.HasPaganRoots ), Not( Faith.IsUnreformed ) )]"
 				text = "FAITH_VIEW_SUBHEADING"
 				align = center
@@ -303,8 +262,10 @@ window = {
 			### Core Tenets
 			vbox = {
 				layoutpolicy_horizontal = expanding
-				spacing = 15
-				margin_top = 15
+				spacing = 8
+				#margin_top = 15
+				margin = { 8 16 }
+				margin_bottom = 11
 
 				text_label_center = {
 					text = "FAITH_CORE_TENETS_HEADING"
@@ -313,7 +274,7 @@ window = {
 				hbox = {
 					name = "doctrines_grid_core_tenets"
 					datamodel = "[FaithWindow.GetGroupingHelper( 'core_tenets' ).GetGrouping]"
-					spacing = 45
+					spacing = 52
 
 					state = {
 						name = "faith_view_refresh"
@@ -339,25 +300,27 @@ window = {
 				name = "doctrines"
 				layoutpolicy_horizontal = expanding
 				layoutpolicy_vertical = expanding
-				margin_top = 10
+				#margin_top = 10
 
 				scrollbox = {
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
 
+
 					blockoverride "scrollbox_content"
 					{
-						spacing = 10
-						margin_top = 20
+						spacing = 16
+						#margin_top = 20
 
 						state = {
 							name = "faith_view_refresh"
 							using = Animation_Refresh_FadeOut
 						}
 
-						state = { using = Animation_Refresh_FadeIn }
+						state = {
+							using = Animation_Refresh_FadeIn
+						}
 
-						#Sins and Virtues
 						hbox = {
 							name = "sins_and_virtues"
 							layoutpolicy_vertical = expanding
@@ -486,190 +449,225 @@ window = {
 							}
 						}
 
-						#Main Doctrines
-						text_label_center = {
+						vbox = {
 							layoutpolicy_horizontal = expanding
-							text = "FAITH_DOCTRINES_IMPORTANT"
-							default_format = "#low"
-						}
+							spacing = 8
 
-						hbox = {
-							layoutpolicy_horizontal = expanding
+							margin_bottom = -8
+
+							text_label_center = {
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_DOCTRINES_IMPORTANT"
+								default_format = "#low"
+							}
 
 							hbox = {
-								name = "important_doctrines"
-								datamodel = "[FaithWindow.GetGroupingHelper( 'main_group' ).GetGrouping]"
-								spacing = 15
-								layoutpolicy_vertical = expanding
-								minimumsize = { 0 108 }
+								layoutpolicy_horizontal = expanding
 
-								item = {
-									vbox = {
-										layoutpolicy_vertical = expanding
-										minimumsize = { 100 0 }
-										name = "doctrine_list_item"
-										datacontext = "[GuiFaithDoctrineItem.GetDoctrine]"
-										visible = "[FaithDoctrine.IsVisible]"
-										tooltip = "FAITH_WINDOW_DOCTRINE_TOOLTIP"
-										using = tooltip_se
+								hbox = {
+									name = "important_doctrines"
+									datamodel = "[FaithWindow.GetGroupingHelper( 'main_group' ).GetGrouping]"
+									#spacing = 15
+									layoutpolicy_vertical = expanding
+									minimumsize = { 0 108 }
 
-										icon_doctrine = {
-											name = "doctrine_group_icon"
-											size = { 60 60 }
-											texture = "[FaithDoctrine.GetIcon]"
+									item = {
+										vbox = {
+											layoutpolicy_vertical = expanding
+											minimumsize = { 100 0 }
+											name = "doctrine_list_item"
+											datacontext = "[GuiFaithDoctrineItem.GetDoctrine]"
+											visible = "[FaithDoctrine.IsVisible]"
+											tooltip = "FAITH_WINDOW_DOCTRINE_TOOLTIP"
+											using = tooltip_se
+
+											icon_doctrine = {
+												name = "doctrine_group_icon"
+												size = { 60 60 }
+												texture = "[FaithDoctrine.GetIcon]"
+											}
+
+											text_single = {
+												name = "doctrine_name"
+												align = center
+												#raw_text = "Bingo Bongo Tongo gyngo"
+												text = "[FaithDoctrine.GetNameNoTooltip( GuiFaithDoctrineItem.GetFaith )]"
+												default_format = "#high"
+												multiline = yes
+												max_width = 101   ##### minimum in order to look good in german
+											}
+
+											expand = {}
 										}
-
-										text_single = {
-											name = "doctrine_name"
-											align = center
-											text = "[FaithDoctrine.GetNameNoTooltip( GuiFaithDoctrineItem.GetFaith )]"
-											default_format = "#high"
-											multiline = yes
-											max_width = 101   ##### minimum in order to look good in german
-										}
-
-										expand = {}
 									}
 								}
 							}
 						}
 
-						text_label_left = {
-							layoutpolicy_horizontal = expanding
-							text = "FAITH_DOCTRINES_MARRIAGE"
-							default_format = "#low"
-						}
-
-						fixedgridbox = {
-							datamodel = "[FaithWindow.GetGroupingHelper( 'marriage' ).GetGrouping]"
-							flipdirection = yes
-							addcolumn = 230
-							addrow = 65
-							datamodel_wrap = 2
-
-							item = {
-								widget_doctrine_item = {}
-							}
-						}
-
-						text_label_left = {
-							layoutpolicy_horizontal = expanding
-							text = "FAITH_DOCTRINES_CRIMES"
-							default_format = "#low"
-						}
-
-						fixedgridbox = {
-							datamodel = "[FaithWindow.GetGroupingHelper( 'crimes' ).GetGrouping]"
-							flipdirection = yes
-							addcolumn = 230
-							addrow = 65
-							datamodel_wrap = 2
-
-							item = {
-								widget_doctrine_item = {}
-							}
-						}
-
-						text_label_left = {
-							layoutpolicy_horizontal = expanding
-							text = "FAITH_DOCTRINES_CLERGY"
-							default_format = "#low"
-						}
-
-						fixedgridbox = {
-							datamodel = "[FaithWindow.GetGroupingHelper( 'clergy' ).GetGrouping]"
-							flipdirection = yes
-							addcolumn = 230
-							addrow = 65
-							datamodel_wrap = 2
-
-							item = {
-								widget_doctrine_item = {}
-							}
-						}
-
-### START: FOR RELIGION-SPECIFIC DOCTRINES HERE
-
-					#Christian Doctrines
-					vbox = {
-							visible = "[Faith.HasDoctrineByKey( 'special_doctrine_is_christian_faith' )]"
-							layoutpolicy_horizontal = expanding
-							spacing = 10
-
-							text_label_left = {
-								layoutpolicy_horizontal = expanding
-								text = "FAITH_DOCTRINES_CHRISTIAN_SPECIFIC"
-								default_format = "#low"
-							}
-
-							#Christian Doctrines
-							fixedgridbox = {
-								datamodel = "[FaithWindow.GetGroupingHelper( 'christian_doctrines' ).GetGrouping]"
-								flipdirection = yes
-								addcolumn = 230
-								addrow = 65
-								datamodel_wrap = 2
-
-								item = { widget_doctrine_item = {} }
-							}
-							
-						}
-						
 						vbox = {
-							visible = "[Faith.HasDoctrineByKey( 'special_doctrine_is_hinduism_faith' )]"
 							layoutpolicy_horizontal = expanding
-							spacing = 10
+							spacing = 12
+							margin_bottom = -10
 
-							text_label_left = {
+							text_label_center = {
 								layoutpolicy_horizontal = expanding
-								text = "FAITH_DOCTRINES_HINDU_SPECIFIC"
+								text = "FAITH_DOCTRINES_MARRIAGE"
 								default_format = "#low"
 							}
 
-							
-							#Hindu Doctrines
 							fixedgridbox = {
-								datamodel = "[FaithWindow.GetGroupingHelper( 'hindu_doctrines' ).GetGrouping]"
+								datamodel = "[FaithWindow.GetGroupingHelper( 'marriage' ).GetGrouping]"
 								flipdirection = yes
-								addcolumn = 270
-								addrow = 65
+								addcolumn = 225
+								addrow = 67
 								datamodel_wrap = 2
 
-								item = { widget_doctrine_item_unique = {} }
+								item = {
+									widget_doctrine_item = {}
+								}
 							}
 						}
 
-### END: FOR RELIGION-SPECIFIC DOCTRINES HERE
+						vbox = {
+							layoutpolicy_horizontal = expanding
+							spacing = 12
+							margin_bottom = -10
+
+							text_label_center = {
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_DOCTRINES_CRIMES"
+								default_format = "#low"
+							}
+
+							fixedgridbox = {
+								datamodel = "[FaithWindow.GetGroupingHelper( 'crimes' ).GetGrouping]"
+								flipdirection = yes
+								addcolumn = 225
+								addrow = 67
+								datamodel_wrap = 2
+
+								item = {
+									widget_doctrine_item = {}
+								}
+							}
+						}
+
+						vbox = {
+							layoutpolicy_horizontal = expanding
+							spacing = 12
+							margin_bottom = -10
+
+							text_label_center = {
+								layoutpolicy_horizontal = expanding
+								text = "FAITH_DOCTRINES_CLERGY"
+								default_format = "#low"
+							}
+
+							fixedgridbox = {
+								datamodel = "[FaithWindow.GetGroupingHelper( 'clergy' ).GetGrouping]"
+								flipdirection = yes
+								addcolumn = 225
+								addrow = 67
+								datamodel_wrap = 2
+
+								item = {
+									widget_doctrine_item = {}
+								}
+							}
+							##### Changed from Vanilla vvvvv
+							vbox = { #Christian Faiths
+								visible = "[Faith.HasDoctrineByKey( 'special_doctrine_is_christian_faith' )]"
+								layoutpolicy_horizontal = expanding
+								spacing = 10
+
+								text_label_center = {
+									layoutpolicy_horizontal = expanding
+									text = "FAITH_DOCTRINES_CHRISTIAN_SPECIFIC"
+									default_format = "#low"
+								}
+
+								#Christian Doctrines
+								fixedgridbox = {
+									datamodel = "[FaithWindow.GetGroupingHelper( 'christian_doctrines' ).GetGrouping]"
+									flipdirection = yes
+									addcolumn = 230
+									addrow = 65
+									datamodel_wrap = 2
+
+									item = { widget_doctrine_item = {} }
+								}
+							}
+							vbox = { #Hindu Faiths
+								visible = "[Faith.HasDoctrineByKey( 'special_doctrine_is_hinduism_faith' )]"
+								layoutpolicy_horizontal = expanding
+								spacing = 10
+
+								text_label_center = {
+									layoutpolicy_horizontal = expanding
+									text = "FAITH_DOCTRINES_HINDU_SPECIFIC"
+									default_format = "#low"
+								}
+
+								
+								#Hindu Doctrines
+								fixedgridbox = {
+									datamodel = "[FaithWindow.GetGroupingHelper( 'hindu_doctrines' ).GetGrouping]"
+									flipdirection = yes
+									addcolumn = 270
+									addrow = 65
+									datamodel_wrap = 2
+
+									item = { widget_doctrine_item_unique = {} }
+								}
+							}
+							##### Changed from Vanilla ^^^^^
+						}
 
 						vbox = {
 							visible = "[DataModelHasItems(FaithWindow.GetGroupingHelper( 'special' ).GetGrouping)]"
 							layoutpolicy_horizontal = expanding
-							spacing = 10
+							spacing = 7
 
-							text_label_left = {
+							text_label_center = {
 								layoutpolicy_horizontal = expanding
 								text = "FAITH_DOCTRINES_SPECIAL"
 								default_format = "#low"
 							}
 
-							fixedgridbox = {
+							vbox = {
 								datamodel = "[FaithWindow.GetGroupingHelper( 'special' ).GetGrouping]"
-								flipdirection = yes
-								addcolumn = 230
-								addrow = 65
-								datamodel_wrap = 2
+								layoutpolicy_horizontal = expanding
+								margin_left = 50
+								margin_right = 66
+
+								spacing = 8
 
 								item = {
+									text_single = {
+										layoutpolicy_horizontal = expanding
 
-									widget_doctrine_item = {
-										blockoverride "doctrine_icon" {}
-										blockoverride "text_title" {
-											text = "[FaithDoctrine.GetNameNoTooltip( GuiFaithDoctrineItem.GetFaith )]"
-											align = center
+										
+										margin = { 17 0 }
+										margin_top = 12
+										margin_bottom = 13
+
+										datacontext = "[GuiFaithDoctrineItem.GetDoctrine]"
+										datacontext = "[GuiFaithDoctrineItem.GetFaith]"
+
+										text = "[FaithDoctrine.GetNameNoTooltip( GuiFaithDoctrineItem.GetFaith )]"
+										tooltip = "FAITH_WINDOW_DOCTRINE_TOOLTIP_WITH_FAITH"
+
+										align = nobaseline
+
+										using = tooltip_es
+
+										background = {
+											using = Background_Area
 										}
 
-										blockoverride "text_desc" {}
+										
 									}
+
 								}
 							}
 						}
@@ -677,11 +675,15 @@ window = {
 				}
 			}
 
+			widget = {
+				size = { 0 8 }
+			}
+
 			### Religious Head // Footer
 			vbox = {
 				name = "religious_head"
 				layoutpolicy_horizontal = expanding
-				margin = { 0 10 }
+				#margin_top = { 0 10 }
 
 				state = {
 					name = "faith_view_refresh"
@@ -860,9 +862,9 @@ window = {
 			}
 
 			hbox = {
-				spacing = 10
-				margin_bottom = 20
-				margin_top = 5
+				#spacing = 10
+				margin_bottom = 8
+				margin_top = 8
 				layoutpolicy_horizontal = expanding
 
 				expand = {}
@@ -936,13 +938,14 @@ window = {
 			}
 
 			background = {
-				texture = "[Illustration.GetTextureForFaith( FaithWindow.GetFaith )]"
 				alpha = 0.5
 				fittype = end
+				texture = "[Illustration.GetTextureForFaith( FaithWindow.GetFaith )]"
 
 				modify_texture = {
-					texture = "gfx/interface/component_masks/mask_fade_vertical_up.dds"
+					mirror = vertical
 					blend_mode = alphamultiply
+					texture = "gfx/interface/component_masks/mask_fade_vertical.dds"
 				}
 			}
 
@@ -1150,12 +1153,12 @@ window = {
 ### RELIGION VIEW
 window = {
 	name = "religion_window"
-	size = { 550 80% }
-	position = { 605 75 }
-	movable = yes
+	size = { 590 80% }
+	position = { 620 75 }
 	datacontext = "[ReligionWindow.GetReligion]"
 	layer = windows_layer
 
+	using = Window_Movable
 	using = Window_Background_Subwindow
 
 	state = {
@@ -1201,7 +1204,7 @@ window = {
 			layoutpolicy_horizontal = expanding
 			margin = { 15 0 }
 			margin_bottom = 5
-			spacing = 20
+			spacing = 5
 
 			hbox = {
 				spacing = 5
@@ -1230,16 +1233,20 @@ window = {
 				max_width = 550
 				spacing = 5
 
-				button_checkbox = {
-					onclick = "[ReligionWindow.OnShowOnlyReligionFaiths]"
-					checked = "[ReligionWindow.ShowOnlyReligionFaiths]"
-				}
+				expand = {}
 
-				text_multi = {
-					layoutpolicy_horizontal = expanding
-					text = "RELIGION_SHOW_ONLY"
-					align = nobaseline
-					default_format = "#clickable"
+				button_checkbox_label = {
+					onclick = "[ReligionWindow.OnShowOnlyReligionFaiths]"
+
+					blockoverride "text"
+					{
+						text = "RELIGION_SHOW_ONLY"
+						max_width = 180
+					}
+					blockoverride "checkbox"
+					{
+						checked = "[ReligionWindow.ShowOnlyReligionFaiths]"
+					}
 				}
 
 				tooltip = "[ReligionWindow.GetShowOnlyReligionFaithsTooltip]"
@@ -1286,8 +1293,6 @@ window = {
 							}
 
 							hbox = {
-								layoutpolicy_horizontal = expanding
-								layoutpolicy_vertical = expanding
 								margin = { 10 5 }
 								alpha = "[Select_float(GreaterThan_int32(Faith.GetNumberOfCountiesOfFaith,'(int32)0'), '(float)1.0','(float)0.5'))]"
 
@@ -1316,6 +1321,14 @@ window = {
 										}
 
 										expand = {}
+
+										text_single = {
+											min_width = 160
+											name = "religion_faith_name"
+											align = right|nobaseline
+											text = "FAITH_RELIGION"
+											margin_right = 5
+										}
 									}
 
 									hbox = {
@@ -1346,14 +1359,6 @@ window = {
 										autoresize = no
 									}
 								}
-
-								text_multi = {
-									min_width = 160
-									name = "religion_faith_name"
-									text = "FAITH_RELIGION"
-									autoresize = no
-									align = center
-								}
 							}
 						}
 					}
@@ -1376,7 +1381,7 @@ types FaithCreationWindow
 		{
 			block "label"
 			{
-				text = "#D enter label...#!"
+				text = "DEFAULT_TEXT"
 			}
 		}
 		size = { 380 30 }
@@ -1418,6 +1423,41 @@ types FaithShared
 			default_format = "#high"
 
 			using = Font_Size_Medium
+		}
+	}
+
+	type fervor_container_vbox = vbox {
+		name = "fervor_container"
+		tooltip = "FERVOR_TT"
+		spacing = -6
+
+		# Fervor
+		hbox = {
+
+			icon = {
+				texture = "gfx/interface/icons/icon_fervor.dds"
+				size = { 22 22 }
+			}
+
+			text_single = {
+				text = "FAITH_WINDOW_FERVOR"
+				default_format = "#high"
+				align = nobaseline
+			}
+		}
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			margin_right = 1
+			expand = {}
+
+			text_single = {
+				name = "fervor_trend"
+				text = "[Faith.GetYearlyFervorChange|=+2]"
+				max_width = 110
+				default_format = "#low"
+				fontsize = 13
+				size = { 0 12 }
+			}
 		}
 	}
 }
@@ -1490,8 +1530,8 @@ types FaithWindow
 			}
 		}
 	}
-	
-######################### NEW CODE #################################
+	##### Changed from Vanilla vvvvv
+	#For doctrines where each icon is unique
 	type widget_doctrine_item_unique = widget {
 		size = { 210 53 }
 		block "wdi_context"
@@ -1554,5 +1594,5 @@ types FaithWindow
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 }
-######################### NEW CODE #################################

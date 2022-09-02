@@ -1,2 +1,3 @@
-mklink /J "%HOMEDRIVE%%HOMEPATH%\Documents\Paradox Interactive\Crusader Kings III\mod\BP" ".\BP"
+﻿#From BP
+mklink /J "%HOMEDRIVE%%HOMEPATH%\Documents\Paradox Interactive\Crusader Kings III\mod\volkerwanderung" ".\volkerwanderung"
 pause

@@ -1,5 +1,5 @@
 ﻿### Army Spawns
-create_migratory_army = {
+create_migratory_army_effect = {
 	$ATTACKER$ = {
 		spawn_army = {
 			name = event_troop_default_name
@@ -11,7 +11,7 @@ create_migratory_army = {
 		}
 	}
 }
-create_odoacer_army = {
+create_odoacer_army_effect = {
 	spawn_army = { #Odoacer's East Germans army
 		name = event_troop_default_name
 		levies = 1000
@@ -35,12 +35,13 @@ create_odoacer_army = {
 			type = onager
 			stacks = 1
 		}
-		location = 2497 #Mantua
+		location = province:2497 #Mantua
 		war = scope:war
-		inheritable = no
+		war_keep_on_attacker_victory = $KEEP_AFTER_VICTORY$ #Otherwise Italy is toast in like 5 years
+		inheritable = no #But his son doesn't get to keep them
 	}
 }
-create_zeno_army = {
+create_zeno_army_effect = {
 	spawn_army = {
 		name = event_troop_default_name
 		levies = 1500
@@ -64,16 +65,96 @@ create_zeno_army = {
 			type = onager
 			stacks = 1
 		}
-		location = $LOCATION$
+		location = province:$LOCATION$
 		war = scope:war
 		inheritable = no
 	}
 }
 
+### Unification CB Code
+unification_cb_title_management_effect = {
+	create_title_and_vassal_change = {
+		type = conquest
+		save_scope_as = change_titles_taken
+		add_claim_on_loss = yes
+	}
+	create_title_and_vassal_change = {
+		type = swear_fealty
+		save_scope_as = change_vassal_status
+		add_claim_on_loss = no
+	}
+	#Mark all counties controlled by the top liege for seizure
+	every_in_list = {
+		list = $TARGET_TITLES$
+		
+		this = { save_scope_as = the_target_title }
+		
+		#Go over counties to seize and vassals to transfer
+		every_in_de_jure_hierarchy = {
+			limit = { tier = tier_county }
+			#Seize a county iff it is owned by the defender OR the holders capital is de jure part of target title
+			if = {
+				limit = {
+					holder = {
+						OR = {
+							this = $DEFENDER$
+							AND = {
+								target_is_liege_or_above = $DEFENDER$
+								NOT = { this.capital_county = { target_is_de_jure_liege_or_above = scope:the_target_title } }
+							}
+						}
+					}
+				}
+				add_to_temporary_list = titles_taken
+			}
+			#Transfer a vassal iff his capital is part of the de jare of the target title
+			else_if = {
+				limit = {
+					holder = {
+						target_is_liege_or_above = $DEFENDER$
+						this.capital_county = { target_is_de_jure_liege_or_above = scope:the_target_title }
+					}
+				}
+				holder = { add_to_temporary_list = vassals_to_transfer }
+			}
+		}
+	}
+	#Seize titles
+	every_in_list = {
+		list = titles_taken
+		change_title_holder = {
+			holder = $ATTACKER$
+			change = scope:change_titles_taken
+			take_baronies = yes
+		}
+	}
+	#Transfer Vassals
+	every_in_list = {
+		list = vassals_to_transfer
+		this = {
+			change_liege = {
+				liege = $ATTACKER$
+				change = scope:change_vassal_status
+			}
+		}
+	}
+	resolve_title_and_vassal_change = scope:change_titles_taken
+	resolve_title_and_vassal_change = scope:change_vassal_status
+}
+
 ### General Migration CB Code
 
+#Scopes to character
+update_number_of_migrations_effect = {
+	if = {
+		limit = { has_variable = number_of_migrations_attempted }
+		change_variable = { name = number_of_migrations_attempted add = 1 }
+	}
+	else = { set_variable = { name = number_of_migrations_attempted value = 1 } }
+}
+
 #Migration CB Title Shenanigans
-migration_cb_title_management = {
+migration_cb_title_management_effect = {
 	create_title_and_vassal_change = {
 		type = conquest
 		save_scope_as = change_titles_taken
@@ -157,14 +238,16 @@ migration_cb_title_management = {
 				location = $ATTACKER$.location
 				culture = this.culture
 				faith = this.faith
-				gender_female_chance = { #TODO: Make more-religion/culture dynamic
+				gender_female_chance = {
 					if = {
-						limit = { $ATTACKER$ = { is_male = yes } }
+						limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
 						value = 0
 					}
-					else = {
+					else_if = {
+						limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
 						value = 100
 					}
+					else = { value = 50 }
 				}
 				save_scope_as = new_char
 			}
@@ -191,6 +274,18 @@ migration_cb_title_management = {
 	resolve_title_and_vassal_change = scope:change_titles_taken
 	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars
 	resolve_title_and_vassal_change = scope:change_vassal_status
+	#Prevent title bootstrapping
+	hidden_effect = {
+		every_in_list = {
+			list = attackers_counties
+			this.holder = {
+				boostrap_prevention_effect = {
+					THE_LANDED_TITLE = this.capital_county
+					THE_PREVIOUS_HOLDER = $ATTACKER$
+				}
+			}
+		}
+	}
 	#Apply county effects
 	hidden_effect = { #apply county modifiers to new counties
 		#text = "minor_migration_apply_modifiers_to_new_counties"
@@ -220,7 +315,7 @@ migration_cb_title_management = {
 	}
 }
 #Migration CB Titular Title Shenanigans
-create_titular_title_if_needed = {
+create_titular_title_if_needed_effect = {
 	#If our primary title **isn't** titular, create a new one of the same rank
 	#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
 	#and counties that have been handed out become independent
@@ -268,36 +363,17 @@ create_titular_title_if_needed = {
 		}
 	}
 }
-#Migration CB Improve Government (Minor Wars only)
-improve_government_form = {
-#If the target was advanced, bootstrap improvement to government form
-	if = {
-		limit = { 
-			$DEFENDER$ = {
-				OR = {
-					has_government = subroman_government
-					has_government = eranshar_government
-					has_government = gupta_government
-					has_government = gubernatorial_government
-					has_government = bureaucratic_government
-					has_government = feudal_government
-				}
-			}
-		}
-		$ATTACKER$ = { change_government = high_tribal_government }
-	}
-}
 #Add migratory invasion flag
-add_migration_flag = {
+add_migration_flag_effect = {
 	$ATTACKER$ = {
 		add_character_flag = {
 			flag = launched_migration_war_recently
-			years = 10
+			years = $YEARS$
 		}
 	}
 }
 #Setup new capital
-setup_new_capital = {
+setup_new_capital_effect = {
 	$ATTACKER$ = {
 		every_held_title = {
 			limit = { tier = tier_county }
@@ -315,7 +391,7 @@ setup_new_capital = {
 ### Major Migrations
 
 #Liberate non-participants
-add_attackers_and_liberate_non_particpants = {
+add_attackers_and_liberate_non_particpants_effect = {
 	scope:attacker = {
 		trigger_event = migration_war.0001
 		every_vassal = {
@@ -326,20 +402,20 @@ add_attackers_and_liberate_non_particpants = {
 	}
 }
 #Spawn armies based on development
-spawn_armies_from_development = {
+spawn_armies_from_development_effect = {
 	$ATTACKER$ = {
 		every_held_title = {
 			limit = { tier = tier_county }
 			if = {
-				limit = { major_migration_valid_source_counties = { ATTACKER = $ATTACKER$ } }
-				create_migratory_army = { ATTACKER = $ATTACKER$ }
+				limit = { major_migration_valid_source_counties_trigger = { ATTACKER = $ATTACKER$ } }
+				create_migratory_army_effect = { ATTACKER = $ATTACKER$ }
 				change_development_level = this.migration_depopulation
 			}
 		}
 	}
 }
 #Major Migration CB Title Shenanigans
-major_migration_cb_title_management = {
+major_migration_cb_title_management_effect_effect = {
 	create_title_and_vassal_change = {
 		type = conquest
 		save_scope_as = change_titles_taken
@@ -361,7 +437,7 @@ major_migration_cb_title_management = {
 			limit = { tier = tier_county }
 			add_to_temporary_list = former_counties
 			if = {
-				limit = { major_migration_valid_source_counties = { ATTACKER = this.holder } }
+				limit = { major_migration_valid_source_counties_trigger = { ATTACKER = this.holder } }
 				add_to_temporary_list = former_source_counties
 			}
 		}
@@ -375,7 +451,7 @@ major_migration_cb_title_management = {
 				limit = { tier = tier_county }
 				add_to_temporary_list = former_counties
 				if = {
-					limit = { major_migration_valid_source_counties = { ATTACKER = this.holder } }
+					limit = { major_migration_valid_source_counties_trigger = { ATTACKER = this.holder } }
 					add_to_temporary_list = former_source_counties
 				}
 			}
@@ -509,15 +585,17 @@ major_migration_cb_title_management = {
 			location = $ATTACKER$.location
 			culture = this.culture
 			faith = this.faith
-			gender_female_chance = { #TODO: Make more-religion/culture dynamic
-				if = {
-					limit = { $ATTACKER$ = { is_male = yes } }
-					value = 0
+			gender_female_chance = {
+					if = {
+						limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
+						value = 0
+					}
+					else_if = {
+						limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
+						value = 100
+					}
+					else = { value = 50 }
 				}
-				else = {
-					value = 100
-				}
-			}
 			save_scope_as = new_char
 		}
 		change_title_holder = {
@@ -526,6 +604,16 @@ major_migration_cb_title_management = {
 			take_baronies = yes
 		}
 		scope:new_char = { becomes_independent = { change = scope:change_vassal_status } }
+	}
+	#Prevent title bootstrapping
+	every_in_list = {
+		list = former_counties
+		this.holder = {
+			boostrap_prevention_effect = {
+				THE_LANDED_TITLE = this.capital_county
+				THE_PREVIOUS_HOLDER = $ATTACKER$
+			}
+		}
 	}
 	resolve_title_and_vassal_change = scope:change_titles_taken
 	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars
@@ -550,7 +638,7 @@ major_migration_cb_title_management = {
 				chance = major_migration_county_flip_chance
 				modifier = { add = this.major_migration_negative_development_level_modifier } #Modify chance by development
 				modifier = { #Sharing **either** faith or culture => no chance
-					add = major_migration_county_flip_chance_negative
+					add = major_migration_county_negative_flip_chance
 					OR = {
 						this.culture = holder.culture
 						this.faith = holder.faith
@@ -577,5 +665,21 @@ major_migration_cb_title_management = {
 				years = major_migration_immigration_emigration_impact_period
 			}
 		}
+	}
+}
+#Handle nomadic government
+major_migration_improve_government_form_effect_effect = {
+	if = {
+		limit = {
+			$DEFENDER$ = {
+				OR = {
+					has_a_feudal_type_of_government_trigger = yes
+					has_advanced_government_trigger = yes
+					has_government = tribal_government
+				}
+			}
+			$ATTACKER$ = { has_government = nomad_government }
+		}
+		$ATTACKER$ = { convert_realm_to_tribal_effect = yes }
 	}
 }

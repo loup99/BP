@@ -1,9 +1,23 @@
 ﻿# Called from code after history generation
 # Empty scope
 
-##### Change from Vanilla vvvvv
+##### Changed from Vanilla vvvvv
 on_game_start = {
+	events = {
+		fp1_scandinavian_adventurers.0004	# FP1 - Organise Norse adventurers.
+		fp1_scandinavian_adventurers.0011	# FP1 - Corral famous Norse adventurers that haven't done much yet.
+		fp1_scandinavian_adventurers.0021	# FP1 - Mark game-start prioritised adventurers.
+		#Guaranteed historical artifacts fixed spawning
+		debug_portraits.1 					# Debug portraits for animation testing
+		easteregg_event.0001				# Charna and Jakub duel.
+	}
+
 	effect = {
+		#####Changed from Vanilla: character:74025 bookmark event
+		#####Changed from Vanilla: character:33358 bookmark event
+		#####Changed from Vanilla: character:7627 bookmark event
+		#####Changed from Vanilla: character:251187 bookmark event
+
 		### HRE SETUP ###
 		if = {
 			limit = { exists = title:e_hre.holder }
@@ -14,14 +28,56 @@ on_game_start = {
 					}
 					vassal_contract_decrease_obligation_level = feudal_government_taxes
 					vassal_contract_decrease_obligation_level = feudal_government_levies
+					set_vassal_contract_modification_blocked = no
+				}
+			}
+			add_to_global_variable_list = {
+				name = hre_elector_list
+				target = title:c_cologne
+			}
+			add_to_global_variable_list = {
+				name = hre_elector_list
+				target = title:c_mainz
+			}
+			add_to_global_variable_list = {
+				name = hre_elector_list
+				target = title:c_trier
+			}
+			add_to_global_variable_list = {
+				name = hre_elector_list
+				target = title:d_bohemia
+			}
+			add_to_global_variable_list = {
+				name = hre_elector_list
+				target = title:d_east_franconia
+			}
+			add_to_global_variable_list = {
+				name = hre_elector_list
+				target = title:d_ostmark
+			}
+			add_to_global_variable_list = {
+				name = hre_elector_list
+				target = title:d_angria
+			}
+			hre_elector_list_save_effect = yes
+		}
+
+		### RELIGIOUS THINGS ###
+		religion:islam_religion = { # Set up Holy Site Buildings to be buildable in Holy Sites
+			every_faith = {
+				every_holy_site = {
+					limit = {
+						title_province = {
+							has_special_building_slot = no
+						}
+					}
+					title_province = {
+						add_special_building_slot = holy_site_mosque_01
+					}
 				}
 			}
 		}
 		
-		#Set up Visigothic Codes.
-		#culture:occitan = { add_innovation = innovation_visigothic_codes }
-		
-		### RELIGIOUS THINGS ###
 		religion:christianity_religion = {
 			every_faith = {
 				every_holy_site = {
@@ -36,6 +92,9 @@ on_game_start = {
 				}
 			}
 		}
+		
+		##### Changed from Vanilla: Removed the reformation of bon faith
+		##### Changed from Vanilla: Removed basque pagan, adoptionist blocks
 
 		every_religion_global = {
 			limit = {
@@ -50,21 +109,31 @@ on_game_start = {
 			every_faith = {
 				every_holy_site = {
 					limit = {
-						title_province = { has_special_building_slot = no }
+						title_province = {
+							has_special_building_slot = no
+						}
 					}
-					title_province = { add_special_building_slot = holy_site_indian_grand_temple_01 }
+					title_province = {
+						add_special_building_slot = holy_site_indian_grand_temple_01
+					}
 				}
 			}
 		}
 		
 		every_religion_global = {
-			limit = { is_in_family = rf_pagan }
+			limit = {
+				is_in_family = rf_pagan
+			}
 			every_faith = {
 				every_holy_site = {
 					limit = {
-						title_province = { has_special_building_slot = no }
+						title_province = {
+							has_special_building_slot = no
+						}
 					}
-					title_province = { add_special_building_slot = holy_site_pagan_grand_temple_01 }
+					title_province = {
+						add_special_building_slot = holy_site_pagan_grand_temple_01
+					}
 				}
 			}
 		}
@@ -83,8 +152,6 @@ on_game_start = {
 				}
 			}
 		}
-		
-		#Title Tweaks
 		if = {
 			limit = { game_start_date <= 1000.1.1 }
 			title:e_scandinavia = { set_coa = e_scandinavia_norse }
@@ -188,126 +255,37 @@ on_game_start = {
 			title:c_argyll = { set_coa = c_argyll_norse }
 		}
 		
-		#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
-		#in through the back door
-		every_barony = {
-			#Which isn't a capital
-			limit = { is_capital_barony = no }
-			#All castle holders should have the government of the county holder
-			if = {
-				limit = { this.title_province = { has_holding_type = castle_holding } }
-				#Vanilla Governments
-				if = {
-					limit = { this.county.holder = { has_government = tribal_government } }
-					this.holder = { change_government = tribal_government }
-				}
-				else_if = { #NB: Causes singular "illegal_government" error in 476 start
-					limit = { this.county.holder = { has_government = republic_government } }
-					this.holder = { change_government = republic_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = theocracy_government } }
-					this.holder = { change_government = theocracy_government }
-				}
-				#BP Governments
-				else_if = {
-					limit = { this.county.holder = { has_government = high_tribal_government } }
-					this.holder = { change_government = high_tribal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = prefeudal_government } }
-					this.holder = { change_government = prefeudal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = nomad_government } }
-					this.holder = { change_government = nomad_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = subroman_government } }
-					this.holder = { change_government = subroman_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = eranshar_government } }
-					this.holder = { change_government = eranshar_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = gupta_government } }
-					this.holder = { change_government = gupta_government }
-				}
-				else_if = {
-					limit = {
-						this.county.holder = {
-							OR = {
-								has_government = gubernatorial_government
-								has_government = bureaucratic_government
-							}
-						}
-					}
-					this.holder = { change_government = gubernatorial_government }
-				}
+		#Royal Court: Set starting Grandeur to be the same as Expected
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
 			}
-			#Handle cases of lay clergy faiths holding temples as well
-			else_if = {
-				limit = {
-					this.title_province = { has_holding_type = church_holding }
-					this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
-				}
-				#Vanilla Governments
-				if = {
-					limit = { this.county.holder = { has_government = tribal_government } }
-					this.holder = { change_government = tribal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = republic_government } }
-					this.holder = { change_government = republic_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = theocracy_government } }
-					this.holder = { change_government = theocracy_government }
-				}
-				#BP Governments
-				else_if = {
-					limit = { this.county.holder = { has_government = high_tribal_government } }
-					this.holder = { change_government = high_tribal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = prefeudal_government } }
-					this.holder = { change_government = prefeudal_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = nomad_government } }
-					this.holder = { change_government = nomad_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = subroman_government } }
-					this.holder = { change_government = subroman_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = eranshar_government } }
-					this.holder = { change_government = eranshar_government }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = gupta_government } }
-					this.holder = { change_government = gupta_government }
-				}
-				else_if = { #NB: Causes singular "illegal_government" error in 476 start
-					limit = {
-						this.county.holder = {
-							OR = {
-								has_government = gubernatorial_government
-								has_government = bureaucratic_government
-							}
-						}
-					}
-					this.holder = { change_government = gubernatorial_government }
+			every_character_with_royal_court = {
+				set_current_court_grandeur = court_grandeur_minimum_expected
+				apply_hold_court_grace_effect = yes
+				# Stops Hold Court reminders at game start
+				set_variable = {
+					name = last_hold_court_date
+					value = current_year
 				}
 			}
 		}
+		### STRUGGLES ###
+		# If we're in 867, Aragonese should be removed from the Struggle, since they don't quite exist yet.
+		if = {
+			limit = {
+				current_date = 867.1.1
+				exists = struggle:iberian_struggle
+			}
+			struggle:iberian_struggle = { set_culture_as_uninvolved = culture:aragonese }
+		}
 	}
 }
-##### Change from Vanilla ^^^^^
+##### Changed from Vanilla ^^^^^
 
 # Like on_game_start, except it is called once the host (or player, in single player) exits the lobby. Good for anything where you need to know who the players are, or what the game rules are
+
+##### Changed from Vanilla vvvvv
 on_game_start_after_lobby = {
 	effect = {
 		### GAME RULE: VIEW ON SAME-SEX RELATIONS
@@ -349,9 +327,108 @@ on_game_start_after_lobby = {
 			limit = { NOT = { has_game_rule = sexuality_distribution_default } }
 			game_rule_sexuality_distribution_effect = yes
 		}
+
+		##### Changed from Vanilla: Removed "ACHIEVEMENT: FROM RAGS TO RICHES"
+		
+		##### Changed from Vanilla: Removed "ACHIEVEMENT (FP2): Holidaying in Iberia"
+		
+		##### Changed from Vanilla: Removed "ACHIEVEMENT TRACKING FOR STARTING CHARACTERS" if-block
+
+		### HOLD COURT STARTING GRACE
+		every_character_with_royal_court = {
+			set_variable = {
+				name = hold_court_cooldown
+	 			days = standard_hold_court_cooldown_time
+	 		}
+		}
+		
+		#Set starting cultural acceptance
+		culture:vlach = {
+			change_cultural_acceptance = {
+				target = culture:serbian
+				value = 40
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:croatian
+				value = 40
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:bosnian
+				value = 40
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:bulgarian
+				value = 40
+				desc = cultural_acceptance_historical_relations
+			}
+		}
+		culture:khazar = {
+			change_cultural_acceptance = {
+				target = culture:radhanite
+				value = 25
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:mordvin
+				value = 30
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:meshchera
+				value = 30
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:muroma
+				value = 30
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:russian
+				value = 30
+				desc = cultural_acceptance_historical_relations
+			}
+		}
+		culture:norse = {
+			change_cultural_acceptance = {
+				target = culture:sami
+				value = 20
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:finnish
+				value = 20
+				desc = cultural_acceptance_historical_relations
+			}
+		}
+		culture:swedish = {
+			change_cultural_acceptance = {
+				target = culture:sami
+				value = 20
+				desc = cultural_acceptance_historical_relations
+			}
+			change_cultural_acceptance = {
+				target = culture:finnish
+				value = 20
+				desc = cultural_acceptance_historical_relations
+			}
+		}
+		culture:norwegian = {
+			change_cultural_acceptance = {
+				target = culture:sami
+				value = 20
+				desc = cultural_acceptance_historical_relations
+			}
+		}
 	}
 
 	events = {
 		game_rule.1000	#Autopopulate families.
+		##### Changed from Vanilla: Removed hungarian migartion effects
+		historical_artifacts.0023			# Historical Artifacts Generator
 	}
 }
+##### Changed from Vanilla ^^^^^

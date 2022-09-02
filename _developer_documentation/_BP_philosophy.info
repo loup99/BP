@@ -1,0 +1,65 @@
+Coding Philosophy Notes:
+
+0). Above all else, code that works is better than code that doesn't or code that's pretty!
+
+1). Whenever possible, write code to a separate file instead of overwriting Vanilla
+
+    Reason: Keeps code base fairly harmonized whenever vanilla updates
+
+2). Make Vanilla overwrites sparse
+    a). If needing to only overwrite some components, create a new file <fname>_BP_overwrite.txt
+        i). Avoids needless Vanilla inclusion and makes maintenance easier
+    b). If the file is only fixing some issue that is likely caused by PDX, create a new file <fname>_BP_vanilla_fix.txt
+        i). Makes it clear what should be reviewed after PDX patches
+    b). If Vanilla files must be overwritten (e.g., removal), try to keep meticulous records of what was changed
+        i). Makes maintenance easier if we have explanations as to why changes were need
+    c). Whenever overriding Vanilla keys/files use the following indicators
+        i). When changing one line, or removing a code block, note with "##### Changed from Vanilla: "
+        ii). When changing a block of lines, start with "##### Changed from Vanilla vvvvv" and end with "##### Changed from Vanilla ^^^^^"
+            Reason: Keeps things easily regex searchable
+    d). Add reasons and file to the _BP_hard_file_overwrites.info for better file tracking
+
+3). When importing a vanilla file into BP for overwriting on a PR, try to have one commit for importing the file and a second commit for doing the changes
+
+    Reason: It will make reviewing your PR easier for the reviewer, since they'll be able to see the exact lines changed by comparing from import commit to the HEAD commit
+
+4). CK3 scripting supports quasi-templating like code via $NAME$ semantics, where $NAME$ is replaced inline [1]. Use that to reduce code duplication.
+
+    Reason: Code duplication leads to the risk of some blocks of code being missed and makes maintenance harder
+
+5). Place as many references as possible in common/scripted_effects/ and common/scripted_triggers/ instead of in actionable folders like common/decisions/ or common/laws/
+
+    Reason: Prevents having code spread out across files for ease of maintenance
+
+6). Use script value references in localization whenever possible.
+    a). Example: "[EmptyScope.ScriptValue('the_script_value')]"
+
+    Reason: This makes the localization always up-to-date as we tweak various values in the mod.
+
+7). One line are preferred whenever possible [2]
+
+    Reason: Prevents extraneous folding in Notepad++/Visual Studio and improves code clarity
+
+8). The more complicated the code, the more comments are needed to explain what you're trying to do
+
+    Reason: Code does exactly what you tell it to do. Best also explain what you want it to do as well
+
+Examples
+
+[1] Pseudo-code example make_feudal.txt:
+
+if = {
+	limit = { this.tier >= tier_barony }
+	do_thing = { NAME = this }
+}
+
+common/scripted_effects/effects.txt:
+	do_thing = {
+		$NAME$.holder = { change_government = feudal_government }
+	}
+
+[2] Do this: this.faith = { has_doctrine = core_tenet_blah } Not this:
+
+this.faith = {
+	has_doctrine = core_tenet_blah
+}

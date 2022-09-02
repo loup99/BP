@@ -1,0 +1,174 @@
+﻿high_tribal_government = {
+	rulers_should_have_dynasty = yes
+	create_cadet_branches = no
+	always_use_patronym = yes
+	royal_court = yes
+	
+	primary_holding = castle_holding
+	valid_holdings = { tribal_holding }
+	required_county_holdings = { castle_holding city_holding church_holding }
+	
+	regiments_prestige_as_gold = no
+	
+	prestige_opinion_override = { -10 0 3 5 10 20 }
+	
+	vassal_contract = {
+		high_tribal_government_obligations
+		#Other special contracts
+		foederatus_special_contract
+		tributary_special_contract
+		tributary_state_special_contract
+	}
+	
+	character_modifier = {
+		title_creation_cost_mult = -0.25
+		army_maintenance_mult = -0.25
+		
+		feudal_government_vassal_opinion = -10
+		clan_government_vassal_opinion = -10
+		republic_government_vassal_opinion = -10
+		subroman_government_vassal_opinion = -10
+		prefeudal_government_vassal_opinion = -10
+		eranshar_government_vassal_opinion = -10
+		gupta_government_vassal_opinion = -10
+		
+		ai_war_chance = 0.25
+	}
+	
+	flag = can_hold_castles_and_tribes
+	flag = cannot_advance_beyond_early_medieval_era
+	flag = high_tribal_character_modifiers
+	
+	color = hsv{ 0.333 1.000 0.250 } #Brightness reduced for more contrast with clan
+}
+
+tribal_government = {
+	rulers_should_have_dynasty = yes
+	affected_by_development = no
+	regiments_prestige_as_gold = yes
+	supply_limit_mult_for_others = -0.5
+	primary_holding = tribal_holding
+	required_county_holdings = { tribal_holding }
+	royal_court = yes
+
+	valid_holdings = { castle_holding }
+
+	prestige_opinion_override = { -10 0 3 5 10 20 }
+	always_use_patronym = yes
+	
+	vassal_contract = {
+		tribal_government_obligations
+		foederatus_special_contract
+		tributary_special_contract
+		tributary_state_special_contract
+	}
+	
+	character_modifier = {
+		title_creation_cost_mult = -0.5
+		army_maintenance_mult = -0.5
+		
+		#disgusting primitives
+		feudal_government_vassal_opinion = -20
+		clan_government_vassal_opinion = -20
+		republic_government_vassal_opinion = -20
+		subroman_government_vassal_opinion = -20
+		prefeudal_government_vassal_opinion = -20
+		eranshar_government_vassal_opinion = -20
+		gupta_government_vassal_opinion = -20
+		#They're not **that** bad...
+		high_tribal_government_vassal_opinion = -10
+		
+		ai_war_chance = 0.25
+		monthly_prestige = 0.2
+	}
+	
+	flag = government_can_raid_rule
+	flag = cannot_advance_beyond_tribal_era
+	flag = tribal_character_modifiers
+	
+	color = hsv{ 0.02 0.75 0.36 }
+}
+
+#Nomad Government Types
+#LT-Rascek: Duplicate of Tribal with clan intergration; brought in for easy integration
+#if/when Paradox implements a true Nomadic Governance
+nomad_government = {
+	rulers_should_have_dynasty = yes
+	affected_by_development = no
+	regiments_prestige_as_gold = yes
+	supply_limit_mult_for_others = -0.5
+	primary_holding = tribal_holding
+	#required_county_holdings = { tribal_holding }
+	royal_court = yes
+	
+	primary_heritages = { heritage_mongolic heritage_turkic }
+	
+	create_cadet_branches = yes
+	rulers_should_have_dynasty = yes
+	
+	required_county_holdings = { castle_holding city_holding church_holding }
+	always_use_patronym = yes
+	
+	vassal_contract = {
+		nomadic_government_obligation
+		foederatus_special_contract
+		tributary_special_contract
+		tributary_state_special_contract
+	}
+	
+	opinion_of_liege = {
+		scope:vassal = {
+			if = {
+				limit = { NOT = { is_allied_to = scope:liege } }
+				if = {
+					limit = { is_powerful_vassal = yes }
+					value = -30
+				}
+				else = { value = -15 }
+			}
+		}
+	}
+	opinion_of_liege_desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:vassal = {
+						NOT = { is_allied_to = scope:liege }
+						is_powerful_vassal = yes
+					}
+				}
+				desc = "GOVERNMENT_NOMAD_NOT_ALLIED_POWERFUL"
+			}
+			triggered_desc = {
+				trigger = {
+					scope:vassal = {
+						NOT = { is_allied_to = scope:liege }
+						is_powerful_vassal = no
+					}
+				}
+				desc = "GOVERNMENT_NOMAD_NOT_ALLIED"
+			}
+		}
+	}
+	
+	character_modifier = {
+		title_creation_cost_mult = -0.5
+		army_maintenance_mult = -0.5
+		
+		feudal_government_vassal_opinion = -20
+		clan_government_vassal_opinion = -20
+		republic_government_vassal_opinion = -20
+		subroman_government_vassal_opinion = -20
+		prefeudal_government_vassal_opinion = -20
+		high_tribal_government_vassal_opinion = -20
+		
+		ai_war_chance = 0.25
+	}
+	
+	flag = government_can_raid_rule
+	flag = cannot_advance_beyond_tribal_era
+	flag = nomad_government_character_modifier
+	
+	color ={ 201 179 36 }
+}
+

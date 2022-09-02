@@ -1,0 +1,533 @@
+﻿##### Changed from Vanilla: Made available to colchiscan descendents
+tradition_caucasian_wolves = {
+	category = regional
+
+	layers = {
+		0 = steward
+		1 = mena
+		4 = mountain.dds
+	}
+	
+	#For Georgians this replaces the Mountaineers tradition
+	is_shown = {
+		OR = {
+			this = culture:colchiscan
+			any_parent_culture_or_above = { this = culture:colchiscan }
+		}
+		NOR = {
+			has_cultural_tradition = tradition_mountaineers
+			has_cultural_tradition = tradition_horn_mountain_skirmishing
+		}
+	}
+	can_pick = {
+		custom_description = {
+			text = culture_in_mountains_desc
+			any_culture_county = {
+				any_county_province = {
+					OR = {
+						terrain = mountains
+						terrain = desert_mountains
+					}
+				}
+			}
+		}
+	}
+	
+	parameters = {
+		unlock_maa_monaspa = yes
+		rough_terrain_expert_trait_more_common = yes
+		mountain_trait_bonuses = yes
+		can_recruit_mountain_specialist = yes
+	}
+	province_modifier = {
+		mountains_levy_size = 0.1
+		desert_mountains_levy_size = 0.1
+		mountains_supply_limit_mult = 0.25
+		desert_mountains_supply_limit_mult = 0.25
+	}
+	character_modifier = {
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							percent >= 0.3
+							any_county_province = {
+								OR = {
+									terrain = mountains
+									terrain = desert_mountains
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = mountain_percentage_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+
+	ai_will_do = {
+		value = 1000
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							culture = scope:character.culture
+							any_county_province = {
+								OR = {
+									terrain = mountains
+									terrain = desert_mountains
+								}
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Made available to pictish cultures and descendents, not pickable with tribal unity
+tradition_strong_kinship = { #There can be only one!
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = western
+		4 = conversation.dds
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		OR = {
+			this = culture:pictish
+			any_parent_culture_or_above = { this = culture:pictish }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		OR = {
+			this = culture:pictish
+			any_parent_culture_or_above = { this = culture:pictish }
+		}
+		NOT = { has_cultural_tradition = tradition_tribe_unity }
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		unlock_schiltron_innovation = yes
+		bonuses_from_patriarch_matriarch_trait = yes
+		cultural_house_personal_scheme_success_chance = yes
+		landing_house_members_give_prestige = yes
+		penalty_for_revoking_titles_from_house_members = yes
+	}
+	character_modifier = {
+		dynasty_house_opinion = 15
+		opinion_of_liege = -10
+	}
+
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+						any_in_list = { list = traits this = flag:ethos_bureaucratic }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_bureaucratic_desc
+				}
+			}
+			if = {
+				limit = {
+					exists = scope:character.house
+					NOT = {
+						scope:character.house = {
+							any_house_member = {
+								count >= 3
+								has_relation_friend = scope:character
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = house_friends_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+	}
+}
+
+##### Changed from Vanilla: Made available to ethiopians
+tradition_horn_mountain_skirmishing = {
+	category = regional
+
+	layers = {
+		0 = steward
+		1 = mena
+		4 = desert_mountains.dds
+	}
+
+	#In the Horn of Africa this replaces the Mountaineers tradition
+	is_shown = {
+		OR ={
+			this = culture:ethiopian
+			has_cultural_pillar = heritage_somalian
+			has_cultural_pillar = heritage_east_african
+		}
+		NOR = {
+			has_cultural_tradition = tradition_mountaineers
+			has_cultural_tradition = tradition_caucasian_wolves
+		}
+	}
+	can_pick = {
+		custom_description = {
+			text = culture_in_mountains_desc
+			any_culture_county = {
+				any_county_province = {
+					OR = {
+						terrain = mountains
+						terrain = desert_mountains
+					}
+				}
+			}
+		}
+	}
+	
+	parameters = {
+		unlock_maa_horn_warrior = yes
+		rough_terrain_expert_trait_more_common = yes
+		mountain_trait_bonuses = yes
+		can_recruit_mountain_specialist = yes
+	}
+	province_modifier = {
+		mountains_levy_size = 0.1
+		desert_mountains_levy_size = 0.1
+		mountains_supply_limit_mult = 0.25
+		desert_mountains_supply_limit_mult = 0.25
+	}
+	character_modifier = {
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_spiritual }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_spiritual_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							percent >= 0.3
+							any_county_province = {
+								OR = {
+									terrain = mountains
+									terrain = desert_mountains
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = mountain_percentage_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							culture = scope:character.culture
+							any_county_province = {
+								OR = {
+									terrain = mountains
+									terrain = desert_mountains
+								}
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Made available to south semitic
+tradition_mountain_herding = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = desert_mountains.dds
+	}
+
+	#Replaces Mountain Homes
+	is_shown = {
+		OR ={
+			has_cultural_pillar = heritage_arabic
+			has_cultural_pillar = heritage_berber
+		}
+	}
+	can_pick = {
+		OR ={
+			has_cultural_pillar = heritage_arabic
+			has_cultural_pillar = heritage_berber
+		}
+		culture_not_pacifistic_trigger = yes
+		custom_description = {
+			text = culture_in_mountains_desc
+			any_culture_county = {
+				any_county_province = {
+					OR = {
+						terrain = mountains
+						terrain = desert_mountains
+					}
+				}
+			}
+		}
+	}
+	
+	parameters = {
+		unlock_maa_abudrar = yes
+		rough_terrain_expert_trait_more_common = yes
+		desert_warrior_trait_more_common = yes
+		mountain_trait_bonuses = yes
+		can_recruit_mountain_specialist = yes
+	}
+	county_modifier = {
+		desert_mountains_development_growth_factor = 0.35
+	}
+	province_modifier = {
+		desert_mountains_construction_gold_cost = -0.15
+		desert_mountains_holding_construction_gold_cost = -0.15
+	}
+
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_stoic }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							percent >= 0.3
+							any_county_province = {
+								terrain = desert_mountains
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = mountain_percentage_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							culture = scope:character.culture
+							any_county_province = {
+								terrain = desert_mountains
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: Made available to East Iranians as well (like Sogdian)
+tradition_futuwaa = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = soldiers.dds
+	}
+	
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		##### Changed from Vanilla vvvvv
+		OR = {
+			has_cultural_pillar = heritage_iranian
+			has_cultural_pillar = heritage_east_iranian
+		}
+		##### Changed from Vanilla ^^^^^
+		NOR = { #Replaces Martial Admiration
+			has_cultural_tradition = tradition_chanson_de_geste
+			has_cultural_tradition = tradition_druzhina
+			has_cultural_tradition = tradition_martial_admiration
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	##### Changed from Vanilla vvvvv
+	can_pick = {
+		##### Changed from Vanilla vvvvv
+		OR = {
+			has_cultural_pillar = heritage_iranian
+			has_cultural_pillar = heritage_east_iranian
+		}
+		##### Changed from Vanilla ^^^^^
+		NOR = { #Replaces Martial Admiration
+			has_cultural_tradition = tradition_chanson_de_geste
+			has_cultural_tradition = tradition_druzhina
+			has_cultural_tradition = tradition_martial_admiration
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	parameters = {
+		unlock_maa_ayyar = yes
+		can_use_sparring_duel = yes
+		martial_education_more_valued = yes
+		prowess_traits_more_valued = yes
+		blademaster_trait_bonuses = yes
+		craven_and_content_traits_looked_down_upon = yes
+		knights_slightly_more_prone_to_injury = yes
+	}
+	character_modifier = {
+		knight_limit = 2
+		negate_prowess_penalty_add = 5
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						any_in_list = { list = traits this = flag:ethos_bellicose }
+						any_in_list = { list = traits this = flag:ethos_courtly }
+						any_in_list = { list = traits this = flag:ethos_communal }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_courtly_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							any_knight = {
+								count >= 6
+								prowess >= 12
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = knights_with_prowess_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+
+	ai_will_do = { value = 100 }
+}
+

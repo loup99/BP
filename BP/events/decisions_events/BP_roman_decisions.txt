@@ -1,0 +1,891 @@
+﻿namespace = BP_roman_decisions
+
+#0001-0009: Ask for HRE/WRE
+#0010-0019: Other Roman Empire Title Related Decisions
+#0020-0039: Senate Events
+#0050-0100: Roman Reformation Events
+#1000+: Minor Events
+
+##################################################
+# Asking for the HRE/WRE
+##################################################
+
+scripted_effect create_new_roman_empire_title_effect = {
+	create_title_and_vassal_change = {
+		type = created
+		save_scope_as = change
+		add_claim_on_loss = no
+	}
+	title:$EMPIRE_TITLE$ = {
+		change_title_holder = {
+			holder = root
+			change = scope:change
+		}
+	}
+	resolve_title_and_vassal_change = scope:change
+	
+	set_primary_title_to = title:$EMPIRE_TITLE$
+	every_held_title = { #Should destroy all other Empires owned at the time.
+		limit = {
+			tier = tier_empire
+			NOT = { this = title:$EMPIRE_TITLE$ }
+		}
+		root = { destroy_title = prev }
+	}
+	#All your kingdom titles acknowledge your rule
+	every_held_title = {
+		every_in_de_jure_hierarchy = {
+			limit = { tier = tier_kingdom }
+			set_de_jure_liege_title = title:$EMPIRE_TITLE$
+		}
+	}
+	#All your kingdom vassals acknowledge your rule
+	every_vassal = {
+		every_held_title = {
+			limit = { tier = tier_kingdom }
+			set_de_jure_liege_title = title:$EMPIRE_TITLE$
+		}
+	}
+}
+
+#The Pope gets the request
+BP_roman_decisions.0001 = {
+	type = character_event
+	title = BP_roman_decisions.0001.t
+	desc = BP_roman_decisions.0001.desc
+	theme = realm
+	
+	left_portrait = {
+		character = this
+		animation = personality_honorable
+	}
+	
+	option = { #Agrees
+		name = BP_roman_decisions.0001.a
+		
+		scope:empire_petitoner = {
+			trigger_event = {
+				id = BP_roman_decisions.0002
+				days = { 3 10 }
+			}
+		}
+		
+		ai_chance = {
+			base = 1
+			
+			#Petioner Heritage effects
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_cultural_pillar = heritage_byzantine }
+			}
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_cultural_pillar = heritage_central_germanic }
+			}
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_cultural_pillar = heritage_latin }
+			}
+			#Petioner Trait Effects
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_trait = roman_nostalgia }
+			}
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_trait = zealous }
+			}
+			#Status of Major Christian Holdings (aka, if he's Emperor, he might fix this situation)
+			modifier = {
+				add = 3
+				NOT = { title:c_byzantion.holder.religion = religion:christianity_religion }
+			}
+			modifier = {
+				add = 3
+				NOT = { title:c_ile_de_france.holder.religion = religion:christianity_religion }
+			}
+		}
+	}
+	option = { #Denies
+		name = BP_roman_decisions.0001.b
+		
+		root.faith.religious_head = {
+			trigger_event = {
+				id = BP_roman_decisions.0003
+				days = { 3 10 }
+			}
+		}
+		
+		ai_chance = {
+			base = 4
+			
+			#Petioner Heritage effects
+			modifier = {
+				add = 10
+				scope:empire_petitoner = { has_cultural_pillar = heritage_iranian }
+			}
+			modifier = {
+				add = 10
+				scope:empire_petitoner = { has_cultural_pillar = heritage_turkic }
+			}
+			modifier = {
+				add = 10
+				scope:empire_petitoner = { has_cultural_pillar = heritage_mongolic }
+			}
+			#Status of Major Pagan Holdings
+			modifier = {
+				add = 3
+				title:c_paderborn.holder.religion = religion:christianity_religion
+			}
+		}
+	}
+}
+#The Pope grants the request
+BP_roman_decisions.0002 = {
+	type = character_event
+	title = BP_roman_decisions.0002.t
+	desc = BP_roman_decisions.0002.desc
+	theme = realm
+	
+	left_portrait = {
+		character = this
+		animation = personality_bold
+	}
+	
+	right_portrait = {
+		character = this.faith.religious_head
+		animation = admiration
+	}
+	
+	option = { #Awesome
+		name = BP_roman_decisions.0002.a
+		
+		#If there's an Eastern Emperor, get his opinion
+		if = {
+			limit = { exists = title:e_byzantium.holder }
+			title:e_byzantium.holder = { #Goes to Eastern Emperor
+				trigger_event = {
+					id = BP_roman_decisions.0004
+					days = { 3 10 }
+				}
+			}
+		}
+		#Otherwise, no one can contradict the Pope's proclaimation
+		else = { create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_wre } }
+	}
+}
+#The Pope denies the request
+BP_roman_decisions.0003 = {
+	type = character_event
+	title = BP_roman_decisions.0003.t
+	desc = BP_roman_decisions.0003.desc
+	theme = realm
+	
+	left_portrait = {
+		character = this
+		animation = anger
+	}
+	
+	right_portrait = {
+		character = this.faith.religious_head
+		animation = dismissal
+	}
+	
+	option = { #Darn
+		name = BP_roman_decisions.0003.a
+	}
+}
+#The Emperor hears the request
+BP_roman_decisions.0004 = {
+	type = character_event
+	title = BP_roman_decisions.0004.t
+	desc = BP_roman_decisions.0004.desc
+	theme = realm
+	
+	left_portrait = {
+		character = this
+		animation = personality_honorable
+	}
+	
+	option = { #Give him the title
+		name = BP_roman_decisions.0004.a
+		
+		scope:empire_petitoner = { #Inform of Approval
+			trigger_event = {
+				id = BP_roman_decisions.0005
+				days = { 3 10 }
+			}
+		}
+		
+		ai_chance = {
+			base = 1
+			
+			#Petioner Heritage effects
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_cultural_pillar = heritage_byzantine }
+			}
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_cultural_pillar = heritage_latin }
+			}
+			#Petioner Trait Effects
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_trait = roman_nostalgia }
+			}
+			modifier = {
+				add = 3
+				scope:empire_petitoner = { has_trait = zealous }
+			}
+			#Status of Major Christian Holdings (aka, if he's Emperor, he might fix this situation)
+			modifier = {
+				add = 3
+				NOT = { title:c_byzantion.holder.religion = religion:christianity_religion }
+			}
+			modifier = {
+				add = 3
+				NOT = { title:c_ile_de_france.holder.religion = religion:christianity_religion }
+			}
+		}
+	}
+	option = { #He's not a true emperor
+		name = BP_roman_decisions.0004.b
+		
+		scope:empire_petitoner = { #Inform of Disapproval
+			trigger_event = {
+				id = BP_roman_decisions.0006
+				days = { 3 10 }
+			}
+		}
+		
+		ai_chance = { base = 5 }
+	}
+}
+#The Emperor Approves the Request
+BP_roman_decisions.0005 = {
+	type = character_event
+	title = BP_roman_decisions.0005.t
+	desc = BP_roman_decisions.0005.desc
+	theme = realm
+	
+	left_portrait = {
+		character = this
+		animation = personality_honorable
+	}
+	
+	right_portrait = {
+		character = title:e_byzantium.holder
+		animation = admiration
+	}
+	
+	option = { #Create the WRE
+		name = BP_roman_decisions.0005.a
+		
+		create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_wre }
+		
+		#Inform people
+		every_player = { trigger_event = { id = BP_roman_decisions.0007 } }
+	}
+}
+#The Emperor Denies the Request
+BP_roman_decisions.0006 = {
+	type = character_event
+	title = BP_roman_decisions.0006.t
+	desc = BP_roman_decisions.0006.desc
+	theme = realm
+	
+	left_portrait = {
+		character = this
+		animation = anger
+	}
+	
+	right_portrait = {
+		character = title:e_byzantium.holder
+		animation = dismissal
+	}
+	
+	option = { #Darn
+		trigger = { scope:empire_petitoner = { has_variable = asked_for_wre } }
+		name = BP_roman_decisions.0006.a
+		
+		add_prestige = major_prestige_loss
+	}
+	
+	option = { #Create the HRE instead
+		trigger = { scope:empire_petitoner = { has_variable = asked_for_hre } }
+		name = BP_roman_decisions.0006.hre_instead
+		
+		create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_hre }
+		
+		#Inform people
+		every_player = { trigger_event = { id = BP_roman_decisions.0007 } }
+	}
+}
+#Announce the event to the whole world
+BP_roman_decisions.0007 = {
+	type = character_event
+	title = BP_roman_decisions.0007.t
+	desc = {
+		desc = BP_roman_decisions.0007.desc
+		first_valid = {
+			triggered_desc = { #Byzantium Approves
+				trigger = {
+					exists = title:e_byzantium.holder
+					scope:empire_petitoner.primary_title = title:e_wre
+				}
+				desc = BP_roman_decisions.0007.e_byzantium_approves
+			}
+			triggered_desc = { #Byzantium doesn't exist
+				trigger = {
+					NOT = { exists = title:e_byzantium.holder }
+					scope:empire_petitoner.primary_title = title:e_wre
+				}
+				desc = BP_roman_decisions.0007.e_byzantium_dead
+			}
+			triggered_desc = { #Byzantium Disapproves
+				trigger = {
+					exists = title:e_byzantium.holder
+					scope:empire_petitoner.primary_title = title:e_hre
+				}
+				desc = BP_roman_decisions.0007.e_byzantium_disapproves
+			}
+		}
+	}
+	theme = realm
+	
+	left_portrait = {
+		character = scope:empire_petitoner
+		animation = personality_bold
+	}
+	
+	immediate = {
+		scope:empire_petitoner.faith.religious_head = { save_scope_as = scoped_pope }
+		#Same-faith non-empire tier rulers are over-awed.
+		if = {
+			limit = {
+				exists = faith.religious_head
+				faith.religious_head = scope:empire_petitoner.faith.religious_head
+			}
+			play_music_cue = "mx_cue_epic_sacral_moment"
+		}
+		#Otherwise, this is a tacit statement of imperial threat.
+		else = { play_music_cue = "mx_cue_combat_2" }
+	}
+	
+	option = { #I See
+		name = BP_roman_decisions.0007.a
+	}
+}
+
+##################################################
+# Other Roman Empire Title Related Decisions
+##################################################
+
+#Sole Roman Empire
+BP_roman_decisions.0010 = { #WTWSMS id: imperial_legacy.10
+	title = BP_roman_decisions.0010.t
+	desc = BP_roman_decisions.0010.desc
+	type = character_event
+	theme = realm
+	
+	right_portrait = {
+		character = root
+		animation = personality_honorable
+	}
+	
+	option = {
+		name = BP_roman_decisions.0010.a
+		custom_tooltip = BP_roman_decisions.0010.a.tooltip
+	}
+}
+#Sole Roman Empire
+BP_roman_decisions.0011 = { #Cribbed from Vanilla roman_restoration.0001
+	type = character_event
+	title = roman_restoration.0001.t
+	desc = {
+		desc = roman_restoration.0001.desc.intro
+		first_valid = {
+			# Doing it as the Greeks.
+			triggered_desc = {
+				trigger = {
+					root.culture = culture:greek
+				}
+				desc = roman_restoration.0001.desc.greeks
+			}
+			# Doing it as somebody else.
+			triggered_desc = {
+				trigger = {
+					NOT = {
+						root.culture = culture:greek
+					}
+				}
+				desc = roman_restoration.0001.desc.other
+			}
+		}
+		first_valid = {
+			# Doing it as Christians.
+			triggered_desc = {
+				trigger = {
+					NOT = {
+						faith.religion = faith:hellenic_pagan.religion
+					}
+				}
+				desc = roman_restoration.0001.desc.christians
+			}
+			# Doing it as Hellenics
+			triggered_desc = {
+				trigger = {
+					faith.religion = faith:hellenic_pagan.religion
+				}
+				desc = roman_restoration.0001.desc.hellenics
+			}
+		}
+	}
+	theme = realm
+	left_portrait = {
+		character = scope:scoped_emperor
+		animation = personality_honorable
+	}
+
+	immediate = {
+		play_music_cue = "mx_cue_epic_sacral_moment"
+		save_scope_as = scoped_emperor
+		bp_create_roman_empire_scripted_effect = yes
+	}
+	option = {
+		name = roman_restoration.0001.a
+		set_nickname_effect = { NICKNAME = nick_the_glorious }
+		# Send narrative fluff to other players (if any).
+		every_player = {
+			limit = {
+				NOT = { this = root }
+				is_within_diplo_range = { CHARACTER = root }
+			}
+			trigger_event = roman_restoration.0002
+		}
+	}
+}
+
+##################################################
+# Senate Events
+##################################################
+BP_roman_decisions.0020 = { #The Senate Lives Again (CK2: SENATE.10005)
+	title = BP_roman_decisions.0020.t
+	desc = BP_roman_decisions.0020.desc
+	type = character_event
+	theme = realm
+	
+	left_portrait = {
+		character = scope:new_senate_head
+		animation = personality_honorable
+	}
+	
+	right_portrait = {
+		character = scope:emperor
+		animation = personality_honorable
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				this.culture = { has_ability_to_reform_rome_directly_trigger = yes }
+				has_government = bureaucratic_government
+				has_government = gubernatorial_government
+			}
+		}
+		name = BP_roman_decisions.0020.a
+	}
+	option = {
+		trigger = {
+			NOR = {
+				this.culture = { has_ability_to_reform_rome_directly_trigger = yes }
+				has_government = bureaucratic_government
+				has_government = gubernatorial_government
+			}
+		}
+		name = BP_roman_decisions.0020.b
+	}
+}
+
+##################################################
+# Partial Empire Reformation (WRE/ERE)
+##################################################
+
+#Empire Reformation
+BP_roman_decisions.0050 = { #WTWSMS id: imperial_legacy.11
+	title = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:requested_title = title:e_wre }
+				desc = BP_roman_decisions.0050.t.west
+			}
+			desc = BP_roman_decisions.0050.t.east
+		}
+	}
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:requested_title = title:e_wre }
+				desc = BP_roman_decisions.0050.desc.west
+			}
+			desc = BP_roman_decisions.0050.desc.east
+		}
+	}
+	type = character_event
+	theme = realm
+	
+	left_portrait = {
+		character = root
+		animation = personality_honorable
+	}
+	
+	immediate = {
+		create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_wre }
+		play_music_cue = "mx_cue_epic_sacral_moment"
+	}
+	
+	option = {
+		trigger = { scope:requested_title = title:e_wre }
+		name = BP_roman_decisions.0050.a
+		custom_tooltip = BP_roman_decisions.0050.a.tooltip.west
+		
+		add_prestige = 1000
+		
+		if = { #Inform the other empire
+			limit = { exists = scope:other_emperor }
+			scope:other_emperor = { trigger_event = { id = BP_roman_decisions.0051 } }
+		}
+		##### TODO (Beta): Inform the Catholic Pope
+	}
+	option = {
+		trigger = { scope:requested_title = title:e_byzantium }
+		name = BP_roman_decisions.0050.a
+		custom_tooltip = BP_roman_decisions.0050.a.tooltip.east
+		
+		add_prestige = 1000
+		
+		if = { #Inform the other empire
+			limit = { exists = scope:other_emperor }
+			scope:other_emperor = { trigger_event = { id = BP_roman_decisions.0051 } }
+		}
+		##### TODO (Beta): Inform the Catholic Pope
+	}
+}
+#The Eastern Emperor is informed
+BP_roman_decisions.0051 = { #WTWSMS id: imperial_legacy.12
+	title = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:requested_title = title:e_wre }
+				desc = BP_roman_decisions.0051.t.west
+			}
+			desc = BP_roman_decisions.0051.t.east
+		}
+	}
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:requested_title = title:e_wre }
+				desc = BP_roman_decisions.0051.desc.west
+			}
+			desc = BP_roman_decisions.0051.desc.east
+		}
+	}
+	type = character_event
+	theme = realm
+	
+	left_portrait = {
+		character = scope:asking_emperor
+		animation = personality_honorable
+	}
+	right_portrait = {
+		character = scope:other_emperor
+		animation = personality_honorable
+	}
+	
+	option = { #Recognize the new Emperor
+		name = {
+			text = {
+				first_valid = {
+					triggered_desc = {
+						trigger = { scope:requested_title = title:e_wre }
+						desc = BP_roman_decisions.0051.a.west
+					}
+					desc = BP_roman_decisions.0051.a.east
+				}
+			}
+		}
+		
+		custom_tooltip = BP_roman_decisions.0051.a.tooltip
+		
+		if = {
+			limit = { has_claim_on = title:e_roman_empire }
+			remove_claim = title:e_roman_empire
+		}
+		if = {
+			limit = { has_claim_on = title:e_wre }
+			remove_claim = title:e_wre
+		}
+		
+		scope:asking_emperor = { trigger_event = { id = BP_roman_decisions.0052 } }
+		
+		ai_chance = {
+			base = 10
+			#Don't do if ambitious or negative opinion, and reduced chance if arrogant
+			modifier = {
+				factor = 0
+				has_trait = ambitious
+			}
+			modifier = {
+				factor = 0
+				OR = {
+					opinion = {
+						target = title:e_wre.holder
+						value = {-100 -50}
+					}
+					has_relation_rival = title:e_wre.holder
+				}
+			}
+			modifier = {
+				factor = 0.5
+				has_trait = arrogant
+			}
+		}
+	}
+	option = { #Don't Recognize the new Emperor
+		name = BP_roman_decisions.0051.b
+		custom_tooltip = BP_roman_decisions.0051.b.tooltip
+		
+		set_global_variable = { name = ere_did_not_recognize_emperor }
+		
+		scope:asking_emperor = { trigger_event = { id = BP_roman_decisions.0053 } }
+		
+		ai_chance = {
+			base = 0
+			#Don't do if has claim to WRE/Roman Empire, or has a positive opinion
+			modifier = {
+				add = 10
+				has_claim_on = title:e_roman_empire
+				has_trait = ambitious
+			}
+			modifier = {
+				add = 5
+				has_claim_on = title:e_roman_empire
+				has_trait = arrogant
+			}
+			modifier = { #You Support your friends and lovers
+				factor = 0
+				OR = {
+					opinion = {
+						target = title:e_wre.holder
+						value = { 50 100 }
+					}
+					OR = {
+						has_relation_friend = title:e_wre.holder
+						has_relation_best_friend = title:e_wre.holder
+						has_relation_soulmate = title:e_wre.holder
+					}
+				}
+			}
+		}
+	}
+}
+#Other Emperor Approves!
+BP_roman_decisions.0052 = { #CK2 ID: imperial_legacy.13
+	title = BP_roman_decisions.0052.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:requested_title = title:e_wre }
+				desc = BP_roman_decisions.0052.desc.west
+			}
+			desc = BP_roman_decisions.0052.desc.east
+		}
+	}
+	
+	type = character_event
+	theme = realm
+	
+	left_portrait = {
+		character = scope:asking_emperor
+		animation = personality_bold
+	}
+	right_portrait = {
+		character = scope:other_emperor 
+		animation = personality_honorable
+	}
+	
+	option = {
+		name = BP_roman_decisions.0052.a
+		add_prestige = 100
+		
+		if = { #Inform the Nicene Pope
+			limit = { title:e_wre.holder.faith = faith:nicene }
+			title:d_papal_state.holder = { trigger_event = { id = BP_roman_decisions.0060 } }
+		}
+	}
+}
+#Other Emperor Disapproves!
+BP_roman_decisions.0053 = { #CK2 ID: imperial_legacy.14
+	title = BP_roman_decisions.0053.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:requested_title = title:e_wre }
+				desc = BP_roman_decisions.0053.desc.west
+			}
+			desc = BP_roman_decisions.0053.desc.east
+		}
+	}
+	
+	type = character_event
+	theme = realm
+	
+	left_portrait = {
+		character = scope:asking_emperor
+		animation = anger
+	}
+	right_portrait = {
+		character = scope:other_emperor 
+		animation = personality_rational
+	}
+	
+	option = {
+		name = BP_roman_decisions.0053.a
+		add_prestige = -100
+		
+		if = { #Inform the Nicene Pope if this is about Italy
+			limit = {
+				scope:requested_title = title:e_wre
+				title:e_wre.holder.faith = faith:nicene
+			}
+			title:d_papal_state.holder = { trigger_event = { id = BP_roman_decisions.0060 } }
+		}
+	}
+}
+
+### Religious Responses
+
+#Inform the Nicene Pope of the Roman Reformation
+BP_roman_decisions.0060 = { #WTWSMS id: imperial_legacy.15
+	title = GENERIC_STRING
+	desc = GENERIC_STRING
+	type = character_event
+	theme = realm
+	
+	option = { #Recognize the new ruler; should do unless hates the ruler
+		name = GENERIC_STRING
+		
+		#If the ERE didn't recognize, trigger the Great Schism!
+		if = {
+			limit = { has_global_variable = ere_did_not_recognize_emperor }
+			##### TODO (Beta): Trigger the Great Schism
+		}
+		
+		#Inform the WRE
+		title:e_wre.holder = { trigger_event = { id = BP_roman_decisions.0061 } }
+		
+		ai_chance = {
+			base = 10
+			
+			modifier = {
+				factor = 0
+				OR = {
+					opinion = {
+						target = title:e_wre.holder
+						value = {-100 -50}
+					}
+					has_relation_rival = title:e_wre.holder
+				}
+			}
+		}
+	}
+	
+	option = { #Don't recognize the new ruler; only do if hates the ruler
+		name = GENERIC_STRING
+		
+		#Inform the WRE
+		title:e_wre.holder = { trigger_event = { id = BP_roman_decisions.0062 } }
+		
+		ai_chance = {
+			base = 0
+			
+			modifier = {
+				add = 10
+				OR = {
+					opinion = {
+						target = title:e_wre.holder
+						value = {-100 -50}
+					}
+					has_relation_rival = title:e_wre.holder
+				}
+			}
+		}
+	}
+}
+#Nicene Pope Approves!
+BP_roman_decisions.0061 = { #CK2 ID: imperial_legacy.16
+	title = BP_roman_decisions.0061.t
+	desc = BP_roman_decisions.0061.desc
+	type = character_event
+	theme = faith
+	
+	left_portrait = {
+		character = scope:asking_emperor
+		animation = happiness
+	}
+	right_portrait = {
+		character = title:d_papal_state.holder
+		animation = happiness
+	}
+	
+	option = {
+		name = BP_roman_decisions.0061.a
+		add_piety = 100
+	}
+}
+#Nicene Pope Disapproves!
+BP_roman_decisions.0062 = { #CK2 ID: imperial_legacy.17
+	title = BP_roman_decisions.0062.t
+	desc = BP_roman_decisions.0062.desc
+	type = character_event
+	theme = faith
+	
+	left_portrait = {
+		character = scope:asking_emperor
+		animation = anger
+	}
+	right_portrait = {
+		character = title:d_papal_state.holder
+		animation = dismissal
+	}
+	
+	option = {
+		name = BP_roman_decisions.0062.a
+		add_piety = -100
+	}
+	##### TODO (Beta): Add option b when toppeling religious rulers is an option
+}
+##### TODO (Beta): d_orthodox holder events
+
+##################################################
+# Minor Events
+##################################################
+
+#1000-1100: Chariot Races
+
+#Chariot Race (From CK2)
+BP_roman_decisions.1000 = { #CK2 ID: WtWSMS_flavour.53
+	title = BP_roman_decisions.1000.t
+	desc = BP_roman_decisions.1000.desc
+	type = character_event
+	theme = party
+	
+	right_portrait = {
+		character = root
+		animation = happiness
+	}
+	
+	option = { name = BP_roman_decisions.1000.a }
+}
