@@ -3,13 +3,11 @@
         file_text = f.readlines()
     #Count instances of item
     item_total_instances = []
-    item_instance_inds = []
     for item in item_list:
         total_instances = 0
         for line in file_text:
             if ('p>'+item+'</p') in line:
                 total_instances+=1
-                item_instance_inds = line
         item_total_instances.append(total_instances)
     #Clean up item instances
     for item_ind in range(len(item_list)):
@@ -32,11 +30,15 @@
 #TODO: Replace hard-coding with querying table files
 creeds = ['Chalcedonian Creed',\
           'Miaphysite Creed',\
-          'Eastern Creed']
+          'Eastern Creed',\
+          'Arian Creed']
 groups = ['Western Dyophysites',\
           'Miaphysites',\
-          'Eastern Dyophysites']
-shared_hof = ['Roman Patriarch',\
+          'Eastern Dyophysites',\
+          'Arians',\
+          'Monophysites',\
+          'Gnostics']
+shared_hof = ['Roman Patriarchate',\
               'Patriarch of Alexandria',\
               'Apostolic Church']
 

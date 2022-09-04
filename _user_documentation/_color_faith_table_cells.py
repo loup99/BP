@@ -14,7 +14,17 @@
               ('Armenian Church',[0.8,0.4,0.1]),\
               ('Aghwank Church',[0.8,0.6,0.5]),\
               ('Georgian Church',[0.0,0.45,0.9]),\
-              ('Eastern Syriac Church',[0.8,0.3,0.5])]
+              ('Eastern Syriac Church',[0.8,0.3,0.5]),\
+              ('Arianism',[0.2,0.1,0.1]),\
+              ('Gothic Church',[0.2,0.1,0.0]),\
+              ('Pneumatomachi',[0.1,0.1,0.1]),\
+              ('Monophysitism',[0.45,0.45,0.65]),\
+              ('Apollinarism',[0.3,0.3,0.75]),\
+              ('Eutychianism',[0.97,0.73,0.14]),\
+              ('Monarchianism',[0.7,0.7,0.7]),\
+              ('Marcionism',[0.7,0.1,0.4]),\
+              ('Melchisdechianism',[1.0,0.5,0.7]),\
+              ('Paulicianism',[0.6,0.1,0.4])]
 
 make_hex = lambda x : str(hex(round(255*x))).replace('0x','').zfill(2)
 make_color = lambda x : make_hex(x[0])+make_hex(x[1])+make_hex(x[2])
