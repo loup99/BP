@@ -41,10 +41,13 @@ faith_list = [('Chalcedonianism',[0.65,0.65,0.37]),\
               ('Paulicianism',[0.6,0.1,0.4])]
 apply_color('Faith.html',faith_list)
 
-culture_list = [('Cappadocian',[0.43,0.1,0.15]),\
+culture_list = [\
+                #Balko-Anatolian
+                ##Anatolian
+                ('Cappadocian',[0.43,0.1,0.15]),\
                 ('Isaurian',[0.35,0.25,0.5]),\
                 ('Phrygian',[0.35,0.55,0.85]),\
-                #Byzantine
+                ##Byzantine
                 ('Greek',[0.8,0.3,0.8]),\
                 ('Pontic',[0.35,0.2,0.6]),\
                 ('Helleno-Libyan',[0.70,0.20,0.90]),\
@@ -56,7 +59,7 @@ culture_list = [('Cappadocian',[0.43,0.1,0.15]),\
                 ('Tsakonian',[0.40,0.0,0.0]),\
                 ('Aeolian',[0.8,0.2,0.2]),\
                 ('Massalian',[0.1,0.8,0.4]),\
-                #Caucasian
+                ##Caucasian
                 ('Armenian',[0.5,0.2,0.5]),\
                 ('Colchiscan',[0.6,0.3,0.8]),\
                 ('Georgian',[0.0,0.3,0.9]),\
@@ -66,11 +69,18 @@ culture_list = [('Cappadocian',[0.43,0.1,0.15]),\
                 ('Abaza',[0.75,0.55,0.75]),\
                 ('Adyghes',[0.6,0.3,0.8]),\
                 ('Corduenian',[0.0,0.08,0.4]),\
-                #Proto-Carpathian
+                ##Proto-Carpathian
                 ('Thracian',[0.5,0.810,0.85]),\
                 ('Illyrian',[0.45,0.35,0.65]),\
                 ('Dacian',[0.35,0.26,0.17]),\
                 ('Macedonian',[0.7,0.5,0.5]),\
                 \
+                #Balto-Slavic
+                ##Baltic
+                ('Prussian',[0.56,0.55,0.4]),\
+                ('Galindian',[0.56,0.55,0.2]),\
+                ('Aesti',[0.66,0.55,0.2]),\
+                ('Przeworsk',[0.6,0.4,0.2]),\
+                ('Vistula Veneti',[0.6,0.6,0.1]),\
                 ]
 apply_color('Culture.html',culture_list)
