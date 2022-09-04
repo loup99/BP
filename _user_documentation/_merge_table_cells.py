@@ -48,7 +48,8 @@ update_html_file(faith_fname,groups)
 update_html_file(faith_fname,shared_hof)
 
 heritages = ['Anatolian_Heritage',\
-             'Byzantine_Heritage']
+             'Byzantine_Heritage',\
+             'Caucasian_Heritage']
 
 culture_fname = 'Culture.html'
 update_html_file(culture_fname,heritages)

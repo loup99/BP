@@ -44,6 +44,7 @@ apply_color('Faith.html',faith_list)
 culture_list = [('Cappadocian',[0.43,0.1,0.15]),\
                 ('Isaurian',[0.35,0.25,0.5]),\
                 ('Phrygian',[0.35,0.55,0.85]),\
+                #Byzantine
                 ('Greek',[0.8,0.3,0.8]),\
                 ('Pontic',[0.35,0.2,0.6]),\
                 ('Helleno-Libyan',[0.70,0.20,0.90]),\
@@ -54,5 +55,15 @@ culture_list = [('Cappadocian',[0.43,0.1,0.15]),\
                 ('Spartan_Culture',[1.0,0.4,0.4]),\
                 ('Tsakonian',[0.40,0.0,0.0]),\
                 ('Aeolian',[0.8,0.2,0.2]),\
-                ('Massalian',[0.1,0.8,0.4])]
+                ('Massalian',[0.1,0.8,0.4]),\
+                #Caucasian
+                ('Armenian',[0.5,0.2,0.5]),\
+                ('Colchiscan',[0.6,0.3,0.8]),\
+                ('Georgian',[0.0,0.3,0.9]),\
+                ('Lazic',[0.6,0.3,0.8]),\
+                ('Aghwank',[0.7,0.5,0.5]),\
+                ('Nakh',[0.7,0.5,0.5]),\
+                ('Abaza',[0.75,0.55,0.75]),\
+                ('Adyghes',[0.6,0.3,0.8]),\
+                ('Corduenian',[0.0,0.08,0.4])]
 apply_color('Culture.html',culture_list)
