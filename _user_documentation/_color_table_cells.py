@@ -65,5 +65,12 @@ culture_list = [('Cappadocian',[0.43,0.1,0.15]),\
                 ('Nakh',[0.7,0.5,0.5]),\
                 ('Abaza',[0.75,0.55,0.75]),\
                 ('Adyghes',[0.6,0.3,0.8]),\
-                ('Corduenian',[0.0,0.08,0.4])]
+                ('Corduenian',[0.0,0.08,0.4]),\
+                #Proto-Carpathian
+                ('Thracian',[0.5,0.810,0.85]),\
+                ('Illyrian',[0.45,0.35,0.65]),\
+                ('Dacian',[0.35,0.26,0.17]),\
+                ('Macedonian',[0.7,0.5,0.5]),\
+                \
+                ]
 apply_color('Culture.html',culture_list)
