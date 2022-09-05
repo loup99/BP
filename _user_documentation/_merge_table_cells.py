@@ -52,7 +52,8 @@ heritages = ['Anatolian_Heritage',\
              'Caucasian_Heritage',\
              'Proto-Carpathian_Heritage',\
              #Balto-Slavic
-             'Baltic_Heritage']
+             'Baltic_Heritage',\
+             'East Slavic_Heritage']
 
 culture_fname = 'Culture.html'
 update_html_file(culture_fname,heritages)

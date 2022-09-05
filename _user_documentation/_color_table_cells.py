@@ -82,5 +82,7 @@ culture_list = [\
                 ('Aesti',[0.66,0.55,0.2]),\
                 ('Przeworsk',[0.6,0.4,0.2]),\
                 ('Vistula Veneti',[0.6,0.6,0.1]),\
+                ##East Slavic
+                ('Old Slavic',[0.35,0.5,0.30])\
                 ]
 apply_color('Culture.html',culture_list)
