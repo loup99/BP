@@ -41,8 +41,9 @@ bp_game_start_after_lobby = {
 		set_starting_culture_acceptance
 		#Other Events
 		trigger_needed_events
-		#Set Global Variables
 		set_global_variables
+		delay = { days = 1 }
+		fix_custom_character_governments
 	}
 }
 
@@ -1514,6 +1515,126 @@ set_global_variables = {
 		if = { #Justinian Ascends the Throne (enabling reconquests)
 			limit = { current_date >= 527.4.1 }
 			set_global_variable = sole_roman_empire
+		}
+	}
+}
+
+fix_custom_character_governments = {
+	effect = {
+		every_ruler = {
+			limit = { is_from_ruler_designer = yes }
+			this = { save_temporary_scope_as = the_holder }
+			this.primary_title.previous_holder = { save_temporary_scope_as = the_previous_holder }
+			
+			if = {
+				limit = { NOT = { exists = this.primary_title.previous_holder } }
+				debug_log = "ERROR: DID NOT FIND PREVIOUS HOLDER FOR CUSTOM RULER"
+			}
+			
+			#Primitive Governments (can hold tribal_holding)
+			if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_tribal_government }
+					}
+				}
+				convert_realm_to_tribal_effect = yes
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_nomad_government }
+					}
+				}
+				convert_realm_to_nomad_effect = yes
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_high_tribal_government }
+					}
+				}
+				convert_realm_to_high_tribal_effect = yes
+			}
+			#Intermediate Governments (prefeudal/feudal/clan)
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_prefeudal_government }
+					}
+				}
+				convert_realm_to_prefeudal_effect = yes
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_feudal_government }
+					}
+				}
+				convert_realm_to_feudal_effect = yes
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_clan_government }
+					}
+				}
+				convert_realm_to_clan_effect = yes
+			}
+			#Advanced Governments
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_subroman_government }
+					}
+				}
+				convert_realm_to_subroman_effect = { THE_PREVIOUS_HOLDER = scope:the_previous_holder }
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_eranshar_government }
+					}
+				}
+				convert_realm_to_eranshar_effect = yes
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_gupta_government }
+					}
+				}
+				convert_realm_to_gupta_effect = yes
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_bureaucratic_government }
+					}
+				}
+				convert_realm_to_bureaucratic_just_ruler_effect = yes
+			}
+			else_if = {
+				limit = {
+					scope:the_previous_holder = {
+						has_variable = government_id
+						var:government_id = { compare_value = id_gubernatorial_government }
+					}
+				}
+				convert_realm_to_gubernatorial_effect = yes
+			}
+			#OTHERS
+			else = { debug_log = "ERROR: DID NOT FIND government_id VALUE FOR CUSTOM RULER PREVIOUS HOLDER" }
 		}
 	}
 }
