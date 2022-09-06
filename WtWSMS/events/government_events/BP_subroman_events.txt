@@ -16,6 +16,9 @@ scripted_trigger basic_character_requirements_trigger = {
 	has_government = subroman_government
 	primary_title = { tier > tier_barony }
 }
+scripted_trigger does_not_have_max_feudal_transition = {
+	NOT = { has_realm_law = subroman_feudal_transition_9 }
+}
 
 ###############################
 # Initial Sub-Roman Events
@@ -64,7 +67,6 @@ BP_subroman_events.0010 = {
 				trigger = { ROOT = { has_realm_law = subroman_taxation_1 } }
 				desc = BP_subroman_events.0010.desc_a_1
 			}
-			
 		}
 		desc = BP_subroman_events.0010.desc_b
 	}
@@ -185,7 +187,7 @@ BP_subroman_events.0011 = {
 		ai_chance = { factor = 1000 }
 	}
 }
-#Liege recieves the request
+#Liege receives the request
 BP_subroman_events.0012 = {
 	type = letter_event
 	opening = BP_subroman_events.0012.opening
@@ -263,6 +265,8 @@ BP_subroman_events.0014 = {
 # Crises
 # ids 0020-0029
 ###############################
+
+#NB: As these are crises, they should NOT depend on the recent_subroman_transition character_flag
 BP_subroman_events.0020 = {
 	type = character_event
 	title = BP_subroman_events.0020.title
@@ -272,6 +276,7 @@ BP_subroman_events.0020 = {
 		basic_game_requirements_trigger = yes
 		ROOT = {
 			basic_character_requirements_trigger = yes
+			does_not_have_max_feudal_transition = yes
 			is_at_war = yes
 			any_sub_realm_county = { county_control < 50 } #Substitute for CK2 devastated_war modifier
 			any_character_war = { war_days >= 1825 } #Been at war for at least 5 years
@@ -332,8 +337,10 @@ BP_subroman_events.0030 = {
 		basic_game_requirements_trigger = yes
 		ROOT = {
 			basic_character_requirements_trigger = yes
+			does_not_have_max_feudal_transition = yes
 			number_of_maa_regiments <= 4 #Port from CK2
 			army_size_trigger = yes
+			NOT = { has_character_flag = recent_subroman_transition }
 		}
 		ROOT.primary_title = { NOT = { has_variable = landed_army } }
 	}
@@ -354,6 +361,7 @@ BP_subroman_events.0030 = {
 			#Propagates down the realm tree
 			increase_feudal_transition_effect = { CHAR = ROOT }
 			ROOT.primary_title = { set_variable = { name = landed_army } }
+			ROOT = { add_character_flag = { flag = recent_subroman_transition years = 10 } }
 		}
 	}
 }
@@ -391,7 +399,7 @@ scripted_trigger a_military_oriented_vassal = {
 
 scripted_trigger at_least_five_military_oriented_vassals_trigger = {
 	any_vassal = {
-		count = 5
+		count >= 5
 		a_military_oriented_vassal = yes
 	}
 }
@@ -406,7 +414,9 @@ BP_subroman_events.0040 = {
 		basic_game_requirements_trigger = yes
 		ROOT = {
 			basic_character_requirements_trigger = yes
+			does_not_have_max_feudal_transition = yes
 			at_least_five_military_oriented_vassals_trigger = yes
+			NOT = { has_character_flag = recent_subroman_transition }
 		}
 		ROOT.primary_title = { NOT = { has_variable = changed_military_cultural_values } }
 	}
@@ -437,6 +447,7 @@ BP_subroman_events.0040 = {
 			#Propagates down the realm tree
 			increase_feudal_transition_effect = { CHAR = ROOT }
 			ROOT.primary_title = { set_variable = { name = changed_military_cultural_values } }
+			ROOT = { add_character_flag = { flag = recent_subroman_transition years = 10 } }
 		}
 	}
 }
@@ -475,7 +486,7 @@ scripted_trigger a_clergy_oriented_vassal = {
 
 scripted_trigger at_least_five_clergy_oriented_vassals_trigger = {
 	any_vassal = {
-		count = 5
+		count >= 5
 		a_clergy_oriented_vassal = yes
 	}
 }
@@ -491,6 +502,8 @@ BP_subroman_events.0050 = {
 		ROOT = {
 			basic_character_requirements_trigger = yes
 			at_least_five_clergy_oriented_vassals_trigger = yes
+			does_not_have_max_feudal_transition = yes
+			NOT = { has_character_flag = recent_subroman_transition }
 		}
 		ROOT.primary_title = { NOT = { has_variable = changed_ecclesiastic_cultural_values } }
 	}
@@ -521,6 +534,7 @@ BP_subroman_events.0050 = {
 			#Propagates down the realm tree
 			increase_feudal_transition_effect = { CHAR = ROOT }
 			ROOT.primary_title = { set_variable = { name = changed_ecclesiastic_cultural_values } }
+			ROOT = { add_character_flag = { flag = recent_subroman_transition years = 10 } }
 		}
 	}
 }
@@ -612,6 +626,7 @@ BP_subroman_events.0060 = {
 	trigger = {
 		basic_game_requirements_trigger = yes
 		meets_transition_date_requirements = yes
+		NOT = { has_character_flag = recent_subroman_transition }
 	}
 	
 	theme = default
@@ -631,11 +646,11 @@ BP_subroman_events.0060 = {
 			}
 			if = {
 				limit = { has_variable = changed_military_cultural_values }
-				remove_variable = landed_army
+				remove_variable = changed_military_cultural_values
 			}
 			if = {
 				limit = { has_variable = changed_ecclesiastic_cultural_values }
-				remove_variable = landed_army
+				remove_variable = changed_ecclesiastic_cultural_values
 			}
 		}
 		convert_realm_to_feudal_effect = yes
