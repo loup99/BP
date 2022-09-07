@@ -38,7 +38,10 @@ faith_list = [('Chalcedonianism',[0.65,0.65,0.37]),\
               ('Monarchianism',[0.7,0.7,0.7]),\
               ('Marcionism',[0.7,0.1,0.4]),\
               ('Melchisdechianism',[1.0,0.5,0.7]),\
-              ('Paulicianism',[0.6,0.1,0.4])]
+              ('Paulicianism',[0.6,0.1,0.4]),\
+              ('Messalianism',[0.6,0.1,0.4]),\
+              ('Adamites',[0.6,0.8,0.6]),\
+              ('Antinomianism',[0.1,0.1,0.0])]
 apply_color('Faith.html',faith_list)
 
 culture_list = [\
