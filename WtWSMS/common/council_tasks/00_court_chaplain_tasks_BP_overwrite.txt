@@ -253,13 +253,39 @@ task_conversion = {
 				desc = minimum_conversion
 			}
 		}
+		### Minority Stuff ###
+		
+		# Because the task needs to complete 3 times with the minority system
+		multiply = 3
+		
+		if = {
+			limit = { scope:county.faith = scope:councillor_liege.faith }
+			multiply = {
+				value = 0.5
+				desc = converting_minority_desc
+			}
+		}
+		### End Minority Stuff ###
 	}
 	##### Changed from Vanilla ^^^^^
 
 	##### Changed from Vanilla vvvvv
 	potential_county = {
 		scope:county = {
-			NOT = { faith = scope:councillor.faith }
+			### Minority stuff ###
+			scope:councillor_liege = { has_realm_law_flag = may_convert_faith }
+			trigger_if = {
+				limit = { faith = scope:councillor_liege.faith }
+				trigger_if = {
+					limit = { county_has_astray_or_worse_minority_faith_trigger = { FAITH = scope:councillor.faith } }
+					custom_tooltip = {
+						text = "not_has_expel_minorities_unlocked"
+						scope:councillor_liege = { has_realm_law_flag = unlock_expel_religious_minorities }
+					}
+				}
+				trigger_else = { NOT = { faith = scope:councillor_liege.faith } }
+			}
+			### End Minority stuff ###
 			trigger_if = {
 				limit = {
 					scope:councillor_liege = { has_variable = hold_court_8120_religion_block }
@@ -541,21 +567,23 @@ task_conversion = {
 	}
 	##### Changed from Vanilla ^^^^^
 
+	##### Changed from Vanilla vvvvv
 	on_finish_task_county = {
 		scope:county = {
-			set_county_faith = scope:councillor.faith
-		}
-		if = {
-			limit = {
-				scope:councillor = {
-					has_council_position = councillor_court_chaplain
-				}
+			if = {
+				limit = { scope:county.faith = scope:councillor.faith }
+				demote_random_faith_minority_effect = yes
 			}
-			scope:councillor = {
-				start_default_task = yes
+			else = {
+				promote_faith_minority_effect = { FAITH = scope:councillor.faith }
+				if = {
+					limit = { scope:county.faith = scope:councillor.faith }
+					scope:councillor = { start_default_task = yes }
+				}
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	monthly_on_action = task_convert_side_effects
 
