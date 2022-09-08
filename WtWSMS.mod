@@ -1,6 +1,6 @@
 name = "WtWSMS"
 version = "0.1.0"
-supported_version = "1.6.1.2"
+supported_version = "1.7.0"
 path = "mod/WtWSMS"
 replace_path="history/characters"
 replace_path="history/cultures"
