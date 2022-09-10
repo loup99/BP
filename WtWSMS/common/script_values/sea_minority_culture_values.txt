@@ -14,42 +14,136 @@
 	}
 }
 ##### Changed from Vanilla vvvvv
+
+#Generic values
+majority_province_support_value = 25
+large_minority_support_value = 2
+large_minority_cost_value = 4
+small_minority_support_value = 1
+small_minority_cost_value = 2
+#Other Script Values
+#County Scope
 minority_capacity_of_county = {
 		# Every county can support minorities as a function of its development; We will utilize the Lucas
 		# Sequence Vn(1,−1) [the Lucas Numbers, a series related to the Fibonacci sequence]
 		# 1, 3, 4, 7, 11, 18, 29, 47, 76 ...
 	value = 1
 	if = {
-		limit = { scope:the_county.title_province = { NOT = { has_holding_type = tribal_holding } } }
-		if = { limit = { scope:the_county.development_level >= 04 } add = 1 }
-		if = { limit = { scope:the_county.development_level >= 07 } add = 1 }
-		if = { limit = { scope:the_county.development_level >= 11 } add = 1 }
-		if = { limit = { scope:the_county.development_level >= 18 } add = 1 }
-		if = { limit = { scope:the_county.development_level >= 29 } add = 1 }
-		if = { limit = { scope:the_county.development_level >= 47 } add = 1 }
-		if = { limit = { scope:the_county.development_level >= 76 } add = 1 }
+		limit = { this = { any_province = { NOT = { has_holding_type = tribal_holding } } } }
+		if = { limit = { this.development_level >= 04 } add = 1 }
+		if = { limit = { this.development_level >= 07 } add = 1 }
+		if = { limit = { this.development_level >= 11 } add = 1 }
+		if = { limit = { this.development_level >= 18 } add = 1 }
+		if = { limit = { this.development_level >= 29 } add = 1 }
+		if = { limit = { this.development_level >= 47 } add = 1 }
+		if = { limit = { this.development_level >= 76 } add = 1 }
 	}
 }
-number_of_faith_minorities_in_county = {
+#Culture Scope
+support_of_a_cultural_minority_in_county = {
+	this = { save_temporary_scope_as = the_culture }
 	value = 0
+	#Determine how much is needed to feed this minority
 	if = {
-		limit = { scope:the_county = { has_variable_list = faith_minorities_small } }
-		scope:the_county = { every_in_list = { variable = faith_minorities_small add = 1 } }
+		limit = {
+			scope:the_county = {
+				has_variable_list = culture_minorities_large
+				is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
+			}
+		}
+		subtract = large_minority_cost_value
 	}
 	if = {
-		limit = { scope:the_county = { has_variable_list = faith_minorities_large } }
-		scope:the_county = { every_in_list = { variable = faith_minorities_large add = 2 } }
+		limit = {
+			scope:the_county = {
+				has_variable_list = culture_minorities_small
+				is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
+			}
+		}
+		subtract = small_minority_cost_value
 	}
+	#Determine how much is supporting this minority
+	if = {
+		limit = { scope:the_county = { any_neighboring_county = { this.culture = scope:the_culture } } }
+		add = majority_province_support_value
+	}
+	if = {
+		limit = {
+			scope:the_county = {
+				any_neighboring_county = {
+					has_variable_list = culture_minorities_large
+					is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
+				}
+			}
+		}
+		add = large_minority_support_value
+	}
+	if = {
+		limit = {
+			scope:the_county = {
+				any_neighboring_county = {
+					has_variable_list = culture_minorities_small
+					is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
+				}
+			}
+		}
+		add = small_minority_support_value
+	}
+	#Certain traditions bolster score
+	if = { #Colonizers/Hellenizers: Equivalent to having a large minority next to you
+		limit = {
+			this = {
+				OR = {
+					has_cultural_tradition = tradition_colonizers
+					has_cultural_tradition = tradition_colonizers_non_dlc
+					has_cultural_tradition = tradition_hellenizers
+					has_cultural_tradition = tradition_hellenizers_non_dlc
+				}
+			}
+		}
+		add = large_minority_support_value
+	}
+	if = { #Romance/Hellenic Culture: Equivalent to having a small minority next to you
+		limit = {
+			this = {
+				OR = {
+					has_cultural_tradition = tradition_romance_culture
+					has_cultural_tradition = tradition_romance_culture_non_dlc
+					has_cultural_tradition = tradition_hellenic_culture
+					has_cultural_tradition = tradition_hellenic_culture_non_dlc
+				}
+			}
+		}
+		add = small_minority_support_value
+	}
+	if = { #Diasporic cultures are equivalent to always being next to a majority province
+		limit = { this = { has_cultural_tradition = tradition_diasporic } }
+		add = majority_province_support_value
+	}
+	multiply = -1.00
 }
+#County Scope
 number_of_culture_minorities_in_county = {
 	value = 0
 	if = {
-		limit = { scope:the_county = { has_variable_list = culture_minorities_small } }
-		scope:the_county = { every_in_list = { variable = culture_minorities_small add = 1 } }
+		limit = { this = { has_variable_list = culture_minorities_small } }
+		this = { every_in_list = { variable = culture_minorities_small add = 1 } }
 	}
 	if = {
-		limit = { scope:the_county = { has_variable_list = culture_minorities_large } }
-		scope:the_county = { every_in_list = { variable = culture_minorities_large add = 2 } }
+		limit = { this = { has_variable_list = culture_minorities_large } }
+		this = { every_in_list = { variable = culture_minorities_large add = 2 } }
+	}
+}
+#County Scope
+number_of_faith_minorities_in_county = {
+	value = 0
+	if = {
+		limit = { this = { has_variable_list = faith_minorities_small } }
+		this = { every_in_list = { variable = faith_minorities_small add = 1 } }
+	}
+	if = {
+		limit = { this = { has_variable_list = faith_minorities_large } }
+		this = { every_in_list = { variable = faith_minorities_large add = 2 } }
 	}
 }
 ##### Changed from Vanilla ^^^^^
