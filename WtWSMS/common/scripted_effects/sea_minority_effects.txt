@@ -219,8 +219,8 @@ demote_random_culture_minority_effect = {
 county_to_county_culture_faith_migration_effect = {
 	scope:source_county = {
 		if = {
-			any_title_to_title_neighboring_county = {
-				limit = {
+			limit = {
+				any_title_to_title_neighboring_county = {
 					OR = {
 						NOT = { faith = scope:source_county.faith }
 						NOT = { culture = scope:source_county.culture }
@@ -574,3 +574,194 @@ notify_recipient_of_culture_migration_effect = {
 		}
 	}
 }
+
+##### Changed from Vanilla vvvvv
+
+# scope:county
+# $CULTURE$
+promote_culture_minority_but_not_to_majority_effect = {
+	if = {
+		limit = { scope:county.culture = $CULTURE$ }
+		# failsafe because this should never happen
+	}
+	else_if = {
+		limit = {
+			has_variable_list = culture_minorities_small
+			is_target_in_variable_list = {
+				name = culture_minorities_small
+				target = $CULTURE$
+			}
+		}
+		add_to_variable_list = {
+			name = culture_minorities_large
+			target = $CULTURE$
+		}
+		remove_list_variable = {
+			name = culture_minorities_small
+			target = $CULTURE$
+		}
+	} 
+	#Large minorities should not become majorities
+	else = {
+		add_to_variable_list = {
+			name = culture_minorities_small
+			target = $CULTURE$
+		}
+	}
+}
+# scope:the_county
+county_to_county_culture_migration_effect = {
+	scope:the_county = {
+		if = {
+			limit = {
+				any_title_to_title_neighboring_county = {
+					OR = {
+						NOT = { faith = scope:the_county.faith }
+						NOT = { culture = scope:the_county.culture }
+					}
+				}
+			}
+			random_neighboring_county = {
+				limit = {
+					OR = {
+						NOT = { faith = scope:the_county.faith }
+						NOT = { culture = scope:the_county.culture }
+					}
+				}
+				save_scope_as = county
+				if = {
+					limit = { NOT = { culture = scope:the_county.culture } }
+					promote_culture_minority_but_not_to_majority_effect = { CULTURE = scope:the_county.culture }
+				}
+				notify_characters_of_culture_or_faith_migration_effect = yes
+			}
+		}
+	}
+}
+# scope:county
+# $FAITH$
+promote_faith_minority_but_not_to_majority_effect = {
+	if = {
+		limit = { scope:county.faith = $FAITH$ }
+		# failsafe because this should never happen
+	}
+	else_if = {
+		limit = {
+			has_variable_list = faith_minorities_small
+			is_target_in_variable_list = {
+				name = faith_minorities_small
+				target = $FAITH$
+			}
+		}
+		add_to_variable_list = {
+			name = faith_minorities_large
+			target = $FAITH$
+		}
+		remove_list_variable = {
+			name = faith_minorities_small
+			target = $FAITH$
+		}
+	}
+	else_if = {
+		limit = {
+			has_variable_list = faith_minorities_large
+			is_target_in_variable_list = {
+				name = faith_minorities_large
+				target = $FAITH$
+			}
+		}
+		remove_list_variable = {
+			name = faith_minorities_large
+			target = $FAITH$
+		}
+		add_to_variable_list = {
+			name = faith_minorities_large
+			target = scope:county.faith
+		}
+
+		set_county_faith = $FAITH$
+	}
+	else = {
+		add_to_variable_list = {
+			name = faith_minorities_small
+			target = $FAITH$
+		}
+	}
+}
+# scope:the_county
+county_to_county_faith_migration_effect = {
+	scope:the_county = {
+		if = {
+			limit = {
+				any_title_to_title_neighboring_county = {
+					OR = {
+						NOT = { faith = scope:the_county.faith }
+						NOT = { culture = scope:the_county.culture }
+					}
+				}
+			}
+			random_neighboring_county = {
+				limit = {
+					OR = {
+						NOT = { faith = scope:the_county.faith }
+						NOT = { culture = scope:the_county.culture }
+					}
+				}
+				save_scope_as = county
+				if = {
+					limit = { NOT = { culture = scope:the_county.culture } }
+					promote_faith_minority_but_not_to_majority_effect = { FAITH = scope:the_county.faith }
+				}
+				notify_characters_of_culture_or_faith_migration_effect = yes
+			}
+		}
+	}
+}
+
+notify_characters_of_culture_or_faith_migration_effect = {
+	scope:the_county.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = {
+				limit = { is_ai = no }
+				add_to_temporary_list = characters_to_notify
+			}
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = scope:the_county }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+
+	scope:county.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = {
+				limit = { is_ai = no }
+				add_to_temporary_list = characters_to_notify
+			}
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = scope:county }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+
+	every_in_local_list = {
+		list = characters_to_notify
+
+		send_interface_toast = {
+			type = event_generic_neutral
+			title = minority_culture_faith_spread_title
+			custom_tooltip = minority_culture_faith_spread_tt
+			right_icon = scope:county
+		}
+	}
+}
+##### Changed from Vanilla ^^^^^
