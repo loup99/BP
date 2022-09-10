@@ -14,48 +14,42 @@ three_year_playable_pulse = {
 
 on_yearly_sea_minority_maintainance = {
 	effect = {
-		# Normal culture/faith spread
-		every_county = {
-			save_scope_as = source_county
-			random = {
-				chance = 3
-				trigger_event = {
-					days = { 1 360 }
-					on_action = do_culture_faith_migration
-				}
-			}
-		}
-
-		# Minority Culture/Faith spread/growth/decline
-		#
+		#### Minority Culture/Faith spread/growth/decline ####
+		#=====================================================
 		# Difference from "Cultural and Religious Minorities" is that we utilize quasi-cellular automata
 		# rules similar to "Conway's Game of Life" to provide a marginally better model in which
 		# cultures will not spread out overly far from existing concentrations of minorities.
 		#
 		#### How many minorities per county? ####
+		#----------------------------------------
 		# Every county can support minorities as a function of its development; We will utilize the Lucas
 		# Sequence Vn(1,−1) [the Lucas Numbers, a series related to the Fibonacci sequence]
 		#
-		# 3, 4, 7, 11, 18, 29, 47, 76 ...
+		# 1, 3, 4, 7, 11, 18, 29, 47, 76 ...
 		#
-		# 04: 1 minority
-		# 07: 2 minorities
-		# 11: 3 minorities
-		# 18: 4 minorities
-		# 29: 5 minorities
-		# 47: 6 minorities
-		# 76: 7 minorities
+		# 01: 1 minority
+		# 04: 2 minorities
+		# 07: 3 minorities
+		# 11: 4 minorities
+		# 18: 5 minorities
+		# 29: 6 minorities
+		# 47: 7 minorities
+		# 76: 8 minorities
 		#
-		# We will assign a "small" minority a size of 1 and a large minority a size of 2. So development
-		# (urbanization) allows for greater minority presence. Note that this count is separate for faiths
-		# and religions.
+		# NB: Each list of culture and faith minorities will be kept separate
+		#
+		# We will assign a "small" minority a size of 1 and a large minority a size of 2.
+		#
+		# So development (urbanization) allows for greater minority presence.
 		#
 		#### How do minorities disappear? ####
+		#-------------------------------------
 		# So long as the number of minorities do not exceed the development limits, the minorities should
 		# not disappear (think the various "relic" populations in various locales). Once this limit is
 		# exceeded, then we need to determine which minorities are being "fed"
 		#
 		#### Which minority disappears first? ####
+		#-----------------------------------------
 		# To determine which minority disappears, we will determine which are being "fed" from
 		# adjoining counties.
 		# * A minority population is always "fed" if it is next to a county where it is a majority
@@ -72,40 +66,74 @@ on_yearly_sea_minority_maintainance = {
 		# all.
 		#
 		#### How do minorities spread? ####
+		#----------------------------------
 		# When a county has fewer minorities than its capacity, it should randomly get a minority from an
 		# adjoining county. For now, let the selection be truly random.
 		#
 		every_county = {
-			limit = {
-				OR = {
+			save_scope_as = the_county
+			
+			#If there are too many minorities, some must die out
+			
+			#If there are too few minorities, then an increase is possible
+			if = {
+				limit = {
 					county_has_minority_culture_trigger = yes
+					number_of_culture_minorities_in_county <= minority_capacity_of_county
+				}
+				random = {
+					chance = 1
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_culture_immigration
+					}
+				}
+			}
+			if = {
+				limit = {
 					county_has_minority_faith_trigger = yes
-					# Holder should not have a policy against minorities
+					number_of_faith_minorities_in_county <= minority_capacity_of_county
+				}
+				random = {
+					chance = 1
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_faith_immigration
+					}
 				}
 			}
-
-			save_scope_as = source_county
-
-			# Culture
-			random = {
-				chance = 1
-				trigger_event = {
-					days = { 1 360 }
-					on_action = do_minority_culture_growth
-				}
-			}
-
-			# Faith
-			random = {
-				chance = 2
-				trigger_event = {
-					days = { 1 360 }
-					on_action = do_minority_faith_growth
-				}
-			}
+			#Otherwise, keep things as they were
 		}
 	}
 }
+do_culture_immigration = {
+	effect = {
+		if = {
+			limit = {
+				scope:the_county = {
+					culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
+					faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
+				}
+			}
+			county_to_county_culture_migration_effect = yes
+		}
+	}
+}
+do_faith_immigration = {
+	effect = {
+		if = {
+			limit = {
+				scope:the_county = {
+					culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
+					faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
+				}
+			}
+			county_to_county_faith_migration_effect = yes
+		}
+	}
+}
+
+##### VANILLA BELOW HERE #####
 do_culture_faith_migration = {
 	effect = {
 		if = {
