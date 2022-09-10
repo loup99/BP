@@ -114,10 +114,17 @@ on_imprison = {
 
 ##### Changed from Vanilla ^^^^^
 
-# Code on-action: character released from prison in root scope. Does not fire when "released" due to dying
+## Code on-action: character released from prison in root scope. Does not fire when "released" due to dying
 # imprisoning character set as scope:imprisoner
 on_release_from_prison = {
 	effect = {
+		create_character_memory = {
+			type = released_from_prison_memory
+			
+			participants = {
+				imprisoner = scope:imprisoner
+			}
+		}
 		# No prison, no problem.
 		if = {
 			limit = { has_character_modifier = gruesome_festivals_designated_sacrifice_fp1_modifier }
@@ -130,6 +137,22 @@ on_release_from_prison = {
 		if = {
 			limit = { has_character_flag = catalyst_release_important_blocker }
 			remove_character_flag = catalyst_release_important_blocker
+		}
+		if = {
+			limit = {
+				has_character_flag = realm_priest
+			}
+			remove_character_flag = realm_priest
+		}
+		if = {
+			limit = {
+				has_character_flag = rival_on_exit_prison
+			}
+			set_relation_rival = {
+				target = scope:imprisoner
+				reason = rival_was_kept_in_jail
+			}
+			remove_character_flag = rival_on_exit_prison
 		}
 
 		# Struggle bonus

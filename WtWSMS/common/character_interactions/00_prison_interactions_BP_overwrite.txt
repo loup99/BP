@@ -215,7 +215,10 @@ imprison_interaction = {
 						remove_relation_potential_rival = scope:actor
 					}
 				}
-				set_relation_rival = scope:actor
+				set_relation_rival = {
+					target = scope:actor
+					reason = rival_imprisoned_and_robbed_me
+				}
 			}
 			else = {
 				hidden_effect = {
@@ -684,10 +687,10 @@ imprison_interaction = {
 			}
 			add = {
 				value = 1
-					subtract = {
-					value = scope:recipient.max_military_strength
-					divide = { value = scope:actor.max_military_strength min = 1 }
-					}
+				subtract = {
+					value = scope:recipient.current_military_strength
+					divide = { value = scope:actor.current_military_strength min = 1 }
+				}
 				multiply = 100
 				min = -1000
 				# This max needs to match the loc in offer_vassalization_interaction_aibehavior_power_tt
@@ -740,6 +743,19 @@ imprison_interaction = {
 			}
 			add = legalistic_vassal_punishment_acceptance
 		}
+		modifier = { # AI Mongols, tyranny wars just delay the inevitable fun!
+			scope:actor = {
+				is_ai = yes
+				OR = {
+					has_trait = greatest_of_khans
+					has_character_modifier = the_great_khan_modifier
+				}
+			}
+			scope:recipient = {
+				is_ai = yes
+			}
+			add = 500
+		}
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -772,14 +788,69 @@ imprison_interaction = {
 		modifier = { # Avoid Tyranny wars at inopportune times
 			add = -190
 			scope:actor = {
-				ai_rationality >= medium_negative_ai_value
+				ai_rationality > -100 # Lunatics can do whatever, let the world burn...
 				is_at_war = yes
 			}
 			scope:recipient = {
 				is_landed = yes
 			}
 		}
+		
+		modifier = { # Avoid imprisonments in certain circumstances
+			add = -190
+			scope:actor = {
+				ai_rationality > -100 # Lunatics can do whatever, let the world burn...
+				NOR = {
+					AND = {
+						intrigue > scope:recipient.intrigue
+						intrigue >= 12
+					}
+					has_perk = prison_feudal_complex_perk
+					scope:recipient = {
+						has_dread_level_towards = {
+							target = scope:actor
+							level >= 1
+						}
+					}
+					culture = { has_cultural_parameter = vassals_more_likely_accept_punishments }
+					current_military_strength >= scope:recipient.twice_current_military_strength
+					scope:recipient.ai_boldness <= -100
+				}
+			}
+			scope:recipient = {
+				is_landed = yes
+			}
+		}
 
+		modifier = { # If the AI is not very bold, avoid imprisoning people unless you're more powerful
+			add = -190
+			scope:actor.ai_rationality > -100 # Lunatics can do whatever, let the world burn...
+			scope:actor.ai_boldness <= 25
+			scope:actor.current_military_strength < scope:recipient.one_and_a_half_times_current_military_strength
+		}
+
+		modifier = { # Avoid imprisoning people that would destroy you
+			add = -190
+			scope:actor.ai_rationality > -100 # Lunatics can do whatever, let the world burn...
+			scope:actor.current_military_strength < scope:recipient.current_military_strength
+		}
+		
+		modifier = { # Do not imprison when the chance of success if exceedingly low
+			add = -190
+			scope:actor.ai_rationality > -100 # Lunatics can do whatever, let the world burn...
+			scope:recipient = {
+				is_landed = yes
+			}
+			NOT = {
+				scope:recipient = {
+					highest_held_title_tier = tier_barony
+				}
+			}
+			scope:actor = {
+				gold < minimum_ai_gold_value_for_tyranny_wars
+			}
+		}
+		
 		modifier = { # Don't imprison people you like
 			scope:actor = {
 				NOT = {
@@ -843,7 +914,7 @@ imprison_interaction = {
 							is_scheme_agent_exposed = scope:recipient
 						}
 					}
-					AND = { # Zealots will imprison character sof other faiths
+					AND = { # Zealots will imprison characters of other faiths
 						scope:actor.ai_zeal >= medium_positive_ai_value
 						NOT = { scope:actor.faith = scope:recipient.faith }
 					}
