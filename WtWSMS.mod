@@ -1,5 +1,5 @@
 name = "WtWSMS"
-version = "0.1.0"
+version = "0.1.1"
 supported_version = "1.7.0"
 path = "mod/WtWSMS"
 replace_path="history/characters"
