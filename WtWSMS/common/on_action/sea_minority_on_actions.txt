@@ -69,14 +69,12 @@ on_yearly_sea_minority_maintainance = {
 		#----------------------------------
 		# When a county has fewer minorities than its capacity, it should randomly get a minority from an
 		# adjoining county. For now, let the selection be truly random.
-		#
 		every_county = {
 			save_scope_as = the_county
 			
+			### Culture
 			#If there are too many minorities, some must die out
-			
-			#If there are too few minorities, then an increase is possible
-			if = {
+			if = { #If there are too few minorities, then an increase is possible
 				limit = {
 					county_has_minority_culture_trigger = yes
 					number_of_culture_minorities_in_county <= minority_capacity_of_county
@@ -89,7 +87,11 @@ on_yearly_sea_minority_maintainance = {
 					}
 				}
 			}
-			if = {
+			#Otherwise, keep things as they were
+			
+			### Faith
+			#If there are too many minorities, some must die out
+			if = { #If there are too few minorities, then an increase is possible
 				limit = {
 					county_has_minority_faith_trigger = yes
 					number_of_faith_minorities_in_county <= minority_capacity_of_county
@@ -134,75 +136,6 @@ do_faith_immigration = {
 }
 
 ##### VANILLA BELOW HERE #####
-do_culture_faith_migration = {
-	effect = {
-		if = {
-			limit = {
-				scope:source_county = {
-					culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
-					faith = { NOT = { has_doctrine = tenet_communal_identity } }
-				}
-			}
-			county_to_county_culture_faith_migration_effect = yes
-		}
-	}
-}
-do_minority_culture_growth = {
-	effect = {
-		scope:source_county = {
-
-			every_in_list = {
-				variable = culture_minorities_small
-				add_to_temporary_list = potential_cultures
-			}
-			every_in_list = {
-				variable = culture_minorities_large
-				add_to_temporary_list = potential_cultures
-			}
-			every_in_list = {
-				variable = culture_minorities_large
-				add_to_temporary_list = potential_cultures
-			}
-
-			random_in_list = {
-				list = potential_cultures
-				save_scope_as = minority_culture
-				random_list = {
-					50 = { minority_culture_growth_effect = yes }
-					50 = { minority_culture_spread_effect = yes }
-				}
-			}
-		}
-	}
-}
-do_minority_faith_growth = {
-	effect = {
-		scope:source_county = {
-
-			every_in_list = {
-				variable = faith_minorities_small
-				add_to_temporary_list = potential_faiths
-			}
-			every_in_list = {
-				variable = faith_minorities_large
-				add_to_temporary_list = potential_faiths
-			}
-			every_in_list = {
-				variable = faith_minorities_large
-				add_to_temporary_list = potential_faiths
-			}
-
-			random_in_list = {
-				list = potential_faiths
-				save_scope_as = minority_faith
-				random_list = {
-					50 = { minority_faith_growth_effect = yes }
-					50 = { minority_faith_spread_effect = yes }
-				}
-			}
-		}
-	}
-}
 
 # Root is a count+ character
 spawn_minority_characters = {
