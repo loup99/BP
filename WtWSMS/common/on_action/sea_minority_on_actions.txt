@@ -26,7 +26,55 @@ on_yearly_sea_minority_maintainance = {
 			}
 		}
 
-		# Minority culture/faith spread/growth
+		# Minority Culture/Faith spread/growth/decline
+		#
+		# Difference from "Cultural and Religious Minorities" is that we utilize quasi-cellular automata
+		# rules similar to "Conway's Game of Life" to provide a marginally better model in which
+		# cultures will not spread out overly far from existing concentrations of minorities.
+		#
+		#### How many minorities per county? ####
+		# Every county can support minorities as a function of its development; We will utilize the Lucas
+		# Sequence Vn(1,−1) [the Lucas Numbers, a series related to the Fibonacci sequence]
+		#
+		# 3, 4, 7, 11, 18, 29, 47, 76 ...
+		#
+		# 04: 1 minority
+		# 07: 2 minorities
+		# 11: 3 minorities
+		# 18: 4 minorities
+		# 29: 5 minorities
+		# 47: 6 minorities
+		# 76: 7 minorities
+		#
+		# We will assign a "small" minority a size of 1 and a large minority a size of 2. So development
+		# (urbanization) allows for greater minority presence. Note that this count is separate for faiths
+		# and religions.
+		#
+		#### How do minorities disappear? ####
+		# So long as the number of minorities do not exceed the development limits, the minorities should
+		# not disappear (think the various "relic" populations in various locales). Once this limit is
+		# exceeded, then we need to determine which minorities are being "fed"
+		#
+		#### Which minority disappears first? ####
+		# To determine which minority disappears, we will determine which are being "fed" from
+		# adjoining counties.
+		# * A minority population is always "fed" if it is next to a county where it is a majority
+		#   population.
+		# * A minority population is fed if it has enough support.
+		# * Large minorities require at least 4 points of adjoining minorities
+		#    * Adjoining large minorities are worth 2
+		# * Small minorities require at least 2 points of adjoining minorities
+		#    * Adjoining small minorities are worth 1
+		# * Any minority that is underfed is at risk of disappearing.
+		#
+		# NB: Certain traditions (like Diasporic) and doctrines should imply a sorting within the underfed
+		# population. Diasporic Jewish populations long established themselves in Europe and Asia after
+		# all.
+		#
+		#### How do minorities spread? ####
+		# When a county has fewer minorities than its capacity, it should randomly get a minority from an
+		# adjoining county. For now, let the selection be truly random.
+		#
 		every_county = {
 			limit = {
 				OR = {
