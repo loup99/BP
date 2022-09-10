@@ -1,5 +1,4 @@
-﻿
-# scope:county
+﻿# scope:county
 # $CULTURE$
 promote_culture_minority_effect = {
 	if = {
@@ -576,6 +575,50 @@ notify_recipient_of_culture_migration_effect = {
 }
 
 ##### Changed from Vanilla vvvvv
+
+#scope:county
+demote_least_supported_cultural_minority_effect = {
+	if = {
+		limit = { has_variable_list = culture_minorities_small }
+		every_in_list = { variable = culture_minorities_small add_to_temporary_list = potential_cultures }
+	}
+	if = {
+		limit = { has_variable_list = culture_minorities_large }
+		every_in_list = { variable = culture_minorities_large add_to_temporary_list = potential_cultures }
+	}
+	
+	ordered_in_list = {
+		list = potential_cultures
+		order_by = support_of_a_cultural_minority_in_county
+		position = 0
+		save_scope_as = culture_to_demote
+	}
+	
+	if = {
+		limit = { exists = scope:culture_to_demote }
+		if = {
+			limit = {
+				has_variable_list = culture_minorities_large
+				is_target_in_variable_list = {
+					name = culture_minorities_large
+					target = scope:culture_to_demote
+				}
+			}
+			remove_list_variable = { name = culture_minorities_large target = scope:culture_to_demote }
+			add_to_variable_list = { name = culture_minorities_small target = scope:culture_to_demote }
+		}
+		else_if = {
+			limit = {
+				has_variable_list = culture_minorities_small
+				is_target_in_variable_list = {
+					name = culture_minorities_small
+					target = scope:culture_to_demote
+				}
+			}
+			remove_list_variable = { name = culture_minorities_small target = scope:culture_to_demote }
+		}
+	}
+}
 
 # scope:county
 # $CULTURE$
