@@ -135,6 +135,62 @@ number_of_culture_minorities_in_county = {
 	}
 }
 #County Scope
+support_of_a_faith_minority_in_county = {
+	this = { save_temporary_scope_as = the_faith }
+	value = 0
+	#Determine how much is needed to feed this minority
+	if = {
+		limit = {
+			scope:the_county = {
+				has_variable_list = faith_minorities_large
+				is_target_in_variable_list = { name = faith_minorities_large target = scope:the_faith }
+			}
+		}
+		subtract = large_minority_cost_value
+	}
+	if = {
+		limit = {
+			scope:the_county = {
+				has_variable_list = faith_minorities_small
+				is_target_in_variable_list = { name = faith_minorities_small target = scope:the_faith }
+			}
+		}
+		subtract = small_minority_cost_value
+	}
+	#Determine how much is supporting this minority
+	if = {
+		limit = { scope:the_county = { any_neighboring_county = { this.culture = scope:the_faith } } }
+		add = majority_province_support_value
+	}
+	if = {
+		limit = {
+			scope:the_county = {
+				any_neighboring_county = {
+					has_variable_list = faith_minorities_large
+					is_target_in_variable_list = { name = faith_minorities_large target = scope:the_faith }
+				}
+			}
+		}
+		add = large_minority_support_value
+	}
+	if = {
+		limit = {
+			scope:the_county = {
+				any_neighboring_county = {
+					has_variable_list = faith_minorities_small
+					is_target_in_variable_list = { name = faith_minorities_small target = scope:the_faith }
+				}
+			}
+		}
+		add = small_minority_support_value
+	}
+	#Certain doctrines bolster score
+	#TODO: Jewish faiths should be bolstered
+	#TODO: Ethnic religions should be bolstered
+	#TODO: Autocephalous churches should be bolstered
+	multiply = -1.00
+}
+#County Scope
 number_of_faith_minorities_in_county = {
 	value = 0
 	if = {

@@ -100,7 +100,17 @@ on_yearly_sea_minority_maintainance = {
 			#Otherwise, keep things as they were
 			
 			### Faith
-			#If there are too many minorities, some must die out
+			if = { #If there are too many minorities, some must die out
+				limit = {
+					county_has_minority_faith_trigger = yes
+					NOT = { has_variable = recently_demoted_faith }
+					this.number_of_faith_minorities_in_county > this.minority_capacity_of_county
+				}
+				trigger_event = {
+					days = { 1 360 }
+					on_action = do_faith_reduction
+				}
+			}
 			if = { #If there are too few minorities, then an increase is possible
 				limit = {
 					county_has_minority_faith_trigger = yes
@@ -122,7 +132,7 @@ do_culture_reduction = {
 	effect = {
 		scope:the_county = {
 			demote_least_supported_cultural_minority_effect = yes
-			set_variable = { name = recently_demoted_culture days = 1826 } #To keep things from dropping too fast
+			set_variable = { name = recently_demoted_culture days = 1826 } #To keep things from dropping *too* fast
 		}
 	}
 }
@@ -136,6 +146,14 @@ do_culture_immigration = {
 				}
 			}
 			county_to_county_culture_migration_effect = yes
+		}
+	}
+}
+do_faith_reduction = {
+	effect = {
+		scope:the_county = {
+			demote_least_supported_faith_minority_effect = yes
+			set_variable = { name = recently_demoted_faith days = 1826 } #To keep things from dropping *too* fast
 		}
 	}
 }
