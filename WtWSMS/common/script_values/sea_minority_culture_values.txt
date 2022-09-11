@@ -16,17 +16,18 @@
 ##### Changed from Vanilla vvvvv
 
 #Generic values
-majority_province_support_value = 25
+minority_always_supported_value = 1000 #For things like Diasporic
+majority_province_support_value = 10
 large_minority_support_value = 2
-large_minority_cost_value = 4
+large_minority_cost_value = 5
 small_minority_support_value = 1
-small_minority_cost_value = 2
+small_minority_cost_value = 3
 #Other Script Values
 #County Scope
 minority_capacity_of_county = {
-		# Every county can support minorities as a function of its development; We will utilize the Lucas
-		# Sequence Vn(1,−1) [the Lucas Numbers, a series related to the Fibonacci sequence]
-		# 1, 3, 4, 7, 11, 18, 29, 47, 76 ...
+	# Every county can support minorities as a function of its development; We will utilize the Lucas
+	# Sequence Vn(1,−1) [the Lucas Numbers, a series related to the Fibonacci sequence]
+	# 1, 3, 4, 7, 11, 18, 29, 47, 76 ...
 	value = 1
 	if = {
 		limit = { this = { any_province = { NOT = { has_holding_type = tribal_holding } } } }
@@ -63,36 +64,38 @@ support_of_a_cultural_minority_in_county = {
 		subtract = small_minority_cost_value
 	}
 	#Determine how much is supporting this minority
-	if = {
-		limit = { scope:the_county = { any_neighboring_county = { this.culture = scope:the_culture } } }
-		add = majority_province_support_value
-	}
-	if = {
-		limit = {
-			scope:the_county = {
-				any_neighboring_county = {
+	scope:county = {
+		every_neighboring_county = {
+			if = { #County with a majority population
+				limit = { this.culture = scope:the_culture }
+				add = majority_province_support_value
+			}
+			else_if = { #County with a large minority
+				limit = {
 					has_variable_list = culture_minorities_large
 					is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
 				}
+				add = large_minority_support_value
 			}
-		}
-		add = large_minority_support_value
-	}
-	if = {
-		limit = {
-			scope:the_county = {
-				any_neighboring_county = {
+			else_if = { #County with a small minority
+				limit = {
 					has_variable_list = culture_minorities_small
 					is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
 				}
+				add = small_minority_support_value
 			}
 		}
-		add = small_minority_support_value
+		holder = {
+			if = { #If the minority matches the ruler, it should not fade
+				limit = { this.culture = scope:the_culture }
+				add = minority_always_supported_value
+			}
+		}
 	}
-	#Certain traditions bolster score
-	if = { #Colonizers/Hellenizers: Equivalent to having a large minority next to you
-		limit = {
-			this = {
+	#Culture specific tradition effects
+	scope:the_culture = {
+		if = { #Colonizers/Hellenizers: Equivalent to having a large minority next to you
+			limit = {
 				OR = {
 					has_cultural_tradition = tradition_colonizers
 					has_cultural_tradition = tradition_colonizers_non_dlc
@@ -100,12 +103,10 @@ support_of_a_cultural_minority_in_county = {
 					has_cultural_tradition = tradition_hellenizers_non_dlc
 				}
 			}
+			add = large_minority_support_value
 		}
-		add = large_minority_support_value
-	}
-	if = { #Romance/Hellenic Culture: Equivalent to having a small minority next to you
-		limit = {
-			this = {
+		if = { #Romance/Hellenic Culture: Equivalent to having a small minority next to you
+			limit = {
 				OR = {
 					has_cultural_tradition = tradition_romance_culture
 					has_cultural_tradition = tradition_romance_culture_non_dlc
@@ -113,12 +114,12 @@ support_of_a_cultural_minority_in_county = {
 					has_cultural_tradition = tradition_hellenic_culture_non_dlc
 				}
 			}
+			add = small_minority_support_value
 		}
-		add = small_minority_support_value
-	}
-	if = { #Diasporic cultures are equivalent to always being next to a majority province
-		limit = { this = { has_cultural_tradition = tradition_diasporic } }
-		add = majority_province_support_value
+		if = {
+			limit = { has_cultural_tradition = tradition_diasporic }
+			add = minority_always_supported_value
+		}
 	}
 	multiply = -1.00
 }
@@ -158,36 +159,38 @@ support_of_a_faith_minority_in_county = {
 		subtract = small_minority_cost_value
 	}
 	#Determine how much is supporting this minority
-	if = {
-		limit = { scope:the_county = { any_neighboring_county = { this.culture = scope:the_faith } } }
-		add = majority_province_support_value
-	}
-	if = {
-		limit = {
-			scope:the_county = {
-				any_neighboring_county = {
+	scope:county = {
+		every_neighboring_county = {
+			if = { #County with a majority population
+				limit = { this.faith = scope:the_faith }
+				add = majority_province_support_value
+			}
+			else_if = { #County with a large minority
+				limit = {
 					has_variable_list = faith_minorities_large
 					is_target_in_variable_list = { name = faith_minorities_large target = scope:the_faith }
 				}
+				add = large_minority_support_value
 			}
-		}
-		add = large_minority_support_value
-	}
-	if = {
-		limit = {
-			scope:the_county = {
-				any_neighboring_county = {
+			else_if = { #County with a small minority
+				limit = {
 					has_variable_list = faith_minorities_small
 					is_target_in_variable_list = { name = faith_minorities_small target = scope:the_faith }
 				}
+				add = small_minority_support_value
 			}
 		}
-		add = small_minority_support_value
+		holder = {
+			if = { #If the minority matches the ruler, it should not fade
+				limit = { this.culture = scope:the_culture }
+				add = minority_always_supported_value
+			}
+		}
 	}
 	#Certain doctrines bolster score
-	#TODO: Jewish faiths should be bolstered
-	#TODO: Ethnic religions should be bolstered
-	#TODO: Autocephalous churches should be bolstered
+	#FIXME: Jewish faiths should be bolstered
+	#FIXME: Ethnic religions should be bolstered
+	#FIXME: Autocephalous churches should be bolstered
 	multiply = -1.00
 }
 #County Scope
