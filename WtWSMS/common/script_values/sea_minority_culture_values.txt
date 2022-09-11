@@ -127,6 +127,7 @@ number_of_faith_minorities_in_county = {
 }
 #Culture Scope
 support_of_a_cultural_minority_in_county = {
+	this = { save_temporary_scope_as = the_culture }
 	value = 0
 	#Determine how much is needed to feed this minority
 	if = {
@@ -173,6 +174,7 @@ support_of_a_cultural_minority_in_county = {
 			if = { #If the minority matches the ruler, it should not fade
 				limit = { this.culture = scope:the_culture }
 				add = minority_always_supported_value
+				add = minority_always_supported_value #Even more-so than Diasporic
 			}
 		}
 	}
@@ -256,14 +258,141 @@ support_of_a_faith_minority_in_county = {
 			if = { #If the minority matches the ruler, it should not fade
 				limit = { this.faith = scope:the_faith }
 				add = minority_always_supported_value
+				add = minority_always_supported_value #Even more so than other faiths
 			}
 		}
+		if = { #Holy Site: Equivalent to having a large minority next to you
+			limit = { any_barony = { is_holy_site_of = scope:the_faith } }
+			add = large_minority_support_value
+		}
 	}
-	#Certain doctrines bolster score
-	#FIXME: Jewish faiths should be bolstered
-	#FIXME: Ethnic religions should be bolstered
-	#FIXME: Autocephalous churches should be bolstered
-	#FIXME: Holy Sites should make it easier for minorities to hold out
+	#Certain doctrines/tenets bolster score
+	scope:the_faith = {
+		if = { #Autocephalous faiths are less likely to disappear if their associated cultures are present
+			limit = { scope:the_faith = { has_doctrine = tenet_autocephaly } }
+			if = {
+				limit = {
+					OR = {
+						scope:the_county.culture = scope:the_faith.var:church_culture
+						actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+							ACTOR = scope:the_county
+							TARGET = scope:the_faith
+							VARIABLE = church_culture
+						}
+					}
+				}
+				add = majority_province_support_value
+			}
+			else_if = {
+				limit = {
+					has_variable_list = culture_minorities_large
+					OR = {
+						is_target_in_variable_list = {
+							name = culture_minorities_large
+							target = scope:the_faith.var:church_culture
+						}
+						any_in_list = {
+							variable = culture_minorities_large
+							actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+								ACTOR = scope:the_county
+								TARGET = this
+								VARIABLE = church_culture
+							}
+						}
+					}
+				}
+				add = large_minority_support_value
+			}
+			else_if = {
+				limit = {
+					has_variable_list = culture_minorities_small
+					OR = {
+						is_target_in_variable_list = {
+							name = culture_minorities_small
+							target = scope:the_faith.var:church_culture
+						}
+						any_in_list = {
+							variable = culture_minorities_small
+							actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+								ACTOR = scope:the_county
+								TARGET = this
+								VARIABLE = church_culture
+							}
+						}
+					}
+				}
+				add = large_minority_support_value
+			}
+		}
+		if = { #Ethnic Religions faiths are less likely to disappear if their associated cultures are present
+			limit = { scope:the_faith = { has_doctrine = tenet_ethnic_religion } }
+			if = {
+				limit = {
+					OR = {
+						scope:the_county.culture = scope:the_faith.var:ethnic_religion_culture
+						actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+							ACTOR = scope:the_county
+							TARGET = scope:the_faith
+							VARIABLE = ethnic_religion_culture
+						}
+					}
+				}
+				add = majority_province_support_value
+				add = majority_province_support_value
+			}
+			else_if = {
+				limit = {
+					has_variable_list = culture_minorities_large
+					OR = {
+						is_target_in_variable_list = {
+							name = culture_minorities_large
+							target = scope:the_faith.var:ethnic_religion_culture
+						}
+						any_in_list = {
+							variable = culture_minorities_large
+							actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+								ACTOR = scope:the_county
+								TARGET = this
+								VARIABLE = ethnic_religion_culture
+							}
+						}
+					}
+				}
+				add = large_minority_support_value
+				add = large_minority_support_value
+			}
+			else_if = {
+				limit = {
+					has_variable_list = culture_minorities_small
+					OR = {
+						is_target_in_variable_list = {
+							name = culture_minorities_small
+							target = scope:the_faith.var:ethnic_religion_culture
+						}
+						any_in_list = {
+							variable = culture_minorities_small
+							actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+								ACTOR = scope:the_county
+								TARGET = this
+								VARIABLE = ethnic_religion_culture
+							}
+						}
+					}
+				}
+				add = small_minority_support_value
+				add = small_minority_support_value
+			}
+		}
+		if = { #Jewish faiths are well protected so long as the holder isn't jewish
+			limit = {
+				this.religion = religion:judaism_religion
+				NOT = { scope:the_county.holder.religion = religion:judaism_religion }
+			}
+			add = majority_province_support_value
+			add = majority_province_support_value
+			add = majority_province_support_value
+		}
+	}
 	multiply = -1.00
 }
 ##### Changed from Vanilla ^^^^^
