@@ -40,6 +40,70 @@ minority_capacity_of_county = {
 		if = { limit = { this.development_level >= 76 } add = 1 }
 	}
 }
+#County Scope
+number_of_culture_minorities_in_county = {
+	value = 0
+	if = {
+		limit = { this = { has_variable_list = culture_minorities_small } }
+		this = {
+			every_in_list = { variable = culture_minorities_small add = 1 }
+		}
+	}
+	if = {
+		limit = { this = { has_variable_list = culture_minorities_large } }
+		this = { every_in_list = { variable = culture_minorities_large add = 2 } }
+	}
+}
+#County Scope
+number_of_faith_minorities_in_county = {
+	this = { save_temporary_scope_as = the_county }
+	value = 0
+	if = { #Small minorities
+		limit = { this = { has_variable_list = faith_minorities_small } }
+		this = {
+			every_in_list = {
+				variable = faith_minorities_small
+				if = { #Indian faiths support greater plurality
+					limit = { scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine } }
+					if = { #Dharmic faiths support 50% more minorities, so long as they are Dharmic or Eastern Pagan
+						limit = {
+							OR = {
+								scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine }
+								scope:the_county.faith = { has_doctrine = eastern_pagan_hostility_doctrine }
+							}
+						}
+						add = 0.67
+					}
+					else = { add = 1 } #Non-Dharmic case
+				}
+				else = { add = 1 } #all other interactions
+			}
+		}
+	}
+	if = { #Large minorities
+		limit = { this = { has_variable_list = faith_minorities_large } }
+		this = {
+			every_in_list = {
+				variable = faith_minorities_large
+				if = { #Indian faiths support greater plurality
+					limit = { scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine } }
+					if = { #Dharmic faiths support 50% more minorities, so long as they are Dharmic or Eastern Pagan
+						limit = {
+							OR = {
+								scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine }
+								scope:the_county.faith = { has_doctrine = eastern_pagan_hostility_doctrine }
+							}
+						}
+						add = 1.34
+					}
+					else = { add = 2 } #Non-Dharmic case
+				}
+				else = { add = 2 } #all other interactions
+			}
+		}
+	}
+	floor = yes #Because of fractional Dharmic values
+}
 #Culture Scope
 support_of_a_cultural_minority_in_county = {
 	this = { save_temporary_scope_as = the_culture }
@@ -124,18 +188,6 @@ support_of_a_cultural_minority_in_county = {
 	multiply = -1.00
 }
 #County Scope
-number_of_culture_minorities_in_county = {
-	value = 0
-	if = {
-		limit = { this = { has_variable_list = culture_minorities_small } }
-		this = { every_in_list = { variable = culture_minorities_small add = 1 } }
-	}
-	if = {
-		limit = { this = { has_variable_list = culture_minorities_large } }
-		this = { every_in_list = { variable = culture_minorities_large add = 2 } }
-	}
-}
-#County Scope
 support_of_a_faith_minority_in_county = {
 	this = { save_temporary_scope_as = the_faith }
 	value = 0
@@ -182,7 +234,7 @@ support_of_a_faith_minority_in_county = {
 		}
 		holder = {
 			if = { #If the minority matches the ruler, it should not fade
-				limit = { this.culture = scope:the_culture }
+				limit = { this.faith = scope:the_faith }
 				add = minority_always_supported_value
 			}
 		}
@@ -192,17 +244,5 @@ support_of_a_faith_minority_in_county = {
 	#FIXME: Ethnic religions should be bolstered
 	#FIXME: Autocephalous churches should be bolstered
 	multiply = -1.00
-}
-#County Scope
-number_of_faith_minorities_in_county = {
-	value = 0
-	if = {
-		limit = { this = { has_variable_list = faith_minorities_small } }
-		this = { every_in_list = { variable = faith_minorities_small add = 1 } }
-	}
-	if = {
-		limit = { this = { has_variable_list = faith_minorities_large } }
-		this = { every_in_list = { variable = faith_minorities_large add = 2 } }
-	}
 }
 ##### Changed from Vanilla ^^^^^
