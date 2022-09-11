@@ -576,202 +576,102 @@ notify_recipient_of_culture_migration_effect = {
 
 ##### Changed from Vanilla vvvvv
 
-#scope:county
-demote_least_supported_cultural_minority_effect = {
+# scope:county
+# $ITEM$ = a scoped faith or culture
+# $CULTURE_OR_FAITH$: either "culture" or "faith"
+demote_least_supported_minority_effect = {
 	if = {
-		limit = { has_variable_list = culture_minorities_small }
-		every_in_list = { variable = culture_minorities_small add_to_temporary_list = potential_cultures }
+		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
+		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_small add_to_temporary_list = potential_items }
 	}
 	if = {
-		limit = { has_variable_list = culture_minorities_large }
-		every_in_list = { variable = culture_minorities_large add_to_temporary_list = potential_cultures }
+		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
+		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_large add_to_temporary_list = potential_items }
 	}
 	
 	ordered_in_list = {
-		list = potential_cultures
-		order_by = support_of_a_cultural_minority_in_county
+		list = potential_items
+		order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
 		position = 0
-		save_scope_as = culture_to_demote
+		save_scope_as = item_to_demote
 	}
 	
 	if = {
-		limit = { exists = scope:culture_to_demote }
+		limit = { exists = scope:item_to_demote }
 		if = {
 			limit = {
-				has_variable_list = culture_minorities_large
+				has_variable_list = $CULTURE_OR_FAITH$_minorities_large
 				is_target_in_variable_list = {
-					name = culture_minorities_large
-					target = scope:culture_to_demote
+					name = $CULTURE_OR_FAITH$_minorities_large
+					target = scope:item_to_demote
 				}
 			}
-			remove_list_variable = { name = culture_minorities_large target = scope:culture_to_demote }
-			add_to_variable_list = { name = culture_minorities_small target = scope:culture_to_demote }
+			remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_large target = scope:item_to_demote }
+			add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = scope:item_to_demote }
 		}
 		else_if = {
 			limit = {
-				has_variable_list = culture_minorities_small
+				has_variable_list = $CULTURE_OR_FAITH$_minorities_small
 				is_target_in_variable_list = {
-					name = culture_minorities_small
-					target = scope:culture_to_demote
+					name = $CULTURE_OR_FAITH$_minorities_small
+					target = scope:item_to_demote
 				}
 			}
-			remove_list_variable = { name = culture_minorities_small target = scope:culture_to_demote }
+			remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = scope:item_to_demote }
 		}
 	}
 }
 # scope:county
-# $CULTURE$
-promote_culture_minority_but_not_to_majority_effect = {
+# $ITEM$ = a scoped faith or culture
+# $CULTURE_OR_FAITH$: either "culture" or "faith"
+promote_minority_but_not_to_majority_effect = {
 	if = {
-		limit = { scope:county.culture = $CULTURE$ }
+		limit = { scope:county.$CULTURE_OR_FAITH$ = $ITEM$ }
 		# failsafe because this should never happen
 	}
 	else_if = {
 		limit = {
-			has_variable_list = culture_minorities_small
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
 			is_target_in_variable_list = {
-				name = culture_minorities_small
-				target = $CULTURE$
+				name = $CULTURE_OR_FAITH$_minorities_small
+				target = $ITEM$
 			}
 		}
 		add_to_variable_list = {
-			name = culture_minorities_large
-			target = $CULTURE$
+			name = $CULTURE_OR_FAITH$_minorities_large
+			target = $ITEM$
 		}
 		remove_list_variable = {
-			name = culture_minorities_small
-			target = $CULTURE$
+			name = $CULTURE_OR_FAITH$_minorities_small
+			target = $ITEM$
 		}
-	} 
+	}
 	#Large minorities should not become majorities
 	else = {
 		add_to_variable_list = {
-			name = culture_minorities_small
-			target = $CULTURE$
+			name = $CULTURE_OR_FAITH$_minorities_small
+			target = $ITEM$
 		}
 	}
 }
 # scope:the_county
-county_to_county_culture_migration_effect = {
+county_to_county_migration_effect = {
 	scope:the_county = {
 		if = {
-			limit = { any_title_to_title_neighboring_county = { NOT = { culture = scope:the_county.culture } } }
+			limit = {
+				any_title_to_title_neighboring_county = {
+					NOT = { $CULTURE_OR_FAITH$ = scope:the_county.$CULTURE_OR_FAITH$ }
+				}
+			}
 			random_neighboring_county = {
-				limit = { NOT = { culture = scope:the_county.culture } }
+				limit = { NOT = { $CULTURE_OR_FAITH$ = scope:the_county.$CULTURE_OR_FAITH$ } }
 				save_scope_as = county
 				if = {
-					limit = { NOT = { culture = scope:the_county.culture } }
-					promote_culture_minority_but_not_to_majority_effect = { CULTURE = scope:the_county.culture }
-				}
-				notify_characters_of_culture_or_faith_migration_effect = yes
-			}
-		}
-	}
-}
-
-demote_least_supported_faith_minority_effect = {
-	if = {
-		limit = { has_variable_list = faith_minorities_small }
-		every_in_list = { variable = faith_minorities_small add_to_temporary_list = potential_faiths }
-	}
-	if = {
-		limit = { has_variable_list = faith_minorities_large }
-		every_in_list = { variable = faith_minorities_large add_to_temporary_list = potential_faiths }
-	}
-	
-	ordered_in_list = {
-		list = potential_faiths
-		order_by = support_of_a_faith_minority_in_county
-		position = 0
-		save_scope_as = faith_to_demote
-	}
-	
-	if = {
-		limit = { exists = scope:faith_to_demote }
-		if = {
-			limit = {
-				has_variable_list = faith_minorities_large
-				is_target_in_variable_list = {
-					name = faith_minorities_large
-					target = scope:faith_to_demote
-				}
-			}
-			remove_list_variable = { name = faith_minorities_large target = scope:faith_to_demote }
-			add_to_variable_list = { name = faith_minorities_small target = scope:faith_to_demote }
-		}
-		else_if = {
-			limit = {
-				has_variable_list = faith_minorities_small
-				is_target_in_variable_list = {
-					name = faith_minorities_small
-					target = scope:faith_to_demote
-				}
-			}
-			remove_list_variable = { name = faith_minorities_small target = scope:faith_to_demote }
-		}
-	}
-}
-# scope:county
-# $FAITH$
-promote_faith_minority_but_not_to_majority_effect = {
-	if = {
-		limit = { scope:county.faith = $FAITH$ }
-		# failsafe because this should never happen
-	}
-	else_if = {
-		limit = {
-			has_variable_list = faith_minorities_small
-			is_target_in_variable_list = {
-				name = faith_minorities_small
-				target = $FAITH$
-			}
-		}
-		add_to_variable_list = {
-			name = faith_minorities_large
-			target = $FAITH$
-		}
-		remove_list_variable = {
-			name = faith_minorities_small
-			target = $FAITH$
-		}
-	}
-	else_if = {
-		limit = {
-			has_variable_list = faith_minorities_large
-			is_target_in_variable_list = {
-				name = faith_minorities_large
-				target = $FAITH$
-			}
-		}
-		remove_list_variable = {
-			name = faith_minorities_large
-			target = $FAITH$
-		}
-		add_to_variable_list = {
-			name = faith_minorities_large
-			target = scope:county.faith
-		}
-
-		set_county_faith = $FAITH$
-	}
-	else = {
-		add_to_variable_list = {
-			name = faith_minorities_small
-			target = $FAITH$
-		}
-	}
-}
-# scope:the_county
-county_to_county_faith_migration_effect = {
-	scope:the_county = {
-		if = {
-			limit = { any_title_to_title_neighboring_county = { NOT = { faith = scope:the_county.faith } } }
-			random_neighboring_county = {
-				limit = { NOT = { faith = scope:the_county.faith } }
-				save_scope_as = county
-				if = {
-					limit = { NOT = { faith = scope:the_county.faith } }
-					promote_faith_minority_but_not_to_majority_effect = { FAITH = scope:the_county.faith }
+					limit = { NOT = { $CULTURE_OR_FAITH$ = scope:the_county.$CULTURE_OR_FAITH$ } }
+					promote_minority_but_not_to_majority_effect = {
+						ITEM = scope:the_county.$CULTURE_OR_FAITH$
+						CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+					}
 				}
 				notify_characters_of_culture_or_faith_migration_effect = yes
 			}
