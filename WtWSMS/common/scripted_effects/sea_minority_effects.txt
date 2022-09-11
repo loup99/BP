@@ -619,7 +619,6 @@ demote_least_supported_cultural_minority_effect = {
 		}
 	}
 }
-
 # scope:county
 # $CULTURE$
 promote_culture_minority_but_not_to_majority_effect = {
@@ -670,6 +669,48 @@ county_to_county_culture_migration_effect = {
 	}
 }
 
+demote_least_supported_faith_minority_effect = {
+	if = {
+		limit = { has_variable_list = faith_minorities_small }
+		every_in_list = { variable = faith_minorities_small add_to_temporary_list = potential_faiths }
+	}
+	if = {
+		limit = { has_variable_list = faith_minorities_large }
+		every_in_list = { variable = faith_minorities_large add_to_temporary_list = potential_faiths }
+	}
+	
+	ordered_in_list = {
+		list = potential_faiths
+		order_by = support_of_a_faith_minority_in_county
+		position = 0
+		save_scope_as = faith_to_demote
+	}
+	
+	if = {
+		limit = { exists = scope:faith_to_demote }
+		if = {
+			limit = {
+				has_variable_list = faith_minorities_large
+				is_target_in_variable_list = {
+					name = faith_minorities_large
+					target = scope:faith_to_demote
+				}
+			}
+			remove_list_variable = { name = faith_minorities_large target = scope:faith_to_demote }
+			add_to_variable_list = { name = culture_minorities_small target = scope:faith_to_demote }
+		}
+		else_if = {
+			limit = {
+				has_variable_list = faith_minorities_small
+				is_target_in_variable_list = {
+					name = faith_minorities_small
+					target = scope:faith_to_demote
+				}
+			}
+			remove_list_variable = { name = faith_minorities_small target = scope:faith_to_demote }
+		}
+	}
+}
 # scope:county
 # $FAITH$
 promote_faith_minority_but_not_to_majority_effect = {
