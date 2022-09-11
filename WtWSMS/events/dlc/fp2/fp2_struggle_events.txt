@@ -71,16 +71,20 @@ fp2_struggle.0003 = {
 				######################
 				if = {
 					limit = { has_character_flag = agenda_towards_escalation }
-					change_variable = {
-						name = agents_for_escalation
-						add = 1
+					root = {
+						change_variable = {
+							name = agents_for_escalation
+							add = 1
+						}
 					}
 				}
 				else_if = {
 					limit = { has_character_flag = agenda_towards_deescalation }
-					change_variable = {
-						name = agents_for_deescalation
-						add = 1
+					root = {
+						change_variable = {
+							name = agents_for_deescalation
+							add = 1
+						}
 					}
 				}
 				else = { # Set a flag
@@ -2482,10 +2486,11 @@ fp2_struggle.1002 = {
 	 }
 
 	 scope:neighboring_ruler = { #but the neighboring ruler gets angry that you harbor him
-		 progress_towards_rival_effect = {
-			 CHARACTER = root
-			 OPINION = no 
-		 }
+		 	progress_towards_rival_effect = {
+				REASON = rival_harbored_polymath
+			 	CHARACTER = root
+			 	OPINION = no 
+		 	}
 	 }
 
 	 add_character_modifier = { #while you get inspired! 
@@ -2730,13 +2735,14 @@ fp2_struggle.1002 = {
 				 modifier = strengthened_friendship_opinion
 			 }
 		 }	
-		 else = {
-			 progress_towards_friend_effect = {
-				 CHARACTER = root
-				 OPINION = no 
-			 }
-		 }	
-	 }
+		 	else = {
+			 	progress_towards_friend_effect = {
+					REASON = friend_returned_refugee
+					CHARACTER = root
+					OPINION = no 
+			 	}
+		 	}	
+	 	}
 
 	 add_dread = minor_dread_gain	#you gain some dread for doing this, naturally
 
@@ -4633,6 +4639,7 @@ fp2_struggle.1050 = {
 			else = {
 				progress_towards_lover_effect = {
 					CHARACTER = root
+					REASON = lover_comforted_nightmare
 					OPINION = no 
 				}
 			}	
@@ -5701,6 +5708,7 @@ fp2_struggle.2001 = {
 				limit = { NOT = { has_trait = arrogant } }
 				scope:fp2_2001_desperate_county.holder = {
 					progress_towards_friend_effect = {
+						REASON = friend_informed_ally_of_betrayal
 						CHARACTER = root
 						OPINION = no
 					}
@@ -5737,6 +5745,7 @@ fp2_struggle.2001 = {
 					opinion = 40
 				}
 				progress_towards_friend_effect = {
+					REASON = friend_informed_ally_of_betrayal
 					CHARACTER = root
 					OPINION = no
 				}
@@ -7380,7 +7389,7 @@ fp2_struggle.2006 = {
 				}
 				if = {
 					limit = { can_set_relation_friend_trigger = { CHARACTER = root } }
-					set_relation_friend = root
+					set_relation_friend = { reason = friend_guided_right_path target = root }
 				}
 				add_opinion = {
 					target = root
@@ -7562,6 +7571,7 @@ fp2_struggle.2006 = {
 						show_as_tooltip = { set_character_faith = scope:fp2_2006_foreign_faith }
 
 						progress_towards_rival_effect = {
+							REASON = rival_fraternising_enemy
 							CHARACTER = root
 							OPINION = no
 						}
@@ -7634,6 +7644,7 @@ fp2_struggle.2006 = {
 
 					add_piety = medium_piety_gain
 					progress_towards_friend_effect = {
+						REASON = friend_guided_right_path
 						CHARACTER = scope:fp2_2006_vassal_in_crisis
 						OPINION = no
 					}
@@ -7673,6 +7684,7 @@ fp2_struggle.2006 = {
 
 		scope:fp2_2006_vassal_in_crisis = {
 			progress_towards_friend_effect = {
+				REASON = friend_religious_tolerance
 				CHARACTER = root
 				OPINION = no
 			}
@@ -7784,6 +7796,7 @@ fp2_struggle.2006 = {
 								if = {
 									limit = { any_secret = { secret_type = secret_non_believer } }
 									progress_towards_rival_effect = { # "HE MUST BE ON TO ME!"
+										REASON = rival_faith_tested
 										CHARACTER = scope:2006_scoped_chaplain
 										OPINION = no
 									}
@@ -7874,6 +7887,7 @@ fp2_struggle.2006 = {
 								if = {
 									limit = { any_secret = { secret_type = secret_non_believer } }
 									progress_towards_rival_effect = { # "HE MUST BE ON TO ME!"
+										REASON = rival_faith_tested
 										CHARACTER = scope:2006_scoped_chaplain
 										OPINION = no
 									}
@@ -7972,6 +7986,7 @@ fp2_struggle.2006 = {
 	
 							scope:fp2_2006_vassal_in_crisis = {
 								progress_towards_friend_effect = {
+									REASON = friend_guided_right_path
 									CHARACTER = scope:2006_scoped_chaplain
 									OPINION = no
 								}
@@ -8854,6 +8869,7 @@ fp2_struggle.2008 = {
 
 		scope:fps_2008_misdeed_actor = {
 			progress_towards_rival_effect = {
+				REASON = rival_defrauded_realm
 				CHARACTER = root
 				OPINION = no
 			}
@@ -9455,6 +9471,7 @@ fp2_struggle.2009 = {
 					opinion = 40
 				}
 				progress_towards_friend_effect = { # very nice
+					REASON = friend_gave_severed_head
 					CHARACTER = root
 					OPINION = no
 				}
@@ -10084,6 +10101,7 @@ fp2_struggle.2014 = {
 					opinion = 45
 				}
 				progress_towards_friend_effect = {
+					REASON = friend_kept_my_secret
 					CHARACTER = root
 					OPINION = no
 				}
@@ -10175,6 +10193,7 @@ fp2_struggle.2014 = {
 				}
 				else = {
 					progress_towards_friend_effect = {
+						REASON = friend_protected_secrets
 						CHARACTER = root
 						OPINION = no
 					}
@@ -10539,6 +10558,7 @@ fp2_struggle.2016 = {
 		}
 		progress_towards_rival_effect = {
 			CHARACTER = scope:fp2_struggle_2015_murder_requester_vassal
+			REASON = rival_tricked_murder
 			OPINION = yes
 		}
 		add_opinion = {
@@ -10793,7 +10813,10 @@ fp2_struggle.2021 = { # Main event
 					limit = { NOT = { scope:fp2_2021_spymaster = scope:fp2_2009_garduna_young_thief } }
 					random = {
 						chance = 25
-						set_relation_rival = scope:fp2_2021_spymaster
+						set_relation_rival = {
+							target = scope:fp2_2021_spymaster
+							reason = rival_garduna_young_thief
+						}
 					}
 				}
 			}
