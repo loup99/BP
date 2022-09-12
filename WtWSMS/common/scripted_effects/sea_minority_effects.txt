@@ -622,6 +622,58 @@ demote_least_supported_minority_effect = {
 	}
 }
 # scope:county
+# $CULTURE_OR_FAITH$: either "culture" or "faith"
+demote_an_underfed_minority_effect = {
+	if = {
+		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
+		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_small add_to_temporary_list = potential_items }
+	}
+	if = {
+		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
+		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_large add_to_temporary_list = potential_items }
+	}
+	
+	every_in_list = {
+		list = potential_items
+		if = {
+			limit = { this.support_of_a_$CULTURE_OR_FAITH$_minority_in_county > 0 }
+			add_to_temporary_list = underfed_minority
+		}
+	}
+	
+	ordered_in_list = {
+		list = underfed_minority
+		order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
+		position = 0
+		save_scope_as = item_to_demote
+	}
+	
+	if = {
+		limit = { exists = scope:item_to_demote }
+		if = {
+			limit = {
+				has_variable_list = $CULTURE_OR_FAITH$_minorities_large
+				is_target_in_variable_list = {
+					name = $CULTURE_OR_FAITH$_minorities_large
+					target = scope:item_to_demote
+				}
+			}
+			remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_large target = scope:item_to_demote }
+			add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = scope:item_to_demote }
+		}
+		else_if = {
+			limit = {
+				has_variable_list = $CULTURE_OR_FAITH$_minorities_small
+				is_target_in_variable_list = {
+					name = $CULTURE_OR_FAITH$_minorities_small
+					target = scope:item_to_demote
+				}
+			}
+			remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = scope:item_to_demote }
+		}
+	}
+}
+# scope:county
 # $ITEM$ = a scoped faith or culture
 # $CULTURE_OR_FAITH$: either "culture" or "faith"
 promote_minority_but_not_to_majority_effect = {

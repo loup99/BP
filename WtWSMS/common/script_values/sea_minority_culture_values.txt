@@ -88,6 +88,7 @@ number_of_culture_minorities_in_county = {
 }
 #County Scope
 number_of_faith_minorities_in_county = {
+	this = { save_temporary_scope_as = the_county_temp }
 	value = 0
 	if = { #Small minorities
 		limit = { this = { has_variable_list = faith_minorities_small } }
@@ -95,12 +96,12 @@ number_of_faith_minorities_in_county = {
 			every_in_list = {
 				variable = faith_minorities_small
 				if = { #Indian faiths support greater plurality
-					limit = { scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine } }
+					limit = { scope:the_county_temp.faith = { has_doctrine = eastern_hostility_doctrine } }
 					if = { #Dharmic faiths support 50% more minorities, so long as they are Dharmic or Eastern Pagan
 						limit = {
 							OR = {
-								scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine }
-								scope:the_county.faith = { has_doctrine = eastern_pagan_hostility_doctrine }
+								scope:the_county_temp.faith = { has_doctrine = eastern_hostility_doctrine }
+								scope:the_county_temp.faith = { has_doctrine = eastern_pagan_hostility_doctrine }
 							}
 						}
 						add = 0.67
@@ -117,12 +118,12 @@ number_of_faith_minorities_in_county = {
 			every_in_list = {
 				variable = faith_minorities_large
 				if = { #Indian faiths support greater plurality
-					limit = { scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine } }
+					limit = { scope:the_county_temp.faith = { has_doctrine = eastern_hostility_doctrine } }
 					if = { #Dharmic faiths support 50% more minorities, so long as they are Dharmic or Eastern Pagan
 						limit = {
 							OR = {
-								scope:the_county.faith = { has_doctrine = eastern_hostility_doctrine }
-								scope:the_county.faith = { has_doctrine = eastern_pagan_hostility_doctrine }
+								scope:the_county_temp.faith = { has_doctrine = eastern_hostility_doctrine }
+								scope:the_county_temp.faith = { has_doctrine = eastern_pagan_hostility_doctrine }
 							}
 						}
 						add = 1.34
@@ -148,6 +149,13 @@ support_of_a_culture_minority_in_county = {
 			}
 		}
 		subtract = large_minority_cost_value
+		#If there's no majority provinces on the map, it takes a bit more to keep large majorities going
+		#this should encourage eventual disappearance of only thinly supported cultures; or at least
+		#push them towards a minority status
+		if = {
+			limit = { NOT = { any_county = { this.culture = scope:the_culture } } }
+			subtract = small_minority_cost_value
+		}
 	}
 	if = {
 		limit = {
@@ -157,6 +165,21 @@ support_of_a_culture_minority_in_county = {
 			}
 		}
 		subtract = small_minority_cost_value
+		#If there's no large minorities on the map, it takes a bit more to keep small majorities going
+		#this should encourage eventual disappearance of only thinly supported cultures; or at least
+		#push them to be more concentrated
+		if = {
+			limit = {
+				NOT = { any_county = { this.culture = scope:the_culture } }
+				NOT = {
+					any_county = {
+						has_variable_list = culture_minorities_large
+						is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
+					}
+				}
+			}
+			subtract = small_minority_cost_value
+		}
 	}
 	#Determine how much is supporting this minority
 	scope:the_county = {
@@ -164,6 +187,10 @@ support_of_a_culture_minority_in_county = {
 			if = { #County with a majority population
 				limit = { this.culture = scope:the_culture }
 				add = majority_province_support_value
+			}
+			else_if = { #County with a directly-related population give a small amount of support
+				limit = { this.culture = { the_culture_or_parent_is_trigger = { CULTURE = scope:the_culture } } }
+				add = small_minority_support_value
 			}
 			else_if = { #County with a large minority
 				limit = {
@@ -201,19 +228,26 @@ support_of_a_culture_minority_in_county = {
 			}
 			add = large_minority_support_value
 		}
-		if = { #Romance/Hellenic Culture: Equivalent to having a small minority next to you
+		if = { #Romance/Hellenic/Levantine Culture: Equivalent to having a small minority next to you
 			limit = {
 				OR = {
 					has_cultural_tradition = tradition_romance_culture
 					has_cultural_tradition = tradition_romance_culture_non_dlc
 					has_cultural_tradition = tradition_hellenic_culture
 					has_cultural_tradition = tradition_hellenic_culture_non_dlc
+					has_cultural_tradition = tradition_levantine_traditions
+					has_cultural_tradition = tradition_levantine_traditions_non_dlc
 				}
 			}
 			add = small_minority_support_value
 		}
-		if = {
-			limit = { has_cultural_tradition = tradition_diasporic }
+		if = { #Certain traditions imply being always supported if a minority
+			limit = {
+				AND = {
+					has_cultural_tradition = tradition_diasporic
+					NOT = { scope:the_county.culture = scope:the_culture }
+				}
+			}
 			add = minority_always_supported_value
 		}
 	}
@@ -232,6 +266,13 @@ support_of_a_faith_minority_in_county = {
 			}
 		}
 		subtract = large_minority_cost_value
+		#If there's no majority provinces on the map, it takes a bit more to keep large majorities going
+		#this should encourage eventual disappearance of only thinly supported cultures; or at least
+		#push them towards a minority status
+		if = {
+			limit = { NOT = { any_county = { this.faith = scope:the_faith } } }
+			subtract = small_minority_cost_value
+		}
 	}
 	if = {
 		limit = {
@@ -241,6 +282,21 @@ support_of_a_faith_minority_in_county = {
 			}
 		}
 		subtract = small_minority_cost_value
+		#If there's no large minorities on the map, it takes a bit more to keep small majorities going
+		#this should encourage eventual disappearance of only thinly supported cultures; or at least
+		#push them to be more concentrated
+		if = {
+			limit = {
+				NOT = { any_county = { this.faith = scope:the_faith } }
+				NOT = {
+					any_county = {
+						has_variable_list = faith_minorities_large
+						is_target_in_variable_list = { name = faith_minorities_large target = scope:the_faith }
+					}
+				}
+			}
+			subtract = small_minority_cost_value
+		}
 	}
 	#Determine how much is supporting this minority
 	scope:the_county = {
@@ -393,10 +449,10 @@ support_of_a_faith_minority_in_county = {
 				add = small_minority_support_value
 			}
 		}
-		if = { #Jewish faiths are well protected so long as the holder isn't jewish
+		if = { #Jewish faiths are well protected so long as the county isn't Jewish
 			limit = {
 				this.religion = religion:judaism_religion
-				NOT = { scope:the_county.holder.religion = religion:judaism_religion }
+				NOT = { scope:the_county.religion = religion:judaism_religion }
 			}
 			add = majority_province_support_value
 			add = majority_province_support_value
