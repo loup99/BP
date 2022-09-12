@@ -70,7 +70,7 @@ on_yearly_sea_minority_maintainance = {
 		# When a county has fewer minorities than its capacity, it should randomly get a minority from an
 		# adjoining county. For now, let the selection be truly random.
 		every_county = {
-			this = { save_scope_as = the_county }
+			this = { save_scope_as = target_county }
 			
 			### Culture
 			if = { #If there are too many minorities, some must die out
@@ -80,7 +80,7 @@ on_yearly_sea_minority_maintainance = {
 					this.number_of_culture_minorities_in_county > this.minority_capacity_of_county
 				}
 				random = {
-					chance = chance_of_county_minority_culture_reduction_event_per_year
+					chance = chance_of_culture_minority_reduction_event_per_year
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_reduction
@@ -93,20 +93,20 @@ on_yearly_sea_minority_maintainance = {
 					NOT = { has_variable = recently_checked_underfed_culture }
 				}
 				random = {
-					chance = chance_of_county_minority_culture_underfed_reduction_event_per_year
+					chance = chance_of_culture_minority_underfed_event_per_year
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_minority_underfed
 					}
 				}
 			}
-			else_if = { #If there are too few minorities, then an increase is possible
+			else_if = { #If there are too few minorities, then immigration is possible
 				limit = {
 					county_has_minority_culture_trigger = yes
 					this.number_of_culture_minorities_in_county <= this.minority_capacity_of_county
 				}
 				random = {
-					chance = chance_of_county_minority_culture_spread_event_per_year
+					chance = chance_of_culture_minority_immigration_event_per_year
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_immigration
@@ -123,7 +123,7 @@ on_yearly_sea_minority_maintainance = {
 					this.number_of_faith_minorities_in_county > this.minority_capacity_of_county
 				}
 				random = {
-					chance = chance_of_county_minority_faith_reduction_event_per_year
+					chance = chance_of_faith_minority_reduction_event_per_year
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_faith_reduction
@@ -136,20 +136,20 @@ on_yearly_sea_minority_maintainance = {
 					NOT = { has_variable = recently_checked_underfed_faith }
 				}
 				random = {
-					chance = chance_of_county_minority_faith_underfed_reduction_event_per_year
+					chance = chance_of_faith_minority_underfed_event_per_year
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_minority_underfed
 					}
 				}
 			}
-			if = { #If there are too few minorities, then an increase is possible
+			if = { #If there are too few minorities, then immigration is possible
 				limit = {
 					county_has_minority_faith_trigger = yes
 					this.number_of_faith_minorities_in_county <= this.minority_capacity_of_county
 				}
 				random = {
-					chance = chance_of_county_minority_faith_spread_event_per_year
+					chance = chance_of_faith_minority_immigration_event_per_year
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_faith_immigration
@@ -162,7 +162,7 @@ on_yearly_sea_minority_maintainance = {
 }
 do_culture_reduction = {
 	effect = {
-		scope:the_county = {
+		scope:target_county = {
 			demote_least_supported_minority_effect = { CULTURE_OR_FAITH = culture }
 			set_variable = { name = recently_demoted_culture days = 1826 } #To keep things from dropping *too* fast
 		}
@@ -170,7 +170,7 @@ do_culture_reduction = {
 }
 do_culture_minority_underfed = {
 	effect = {
-		scope:the_county = {
+		scope:target_county = {
 			demote_an_underfed_minority_effect = { CULTURE_OR_FAITH = culture }
 			set_variable = { name = recently_checked_underfed_culture years = 10 }
 		}
@@ -180,17 +180,17 @@ do_culture_immigration = {
 	effect = {
 		if = {
 			limit = {
-				scope:the_county = {
+				scope:target_county = {
 					culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
 				}
 			}
-			county_to_county_migration_effect = { CULTURE_OR_FAITH = culture }
+			immigration_effect = { CULTURE_OR_FAITH = culture }
 		}
 	}
 }
 do_faith_reduction = {
 	effect = {
-		scope:the_county = {
+		scope:target_county = {
 			demote_least_supported_minority_effect = { CULTURE_OR_FAITH = faith }
 			set_variable = { name = recently_demoted_faith days = 1826 } #To keep things from dropping *too* fast
 		}
@@ -198,7 +198,7 @@ do_faith_reduction = {
 }
 do_faith_minority_underfed = {
 	effect = {
-		scope:the_county = {
+		scope:target_county = {
 			demote_an_underfed_minority_effect = { CULTURE_OR_FAITH = faith }
 			set_variable = { name = recently_checked_underfed_faith years = 10 }
 		}
@@ -208,11 +208,11 @@ do_faith_immigration = {
 	effect = {
 		if = {
 			limit = {
-				scope:the_county = {
+				scope:target_county = {
 					faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
 				}
 			}
-			county_to_county_migration_effect = { CULTURE_OR_FAITH = faith }
+			immigration_effect = { CULTURE_OR_FAITH = faith }
 		}
 	}
 }
