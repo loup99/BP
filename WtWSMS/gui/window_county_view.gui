@@ -225,124 +225,6 @@ window = {
 				}
 			}
 
-			########################
-			### BEGIN MINORITIES ###
-			########################
-
-			hbox = {
-				name = "county_culture_minorities_small_grid"
-
-				datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_small')]"
-				visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_small')))]"
-
-				item = {
-					button = {
-						size = { 30 30 }
-
-						onclick = "[DefaultOnCultureClick(Scope.Culture.GetID)]"
-						texture = "gfx/interface/icons/modifiers/sea_culture_minority_small.dds"
-						using = tooltip_ne
-						tooltipwidget = {
-							culture_minorities_tooltip = {
-								blockoverride "minority_label"
-								{
-									text = "[minority_culture_small|E]"
-								}
-							}
-						}
-					}
-				}
-			}
-
-			hbox = {
-				name = "county_faith_minorities_small_grid"
-
-				datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_small')]"
-				visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_small')))]"
-
-				item = {
-					button = {
-						size = { 30 30 }
-
-						onclick = "[DefaultOnFaithClick(Scope.Faith.GetID)]"
-						texture = "gfx/interface/icons/modifiers/sea_faith_minority_small.dds"
-						using = tooltip_ne
-						tooltipwidget = {
-							faith_minorities_tooltip = {
-								blockoverride "minority_label"
-								{
-									text = "[minority_faith_small|E]"
-								}
-							}
-						}
-
-						icon = {
-							name = "gold_negative_console_button_minus"
-							position = { 4 7 }
-							size = { 30 30 }
-							texture = "[Scope.Faith.GetIcon]"
-						}
-					}
-				}
-			}
-
-			hbox = {
-				name = "county_culture_minorities_large_grid"
-				datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_large')]"
-				visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_large')))]"
-
-				item = {
-					button = {
-						size = { 30 30 }
-						onclick = "[DefaultOnCultureClick(Scope.Culture.GetID)]"
-						texture = "gfx/interface/icons/modifiers/sea_culture_minority_large.dds"
-						using = tooltip_ne
-						tooltipwidget = {
-							culture_minorities_tooltip = {
-								blockoverride "minority_label"
-								{
-									text = "[minority_culture_large|E]"
-								}
-							}
-						}
-					}
-				}
-			}
-
-			hbox = {
-				name = "county_faith_minorities_large_grid"
-				datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_large')]"
-				visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_large')))]"
-
-				item = {
-					button = {
-						size = { 30 30 }
-						onclick = "[DefaultOnFaithClick(Scope.Faith.GetID)]"
-						texture = "gfx/interface/icons/modifiers/sea_faith_minority_large.dds"
-						using = tooltip_ne
-						tooltipwidget = {
-							faith_minorities_tooltip = {
-								blockoverride "minority_label"
-								{
-									text = "[minority_faith_large|E]"
-								}
-							}
-						}
-
-						icon = {
-							name = "gold_negative_console_button_minus"
-							position = { 4 7 }
-							size = { 30 30 }
-							texture = "[Scope.Faith.GetIcon]"
-						}
-					}
-				}
-			}
-
-			######################
-			### END MINORITIES ###
-			######################
-
 			hbox = {
 				layoutpolicy_vertical = expanding
 				visible = [County.IsFullyOccupied]
@@ -738,8 +620,21 @@ window = {
 					}
 				}
 			}
-
 			expand = {}
+			hbox = {
+				button_tab = {
+					parentanchor = right
+					layoutpolicy_horizontal = expanding
+					size = { 150 40 }
+					onclick = "[GetVariableSystem.Toggle( 'minority_view' )]"
+					down = "[GetVariableSystem.Toggle( 'minority_view' )]"
+					onclick = "[PdxGuiTriggerAllAnimations('holding_view_refresh')]"
+					text = "MINORITY_HEADING"
+					default_format = "#low"
+
+					using = tooltip_below
+				}
+			}
 		}
 
 		####################################
@@ -754,6 +649,7 @@ window = {
 			margin_bottom = 10
 			margin_right = 15
 			scissor = yes
+			visible = "[Not(GetVariableSystem.Exists('minority_view'))]"
 
 			state = {
 				name = "holding_view_refresh"
@@ -1610,6 +1506,162 @@ window = {
 				}
 			}
 
+		}
+		
+		#########################
+		### MINORITIES WIDGET ###
+		#########################
+		margin_widget = {
+			name = "minority_view"
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			minimumsize = { 0 200 }
+			margin = { 10 5 }
+			margin_bottom = 10
+			margin_right = 15
+			scissor = yes
+			visible = "[GetVariableSystem.Exists('minority_view')]"
+			
+			########################
+			### BEGIN MINORITIES ###
+			########################
+			
+			flowcontainer = {
+				direction = vertical
+				spacing = 10
+				flowcontainer = { #Cultures
+					spacing = 10
+					
+					text_single = {
+						text = "MINORITY_CULTURES"
+						align = nobaseline|left
+						parentanchor = left|top
+					}
+					divider = {}
+					flowcontainer = {
+						name = "county_culture_minorities_small_grid"
+
+						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_small')]"
+						visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_small')))]"
+
+						item = {
+							button = {
+								size = { 30 30 }
+
+								onclick = "[DefaultOnCultureClick(Scope.Culture.GetID)]"
+								texture = "gfx/interface/icons/modifiers/sea_culture_minority_small.dds"
+								using = tooltip_ne
+								tooltipwidget = {
+									culture_minorities_tooltip = {
+										blockoverride "minority_label"
+										{
+											text = "[minority_culture_small|E]"
+										}
+									}
+								}
+							}
+						}
+					}
+					flowcontainer = {
+						name = "county_culture_minorities_large_grid"
+						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_large')]"
+						visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_large')))]"
+
+						item = {
+							button = {
+								size = { 30 30 }
+								onclick = "[DefaultOnCultureClick(Scope.Culture.GetID)]"
+								texture = "gfx/interface/icons/modifiers/sea_culture_minority_large.dds"
+								using = tooltip_ne
+								tooltipwidget = {
+									culture_minorities_tooltip = {
+										blockoverride "minority_label"
+										{
+											text = "[minority_culture_large|E]"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				divider = {}
+				flowcontainer = { #Faiths
+					spacing = 10
+					
+					text_single = {
+						text = "MINORITY_FAITHS"
+						align = nobaseline|center
+					}
+					divider = {}
+					flowcontainer = {
+						name = "county_faith_minorities_small_grid"
+
+						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_small')]"
+						visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_small')))]"
+
+						item = {
+							button = {
+								size = { 30 30 }
+
+								onclick = "[DefaultOnFaithClick(Scope.Faith.GetID)]"
+								texture = "gfx/interface/icons/modifiers/sea_faith_minority_small.dds"
+								using = tooltip_ne
+								tooltipwidget = {
+									faith_minorities_tooltip = {
+										blockoverride "minority_label"
+										{
+											text = "[minority_faith_small|E]"
+										}
+									}
+								}
+
+								icon = {
+									name = "gold_negative_console_button_minus"
+									position = { 4 7 }
+									size = { 30 30 }
+									texture = "[Scope.Faith.GetIcon]"
+								}
+							}
+						}
+					}
+					flowcontainer = {
+						name = "county_faith_minorities_large_grid"
+						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_large')]"
+						visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_large')))]"
+
+						item = {
+							button = {
+								size = { 30 30 }
+								onclick = "[DefaultOnFaithClick(Scope.Faith.GetID)]"
+								texture = "gfx/interface/icons/modifiers/sea_faith_minority_large.dds"
+								using = tooltip_ne
+								tooltipwidget = {
+									faith_minorities_tooltip = {
+										blockoverride "minority_label"
+										{
+											text = "[minority_faith_large|E]"
+										}
+									}
+								}
+
+								icon = {
+									name = "gold_negative_console_button_minus"
+									position = { 4 7 }
+									size = { 30 30 }
+									texture = "[Scope.Faith.GetIcon]"
+								}
+							}
+						}
+					}
+				}
+				
+			} #END VBox
+
+			######################
+			### END MINORITIES ###
+			######################
+			
 		}
 	}
 }
