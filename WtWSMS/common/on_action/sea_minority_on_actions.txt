@@ -87,6 +87,19 @@ on_yearly_sea_minority_maintainance = {
 					}
 				}
 			}
+			else_if = { #There's a chance for underfed minorities to die out
+				limit = {
+					county_has_minority_culture_trigger = yes
+					NOT = { has_variable = recently_checked_underfed_culture }
+				}
+				random = {
+					chance = 1
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_culture_minority_underfed
+					}
+				}
+			}
 			else_if = { #If there are too few minorities, then an increase is possible
 				limit = {
 					county_has_minority_culture_trigger = yes
@@ -117,6 +130,19 @@ on_yearly_sea_minority_maintainance = {
 					}
 				}
 			}
+			else_if = { #There's a chance for underfed minorities to die out
+				limit = {
+					county_has_minority_faith_trigger = yes
+					NOT = { has_variable = recently_checked_underfed_faith }
+				}
+				random = {
+					chance = 1
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_culture_minority_underfed
+					}
+				}
+			}
 			if = { #If there are too few minorities, then an increase is possible
 				limit = {
 					county_has_minority_faith_trigger = yes
@@ -142,6 +168,14 @@ do_culture_reduction = {
 		}
 	}
 }
+do_culture_minority_underfed = {
+	effect = {
+		scope:the_county = {
+			demote_an_underfed_minority_effect = { CULTURE_OR_FAITH = culture }
+			set_variable = { name = recently_checked_underfed_culture years = 10 }
+		}
+	}
+}
 do_culture_immigration = {
 	effect = {
 		if = {
@@ -159,6 +193,14 @@ do_faith_reduction = {
 		scope:the_county = {
 			demote_least_supported_minority_effect = { CULTURE_OR_FAITH = faith }
 			set_variable = { name = recently_demoted_faith days = 1826 } #To keep things from dropping *too* fast
+		}
+	}
+}
+do_faith_minority_underfed = {
+	effect = {
+		scope:the_county = {
+			demote_an_underfed_minority_effect = { CULTURE_OR_FAITH = faith }
+			set_variable = { name = recently_checked_underfed_faith years = 10 }
 		}
 	}
 }
