@@ -450,14 +450,14 @@ BP_set_minorities_universal = {
 				if = {
 					limit = { NOT = { this.faith = faith:african_church } }
 					add_to_variable_list = {
-						name = faith_minorities_small
+						name = faith_minorities_large
 						target = faith:african_church
 					}
 				}
 				if = {
 					limit = { NOT = { this.faith = faith:donatism } }
 					add_to_variable_list = {
-						name = faith_minorities_small
+						name = faith_minorities_large
 						target = faith:donatism
 					}
 				}
@@ -502,6 +502,10 @@ BP_set_minorities_universal = {
 					name = faith_minorities_large
 					target = faith:miaphysitism
 				}
+			}
+			add_to_variable_list = {
+				name = culture_minorities_large
+				target = culture:coptic
 			}
 			add_to_variable_list = {
 				name = faith_minorities_small
@@ -653,7 +657,7 @@ BP_set_minorities_by_date = {
 				}
 			}
 			
-			# Culture
+			# Cultures
 			#========================
 			###Remnant Medians
 			title:c_hamadan = {
@@ -732,8 +736,10 @@ BP_set_minorities_by_date = {
 			}
 			every_county = {
 				limit = {
-					this = title:c_melilla
-					this = title:c_gharb
+					OR = {
+						this = title:c_melilla
+						this = title:c_gharb
+					}
 				}
 				this = {
 					#Faiths
@@ -750,6 +756,38 @@ BP_set_minorities_by_date = {
 						add_to_variable_list = {
 							name = culture_minorities_small
 							target = culture:romano_african
+						}
+					}
+				}
+			}
+			### Vandal Settlement in North Africa & Hispaniae
+			every_county = {
+				limit = {
+					OR = {
+						this.duchy = title:d_carthago
+						this.duchy = title:d_tripolitania
+						#Remnant Vandals in Hispaniae (see CK2)
+						this = title:c_algeciras
+						this = title:c_cadiz
+					}
+					NOT = { this = title:c_tripolitana }
+					is_coastal_county = yes
+				}
+				this = {
+					#Faiths
+					if = {
+						limit = { NOT = { this.faith = faith:arian } }
+						add_to_variable_list = {
+							name = faith_minorities_small
+							target = faith:arian
+						}
+					}
+					#Cultures
+					if = {
+						limit = { NOT = { this.culture = culture:vandalic } }
+						add_to_variable_list = {
+							name = culture_minorities_small
+							target = culture:vandalic
 						}
 					}
 				}
@@ -801,6 +839,9 @@ BP_set_minorities_by_date = {
 						this = title:c_moura
 						this = title:c_badajoz
 						this = title:c_lisboa
+						#North Africa
+						this = title:c_bejaia
+						this = title:c_algier
 					}
 				}
 				this = {
@@ -811,6 +852,65 @@ BP_set_minorities_by_date = {
 					add_to_variable_list = {
 						name = culture_minorities_small
 						target = culture:alan
+					}
+				}
+			}
+			### Visigothic Settlement
+			#The Iberian conquests are _very_ recent, so there really shouldn't be much Gothic
+			#settlement in Iberia at this time. Some of the various nucleus of later settlement should
+			#exist, but not actual majorities
+			every_county = {
+				limit = {
+					OR = {
+						#Major urban nucleus under Visigoths directly in 476
+						this = title:c_barcelona
+						this = title:c_toledo
+						#Campi Gothorum
+						this = title:c_burgos
+						this = title:c_valladolid
+					}
+				}
+				this = {
+					add_to_variable_list = {
+						name = faith_minorities_small
+						target = faith:gothic_church
+					}
+					add_to_variable_list = {
+						name = culture_minorities_small
+						target = culture:visigothic
+					}
+				}
+			}
+			### Nicene Christians amongst the Priscillianists & Hellenics
+			every_county = { #Large populations
+				limit = {
+					OR = {
+						this.faith = faith:priscillianism
+						this.faith = faith:hellenic_pagan
+					}
+					this.culture = culture:romano_hispanic
+					any_neighboring_county = { this.faith = faith:mozarabic_church }
+				}
+				this = {
+					add_to_variable_list = {
+						name = faith_minorities_large
+						target = faith:mozarabic_church
+					}
+				}
+			}
+			every_county = { #Small populations
+				limit = {
+					OR = {
+						this.faith = faith:priscillianism
+						this.faith = faith:hellenic_pagan
+					}
+					this.culture = culture:romano_hispanic
+					NOT = { any_neighboring_county = { this.faith = faith:mozarabic_church } }
+				}
+				this = {
+					add_to_variable_list = {
+						name = faith_minorities_small
+						target = faith:mozarabic_church
 					}
 				}
 			}
@@ -917,6 +1017,13 @@ BP_set_minorities_by_date = {
 					target = culture:aramean
 				}
 			}
+			title:c_samosata = {
+				#Cultures
+				add_to_variable_list = {
+					name = culture_minorities_small
+					target = culture:aramean
+				}
+			}
 			### Egypt
 			title:c_alexandria = {
 				#Faiths
@@ -945,15 +1052,7 @@ BP_set_minorities_by_date = {
 			title:c_tunis = {
 				add_to_variable_list = {
 					name = faith_minorities_small
-					target = faith:arian
-				}
-				add_to_variable_list = {
-					name = faith_minorities_small
 					target = faith:rabbinism
-				}
-				add_to_variable_list = {
-					name = culture_minorities_small
-					target = culture:vandalic
 				}
 				add_to_variable_list = {
 					name = culture_minorities_small
@@ -1024,12 +1123,29 @@ BP_set_minorities_by_date = {
 			### Spain
 			title:c_porto = {
 				add_to_variable_list = {
+					name = faith_minorities_large
+					target = faith:priscillianism
+				}
+				add_to_variable_list = {
 					name = faith_minorities_small
 					target = faith:arian
+				}
+				add_to_variable_list = {
+					name = faith_minorities_small
+					target = faith:mozarabic_church
 				}
 				add_to_variable_list = { #Terras de Boro
 					name = culture_minorities_small
 					target = culture:buri
+				}
+				add_to_variable_list = {
+					name = culture_minorities_small
+					target = culture:suebi
+				}
+				#Remnant Romano-Hispanics
+				add_to_variable_list = {
+					name = culture_minorities_large
+					target = culture:romano_hispanic
 				}
 			}
 			title:c_santiago = {
@@ -1040,6 +1156,30 @@ BP_set_minorities_by_date = {
 				add_to_variable_list = {
 					name = culture_minorities_small
 					target = culture:macromanni
+				}
+			}
+			title:c_viseu = {
+				add_to_variable_list = {
+					name = faith_minorities_small
+					target = faith:mozarabic_church
+				}
+				add_to_variable_list = {
+					name = culture_minorities_large
+					target = culture:romano_hispanic
+				}
+			}
+			title:c_monterrei = {
+				add_to_variable_list = {
+					name = faith_minorities_large
+					target = faith:priscillianism
+				}
+				add_to_variable_list = {
+					name = faith_minorities_small
+					target = faith:mozarabic_church
+				}
+				add_to_variable_list = {
+					name = culture_minorities_large
+					target = culture:romano_hispanic
 				}
 			}
 		}
