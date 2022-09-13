@@ -73,6 +73,23 @@ on_yearly_sea_minority_maintainance = {
 		every_county = {
 			this = { save_scope_as = target_county }
 			
+			### Immigration
+			if = { #If there are too few minorities, then immigration is possible
+				limit = {
+					county_has_minority_faith_trigger = yes
+					county_has_minority_culture_trigger = yes
+					this.number_of_faith_minorities_in_county <= this.minority_capacity_of_county
+					this.number_of_culture_minorities_in_county <= this.minority_capacity_of_county
+				}
+				random = {
+					chance = chance_of_minority_immigration_event_per_year
+					trigger_event = {
+						#days = { 1 360 }
+						on_action = do_immigration
+					}
+				}
+			}
+			
 			### Culture
 			if = { #If there are too many minorities, some must die out
 				limit = {
@@ -98,19 +115,6 @@ on_yearly_sea_minority_maintainance = {
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_minority_underfed
-					}
-				}
-			}
-			else_if = { #If there are too few minorities, then immigration is possible
-				limit = {
-					county_has_minority_culture_trigger = yes
-					this.number_of_culture_minorities_in_county <= this.minority_capacity_of_county
-				}
-				random = {
-					chance = chance_of_culture_minority_immigration_event_per_year
-					trigger_event = {
-						days = { 1 360 }
-						on_action = do_culture_immigration
 					}
 				}
 			}
@@ -144,20 +148,20 @@ on_yearly_sea_minority_maintainance = {
 					}
 				}
 			}
-			if = { #If there are too few minorities, then immigration is possible
-				limit = {
-					county_has_minority_faith_trigger = yes
-					this.number_of_faith_minorities_in_county <= this.minority_capacity_of_county
-				}
-				random = {
-					chance = chance_of_faith_minority_immigration_event_per_year
-					trigger_event = {
-						days = { 1 360 }
-						on_action = do_faith_immigration
-					}
+			#Otherwise, keep things as they were
+		}
+	}
+}
+do_immigration = {
+	effect = {
+		if = {
+			limit = {
+				scope:target_county = {
+					culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
+					faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
 				}
 			}
-			#Otherwise, keep things as they were
+			immigration_effect = yes
 		}
 	}
 }
@@ -177,18 +181,6 @@ do_culture_minority_underfed = {
 		}
 	}
 }
-do_culture_immigration = {
-	effect = {
-		if = {
-			limit = {
-				scope:target_county = {
-					culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
-				}
-			}
-			immigration_effect = { CULTURE_OR_FAITH = culture }
-		}
-	}
-}
 do_faith_reduction = {
 	effect = {
 		scope:target_county = {
@@ -202,18 +194,6 @@ do_faith_minority_underfed = {
 		scope:target_county = {
 			demote_an_underfed_minority_effect = { CULTURE_OR_FAITH = faith }
 			set_variable = { name = recently_checked_underfed_faith years = 10 }
-		}
-	}
-}
-do_faith_immigration = {
-	effect = {
-		if = {
-			limit = {
-				scope:target_county = {
-					faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
-				}
-			}
-			immigration_effect = { CULTURE_OR_FAITH = faith }
 		}
 	}
 }
