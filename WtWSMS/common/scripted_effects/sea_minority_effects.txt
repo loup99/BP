@@ -639,6 +639,102 @@ demote_an_underfed_minority_effect = {
 		}
 	}
 }
+#Requires scope:target_county
+immigration_effect = {
+	scope:target_county = {
+		if = {
+			limit = {
+				any_neighboring_county = {
+					NOT = { $CULTURE_OR_FAITH$ = scope:target_county.$CULTURE_OR_FAITH$ }
+				}
+			}
+			random_neighboring_county = {
+				limit = { NOT = { $CULTURE_OR_FAITH$ = scope:target_county.$CULTURE_OR_FAITH$ } }
+				this = { save_scope_as = source_county }
+			}
+			#Carry out immigration
+			evangelization_immigration_effect = {
+				CULTURE_OR_FAITH = faith
+				TYPE = immigration
+			}
+		}
+	}
+}
+#Requires scope:source_county
+evangelization_effect = {
+	scope:source_county = {
+		if = {
+			limit = {
+				any_neighboring_county = {
+					NOT = { faith = scope:source_county.faith }
+					faith = { is_valid_evangelizing_target_faith_trigger = yes }
+				}
+			}
+			random_neighboring_county = {
+				limit = {
+					NOT = { faith = scope:source_county.faith }
+					faith = { is_valid_evangelizing_target_faith_trigger = yes }
+				}
+				weight = {
+					base = 1
+					#Autocephaly should restrict targeting
+					modifier = {
+						factor = 2
+						scope:source_county.faith = { has_doctrine = tenet_autocephaly }
+						actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:source_county
+							VARIABLE = church_culture
+						}
+					}
+					modifier = { #Don't commingle autocephalous churches
+						factor = 0
+						scope:source_county.faith = { has_doctrine = tenet_autocephaly }
+						this.faith = { has_doctrine = tenet_autocephaly }
+					}
+					modifier = { #Don't proselytize autocephalous churches to unrelated cultures
+						factor = 0
+						scope:source_county.faith = { has_doctrine = tenet_autocephaly }
+						NOT = {
+							actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+								ACTOR = this
+								TARGET = scope:source_county
+								VARIABLE = church_culture
+							}
+						}
+					}
+				}
+				this = { save_scope_as = target_county }
+			}
+			#Carry out evangelization
+			evangelization_immigration_effect = {
+				CULTURE_OR_FAITH = faith
+				TYPE = evangelization
+			}
+		}
+	}
+}
+
+### General Routines
+
+#Requires source_county and target_county to be defined
+evangelization_immigration_effect = {
+	if = {
+		limit = { NOT = { scope:source_county.$CULTURE_OR_FAITH$ = scope:target_county.$CULTURE_OR_FAITH$ } }
+		scope:target_county = {
+			promote_minority_but_not_to_majority_effect = {
+				ITEM = scope:source_county.$CULTURE_OR_FAITH$
+				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+			}
+			notify_characters_of_minority_immigration_effect = {
+				THE_SOURCE_COUNTY = scope:source_county
+				THE_TARGET_COUNTY = scope:target_county
+				EVENT_TITLE = minority_$CULTURE_OR_FAITH$_$TYPE$_title
+				EVENT_TOOLTIP = minority_$CULTURE_OR_FAITH$_$TYPE$_tt
+			}
+		}
+	}
+}
 #This is done at a county scope
 # $ITEM$ = a scoped faith or culture
 # $CULTURE_OR_FAITH$: either "culture" or "faith"
@@ -652,6 +748,12 @@ promote_minority_but_not_to_majority_effect = {
 		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
 	}
 	#Large minorities should not become majorities
+	else_if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		}
+	}
 	else = { add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ } }
 }
 #This is done at a county scope
@@ -675,39 +777,7 @@ demote_minority_effect = {
 	}
 }
 
-#Requires scope:target_county
-immigration_effect = {
-	scope:target_county = {
-		if = {
-			limit = {
-				any_neighboring_county = {
-					NOT = { $CULTURE_OR_FAITH$ = scope:target_county.$CULTURE_OR_FAITH$ }
-				}
-			}
-			random_neighboring_county = {
-				limit = { NOT = { $CULTURE_OR_FAITH$ = scope:target_county.$CULTURE_OR_FAITH$ } }
-				this = { save_scope_as = source_county }
-			}
-			#Carry out immigration
-			if = {
-				limit = { NOT = { scope:source_county.$CULTURE_OR_FAITH$ = scope:target_county.$CULTURE_OR_FAITH$ } }
-				scope:target_county = {
-					promote_minority_but_not_to_majority_effect = {
-						ITEM = scope:source_county.$CULTURE_OR_FAITH$
-						CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
-					}
-					notify_characters_of_minority_immigration_effect = {
-						THE_SOURCE_COUNTY = scope:source_county
-						THE_TARGET_COUNTY = scope:target_county
-						EVENT_TITLE = minority_$CULTURE_OR_FAITH$_immigration_title
-						EVENT_TOOLTIP = minority_$CULTURE_OR_FAITH$_immigration_tt
-					}
-				}
-			}
-		}
-	}
-}
-
+### Notification routines
 notify_characters_of_minority_reduction_effect = {
 	$THE_TARGET_COUNTY$.holder = {
 		add_to_temporary_list = characters_to_notify

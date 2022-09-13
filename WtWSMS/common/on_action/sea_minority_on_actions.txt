@@ -2,6 +2,7 @@
 yearly_global_pulse = {
 	on_actions = {
 		on_yearly_sea_minority_maintainance
+		on_yearly_sea_majority_maintainance
 	}
 }
 
@@ -214,6 +215,52 @@ do_faith_immigration = {
 			}
 			immigration_effect = { CULTURE_OR_FAITH = faith }
 		}
+	}
+}
+
+on_yearly_sea_majority_maintainance = {
+	effect = {
+		every_county = {
+			this = { save_scope_as = source_county }
+			
+			### Faith
+			if = { #If there are too many minorities, some must die out
+				limit = {
+					faith = { is_valid_evangelizing_source_faith_trigger = yes }
+					NOT = { has_variable = recently_evangelized_faith }
+				}
+				random = {
+					chance = chance_of_faith_majority_evangelization_event_per_year
+					modifier = {
+						factor = 2
+						faith = {
+							OR = {
+								has_doctrine = tenet_mendicant_preachers
+								has_doctrine = tenet_autocephaly
+							}
+						}
+					}
+					modifier = {
+						factor = 0.5
+						faith = { has_doctrine = tenet_communal_identity }
+					}
+					modifier = {
+						factor = 0
+						faith = { infrequent_evangelization_trigger = yes }
+					}
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_faith_evangelization
+					}
+				}
+			}
+		}
+	}
+}
+do_faith_evangelization = {
+	effect = {
+		evangelization_effect = yes
+		set_variable = { name = recently_evangelized_faith years = 10 }
 	}
 }
 
