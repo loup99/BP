@@ -144,22 +144,55 @@ county_has_specific_minority_culture_trigger = {
 
 ##### Changed from Vanilla vvvvv
 
-#faith scope
-is_valid_evangelizing_source_faith_trigger = {
+### These are meant to overwritten liberally when integrated into other mods
+is_valid_immigration_target_county = { #county scope
+	culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
+	faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
+}
+is_valid_evangelizing_source_faith_trigger = { #faith scope
 	NOT = { has_doctrine_parameter = unreformed }
 	NOT = { has_doctrine = tenet_ethnic_religion }
+	OR = {
+		this.religion = religion:christianity_religion
+		this.religion = religion:islam_religion
+		this.religion = religion:buddhism_religion
+		this.religion = religion:dualism_religion
+	}
 }
-#faith scope
-is_valid_evangelizing_target_faith_trigger = {
-	has_doctrine_parameter = unreformed
-}
-#faith scope
-infrequent_evangelization_trigger = {
+never_evangelizes_trigger = { #faith scope
 	NOR = {
 		this.religion = religion:christianity_religion
 		this.religion = religion:islam_religion
 		this.religion = religion:buddhism_religion
 		this.religion = religion:dualism_religion
+	}
+}
+is_frequently_evangelizeing_faith_trigger = { #faith scope
+	OR = {
+		has_doctrine = tenet_mendicant_preachers
+		has_doctrine = tenet_autocephaly
+	}
+}
+is_valid_evangelizing_target_faith_trigger = { #faith scope
+	has_doctrine_parameter = unreformed
+}
+infrequent_evangelization_trigger = { #faith scope
+	has_doctrine = tenet_communal_identity
+}
+valid_neighbor_immigration_state_trigger = {
+	NOT = { culture = { has_cultural_tradition = tradition_isolationist } }
+	NOT = { faith = { has_doctrine = tenet_ethnic_religion } }
+}
+### These are NOT meant to be overwritten when integrated into other mods; impacts some core functionality
+county_has_a_minority_with_type_and_size_trigger = { 
+	AND = {
+		has_variable_list = $CULTURE_OR_FAITH$_minorities_$SIZE$
+		NOT = {
+			is_target_in_variable_list = {
+				name = $CULTURE_OR_FAITH$_minorities_$SIZE$
+				target = $THE_COUNTY$.$CULTURE_OR_FAITH$
+			}
+		}
 	}
 }
 ##### Changed from Vanilla ^^^^^
