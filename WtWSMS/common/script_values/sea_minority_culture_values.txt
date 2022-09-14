@@ -15,18 +15,6 @@
 }
 ##### Changed from Vanilla vvvvv
 
-#Generic values
-minority_always_supported_value = 1000 #For things like Diasporic
-majority_province_support_value = 10
-large_minority_support_value = 2
-large_minority_cost_value = 4
-small_minority_support_value = 1
-small_minority_cost_value = 2
-#Other values
-
-#small minority, large minority, majority; script value in case we want to change this
-number_of_minority_levels = 3
-
 #Assuming you know how many years Y you want a P% of a minority spread, you can 
 #calculate as P = (1-X)^Y, for P the chance of minority spread
 # So here's a quick look-up table:
@@ -66,7 +54,7 @@ minority_capacity_of_county = {
 	}
 }
 #County Scope
-number_of_culture_minorities_in_county = {
+number_of_culture_minorities_in_county_weighted = {
 	value = 0
 	if = {
 		limit = { this = { has_variable_list = culture_minorities_small } }
@@ -80,7 +68,7 @@ number_of_culture_minorities_in_county = {
 	}
 }
 #County Scope
-number_of_faith_minorities_in_county = {
+number_of_faith_minorities_in_county_weighted = {
 	this = { save_temporary_scope_as = the_county_temp }
 	value = 0
 	if = { #Small minorities
@@ -129,203 +117,19 @@ number_of_faith_minorities_in_county = {
 	}
 	floor = yes #Because of fractional Dharmic values
 }
-#Culture Scope
+#Culture Support Determination
 support_of_a_culture_minority_in_county = {
 	this = { save_temporary_scope_as = the_culture }
-	value = 0
-	#Determine how much is needed to feed this minority
-	if = {
-		limit = {
-			scope:target_county = {
-				has_variable_list = culture_minorities_large
-				is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
-			}
-		}
-		subtract = large_minority_cost_value
-		#If there's no majority provinces on the map, it takes a bit more to keep large majorities going
-		#this should encourage eventual disappearance of only thinly supported cultures; or at least
-		#push them towards a minority status
-		if = {
-			limit = { NOT = { any_county = { this.culture = scope:the_culture } } }
-			subtract = small_minority_cost_value
-		}
-	}
-	if = {
-		limit = {
-			scope:target_county = {
-				has_variable_list = culture_minorities_small
-				is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
-			}
-		}
-		subtract = small_minority_cost_value
-		#If there's no large minorities on the map, it takes a bit more to keep small majorities going
-		#this should encourage eventual disappearance of only thinly supported cultures; or at least
-		#push them to be more concentrated
-		if = {
-			limit = {
-				NOT = { any_county = { this.culture = scope:the_culture } }
-				NOT = {
-					any_county = {
-						has_variable_list = culture_minorities_large
-						is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
-					}
-				}
-			}
-			subtract = small_minority_cost_value
-		}
-	}
-	#Determine how much is supporting this minority
-	scope:target_county = {
-		every_neighboring_county = {
-			if = { #County with a majority population
-				limit = { this.culture = scope:the_culture }
-				add = majority_province_support_value
-			}
-			else_if = { #County with a directly-related population give a small amount of support
-				limit = { this.culture = { the_culture_or_parent_is_trigger = { CULTURE = scope:the_culture } } }
-				add = small_minority_support_value
-			}
-			else_if = { #County with a large minority
-				limit = {
-					has_variable_list = culture_minorities_large
-					is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
-				}
-				add = large_minority_support_value
-			}
-			else_if = { #County with a small minority
-				limit = {
-					has_variable_list = culture_minorities_small
-					is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
-				}
-				add = small_minority_support_value
-			}
-		}
-		holder = {
-			if = { #If the minority matches the ruler, it should not fade
-				limit = { this.culture = scope:the_culture }
-				add = minority_always_supported_value
-				add = minority_always_supported_value #Even more-so than Diasporic
-			}
-		}
-	}
-	#Culture specific tradition effects
-	scope:the_culture = {
-		if = { #Colonizers/Hellenizers: Equivalent to having a large minority next to you
-			limit = {
-				OR = {
-					has_cultural_tradition = tradition_colonizers
-					has_cultural_tradition = tradition_colonizers_non_dlc
-					has_cultural_tradition = tradition_hellenizers
-					has_cultural_tradition = tradition_hellenizers_non_dlc
-				}
-			}
-			add = large_minority_support_value
-		}
-		if = { #Romance/Hellenic/Levantine Culture: Equivalent to having a small minority next to you
-			limit = {
-				OR = {
-					has_cultural_tradition = tradition_romance_culture
-					has_cultural_tradition = tradition_romance_culture_non_dlc
-					has_cultural_tradition = tradition_hellenic_culture
-					has_cultural_tradition = tradition_hellenic_culture_non_dlc
-					has_cultural_tradition = tradition_levantine_traditions
-					has_cultural_tradition = tradition_levantine_traditions_non_dlc
-				}
-			}
-			add = small_minority_support_value
-		}
-		if = { #Certain traditions imply being always supported if a minority
-			limit = {
-				AND = {
-					has_cultural_tradition = tradition_diasporic
-					NOT = { scope:target_county.culture = scope:the_culture }
-				}
-			}
-			add = minority_always_supported_value
-		}
-	}
+	value = support_of_a_minority_culture_generic
+	### Additional, TC-specific features go before the "multiply = -1.00" line
 	multiply = -1.00
 }
-#County Scope
+#Faith Support Determination
 support_of_a_faith_minority_in_county = {
 	this = { save_temporary_scope_as = the_faith }
-	value = 0
-	#Determine how much is needed to feed this minority
-	if = {
-		limit = {
-			scope:target_county = {
-				has_variable_list = faith_minorities_large
-				is_target_in_variable_list = { name = faith_minorities_large target = scope:the_faith }
-			}
-		}
-		subtract = large_minority_cost_value
-		#If there's no majority provinces on the map, it takes a bit more to keep large majorities going
-		#this should encourage eventual disappearance of only thinly supported cultures; or at least
-		#push them towards a minority status
-		if = {
-			limit = { NOT = { any_county = { this.faith = scope:the_faith } } }
-			subtract = small_minority_cost_value
-		}
-	}
-	if = {
-		limit = {
-			scope:target_county = {
-				has_variable_list = faith_minorities_small
-				is_target_in_variable_list = { name = faith_minorities_small target = scope:the_faith }
-			}
-		}
-		subtract = small_minority_cost_value
-		#If there's no large minorities on the map, it takes a bit more to keep small majorities going
-		#this should encourage eventual disappearance of only thinly supported cultures; or at least
-		#push them to be more concentrated
-		if = {
-			limit = {
-				NOT = { any_county = { this.faith = scope:the_faith } }
-				NOT = {
-					any_county = {
-						has_variable_list = faith_minorities_large
-						is_target_in_variable_list = { name = faith_minorities_large target = scope:the_faith }
-					}
-				}
-			}
-			subtract = small_minority_cost_value
-		}
-	}
-	#Determine how much is supporting this minority
-	scope:target_county = {
-		every_neighboring_county = {
-			if = { #County with a majority population
-				limit = { this.faith = scope:the_faith }
-				add = majority_province_support_value
-			}
-			else_if = { #County with a large minority
-				limit = {
-					has_variable_list = faith_minorities_large
-					is_target_in_variable_list = { name = faith_minorities_large target = scope:the_faith }
-				}
-				add = large_minority_support_value
-			}
-			else_if = { #County with a small minority
-				limit = {
-					has_variable_list = faith_minorities_small
-					is_target_in_variable_list = { name = faith_minorities_small target = scope:the_faith }
-				}
-				add = small_minority_support_value
-			}
-		}
-		holder = {
-			if = { #If the minority matches the ruler, it should not fade
-				limit = { this.faith = scope:the_faith }
-				add = minority_always_supported_value
-				add = minority_always_supported_value #Even more so than other faiths
-			}
-		}
-		if = { #Holy Site: Equivalent to having a large minority next to you
-			limit = { any_barony = { is_holy_site_of = scope:the_faith } }
-			add = large_minority_support_value
-		}
-	}
-	#Certain doctrines/tenets bolster score
+	value = support_of_a_minority_faith_generic
+	### Additional, TC-specific features go before the "multiply = -1.00" line
+	### New WtWSMS Features
 	scope:the_faith = {
 		if = { #Autocephalous faiths are less likely to disappear if their associated cultures are present
 			limit = { scope:the_faith = { has_doctrine = tenet_autocephaly } }
@@ -334,9 +138,9 @@ support_of_a_faith_minority_in_county = {
 					OR = {
 						scope:target_county.culture = scope:the_faith.var:church_culture
 						actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
-								ACTOR = scope:target_county
-								TARGET_FAITH = scope:the_faith
-								VARIABLE = church_culture
+							ACTOR = scope:target_county
+							TARGET_FAITH = scope:the_faith
+							VARIABLE = church_culture
 						}
 					}
 				}
@@ -441,15 +245,6 @@ support_of_a_faith_minority_in_county = {
 				add = small_minority_support_value
 				add = small_minority_support_value
 			}
-		}
-		if = { #Jewish faiths are well protected so long as the county isn't Jewish
-			limit = {
-				this.religion = religion:judaism_religion
-				NOT = { scope:target_county.religion = religion:judaism_religion }
-			}
-			add = majority_province_support_value
-			add = majority_province_support_value
-			add = majority_province_support_value
 		}
 	}
 	multiply = -1.00

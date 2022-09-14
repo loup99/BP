@@ -145,7 +145,7 @@ county_has_specific_minority_culture_trigger = {
 ##### Changed from Vanilla vvvvv
 
 ### These are meant to overwritten liberally when integrated into other mods
-is_valid_immigration_target_county = { #county scope
+is_valid_immigration_target_county_trigger = { #county scope
 	culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
 	faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
 }
@@ -183,15 +183,80 @@ valid_neighbor_immigration_state_trigger = {
 	NOT = { culture = { has_cultural_tradition = tradition_isolationist } }
 	NOT = { faith = { has_doctrine = tenet_ethnic_religion } }
 }
-### These are NOT meant to be overwritten when integrated into other mods; impacts some core functionality
-county_has_a_minority_with_type_and_size_trigger = { 
-	AND = {
-		has_variable_list = $CULTURE_OR_FAITH$_minorities_$SIZE$
-		NOT = {
-			is_target_in_variable_list = {
-				name = $CULTURE_OR_FAITH$_minorities_$SIZE$
-				target = $THE_COUNTY$.$CULTURE_OR_FAITH$
+#support_of_a_culture_minority_in_county triggers
+county_specific_support_aspect_culture_trigger = {
+	always = no
+}
+large_minority_support_culture_aspect_trigger = { #culture scope
+	#Colonizers/Hellenizers: Equivalent to having a large minority next to you
+	OR = {
+		has_cultural_tradition = tradition_colonizers
+		has_cultural_tradition = tradition_colonizers_non_dlc
+		has_cultural_tradition = tradition_hellenizers
+		has_cultural_tradition = tradition_hellenizers_non_dlc
+	}
+}
+small_minority_support_culture_aspect_trigger = { #culture scope
+	#Romance/Hellenic/Levantine Culture: Equivalent to having a small minority next to you
+	OR = {
+		has_cultural_tradition = tradition_romance_culture
+		has_cultural_tradition = tradition_romance_culture_non_dlc
+		has_cultural_tradition = tradition_hellenic_culture
+		has_cultural_tradition = tradition_hellenic_culture_non_dlc
+		has_cultural_tradition = tradition_levantine_traditions
+		has_cultural_tradition = tradition_levantine_traditions_non_dlc
+	}
+}
+minority_always_supported_culture_aspect_trigger = { #culture scope
+	#Vanilla conditions
+	OR = {
+		has_cultural_tradition = tradition_diasporic
+		AND = {
+			#Konchinim
+			OR = {
+				$THE_COUNTY$ = title:c_kerala
+				$THE_COUNTY$ = title:c_venadu
+				$THE_COUNTY$ = title:c_alupa
 			}
+			scope:the_culture = culture:kochinim
+		}
+			#Parsees
+		AND = {
+			$THE_COUNTY$ = title:c_daman
+			scope:the_culture = culture:persian
+		}
+	}
+}
+#support_of_a_faith_minority_in_county triggers
+county_specific_support_aspect_faith_trigger = { #county scope
+	any_barony = { is_holy_site_of = scope:the_faith }
+}
+large_minority_support_faith_aspect_trigger = { #faith scope
+	always = no
+}
+small_minority_support_faith_aspect_trigger = { #faith scope
+	always = no
+}
+minority_always_supported_faith_aspect_trigger = { #faith scope
+	#Vanilla conditions
+	OR = {
+		AND = {
+			this.religion = religion:judaism_religion
+			NOT = { scope:target_county.religion = religion:judaism_religion }
+		}
+		AND = {
+			#Konchinim
+			OR = {
+				$THE_COUNTY$ = title:c_kerala
+				$THE_COUNTY$ = title:c_venadu
+				$THE_COUNTY$ = title:c_alupa
+			}
+			scope:the_faith = faith:malabarism
+		}
+			#Parsees
+		AND = {
+			$THE_COUNTY$ = title:c_daman
+			scope:the_faith = faith:mazdayasna
 		}
 	}
 }
