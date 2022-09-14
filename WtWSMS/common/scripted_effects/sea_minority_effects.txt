@@ -578,126 +578,125 @@ notify_recipient_of_culture_migration_effect = {
 
 #This is done at a county scope
 # $CULTURE_OR_FAITH$: either "culture" or "faith"
-demote_least_supported_minority_effect = {
-	if = {
-		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
-		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_small add_to_temporary_list = potential_items }
-	}
-	if = {
-		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
-		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_large add_to_temporary_list = potential_items }
-	}
-	
-	ordered_in_list = {
-		list = potential_items
-		order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
-		position = 0
-		save_scope_as = item_to_demote
-	}
-	
-	if = {
-		limit = { exists = scope:item_to_demote }
-		demote_minority_effect = { CULTURE_OR_FAITH = $CULTURE_OR_FAITH$ ITEM = scope:item_to_demote }
-		notify_characters_of_minority_reduction_effect = {
-			THE_TARGET_COUNTY = scope:target_county
-			CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+demote_least_supported_minority_in_county_effect = {
+	$THE_COUNTY$ = { save_scope_as = the_county }
+	$THE_COUNTY$ = {
+		if = {
+			limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
+			every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_small add_to_temporary_list = potential_items }
+		}
+		if = {
+			limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
+			every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_large add_to_temporary_list = potential_items }
+		}
+		
+		ordered_in_list = {
+			list = potential_items
+			order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
+			position = 0
+			save_scope_as = item_to_demote
+		}
+		
+		if = {
+			limit = { exists = scope:item_to_demote }
+			demote_minority_effect = { CULTURE_OR_FAITH = $CULTURE_OR_FAITH$ ITEM = scope:item_to_demote }
+			notify_characters_of_minority_reduction_effect = {
+				THE_TARGET_COUNTY = scope:target_county
+				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+			}
 		}
 	}
 }
 #This is done at a county scope
 # $CULTURE_OR_FAITH$: either "culture" or "faith"
-demote_an_underfed_minority_effect = {
-	if = {
-		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
-		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_small add_to_temporary_list = potential_items }
-	}
-	if = {
-		limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
-		every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_large add_to_temporary_list = potential_items }
-	}
-	
-	every_in_list = {
-		list = potential_items
+demote_an_underfed_minority_in_county_effect = {
+	$THE_COUNTY$ = { save_scope_as = the_county }
+	$THE_COUNTY$ = {
 		if = {
-			limit = { this.support_of_a_$CULTURE_OR_FAITH$_minority_in_county > 0 }
-			add_to_temporary_list = underfed_minority
+			limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
+			every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_small add_to_temporary_list = potential_items }
 		}
-	}
-	
-	ordered_in_list = {
-		list = underfed_minority
-		order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
-		position = 0
-		save_scope_as = item_to_demote
-	}
-	if = {
-		limit = { exists = scope:item_to_demote }
-		demote_minority_effect = { CULTURE_OR_FAITH = $CULTURE_OR_FAITH$ ITEM = scope:item_to_demote }
-		notify_characters_of_minority_reduction_effect = {
-			THE_TARGET_COUNTY = scope:target_county
-			CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+		if = {
+			limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
+			every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_large add_to_temporary_list = potential_items }
+		}
+		
+		every_in_list = {
+			list = potential_items
+			if = {
+				limit = { this.support_of_a_$CULTURE_OR_FAITH$_minority_in_county > 0 }
+				add_to_temporary_list = underfed_minority
+			}
+		}
+		
+		ordered_in_list = {
+			list = underfed_minority
+			order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
+			position = 0
+			save_scope_as = item_to_demote
+		}
+		if = {
+			limit = { exists = scope:item_to_demote }
+			demote_minority_effect = { CULTURE_OR_FAITH = $CULTURE_OR_FAITH$ ITEM = scope:item_to_demote }
+			notify_characters_of_minority_reduction_effect = {
+				THE_TARGET_COUNTY = $THE_COUNTY$
+				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+			}
 		}
 	}
 }
 #Requires scope:target_county
-immigration_effect = {
-	scope:target_county = {
-		if = {
+inward_immigration_effect = {
+	$THE_TARGET_COUNTY$ = { save_scope_as = the_county }
+	$THE_TARGET_COUNTY$ = {
+		random_neighboring_county = {
 			limit = {
 				NOT = { culture = scope:target_county.culture }
 				NOT = { faith = scope:target_county.faith }
 				valid_neighbor_immigration_state_trigger = yes
 			}
-			random_neighboring_county = {
-				limit = {
-					NOT = { culture = scope:target_county.culture }
-					NOT = { faith = scope:target_county.faith }
-					valid_neighbor_immigration_state_trigger = yes
-				}
-				this = { save_scope_as = source_county }
-			}
-			#Carry out immigration iff it has some *actual* effect (as in, at least one of 
-			#the source's culture/faith is not large
-			scope:target_county = {
-				if = {
-					limit = {
-						#AKA, at least one of large faith/culture minorities must not have the 
-						#source county's faith/culture
-						OR = {
-							county_has_a_minority_with_type_and_size_trigger = {
-								CULTURE_OR_FAITH = culture
-								SIZE = large
-								TARGET = scope:source_county.culture
-							}
-							county_has_a_minority_with_type_and_size_trigger = {
-								CULTURE_OR_FAITH = faith
-								SIZE = large
-								TARGET = scope:source_county.faith
-							}
-						}
-					}
-					promote_minority_but_not_to_majority_effect = {
-						ITEM = scope:source_county.faith
-						CULTURE_OR_FAITH = faith
-					}
-					promote_minority_but_not_to_majority_effect = {
-						ITEM = scope:source_county.culture
+			this = { save_scope_as = source_county }
+		}
+		#Carry out immigration iff it has some *actual* effect (as in, at least one of 
+		#the source's culture/faith is not large
+		if = {
+			limit = {
+				exists = scope:source_county
+				#AKA, at least one of large faith/culture minorities must not have the 
+				#source county's faith/culture
+				OR = {
+					county_has_a_minority_with_type_and_size_trigger = {
 						CULTURE_OR_FAITH = culture
+						SIZE = large
+						TARGET = scope:source_county.culture
 					}
-					notify_characters_of_minority_immigration_effect = {
-						THE_SOURCE_COUNTY = scope:source_county
-						THE_TARGET_COUNTY = scope:target_county
-						EVENT_TITLE = minority_immigration_title
-						EVENT_TOOLTIP = minority_immigration_tt
+					county_has_a_minority_with_type_and_size_trigger = {
+						CULTURE_OR_FAITH = faith
+						SIZE = large
+						TARGET = scope:source_county.faith
 					}
 				}
+			}
+			promote_minority_but_not_to_majority_effect = {
+				ITEM = scope:source_county.faith
+				CULTURE_OR_FAITH = faith
+			}
+			promote_minority_but_not_to_majority_effect = {
+				ITEM = scope:source_county.culture
+				CULTURE_OR_FAITH = culture
+			}
+			notify_characters_of_minority_immigration_effect = {
+				THE_SOURCE_COUNTY = scope:source_county
+				THE_TARGET_COUNTY = $THE_TARGET_COUNTY$
+				EVENT_TITLE = minority_immigration_title
+				EVENT_TOOLTIP = minority_immigration_tt
 			}
 		}
 	}
 }
 #Requires scope:source_county
 outward_immigration_effect = {
-	scope:source_county = {
+	$SOURCE_COUNTY$ = {
 		random_neighboring_county = {
 			limit = {
 				NAND = {
@@ -709,108 +708,112 @@ outward_immigration_effect = {
 		}
 	}
 	
-	#Odds of immigration actually happening depends on differential in county development
-	random = {
-		chance = 100
-		modifier = {
-			factor = 0.90
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 90
-			}
-		}
-		modifier = {
-			factor = 0.80
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 80
-			}
-		}
-		modifier = {
-			factor = 0.70
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 70
-			}
-		}
-		modifier = {
-			factor = 0.60
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 60
-			}
-		}
-		modifier = {
-			factor = 0.50
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 50
-			}
-		}
-		modifier = {
-			factor = 0.40
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 40
-			}
-		}
-		modifier = {
-			factor = 0.30
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 30
-			}
-		}
-		modifier = {
-			factor = 0.20
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 20
-			}
-		}
-		modifier = {
-			factor = 0.10
-			scope:source_county.development_level.compare_value < {
-				value = scope:target_county.development_level
-				add = 10
-			}
-		}
-		modifier = {
-			factor = 0
-			scope:source_county.development_level.compare_value < scope:target_county.development_level
-		}
-		### Actual immigration effect here ###
-		scope:target_county = {
-			this.faith = { save_scope_as = old_faith }
-			this.culture = { save_scope_as = old_culture }
-			promote_minority_effect = { CULTURE_OR_FAITH = culture ITEM = scope:source_county.culture }
-			promote_minority_effect = { CULTURE_OR_FAITH = faith ITEM = scope:source_county.faith }
-		}
-		#Determine the message to use
-		if = {
-			limit = {
-				OR = {
-					scope:source_county.culture = scope:target_county.culture
-					scope:source_county.faith = scope:target_county.faith
+	if = {
+		limit = { exists = scope:target_county }
+		#Odds of immigration actually happening depends on differential in county development
+		random = {
+			chance = 100
+			modifier = {
+				factor = 0.90
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 90
 				}
 			}
-			notify_characters_of_county_change_immigration_effect = {
-				THE_SOURCE_COUNTY = scope:source_county
-				THE_TARGET_COUNTY = scope:target_county
+			modifier = {
+				factor = 0.80
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 80
+				}
 			}
-		}
-		else = {
-			notify_characters_of_minority_immigration_effect = {
-				THE_SOURCE_COUNTY = scope:source_county
-				THE_TARGET_COUNTY = scope:target_county
-				EVENT_TITLE = minority_immigration_title
-				EVENT_TOOLTIP = minority_immigration_tt
+			modifier = {
+				factor = 0.70
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 70
+				}
+			}
+			modifier = {
+				factor = 0.60
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 60
+				}
+			}
+			modifier = {
+				factor = 0.50
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 50
+				}
+			}
+			modifier = {
+				factor = 0.40
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 40
+				}
+			}
+			modifier = {
+				factor = 0.30
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 30
+				}
+			}
+			modifier = {
+				factor = 0.20
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 20
+				}
+			}
+			modifier = {
+				factor = 0.10
+				$SOURCE_COUNTY$.development_level.compare_value < {
+					value = scope:target_county.development_level
+					add = 10
+				}
+			}
+			modifier = {
+				factor = 0
+				$SOURCE_COUNTY$.development_level.compare_value < scope:target_county.development_level
+			}
+			### Actual immigration effect here ###
+			scope:target_county = {
+				this.faith = { save_scope_as = old_faith }
+				this.culture = { save_scope_as = old_culture }
+				promote_minority_effect = { CULTURE_OR_FAITH = culture ITEM = $SOURCE_COUNTY$.culture }
+				promote_minority_effect = { CULTURE_OR_FAITH = faith ITEM = $SOURCE_COUNTY$.faith }
+			}
+			#Determine the message to use
+			if = {
+				limit = {
+					OR = {
+						$SOURCE_COUNTY$.culture = scope:target_county.culture
+						$SOURCE_COUNTY$.faith = scope:target_county.faith
+					}
+				}
+				notify_characters_of_county_change_immigration_effect = {
+					THE_SOURCE_COUNTY = $SOURCE_COUNTY$
+					THE_TARGET_COUNTY = scope:target_county
+				}
+			}
+			else = {
+				notify_characters_of_minority_immigration_effect = {
+					THE_SOURCE_COUNTY = $SOURCE_COUNTY$
+					THE_TARGET_COUNTY = scope:target_county
+					EVENT_TITLE = minority_immigration_title
+					EVENT_TOOLTIP = minority_immigration_tt
+				}
 			}
 		}
 	}
 }
 minority_growth_effect = {
-	scope:source_county = {
+	$SOURCE_COUNTY$ = { save_scope_as = the_county }
+	$SOURCE_COUNTY$ = {
 		#Growth implies that it could flip naturally, so include the actual counties culture/faith as well
 		this.$CULTURE_OR_FAITH$ = { add_to_temporary_list = growing_minority }
 		if = {
@@ -843,7 +846,10 @@ minority_growth_effect = {
 		# pick again, using promote_minority_but_not_to_majority_effect; otherwise use 
 		# promote_minority_effect (conditions have changed that the minority should flip this time)
 		if = {
-			limit = { scope:source_county.$CULTURE_OR_FAITH$ = scope:candidate_minority_to_promote }
+			limit = {
+				exists = scope:candidate_minority_to_promote
+				$SOURCE_COUNTY$.$CULTURE_OR_FAITH$ = scope:candidate_minority_to_promote
+			}
 			scope:candidate_minority_to_promote = { remove_from_list = growing_minority }
 				ordered_in_list = {
 				list = growing_minority
@@ -856,35 +862,37 @@ minority_growth_effect = {
 				ITEM = scope:candidate_minority_to_promote
 			}
 			notify_characters_of_minority_growth_effect = {
-				THE_SOURCE_COUNTY = scope:source_county
+				THE_SOURCE_COUNTY = $SOURCE_COUNTY$
 				EVENT_TITLE = minority_$CULTURE_OR_FAITH$_growing_title
 				EVENT_TOOLTIP = minority_$CULTURE_OR_FAITH$_growing_tt
 			}
 		}
-		else = {
+		else_if = {
+			limit = { exists = scope:candidate_minority_to_promote }
 			this.culture = { save_scope_as = old_culture }
 			this.faith = { save_scope_as = old_faith }
 			promote_minority_effect = {
 				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
 				ITEM = scope:candidate_minority_to_promote
 			}
-			notify_characters_of_county_change_growth_effect = { THE_SOURCE_COUNTY = scope:source_county }
+			notify_characters_of_county_change_growth_effect = { THE_SOURCE_COUNTY = $SOURCE_COUNTY$ }
 		}
+		#else, do nothing (growing_minority list is empty)
 	}
 }
 #Requires scope:source_county
 evangelization_effect = {
-	scope:source_county = {
+	$SOURCE_COUNTY$ = {
 		if = {
 			limit = {
 				any_neighboring_county = {
-					NOT = { faith = scope:source_county.faith }
+					NOT = { faith = $SOURCE_COUNTY$.faith }
 					faith = { is_valid_evangelizing_target_faith_trigger = yes }
 				}
 			}
 			random_neighboring_county = {
 				limit = {
-					NOT = { faith = scope:source_county.faith }
+					NOT = { faith = $SOURCE_COUNTY$.faith }
 					faith = { is_valid_evangelizing_target_faith_trigger = yes }
 				}
 				### WtWSMS Autocephaly Weights vvv
@@ -893,25 +901,25 @@ evangelization_effect = {
 					#Autocephaly should restrict targeting
 					modifier = {
 						factor = 2
-						scope:source_county.faith = { has_doctrine = tenet_autocephaly }
+						$SOURCE_COUNTY$.faith = { has_doctrine = tenet_autocephaly }
 						actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
 							ACTOR = this
-							TARGET = scope:source_county
+							TARGET = $SOURCE_COUNTY$
 							VARIABLE = church_culture
 						}
 					}
 					modifier = { #Don't commingle autocephalous churches
 						factor = 0
-						scope:source_county.faith = { has_doctrine = tenet_autocephaly }
+						$SOURCE_COUNTY$.faith = { has_doctrine = tenet_autocephaly }
 						this.faith = { has_doctrine = tenet_autocephaly }
 					}
 					modifier = { #Don't proselytize autocephalous churches to unrelated cultures
 						factor = 0
-						scope:source_county.faith = { has_doctrine = tenet_autocephaly }
+						$SOURCE_COUNTY$.faith = { has_doctrine = tenet_autocephaly }
 						NOT = {
 							actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
 								ACTOR = this
-								TARGET = scope:source_county
+								TARGET = $SOURCE_COUNTY$
 								VARIABLE = church_culture
 							}
 						}
@@ -922,14 +930,17 @@ evangelization_effect = {
 			}
 			#Carry out evangelization
 			if = {
-				limit = { NOT = { scope:source_county.faith = scope:target_county.faith } }
+				limit = {
+					exists = scope:target_county
+					NOT = { $SOURCE_COUNTY$.faith = scope:target_county.faith }
+				}
 				scope:target_county = {
 					promote_minority_but_not_to_majority_effect = {
-						ITEM = scope:source_county.faith
+						ITEM = $SOURCE_COUNTY$.faith
 						CULTURE_OR_FAITH = faith
 					}
 					notify_characters_of_minority_immigration_effect = {
-						THE_SOURCE_COUNTY = scope:source_county
+						THE_SOURCE_COUNTY = $SOURCE_COUNTY$
 						THE_TARGET_COUNTY = scope:target_county
 						EVENT_TITLE = minority_faith_evangelization_title
 						EVENT_TOOLTIP = minority_faith_evangelization_tt
@@ -937,253 +948,6 @@ evangelization_effect = {
 				}
 			}
 		}
-	}
-}
-
-### General Routines
-
-#This is done at a county scope
-# $ITEM$ = a scoped faith or culture
-# $CULTURE_OR_FAITH$: either "culture" or "faith"
-promote_minority_but_not_to_majority_effect = {
-	if = {
-		limit = {
-			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
-			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
-		}
-		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
-		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
-	}
-	#Large minorities should not become majorities
-	else_if = {
-		limit = {
-			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
-			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
-		}
-	}
-	else = { add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ } }
-}
-# County scope
-# $ITEM$ = a scoped faith or culture
-# $CULTURE_OR_FAITH$: either "culture" or "faith"
-promote_minority_effect = {
-	if = {
-		limit = { this.$CULTURE_OR_FAITH$ = $ITEM$ }
-		#Don't do anything in this case; we're already a majority
-	}
-	#Small minorities become large minorities
-	else_if = {
-		limit = {
-			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
-			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
-		}
-		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
-		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
-	}
-	#Large minorities become majorities
-	else_if = {
-		limit = {
-			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
-			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
-		}
-		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
-		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = this.$CULTURE_OR_FAITH$ }
-		set_county_$CULTURE_OR_FAITH$ = $ITEM$
-	}
-	else = { add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ } }
-}
-
-#This is done at a county scope
-# $ITEM$ = a scoped faith or culture
-# $CULTURE_OR_FAITH$: either "culture" or "faith"
-demote_minority_effect = {
-	if = {
-		limit = {
-			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
-			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
-		}
-		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
-		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
-	}
-	else_if = {
-		limit = {
-			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
-			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
-		}
-		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
-	}
-}
-
-### Notification routines
-notify_characters_of_minority_reduction_effect = {
-	$THE_TARGET_COUNTY$.holder = {
-		add_to_temporary_list = characters_to_notify
-		top_liege = {
-			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
-			every_vassal_or_below = {
-				limit = {
-					is_ai = no
-					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
-				}
-				add_to_temporary_list = characters_to_notify
-			}
-		}
-	}
-	every_in_local_list = {
-		list = characters_to_notify
-		if = {
-			limit = {
-				$THE_TARGET_COUNTY$ = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
-				$THE_TARGET_COUNTY$ = {
-					is_target_in_variable_list = {
-						name = $CULTURE_OR_FAITH$_minorities_large
-						target = scope:item_to_demote
-					}
-				}
-			}
-			debug_log = "common/scripted_effects/sea_minority_effects.txt: HAD A CULTURAL/RELIGIOUS MINORITY REDUCTION THAT WAS STILL EXTANT IN LARGE MINORITIES"
-		}
-		else_if = {
-			limit = {
-				$THE_TARGET_COUNTY$ = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
-				$THE_TARGET_COUNTY$ = {
-					is_target_in_variable_list = {
-						name = $CULTURE_OR_FAITH$_minorities_small
-						target = scope:item_to_demote
-					}
-				}
-			}
-			send_interface_toast = {
-				type = event_generic_neutral
-				title = minority_$CULTURE_OR_FAITH$_declined_title
-				custom_tooltip = minority_$CULTURE_OR_FAITH$_declined_tt
-				right_icon = $THE_TARGET_COUNTY$
-			}
-		}
-		else = {
-			send_interface_toast = {
-				type = event_generic_neutral
-				title = minority_$CULTURE_OR_FAITH$_disappeared_title
-				custom_tooltip = minority_$CULTURE_OR_FAITH$_disappeared_tt
-				right_icon = $THE_TARGET_COUNTY$
-			}
-		}
-	}
-}
-notify_characters_of_minority_immigration_effect = {
-	$THE_SOURCE_COUNTY$.holder = {
-		add_to_temporary_list = characters_to_notify
-		top_liege = {
-			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
-			every_vassal_or_below = {
-				limit = {
-					is_ai = no
-					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
-				}
-				add_to_temporary_list = characters_to_notify
-			}
-		}
-	}
-	$THE_TARGET_COUNTY$.holder = {
-		add_to_temporary_list = characters_to_notify
-		top_liege = {
-			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
-			every_vassal_or_below = {
-				limit = {
-					is_ai = no
-					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
-				}
-				add_to_temporary_list = characters_to_notify
-			}
-		}
-	}
-	
-	every_in_local_list = {
-		list = characters_to_notify
-		send_interface_toast = {
-			type = event_generic_neutral
-			title = $EVENT_TITLE$
-			custom_tooltip = $EVENT_TOOLTIP$
-			right_icon = $THE_TARGET_COUNTY$
-		}
-	}
-}
-notify_characters_of_minority_growth_effect = {
-	$THE_SOURCE_COUNTY$.holder = {
-		add_to_temporary_list = characters_to_notify
-		top_liege = {
-			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
-			every_vassal_or_below = {
-				limit = {
-					is_ai = no
-					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
-				}
-				add_to_temporary_list = characters_to_notify
-			}
-		}
-	}
-	
-	every_in_local_list = {
-		list = characters_to_notify
-		send_interface_toast = {
-			type = event_generic_neutral
-			title = $EVENT_TITLE$
-			custom_tooltip = $EVENT_TOOLTIP$
-			right_icon = $THE_SOURCE_COUNTY$
-		}
-	}
-}
-notify_characters_of_county_change_immigration_effect = {
-	$THE_SOURCE_COUNTY$.holder = {
-		add_to_temporary_list = characters_to_notify
-		top_liege = {
-			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
-			every_vassal_or_below = {
-				limit = {
-					is_ai = no
-					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
-				}
-				add_to_temporary_list = characters_to_notify
-			}
-		}
-	}
-	$THE_TARGET_COUNTY$.holder = {
-		add_to_temporary_list = characters_to_notify
-		top_liege = {
-			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
-			every_vassal_or_below = {
-				limit = {
-					is_ai = no
-					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
-				}
-				add_to_temporary_list = characters_to_notify
-			}
-		}
-	}
-	
-	every_in_local_list = {
-		list = characters_to_notify
-		trigger_event = { id = minorities.9998 }
-	}
-}
-notify_characters_of_county_change_growth_effect = {
-	$THE_SOURCE_COUNTY$.holder = {
-		add_to_temporary_list = characters_to_notify
-		top_liege = {
-			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
-			every_vassal_or_below = {
-				limit = {
-					is_ai = no
-					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
-				}
-				add_to_temporary_list = characters_to_notify
-			}
-		}
-	}
-	
-	every_in_local_list = {
-		list = characters_to_notify
-		trigger_event = { id = minorities.9999 }
 	}
 }
 ##### Changed from Vanilla ^^^^^
