@@ -644,50 +644,35 @@ immigration_effect = {
 	scope:target_county = {
 		if = {
 			limit = {
-				any_neighboring_county = {
-					NOR = {
-						culture = scope:target_county.culture
-						culture = { has_cultural_tradition = tradition_isolationist }
-						faith = scope:target_county.faith
-						faith = { has_doctrine = tenet_ethnic_religion }
-					}
-				}
+				NOT = { culture = scope:target_county.culture }
+				NOT = { faith = scope:target_county.faith }
+				valid_neighbor_immigration_state_trigger = yes
 			}
 			random_neighboring_county = {
 				limit = {
-					NOR = {
-						culture = scope:target_county.culture
-						culture = { has_cultural_tradition = tradition_isolationist }
-						faith = scope:target_county.faith
-						faith = { has_doctrine = tenet_ethnic_religion }
-					}
+					NOT = { culture = scope:target_county.culture }
+					NOT = { faith = scope:target_county.faith }
+					valid_neighbor_immigration_state_trigger = yes
 				}
 				this = { save_scope_as = source_county }
 			}
-			#Carry out immigration iff it has some effect
+			#Carry out immigration iff it has some *actual* effect (as in, at least one of 
+			#the source's culture/faith is not large
 			scope:target_county = {
 				if = {
 					limit = {
 						#AKA, at least one of large faith/culture minorities must not have the 
 						#source county's faith/culture
 						OR = {
-							AND = {
-								has_variable_list = culture_minorities_large
-								NOT = {
-									is_target_in_variable_list = {
-										name = culture_minorities_large
-										target = scope:source_county.culture
-									}
-								}
+							county_has_a_minority_with_type_and_size_trigger = {
+								THE_COUNTY = scope:source_county
+								CULTURE_OR_FAITH = culture
+								SIZE = large
 							}
-							AND = {
-								has_variable_list = faith_minorities_large
-								NOT = {
-									is_target_in_variable_list = {
-										name = faith_minorities_large
-										target = scope:source_county.faith
-									}
-								}
+							county_has_a_minority_with_type_and_size_trigger = {
+								THE_COUNTY = scope:source_county
+								CULTURE_OR_FAITH = faith
+								SIZE = large
 							}
 						}
 					}
@@ -725,6 +710,7 @@ evangelization_effect = {
 					NOT = { faith = scope:source_county.faith }
 					faith = { is_valid_evangelizing_target_faith_trigger = yes }
 				}
+				### WtWSMS Autocephaly Weights vvv
 				weight = {
 					base = 1
 					#Autocephaly should restrict targeting
@@ -754,6 +740,7 @@ evangelization_effect = {
 						}
 					}
 				}
+				### WtWSMS Autocephaly Weights ^^^
 				this = { save_scope_as = target_county }
 			}
 			#Carry out evangelization
