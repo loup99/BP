@@ -696,6 +696,120 @@ immigration_effect = {
 	}
 }
 #Requires scope:source_county
+outward_immigration_effect = {
+	scope:source_county = {
+		random_neighboring_county = {
+			limit = {
+				NAND = {
+					this.culture = scope:source_county.culture
+					this.faith = scope:source_county.faith
+				}
+			}
+			this = { save_scope_as = target_county }
+		}
+	}
+	
+	#Odds of immigration actually happening depends on differential in county development
+	random = {
+		chance = 100
+		modifier = {
+			factor = 0.90
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 90
+			}
+		}
+		modifier = {
+			factor = 0.80
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 80
+			}
+		}
+		modifier = {
+			factor = 0.70
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 70
+			}
+		}
+		modifier = {
+			factor = 0.60
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 60
+			}
+		}
+		modifier = {
+			factor = 0.50
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 50
+			}
+		}
+		modifier = {
+			factor = 0.40
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 40
+			}
+		}
+		modifier = {
+			factor = 0.30
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 30
+			}
+		}
+		modifier = {
+			factor = 0.20
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 20
+			}
+		}
+		modifier = {
+			factor = 0.10
+			scope:source_county.development_level.compare_value < {
+				value = scope:target_county.development_level
+				add = 10
+			}
+		}
+		modifier = {
+			factor = 0
+			scope:source_county.development_level.compare_value < scope:target_county.development_level
+		}
+		### Actual immigration effect here ###
+		scope:target_county = {
+			this.faith = { save_scope_as = old_faith }
+			this.culture = { save_scope_as = old_culture }
+			promote_minority_effect = { CULTURE_OR_FAITH = culture ITEM = scope:source_county.culture }
+			promote_minority_effect = { CULTURE_OR_FAITH = faith ITEM = scope:source_county.faith }
+		}
+		#Determine the message to use
+		if = {
+			limit = {
+				OR = {
+					scope:source_county.culture = scope:target_county.culture
+					scope:source_county.faith = scope:target_county.faith
+				}
+			}
+			notify_characters_of_county_change_effect = {
+				THE_SOURCE_COUNTY = scope:source_county
+				THE_TARGET_COUNTY = scope:target_county
+			}
+		}
+		else = {
+			notify_characters_of_minority_immigration_effect = {
+				THE_SOURCE_COUNTY = scope:source_county
+				THE_TARGET_COUNTY = scope:target_county
+				EVENT_TITLE = minority_immigration_title
+				EVENT_TOOLTIP = minority_immigration_tt
+			}
+		}
+	}
+}
+#Requires scope:source_county
 evangelization_effect = {
 	scope:source_county = {
 		if = {
@@ -786,6 +900,36 @@ promote_minority_but_not_to_majority_effect = {
 	}
 	else = { add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ } }
 }
+# County scope
+# $ITEM$ = a scoped faith or culture
+# $CULTURE_OR_FAITH$: either "culture" or "faith"
+promote_minority_effect = {
+	if = {
+		limit = { this.$CULTURE_OR_FAITH$ = $ITEM$ }
+		#Don't do anything in this case; we're already a majority
+	}
+	#Small minorities become large minorities
+	else_if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+		}
+		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+	}
+	#Large minorities become majorities
+	else_if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		}
+		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = this.$CULTURE_OR_FAITH$ }
+		set_county_$CULTURE_OR_FAITH$ = $ITEM$
+	}
+	else = { add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ } }
+}
+
 #This is done at a county scope
 # $ITEM$ = a scoped faith or culture
 # $CULTURE_OR_FAITH$: either "culture" or "faith"
@@ -822,7 +966,6 @@ notify_characters_of_minority_reduction_effect = {
 			}
 		}
 	}
-	
 	every_in_local_list = {
 		list = characters_to_notify
 		if = {
@@ -864,7 +1007,6 @@ notify_characters_of_minority_reduction_effect = {
 		}
 	}
 }
-
 notify_characters_of_minority_immigration_effect = {
 	$THE_SOURCE_COUNTY$.holder = {
 		add_to_temporary_list = characters_to_notify
@@ -895,14 +1037,45 @@ notify_characters_of_minority_immigration_effect = {
 	
 	every_in_local_list = {
 		list = characters_to_notify
-		if = {
-			send_interface_toast = {
-				type = event_generic_neutral
-				title = $EVENT_TITLE$
-				custom_tooltip = $EVENT_TOOLTIP$
-				right_icon = $THE_TARGET_COUNTY$
+		send_interface_toast = {
+			type = event_generic_neutral
+			title = $EVENT_TITLE$
+			custom_tooltip = $EVENT_TOOLTIP$
+			right_icon = $THE_TARGET_COUNTY$
+		}
+	}
+}
+notify_characters_of_county_change_effect = {
+	$THE_SOURCE_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
 			}
 		}
+	}
+	$THE_TARGET_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	
+	every_in_local_list = {
+		list = characters_to_notify
+		trigger_event = { id = minorities.9999 }
 	}
 }
 ##### Changed from Vanilla ^^^^^
