@@ -794,7 +794,7 @@ outward_immigration_effect = {
 					scope:source_county.faith = scope:target_county.faith
 				}
 			}
-			notify_characters_of_county_change_effect = {
+			notify_characters_of_county_change_immigration_effect = {
 				THE_SOURCE_COUNTY = scope:source_county
 				THE_TARGET_COUNTY = scope:target_county
 			}
@@ -806,6 +806,69 @@ outward_immigration_effect = {
 				EVENT_TITLE = minority_immigration_title
 				EVENT_TOOLTIP = minority_immigration_tt
 			}
+		}
+	}
+}
+minority_growth_effect = {
+	scope:source_county = {
+		#Growth implies that it could flip naturally, so include the actual counties culture/faith as well
+		this.$CULTURE_OR_FAITH$ = { add_to_temporary_list = growing_minority }
+		if = {
+			limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
+			every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_small add_to_temporary_list = potential_items }
+		}
+		if = {
+			limit = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
+			every_in_list = { variable = $CULTURE_OR_FAITH$_minorities_large add_to_temporary_list = potential_items }
+		}
+		
+		#Get only the minorities that are growing
+		every_in_list = {
+			list = potential_items
+			if = {
+				limit = { this.support_of_a_$CULTURE_OR_FAITH$_minority_in_county < 0 }
+				add_to_temporary_list = growing_minority
+			}
+		}
+		
+		#Get the fastest growing minority
+		ordered_in_list = {
+			list = growing_minority
+			order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
+			position = 0
+			save_scope_as = candidate_minority_to_promote
+		}
+		
+		#If the fastest growing minority **is** the majority, we remove it from the list and
+		# pick again, using promote_minority_but_not_to_majority_effect; otherwise use 
+		# promote_minority_effect (conditions have changed that the minority should flip this time)
+		if = {
+			limit = { scope:source_county.$CULTURE_OR_FAITH$ = scope:candidate_minority_to_promote }
+			scope:candidate_minority_to_promote = { remove_from_list = growing_minority }
+				ordered_in_list = {
+				list = growing_minority
+				order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
+				position = 0
+				save_scope_as = candidate_minority_to_promote
+			}
+			promote_minority_but_not_to_majority_effect = {
+				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+				ITEM = scope:candidate_minority_to_promote
+			}
+			notify_characters_of_minority_growth_effect = {
+				THE_SOURCE_COUNTY = scope:source_county
+				EVENT_TITLE = minority_$CULTURE_OR_FAITH$_growing_title
+				EVENT_TOOLTIP = minority_$CULTURE_OR_FAITH$_growing_tt
+			}
+		}
+		else = {
+			this.culture = { save_scope_as = old_culture }
+			this.faith = { save_scope_as = old_faith }
+			promote_minority_effect = {
+				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+				ITEM = scope:candidate_minority_to_promote
+			}
+			notify_characters_of_county_change_growth_effect = { THE_SOURCE_COUNTY = scope:source_county }
 		}
 	}
 }
@@ -1045,7 +1108,32 @@ notify_characters_of_minority_immigration_effect = {
 		}
 	}
 }
-notify_characters_of_county_change_effect = {
+notify_characters_of_minority_growth_effect = {
+	$THE_SOURCE_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	
+	every_in_local_list = {
+		list = characters_to_notify
+		send_interface_toast = {
+			type = event_generic_neutral
+			title = $EVENT_TITLE$
+			custom_tooltip = $EVENT_TOOLTIP$
+			right_icon = $THE_SOURCE_COUNTY$
+		}
+	}
+}
+notify_characters_of_county_change_immigration_effect = {
 	$THE_SOURCE_COUNTY$.holder = {
 		add_to_temporary_list = characters_to_notify
 		top_liege = {
@@ -1067,6 +1155,26 @@ notify_characters_of_county_change_effect = {
 				limit = {
 					is_ai = no
 					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	
+	every_in_local_list = {
+		list = characters_to_notify
+		trigger_event = { id = minorities.9998 }
+	}
+}
+notify_characters_of_county_change_growth_effect = {
+	$THE_SOURCE_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
 				}
 				add_to_temporary_list = characters_to_notify
 			}
