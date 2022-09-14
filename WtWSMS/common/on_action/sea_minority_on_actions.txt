@@ -84,7 +84,7 @@ on_yearly_sea_minority_maintainance = {
 				random = {
 					chance = chance_of_minority_immigration_event_per_year
 					trigger_event = {
-						#days = { 1 360 }
+						days = { 1 360 }
 						on_action = do_immigration
 					}
 				}
@@ -198,8 +198,23 @@ on_yearly_sea_majority_maintainance = {
 		every_county = {
 			this = { save_scope_as = source_county }
 			
-			### Faith
-			if = { #If there are too many minorities, some must die out
+			### Immigration
+			if = { #Immigration via development is driven by the development differential
+				limit = {
+					valid_immigration_source_trigger = yes
+					NOT = { has_variable = recently_emmigrated }
+				}
+				random = {
+					chance = chance_of_outward_immigration_event_per_year
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_outward_immigration
+					}
+				}
+			}
+			
+			### Faith Evangelization
+			if = {
 				limit = {
 					faith = { is_valid_evangelizing_source_faith_trigger = yes }
 					NOT = { has_variable = recently_evangelized_faith }
@@ -225,6 +240,12 @@ on_yearly_sea_majority_maintainance = {
 				}
 			}
 		}
+	}
+}
+do_outward_immigration = {
+	effect = {
+		outward_immigration_effect = yes
+		set_variable = { name = recently_emmigrated years = 10 }
 	}
 }
 do_faith_evangelization = {
