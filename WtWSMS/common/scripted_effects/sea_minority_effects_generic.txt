@@ -1,0 +1,246 @@
+﻿### General Routines
+
+#This is done at a county scope
+# $ITEM$ = a scoped faith or culture
+# $CULTURE_OR_FAITH$: either "culture" or "faith"
+promote_minority_but_not_to_majority_effect = {
+	if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+		}
+		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+	}
+	#Large minorities should not become majorities
+	else_if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		}
+	}
+	else = { add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ } }
+}
+# County scope
+# $ITEM$ = a scoped faith or culture
+# $CULTURE_OR_FAITH$: either "culture" or "faith"
+promote_minority_effect = {
+	if = {
+		limit = { this.$CULTURE_OR_FAITH$ = $ITEM$ }
+		#Don't do anything in this case; we're already a majority
+	}
+	#Small minorities become large minorities
+	else_if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+		}
+		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+	}
+	#Large minorities become majorities
+	else_if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		}
+		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = this.$CULTURE_OR_FAITH$ }
+		set_county_$CULTURE_OR_FAITH$ = $ITEM$
+	}
+	else = { add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ } }
+}
+
+#This is done at a county scope
+# $ITEM$ = a scoped faith or culture
+# $CULTURE_OR_FAITH$: either "culture" or "faith"
+demote_minority_effect = {
+	if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_large
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		}
+		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_large target = $ITEM$ }
+		add_to_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+	}
+	else_if = {
+		limit = {
+			has_variable_list = $CULTURE_OR_FAITH$_minorities_small
+			is_target_in_variable_list = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+		}
+		remove_list_variable = { name = $CULTURE_OR_FAITH$_minorities_small target = $ITEM$ }
+	}
+}
+
+### Notification routines
+notify_characters_of_minority_reduction_effect = {
+	$THE_TARGET_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	every_in_local_list = {
+		list = characters_to_notify
+		if = {
+			limit = {
+				$THE_TARGET_COUNTY$ = { has_variable_list = $CULTURE_OR_FAITH$_minorities_large }
+				$THE_TARGET_COUNTY$ = {
+					is_target_in_variable_list = {
+						name = $CULTURE_OR_FAITH$_minorities_large
+						target = scope:item_to_demote
+					}
+				}
+			}
+			debug_log = "common/scripted_effects/sea_minority_effects.txt: HAD A CULTURAL/RELIGIOUS MINORITY REDUCTION THAT WAS STILL EXTANT IN LARGE MINORITIES"
+		}
+		else_if = {
+			limit = {
+				$THE_TARGET_COUNTY$ = { has_variable_list = $CULTURE_OR_FAITH$_minorities_small }
+				$THE_TARGET_COUNTY$ = {
+					is_target_in_variable_list = {
+						name = $CULTURE_OR_FAITH$_minorities_small
+						target = scope:item_to_demote
+					}
+				}
+			}
+			send_interface_toast = {
+				type = event_generic_neutral
+				title = minority_$CULTURE_OR_FAITH$_declined_title
+				custom_tooltip = minority_$CULTURE_OR_FAITH$_declined_tt
+				right_icon = $THE_TARGET_COUNTY$
+			}
+		}
+		else = {
+			send_interface_toast = {
+				type = event_generic_neutral
+				title = minority_$CULTURE_OR_FAITH$_disappeared_title
+				custom_tooltip = minority_$CULTURE_OR_FAITH$_disappeared_tt
+				right_icon = $THE_TARGET_COUNTY$
+			}
+		}
+	}
+}
+notify_characters_of_minority_immigration_effect = {
+	$THE_SOURCE_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	$THE_TARGET_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	
+	every_in_local_list = {
+		list = characters_to_notify
+		send_interface_toast = {
+			type = event_generic_neutral
+			title = $EVENT_TITLE$
+			custom_tooltip = $EVENT_TOOLTIP$
+			right_icon = $THE_TARGET_COUNTY$
+		}
+	}
+}
+notify_characters_of_minority_growth_effect = {
+	$THE_SOURCE_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	
+	every_in_local_list = {
+		list = characters_to_notify
+		send_interface_toast = {
+			type = event_generic_neutral
+			title = $EVENT_TITLE$
+			custom_tooltip = $EVENT_TOOLTIP$
+			right_icon = $THE_SOURCE_COUNTY$
+		}
+	}
+}
+notify_characters_of_county_change_immigration_effect = {
+	$THE_SOURCE_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	$THE_TARGET_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_TARGET_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	
+	every_in_local_list = {
+		list = characters_to_notify
+		trigger_event = { id = minorities.9998 }
+	}
+}
+notify_characters_of_county_change_growth_effect = {
+	$THE_SOURCE_COUNTY$.holder = {
+		add_to_temporary_list = characters_to_notify
+		top_liege = {
+			if = { limit = { is_ai = no } add_to_temporary_list = characters_to_notify }
+			every_vassal_or_below = {
+				limit = {
+					is_ai = no
+					any_sub_realm_county = { this = $THE_SOURCE_COUNTY$ }
+				}
+				add_to_temporary_list = characters_to_notify
+			}
+		}
+	}
+	
+	every_in_local_list = {
+		list = characters_to_notify
+		trigger_event = { id = minorities.9999 }
+	}
+}
