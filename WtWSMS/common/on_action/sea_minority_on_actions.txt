@@ -1,4 +1,77 @@
-﻿
+﻿#### Minority Culture/Faith spread/growth/decline ####
+#=====================================================
+# Difference from "Cultural and Religious Minorities" is that we utilize quasi-cellular automata
+# rules similar to "Conway's Game of Life" to provide a marginally better model in which
+# cultures will not spread out overly far from existing concentrations of minorities.
+#
+#### How many minorities per county? ####
+#----------------------------------------
+# Every county can support minorities as a function of its development; We will utilize the Lucas
+# Sequence Vn(1,−1) [the Lucas Numbers, a series related to the Fibonacci sequence]
+#
+# 1, 3, 4, 7, 11, 18, 29, 47, 76 ...
+#
+# 01: 1 minority
+# 04: 2 minorities
+# 07: 3 minorities
+# 11: 4 minorities
+# 18: 5 minorities
+# 29: 6 minorities
+# 47: 7 minorities
+# 76: 8 minorities
+#
+# Each list of culture and faith minorities will be kept separate
+#
+# We will assign a "small" minority a size of 1 and a large minority a size of 2.
+#
+# So development (urbanization) allows for greater minority presence.
+#
+# Certain faiths, ethos, and religions will influence how much of the capacity is used per minority.
+# By default, Dharmic faiths use less capacity in majority-Dharmic counties, but this is modifiable
+#
+# Certain ethos (egalitarian) and religious attitudes (pluralism) will provide additional capacity,
+# while their opposites (communal and fundamentalism) will reduce capacity. Every county has a 
+# minimum capacity of 1.
+#
+#### How do minorities disappear? ####
+#-------------------------------------
+# Every so often, a check will be made to see if minorities are being "fed", a measure of how much
+# presence the minority has in neighbouring counties. If it is too low, the minority will be
+# slated for removal.
+#
+# Certain combinations of traits, traditions, county features, &c. will impact how well fed
+# a minority is.
+#
+# More frequently, a check is performed when the number of minorities exceeds the capacity of the
+# county and removes the least supported minority.
+#
+#### Which minority disappears first? ####
+#-----------------------------------------
+# To determine which minority disappears, we will determine which are being "fed" from
+# adjoining counties.
+# * A minority population is always "fed" if it is next to a county where it is a majority
+#   population.
+# * A minority population is fed if it has enough support.
+# * Large minorities require at least 4 points of adjoining minorities
+#    * Adjoining large minorities are worth 2
+# * Small minorities require at least 2 points of adjoining minorities
+#    * Adjoining small minorities are worth 1
+# * Any minority that is underfed is at risk of disappearing.
+#
+# NB: Certain traditions (like Diasporic) and doctrines should imply a sorting within the underfed
+# population. Diasporic Jewish populations long established themselves in Europe and Asia after
+# all.
+#
+#### How do minorities spread? ####
+#----------------------------------
+# Minorities spread either via target immigration (the target_county has spare minority capacity),
+# or from conditions in a source_county (having an evangelical faith or a noticeable differential
+# in development levels between neighbouring counties.
+#
+# Most effects will **not** let minorities become majorities in these on_actions. The following are
+# exceptions:
+# * do_outward_immigration (development differential-driven immigration)
+
 yearly_global_pulse = {
 	on_actions = {
 		on_yearly_sea_minority_maintainance
@@ -15,61 +88,6 @@ three_year_playable_pulse = {
 
 on_yearly_sea_minority_maintainance = {
 	effect = {
-		#### Minority Culture/Faith spread/growth/decline ####
-		#=====================================================
-		# Difference from "Cultural and Religious Minorities" is that we utilize quasi-cellular automata
-		# rules similar to "Conway's Game of Life" to provide a marginally better model in which
-		# cultures will not spread out overly far from existing concentrations of minorities.
-		#
-		#### How many minorities per county? ####
-		#----------------------------------------
-		# Every county can support minorities as a function of its development; We will utilize the Lucas
-		# Sequence Vn(1,−1) [the Lucas Numbers, a series related to the Fibonacci sequence]
-		#
-		# 1, 3, 4, 7, 11, 18, 29, 47, 76 ...
-		#
-		# 01: 1 minority
-		# 04: 2 minorities
-		# 07: 3 minorities
-		# 11: 4 minorities
-		# 18: 5 minorities
-		# 29: 6 minorities
-		# 47: 7 minorities
-		# 76: 8 minorities
-		#
-		# NB: Each list of culture and faith minorities will be kept separate
-		#
-		# We will assign a "small" minority a size of 1 and a large minority a size of 2.
-		#
-		# So development (urbanization) allows for greater minority presence.
-		#
-		#### How do minorities disappear? ####
-		#-------------------------------------
-		# So long as the number of minorities do not exceed the development limits, the minorities should
-		# not disappear (think the various "relic" populations in various locales). Once this limit is
-		# exceeded, then we need to determine which minorities are being "fed"
-		#
-		#### Which minority disappears first? ####
-		#-----------------------------------------
-		# To determine which minority disappears, we will determine which are being "fed" from
-		# adjoining counties.
-		# * A minority population is always "fed" if it is next to a county where it is a majority
-		#   population.
-		# * A minority population is fed if it has enough support.
-		# * Large minorities require at least 4 points of adjoining minorities
-		#    * Adjoining large minorities are worth 2
-		# * Small minorities require at least 2 points of adjoining minorities
-		#    * Adjoining small minorities are worth 1
-		# * Any minority that is underfed is at risk of disappearing.
-		#
-		# NB: Certain traditions (like Diasporic) and doctrines should imply a sorting within the underfed
-		# population. Diasporic Jewish populations long established themselves in Europe and Asia after
-		# all.
-		#
-		#### How do minorities spread? ####
-		#----------------------------------
-		# When a county has fewer minorities than its capacity, it should randomly get a minority from an
-		# adjoining county. For now, let the selection be truly random.
 		every_county = {
 			this = { save_scope_as = target_county }
 			
@@ -164,7 +182,7 @@ do_culture_reduction = {
 	effect = {
 		scope:target_county = {
 			demote_least_supported_minority_effect = { CULTURE_OR_FAITH = culture }
-			set_variable = { name = recently_demoted_culture days = 1826 } #To keep things from dropping *too* fast
+			set_variable = { name = recently_demoted_culture years = years_between_over_capacity_reduction_events }
 		}
 	}
 }
@@ -172,7 +190,7 @@ do_culture_minority_underfed = {
 	effect = {
 		scope:target_county = {
 			demote_an_underfed_minority_effect = { CULTURE_OR_FAITH = culture }
-			set_variable = { name = recently_checked_underfed_culture years = 10 }
+			set_variable = { name = recently_checked_underfed_culture years = years_between_general_events }
 		}
 	}
 }
@@ -180,7 +198,7 @@ do_faith_reduction = {
 	effect = {
 		scope:target_county = {
 			demote_least_supported_minority_effect = { CULTURE_OR_FAITH = faith }
-			set_variable = { name = recently_demoted_faith days = 1826 } #To keep things from dropping *too* fast
+			set_variable = { name = recently_demoted_faith years = years_between_over_capacity_reduction_events }
 		}
 	}
 }
@@ -188,7 +206,7 @@ do_faith_minority_underfed = {
 	effect = {
 		scope:target_county = {
 			demote_an_underfed_minority_effect = { CULTURE_OR_FAITH = faith }
-			set_variable = { name = recently_checked_underfed_faith years = 10 }
+			set_variable = { name = recently_checked_underfed_faith years = years_between_general_events }
 		}
 	}
 }
@@ -245,13 +263,13 @@ on_yearly_sea_majority_maintainance = {
 do_outward_immigration = {
 	effect = {
 		outward_immigration_effect = yes
-		set_variable = { name = recently_emmigrated years = 10 }
+		set_variable = { name = recently_emmigrated years = years_between_general_events }
 	}
 }
 do_faith_evangelization = {
 	effect = {
 		evangelization_effect = yes
-		set_variable = { name = recently_evangelized_faith years = 10 }
+		set_variable = { name = recently_evangelized_faith years = years_between_general_events }
 	}
 }
 
