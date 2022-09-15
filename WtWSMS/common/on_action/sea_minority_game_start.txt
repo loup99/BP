@@ -263,12 +263,7 @@ BP_set_minorities_universal = {
 			add_small_faith_to_county_effect = { FAITH = faith:nicene }
 			#Cultures
 			if = {
-				limit = {
-					OR = {
-						this = title:c_jerusalem
-						is_coastal_county = yes
-					}
-				}
+				limit = { this = title:c_jerusalem }
 				add_small_culture_to_county_effect = { CULTURE = culture:greek }
 			}
 			add_small_culture_to_county_effect = { CULTURE = culture:aramean }
@@ -289,6 +284,12 @@ BP_set_minorities_universal = {
 		}
 		# Other Specific Counties
 		#========================
+		title:c_amida = {
+			add_small_culture_and_faith_to_county_effect = {
+				CULTURE = culture:armenian
+				FAITH = faith:urartuism
+			}
+		}
 		title:c_jerusalem = { add_small_faith_to_county_effect = { FAITH = faith:miaphysitism } }
 		title:c_harran = {
 			#Faiths
@@ -304,7 +305,6 @@ BP_set_minorities_universal = {
 				FAITH = faith:miaphysitism
 				CULTURE = culture:coptic
 			}
-			add_small_culture_to_county_effect = { CULTURE = culture:greek }
 			add_small_faith_to_county_effect = { FAITH = faith:karaism }
 		}
 		title:c_baghdad = {
@@ -334,6 +334,17 @@ BP_set_minorities_by_date = {
 			#========================
 			# Abrahamics
 			## Christians
+			### Nicene
+			every_county = {
+				limit = {
+					OR = {
+						this.kingdom = title:k_asia
+						this.kingdom = title:k_galatia
+					}
+					NOT = { this.religion = religion:christianity_religion }
+				}
+				add_large_faith_to_county_effect = { FAITH = faith:nicene }
+			}
 			### Georgian Orthodox
 			title:c_abkhazia = { #Abkhaz Christians
 				add_large_faith_to_county_effect = { FAITH = faith:georgian_orthodox }
@@ -343,8 +354,8 @@ BP_set_minorities_by_date = {
 				limit = {
 					OR = {
 						this.duchy = title:d_phoenice
-						this = title:c_baalbek
-						this = title:c_homs
+						this = title:c_juwair
+						this = title:c_qaryatan
 						#In the North Mountains
 						this = title:c_aintab
 						this = title:c_antiocheia
@@ -379,16 +390,14 @@ BP_set_minorities_by_date = {
 			every_county = {
 				limit = {
 					OR = {
-						this.duchy = title:d_syria
-						this.duchy = title:d_syria_salutaris
-						this = title:c_marash
-						this = title:c_aintab
 						this = title:c_palmyra
 						this = title:c_qaryatan
 						this = title:c_homs
 						this = title:c_tripoli
-						this = title:c_alexandretta
-						this = title:c_tall_hamid
+						#Orontes Valley
+						this = title:c_hama
+						this = title:c_shayzar
+						this = title:c_homs
 					}
 				}
 				add_large_faith_to_county_effect = { FAITH = faith:syrian_orthodox }
@@ -398,6 +407,10 @@ BP_set_minorities_by_date = {
 					OR = {
 						this = title:c_marash
 						this = title:c_samosata
+						this = title:c_dausar
+						#Lower Syrian
+						this = title:c_damascus
+						this = title:c_hauran
 					}
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:syrian_orthodox }
@@ -409,24 +422,51 @@ BP_set_minorities_by_date = {
 			}
 			###Nestorians
 			every_county = {
-				limit = {
-					this.culture = culture:assyrian
-					NOT = { this = title:c_harran }
-				}
+				limit = { this.culture = culture:assyrian }
 				add_large_faith_to_county_effect = { FAITH = faith:nestorian }
 			}
 			every_county = { #Small Concentrations
 				limit = { this.duchy = title:d_tabaristan }
 				add_small_faith_to_county_effect = { FAITH = faith:nestorian }
 			}
+			### Marcionism
+			every_county = { #Large Concentrations
+				limit = { this = title:c_aintab }
+				add_large_faith_to_county_effect = { FAITH = faith:marcionism }
+			}
+			### Audians
+			title:c_damascus = { #Site of Jubb'adin "Well of Audius"
+				add_small_faith_to_county_effect = { FAITH = faith:audianism }
+			}
 			every_county = {
 				limit = {
 					OR = {
-						this.duchy = title:d_leptis_magna
-						this = title:c_tripolitana
+						this.duchy = title:d_libanensis
+						this.duchy = title:d_syria
+						this.duchy = title:d_syria_salutaris
+						this.duchy = title:d_osrhoene
+						this = title:c_aintab
+						this = title:c_alexandretta
+						this = title:c_tall_hamid
+					}
+					this.religion = religion:christianity_religion
+					NOT = { this = title:c_damascus }
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:audianism }
+			}
+			### Patripassianists
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_homs
+						this = title:c_shayzar
+						this = title:c_hama
+						this = title:c_qinnasrin
+						this = title:c_suriya
+						this = title:c_amida
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:gurzil }
+				add_small_faith_to_county_effect = { FAITH = faith:patripassianism }
 			}
 			#Hypsisterians
 			##Hypsisterians
@@ -473,15 +513,34 @@ BP_set_minorities_by_date = {
 			}
 			#Pagans
 			##Hellenics
+			### Hellenism
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_baalbek #Still heavily pagan in the late IVth into Vth century
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
+			}
 			###Cybellians
 			every_county = {
-				limit = { #Cybellian holy sites; still about 100 years since 
+				limit = { #Cybellian holy sites
 					OR = {
 						this = title:c_phrygia
-						this = title:c_satif
+						this = title:c_satif #Still only 100 years since the temple burnt down
 					}
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:cybelian }
+			}
+			###Gurzilism
+			every_county = {
+				limit = {
+					OR = {
+						this.duchy = title:d_leptis_magna
+						this = title:c_tripolitana
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:gurzil }
 			}
 			
 			# Cultures
@@ -527,6 +586,12 @@ BP_set_minorities_by_date = {
 					OR = {
 						this = title:c_antiocheia
 						this = title:c_acre
+						this = title:c_alexandria
+						AND = {
+							this.kingdom = title:k_oriens
+							NOT = { this = title:c_farama }
+							is_coastal_county = yes
+						}
 					}
 				}
 				add_small_culture_to_county_effect = { CULTURE = culture:greek }
@@ -552,6 +617,64 @@ BP_set_minorities_by_date = {
 				}
 				add_small_culture_to_county_effect = { CULTURE = culture:bosporan }
 			}
+			#Arameans
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_marash
+						this = title:c_samman
+						this = title:c_rusafa
+						this = title:c_sukhna
+						this.culture = culture:helleno_aramean
+					}
+					NOT = { this.duchy = title:d_cyprus }
+				}
+				add_large_culture_to_county_effect = { CULTURE = culture:aramean }
+			}
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_samosata
+						AND = {
+							this.culture = culture:assyrian
+							any_neighboring_county = { culture = culture:aramean }
+						}
+					}
+					NOT = { this.culture = culture:helleno_aramean }
+				}
+				add_small_culture_to_county_effect = { CULTURE = culture:aramean }
+			}
+			#Assyrians
+			every_county = {
+				limit = {
+					OR = {
+						AND = {
+							this.culture = culture:aramean
+							any_neighboring_county = { culture = culture:assyrian }
+						}
+					}
+				}
+				add_small_culture_to_county_effect = { CULTURE = culture:assyrian }
+			}
+			#Khalans
+			every_county = {
+				limit = {
+					OR = {
+						#Ghassanids
+						this = title:c_hauran
+						this = title:c_balqa
+						this = title:c_irbid
+						this = title:c_damascus
+						#Lakhmids
+						this = title:c_waqisa
+						this = title:c_thalabiya
+						this = title:c_akhadid
+						this = title:c_karbala
+					}
+				}
+				add_small_culture_to_county_effect = { CULTURE = culture:khalan }
+			}
+			
 			
 			## Other Special Regions
 			#========================
@@ -721,9 +844,6 @@ BP_set_minorities_by_date = {
 				add_small_culture_to_county_effect = { CULTURE = culture:roman }
 				add_small_faith_to_county_effect = { FAITH = faith:monophysitism }
 			}
-			title:c_marash = { add_large_culture_to_county_effect = { CULTURE = culture:aramean } }
-			title:c_samosata = { add_small_culture_to_county_effect = { CULTURE = culture:aramean } }
-			title:c_antiocheia = { add_small_culture_to_county_effect = { CULTURE = culture:aramean } }
 			### Egypt
 			title:c_alexandria = {
 				add_small_faith_to_county_effect = { FAITH = faith:egyptian_pagan } #Horapollo in the late 5th century was buried by Egyptian Rites
@@ -739,7 +859,6 @@ BP_set_minorities_by_date = {
 			### North Africa
 			title:c_tunis = { add_small_culture_to_county_effect = { CULTURE = culture:punic } }
 			### Asoristan
-			title:c_rusafa = { add_small_culture_to_county_effect = { CULTURE = culture:aramean } }
 			title:c_tustar = { #Gondishapur, Susa, &c. a Cosmopolitan region
 				#Faith
 				add_large_faith_to_county_effect = { FAITH = faith:nestorian }
@@ -760,8 +879,6 @@ BP_set_minorities_by_date = {
 				add_small_faith_to_county_effect = { FAITH = faith:manichean }
 			}
 			title:c_talish = { add_large_faith_to_county_effect = { FAITH = faith:manichean } }
-			### Arabia
-			title:c_samman = { add_large_culture_to_county_effect = { CULTURE = culture:aramean } }
 			### Spain
 			title:c_porto = {
 				add_small_culture_and_faith_to_county_effect = {
