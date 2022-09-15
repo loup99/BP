@@ -1,5 +1,6 @@
 ﻿#Sources:
 #[1] M. Mueller, HYPSISTOS CULTS IN THE GREEK WORLD DURING THE ROMAN IMPERIUM. Hamilton, Ontario: McMaster University, 2014.
+#[2] Abu Muhammad 'Abd Allah Ruzbih ibn Daduya wrote a number of anti-monotheist, pro-dualist tracts early in Muslim rules (ca 760s); weren't stamped out until the 790s
 
 on_game_start = {
 	on_actions = {
@@ -153,19 +154,31 @@ BP_set_minorities_universal = {
 					this = title:c_kakheti
 					this = title:c_tbilisi
 					this = title:c_kartli
-					#Other Jews
+					#Greece & Asia Minor
 					this = title:c_byzantion
+					this = title:c_pacatiana #Jewish presence since Seleucid time, likely contributed to Hypsisterians
 					this = title:c_aeolis
 					this = title:c_ionia
+					this = title:c_attica
+					#Oriens & Egypt (sans Hebrew territories)
+					this.duchy = title:d_cyprus #Long term Jewish presence in Cyprus, although significantly reduced after the AD 116 revolt and poorly attested AD II-IV century [1]
+					this = title:c_antiocheia
 					this = title:c_alexandria
+					#Western Roman Empire
 					this = title:c_roma
 					this = title:c_tunis #Carthage
-					this = title:c_antiocheia
-					this = title:c_attica
-					this = title:c_baghdad
+					#Asoristan & it's Talmudic Academies
+					this = title:c_baghdad #Mahuz Academies
+					this = title:c_kufa #Sura Academy
+					this = title:c_anbar #Pumbedita & Pum-Nahara & Firuz Shapur Academies
+					this = title:c_karbala #Nehardea Academy
+					#Not *necessarily* large populations of Jews, but it's where we've parked the Exilarch
+					this = title:c_hulwan
+					this = title:c_kirkuk
+					#Persia
+					this = title:c_isfahan
+					#Central Asia
 					this = title:c_guzgan #Yahudan seems to be a reference to Jews
-					this = title:c_pacatiana #Jewish presence since Selecudi time, likely contributed to Hypsisterians
-					this.duchy = title:d_cyprus #Long term Jewish presence in Cyprus, although significantly reduced after the AD 116 revolt and poorly attested AD II-IV century [1]
 				}
 			}
 			add_small_faith_to_county_effect = { FAITH = faith:rabbinism }
@@ -196,21 +209,31 @@ BP_set_minorities_universal = {
 		}
 		## Dualists
 		###Manicheans
-		every_county = { #Large Concentrations
+		every_county = {
 			limit = { this.duchy = title:d_soghd }
 			add_large_faith_to_county_effect = { FAITH = faith:manichean }
 		}
-		every_county = { #Small Concentrations
+		every_county = {
 			limit = {
 				OR = {
+					#Central Asia
 					this.duchy = title:d_osrushana
 					this.duchy = title:d_ferghana
 					this.duchy = title:d_chah
-					this = title:c_baghdad
+					#Asoristan [2]
+					this.duchy = title:d_asoristan
+					this.duchy = title:d_beth_garami
+					this.duchy = title:d_mesan
+					this.duchy = title:d_hira
+					this.duchy = title:d_euphrates
+					#Other
+					this = title:c_tustar
 				}
-				NOT = { this = title:c_otrar }
 			}
-			add_small_faith_to_county_effect = { FAITH = faith:manichean }
+			if = {
+				limit = { this = { has_a_non_tribal_holding_trigger = yes } }
+				add_small_faith_to_county_effect = { FAITH = faith:manichean }
+			}
 		}
 		###Mandeans
 		every_county = {
@@ -252,6 +275,22 @@ BP_set_minorities_universal = {
 			}
 			add_small_faith_to_county_effect = { FAITH = faith:dharmaguptaka }
 		}
+		#Pagans
+		##Assyrian Pagans
+		###Assyrian Pagans
+		every_county = {
+			limit = {
+				OR = {
+					#Shamsīyah
+					this = title:c_tall_basma
+					this = title:c_amida
+					this = title:c_samosata
+					this = title:c_edessa
+				}
+			}
+			add_small_faith_to_county_effect = { FAITH = faith:assyrian_pagan }
+		}
+		
 		## Other Special Regions
 		#========================
 		### Hebrew territories are an admixture of many different groups
@@ -266,7 +305,6 @@ BP_set_minorities_universal = {
 				limit = { this = title:c_jerusalem }
 				add_small_culture_to_county_effect = { CULTURE = culture:greek }
 			}
-			add_small_culture_to_county_effect = { CULTURE = culture:aramean }
 		}
 		#North African religious admixture of Donatists/Nicenes in Carthage/Numidia/Sitifensis
 		every_county = {
@@ -298,7 +336,6 @@ BP_set_minorities_universal = {
 			add_small_faith_to_county_effect = { FAITH = faith:assyrian_pagan }
 			#Cultures
 			add_small_culture_to_county_effect = { CULTURE = culture:greek }
-			add_small_culture_to_county_effect = { CULTURE = culture:aramean }
 		}
 		title:c_alexandria = {
 			add_large_culture_and_faith_to_county_effect = {
@@ -367,12 +404,7 @@ BP_set_minorities_by_date = {
 				add_large_faith_to_county_effect = { FAITH = faith:maronite_church }
 			}
 			every_county = {
-				limit = {
-					OR = {
-						this = title:c_marash
-						this = title:c_samosata
-					}
-				}
+				limit = { this = title:c_marash }
 				add_small_faith_to_county_effect = { FAITH = faith:maronite_church }
 			}
 			###Apollinarism
@@ -425,12 +457,12 @@ BP_set_minorities_by_date = {
 				limit = { this.culture = culture:assyrian }
 				add_large_faith_to_county_effect = { FAITH = faith:nestorian }
 			}
-			every_county = { #Small Concentrations
+			every_county = {
 				limit = { this.duchy = title:d_tabaristan }
 				add_small_faith_to_county_effect = { FAITH = faith:nestorian }
 			}
 			### Marcionism
-			every_county = { #Large Concentrations
+			every_county = {
 				limit = { this = title:c_aintab }
 				add_large_faith_to_county_effect = { FAITH = faith:marcionism }
 			}
@@ -465,9 +497,11 @@ BP_set_minorities_by_date = {
 						this = title:c_suriya
 						this = title:c_amida
 					}
+					this.religion = religion:christianity_religion
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:patripassianism }
 			}
+			
 			#Hypsisterians
 			##Hypsisterians
 			###Hypsisterians
@@ -511,6 +545,7 @@ BP_set_minorities_by_date = {
 				}
 				add_large_faith_to_county_effect = { FAITH = faith:bosporan_faith }
 			}
+			
 			#Pagans
 			##Hellenics
 			### Hellenism
@@ -532,6 +567,7 @@ BP_set_minorities_by_date = {
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:cybelian }
 			}
+			##Berbers
 			###Gurzilism
 			every_county = {
 				limit = {
@@ -621,40 +657,59 @@ BP_set_minorities_by_date = {
 			every_county = {
 				limit = {
 					OR = {
-						this = title:c_marash
-						this = title:c_samman
-						this = title:c_rusafa
-						this = title:c_sukhna
-						this.culture = culture:helleno_aramean
+						this.kingdom = title:k_asoristan
+						this.kingdom = title:k_oriens
+						this.duchy = title:d_khuzestan
+						this.duchy = title:d_kermanshah
+						this = title:c_tall_hamid
+						this = title:c_alexandretta
 					}
+					NOT = { this.duchy = title:d_palestinia_salutaris }
 					NOT = { this.duchy = title:d_cyprus }
 				}
-				add_large_culture_to_county_effect = { CULTURE = culture:aramean }
-			}
-			every_county = {
-				limit = {
-					OR = {
-						this = title:c_samosata
-						AND = {
-							this.culture = culture:assyrian
-							any_neighboring_county = { culture = culture:aramean }
+				if = {
+					limit = {
+						any_neighboring_county = { this.culture = culture:aramean }
+						OR = {
+							this = { has_a_non_tribal_holding_trigger = yes }
+							this = title:c_rusafa
 						}
 					}
-					NOT = { this.culture = culture:helleno_aramean }
+					add_large_culture_to_county_effect = { CULTURE = culture:aramean }
 				}
-				add_small_culture_to_county_effect = { CULTURE = culture:aramean }
+				else_if = {
+					limit = { this = { has_a_non_tribal_holding_trigger = yes } }
+					add_small_culture_to_county_effect = { CULTURE = culture:aramean }
+				}
 			}
 			#Assyrians
 			every_county = {
 				limit = {
 					OR = {
-						AND = {
-							this.culture = culture:aramean
-							any_neighboring_county = { culture = culture:assyrian }
-						}
+						#Asoristan
+						this.duchy = title:d_asoristan
+						this.duchy = title:d_beth_garami
+						this.duchy = title:d_euphrates
+						this = title:c_akhadid
+						this = title:c_kufa
+						this = title:c_karbala
+						#Oriens
+						this.duchy = title:d_euphratensis
+						this = title:c_aleppo
+						this = title:c_syrrusafa
 					}
 				}
-				add_small_culture_to_county_effect = { CULTURE = culture:assyrian }
+				if = {
+					limit = {
+						any_neighboring_county = { this.culture = culture:assyrian }
+						this = { has_a_non_tribal_holding_trigger = yes }
+					}
+					add_large_culture_to_county_effect = { CULTURE = culture:assyrian }
+				}
+				else_if = {
+					limit = { this = { has_a_non_tribal_holding_trigger = yes } }
+					add_small_culture_to_county_effect = { CULTURE = culture:assyrian }
+				}
 			}
 			#Khalans
 			every_county = {
@@ -865,7 +920,6 @@ BP_set_minorities_by_date = {
 				add_small_faith_to_county_effect = { FAITH = faith:nicene } #Roman captives after Shapur II rebuilt the city
 				add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan } #Roman captives after Shapur II rebuilt the city
 				#Culture
-				add_large_culture_to_county_effect = { CULTURE = culture:aramean }
 				add_small_culture_to_county_effect = { CULTURE = culture:roman } #Roman captives after Shapur II rebuilt the city
 				add_small_culture_to_county_effect = { CULTURE = culture:greek } #Ancient Greek settlement in Susa
 			}
