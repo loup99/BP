@@ -1,0 +1,93 @@
+﻿### On-Actions
+add_small_culture_to_county_effect = {
+	add_minority_to_county_effect = {
+		CULTURE_OR_FAITH = culture
+		ITEM = $CULTURE$
+		SIZE = small
+	}
+}
+add_large_culture_to_county_effect = {
+	add_minority_to_county_effect = {
+		CULTURE_OR_FAITH = culture
+		ITEM = $CULTURE$
+		SIZE = large
+	}
+}
+add_small_faith_to_county_effect = {
+	add_minority_to_county_effect = {
+		CULTURE_OR_FAITH = faith
+		ITEM = $FAITH$
+		SIZE = small
+	}
+}
+add_large_faith_to_county_effect = {
+	add_minority_to_county_effect = {
+		CULTURE_OR_FAITH = faith
+		ITEM = $FAITH$
+		SIZE = large
+	}
+}
+add_small_culture_and_faith_to_county_effect = {
+	add_minority_faith_and_culture_to_county_effect = {
+		CULTURE = $CULTURE$
+		FAITH = $FAITH$
+		SIZE = small
+	}
+}
+add_large_culture_and_faith_to_county_effect = {
+	add_minority_faith_and_culture_to_county_effect = {
+		CULTURE = $CULTURE$
+		FAITH = $FAITH$
+		SIZE = large
+	}
+}
+#Generate Indian Diversity
+add_dharmic_faith_minorities = {
+	every_county = {
+		limit = {
+			this.title_province = { geographical_region = world_india }
+			this.faith = {
+				has_doctrine = eastern_hostility_doctrine
+				NOT = { has_doctrine = tenet_ethnic_religion }
+			}
+		}
+		this = { save_temporary_scope_as = the_county_temp }
+		every_neighboring_county = {
+			if = {
+				limit = {
+					faith = {
+						has_doctrine = eastern_hostility_doctrine
+						NOT = { has_doctrine = tenet_ethnic_religion }
+						NOT = { this = scope:the_county_temp.faith }
+					}
+				}
+				faith = { add_to_list = neighboring_faiths }
+			}
+		}
+		every_in_list = {
+			list = neighboring_faiths
+			this = { save_temporary_scope_as = the_faith_temp }
+			scope:the_county_temp = {
+				add_to_variable_list = {
+					name = faith_minorities_small
+					target = scope:the_faith_temp
+				}
+			}
+			this = { remove_from_list = neighboring_faiths }
+		}
+		scope:the_county_temp.holder.faith = {
+			if = {
+				limit = {
+					has_doctrine = eastern_hostility_doctrine
+					NOT = { has_doctrine = tenet_ethnic_religion }
+					NOT = { this = scope:the_county_temp.faith }
+				}
+				add_to_variable_list = {
+					name = faith_minorities_small
+					target = scope:the_faith_temp
+				}
+			}
+		}
+	}
+}
+
