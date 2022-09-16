@@ -139,38 +139,82 @@ minority_capacity_of_county_faith = {
 	floor = yes
 }
 #County Scope
+culture_small_minority_weight_value = {
+	value = base_small_minority_weight
+	if = {
+		limit = { scope:the_county_temp.culture = { has_a_culture_blending_tradition_trigger = yes } }
+		multiply = tradition_culture_blending_multiplier
+	}
+}
+culture_large_minority_weight_value = {
+	value = base_large_minority_weight
+	if = {
+		limit = { scope:the_county_temp.culture = { has_a_culture_blending_tradition_trigger = yes } }
+		multiply = tradition_culture_blending_multiplier
+	}
+}
 number_of_culture_minorities_in_county_weighted = {
+	this = { save_temporary_scope_as = the_county_temp }
 	value = 0
 	if = {
 		limit = { this = { has_variable_list = culture_minorities_small } }
 		this = {
-			every_in_list = { variable = culture_minorities_small add = 1 }
+			every_in_list = {
+				variable = culture_minorities_small
+				this = { save_temporary_scope_as = the_culture_temp }
+				add = culture_small_minority_weight_value
+			}
 		}
 	}
 	if = {
 		limit = { this = { has_variable_list = culture_minorities_large } }
-		this = { every_in_list = { variable = culture_minorities_large add = 2 } }
+		this = {
+			every_in_list = {
+				variable = culture_minorities_large
+				this = { save_temporary_scope_as = the_culture_temp }
+				add = culture_large_minority_weight_value
+			}
+		}
 	}
 }
 #County Scope
+faith_small_minority_weight_value = {
+	value = base_small_minority_weight
+	if = {
+		limit = {
+			scope:the_county_temp.faith = { is_dharmic_faith_trigger = yes }
+			scope:the_faith_temp = { has_reduced_weight_in_dharmic_counties_trigger = yes }
+		}
+		multiply = dharmic_minorities_in_dharmic_counties_multiplier
+	}
+	else_if = {
+		limit = { scope:the_county_temp.culture = { has_a_religion_blending_tradition_trigger = yes } }
+		multiply = tradition_religion_blending_multiplier
+	}
+}
+faith_large_minority_weight_value = {
+	value = base_large_minority_weight
+	if = {
+		limit = {
+			scope:the_county_temp.faith = { is_dharmic_faith_trigger = yes }
+			scope:the_faith_temp = { has_reduced_weight_in_dharmic_counties_trigger = yes }
+		}
+		multiply = dharmic_minorities_in_dharmic_counties_multiplier
+	}
+	else_if = {
+		limit = { scope:the_county_temp.culture = { has_a_religion_blending_tradition_trigger = yes } }
+		multiply = tradition_religion_blending_multiplier
+	}
+}
 number_of_faith_minorities_in_county_weighted = {
 	this = { save_temporary_scope_as = the_county_temp }
 	value = 0
 	if = { #Small minorities
 		limit = { this = { has_variable_list = faith_minorities_small } }
-		this = {
-			every_in_list = {
-				variable = faith_minorities_small
-				if = { #Indian faiths support greater plurality
-					limit = { scope:the_county_temp.faith = { is_dharmic_faith_trigger = yes } }
-					if = { #Dharmic faiths support 50% more minorities, so long as they are Dharmic or Eastern Pagan
-						limit = { scope:the_county_temp.faith = { is_valid_dharmic_minority_cost_trigger = yes } }
-						add = 0.67
-					}
-					else = { add = 1 } #Non-Dharmic case
-				}
-				else = { add = 1 } #all other interactions
-			}
+		every_in_list = {
+			variable = faith_minorities_small
+			this = { save_temporary_scope_as = the_faith_temp }
+			add = faith_small_minority_weight_value
 		}
 	}
 	if = { #Large minorities
@@ -178,15 +222,8 @@ number_of_faith_minorities_in_county_weighted = {
 		this = {
 			every_in_list = {
 				variable = faith_minorities_large
-				if = { #Indian faiths support greater plurality
-					limit = { scope:the_county_temp.faith = { is_dharmic_faith_trigger = yes } }
-					if = { #Dharmic faiths support 50% more minorities, so long as they are Dharmic or Eastern Pagan
-						limit = { scope:the_county_temp.faith = { is_valid_dharmic_minority_cost_trigger = yes } }
-						add = 1.34
-					}
-					else = { add = 2 } #Non-Dharmic case
-				}
-				else = { add = 2 } #all other interactions
+				this = { save_temporary_scope_as = the_faith_temp }
+				add = faith_small_minority_weight_value
 			}
 		}
 	}
