@@ -154,6 +154,8 @@ BP_set_minorities_universal = {
 					this = title:c_kakheti
 					this = title:c_tbilisi
 					this = title:c_kartli
+					#Armenian Jews
+					this = title:c_ayrarat
 					#Greece & Asia Minor
 					this = title:c_byzantion
 					this = title:c_pacatiana #Jewish presence since Seleucid time, likely contributed to Hypsisterians
@@ -372,6 +374,36 @@ BP_set_minorities_universal = {
 				CULTURE = culture:nakh
 			}
 		}
+		#Armenian-Aghwank border
+		title:c_khachen = {
+			add_large_culture_and_faith_to_county_effect = {
+				FAITH = faith:armenian_apostolic
+				CULTURE = culture:armenian
+			}
+		}
+		#Georgian-Aghwank border
+		title:c_kakheti = {
+			add_small_culture_and_faith_to_county_effect = {
+				FAITH = faith:albanian_apostolic
+				CULTURE = culture:caucasian_albanian
+			}
+		}
+		#Georgian-Armenian border
+		title:c_lori = {
+			add_large_culture_and_faith_to_county_effect = {
+				FAITH = faith:georgian_orthodox
+				CULTURE = culture:georgian
+			}
+		}
+		#Svan-Lazic border
+		title:c_odishi ={
+			add_small_culture_and_faith_to_county_effect = {
+				FAITH = faith:georgian_pagan
+				CULTURE = culture:svan
+			}
+		}
+		#Svan-Abkhaz border
+		title:c_odishi ={ add_small_culture_to_county_effect = { CULTURE = culture:svan } }
 		## India and it's religious diversity
 		#========================
 		add_dharmic_faith_minorities = yes
@@ -389,17 +421,47 @@ BP_set_minorities_by_date = {
 			### Nicene
 			every_county = {
 				limit = {
-					OR = {
-						this.kingdom = title:k_asia
-						this.kingdom = title:k_galatia
+					AND = { #West Asia Minor
+						OR = {
+							this.kingdom = title:k_asia
+							this.kingdom = title:k_galatia
+						}
+						NOT = { this.religion = religion:christianity_religion }
 					}
-					NOT = { this.religion = religion:christianity_religion }
 				}
 				add_large_faith_to_county_effect = { FAITH = faith:nicene }
 			}
+			every_county = {
+				limit = {
+					OR = {
+						#Cappadocia
+						this = title:c_ablastha
+						this = title:c_azysia
+						this = title:c_lycandus
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:nicene }
+			}
 			### Georgian Orthodox
-			title:c_abkhazia = { #Abkhaz Christians
-				add_large_faith_to_county_effect = { FAITH = faith:georgian_orthodox }
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_svaneti
+						this = title:c_abkhazia
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:georgian_orthodox }
+			}
+			### Armenian Church
+			every_county = {
+				limit = {
+					AND = {
+						this.faith = faith:marcionism
+						this.culture = culture:armenian
+					}
+					NOT = { this = title:c_samosata }
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:armenian_apostolic }
 			}
 			### Albanian Church
 			every_county = {
@@ -496,8 +558,29 @@ BP_set_minorities_by_date = {
 			}
 			### Marcionism
 			every_county = {
-				limit = { this = title:c_aintab }
+				limit = {
+					OR = {
+						this = title:c_edessa
+						this = title:c_aintab
+						AND = {
+							this.kingdom = title:k_armenia_inferior
+							this.faith = faith:armenian_apostolic
+						}
+					}
+				}
 				add_large_faith_to_county_effect = { FAITH = faith:marcionism }
+			}
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_kaisereia
+						this = title:c_sebasteia
+						this = title:c_colonea
+						#NOT kilikia & kyzistria because it was too developed and later Marcionism seemed to exist in the
+						#"no-man's land" between Armenia and Rome
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:marcionism }
 			}
 			### Audians
 			title:c_damascus = { #Site of Jubb'adin "Well of Audius"
@@ -536,17 +619,42 @@ BP_set_minorities_by_date = {
 			}
 			
 			#Mazdans
+			##Dualists
+			###Valentinians
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_beirut
+						this = title:c_antiocheia
+						this = title:c_alexandretta
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:valentinianism }
+			}
 			##Zoroastrians
 			###Arewordiks
 			every_county = {
 				limit = {
 					OR = {
-						this = title:c_hereti
-						this = title:c_shirvan
-						this = title:c_mugan
+						this.kingdom = title:k_armenia
+						this.kingdom = title:k_caucasian_albania
+						#For continuity with the later Arewordiks
+						this = title:c_bakriya
+						this = title:c_mayyafariqin
 					}
+					#Northern reaches of Armenia were more likely thoroughly Christanized
+					NOT = { this = title:c_gugark }
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:urartuism }
+				if = {
+					limit = {
+						OR = {
+							this = title:c_bagrewand #Major center in Ascarid Armenia
+							any_neighboring_county = { religion = religion:zoroastrianism_religion }
+						}
+					}
+					add_large_faith_to_county_effect = { FAITH = faith:urartuism }
+				}
+				else = { add_small_faith_to_county_effect = { FAITH = faith:urartuism } }
 			}
 			
 			#Hypsisterians
@@ -628,6 +736,19 @@ BP_set_minorities_by_date = {
 			##Iranian Pagans
 			###Iranian Pagans
 			title:c_mugan = { add_small_faith_to_county_effect = { FAITH = faith:iranian_pagan_faith } }
+			##Georgians
+			###Georgian Pagans
+			every_county = {
+				limit = {
+					OR = {
+						this.culture = culture:georgian
+						this.culture = culture:macronian
+						this = title:c_lori
+					}
+					NOT = { this = title:c_odishi }
+				}
+				add_large_faith_to_county_effect = { FAITH = faith:georgian_pagan }
+			}
 			
 			# Cultures
 			#========================
@@ -818,6 +939,16 @@ BP_set_minorities_by_date = {
 					}
 				}
 				add_large_culture_to_county_effect = { CULTURE = culture:caucasian_albanian }
+			}
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_odishi
+						this = title:c_guria
+						this = title:c_acampse
+					}
+				}
+				add_small_culture_to_county_effect = { CULTURE = culture:georgian }
 			}
 			
 			## Other Special Regions
