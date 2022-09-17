@@ -228,11 +228,26 @@ valid_immigration_source_trigger = {
 
 #support_of_a_culture_minority_in_county triggers
 county_specific_large_support_culture_trigger = { #target_county scope
-	always = no
+	#Rough terrain diversity minorities are mostly self-supporting when established
+	AND = {
+		scope:the_culture = { has_cultural_parameter = encourages_diversity_in_mountains }
+		has_variable_list = culture_minorities_large
+		is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
+		has_a_rough_terrain_province_trigger = yes
+	}
 }
 county_specific_small_support_culture_trigger = { #target_county scope
-	#So that penninsulae and islands don't have small minorities die out (see Cyprus, Socotra)
-	is_coastal_county = yes
+	OR = {
+		#Rough terrain diversity minorities are mostly self-supporting when established
+		AND = {
+			scope:the_culture = { has_cultural_parameter = encourages_diversity_in_mountains }
+			has_variable_list = culture_minorities_small
+			is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
+			has_a_rough_terrain_province_trigger = yes
+		}
+		#So that penninsulae and islands don't have small minorities die out (see Cyprus, Socotra)
+		is_coastal_county = yes
+	}
 }
 large_minority_support_culture_aspect_trigger = { #culture scope
 	#Colonizers/Hellenizers: Equivalent to having a large minority next to you
