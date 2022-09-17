@@ -309,10 +309,15 @@ BP_set_minorities_universal = {
 			}
 		}
 		#Adyghes (Circassians)
+		title:c_maghas = {
+			add_large_culture_and_faith_to_county_effect = {
+				FAITH = faith:georgian_pagan
+				CULTURE = culture:adyghes
+			}
+		}
 		every_county = {
 			limit = {
 				OR = {
-					this = title:c_maghas
 					this = title:c_cabardinia
 					this = title:c_abkhazia
 				}
@@ -322,6 +327,8 @@ BP_set_minorities_universal = {
 				CULTURE = culture:adyghes
 			}
 		}
+		#Greeks
+		title:c_al-buhaira = { add_small_culture_to_county_effect = { CULTURE = culture:greek } } #Naucratis
 		
 		## Other Special Regions
 		#========================
@@ -367,6 +374,36 @@ BP_set_minorities_universal = {
 				FAITH = faith:urartuism
 			}
 		}
+		###Miaphysite Copts
+		every_county = {
+			limit = {
+				OR = {
+					this.kingdom = title:k_egypt
+					this.duchy = title:d_palestinia_salutaris
+				}
+				#Needs one of these conditions
+				OR = {
+					any_neighboring_county = { culture = culture:coptic }
+					this = title:c_al-gharbiya #Separated by water
+					this = title:c_siwa
+				}
+				#Always must be true
+				has_a_non_tribal_holding_trigger = yes
+			}
+			if = {
+				limit = { this.culture = culture:helleno_coptic }
+				add_large_culture_and_faith_to_county_effect = {
+					CULTURE = culture:coptic
+					FAITH = faith:miaphysitism
+				}
+			}
+			else = {
+				add_small_culture_and_faith_to_county_effect = {
+					CULTURE = culture:coptic
+					FAITH = faith:miaphysitism
+				}
+			}
+		}
 		
 		# Other Specific Counties
 		#========================
@@ -379,13 +416,7 @@ BP_set_minorities_universal = {
 			#Cultures
 			add_small_culture_to_county_effect = { CULTURE = culture:greek }
 		}
-		title:c_alexandria = {
-			add_large_culture_and_faith_to_county_effect = {
-				FAITH = faith:miaphysitism
-				CULTURE = culture:coptic
-			}
-			add_small_faith_to_county_effect = { FAITH = faith:karaism }
-		}
+		title:c_alexandria = { add_small_faith_to_county_effect = { FAITH = faith:karaism } }
 		title:c_baghdad = {
 			add_large_culture_and_faith_to_county_effect = {
 				FAITH = faith:mazdayasna
@@ -452,15 +483,26 @@ BP_set_minorities_by_date = {
 			### Nicene
 			every_county = {
 				limit = {
-					AND = { #West Asia Minor
-						OR = {
-							this.kingdom = title:k_asia
-							this.kingdom = title:k_galatia
-						}
-						NOT = { this.religion = religion:christianity_religion }
+					OR = {
+						#West Asia Minor
+						this.kingdom = title:k_asia
+						this.kingdom = title:k_galatia
+						this.kingdom = title:k_byzantium
+						#Pentopolis
+						this = title:c_barqa
+						this = title:c_derna
 					}
 				}
-				add_large_faith_to_county_effect = { FAITH = faith:nicene }
+				if = {
+					limit = {
+						OR = {
+							NOT = { this.religion = religion:christianity_religion }
+							any_neighboring_county = { faith = faith:nicene }
+						}
+					}
+					add_large_faith_to_county_effect = { FAITH = faith:nicene }
+				}
+				else = { add_small_faith_to_county_effect = { FAITH = faith:nicene } }
 			}
 			every_county = {
 				limit = {
@@ -743,6 +785,14 @@ BP_set_minorities_by_date = {
 				}
 				add_large_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
 			}
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_alexandria
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
+			}
 			###Cybellians
 			every_county = {
 				limit = { #Cybellian holy sites
@@ -779,6 +829,47 @@ BP_set_minorities_by_date = {
 					NOT = { this = title:c_odishi }
 				}
 				add_large_faith_to_county_effect = { FAITH = faith:georgian_pagan }
+			}
+			##Kemetism
+			### Egyptian Paganism
+			every_county = {
+				limit = {
+					OR = {
+						#Egypt
+						#Still extant, if small, in the highly populous Delta
+						this = title:c_alexandria #Horapollo in the late 5th century was buried by Egyptian Rites
+						this = title:c_al-buhaira
+						this = title:c_al-gharbiya
+						this = title:c_damietta
+						#And near other pagans
+						AND = {
+							culture = culture:coptic
+							any_neighboring_county = {
+								faith = faith:egyptian_pagan
+								culture = culture:coptic
+							}
+						}
+						#Nubians
+						this = title:c_kalabsha
+						this = title:c_qurta
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:egyptian_pagan } 
+			}
+			### Mandulism
+			every_county = {
+				limit = {
+					OR = {
+						#Egypt
+						this = title:c_qus
+						this = title:c_aswan
+						this = title:c_qusayr
+						#Nubians
+						this = title:c_kalabsha
+						this = title:c_qurta
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:kushitism_pagan }
 			}
 			
 			# Cultures
@@ -848,15 +939,18 @@ BP_set_minorities_by_date = {
 			every_county = {
 				limit = {
 					OR = {
-						this = title:c_antiocheia
-						this = title:c_acre
-						this = title:c_alexandria
+						#Egypt
+						this.culture = culture:helleno_coptic
+						#Pentopolis
+						this = title:c_barqa
+						this = title:c_derna
+						#Oriens
 						AND = {
 							this.kingdom = title:k_oriens
-							NOT = { this = title:c_farama }
 							is_coastal_county = yes
 						}
 					}
+					NOT = { this.duchy = title:d_palestinia_salutaris }
 				}
 				add_small_culture_to_county_effect = { CULTURE = culture:greek }
 			}
@@ -1164,10 +1258,7 @@ BP_set_minorities_by_date = {
 				add_small_faith_to_county_effect = { FAITH = faith:monophysitism }
 			}
 			### Egypt
-			title:c_alexandria = {
-				add_small_faith_to_county_effect = { FAITH = faith:egyptian_pagan } #Horapollo in the late 5th century was buried by Egyptian Rites
-				add_small_culture_to_county_effect = { CULTURE = culture:roman }
-			}
+			title:c_alexandria = { add_small_culture_to_county_effect = { CULTURE = culture:roman } }
 			### Gaul
 			title:c_provence = {
 				add_small_culture_and_faith_to_county_effect = {
