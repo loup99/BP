@@ -148,36 +148,6 @@ county_is_religiously_protected_trigger = {
 }
 
 ### General triggers
-has_a_culture_blending_tradition_trigger = {
-	OR = {
-		has_cultural_tradition = tradition_culture_blending
-		has_cultural_tradition = tradition_malleable_invaders
-	}
-}
-has_a_religion_blending_tradition_trigger = {
-	OR = {
-		has_cultural_tradition = tradition_religion_blending
-		has_cultural_tradition = tradition_steppe_tolerance
-	}
-}
-is_dharmic_faith_trigger = {
-	OR = {
-		religion = religion:buddhism_religion
-		religion = religion:hinduism_religion
-		religion = religion:jainism_religion
-	}
-}
-has_reduced_weight_in_dharmic_counties_trigger = {
-	OR = {
-		is_dharmic_faith_trigger = yes
-		religion = religion:bon_religion
-		religion = religion:tani_religion
-		religion = religion:mundhum_religion
-		religion = religion:qiangic_religion
-		religion = religion:zunism_religion
-		religion = religion:munda_religion
-	}
-}
 is_valid_immigration_target_county_trigger = { #county scope
 	culture = { NOT = { has_cultural_tradition = tradition_isolationist } }
 	faith = { NOT = { has_doctrine = tenet_ethnic_religion } }
@@ -224,13 +194,56 @@ valid_immigration_source_trigger = {
 		}
 	}
 }
+#### These determine the triggers for how much weight a minority uses
+
+has_a_non_tribal_holding_trigger = {
+	any_province = {
+		NOT = { has_holding_type = tribal_holding }
+		has_holding = yes
+	}
+}
+
+has_a_culture_blending_tradition_trigger = {
+	OR = {
+		has_cultural_tradition = tradition_culture_blending
+		has_cultural_tradition = tradition_malleable_invaders
+	}
+}
+has_a_religion_blending_tradition_trigger = {
+	OR = {
+		has_cultural_tradition = tradition_religion_blending
+		has_cultural_tradition = tradition_steppe_tolerance
+	}
+}
+is_dharmic_faith_trigger = {
+	OR = {
+		religion = religion:buddhism_religion
+		religion = religion:hinduism_religion
+		religion = religion:jainism_religion
+	}
+}
+has_reduced_weight_in_dharmic_counties_trigger = {
+	OR = {
+		is_dharmic_faith_trigger = yes
+		religion = religion:bon_religion
+		religion = religion:tani_religion
+		religion = religion:mundhum_religion
+		religion = religion:qiangic_religion
+		religion = religion:zunism_religion
+		religion = religion:munda_religion
+	}
+}
+has_reduced_weight_in_rough_terrain_trigger = {
+	has_cultural_parameter = encourages_diversity_in_rough_terrain
+}
+
 #### These determine the triggers for support in generic support calculations
 
 #support_of_a_culture_minority_in_county triggers
 county_specific_large_support_culture_trigger = { #target_county scope
 	#Rough terrain diversity minorities are mostly self-supporting when established
 	AND = {
-		scope:the_culture = { has_cultural_parameter = encourages_diversity_in_mountains }
+		scope:the_culture = { has_cultural_parameter = encourages_diversity_in_rough_terrain }
 		has_variable_list = culture_minorities_large
 		is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
 		has_a_rough_terrain_province_trigger = yes
@@ -240,7 +253,7 @@ county_specific_small_support_culture_trigger = { #target_county scope
 	OR = {
 		#Rough terrain diversity minorities are mostly self-supporting when established
 		AND = {
-			scope:the_culture = { has_cultural_parameter = encourages_diversity_in_mountains }
+			scope:the_culture = { has_cultural_parameter = encourages_diversity_in_rough_terrain }
 			has_variable_list = culture_minorities_small
 			is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
 			has_a_rough_terrain_province_trigger = yes
