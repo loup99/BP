@@ -65,7 +65,7 @@ minority_capacity_of_county = {
 	# 1, 3, 4, 7, 11, 18, 29, 47, 76 ...
 	value = 1
 	if = { #Only non-tribal counties should support more than one minority
-		limit = { this = { any_province = { NOT = { has_holding_type = tribal_holding } } } }
+		limit = { this = { has_a_non_tribal_holding_trigger = yes } }
 		if = { limit = { this.development_level >= 04 } add = 1 }
 		if = { limit = { this.development_level >= 07 } add = 1 }
 		if = { limit = { this.development_level >= 11 } add = 1 }
@@ -78,7 +78,7 @@ minority_capacity_of_county = {
 minority_capacity_of_county_culture = {
 	value = minority_capacity_of_county
 	if = { #Only non-tribal counties should support more than one minority
-		limit = { this = { any_province = { NOT = { has_holding_type = tribal_holding } } } }
+		limit = { this = { has_a_non_tribal_holding_trigger = yes } }
 		# Egalitarian Ethos decreases minority capacity per development cut-off
 		if = {
 			limit = { this.culture = { has_cultural_pillar = ethos_egalitarian } }
@@ -104,12 +104,11 @@ minority_capacity_of_county_culture = {
 		}
 	}
 	min = 1
-	floor = yes
 }
 minority_capacity_of_county_faith = {
 	value = minority_capacity_of_county
 	if = { #Only non-tribal counties should support more than one minority
-		limit = { this = { any_province = { NOT = { has_holding_type = tribal_holding } } } }
+		limit = { this = { has_a_non_tribal_holding_trigger = yes } }
 		# Pluralism decreases minority capacity per development cut-off
 		if = {
 			limit = { this.faith = { has_doctrine = doctrine_pluralism_pluralistic } }
@@ -136,7 +135,6 @@ minority_capacity_of_county_faith = {
 		}
 	}
 	min = 1
-	floor = yes
 }
 #County Scope
 culture_small_minority_weight_value = {
@@ -147,7 +145,7 @@ culture_small_minority_weight_value = {
 	}
 	if = {
 		limit = {
-			scope:the_culture_temp = { has_cultural_parameter = encourages_diversity_in_mountains }
+			scope:the_culture_temp = { has_reduced_weight_in_rough_terrain_trigger = yes }
 			scope:the_county_temp = { has_a_rough_terrain_province_trigger = yes }
 		}
 		multiply = tradition_rough_terrain_diversity_multiplier
@@ -161,7 +159,7 @@ culture_large_minority_weight_value = {
 	}
 	if = {
 		limit = {
-			scope:the_culture_temp = { has_cultural_parameter = encourages_diversity_in_mountains }
+			scope:the_culture_temp = { has_reduced_weight_in_rough_terrain_trigger = yes }
 			scope:the_county_temp = { has_a_rough_terrain_province_trigger = yes }
 		}
 		multiply = tradition_rough_terrain_diversity_multiplier
@@ -215,7 +213,7 @@ faith_large_minority_weight_value = {
 		}
 		multiply = dharmic_minorities_in_dharmic_counties_multiplier
 	}
-	else_if = {
+	if = {
 		limit = { scope:the_county_temp.culture = { has_a_religion_blending_tradition_trigger = yes } }
 		multiply = tradition_religion_blending_multiplier
 	}
@@ -241,7 +239,6 @@ number_of_faith_minorities_in_county_weighted = {
 			}
 		}
 	}
-	floor = yes #Because of fractional Dharmic values
 }
 
 ### Minority Supports
