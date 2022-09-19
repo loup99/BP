@@ -1,6 +1,7 @@
 ﻿#Sources:
 #[1] M. Mueller, HYPSISTOS CULTS IN THE GREEK WORLD DURING THE ROMAN IMPERIUM. Hamilton, Ontario: McMaster University, 2014.
 #[2] Abu Muhammad 'Abd Allah Ruzbih ibn Daduya wrote a number of anti-monotheist, pro-dualist tracts early in Muslim rules (ca 760s); weren't stamped out until the 790s
+#[3] https://en.wikipedia.org/wiki/Aquitanian_language#/media/File:Euskararen_aztarna_geografikoak.svg
 
 on_game_start = {
 	on_actions = {
@@ -399,9 +400,7 @@ BP_set_minorities_universal = {
 				}
 			}
 		}
-		
-		# Other Specific Sets
-		#========================
+		### Persians
 		every_county = {
 			limit = {
 				OR = {
@@ -412,6 +411,37 @@ BP_set_minorities_universal = {
 			add_small_culture_and_faith_to_county_effect = {
 				FAITH = faith:mazdayasna
 				CULTURE = culture:persian
+			}
+		}
+		### Vascons
+		every_county = { #Based on toponymic evidence here: [3]
+			limit = {
+				OR = {
+					AND = {
+						OR = {
+							this.duchy = title:d_catalonia
+							this.duchy = title:d_caesaraugusta
+							this.duchy = title:d_celtiberia
+							this.duchy = title:d_upper_durius
+						}
+						any_neighboring_county = { culture = culture:basque }
+						NOT = { culture = { has_cultural_pillar = heritage_vasconic } }
+					}
+					this = title:c_foix
+				}
+			}
+			if = {
+				limit = { any_neighboring_county = { count > 1 culture = culture:basque } }
+				add_large_culture_and_faith_to_county_effect = {
+					FAITH = faith:basque_pagan
+					CULTURE = culture:basque
+				}
+			}
+			else = {
+				add_small_culture_and_faith_to_county_effect = {
+					FAITH = faith:basque_pagan
+					CULTURE = culture:basque
+				}
 			}
 		}
 		
@@ -1076,6 +1106,18 @@ BP_set_minorities_by_date = {
 			
 			## Other Special Regions
 			#========================
+			### Romano-Gaul presence throughout Septem Provincae
+			add_minority_to_region_granular_effect = {
+				REGIONAL_TRIGGER = e_gaul_romance_trigger
+				CULTURE_OR_FAITH = culture
+				TARGET = culture:romano_gallic
+			}
+			add_minority_to_region_granular_effect = {
+				REGIONAL_TRIGGER = e_gaul_nicene_trigger
+				CULTURE_OR_FAITH = faith
+				TARGET = faith:gallican_church
+			}
+			
 			### North Africa
 			#Western North Africa should have populations of Romano-African African Rite Nicenes
 			every_county = {
