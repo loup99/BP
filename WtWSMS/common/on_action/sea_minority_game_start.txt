@@ -2,6 +2,7 @@
 #[1] M. Mueller, HYPSISTOS CULTS IN THE GREEK WORLD DURING THE ROMAN IMPERIUM. Hamilton, Ontario: McMaster University, 2014.
 #[2] Abu Muhammad 'Abd Allah Ruzbih ibn Daduya wrote a number of anti-monotheist, pro-dualist tracts early in Muslim rules (ca 760s); weren't stamped out until the 790s
 #[3] https://en.wikipedia.org/wiki/Aquitanian_language#/media/File:Euskararen_aztarna_geografikoak.svg
+#[4] https://penelope.uchicago.edu/Thayer/E/Roman/Texts/secondary/BURLAT/12*.html
 
 on_game_start = {
 	on_actions = {
@@ -157,18 +158,26 @@ BP_set_minorities_universal = {
 					this = title:c_kartli
 					#Armenian Jews
 					this = title:c_ayrarat
-					#Greece & Asia Minor
+					#Greece
 					this = title:c_byzantion
+					this = title:c_euboea #Chalkis; oldes presence in Europe (possibly)
+					this = title:c_attica
+					this = title:c_thessalonika
+					#Asia Minor
 					this = title:c_pacatiana #Jewish presence since Seleucid time, likely contributed to Hypsisterians
 					this = title:c_aeolis
 					this = title:c_ionia
-					this = title:c_attica
+					this = title:c_cilicia #Tarsus
 					#Oriens & Egypt (sans Hebrew territories)
 					this.duchy = title:d_cyprus #Long term Jewish presence in Cyprus, although significantly reduced after the AD 116 revolt and poorly attested AD II-IV century [1]
 					this = title:c_antiocheia
 					this = title:c_alexandria
 					#Western Roman Empire
 					this = title:c_roma
+					this = title:c_reggio_calabria #Mentioned in an edit by Honorius in 398
+					this = title:c_apulia #Jewish Catacombs in Venusia (Encylopedia Britannica)
+					this = title:c_benevento #Vth Century (Jewish Virtual Library)
+					#North Africa
 					this = title:c_tunis #Carthage
 					#Asoristan & it's Talmudic Academies
 					this = title:c_baghdad #Mahuz Academies
@@ -545,6 +554,11 @@ BP_set_minorities_by_date = {
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:nicene }
 			}
+			#Italy and Raetia Noricum
+			add_faith_to_region_effect = {
+				REGIONAL_TRIGGER = annonaria_italy_noricum_trigger
+				FAITH = faith:nicene
+			}
 			### Georgian Orthodox
 			every_county = {
 				limit = {
@@ -733,6 +747,8 @@ BP_set_minorities_by_date = {
 				}
 				add_large_faith_to_county_effect = { FAITH = faith:manichean }
 			}
+			#Probably extant, minimally, by this point
+			title:c_roma = { add_small_faith_to_county_effect = { FAITH = faith:manichean } }
 			###Valentinians
 			every_county = {
 				limit = {
@@ -850,6 +866,11 @@ BP_set_minorities_by_date = {
 					}
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
+			}
+			#Italy and Raetia Noricum
+			add_faith_to_region_granular_effect = {
+				REGIONAL_TRIGGER = annonaria_italy_noricum_trigger
+				FAITH = faith:hellenic_pagan
 			}
 			###Cybellians
 			every_county = {
@@ -1058,7 +1079,7 @@ BP_set_minorities_by_date = {
 			
 			## Other Special Regions
 			#========================
-			### Romano-Gaul presence throughout Septem Provincae
+			### Romano-Gaul presence throughout former Gaul
 			add_culture_to_region_granular_effect = {
 				REGIONAL_TRIGGER = e_gaul_romance_trigger
 				CULTURE = culture:romano_gallic
@@ -1067,7 +1088,6 @@ BP_set_minorities_by_date = {
 				REGIONAL_TRIGGER = e_gaul_nicene_trigger
 				FAITH = faith:gallican_church
 			}
-			
 			### North Africa
 			#Western North Africa should have populations of Romano-African African Rite Nicenes
 			every_county = {
@@ -1214,11 +1234,13 @@ BP_set_minorities_by_date = {
 				}
 			}
 			## Persians
-			title:c_behabad = {
-				add_large_culture_and_faith_to_county_effect = {
-					FAITH = faith:mazdayasna
-					CULTURE = culture:persian
-				}
+			add_culture_to_region_granular_effect = {
+				REGIONAL_TRIGGER = zoroastrian_persian_location_trigger
+				CULTURE = culture:persian
+			}
+			add_faith_to_region_granular_effect = {
+				REGIONAL_TRIGGER = zoroastrian_persian_location_trigger
+				FAITH = faith:mazdayasna
 			}
 			### Balkh Khurmazta/Dharmagutaka Bactrians
 			every_county = { #Large Concentrations
@@ -1228,6 +1250,42 @@ BP_set_minorities_by_date = {
 					CULTURE = culture:bactrian
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:dharmaguptaka }
+			}
+			### Odoacer's merry band of misfits [4]
+			### Mixture of Heruls, Rygirs, and Skirians
+			### Unfortunately, we're not told _where_ precisely they were quartered,
+			### so this is a guess based on Placentia falling quickly [4] and Ravenna
+			### shortly thereafter
+			title:c_mantua = {
+				add_small_culture_and_faith_to_county_effect = {
+					FAITH = faith:arian
+					CULTURE = culture:skirian
+				}
+			}
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_verona
+						this = title:c_polesine
+					}
+				}
+				add_small_culture_and_faith_to_county_effect = {
+					FAITH = faith:germanic_pagan
+					CULTURE = culture:rygir
+				}
+			}
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_cremona
+						this = title:c_tortona
+						this = title:c_pavia
+					}
+				}
+				add_small_culture_and_faith_to_county_effect = {
+					FAITH = faith:germanic_pagan
+					CULTURE = culture:heruli
+				}
 			}
 			
 			# Other Specific Counties
