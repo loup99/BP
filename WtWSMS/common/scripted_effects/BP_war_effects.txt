@@ -714,7 +714,7 @@ major_migration_cb_title_management_effect_effect = {
 					#(without considering development impacts)
 					modifier = {
 						factor = 3.3333
-						has_all_rough_terrain_provinces_trigger = yes
+						scope:the_county = { has_all_rough_terrain_provinces_trigger = yes }
 					}
 					modifier = { factor = development_level_no_effect_modifier }
 				}
@@ -724,16 +724,19 @@ major_migration_cb_title_management_effect_effect = {
 					add_small_faith_to_county_effect = { FAITH = holder.faith }
 				}
 				15 = { # Large Minority
-					#No large majorities over this level
 					modifier = { factor = development_level_large_minority_modifier }
 					add_large_culture_to_county_effect = { CULTURE = holder.culture }
 					add_large_faith_to_county_effect = { FAITH = holder.faith }
 				}
 				05 = { # Population Flip
-					#Flip cannot happen if above the cut-off
 					modifier = { factor = development_level_majority_modifier }
 					displace_majority_culture_effect = { CULTURE = holder.culture }
 					displace_majority_faith_effect = { FAITH = holder.faith }
+					#This should no longer exist after successful migrations
+					if = {
+						limit = { has_county_modifier = county_modifier_migration_recent_immigration }
+						remove_county_modifier = county_modifier_migration_recent_immigration
+					}
 				}
 			}
 		}
