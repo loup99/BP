@@ -267,16 +267,21 @@ BP_remove_migration_modifiers = {
 					#If counties under aristocracy/recent immigration modifiers are conquered by others,
 					#remove the modifiers
 					if = {
-						limit = { this = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy } }
-						this = { remove_county_modifier = county_modifier_minor_migration_minor_aristocracy }
-					}
-					else_if = {
 						limit = { this = { has_county_modifier = county_modifier_migration_recent_emigration } }
 						this = { remove_county_modifier = county_modifier_migration_recent_emigration }
 					}
-					else_if = {
+					if = {
 						limit = { this = { has_county_modifier = county_modifier_migration_recent_immigration } }
 						this = { remove_county_modifier = county_modifier_migration_recent_immigration }
+					}
+					#Minor Aristocracy should be a little different
+					if = {
+						limit = {
+							this = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy }
+							NOT = { this.holder.capital_county = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy } }
+							NOT = { this.holder.top_liege = this.previous_holder.top_liege }
+						}
+						this = { remove_county_modifier = county_modifier_minor_migration_minor_aristocracy }
 					}
 				}
 			}
