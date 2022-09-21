@@ -647,20 +647,50 @@ major_migration_cb_title_management_effect_effect = {
 	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars
 	resolve_title_and_vassal_change = scope:change_vassal_status
 	#Apply modifiers to counties
-	hidden_effect = { #apply county modifiers to new counties
-		every_in_list = {
-			list = counties_seized
-			add_county_modifier = {
-				modifier = county_recently_migrated_to_modifier
-				years = major_migration_immigration_emigration_impact_period
-			}
-			if = {
-				limit = { this.development_level < major_migration_max_development_for_settling }
+	
+	#Apply county effects
+	custom_tooltip = {
+		text = major_migration_new_counties_get_nerf_tt
+		hidden_effect = { #apply county modifiers to new counties
+			#text = "minor_migration_apply_modifiers_to_new_counties"
+			every_in_list = {
+				list = titles_taken
+				add_county_modifier = {
+					modifier = county_recently_migrated_to_modifier
+					years = major_migration_immigration_emigration_impact_period
+				}
 				add_county_modifier = {
 					modifier = county_modifier_migration_recent_immigration
 					years = major_migration_immigration_emigration_conversion_period
 				}
 			}
+		}
+	}
+	#Old counties get their own nerfs
+	custom_tooltip = {
+		text = major_migration_old_counties_get_nerf_tt
+		hidden_effect = { #apply county modifiers to old counties
+			every_in_list = {
+				list = former_counties
+				change_county_control = major_migration_new_char_county_control_loss
+			}
+			every_in_list = { #If the county was a source for migration, apply conversion boost
+				list = former_source_counties
+				add_county_modifier = {
+					modifier = county_recently_migrated_away_modifier
+					years = major_migration_immigration_emigration_impact_period
+				}
+				add_county_modifier = {
+					modifier = county_modifier_migration_recent_emigration
+					years = major_migration_immigration_emigration_conversion_period
+				}
+			}
+		}
+	}
+	#Apply minorities as appropriate
+	hidden_effect = {
+		every_in_list = {
+			list = counties_seized
 			#Change county culture/faiths; 30% chance per county, modified by development/culture
 			random = {
 				chance = major_migration_county_flip_chance
@@ -674,23 +704,6 @@ major_migration_cb_title_management_effect_effect = {
 				}
 				set_county_faith = holder.faith
 				set_county_culture = holder.culture
-			}
-		}
-	}
-	hidden_effect = { #apply county modifiers to old counties
-		every_in_list = {
-			list = former_counties
-			change_county_control = major_migration_new_char_county_control_loss
-		}
-		every_in_list = { #If the county was a source for migration, apply conversion boost
-			list = former_source_counties
-			add_county_modifier = {
-				modifier = county_recently_migrated_away_modifier
-				years = major_migration_immigration_emigration_conversion_period
-			}
-			add_county_modifier = {
-				modifier = county_modifier_migration_recent_emigration
-				years = major_migration_immigration_emigration_impact_period
 			}
 		}
 	}
