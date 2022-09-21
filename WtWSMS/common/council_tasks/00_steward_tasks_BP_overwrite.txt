@@ -651,6 +651,21 @@ task_promote_culture = {
 				desc = GAME_RULE_DEFAULT_BP_CULTURE_CONVERSION_VALUE
 			}
 		}
+		#Not being adjacent to other provinces makes conversion harder
+		if = {
+			limit = {
+				exists = scope:county
+				NOT = { scope:county = { any_neighboring_county = { this.culture = scope:councillor_liege.culture } } }
+				NOR = { #Temporarily should negate being next to nerf
+					scope:county = { has_county_modifier = county_modifier_migration_recent_immigration }
+					scope:county = { has_county_modifier = county_modifier_migration_recent_emigration }
+				}
+			}
+			multiply = {
+				value = conversion_culture_resistant_to_culture_change_without_adjacent
+				desc = TRADITION_HARDER_TO_CULTURE_CONVERT_WITHOUT_ADJACENT
+			}
+		}
 		#### Changed from Vanilla ^^^^^
 		
 		# Faster conversion for FP2 Hostility ending, if county is in Iberia and culture was involved
@@ -971,13 +986,20 @@ task_promote_culture = {
 				if = {
 					limit = { scope:county.culture = scope:councillor_liege.culture }
 					scope:councillor = { start_default_task = yes }
+					#Remove temporary modifiers as well, if they no longer apply
+					if = {
+						limit = { has_county_modifier = county_modifier_migration_recent_immigration }
+						remove_county_modifier = county_modifier_migration_recent_immigration
+					}
+					if = {
+						limit = { has_county_modifier = county_modifier_migration_recent_emigration }
+						remove_county_modifier = county_modifier_migration_recent_emigration
+					}
 				}
 			}
 		}
 		### End Minority Stuff ###
-		scope:councillor = {
-			start_default_task = yes
-		}
+		scope:councillor = { start_default_task = yes }
 	}
 	##### Changed from Vanilla ^^^^^
 
