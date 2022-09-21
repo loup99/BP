@@ -606,40 +606,42 @@ major_migration_cb_title_management_effect_effect = {
 		}
 	}
 	#Release former counties to new rulers
-	every_in_list = {
-		list = former_counties
-		
-		create_character = {
-			location = $ATTACKER$.location
-			culture = this.culture
-			faith = this.faith
-			gender_female_chance = {
-					if = {
-						limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
-						value = 0
+	hidden_effect = { #Hide from GUI to avoid cluttering
+		every_in_list = {
+			list = former_counties
+			
+			create_character = {
+				location = $ATTACKER$.location
+				culture = this.culture
+				faith = this.faith
+				gender_female_chance = {
+						if = {
+							limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
+							value = 0
+						}
+						else_if = {
+							limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
+							value = 100
+						}
+						else = { value = 50 }
 					}
-					else_if = {
-						limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
-						value = 100
-					}
-					else = { value = 50 }
+				save_scope_as = new_char
+			}
+			change_title_holder = {
+				holder = scope:new_char
+				change = scope:change_grant_title_to_other_chars
+				take_baronies = yes
+			}
+			scope:new_char = { becomes_independent = { change = scope:change_vassal_status } }
+		}
+		#Prevent title bootstrapping
+		every_in_list = {
+			list = former_counties
+			this.holder = {
+				boostrap_prevention_effect = {
+					THE_LANDED_TITLE = this.capital_county
+					THE_PREVIOUS_HOLDER = $ATTACKER$
 				}
-			save_scope_as = new_char
-		}
-		change_title_holder = {
-			holder = scope:new_char
-			change = scope:change_grant_title_to_other_chars
-			take_baronies = yes
-		}
-		scope:new_char = { becomes_independent = { change = scope:change_vassal_status } }
-	}
-	#Prevent title bootstrapping
-	every_in_list = {
-		list = former_counties
-		this.holder = {
-			boostrap_prevention_effect = {
-				THE_LANDED_TITLE = this.capital_county
-				THE_PREVIOUS_HOLDER = $ATTACKER$
 			}
 		}
 	}
@@ -651,59 +653,88 @@ major_migration_cb_title_management_effect_effect = {
 	#Apply county effects
 	custom_tooltip = {
 		text = major_migration_new_counties_get_nerf_tt
-		hidden_effect = { #apply county modifiers to new counties
-			#text = "minor_migration_apply_modifiers_to_new_counties"
-			every_in_list = {
-				list = titles_taken
-				add_county_modifier = {
-					modifier = county_recently_migrated_to_modifier
-					years = major_migration_immigration_emigration_impact_period
-				}
-				add_county_modifier = {
-					modifier = county_modifier_migration_recent_immigration
-					years = major_migration_immigration_emigration_conversion_period
-				}
+		every_in_list = {
+			list = counties_seized
+			add_county_modifier = {
+				modifier = county_recently_migrated_to_modifier
+				years = major_migration_immigration_emigration_impact_period
+			}
+			add_county_modifier = {
+				modifier = county_modifier_migration_recent_immigration
+				years = major_migration_immigration_emigration_conversion_period
 			}
 		}
 	}
 	#Old counties get their own nerfs
 	custom_tooltip = {
 		text = major_migration_old_counties_get_nerf_tt
-		hidden_effect = { #apply county modifiers to old counties
-			every_in_list = {
-				list = former_counties
-				change_county_control = major_migration_new_char_county_control_loss
+		every_in_list = {
+			list = former_counties
+			change_county_control = major_migration_new_char_county_control_loss
+		}
+		every_in_list = { #If the county was a source for migration, apply conversion boost
+			list = former_source_counties
+			add_county_modifier = {
+				modifier = county_recently_migrated_away_modifier
+				years = major_migration_immigration_emigration_impact_period
 			}
-			every_in_list = { #If the county was a source for migration, apply conversion boost
-				list = former_source_counties
-				add_county_modifier = {
-					modifier = county_recently_migrated_away_modifier
-					years = major_migration_immigration_emigration_impact_period
-				}
-				add_county_modifier = {
-					modifier = county_modifier_migration_recent_emigration
-					years = major_migration_immigration_emigration_conversion_period
-				}
+			add_county_modifier = {
+				modifier = county_modifier_migration_recent_emigration
+				years = major_migration_immigration_emigration_conversion_period
 			}
 		}
 	}
 	#Apply minorities as appropriate
-	hidden_effect = {
+	custom_tooltip = {
+		text = major_migration_culture_changes_tt
 		every_in_list = {
 			list = counties_seized
-			#Change county culture/faiths; 30% chance per county, modified by development/culture
-			random = {
-				chance = major_migration_county_flip_chance
-				modifier = { add = this.major_migration_negative_development_level_modifier } #Modify chance by development
-				modifier = { #Sharing **either** faith or culture => no chance
-					add = major_migration_county_negative_flip_chance
-					OR = {
-						this.culture = holder.culture
-						this.faith = holder.faith
+			this = { save_temporary_scope_as = the_county }
+			random_list = {
+				#Basic Odds:
+				#without considering any other factors:
+				#60% - No Effect
+				#30% - Small Minority
+				#15% - Large Minority
+				#05% - Majority
+				# Effect of development of probability can be found in the `BP/_developer_documentation/`
+				# folder in the corresponding octave code and *.png
+				60 = { # No Effect
+					#Something *must* happen for purely adjacent counties
+					modifier = {
+						factor = 0
+						scope:the_county = {
+							any_neighboring_county = {
+								this.culture = holder.culture
+								this.faith = holder.faith
+							}
+						}
 					}
+					#A purely rough terrain county shifts the odds to 80% nothing happens: 40:6:3:1
+					#(without considering development impacts)
+					modifier = {
+						factor = 3.3333
+						has_all_rough_terrain_provinces_trigger = yes
+					}
+					modifier = { factor = development_level_no_effect_modifier }
 				}
-				set_county_faith = holder.faith
-				set_county_culture = holder.culture
+				30 = { # Small Minority
+					modifier = { factor = development_level_small_minority_modifier } 
+					add_small_culture_to_county_effect = { CULTURE = holder.culture }
+					add_small_faith_to_county_effect = { FAITH = holder.faith }
+				}
+				15 = { # Large Minority
+					#No large majorities over this level
+					modifier = { factor = development_level_large_minority_modifier }
+					add_large_culture_to_county_effect = { CULTURE = holder.culture }
+					add_large_faith_to_county_effect = { FAITH = holder.faith }
+				}
+				05 = { # Population Flip
+					#Flip cannot happen if above the cut-off
+					modifier = { factor = development_level_majority_modifier }
+					displace_majority_culture_effect = { CULTURE = holder.culture }
+					displace_majority_faith_effect = { FAITH = holder.faith }
+				}
 			}
 		}
 	}

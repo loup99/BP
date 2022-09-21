@@ -244,17 +244,49 @@ major_migration_max_number_of_vassal_counties = {
 }
 
 # Determination of whether a county flips religion & culture or not
-major_migration_county_flip_chance = 30
-major_migration_max_valid_development_for_flip = 10
-major_migration_negative_development_level_modifier = {
-	value = this.development_level
-	divide = major_migration_max_valid_development_for_flip
-	multiply = -1.00
-	multiply = major_migration_county_flip_chance
-	#Give a whole number.
-	floor = yes
+major_migration_max_development_for_flip = 10
+major_migration_max_development_for_large_minority = 20
+major_migration_max_development_for_small_minority = 100
+#Below the cut-off yields an increase in something happening
+development_level_no_effect_modifier = {
+	value = scope:the_county.development_level
+	divide = 10
 }
-major_migration_county_negative_flip_chance = {
-	value = major_migration_county_flip_chance
-	multiply = -1.00
+# See the developer documentation for more details on how development
+# effects the odds of a county getting a majority/minority
+#
+#y = mx+b form where:
+#y = odds
+#x = development level
+#m = slope (from b to the cut-off)
+#b = default odds
+development_level_small_minority_modifier = {
+	#Slope
+	value = -1.00
+	divide = major_migration_max_development_for_small_minority
+	#X
+	multiply = scope:the_county.development_level
+	#B
+	add = 1
+	floor = 0
+}
+development_level_large_minority_modifier = {
+	#Slope
+	value = -1.00
+	divide = major_migration_max_development_for_large_minority
+	#X
+	multiply = scope:the_county.development_level
+	#B
+	add = 1
+	floor = 0
+}
+development_level_majority_modifier = {
+	#Slope
+	value = -1.00
+	divide = major_migration_max_development_for_flip
+	#X
+	multiply = scope:the_county.development_level
+	#B
+	add = 1
+	floor = 0
 }
