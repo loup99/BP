@@ -74,8 +74,8 @@
 
 yearly_global_pulse = {
 	on_actions = {
-		on_yearly_sea_minority_maintainance
-		on_yearly_sea_majority_maintainance
+		on_yearly_sea_minority_maintainance #Target County Driven
+		on_yearly_sea_majority_maintainance #Source County Driven
 	}
 }
 
@@ -108,6 +108,27 @@ on_yearly_sea_minority_maintainance = {
 				}
 			}
 			
+		}
+	}
+}
+do_immigration = {
+	effect = {
+		if = {
+			limit = { scope:target_county = { is_valid_immigration_target_county_trigger = yes } }
+			inward_immigration_effect = { THE_TARGET_COUNTY = scope:target_county }
+		}
+	}
+}
+
+on_yearly_sea_majority_maintainance = {
+	effect = {
+		every_county = {
+			this = { save_scope_as = source_county }
+			
+			##### Check Culture/Faith Capacity & Feeding #####
+			
+			#Keep these on an if/else_if because both should not happen at the same time
+			
 			### Culture
 			if = { #If there are too many minorities, some must die out
 				limit = {
@@ -117,6 +138,14 @@ on_yearly_sea_minority_maintainance = {
 				}
 				random = {
 					chance = chance_of_culture_minority_reduction_event_per_year
+					modifier = {
+						factor = 0.5
+						scope:source_county = { county_checks_culture_overcapacity_less_frequently_trigger = yes }
+					}
+					modifier = {
+						factor = 2.0
+						scope:source_county = { county_checks_culture_overcapacity_more_frequently_trigger = yes }
+					}
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_reduction
@@ -130,6 +159,16 @@ on_yearly_sea_minority_maintainance = {
 				}
 				random = {
 					chance = chance_of_culture_minority_underfed_event_per_year
+					#Odds of checking underfed are modified by majority culture ethos
+					#so egalitarian/cosmopolitan counties have less pressure to check
+					modifier = {
+						factor = 0.5
+						scope:source_county = { county_checks_culture_underfed_less_frequently_trigger = yes }
+					}
+					modifier = {
+						factor = 2.0
+						scope:source_county = { county_checks_culture_underfed_more_frequently_trigger = yes }
+					}
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_minority_underfed
@@ -147,6 +186,16 @@ on_yearly_sea_minority_maintainance = {
 				}
 				random = {
 					chance = chance_of_faith_minority_reduction_event_per_year
+					#Odds of checking being over capacity are modified by majority faith pluralism
+					#so pluralist counties have less pressure to check and fundamentalist have more
+					modifier = {
+						factor = 0.5
+						scope:source_county = { county_checks_faith_overcapacity_less_frequently_trigger = yes }
+					}
+					modifier = {
+						factor = 2.0
+						scope:source_county.faith = { county_checks_faith_overcapacity_more_frequently_trigger = yes }
+					}
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_faith_reduction
@@ -160,6 +209,14 @@ on_yearly_sea_minority_maintainance = {
 				}
 				random = {
 					chance = chance_of_faith_minority_underfed_event_per_year
+					modifier = {
+						factor = 0.5
+						scope:source_county.faith = { county_checks_faith_underfed_less_frequently_trigger = yes }
+					}
+					modifier = {
+						factor = 2.0
+						scope:source_county.faith = { county_checks_faith_underfed_more_frequently_trigger = yes }
+					}
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_culture_minority_underfed
@@ -167,78 +224,8 @@ on_yearly_sea_minority_maintainance = {
 				}
 			}
 			#Otherwise, keep things as they were
-		}
-	}
-}
-do_immigration = {
-	effect = {
-		if = {
-			limit = { scope:target_county = { is_valid_immigration_target_county_trigger = yes } }
-			inward_immigration_effect = { THE_TARGET_COUNTY = scope:target_county }
-		}
-	}
-}
-do_culture_reduction = {
-	effect = {
-		demote_least_supported_minority_in_county_effect = {
-			CULTURE_OR_FAITH = culture
-			THE_COUNTY = scope:target_county
-		}
-		scope:target_county = {
-			set_variable = {
-				name = recently_demoted_culture
-				years = years_between_over_capacity_reduction_events
-			}
-		}
-	}
-}
-do_culture_minority_underfed = {
-	effect = {
-		demote_an_underfed_minority_in_county_effect = {
-			CULTURE_OR_FAITH = culture
-			THE_COUNTY = scope:target_county
-		}
-		scope:target_county = {
-			set_variable = {
-				name = recently_checked_underfed_culture
-				years = years_between_general_events
-			}
-		}
-	}
-}
-do_faith_reduction = {
-	effect = {
-		demote_least_supported_minority_in_county_effect = {
-			CULTURE_OR_FAITH = faith
-			THE_COUNTY = scope:target_county
-		}
-		scope:target_county = {
-			set_variable = {
-				name = recently_demoted_faith
-				years = years_between_over_capacity_reduction_events
-			}
-		}
-	}
-}
-do_faith_minority_underfed = {
-	effect = {
-		demote_an_underfed_minority_in_county_effect = {
-			CULTURE_OR_FAITH = faith
-			THE_COUNTY = scope:target_county
-		}
-		scope:target_county = {
-			set_variable = {
-				name = recently_checked_underfed_faith
-				years = years_between_general_events
-			}
-		}
-	}
-}
-
-on_yearly_sea_majority_maintainance = {
-	effect = {
-		every_county = {
-			this = { save_scope_as = source_county }
+			
+			##### Minority Outward Effects #####
 			
 			### Immigration
 			if = { #Immigration via development is driven by the development differential
@@ -251,34 +238,6 @@ on_yearly_sea_majority_maintainance = {
 					trigger_event = {
 						days = { 1 360 }
 						on_action = do_outward_immigration
-					}
-				}
-			}
-			
-			### Minority Growth
-			if = {
-				limit = {
-					this.number_of_culture_minorities_in_county > 0
-					NOT = { has_variable = recently_grew_minority }
-				}
-				random = {
-					chance = chance_of_majority_growth_event_per_year
-					trigger_event = {
-						days = { 1 360 }
-						on_action = do_culture_minority_growth
-					}
-				}
-			}
-			if = {
-				limit = {
-					this.number_of_faith_minorities_in_county > 0
-					NOT = { has_variable = recently_grew_minority }
-				}
-				random = {
-					chance = chance_of_majority_growth_event_per_year
-					trigger_event = {
-						days = { 1 360 }
-						on_action = do_faith_minority_growth
 					}
 				}
 			}
@@ -309,9 +268,99 @@ on_yearly_sea_majority_maintainance = {
 					}
 				}
 			}
+			
+			##### Minority Growth Effects #####
+			
+			### Minority Growth
+			if = {
+				limit = {
+					this.number_of_culture_minorities_in_county > 0
+					NOT = { has_variable = recently_grew_minority }
+				}
+				random = {
+					chance = chance_of_majority_growth_event_per_year
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_culture_minority_growth
+					}
+				}
+			}
+			if = {
+				limit = {
+					this.number_of_faith_minorities_in_county > 0
+					NOT = { has_variable = recently_grew_minority }
+				}
+				random = {
+					chance = chance_of_majority_growth_event_per_year
+					trigger_event = {
+						days = { 1 360 }
+						on_action = do_faith_minority_growth
+					}
+				}
+			}
+			
+			
 		}
 	}
 }
+##### Check Culture/Faith Capacity & Feeding #####
+do_culture_reduction = {
+	effect = {
+		demote_least_supported_minority_in_county_effect = {
+			CULTURE_OR_FAITH = culture
+			THE_COUNTY = scope:source_county
+		}
+		scope:source_county = {
+			set_variable = {
+				name = recently_demoted_culture
+				years = years_between_over_capacity_reduction_events
+			}
+		}
+	}
+}
+do_culture_minority_underfed = {
+	effect = {
+		demote_an_underfed_minority_in_county_effect = {
+			CULTURE_OR_FAITH = culture
+			THE_COUNTY = scope:source_county
+		}
+		scope:source_county = {
+			set_variable = {
+				name = recently_checked_underfed_culture
+				years = years_between_general_events
+			}
+		}
+	}
+}
+do_faith_reduction = {
+	effect = {
+		demote_least_supported_minority_in_county_effect = {
+			CULTURE_OR_FAITH = faith
+			THE_COUNTY = scope:source_county
+		}
+		scope:source_county = {
+			set_variable = {
+				name = recently_demoted_faith
+				years = years_between_over_capacity_reduction_events
+			}
+		}
+	}
+}
+do_faith_minority_underfed = {
+	effect = {
+		demote_an_underfed_minority_in_county_effect = {
+			CULTURE_OR_FAITH = faith
+			THE_COUNTY = scope:source_county
+		}
+		scope:source_county = {
+			set_variable = {
+				name = recently_checked_underfed_faith
+				years = years_between_general_events
+			}
+		}
+	}
+}
+##### Minority Outward Effects #####
 do_outward_immigration = {
 	effect = {
 		outward_immigration_effect = { SOURCE_COUNTY = scope:source_county }
@@ -323,6 +372,18 @@ do_outward_immigration = {
 		}
 	}
 }
+do_faith_evangelization = {
+	effect = {
+		evangelization_effect = { SOURCE_COUNTY = scope:source_county }
+		scope:source_county = {
+			set_variable = {
+				name = recently_evangelized_faith
+				years = years_between_general_events
+			}
+		}
+	}
+}
+##### Minority Growth Effects #####
 do_culture_minority_growth = {
 	effect = {
 		minority_growth_effect = {
@@ -351,17 +412,7 @@ do_faith_minority_growth = {
 		}
 	}
 }
-do_faith_evangelization = {
-	effect = {
-		evangelization_effect = { SOURCE_COUNTY = scope:source_county }
-		scope:source_county = {
-			set_variable = {
-				name = recently_evangelized_faith
-				years = years_between_general_events
-			}
-		}
-	}
-}
+
 
 ##### VANILLA BELOW HERE #####
 
