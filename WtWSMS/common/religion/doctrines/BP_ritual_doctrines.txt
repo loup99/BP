@@ -1,4 +1,88 @@
-﻿doctrine_ritual_pilgrimages = {
+﻿doctrine_ritual_conversion = {
+	group = "ritual"
+	
+	doctrine_ritual_conversion_encouraged = {
+		piety_cost = {
+			if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_neutral }
+				value = flavor_doctrine_cost_mid
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_discouraged }
+				value = flavor_doctrine_cost_massive
+			}
+			
+			if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_encouraged }
+				multiply = flavor_doctrine_unchanged_cost_mult
+			}
+		}
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_ethnic_religion_trigger
+				NOT = { flag:tenet_ethnic_religion = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_interpretatio_romana_trigger
+				NOT = { flag:tenet_interpretatio_romana = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_communal_identity_trigger
+				NOT = { flag:tenet_communal_identity = { is_in_list = selected_doctrines } }
+			}
+		}
+		parameters = {
+			external_conversion_enabled = yes
+			demand_conversion_enabled = yes
+		}
+	}
+	
+	doctrine_ritual_conversion_neutral = {
+		piety_cost = {
+			if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_encouraged }
+				value = flavor_doctrine_cost_mid
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_discouraged }
+				value = flavor_doctrine_cost_mid
+			}
+			
+			if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_neutral }
+				multiply = flavor_doctrine_unchanged_cost_mult
+			}
+		}
+		can_pick = {}
+		parameters = { demand_conversion_enabled = yes }
+	}
+	
+	doctrine_ritual_conversion_discouraged = {
+		piety_cost = {
+			if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_encouraged }
+				value = flavor_doctrine_cost_massive
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_neutral }
+				value = flavor_doctrine_cost_mid
+			}
+			
+			if = {
+				limit = { has_doctrine = doctrine_ritual_conversion_discouraged }
+				multiply = flavor_doctrine_unchanged_cost_mult
+			}
+		}
+		can_pick = {
+			NOT = { religion_tag = christianity_religion }
+			NOT = { religion_tag = islam_religion }
+			NOT = { religion_tag = buddhism_religion }
+		}
+		parameters = {}
+	}
+}
+
+doctrine_ritual_pilgrimages = {
 	group = "ritual"
 	
 	#TODO (Beta): Check how Islam interacts with pilgrimages; the Hajj is separate from pilgrimages it seems

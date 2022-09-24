@@ -1265,6 +1265,7 @@ set_ethnic_religion_flags = {
 		faith:samaritan = { set_variable = { name = ethnic_religion_culture value = culture:hebrew } }
 		faith:tzadikite = { set_variable = { name = ethnic_religion_culture value = culture:juhuro } }
 		faith:haymanot = { set_variable = { name = ethnic_religion_culture value = culture:sidamic } }
+		faith:malabarism = { set_variable = { name = ethnic_religion_culture value = culture:kochinim } }
 		#Munhumism
 		faith:kiratism = { set_variable = { name = ethnic_religion_culture value = culture:kirati } }
 		faith:yumaism = { set_variable = { name = ethnic_religion_culture value = culture:kirati } }
@@ -1283,31 +1284,55 @@ other_religion_effects = {
 	effect = {
 		#Pagan Iranianism is not a Zoroastrian faith...
 		faith:iranian_pagan_faith = { remove_doctrine = special_doctrine_is_zoroastrian_faith }
-		#Set Various default Ritual doctrines
+		#Set Various default Ritual doctrines so we don't have to copy over every (otherwise) 
+		#untouched faith from Vanilla
 		every_religion_global = {
 			every_faith = {
-				limit = {
-					NOR = {
-						has_doctrine = doctrine_ritual_vegetarianism_required
-						has_doctrine = doctrine_ritual_vegetarianism_clerics
-						has_doctrine = doctrine_ritual_vegetarianism_partial
-						has_doctrine = doctrine_ritual_vegetarianism_no_statement
-					}
-				}
+				#Conversion
 				if = {
-					limit = { religion = religion:taoism_religion } #CK2 effect
-					add_doctrine = doctrine_ritual_vegetarianism_partial
-				}
-				else = { add_doctrine = doctrine_ritual_vegetarianism_no_statement }
-			}
-			every_faith = {
-				limit = {
-					NOR = {
-						has_doctrine = doctrine_ritual_pilgrimages_approves
-						has_doctrine = doctrine_ritual_pilgrimages_disapproves
+					limit = {
+						NOR = {
+							has_doctrine = doctrine_ritual_conversion_encouraged
+							has_doctrine = doctrine_ritual_conversion_neutral
+							has_doctrine = doctrine_ritual_conversion_discouraged
+						}
 					}
+					add_doctrine = doctrine_ritual_conversion_neutral
 				}
-				add_doctrine = doctrine_ritual_pilgrimages_approves
+				#Pilgrimages
+				if = {
+					limit = {
+						NOR = {
+							has_doctrine = doctrine_ritual_pilgrimages_approves
+							has_doctrine = doctrine_ritual_pilgrimages_disapproves
+						}
+					}
+					add_doctrine = doctrine_ritual_pilgrimages_approves
+				}
+				#Vegetarianism
+				if = {
+					limit = {
+						NOR = {
+							has_doctrine = doctrine_ritual_vegetarianism_required
+							has_doctrine = doctrine_ritual_vegetarianism_clerics
+							has_doctrine = doctrine_ritual_vegetarianism_partial
+							has_doctrine = doctrine_ritual_vegetarianism_no_statement
+						}
+					}
+					if = {
+						limit = { religion = religion:taoism_religion } #CK2 effect
+						add_doctrine = doctrine_ritual_vegetarianism_partial
+					}
+					else = { add_doctrine = doctrine_ritual_vegetarianism_no_statement }
+				}
+				#Pagan Faiths so we can minimize the amount of Vanilla overwrite
+				if = {
+					limit = {
+						religion = { is_in_family = rf_pagan }
+						NOT = { has_doctrine = special_doctrine_is_pagan_faith }
+					}
+					add_doctrine = special_doctrine_is_pagan_faith
+				}
 			}
 		}
 		if = { #Treaty of Nvarsak
