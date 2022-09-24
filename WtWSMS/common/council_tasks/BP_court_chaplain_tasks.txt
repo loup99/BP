@@ -1,0 +1,237 @@
+﻿##### Changed from Vanilla: Updated progress with various modifiers for BP, updated targets, added new game rule effects
+task_conversion_external = {
+	is_shown = { scope:councillor_liege.faith = { has_doctrine_parameter = external_conversion_enabled } }
+
+	position = councillor_court_chaplain
+
+	task_type = task_type_county
+	county_target = all
+	ai_county_target = neighbor_land
+	task_progress = task_progress_percentage
+	highlight_own_realm = no
+
+	effect_desc = {
+		desc = task_conversion_effect_desc
+		desc = {
+			desc = council_task_possible_side_effects
+			triggered_desc = {
+				trigger = {
+					learning > mediocre_skill_rating
+				}
+				desc = task_conversion_opinion_gain
+			}
+			triggered_desc = {
+				trigger = {
+					learning > mediocre_skill_rating
+				}
+				desc = task_conversion_development_gain
+			}
+			triggered_desc = {
+				trigger = {
+					learning > mediocre_skill_rating
+				}
+				desc = task_conversion_levy_gain
+			}
+			triggered_desc = {
+				trigger = {
+					learning < high_skill_rating
+				}
+				desc = task_conversion_resistance_to_conversion
+			}
+			triggered_desc = {
+				trigger = {
+					learning < high_skill_rating
+				}
+				desc = task_conversion_opinion_loss
+			}
+		}
+	}
+
+	progress = {
+		value = 0
+		#Base conversion speed
+		add = {
+			value = court_chaplain_conversion_base
+			desc = COURT_CHAPLAIN_PROGRESS_BASE
+		}
+		add = {
+			value = scope:councillor.court_chaplain_conversion_monthly_increase
+			desc = SCALED_COUNCILLOR_LEARNING_VALUE
+		}
+		#Fervor of Court Chaplain's Faith
+		if = {
+			limit = { # Conditional in order to not mess up the preview-tooltip
+				exists = scope:county
+				exists = scope:councillor.faith
+				exists = scope:county.faith
+			}
+			add = {
+				add = {
+					add = scope:councillor.court_chaplain_progress_percentage
+					multiply = scope:councillor.faith.fervor
+					multiply = convert_faith_fervor_modifier_scale
+				}
+				subtract = {
+					add = scope:councillor.court_chaplain_progress_percentage
+					multiply = scope:county.faith.fervor
+					multiply = convert_faith_fervor_modifier_scale
+				}
+				if = {
+					limit = {
+						scope:councillor_liege = { has_perk = religious_icon_perk }
+					}
+					min = 0
+				}
+				desc = COURT_CHAPLAIN_CONVERSION_FERVOR_IMPACT
+			}
+		}
+		add = court_chaplain_conversion_contextual_bonuses
+
+		# Development reduces the speed. Should be the last non-multiply modifier applied to avoid negative values
+		if = {
+			limit = {
+				exists = scope:county
+				scope:county = {
+					development_level > 0
+				}
+			}
+			add = {
+				value = scope:county.convert_faith_development_penalty
+				desc = STEWARD_PROMOTE_CULTURE_DEVELOPMENT_PENALTY
+			}
+		}
+		
+		# Conversion speed game rules
+		if = {
+			limit = {
+				has_game_rule = slower_faith_conversion_speed
+			}
+			multiply = {
+				value = slower_game_rule_value
+				desc = GAME_RULE_SLOWER_REASON
+			}
+		}
+		if = {
+			limit = {
+				has_game_rule = significantly_slower_faith_conversion_speed
+			}
+			multiply = {
+				value = significantly_slower_game_rule_value
+				desc = GAME_RULE_SIGNIFICANTLY_SLOWER_REASON
+			}
+		}
+		if = {
+			limit = {
+				has_game_rule = faster_faith_conversion_speed
+			}
+			multiply = {
+				value = faster_game_rule_value
+				desc = GAME_RULE_FASTER_REASON
+			}
+		}
+		if = {
+			limit = {
+				has_game_rule = significantly_faster_faith_conversion_speed
+			}
+			multiply = {
+				value = significantly_faster_game_rule_value
+				desc = GAME_RULE_SIGNIFICANTLY_FASTER_REASON
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		if = {
+			limit = { has_game_rule = bp_default_culture_conversion_speed }
+			multiply = {
+				value = bp_default_faith_conversion_value
+				desc = GAME_RULE_DEFAULT_BP_FAITH_CONVERSION_VALUE
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		if = {
+			limit = {
+				exists = scope:county
+				OR = {
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = unreformed_syncretic_actor_opinion_active }
+						scope:county.faith = { has_doctrine_parameter = unreformed }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = christian_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = christianity_religion }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = islamic_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = islam_religion }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = jewish_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = judaism_religion }
+					}
+				}
+			}
+			min = {
+				value = 0.1
+				desc = minimum_conversion
+			}
+		}
+		### Minority Stuff ###
+		
+		# Because the task needs to complete several times with the minority system
+		multiply = minority_faith_conversion_speed
+		
+		if = {
+			limit = { scope:county.faith = scope:councillor_liege.faith }
+			multiply = {
+				value = converting_faith_minority_in_majority_province_speed_reduction
+				desc = converting_minority_desc
+			}
+		}
+		### End Minority Stuff ###
+	}
+
+	potential_county = {
+		scope:county = {
+			##### Changed from Vanilla vvvvv
+			trigger_if = {
+				limit = { holder.top_liege = scope:councillor_liege }
+				custom_tooltip = {
+					text = cannot_target_own_realm
+					always = no
+				}
+			}
+			trigger_else_if = {
+				limit = { NOT = { holder.top_leige = scope:councillor_liege } }
+				custom_tooltip = {
+					text = must_be_unreformed
+					faith = { has_doctrine_parameter = unreformed }
+					holder.top_liege.faith = { has_doctrine_parameter = unreformed }
+					this = holder.top_liege.capital_county
+					holder = { in_diplomatic_range = scope:councillor_liege }
+				}
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+	}
+
+	on_finish_task_county = {
+		scope:county = {
+			if = {
+				limit = { scope:county.faith = scope:councillor.faith }
+				demote_least_supported_minority_in_county_effect = {
+					CULTURE_OR_FAITH = faith
+					THE_COUNTY = scope:county
+				}
+			}
+			else = {
+				promote_minority_effect = {
+					CULTURE_OR_FAITH = faith
+					ITEM = scope:councillor.faith
+				}
+			}
+		}
+	}
+
+	monthly_on_action = task_convert_side_effects
+
+	ai_will_do = { value = 0 } #Disabled for AI at this time
+}
