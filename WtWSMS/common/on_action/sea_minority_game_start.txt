@@ -9,6 +9,8 @@ on_game_start = {
 		set_minorities_game_start
 		BP_set_minorities_universal
 		BP_set_minorities_by_date
+		### This must be executed **after** all other game start actions to ensure we find every minority
+		set_minority_modifiers_start
 	}
 }
 
@@ -1466,4 +1468,15 @@ BP_set_minorities_by_date = {
 
 initial_spawn_minority_courtiers = {
 	effect = { every_ruler = { trigger_event = { on_action = spawn_minority_characters } } }
+}
+
+set_minority_modifiers_start = {
+	effect = {
+		every_county = {
+			if = {
+				limit = { county_has_any_type_of_minority = yes }
+				update_minority_modifier_effect = yes
+			}
+		}
+	}
 }
