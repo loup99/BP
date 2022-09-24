@@ -1,5 +1,4 @@
-﻿##### Changed from Vanilla: Updated progress with various modifiers for BP, updated targets, added new game rule effects
-task_conversion_external = {
+﻿task_conversion_external = {
 	is_shown = { scope:councillor_liege.faith = { has_doctrine_parameter = external_conversion_enabled } }
 
 	position = councillor_court_chaplain
@@ -11,27 +10,9 @@ task_conversion_external = {
 	highlight_own_realm = no
 
 	effect_desc = {
-		desc = task_conversion_effect_desc
+		desc = task_external_conversion_effect_desc
 		desc = {
 			desc = council_task_possible_side_effects
-			triggered_desc = {
-				trigger = {
-					learning > mediocre_skill_rating
-				}
-				desc = task_conversion_opinion_gain
-			}
-			triggered_desc = {
-				trigger = {
-					learning > mediocre_skill_rating
-				}
-				desc = task_conversion_development_gain
-			}
-			triggered_desc = {
-				trigger = {
-					learning > mediocre_skill_rating
-				}
-				desc = task_conversion_levy_gain
-			}
 			triggered_desc = {
 				trigger = {
 					learning < high_skill_rating
@@ -44,6 +25,33 @@ task_conversion_external = {
 				}
 				desc = task_conversion_opinion_loss
 			}
+		}
+	}
+
+	#On task start, the heathen ruler decides whether to
+	#1). Imprison your missionary
+	#2). Banish your missionary
+	#3). Allow the preachers
+	#
+	#Missionary will be a random char instead of your Court Chaplain to make it not harder
+	#to remove CCs you dislike.
+	on_start_task_county = {
+		scope:county.holder = { trigger_event = { id = BP_court_chaplain_task.0001 days = {7 14 } } }
+	}
+	#If there's a change in ownership or the capital changes, cancel the operation
+	potential_county = {
+		NOT = { scope:county.holder = { has_character_flag = recently_had_missionaries_sent } }
+	}
+	#Garbage collection and further proselytization prevention
+	on_cancel_task_county = {
+		if = {
+			limit = { scope:councillor = { has_character_flag = missionary_target } }
+			remove_character_flag = missionary_target
+		}
+		if = {
+			limit = { scope:county.holder = { has_character_flag = allowed_missionaries } }
+			remove_character_flag = allowed_missionaries
+			add_character_flag = { flag = recently_had_missionaries_sent years = 10 }
 		}
 	}
 
@@ -167,6 +175,19 @@ task_conversion_external = {
 						scope:councillor.faith = { has_doctrine_parameter = jewish_syncretic_actor_opinion_active }
 						scope:county.faith = { religion_tag = judaism_religion }
 					}
+					##### ADDITIONAL SYNCRETISMS #####
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = hellenism_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = hellenism_religion }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = zoroastrian_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = zoroastrianism_religion }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = egyptian_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = egyptian_religion }
+					}
 				}
 			}
 			min = {
@@ -189,33 +210,68 @@ task_conversion_external = {
 		### End Minority Stuff ###
 	}
 
-	potential_county = {
+	valid_county = {
 		scope:county = {
-			##### Changed from Vanilla vvvvv
 			trigger_if = {
-				limit = { holder.top_liege = scope:councillor_liege }
+				limit = { NOT = { holder = { in_diplomatic_range = scope:councillor_liege } } }
+				holder = { in_diplomatic_range = scope:councillor_liege }
+			}
+			trigger_else_if = {
+				limit = { scope:councillor = { has_character_flag = missionary_target } }
+				scope:councillor.var:missionary_target = scope:county.holder
+			}
+			trigger_else_if = {
+				limit = { holder = scope:councillor_liege }
 				custom_tooltip = {
 					text = cannot_target_own_realm
 					always = no
 				}
 			}
 			trigger_else_if = {
-				limit = { NOT = { holder.top_leige = scope:councillor_liege } }
+				limit = { NOT = { holder.top_liege.capital_county = scope:county } }
+				custom_tooltip = {
+					text = must_be_capital
+					always = no
+				}
+			}
+			trigger_else_if = {
+				limit = {
+					#Neither had missionaries recently *nor* have missionaries currently proselytizing
+					OR = {
+						scope:county.holder.top_liege = {
+							OR = {
+								has_character_flag = allowed_missionaries
+								has_character_flag = recently_had_missionaries_sent
+							}
+						}
+						scope:county.holder = {
+							OR = {
+								has_character_flag = allowed_missionaries
+								has_character_flag = recently_had_missionaries_sent
+							}
+						}
+					}
+				}
+				custom_tooltip = {
+					text = must_not_have_been_proselytized_to_recently
+					always = no
+				}
+			}
+			trigger_else_if = {
+				limit = { NOT = { holder.top_liege = scope:councillor_liege } }
 				custom_tooltip = {
 					text = must_be_unreformed
 					faith = { has_doctrine_parameter = unreformed }
 					holder.top_liege.faith = { has_doctrine_parameter = unreformed }
-					this = holder.top_liege.capital_county
-					holder = { in_diplomatic_range = scope:councillor_liege }
 				}
 			}
-			##### Changed from Vanilla ^^^^^
+			trigger_else = {}
 		}
 	}
 
 	on_finish_task_county = {
 		scope:county = {
-			if = {
+			if = { #For safety, but this should never occur
 				limit = { scope:county.faith = scope:councillor.faith }
 				demote_least_supported_minority_in_county_effect = {
 					CULTURE_OR_FAITH = faith
@@ -228,10 +284,18 @@ task_conversion_external = {
 					ITEM = scope:councillor.faith
 				}
 			}
+			holder = {
+				if = {
+					limit = { scope:county.holder = { has_character_flag = allowed_missionaries } }
+					remove_character_flag = allowed_missionaries
+				}
+				add_character_flag = { flag = recently_had_missionaries_sent years = 10 }
+			}
 		}
 	}
 
-	monthly_on_action = task_convert_side_effects
+	monthly_on_action = task_external_convert_side_effects
 
+	##### TODO (0.2.0): Implement ai_will_do and ai_county_target logic for task_conversion_external
 	ai_will_do = { value = 0 } #Disabled for AI at this time
 }

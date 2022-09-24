@@ -1,0 +1,181 @@
+﻿namespace = BP_court_chaplain_task
+
+# 0001-0099: External Conversion Events
+
+#The missionary appears, giving the heathen an option on what to do
+BP_court_chaplain_task.0001 = {
+	immediate = {
+		scope:county.holder = { save_scope_as = target_heathen } #Replace me!
+		create_character = {
+			template = priest_character_template
+			location = scope:target_heathen.capital_province
+			faith = scope:councillor.faith
+			culture = scope:councillor.culture
+			save_scope_as = missionary
+		}
+		hidden_effect = {
+			scope:missionary = {
+				if = { limit = { has_trait = cynical } remove_trait = cynical }
+				add_trait = zealous
+			}
+		}
+	}
+	
+	type = character_event
+	title = BP_court_chaplain_task.0001.t
+	desc = BP_court_chaplain_task.0001.desc
+	theme = faith
+	
+	left_portrait = {
+		character = scope:councillor
+		animation = personality_zealous
+	}
+	right_portrait = {
+		character = scope:target_heathen
+		animation = personality_rational
+	}
+	lower_center_portrait = {
+		character = scope:missionary
+		animation = personality_zealous
+	}
+	
+	#### TODO (0.2.0): Revisit weights for these options
+	
+	#Imprison
+	option = {
+		name = BP_court_chaplain_task.0001.imprison
+		scope:target_heathen = {
+			imprison = { target = scope:missionary type = dungeon }
+			custom_tooltip = {
+				text = recently_had_missionaries_sent_tt
+				add_character_flag = { flag = recently_had_missionaries_sent years = 10 }
+			}
+		}
+		scope:councillor = { add_opinion = { modifier = angry_opinion opinion = -40 target = scope:target_heathen } }
+		scope:councillor_liege = {
+			add_opinion = { modifier = angry_opinion opinion = -40 target = scope:target_heathen }
+			send_interface_toast = {
+				type = event_generic_bad
+				title = heathen_imprisons_missionaries_title
+				custom_tooltip = heathen_imprisons_missionaries_tt
+				right_icon = scope:target_heathen.capital_county
+			}
+		}
+		ai_chance = {
+			base = 50
+			#General personality effects
+			modifier = {
+				factor = 0.5
+				OR = {
+					has_trait = cynical
+					has_trait = honest
+				}
+			}
+			modifier = {
+				factor = 2
+				OR = {
+					has_trait = sadistic
+					has_trait = callous
+					has_trait = wrathful
+					has_trait = content
+					has_trait = deceitful
+				}
+			}
+			##### TODO (0.2.0): Should be more likely to keep faith if current faith agrees with personality
+		}
+	}
+	#Banish
+	option = {
+		name = BP_court_chaplain_task.0001.banish
+		scope:target_heathen = {
+			custom_tooltip = {
+				text = recently_had_missionaries_sent_tt
+				add_character_flag = { flag = recently_had_missionaries_sent years = 10 }
+			}
+		}
+		#No reason to keep him around
+		hidden_effect = { scope:missionary = { death = { death_reason = death_vanished } } }
+		scope:councillor = { add_opinion = { modifier = angry_opinion opinion = -20 target = scope:target_heathen } }
+		scope:councillor_liege = {
+			add_opinion = { modifier = angry_opinion opinion = -20 target = scope:target_heathen }
+			send_interface_toast = {
+				type = event_generic_bad
+				title = heathen_banishes_missionaries_title
+				custom_tooltip = heathen_banishes_missionaries_tt
+				right_icon = scope:target_heathen.capital_county
+			}
+		}
+		ai_chance = {
+			base = 50
+			#General personality effects
+			modifier = {
+				factor = 0.5
+				has_trait = cynical
+			}
+			modifier = {
+				factor = 2
+				OR = {
+					has_trait = compassionate
+					has_trait = calm
+					has_trait = forgiving
+					has_trait = arrogant
+					has_trait = deceitful
+				}
+			}
+			##### TODO (0.2.0): Should be more likely to keep faith if current faith agrees with personality
+		}
+	}
+	#Allow
+	option = {
+		name = BP_court_chaplain_task.0001.allow
+		scope:target_heathen = {
+			custom_tooltip = {
+				text = recently_had_missionaries_sent_tt
+				add_character_flag = { flag = allowed_missionaries }
+			}
+		}
+		scope:missionary = { set_employer = scope:target_heathen }
+		scope:councillor = {
+			add_opinion = { modifier = happy_opinion opinion = 20 target = scope:target_heathen }
+			set_variable = {
+				name = missionary_target
+				value = scope:target_heathen
+			}
+		}
+		scope:councillor_liege = {
+			add_opinion = { modifier = happy_opinion opinion = 20 target = scope:target_heathen }
+			send_interface_toast = {
+				type = event_generic_good
+				title = heathen_allows_missionaries_title
+				custom_tooltip = heathen_allows_missionaries_tt
+				right_icon = scope:target_heathen.capital_county
+			}
+		}
+		ai_chance = {
+			base = 50
+			#General personality effects
+			modifier = {
+				factor = 2
+				OR = {
+					has_trait = cynical
+					has_trait = trusting
+					has_trait = humble
+				}
+			}
+			modifier = {
+				factor = 0.5
+				has_trait = shy
+			}
+			modifier = {
+				factor = 0
+				OR = {
+					has_trait = zealous
+					has_trait = stubborn
+					has_trait = paranoid
+				}
+			}
+			##### TODO (0.2.0): Should be more likely to convert if new faith agrees with personality
+		}
+	}
+}
+
