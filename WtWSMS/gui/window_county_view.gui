@@ -623,6 +623,7 @@ window = {
 			expand = {}
 			hbox = {
 				button_tab = {
+					visible = "[GreaterThan_CFixedPoint(HoldingView.GetCountyTitle.MakeScope.ScriptValue('number_of_all_minorities_in_county'),'(CFixedPoint)0')]"
 					layoutpolicy_horizontal = expanding
 					size = { 150 40 }
 					onclick = "[GetVariableSystem.Toggle( 'minority_view' )]"
@@ -1521,6 +1522,36 @@ window = {
 			scissor = yes
 			visible = "[GetVariableSystem.Exists('minority_view')]"
 			
+			state = {
+				name = "holding_view_refresh"
+				next = a
+				alpha = 0.5
+			}
+
+			state = {
+				name = "a"
+				alpha = 1
+				duration = 0.5
+				using = Animation_Curve_Default
+			}
+
+			background = {
+				using = Background_Area_Dark
+				margin_left = 5
+				margin_top = 3
+			}
+
+			background = {
+				texture = "gfx/interface/illustrations/holding_types/minority_background.dds"
+				alpha = 0.30
+
+				modify_texture = {
+					texture = "gfx/interface/window_county/mask_holding_illustration.dds"
+					blend_mode = alphamultiply
+					alpha = 0.30
+				}
+			}
+			
 			########################
 			### BEGIN MINORITIES ###
 			########################
@@ -1529,14 +1560,18 @@ window = {
 				direction = vertical
 				spacing = 10
 				flowcontainer = { #Cultures
-					
 					text_single = {
 						text = "MINORITY_CULTURES"
+						default_format = "#bold"
 						align = nobaseline|left
 						parentanchor = left|top
+						tooltipwidget = {
+							culture_minority_breakdown = {}
+						}
 					}
 					divider = {}
 					flowcontainer = {
+						ignoreinvisible = yes
 						name = "county_culture_minorities_small_grid"
 
 						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_small')]"
@@ -1561,6 +1596,7 @@ window = {
 						}
 					}
 					flowcontainer = {
+						ignoreinvisible = yes
 						name = "county_culture_minorities_large_grid"
 						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_large')]"
 						visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_large')))]"
@@ -1585,13 +1621,15 @@ window = {
 				}
 				divider = {}
 				flowcontainer = { #Faiths
-					
 					text_single = {
 						text = "MINORITY_FAITHS"
+						default_format = "#bold"
 						align = nobaseline|center
+						tooltipwidget = { faith_minority_breakdown = {} }
 					}
 					divider = {}
 					flowcontainer = {
+						ignoreinvisible = yes
 						name = "county_faith_minorities_small_grid"
 
 						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_small')]"
@@ -1623,6 +1661,7 @@ window = {
 						}
 					}
 					flowcontainer = {
+						ignoreinvisible = yes
 						name = "county_faith_minorities_large_grid"
 						datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_large')]"
 						visible = "[Not(IsDataModelEmpty(Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_large')))]"
@@ -3279,6 +3318,121 @@ types CountyViewTypes
 				}
 
 				block "extra_info" {}
+			}
+		}
+	}
+
+	type culture_minority_breakdown = widget
+	{
+		using = GeneralTooltipSetup
+		alwaystransparent = no
+
+		widget = {
+			name = "background"
+			using = DefaultTooltipBackground
+			size = { 100% 100% }
+			alwaystransparent = no
+			visible = "[GreaterThan_CFixedPoint(HoldingView.GetCountyTitle.MakeScope.ScriptValue('number_of_culture_minorities_in_county'),'(CFixedPoint)0')]"
+		}
+		
+		vbox = {
+			set_parent_size_to_minimum = yes
+			margin = { 15 5 }
+			margin_bottom = 16
+			
+			vbox = {
+				flowcontainer = {
+					ignoreinvisible = yes
+					direction = vertical
+					visible = "[GreaterThan_CFixedPoint(HoldingView.GetCountyTitle.MakeScope.ScriptValue('number_of_culture_minorities_in_county'),'(CFixedPoint)0')]"
+					datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_small')]"
+					
+					layoutpolicy_vertical = expanding
+					
+					item = {
+						text_single = {
+							align = nobaseline|left
+							parentanchor = left|top
+							text = "SPECIFIC_CULTURE_SMALL_MINORITY_UTILIZATION"
+							default_format = "#bold"
+						}
+					}
+				}
+				flowcontainer = {
+					ignoreinvisible = yes
+					direction = vertical
+					visible = "[GreaterThan_CFixedPoint(HoldingView.GetCountyTitle.MakeScope.ScriptValue('number_of_culture_minorities_in_county'),'(CFixedPoint)0')]"
+					datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('culture_minorities_large')]"
+					
+					layoutpolicy_vertical = expanding
+					
+					item = {
+						text_single = {
+							align = nobaseline|left
+							parentanchor = left|top
+							text = "SPECIFIC_CULTURE_LARGE_MINORITY_UTILIZATION"
+							default_format = "#bold"
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	type faith_minority_breakdown = widget
+	{
+		using = GeneralTooltipSetup
+		alwaystransparent = no
+		
+
+		widget = {
+			name = "background"
+			using = DefaultTooltipBackground
+			size = { 100% 100% }
+			alwaystransparent = no
+			visible = "[GreaterThan_CFixedPoint(HoldingView.GetCountyTitle.MakeScope.ScriptValue('number_of_faith_minorities_in_county'),'(CFixedPoint)0')]"
+		}
+		
+		vbox = {
+			set_parent_size_to_minimum = yes
+			margin = { 15 5 }
+			margin_bottom = 16
+			
+			vbox = {
+				flowcontainer = {
+					ignoreinvisible = yes
+					direction = vertical
+					visible = "[GreaterThan_CFixedPoint(HoldingView.GetCountyTitle.MakeScope.ScriptValue('number_of_faith_minorities_in_county'),'(CFixedPoint)0')]"
+					datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_small')]"
+					
+					layoutpolicy_vertical = expanding
+					
+					item = {
+						text_single = {
+							align = nobaseline|left
+							parentanchor = left|top
+							text = "SPECIFIC_FAITH_SMALL_MINORITY_UTILIZATION"
+							default_format = "#bold"
+						}
+					}
+				}
+				flowcontainer = {
+					ignoreinvisible = yes
+					direction = vertical
+					visible = "[GreaterThan_CFixedPoint(HoldingView.GetCountyTitle.MakeScope.ScriptValue('number_of_faith_minorities_in_county'),'(CFixedPoint)0')]"
+					datamodel = "[Province.GetCounty.GetTitle.MakeScope.GetList('faith_minorities_large')]"
+					
+					layoutpolicy_vertical = expanding
+					
+					item = {
+						text_single = {
+							align = nobaseline|left
+							parentanchor = left|top
+							text = "SPECIFIC_FAITH_LARGE_MINORITY_UTILIZATION"
+							default_format = "#bold"
+						}
+					}
+				}
 			}
 		}
 	}
