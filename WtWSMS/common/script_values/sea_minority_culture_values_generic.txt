@@ -106,6 +106,67 @@ number_of_all_minorities_including_size_in_county = {
 # "support_of_a_culture_minority_in_county" in sea_minority_culture_values.txt is suggested instead.
 support_of_a_minority_culture_generic = {
 	value = 0
+	#Determine how much is supporting this minority
+	scope:the_county = {
+		every_neighboring_county = {
+			if = { #County with a majority population
+				limit = { this.culture = scope:the_culture }
+				add = majority_province_support_value
+			}
+			else_if = { #County with a large minority
+				limit = {
+					county_has_a_minority_with_type_and_size_trigger = {
+						CULTURE_OR_FAITH = culture
+						SIZE = large
+						TARGET = scope:the_culture
+					}
+				}
+				add = large_minority_support_value
+			}
+			else_if = { #County with a small minority
+				limit = {
+					county_has_a_minority_with_type_and_size_trigger = {
+						CULTURE_OR_FAITH = culture
+						SIZE = small
+						TARGET = scope:the_culture
+					}
+				}
+				add = small_minority_support_value
+			}
+		}
+		holder = {
+			if = { #If the minority matches the ruler, it should be supported to the utmost
+				limit = { this.culture = scope:the_culture }
+				add = minority_always_supported_value
+				add = minority_always_supported_value #Even more-so than the "Always Supported"
+			}
+		}
+		#Specific factors about the county
+		if = {
+			limit = { county_specific_large_support_culture_trigger = yes }
+			add = large_minority_support_value
+		}
+		if = {
+			limit = { county_specific_small_support_culture_trigger = yes }
+			add = small_minority_support_value
+		}
+	}
+	#Generic Item Specific Effects
+	scope:the_culture = {
+		if = { limit = { large_minority_support_culture_aspect_trigger = yes } add = large_minority_support_value }
+		if = { limit = { small_minority_support_culture_aspect_trigger = yes } add = small_minority_support_value }
+		if = {
+			limit = { minority_always_supported_culture_aspect_trigger = { THE_COUNTY = scope:the_county } }
+			add = minority_always_supported_value
+		}
+	}
+}
+#The general calculation for the "feeding" of a minority in a given the_county; similar to the 
+#support calculation, but subtracts the necessary "feeding" cost
+#Modders shouldn't tweak this unless they really want to change core functionality; changing
+# "support_of_a_culture_minority_in_county" in sea_minority_culture_values.txt is suggested instead.
+feeding_of_a_minority_culture_generic = {
+	value = support_of_a_minority_culture_generic
 	#Determine how much is needed to feed this minority
 	if = {
 		limit = {
@@ -156,60 +217,6 @@ support_of_a_minority_culture_generic = {
 			subtract = small_minority_cost_value
 		}
 	}
-	#Determine how much is supporting this minority
-	scope:the_county = {
-		every_neighboring_county = {
-			if = { #County with a majority population
-				limit = { this.culture = scope:the_culture }
-				add = majority_province_support_value
-			}
-			else_if = { #County with a large minority
-				limit = {
-					county_has_a_minority_with_type_and_size_trigger = {
-						CULTURE_OR_FAITH = culture
-						SIZE = large
-						TARGET = scope:the_culture
-					}
-				}
-				add = large_minority_support_value
-			}
-			else_if = { #County with a small minority
-				limit = {
-					county_has_a_minority_with_type_and_size_trigger = {
-						CULTURE_OR_FAITH = culture
-						SIZE = small
-						TARGET = scope:the_culture
-					}
-				}
-				add = small_minority_support_value
-			}
-		}
-		holder = {
-			if = { #If the minority matches the ruler, it should not fade
-				limit = { this.culture = scope:the_culture }
-				add = minority_always_supported_value
-				add = minority_always_supported_value #Even more-so than the "Always Supported"
-			}
-		}
-		#Specific factors about the county
-		if = {
-			limit = { county_specific_large_support_culture_trigger = yes }
-			add = large_minority_support_value
-		}
-		if = {
-			limit = { county_specific_small_support_culture_trigger = yes }
-			add = small_minority_support_value
-		}
-	}
-	#Generic Item Specific Effects
-	scope:the_culture = {
-		if = { limit = { large_minority_support_culture_aspect_trigger = yes } add = large_minority_support_value }
-		if = { limit = { small_minority_support_culture_aspect_trigger = yes } add = small_minority_support_value }
-		if = {
-			limit = { minority_always_supported_culture_aspect_trigger = { THE_COUNTY = scope:the_county } }
-			add = minority_always_supported_value
-		}
-	}
 }
 #Faith Scope
 #The general calculation for the "support" of a minority in a given the_county
@@ -217,56 +224,6 @@ support_of_a_minority_culture_generic = {
 # "support_of_a_faith_minority_in_county" in sea_minority_culture_values.txt is suggested instead.
 support_of_a_minority_faith_generic = {
 	value = 0
-	#Determine how much is needed to feed this minority
-	if = {
-		limit = {
-			scope:the_county = {
-				county_has_a_minority_with_type_and_size_trigger = {
-					CULTURE_OR_FAITH = faith
-					SIZE = large
-					TARGET = scope:the_faith
-				}
-			}
-		}
-		subtract = large_minority_cost_value
-		#If there's no majority provinces on the map, it takes a bit more to keep large majorities going
-		#this should encourage eventual disappearance of only thinly supported faiths;
-		# or at least push them towards a minority status
-		if = {
-			limit = { NOT = { any_county = { this.faith = scope:the_faith } } }
-			subtract = small_minority_cost_value
-		}
-	}
-	if = {
-		limit = {
-			scope:the_county = {
-				county_has_a_minority_with_type_and_size_trigger = {
-					CULTURE_OR_FAITH = faith
-					SIZE = small
-					TARGET = scope:the_faith
-				}
-			}
-		}
-		subtract = small_minority_cost_value
-		#If there's no large minorities on the map, it takes a bit more to keep small majorities going
-		#this should encourage eventual disappearance of only thinly supported faiths;
-		#or at least push them to be more concentrated
-		if = {
-			limit = {
-				NOT = { any_county = { this.faith = scope:the_faith } }
-				NOT = {
-					any_county = {
-						county_has_a_minority_with_type_and_size_trigger = {
-							CULTURE_OR_FAITH = faith
-							SIZE = large
-							TARGET = scope:the_faith
-						}
-					}
-				}
-			}
-			subtract = small_minority_cost_value
-		}
-	}
 	#Determine how much is supporting this minority
 	scope:the_county = {
 		every_neighboring_county = {
@@ -319,6 +276,63 @@ support_of_a_minority_faith_generic = {
 		if = {
 			limit = { minority_always_supported_faith_aspect_trigger = { THE_COUNTY = scope:the_county } }
 			add = minority_always_supported_value
+		}
+	}
+}
+#The general calculation for the "feeding" of a minority in a given the_county; similar to the 
+#support calculation, but subtracts the necessary "feeding" cost
+#Modders shouldn't tweak this unless they really want to change core functionality; changing
+# "support_of_a_culture_minority_in_county" in sea_minority_culture_values.txt is suggested instead.
+feeding_of_a_minority_faith_generic = {
+	value = support_of_a_minority_faith_generic
+	#Determine how much is needed to feed this minority
+	if = {
+		limit = {
+			scope:the_county = {
+				county_has_a_minority_with_type_and_size_trigger = {
+					CULTURE_OR_FAITH = faith
+					SIZE = large
+					TARGET = scope:the_faith
+				}
+			}
+		}
+		subtract = large_minority_cost_value
+		#If there's no majority provinces on the map, it takes a bit more to keep large majorities going
+		#this should encourage eventual disappearance of only thinly supported faiths;
+		# or at least push them towards a minority status
+		if = {
+			limit = { NOT = { any_county = { this.faith = scope:the_faith } } }
+			subtract = small_minority_cost_value
+		}
+	}
+	if = {
+		limit = {
+			scope:the_county = {
+				county_has_a_minority_with_type_and_size_trigger = {
+					CULTURE_OR_FAITH = faith
+					SIZE = small
+					TARGET = scope:the_faith
+				}
+			}
+		}
+		subtract = small_minority_cost_value
+		#If there's no large minorities on the map, it takes a bit more to keep small majorities going
+		#this should encourage eventual disappearance of only thinly supported faiths;
+		#or at least push them to be more concentrated
+		if = {
+			limit = {
+				NOT = { any_county = { this.faith = scope:the_faith } }
+				NOT = {
+					any_county = {
+						county_has_a_minority_with_type_and_size_trigger = {
+							CULTURE_OR_FAITH = faith
+							SIZE = large
+							TARGET = scope:the_faith
+						}
+					}
+				}
+			}
+			subtract = small_minority_cost_value
 		}
 	}
 }
