@@ -8,21 +8,69 @@
 #0101-0200: Heritage Drift Events
 
 scripted_trigger valid_linguistic_drift_culture_trigger = {
-	this = culture:romano_african
+	#Should actually be uses the latin language, but we need to make sure to map all possiblities
+	OR = {
+		this = culture:romano_african
+		this = culture:romano_noric
+		this = culture:romano_raetian
+	}
+	this = { has_cultural_pillar = language_latin }
+}
+
+#60% of culture counties under a single Latin-speaking Empire
+scripted_trigger valid_linguistic_prevention_condition_trigger = {
+	any_ruler = {
+		this = { save_temporary_scope_as = ruler }
+		primary_title.tier = tier_empire
+		culture = { has_same_culture_language = scope:linguistic_shift_culture }
+		scope:linguistic_shift_culture = {
+			any_culture_county = {
+				percent >= 0.60
+				holder = {
+					OR = {
+						this = scope:ruler
+						this = { any_liege_or_above = { this = scope:ruler } }
+					}
+				}
+			}
+		}
+	}
 }
 
 scripted_effect shift_language_effect = {
 	scope:linguistic_shift_culture = {
-		custom_tooltip = {
-			text = african_romance_language
-			subject = scope:linguistic_shift_culture
-			set_culture_pillar = language_african_romance
+		if = {
+			limit = { this = culture:romano_african }
+			custom_tooltip = {
+				text = african_romance_language
+				subject = scope:linguistic_shift_culture
+				set_culture_pillar = language_african_romance
+			}
+			custom_tooltip = {
+				text = african_romance_name_list
+				subject = scope:linguistic_shift_culture
+				set_name_list = name_list_african_romance
+			}
 		}
-		custom_tooltip = {
-			text = african_romance_name_list
-			subject = scope:linguistic_shift_culture
-			set_name_list = name_list_african_romance
+		else_if = {
+			limit = {
+				OR = {
+					this = culture:romano_noric
+					this = culture:romano_raetian
+				}
+			}
+			custom_tooltip = {
+				text = rhaeto_romance_language
+				subject = scope:linguistic_shift_culture
+				set_culture_pillar = language_rhaeto_romance
+			}
+			custom_tooltip = {
+				text = romansh_name_list
+				subject = scope:linguistic_shift_culture
+				set_name_list = name_list_romansh
+			}
 		}
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE" }
 	}
 }
 
@@ -40,15 +88,24 @@ bp_heritage_linguistic_drift.0001 = {
 			save_scope_as = linguistic_shift_culture
 		}
 		
-		#If the culture head exists, inform him/her first
 		if = {
-			limit = { exists = scope:linguistic_shift_culture.culture_head }
-			scope:linguistic_shift_culture.culture_head = { trigger_event = { id = bp_heritage_linguistic_drift.0002 } }
-		}
-		#Otherwise, directly change the culture and tell everyone
-		else = {
-			shift_language_effect = yes
-			every_player = { trigger_event = { id = bp_heritage_linguistic_drift.0003 } }
+			limit = { NOT = { valid_linguistic_prevention_condition_trigger = yes } }
+			
+			if = {
+				limit = { exists = scope:linguistic_shift_culture }
+				#If the culture head exists, inform him/her first
+				if = {
+					limit = { exists = scope:linguistic_shift_culture.culture_head }
+					scope:linguistic_shift_culture.culture_head = { trigger_event = { id = bp_heritage_linguistic_drift.0002 } }
+				}
+				#Otherwise, directly change the culture and tell everyone
+				else = {
+					shift_language_effect = yes
+					every_player = { trigger_event = { id = bp_heritage_linguistic_drift.0003 } }
+				}
+			}
+			#Handle failure case; shouldn't happen unless some Latin-speaking culture doesn't map
+			else = { debug_log = "NO LATIN SPEAKING CULTURE CAN BE SELECTED FOR bp_heritage_linguistic_drift.0001 EVENT" }
 		}
 	}
 }
@@ -65,11 +122,11 @@ bp_heritage_linguistic_drift.0002 = {
 	option = {
 		name = bp_heritage_linguistic_drift.0002.accept
 		shift_language_effect = yes
-		every_player = {
+		every_ruler = {
 			limit = {
 				OR = {
 					this = { in_diplomatic_range = root }
-					this.culture = { has_same_culture_language = root.culture }
+					this.culture = { has_same_culture_language = scope:linguistic_shift_culture }
 				}
 				NOT = { this = root }
 			}
@@ -84,8 +141,23 @@ bp_heritage_linguistic_drift.0003 = {
 	title = bp_heritage_linguistic_drift.0003.t
 	desc = bp_heritage_linguistic_drift.0003.desc
 	theme = culture_change
+	left_portrait = scope:chosen_character
 	
-	immediate = {}
+	immediate = {
+		if = {
+			limit = { exists = scope:linguistic_shift_culture.culture_head }
+			scope:linguistic_shift_culture.culture_head = { save_scope_as = chosen_character }
+		}
+		else_if = {
+			limit = { any_ruler = { culture = scope:linguistic_shift_culture } }
+			random_ruler = {
+				limit = { culture = scope:linguistic_shift_culture }
+				save_scope_as = chosen_character
+			}
+		}
+		#Fallback
+		else = { root = { save_scope_as = chosen_character } }
+	}
 	
 	#For other rulers of the culture
 	option = {
@@ -101,3 +173,6 @@ bp_heritage_linguistic_drift.0003 = {
 		fallback = yes
 	}
 }
+
+##### Heritage cases: Should require culture counties under dominance of another heritage
+##### (80% under another heritage, not 80% under a set)
