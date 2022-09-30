@@ -1,0 +1,103 @@
+﻿namespace = bp_heritage_linguistic_drift
+
+#Design Notes:
+# For 0.2.0, this will be a simple binary, but later we'll want to make the linguistic/heritage drifts
+# more gradual.
+
+#0001-0100: Linguistic Drift Events
+#0101-0200: Heritage Drift Events
+
+scripted_trigger valid_linguistic_drift_culture_trigger = {
+	this = culture:romano_african
+}
+
+scripted_effect shift_language_effect = {
+	scope:linguistic_shift_culture = {
+		custom_tooltip = {
+			text = african_romance_language
+			subject = scope:linguistic_shift_culture
+			set_culture_pillar = language_african_romance
+		}
+		custom_tooltip = {
+			text = african_romance_name_list
+			subject = scope:linguistic_shift_culture
+			set_name_list = name_list_african_romance
+		}
+	}
+}
+
+#Make sure culture is actually valid
+bp_heritage_linguistic_drift.0001 = {
+	hidden = yes
+	
+	#Make sure a valid culture exists
+	trigger = { any_culture_global = { valid_linguistic_drift_culture_trigger = yes } }
+	
+	#Pick one of the random valid cultures
+	immediate = {
+		random_culture_global = {
+			limit = { valid_linguistic_drift_culture_trigger = yes }
+			save_scope_as = linguistic_shift_culture
+		}
+		
+		#If the culture head exists, inform him/her first
+		if = {
+			limit = { exists = scope:linguistic_shift_culture.culture_head }
+			scope:linguistic_shift_culture.culture_head = { trigger_event = { id = bp_heritage_linguistic_drift.0002 } }
+		}
+		#Otherwise, directly change the culture and tell everyone
+		else = {
+			shift_language_effect = yes
+			every_player = { trigger_event = { id = bp_heritage_linguistic_drift.0003 } }
+		}
+	}
+}
+
+bp_heritage_linguistic_drift.0002 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0002.t
+	desc = bp_heritage_linguistic_drift.0002.desc
+	theme = culture_change
+	left_portrait = root
+	
+	immediate = {}
+	
+	option = {
+		name = bp_heritage_linguistic_drift.0002.accept
+		shift_language_effect = yes
+		every_player = {
+			limit = {
+				OR = {
+					this = { in_diplomatic_range = root }
+					this.culture = { has_same_culture_language = root.culture }
+				}
+				NOT = { this = root }
+			}
+			trigger_event = { id = bp_heritage_linguistic_drift.0003 }
+		}
+		flavor = bp_heritage_linguistic_drift.0002.accept.tooltip
+	}
+}
+
+bp_heritage_linguistic_drift.0003 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0003.t
+	desc = bp_heritage_linguistic_drift.0003.desc
+	theme = culture_change
+	
+	immediate = {}
+	
+	#For other rulers of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0003.accept_same_culture
+		flavor = bp_heritage_linguistic_drift.0003.accept_same_culture.tooltip
+		trigger = { root.culture = scope:linguistic_shift_culture }
+	}
+	#For other rulers not of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0003.accept_different_culture
+		flavor = bp_heritage_linguistic_drift.0003.accept_different_culture.tooltip
+		trigger = { NOT = { root.culture = scope:linguistic_shift_culture } }
+		fallback = yes
+	}
+}
