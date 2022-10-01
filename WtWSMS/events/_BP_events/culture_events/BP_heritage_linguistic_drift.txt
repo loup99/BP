@@ -8,7 +8,7 @@
 #0101-0200: Heritage Drift Events
 
 scripted_trigger valid_linguistic_drift_culture_trigger = {
-	#Should actually be uses the latin language, but we need to make sure to map all possiblities
+	#Should actually be uses the Latin language, but we need to make sure to map all possibilities
 	OR = {
 		this = culture:romano_african
 		this = culture:romano_noric
@@ -191,3 +191,144 @@ bp_heritage_linguistic_drift.0003 = {
 
 ##### Heritage cases: Should require culture counties under dominance of another heritage
 
+scripted_trigger valid_heritage_drift_culture_trigger = {
+	#Should actually be uses the Latin heritage, but we need to make sure to map all possibilities
+	OR = {
+		this = culture:romano_hispanic
+	}
+	this = { has_cultural_pillar = heritage_latin }
+}
+
+#60% of culture counties under a single non-Latin heritage Ruler
+scripted_trigger valid_heritage_drift_condition_trigger = {
+	any_ruler = {
+		this = { save_temporary_scope_as = ruler }
+		NOT = { culture = { has_same_culture_language = scope:heritage_shift_culture } }
+		scope:heritage_shift_culture = {
+			any_culture_county = {
+				percent >= 0.60
+				holder = {
+					OR = {
+						this = scope:ruler
+						this = { any_liege_or_above = { this = scope:ruler } }
+					}
+				}
+			}
+		}
+	}
+}
+
+scripted_effect shift_heritage_effect = {
+	scope:heritage_shift_culture = {
+		if = {
+			limit = { this = culture:romano_hispanic }
+			custom_tooltip = {
+				text = african_romance_language
+				subject = scope:heritage_shift_culture
+				set_culture_pillar = heritage_iberian
+			}
+		}
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE" }
+	}
+}
+
+#Make sure culture is actually valid
+bp_heritage_linguistic_drift.0101 = {
+	type = empty
+	hidden = yes
+	
+	#Make sure a valid culture exists
+	trigger = { any_culture_global = { valid_heritage_drift_culture_trigger = yes } }
+	
+	#Pick one of the random valid cultures
+	immediate = {
+		random_culture_global = {
+			limit = { valid_heritage_drift_culture_trigger = yes }
+			save_scope_as = heritage_shift_culture
+		}
+		
+		if = {
+			limit = { valid_heritage_drift_condition_trigger = yes }
+			
+			if = {
+				limit = { exists = scope:heritage_shift_culture }
+				#If the culture head exists, inform him/her first
+				if = {
+					limit = { exists = scope:heritage_shift_culture.culture_head }
+					scope:heritage_shift_culture.culture_head = { trigger_event = { id = bp_heritage_linguistic_drift.0102 } }
+				}
+				#Otherwise, directly change the culture and tell everyone
+				else = {
+					shift_heritage_effect = yes
+					every_player = { trigger_event = { id = bp_heritage_linguistic_drift.0103 } }
+				}
+			}
+			#Handle failure case; shouldn't happen unless some Latin-speaking culture doesn't map
+			else = { debug_log = "NO LATIN SPEAKING CULTURE CAN BE SELECTED FOR bp_heritage_linguistic_drift.0001 EVENT" }
+		}
+	}
+}
+
+bp_heritage_linguistic_drift.0102 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0102.t
+	desc = bp_heritage_linguistic_drift.0102.desc
+	theme = culture_change
+	left_portrait = root
+	
+	immediate = {}
+	
+	option = {
+		name = bp_heritage_linguistic_drift.0102.accept
+		shift_heritage_effect = yes
+		every_ruler = {
+			limit = {
+				OR = {
+					this = { in_diplomatic_range = root }
+					this.culture = { has_same_culture_language = scope:heritage_shift_culture }
+				}
+				NOT = { this = root }
+			}
+			trigger_event = { id = bp_heritage_linguistic_drift.0103 }
+		}
+		flavor = bp_heritage_linguistic_drift.0102.accept.tooltip
+	}
+}
+
+bp_heritage_linguistic_drift.0103 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0103.t
+	desc = bp_heritage_linguistic_drift.0103.desc
+	theme = culture_change
+	left_portrait = scope:chosen_character
+	
+	immediate = {
+		if = {
+			limit = { exists = scope:heritage_shift_culture.culture_head }
+			scope:heritage_shift_culture.culture_head = { save_scope_as = chosen_character }
+		}
+		else_if = {
+			limit = { any_ruler = { culture = scope:heritage_shift_culture } }
+			random_ruler = {
+				limit = { culture = scope:heritage_shift_culture }
+				save_scope_as = chosen_character
+			}
+		}
+		#Fallback
+		else = { root = { save_scope_as = chosen_character } }
+	}
+	
+	#For other rulers of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0103.accept_same_culture
+		flavor = bp_heritage_linguistic_drift.0103.accept_same_culture.tooltip
+		trigger = { root.culture = scope:heritage_shift_culture }
+	}
+	#For other rulers not of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0103.accept_different_culture
+		flavor = bp_heritage_linguistic_drift.0103.accept_different_culture.tooltip
+		trigger = { NOT = { root.culture = scope:heritage_shift_culture } }
+		fallback = yes
+	}
+}
