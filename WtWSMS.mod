@@ -1,6 +1,6 @@
 name = "When the World Stopped Making Sense"
-version = "0.1.1"
-supported_version = "1.7.0"
+version = "0.1.2"
+supported_version = "1.7.2"
 path = "mod/WtWSMS"
 replace_path="history/characters"
 replace_path="history/cultures"
