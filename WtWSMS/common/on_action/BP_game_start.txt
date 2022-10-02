@@ -922,67 +922,6 @@ setup_vassal_contracts = {
 					level = 0
 				}
 			}
-#			if = { #Thracian Goths are always foederati
-#				limit = { primary_title = title:d_thracian_goths }
-#				vassal_contract_set_obligation_level = {
-#					type = foederatus_special_contract
-#					level = 1
-#				}
-#			}
-#			if = { #Ghasanids are always foederati
-#				limit = { primary_title = title:k_arabia_petraea }
-#				vassal_contract_set_obligation_level = {
-#					type = foederatus_special_contract
-#					level = 1
-#				}
-#			}
-#			if = { #Salihids are always foederati
-#				limit = { primary_title = title:k_salihid }
-#				vassal_contract_set_obligation_level = {
-#					type = foederatus_special_contract
-#					level = 1
-#				}
-#			}
-#			if = { #Sarir is always a Byzantine Tributary
-#				limit = { primary_title = title:k_sarir }
-#				vassal_contract_set_obligation_level = {
-#					type = tributary_state_special_contract
-#					level = 1
-#				}
-#			}
-#			if = { #Lazica is always a Byzantine Tributary
-#				limit = { primary_title = title:k_lazica }
-#				vassal_contract_set_obligation_level = {
-#					type = tributary_state_special_contract
-#					level = 1
-#				}
-#			}
-#			if = { #Albania is always a Persian Tributary
-#				limit = {
-#					OR = {
-#						primary_title = title:k_caucasian_albania
-#						primary_title = title:d_caucasian_albania
-#					}
-#				}
-#				vassal_contract_set_obligation_level = {
-#					type = tributary_state_special_contract
-#					level = 1
-#				}
-#			}
-#			if = { #Iberia is always a Persian Tributary
-#				limit = { primary_title = title:k_iberia }
-#				vassal_contract_set_obligation_level = {
-#					type = tributary_state_special_contract
-#					level = 1
-#				}
-#			}
-#			if = { #Lakhmids are always presian tributary
-#				limit = { primary_title = title:k_al_hirah }
-#				vassal_contract_set_obligation_level = {
-#					type = tributary_state_special_contract
-#					level = 1
-#				}
-#			}
 			if = { #d_sophanene, d_sophene have some nice rights
 				limit = {
 					OR = {
@@ -997,37 +936,6 @@ setup_vassal_contracts = {
 				vassal_contract_set_obligation_level = {
 					type = title_revocation_rights
 					level = 1
-				}
-			}
-#			#Everyone under e_xiongnu is a tributary... except d_chach
-#			if = {
-#				limit = {
-#					this.liege.primary_title = title:e_xiongnu
-#					this.primary_title.tier >= tier_duchy
-#					NOT = { this.primary_title = title:d_chah }
-#					NOT = { this.primary_title = title:e_xiongnu } #Excluded the holder of e_xiongnu (not a vassal)
-#				}
-#				debug_log_scopes = no
-#				vassal_contract_set_obligation_level = {
-#					type = tributary_special_contract
-#					level = 1
-#				}
-#			}
-			if = { #Vassals of the Gupta Empire are militarily oriented
-				limit = {
-					liege.primary_title = title:e_rajastan
-					primary_title.tier >= tier_duchy
-					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
-					has_government = mandala_government
-				}
-				debug_log_scopes = no
-				vassal_contract_set_obligation_level = {
-					type = mandala_government_taxes
-					level = 1
-				}
-				vassal_contract_set_obligation_level = {
-					type = mandala_government_levies
-					level = 3
 				}
 			}
 			if = { #Non-Tributary Prefeudal Christian Vassals of Persia have religious freedom
@@ -1048,15 +956,144 @@ setup_vassal_contracts = {
 					level = 1
 				}
 			}
-#			#e_rouran Tributaries
-#			if = {
-#				limit = { primary_title = title:k_gaochang }
-#				debug_log_scopes = no
-#				vassal_contract_set_obligation_level = {
-#					type = tributary_state_special_contract
-#					level = 1
-#				}
-#			}
+			if = { #Vassals of the Gupta Empire are militarily oriented
+				limit = {
+					liege.primary_title = title:e_rajastan
+					primary_title.tier >= tier_duchy
+					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
+					has_government = mandala_government
+				}
+				debug_log_scopes = no
+				vassal_contract_set_obligation_level = {
+					type = mandala_government_taxes
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = mandala_government_levies
+					level = 3
+				}
+			}
+		}
+		### Tributaries/Foederati
+		
+		#Byzantines
+		make_tributary = {
+			TYPE = foederatus_tributary
+			TRIBUTARY = title:d_thracian_goths.holder
+			SUZERAIN = title:e_byzantium.holder
+		}
+		make_tributary = {
+			TYPE = foederatus_tributary
+			TRIBUTARY = title:k_arabia_petraea.holder
+			SUZERAIN = title:e_byzantium.holder
+		}
+		make_tributary = {
+			TYPE = foederatus_tributary
+			TRIBUTARY = title:k_salihid.holder
+			SUZERAIN = title:e_byzantium.holder
+		}
+		make_tributary = {
+			TYPE = tributary_permanent
+			TRIBUTARY = title:k_sarir.holder
+			SUZERAIN = title:e_byzantium.holder
+		}
+		make_tributary = {
+			TYPE = tributary_permanent
+			TRIBUTARY = title:k_lazica.holder
+			SUZERAIN = title:e_byzantium.holder
+		}
+		#Persians
+		if = {
+			limit = { exists = title:k_caucasian_albania.holder }
+			make_tributary = {
+				TYPE = tributary_permanent
+				TRIBUTARY = title:k_caucasian_albania.holder
+				SUZERAIN = title:e_persia.holder
+			}
+		}
+		else = {
+			make_tributary = {
+				TYPE = tributary_permanent
+				TRIBUTARY = title:d_caucasian_albania.holder
+				SUZERAIN = title:e_persia.holder
+			}
+		}
+		make_tributary = {
+			TYPE = tributary_permanent
+			TRIBUTARY = title:k_iberia.holder
+			SUZERAIN = title:e_persia.holder
+		}
+		make_tributary = {
+			TYPE = tributary_permanent
+			TRIBUTARY = title:k_al_hirah.holder
+			SUZERAIN = title:e_persia.holder
+		}
+		#Xiongnu
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_badakhshan.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_khuttal.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_samarkand.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_bukhara.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_khorezm.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_osrushana.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_ferghana.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_chah.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_muyunkum.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:d_kashgar.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:k_kabulistan.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:k_kucha.holder
+			SUZERAIN = title:e_xiongnu.holder
+		}
+		#Rouran
+		make_tributary = {
+			TYPE = tributary_non_permanent
+			TRIBUTARY = title:k_gaochang.holder
+			SUZERAIN = title:e_rouran.holder
 		}
 	}
 }
@@ -1104,7 +1141,7 @@ other_title_effects = {
 			title:d_gugark = { set_de_jure_liege_title = title:k_armenia }
 			title:d_gardman = { set_de_jure_liege_title = title:k_armenia }
 			title:d_tayk = { set_de_jure_liege_title = title:k_armenia }
-			#e_peria
+			#e_persia
 			title:d_gortyene = { set_de_jure_liege_title = title:k_asoristan }
 			title:d_kwrtstan = { set_de_jure_liege_title = title:k_persia }
 			title:d_exilarch = { set_de_jure_liege_title = title:k_asoristan }
