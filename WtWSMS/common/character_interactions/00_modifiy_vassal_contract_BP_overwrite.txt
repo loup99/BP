@@ -21,21 +21,8 @@ liege_modify_vassal_contract_interaction = {
 			liege = scope:actor
 			is_ruler = yes
 			##### Changed from Vanilla vvvvv
-			OR = {
-				#Unmodifiable contracts combined with modifiable contracts weirdness needs to be covered
-				AND = {
-					OR = {
-						vassal_contract_has_flag = tributary_installed_flag
-						vassal_contract_has_flag = tributary_state_installed_flag
-						vassal_contract_has_flag = foederatus_contract_installed
-					}
-					has_government_without_modifiable_contracts_excluding_uniques_trigger = yes
-				}
-				AND = {
-					vassal_contract_has_modifiable_obligations = yes
-					has_government_without_modifiable_contracts_excluding_uniques_trigger = no
-				}
-			}
+			vassal_contract_has_modifiable_obligations = yes
+			has_government_without_modifiable_contracts_excluding_uniques_trigger = no
 			##### Changed from Vanilla ^^^^^
 		}
 	}
@@ -304,19 +291,6 @@ liege_modify_vassal_contract_interaction = {
 						limit = { valid_government_bureaucratic_special_trigger = yes }
 						set_obligation_if_changed_effect = { OBLIGATION_TYPE = bureaucratic_special_contract }
 					}
-					#Tributary-Type Contracts
-					if = {
-						limit = { valid_government_foederatus_special_trigger = yes }
-						set_obligation_if_changed_effect_tributaries_foederati_effect = { OBLIGATION_TYPE = foederatus_special_contract }
-					}
-					if = {
-						limit = { vassal_contract_has_flag = tributary_installed_flag }
-						set_obligation_if_changed_effect_tributaries_foederati_effect = { OBLIGATION_TYPE = tributary_special_contract }
-					}
-					if = {
-						limit = { vassal_contract_has_flag = tributary_state_installed_flag }
-						set_obligation_if_changed_effect_tributaries_foederati_effect = { OBLIGATION_TYPE = tributary_state_special_contract }
-					}
 					if = {
 						limit = {
 							valid_bureacratic_vassal_governance_vassal_gov_trigger = yes
@@ -382,21 +356,8 @@ vassal_modify_vassal_contract_interaction = {
 			NOT = { this = scope:actor }
 			liege = scope:actor
 			##### Changed from Vanilla vvvvv
-			OR = {
-				#Unmodifiable contracts combined with modifiable contracts weirdness needs to be covered
-				AND = {
-					OR = {
-						vassal_contract_has_flag = tributary_installed_flag
-						vassal_contract_has_flag = tributary_state_installed_flag
-						vassal_contract_has_flag = foederatus_contract_installed
-					}
-					has_government_without_modifiable_contracts_excluding_uniques_trigger = yes
-				}
-				AND = {
-					vassal_contract_has_modifiable_obligations = yes
-					has_government_without_modifiable_contracts_excluding_uniques_trigger = no
-				}
-			}
+			vassal_contract_has_modifiable_obligations = yes
+			has_government_without_modifiable_contracts_excluding_uniques_trigger = no
 			##### Changed from Vanilla ^^^^^
 		}
 	}
@@ -433,29 +394,6 @@ vassal_modify_vassal_contract_interaction = {
 					text = "vassal_modify_vassal_contract_obligation_change_limit"
 					value = count_total_obligation_changes
 					count_total_obligation_changes <= max_contract_changes
-				}
-			}
-		}
-		#Vassals with tributary-like contracts can't just free themselves via negotiation.
-		trigger_if = {
-			limit = { scope:recipient = { vassal_contract_has_flag = vassal_cant_modify_this_contract } }
-			scope:recipient = {
-				custom_description = {
-					text = vassal_cannot_voluntarily_modify_this_contract
-					NOR = {
-						AND = {
-							vassal_contract_has_flag = foederatus_contract_installed
-							local_var:foederatus_special_contract != vassal_contract_obligation_level:foederatus_special_contract
-						}
-						AND = {
-							vassal_contract_has_flag = tributary_installed_flag
-							local_var:tributary_special_contract != vassal_contract_obligation_level:tributary_special_contract
-						}
-						AND = {
-							vassal_contract_has_flag = tributary_state_installed_flag
-							local_var:tributary_state_special_contract != vassal_contract_obligation_level:tributary_state_special_contract
-						}
-					}
 				}
 			}
 		}
@@ -542,18 +480,6 @@ vassal_modify_vassal_contract_interaction = {
 				if = {
 					limit = { valid_government_bureaucratic_special_trigger = yes }
 					set_obligation_if_changed_effect = { OBLIGATION_TYPE = bureaucratic_special_contract }
-				}
-				if = {
-					limit = { valid_government_foederatus_special_trigger = yes }
-					set_obligation_if_changed_effect = { OBLIGATION_TYPE = foederatus_special_contract }
-				}
-				if = {
-					limit = { can_have_tributary_contract_trigger = yes }
-					set_obligation_if_changed_effect = { OBLIGATION_TYPE = tributary_special_contract }
-				}
-				if = {
-					limit = { can_have_tributary_state_contract_trigger = yes }
-					set_obligation_if_changed_effect = { OBLIGATION_TYPE = tributary_state_special_contract }
 				}
 				if = {
 					limit = {
