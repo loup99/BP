@@ -231,10 +231,6 @@ offer_foederatus_interaction = {
 		#Apply actor effects
 		#Setup Title Changes
 		create_title_and_vassal_change = {
-			type = swear_fealty
-			save_scope_as = swear_fealty_to_new_liege
-		}
-		create_title_and_vassal_change = {
 			type = granted
 			save_scope_as = grant_old_titles_to_new_chars
 			add_claim_on_loss = no
@@ -249,12 +245,7 @@ offer_foederatus_interaction = {
 			save_scope_as = liberate_old_counties_with_new_chars
 			add_claim_on_loss = no
 		}
-		#Make a New Vassal
 		scope:recipient = {
-			change_liege = {
-				liege = scope:actor
-				change = scope:swear_fealty_to_new_liege
-			}
 			#Mark former counties for release
 			every_held_title = {
 				limit = { tier = tier_county }
@@ -307,17 +298,14 @@ offer_foederatus_interaction = {
 				}
 			}
 		}
-		resolve_title_and_vassal_change = scope:swear_fealty_to_new_liege
 		resolve_title_and_vassal_change = scope:grant_new_counties_to_recipient
 		resolve_title_and_vassal_change = scope:grant_old_titles_to_new_chars
 		resolve_title_and_vassal_change = scope:liberate_old_counties_with_new_chars
-		scope:recipient = {
-			hidden_effect = {
-				if = {
-					limit = { is_independent_ruler = no }
-					vassal_contract_set_obligation_level = { type = foederatus_special_contract level = 1 }
-				}
-			}
+		
+		make_tributary = {
+			TYPE = foederatus_tributary
+			SUZERAIN = scope:actor
+			TRIBUTARY = scope:recipient
 		}
 		
 		#Create Titular title if primary isn't titular
@@ -325,20 +313,14 @@ offer_foederatus_interaction = {
 		#and counties that have been handed out become independent
 		create_titular_title_if_needed_effect = { ATTACKER = scope:recipient }
 		scope:actor = {
-			add_character_flag = {
-				flag = recently_offered_foederatus
-				years = 10
-			}
+			add_character_flag = { flag = recently_offered_foederatus years = 10 }
 			trigger_event = BP_char_interaction.0001
 		}
 	}
 
 	on_decline = {
 		scope:actor = {
-			add_character_flag = {
-				flag = recently_offered_foederatus
-				years = 10
-			}
+			add_character_flag = { flag = recently_offered_foederatus years = 10 }
 			trigger_event = BP_char_interaction.0002
 		}
 	}
@@ -610,29 +592,17 @@ request_foederatus_interaction = {
 	#send_options_exclusive = yes
 
 	on_accept = {
-		create_title_and_vassal_change = {
-			type = swear_fealty
-			save_scope_as = change
-		}
 		scope:actor = {
-			change_liege = {
-				liege = scope:recipient
-				change = scope:change
-			}
-			
 			stress_impact = {
 				ambitious = medium_stress_impact_gain
 				arrogant = medium_stress_impact_gain
 			}
 		}
-		resolve_title_and_vassal_change = scope:change
-		scope:actor = {
-			hidden_effect = {
-				if = {
-					limit = { is_independent_ruler = no }
-					vassal_contract_set_obligation_level = { type = foederatus_special_contract level = 1 }
-				}
-			}
+		
+		make_tributary = {
+			TYPE = foederatus_tributary
+			SUZERAIN = scope:recipient
+			TRIBUTARY = scope:actor
 		}
 		
 		scope:actor = { trigger_event = BP_char_interaction.0003 }
