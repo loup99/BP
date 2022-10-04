@@ -146,23 +146,57 @@ heresy.0001 = {
 				add_to_list = neaby_same_religion_counties
 			}
 
+			##### Changed from Vanilla vvvvv
+
 			# Compile a list of possible heresies to convert to.
 			religion = {
 				every_faith = { add_to_list = potential_heresies }
 				if = {
 					# Abrahamics also get bonus dualistic heresies
 					limit = { is_in_family = rf_abrahamic }
-					#Add all Dualist faiths
-					faith:manichean = { add_to_list = potential_heresies }
-					faith:valentinianism = { add_to_list = potential_heresies }
-					faith:sethianism = { add_to_list = potential_heresies }
-					faith:priscillianism = { add_to_list = potential_heresies }
-					faith:marcosianism = { add_to_list = potential_heresies }
-					faith:mandeaism = { add_to_list = potential_heresies }
-					faith:sabianism = { add_to_list = potential_heresies }
-					faith:cainitism = { add_to_list = potential_heresies }
+					this = { save_temporary_scope_as = the_splitting_religion }
+					
+					religion:dualism_religion = {
+						every_faith = {
+							limit = { NOT = { has_doctrine = tenet_ethnic_religion } }
+							if = {
+								limit = { has_doctrine = gnostic_syncretism_supersessionism }
+								add_to_list = potential_heresies
+							}
+							else_if = {
+								limit = {
+									scope:the_splitting_religion = religion:christianity_religion
+									this = { has_doctrine = gnostic_syncretism_christian }
+								}
+								add_to_list = potential_heresies
+							}
+							else_if = {
+								limit = {
+									scope:the_splitting_religion = religion:islam_religion
+									this = { has_doctrine = gnostic_syncretism_islamic }
+								}
+								add_to_list = potential_heresies
+							}
+							else_if = {
+								limit = {
+									scope:the_splitting_religion = religion:judaism_religion
+									this = { has_doctrine = gnostic_syncretism_jewish }
+								}
+								add_to_list = potential_heresies
+							}
+							else_if = {
+								limit = {
+									scope:the_splitting_religion = religion:hellenism_religion
+									this = { has_doctrine = gnostic_syncretism_hellenism }
+								}
+								add_to_list = potential_heresies
+							}
+							else = {} #Error suppression
+						}
+					}
 				}
 			}
+			##### Changed from Vanilla ^^^^^
 
 			#We want to pick certain faiths to be our heresy over others, assuming they are valid.
 			random_in_list = {
