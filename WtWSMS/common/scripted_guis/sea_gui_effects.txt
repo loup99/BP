@@ -1,8 +1,53 @@
-﻿open_minority_tooltip = {
+﻿##### TODO: Store all the possible trigger conditions
+#has_a_religion_blending_tradition_trigger
+#has_reduced_weight_in_dharmic_counties_trigger
+#&c. in the county scope for later query
+#
+#TODO: Add net size variable to faiths/cultures as well
+
+open_minority_tooltip = {
 	scope = county
 	
 	effect = {
-		root = { set_variable = the_county_temp }
+		root = {
+			set_variable = {
+				name = the_county_temp
+				value = root
+			}
+			if = {
+				limit = { faith = { is_dharmic_faith_trigger = yes } }
+				set_variable = the_county_has_dharmic_faith
+			}
+			if = {
+				limit = { culture = { has_a_religion_blending_tradition_trigger = yes } }
+				set_variable = the_county_has_a_religion_blending_tradition
+			}
+			if = {
+				limit = { has_variable_list = faith_minorities_small }
+				every_in_list = {
+					variable = faith_minorities_small
+					this = {
+						if = {
+							limit = { has_reduced_weight_in_dharmic_counties_trigger = yes }
+							set_variable = the_faith_has_reduced_weight_in_dharmic_counties
+							set_variable = the_faith_is_small
+						}
+					}
+				}
+			}
+			if = {
+				limit = { has_variable_list = faith_minorities_large }
+				every_in_list = {
+					variable = faith_minorities_small
+					this = {
+						if = {
+							limit = { has_reduced_weight_in_dharmic_counties_trigger = yes }
+							set_variable = the_faith_has_reduced_weight_in_dharmic_counties
+						}
+					}
+				}
+			}
+		}
 	}
 }
 close_minority_tooltip = {
@@ -11,6 +56,34 @@ close_minority_tooltip = {
 	effect = {
 		root = {
 			remove_variable = the_county_temp
+			if = {
+				limit = { has_variable = the_county_has_dharmic_faith }
+				remove_variable = the_county_has_dharmic_faith
+			}
+			if = {
+				limit = { has_variable_list = faith_minorities_small }
+				every_in_list = {
+					variable = faith_minorities_small
+					this = {
+						if = {
+							limit = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
+							remove_variable = the_faith_has_reduced_weight_in_dharmic_counties
+						}
+					}
+				}
+			}
+			if = {
+				limit = { has_variable_list = faith_minorities_large }
+				every_in_list = {
+					variable = faith_minorities_large
+					this = {
+						if = {
+							limit = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
+							remove_variable = the_faith_has_reduced_weight_in_dharmic_counties
+						}
+					}
+				}
+			}
 		}
 	}
 }
