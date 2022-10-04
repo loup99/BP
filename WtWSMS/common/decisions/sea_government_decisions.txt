@@ -1,0 +1,141 @@
+﻿reform_government_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	major = yes
+	desc = reform_government_decision_desc
+	ai_check_interval = 36
+
+	is_shown = {
+		OR = {
+			faith = { has_doctrine_parameter = right_to_rule_feudal }
+			faith = { has_doctrine_parameter = right_to_rule_clan }
+			faith = { has_doctrine_parameter = right_to_rule_mandala }
+			faith = { has_doctrine_parameter = right_to_rule_sassanid }
+		}
+		OR = {
+			AND = {
+				has_government = feudal_government
+				faith = { NOT = { has_doctrine_parameter = right_to_rule_feudal } }
+			}
+			AND = {
+				has_government = clan_government
+				OR = {
+					faith = { NOT = { has_doctrine_parameter = right_to_rule_clan } }
+					culture = { NOT = { has_cultural_parameter = right_to_rule_clan } }
+				}
+			}
+			AND = {
+				has_government = mandala_government
+				faith = { NOT = { has_doctrine_parameter = right_to_rule_mandala } }
+			}
+			AND = {
+				has_government = eranshar_government
+				faith = { NOT = { has_doctrine_parameter = right_to_rule_sassanid } }
+			}
+		}
+	}
+
+	is_valid = {
+		is_independent_ruler = yes
+		is_at_war = no
+		culture = { has_innovation = innovation_dominium_mundi }
+		#Mandala requires slightly more details
+		trigger_if = {
+			limit = { faith = { has_doctrine_parameter = right_to_rule_mandala } }
+			OR = {
+				culture = { has_cultural_pillar = heritage_indo_aryan }
+				culture = { has_cultural_pillar = heritage_dravidian }
+			}
+		}
+	}
+
+	effect = {
+		custom_tooltip = reform_government_decision_help_text
+
+		save_scope_as = liege
+		faith = { save_scope_as = liege_faith }
+		add_to_temporary_list = characters_to_convert
+
+		every_vassal_or_below = {
+			limit = {
+				OR = {
+					AND = {
+						has_government = feudal_government
+						scope:liege = { has_government = feudal_government }
+					}
+					AND = {
+						has_government = clan_government
+						scope:liege = { has_government = clan_government }
+					}
+					AND = {
+						has_government = mandala_government
+						scope:liege = { has_government = mandala_government }
+					}
+					AND = {
+						has_government = eranshar_government
+						scope:liege = { has_government = eranshar_government }
+					}
+				}
+				OR = {
+					AND = {
+						faith = { has_doctrine_parameter = right_to_rule_feudal }
+						scope:liege_faith = { has_doctrine_parameter = right_to_rule_feudal }
+					}
+					AND = {
+						faith = { has_doctrine_parameter = right_to_rule_clan }
+						scope:liege_faith = { has_doctrine_parameter = right_to_rule_clan }
+					}
+					AND = {
+						faith = { has_doctrine_parameter = right_to_rule_mandala }
+						scope:liege_faith = { has_doctrine_parameter = right_to_rule_mandala }
+					}
+					AND = {
+						faith = { has_doctrine_parameter = right_to_rule_sassanid }
+						scope:liege_faith = { has_doctrine_parameter = right_to_rule_sassanid }
+					}
+				}
+			}
+			add_to_temporary_list = characters_to_convert
+		}
+
+		if = {
+			limit = { faith = { has_doctrine_parameter = right_to_rule_feudal } }
+			every_in_list = {
+				list = characters_to_convert
+				convert_realm_to_feudal_effect = yes
+			}
+		}
+		else_if = {
+			limit = { faith = { has_doctrine = right_to_rule_clan } }
+			every_in_list = {
+				list = characters_to_convert
+				convert_realm_to_clan_effect = yes
+			}
+		}
+		else_if = {
+			limit = { faith = { has_doctrine = right_to_rule_mandala } }
+			every_in_list = {
+				list = characters_to_convert
+				convert_realm_to_gupta_effect = yes
+			}
+		}
+		else_if = {
+			limit = { faith = { has_doctrine = right_to_rule_sassanid } }
+			every_in_list = {
+				list = characters_to_convert
+				convert_realm_to_eranshar_effect = yes
+			}
+		}
+	}
+
+	cost = {
+		prestige = medium_prestige_value
+	}
+
+	ai_potential = {
+		always = no
+	}
+
+	ai_will_do = {
+		base = 0
+	}
+}
