@@ -31,15 +31,69 @@ open_minority_tooltip = {
 						}
 					}
 				}
+				#Calculate the net size of each culture; should mirror culture_small_minority_weight_value
+				every_in_list = {
+					variable = culture_minorities_small
+					this = {
+						set_variable = {
+							name = net_size
+							value = base_small_minority_weight
+						}
+						if = {
+							limit = { root = { has_variable = the_county_has_a_culture_blending_tradition } }
+							change_variable = {
+								name = net_size
+								multiply = tradition_culture_blending_multiplier
+							}
+						}
+						if = {
+							limit = {
+								this = { has_variable = the_culture_has_reduced_weight_in_rough_terrain }
+								root = { has_variable = the_county_has_a_rough_terrain_province }
+							}
+							change_variable = {
+								name = net_size
+								multiply = tradition_rough_terrain_diversity_multiplier
+							}
+						}
+					}
+				}
 			}
 			if = {
 				limit = { has_variable_list = culture_minorities_large }
 				every_in_list = {
-					variable = culture_minorities_small
+					variable = culture_minorities_large
 					this = {
 						if = {
 							limit = { has_reduced_weight_in_rough_terrain_trigger = yes }
 							set_variable = the_culture_has_reduced_weight_in_rough_terrain
+						}
+					}
+				}
+				#Calculate the net size of each culture; should mirror culture_large_minority_weight_value
+				every_in_list = {
+					variable = culture_minorities_large
+					this = {
+						set_variable = {
+							name = net_size
+							value = base_large_minority_weight
+						}
+						if = {
+							limit = { root = { has_variable = the_county_has_a_culture_blending_tradition } }
+							change_variable = {
+								name = net_size
+								multiply = tradition_culture_blending_multiplier
+							}
+						}
+						if = {
+							limit = {
+								this = { has_variable = the_culture_has_reduced_weight_in_rough_terrain }
+								root = { has_variable = the_county_has_a_rough_terrain_province }
+							}
+							change_variable = {
+								name = net_size
+								multiply = tradition_rough_terrain_diversity_multiplier
+							}
 						}
 					}
 				}
@@ -66,15 +120,69 @@ open_minority_tooltip = {
 						}
 					}
 				}
+				#Calculate the net size of each culture; should mirror faith_small_minority_weight_value
+				every_in_list = {
+					variable = faith_minorities_small
+					this = {
+						set_variable = {
+							name = net_size
+							value = base_small_minority_weight
+						}
+						if = {
+							limit = {
+								root = { has_variable = the_county_has_dharmic_faith }
+								this = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
+							}
+							change_variable = {
+								name = net_size
+								multiply = dharmic_minorities_in_dharmic_counties_multiplier
+							}
+						}
+						if = {
+							limit = { root = { has_variable = the_county_has_a_religion_blending_tradition } }
+							change_variable = {
+								name = net_size
+								multiply = tradition_religion_blending_multiplier
+							}
+						}
+					}
+				}
 			}
 			if = {
 				limit = { has_variable_list = faith_minorities_large }
 				every_in_list = {
-					variable = faith_minorities_small
+					variable = faith_minorities_large
 					this = {
 						if = {
 							limit = { has_reduced_weight_in_dharmic_counties_trigger = yes }
 							set_variable = the_faith_has_reduced_weight_in_dharmic_counties
+						}
+					}
+				}
+				#Calculate the net size of each culture; should mirror faith_large_minority_weight_value
+				every_in_list = {
+					variable = faith_minorities_large
+					this = {
+						set_variable = {
+							name = net_size
+							value = base_large_minority_weight
+						}
+						if = {
+							limit = {
+								root = { has_variable = the_county_has_dharmic_faith }
+								this = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
+							}
+							change_variable = {
+								name = net_size
+								multiply = dharmic_minorities_in_dharmic_counties_multiplier
+							}
+						}
+						if = {
+							limit = { root = { has_variable = the_county_has_a_religion_blending_tradition } }
+							change_variable = {
+								name = net_size
+								multiply = tradition_religion_blending_multiplier
+							}
 						}
 					}
 				}
@@ -87,7 +195,10 @@ close_minority_tooltip = {
 	
 	effect = {
 		root = {
-			remove_variable = the_county_temp
+			if = {
+				limit = { has_variable = the_county_temp }
+				remove_variable = the_county_temp
+			}
 			
 			##### CULTURE CASES #####
 			if = {
@@ -123,7 +234,6 @@ close_minority_tooltip = {
 					}
 				}
 			}
-			
 			
 			##### FAITH CASES #####
 			if = {
