@@ -5,9 +5,19 @@ open_minority_tooltip = {
 	
 	effect = {
 		root = {
+			save_temporary_scope_as = the_county_temp
 			set_variable = {
 				name = the_county_temp
 				value = root
+			}
+			
+			if = {
+				limit = { scope:the_county_temp.number_of_culture_minorities_in_county_weighted > scope:the_county_temp.minority_capacity_of_county_culture }
+				set_variable = over_culture_capacity
+			}
+			if = {
+				limit = { scope:the_county_temp.number_of_faith_minorities_in_county_weighted > scope:the_county_temp.minority_capacity_of_county_culture }
+				set_variable = over_faith_capacity
 			}
 			
 			##### CULTURE CASES #####
@@ -29,32 +39,19 @@ open_minority_tooltip = {
 							limit = { has_reduced_weight_in_rough_terrain_trigger = yes }
 							set_variable = the_culture_has_reduced_weight_in_rough_terrain
 						}
-					}
-				}
-				#Calculate the net size of each culture; should mirror culture_small_minority_weight_value
-				every_in_list = {
-					variable = culture_minorities_small
-					this = {
+						root = { save_temporary_scope_as = the_county }
+						this = { save_temporary_scope_as = the_culture }
+						set_variable = {
+							name = support
+							value = support_of_a_culture_minority_in_county
+						}
+						set_variable = {
+							name = feeding
+							value = feeding_of_a_culture_minority_in_county
+						}
 						set_variable = {
 							name = net_size
-							value = base_small_minority_weight
-						}
-						if = {
-							limit = { root = { has_variable = the_county_has_a_culture_blending_tradition } }
-							change_variable = {
-								name = net_size
-								multiply = tradition_culture_blending_multiplier
-							}
-						}
-						if = {
-							limit = {
-								this = { has_variable = the_culture_has_reduced_weight_in_rough_terrain }
-								root = { has_variable = the_county_has_a_rough_terrain_province }
-							}
-							change_variable = {
-								name = net_size
-								multiply = tradition_rough_terrain_diversity_multiplier
-							}
+							value = culture_small_minority_weight_value
 						}
 					}
 				}
@@ -67,6 +64,20 @@ open_minority_tooltip = {
 						if = {
 							limit = { has_reduced_weight_in_rough_terrain_trigger = yes }
 							set_variable = the_culture_has_reduced_weight_in_rough_terrain
+						}
+						root = { save_temporary_scope_as = the_county }
+						this = { save_temporary_scope_as = the_culture }
+						set_variable = {
+							name = support
+							value = support_of_a_culture_minority_in_county
+						}
+						set_variable = {
+							name = feeding
+							value = feeding_of_a_culture_minority_in_county
+						}
+						set_variable = {
+							name = net_size
+							value = culture_large_minority_weight_value
 						}
 					}
 				}
@@ -118,32 +129,19 @@ open_minority_tooltip = {
 							limit = { has_reduced_weight_in_dharmic_counties_trigger = yes }
 							set_variable = the_faith_has_reduced_weight_in_dharmic_counties
 						}
-					}
-				}
-				#Calculate the net size of each culture; should mirror faith_small_minority_weight_value
-				every_in_list = {
-					variable = faith_minorities_small
-					this = {
+						root = { save_temporary_scope_as = the_county }
+						this = { save_temporary_scope_as = the_faith }
+						set_variable = {
+							name = support
+							value = support_of_a_faith_minority_in_county
+						}
+						set_variable = {
+							name = feeding
+							value = feeding_of_a_faith_minority_in_county
+						}
 						set_variable = {
 							name = net_size
-							value = base_small_minority_weight
-						}
-						if = {
-							limit = {
-								root = { has_variable = the_county_has_dharmic_faith }
-								this = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
-							}
-							change_variable = {
-								name = net_size
-								multiply = dharmic_minorities_in_dharmic_counties_multiplier
-							}
-						}
-						if = {
-							limit = { root = { has_variable = the_county_has_a_religion_blending_tradition } }
-							change_variable = {
-								name = net_size
-								multiply = tradition_religion_blending_multiplier
-							}
+							value = faith_small_minority_weight_value
 						}
 					}
 				}
@@ -157,32 +155,19 @@ open_minority_tooltip = {
 							limit = { has_reduced_weight_in_dharmic_counties_trigger = yes }
 							set_variable = the_faith_has_reduced_weight_in_dharmic_counties
 						}
-					}
-				}
-				#Calculate the net size of each culture; should mirror faith_large_minority_weight_value
-				every_in_list = {
-					variable = faith_minorities_large
-					this = {
+						root = { save_temporary_scope_as = the_county }
+						this = { save_temporary_scope_as = the_faith }
+						set_variable = {
+							name = support
+							value = support_of_a_faith_minority_in_county
+						}
+						set_variable = {
+							name = feeding
+							value = feeding_of_a_faith_minority_in_county
+						}
 						set_variable = {
 							name = net_size
-							value = base_large_minority_weight
-						}
-						if = {
-							limit = {
-								root = { has_variable = the_county_has_dharmic_faith }
-								this = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
-							}
-							change_variable = {
-								name = net_size
-								multiply = dharmic_minorities_in_dharmic_counties_multiplier
-							}
-						}
-						if = {
-							limit = { root = { has_variable = the_county_has_a_religion_blending_tradition } }
-							change_variable = {
-								name = net_size
-								multiply = tradition_religion_blending_multiplier
-							}
+							value = faith_large_minority_weight_value
 						}
 					}
 				}
@@ -198,6 +183,14 @@ close_minority_tooltip = {
 			if = {
 				limit = { has_variable = the_county_temp }
 				remove_variable = the_county_temp
+			}
+			if = {
+				limit = { has_variable = over_culture_capacity }
+				remove_variable = over_culture_capacity
+			}
+			if = {
+				limit = { has_variable = over_faith_capacity }
+				remove_variable = over_faith_capacity
 			}
 			
 			##### CULTURE CASES #####
@@ -219,6 +212,18 @@ close_minority_tooltip = {
 							limit = { has_variable = has_reduced_weight_in_rough_terrain_trigger }
 							remove_variable = the_culture_has_reduced_weight_in_rough_terrain
 						}
+						if = {
+							limit = { has_variable = support }
+							remove_variable = support
+						}
+						if = {
+							limit = { has_variable = feeding }
+							remove_variable = feeding
+						}
+						if = {
+							limit = { has_variable = net_size }
+							remove_variable = net_size
+						}
 					}
 				}
 			}
@@ -230,6 +235,18 @@ close_minority_tooltip = {
 						if = {
 							limit = { has_variable = has_reduced_weight_in_rough_terrain_trigger }
 							remove_variable = the_culture_has_reduced_weight_in_rough_terrain
+						}
+						if = {
+							limit = { has_variable = support }
+							remove_variable = support
+						}
+						if = {
+							limit = { has_variable = feeding }
+							remove_variable = feeding
+						}
+						if = {
+							limit = { has_variable = net_size }
+							remove_variable = net_size
 						}
 					}
 				}
@@ -249,6 +266,18 @@ close_minority_tooltip = {
 							limit = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
 							remove_variable = the_faith_has_reduced_weight_in_dharmic_counties
 						}
+						if = {
+							limit = { has_variable = support }
+							remove_variable = support
+						}
+						if = {
+							limit = { has_variable = feeding }
+							remove_variable = feeding
+						}
+						if = {
+							limit = { has_variable = net_size }
+							remove_variable = net_size
+						}
 					}
 				}
 			}
@@ -261,6 +290,18 @@ close_minority_tooltip = {
 						if = {
 							limit = { has_variable = the_faith_has_reduced_weight_in_dharmic_counties }
 							remove_variable = the_faith_has_reduced_weight_in_dharmic_counties
+						}
+						if = {
+							limit = { has_variable = support }
+							remove_variable = support
+						}
+						if = {
+							limit = { has_variable = feeding }
+							remove_variable = feeding
+						}
+						if = {
+							limit = { has_variable = net_size }
+							remove_variable = net_size
 						}
 					}
 				}

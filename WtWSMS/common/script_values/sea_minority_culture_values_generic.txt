@@ -1,7 +1,7 @@
 ﻿#The values in this file are "generic" in one of three senses:
 # 1). They'd be templated if script values supported $SUBSTITUTION$ syntax and thus represent code duplication
 # 2). They provide various common interfaces and values that shouldn't be modified by others
-# 3). They are not meant for TCs (or other mods) to modify as they will touch some core mod mechanics
+# 3). They are not meant for TCs (or other mods) to modify as they will touch some core sub-mod mechanics
 # Modify at your own risk.
 
 #Generic values
@@ -166,7 +166,36 @@ support_of_a_minority_culture_generic = {
 #Modders shouldn't tweak this unless they really want to change core functionality; changing
 # "support_of_a_culture_minority_in_county" in sea_minority_culture_values.txt is suggested instead.
 feeding_of_a_minority_culture_generic = {
-	value = support_of_a_minority_culture_generic
+	value = 0
+	#Determine how much is supporting this minority
+	scope:the_county = {
+		every_neighboring_county = {
+			if = { #County with a majority population
+				limit = { this.culture = scope:the_culture }
+				add = majority_province_support_value
+			}
+			else_if = { #County with a large minority
+				limit = {
+					county_has_a_minority_with_type_and_size_trigger = {
+						CULTURE_OR_FAITH = culture
+						SIZE = large
+						TARGET = scope:the_culture
+					}
+				}
+				add = large_minority_support_value
+			}
+			else_if = { #County with a small minority
+				limit = {
+					county_has_a_minority_with_type_and_size_trigger = {
+						CULTURE_OR_FAITH = culture
+						SIZE = small
+						TARGET = scope:the_culture
+					}
+				}
+				add = small_minority_support_value
+			}
+		}
+	}
 	#Determine how much is needed to feed this minority
 	if = {
 		limit = {
@@ -216,6 +245,10 @@ feeding_of_a_minority_culture_generic = {
 			}
 			subtract = small_minority_cost_value
 		}
+	}
+	if = {
+		limit = { scope:the_county.holder.culture = scope:the_culture }
+		add = majority_province_support_value
 	}
 }
 #Faith Scope
@@ -284,7 +317,36 @@ support_of_a_minority_faith_generic = {
 #Modders shouldn't tweak this unless they really want to change core functionality; changing
 # "support_of_a_culture_minority_in_county" in sea_minority_culture_values.txt is suggested instead.
 feeding_of_a_minority_faith_generic = {
-	value = support_of_a_minority_faith_generic
+	value = 0
+	#Determine how much is supporting this minority
+	scope:the_county = {
+		every_neighboring_county = {
+			if = { #County with a majority population
+				limit = { this.faith = scope:the_faith }
+				add = majority_province_support_value
+			}
+			else_if = { #County with a large minority
+				limit = {
+					county_has_a_minority_with_type_and_size_trigger = {
+						CULTURE_OR_FAITH = faith
+						SIZE = large
+						TARGET = scope:the_faith
+					}
+				}
+				add = large_minority_support_value
+			}
+			else_if = { #County with a small minority
+				limit = {
+					county_has_a_minority_with_type_and_size_trigger = {
+						CULTURE_OR_FAITH = faith
+						SIZE = small
+						TARGET = scope:the_faith
+					}
+				}
+				add = small_minority_support_value
+			}
+		}
+	}
 	#Determine how much is needed to feed this minority
 	if = {
 		limit = {
@@ -298,7 +360,7 @@ feeding_of_a_minority_faith_generic = {
 		}
 		subtract = large_minority_cost_value
 		#If there's no majority provinces on the map, it takes a bit more to keep large majorities going
-		#this should encourage eventual disappearance of only thinly supported faiths;
+		#this should encourage eventual disappearance of only thinly supported cultures;
 		# or at least push them towards a minority status
 		if = {
 			limit = { NOT = { any_county = { this.faith = scope:the_faith } } }
@@ -317,7 +379,7 @@ feeding_of_a_minority_faith_generic = {
 		}
 		subtract = small_minority_cost_value
 		#If there's no large minorities on the map, it takes a bit more to keep small majorities going
-		#this should encourage eventual disappearance of only thinly supported faiths;
+		#this should encourage eventual disappearance of only thinly supported cultures;
 		#or at least push them to be more concentrated
 		if = {
 			limit = {
@@ -334,5 +396,9 @@ feeding_of_a_minority_faith_generic = {
 			}
 			subtract = small_minority_cost_value
 		}
+	}
+	if = {
+		limit = { scope:the_county.holder.faith = scope:the_faith }
+		add = majority_province_support_value
 	}
 }
