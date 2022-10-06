@@ -307,9 +307,11 @@ has_reduced_weight_in_rough_terrain_trigger = {
 	has_cultural_parameter = encourages_diversity_in_rough_terrain
 }
 
-#### These determine the triggers for support in generic support calculations
+##### SUPPORT CALCULATIONS #####
 
-#support_of_a_culture_minority_in_county triggers
+### CULTURE ###
+
+## SUPPORT ##
 county_specific_large_support_culture_trigger = { #target_county scope
 	#Rough terrain diversity minorities are mostly self-supporting when established
 	AND = {
@@ -355,7 +357,16 @@ small_minority_support_culture_aspect_trigger = { #culture scope
 minority_always_supported_culture_aspect_trigger = { #culture scope
 	minority_always_supported_culture_aspect_generic_trigger = { THE_COUNTY = $THE_COUNTY$ }
 }
-#support_of_a_faith_minority_in_county triggers
+## FEEDING ##
+small_minority_always_fed_culture_aspect_trigger = {
+	OR = {
+		minority_always_supported_culture_aspect_generic_trigger = { THE_COUNTY = $THE_COUNTY$ }
+	}
+}
+
+### FAITH ###
+
+## SUPPORT ##
 county_specific_large_support_faith_trigger = { #target_county scope
 	any_barony = { is_holy_site_of = scope:the_faith }
 }
@@ -363,7 +374,7 @@ county_specific_small_support_faith_trigger = { #target_county scope
 	OR = {
 		#A zealous people supports keeping small minorities around a bit longer
 		culture = { has_cultural_tradition = tradition_zealous_people }
-		#So that penninsulae and islands don't have small minorities die out (see Cyprus, Socotra)
+		#So that peninsulae and islands don't have small minorities die out (see Cyprus, Socotra)
 		is_coastal_county = yes
 	}
 }
@@ -375,5 +386,34 @@ small_minority_support_faith_aspect_trigger = { #faith scope
 }
 minority_always_supported_faith_aspect_trigger = { #faith scope
 	minority_always_supported_faith_aspect_generic_trigger = { THE_COUNTY = $THE_COUNTY$ }
+}
+## FEEDING ##
+small_minority_always_fed_faith_aspect_trigger = {
+	OR = {
+		minority_always_supported_faith_aspect_generic_trigger = { THE_COUNTY = $THE_COUNTY$ }
+		#WtWSMS Special Cases (like in the generic trigger)
+		
+		#Jewish faiths should always be fed if small minorities
+		AND = {
+			scope:the_faith.religion = religion:judaism_religion
+			county_has_a_minority_with_type_and_size_trigger = {
+				CULTURE_OR_FAITH = faith
+				SIZE = small
+				TARGET = scope:the_faith
+			}
+		}
+		#Ethnic religions should always be fed if small and still have their corresponding culture
+		#in the county
+		ethnic_or_autocephalous_related_culture_in_county_trigger = {
+			THE_TENET = tenet_ethnic_religion
+			VARIABLE = ethnic_religion_culture
+		}
+		#Autocephalous faiths should always be fed if small and still have their corresponding culture
+		#in the county
+		ethnic_or_autocephalous_related_culture_in_county_trigger = {
+			THE_TENET = tenet_autocephaly
+			VARIABLE = church_culture
+		}
+	}
 }
 ##### Changed from Vanilla ^^^^^
