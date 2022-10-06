@@ -623,3 +623,45 @@ actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = 
 		}
 	}
 }
+
+##### MINORITY TRIGGERS
+ethnic_or_autocephalous_related_culture_in_county_trigger = {
+	AND = {
+		scope:the_faith = { has_doctrine = $THE_TENET$ }
+		county_has_a_minority_with_type_and_size_trigger = {
+			CULTURE_OR_FAITH = faith
+			SIZE = small
+			TARGET = scope:the_faith
+		}
+		OR = {
+			#Majority faith is culture/child culture
+			actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+				ACTOR = scope:the_county
+				TARGET_FAITH = scope:the_faith
+				VARIABLE = $VARIABLE$
+			}
+			AND = {
+				scope:the_county = { has_variable_list = culture_minorities_large }
+				any_in_list = {
+					variable = culture_minorities_large
+					actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+						ACTOR = this
+						TARGET_FAITH = scope:the_faith
+						VARIABLE = $VARIABLE$
+					}
+				}
+			}
+			AND = {
+				scope:the_county = { has_variable_list = culture_minorities_small }
+				any_in_list = {
+					variable = culture_minorities_small
+					actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+						ACTOR = this
+						TARGET_FAITH = scope:the_faith
+						VARIABLE = $VARIABLE$
+					}
+				}
+			}
+		}
+	}
+}
