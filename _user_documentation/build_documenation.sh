@@ -1,10 +1,10 @@
 #Faith
-pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 -s Faith.wiki -o Faith.html
-pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 -s Culture.wiki -o Culture.html
-pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 -s Traditions.wiki -o Traditions.html
-pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 -s Differences.wiki -o Differences.html
-pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 -s Historical_Notes.wiki -o Historical_Notes.html
-pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 -s Main_Page.wiki -o Main_Page.html
+pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 --metadata title="Faith" -s Faith.wiki -o Faith.html
+pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 --metadata title="Culture" -s Culture.wiki -o Culture.html
+pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 --metadata title="Traditions" -s Traditions.wiki -o Traditions.html
+pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 --metadata title="Differences" -s Differences.wiki -o Differences.html
+pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 --metadata title="Historical Notes" -s Historical_Notes.wiki -o Historical_Notes.html
+pandoc.exe --columns=250 -c pandoc.css -f mediawiki -t html5 --metadata title="Main Page" -s Main_Page.wiki -o Main_Page.html
 
 #NB: Merge *before* coloring to avoid having the parser fail
 

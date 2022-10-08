@@ -38,7 +38,9 @@ groups = ['Western Dyophysites',\
           'Arians',\
           'Monophysites',\
           'Gnostics',\
-          'Antinomians']
+          'Antinomians',\
+          'Major',\
+          'Minor']
 shared_hof = ['Roman Patriarchate',\
               'Patriarch of Alexandria',\
               'Apostolic Church']

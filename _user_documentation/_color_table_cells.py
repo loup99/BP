@@ -17,6 +17,7 @@ faith_list = [('Chalcedonianism',[0.65,0.65,0.37]),\
               ('Hispanic Church',[0.49,1.0,0.56]),\
               ('African Church',[1.00,0.25,0.25]),\
               ('Gallican Church',[0.10,0.10,0.60]),\
+              ('Maronite Church',[0.5,0.25,0.50]),\
               ('Aqueleianism',[0.7,0.7,1.0]),\
               ('Iconoclasm',[0.5,0.2,0.4]),\
               ('Montanism',[0.5,0.0,0.1]),\
@@ -41,7 +42,13 @@ faith_list = [('Chalcedonianism',[0.65,0.65,0.37]),\
               ('Paulicianism',[0.6,0.1,0.4]),\
               ('Messalianism',[0.6,0.1,0.4]),\
               ('Adamites',[0.6,0.8,0.6]),\
-              ('Antinomianism',[0.1,0.1,0.0])]
+              ('Antinomianism',[0.1,0.1,0.0]),\
+              ('Ebionites',[0.95,0.95,0.60]),\
+              ('Doceticism',[0.8,1.0,0.5]),\
+              ('Audianism',[0.45,0.85,1.00]),\
+              ('Binitarianism',[0.5,0.5,0.23]),
+              ('Patripassianism',[0.8,0.4,0.3]),
+              ('Total Depravity',[1.0,0.0,0.1])]
 apply_color('Faith.html',faith_list)
 
 culture_list = [\
