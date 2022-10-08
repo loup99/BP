@@ -40,6 +40,7 @@ faith_list = [('Chalcedonianism',[0.65,0.65,0.37]),\
               ('Marcionism',[0.7,0.1,0.4]),\
               ('Melchisdechianism',[1.0,0.5,0.7]),\
               ('Paulicianism',[0.6,0.1,0.4]),\
+              ('Priscillianism',[0.3,0.6,0.2]),\
               ('Messalianism',[0.6,0.1,0.4]),\
               ('Adamites',[0.6,0.8,0.6]),\
               ('Antinomianism',[0.1,0.1,0.0]),\
