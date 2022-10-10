@@ -81,46 +81,6 @@ county_has_different_heritage_minority_culture_trigger = {
 	}
 }
 
-# $FAITH$
-county_has_specific_minority_faith_trigger = {
-	OR = {
-		AND = {
-			has_variable_list = faith_minorities_small
-			is_target_in_variable_list = {
-				name = faith_minorities_small
-				target = $FAITH$
-			}
-		}
-		AND = {
-			has_variable_list = faith_minorities_large
-			is_target_in_variable_list = {
-				name = faith_minorities_large
-				target = $FAITH$
-			}
-		}
-	}
-}
-
-# $CULTURE$
-county_has_specific_minority_culture_trigger = {
-	OR = {
-		AND = {
-			has_variable_list = culture_minorities_small
-			is_target_in_variable_list = {
-				name = culture_minorities_small
-				target = $CULTURE$
-			}
-		}
-		AND = {
-			has_variable_list = culture_minorities_large
-			is_target_in_variable_list = {
-				name = culture_minorities_large
-				target = $CULTURE$
-			}
-		}
-	}
-}
-
 ##### Changed from Vanilla vvvvv
 
 county_has_any_type_of_minority = {
@@ -304,7 +264,20 @@ has_reduced_weight_in_dharmic_counties_trigger = {
 	}
 }
 has_reduced_weight_in_rough_terrain_trigger = {
-	has_cultural_parameter = encourages_diversity_in_rough_terrain
+	$CULTURE$ = { increased_support_in_rough_terrain_trigger = yes }
+}
+has_reduced_weight_in_wooded_terrain_trigger = {
+	$CULTURE$ = { increased_support_in_wooded_terrain_trigger = yes }
+}
+has_reduced_weight_in_jungle_terrain_trigger = {
+	$CULTURE$ = { increased_support_in_jungle_terrain_trigger = yes }
+}
+has_reduced_weight_in_desert_terrain_trigger = {
+	$CULTURE$ = { increased_support_in_desert_terrain_trigger = yes }
+}
+
+has_adaptive_type_tenet_trigger = {
+	has_doctrine = tenet_adaptive
 }
 
 ##### SUPPORT CALCULATIONS #####
@@ -313,25 +286,33 @@ has_reduced_weight_in_rough_terrain_trigger = {
 
 ## SUPPORT ##
 county_specific_large_support_culture_trigger = { #target_county scope
-	#Rough terrain diversity minorities are mostly self-supporting when established
-	AND = {
-		scope:the_culture = { has_cultural_parameter = encourages_diversity_in_rough_terrain }
-		has_variable_list = culture_minorities_large
-		is_target_in_variable_list = { name = culture_minorities_large target = scope:the_culture }
-		has_a_rough_terrain_province_trigger = yes
+	OR = {
+		AND = {
+			has_reduced_weight_in_rough_terrain_trigger = { CULTURE = $CULTURE$ }
+			has_a_rough_terrain_province_trigger = yes
+		}
+		AND = {
+			has_reduced_weight_in_wooded_terrain_trigger = { CULTURE = $CULTURE$ }
+			has_a_wooded_terrain_province_trigger = yes
+		}
+		AND = {
+			has_reduced_weight_in_jungle_terrain_trigger = { CULTURE = $CULTURE$ }
+			has_a_jungle_terrain_province_trigger = yes
+		}
+		AND = {
+			has_reduced_weight_in_desert_terrain_trigger = { CULTURE = $CULTURE$ }
+			has_a_desert_terrain_province_trigger = yes
+		}
 	}
+	has_variable_list = culture_minorities_small
+	is_target_in_variable_list = { name = culture_minorities_small target = $CULTURE$ }
 }
 county_specific_small_support_culture_trigger = { #target_county scope
 	OR = {
-		#Rough terrain diversity minorities are mostly self-supporting when established
-		AND = {
-			scope:the_culture = { has_cultural_parameter = encourages_diversity_in_rough_terrain }
-			has_variable_list = culture_minorities_small
-			is_target_in_variable_list = { name = culture_minorities_small target = scope:the_culture }
-			has_a_rough_terrain_province_trigger = yes
-		}
-		#So that penninsulae and islands don't have small minorities die out (see Cyprus, Socotra)
-		is_coastal_county = yes
+		has_reduced_weight_in_rough_terrain_trigger = { CULTURE = $CULTURE$ }
+		has_reduced_weight_in_wooded_terrain_trigger = { CULTURE = $CULTURE$ }
+		has_reduced_weight_in_jungle_terrain_trigger = { CULTURE = $CULTURE$ }
+		has_reduced_weight_in_desert_terrain_trigger = { CULTURE = $CULTURE$ }
 	}
 }
 large_minority_support_culture_aspect_trigger = { #culture scope
@@ -361,6 +342,8 @@ minority_always_supported_culture_aspect_trigger = { #culture scope
 small_minority_always_fed_culture_aspect_trigger = {
 	OR = {
 		minority_always_supported_culture_aspect_generic_trigger = { THE_COUNTY = $THE_COUNTY$ }
+		#If the top liege is of the same culture as list here, make sure at least a small minority is fed
+		$THE_COUNTY$.holder.top_liege.culture = scope:the_culture
 	}
 }
 
@@ -374,18 +357,21 @@ county_specific_small_support_faith_trigger = { #target_county scope
 	OR = {
 		#A zealous people supports keeping small minorities around a bit longer
 		culture = { has_cultural_tradition = tradition_zealous_people }
-		#So that peninsulae and islands don't have small minorities die out (see Cyprus, Socotra)
-		is_coastal_county = yes
 	}
 }
 large_minority_support_faith_aspect_trigger = { #faith scope
-	always = no
+	OR = {
+		has_doctrine = tenet_cthonic_redoubts
+		has_doctrine = tenet_adaptive
+	}
 }
 small_minority_support_faith_aspect_trigger = { #faith scope
 	always = no
 }
 minority_always_supported_faith_aspect_trigger = { #faith scope
 	minority_always_supported_faith_aspect_generic_trigger = { THE_COUNTY = $THE_COUNTY$ }
+	#If the top liege is of the same faith as listed here, make sure at least a small minority is fed
+	$THE_COUNTY$.holder.top_liege.faith = scope:the_faith
 }
 ## FEEDING ##
 small_minority_always_fed_faith_aspect_trigger = {

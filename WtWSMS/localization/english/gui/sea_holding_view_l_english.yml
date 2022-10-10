@@ -1,8 +1,5 @@
 ﻿l_english:
  MINORITY_HEADING: "Minority Information"
- MINORITY_INFORMATION: "[Province.GetCounty.GetTitle.MakeScope.ScriptValue('gui_culture_minority_percent')|0]%,[Province.GetCounty.GetTitle.MakeScope.ScriptValue('gui_faith_minority_percent')|0]%"
- MAJORITY_CULTURE: "Majority Culture: [Province.GetCounty.GetCulture.GetNameNoTooltip]"
- MAJORITY_FAITH: "Majority Faith: [Province.GetCounty.GetFaith.GetNameNoTooltip]"
  MINORITY_CAPACITY: "Minority Capacity: [Province.GetCounty.GetTitle.MakeScope.ScriptValue('minority_capacity_of_county')|0]"
  #TODO (0.2.0): Generate these numbers from script values instead of hardcoded
  MINORITY_CULTURES: "Minority Cultures:\n$TAB$$MINORITY_CULTURE_UTILIZATION$"
@@ -16,19 +13,24 @@
  
  ##### General Culture
  CULTURE_OPENING: "Minority Capacity Utilization: [Scope.Culture.MakeScope.Var('net_size').GetValue|2]"
- ROUGH_TERRAIN_STRING: "\n$BULLET_WITH_TAB$County with Rough Terrain: #P $multiplication_sign$0.40#!"
  CULTURE_BLENDING_STRING: "\n$BULLET_WITH_TAB$County Majority Culture (#V $tradition_culture_blending_name$#!): #P $multiplication_sign$0.75#!"
-#Small Culture
- SMALL_CULTURE_BREAKDOWN: "$CULTURE_OPENING$$SMALL_CULTURE_BASE$$SMALL_CULTURE_ROUGH$$SMALL_CULTURE_BLENDING$"
+ ROUGH_TERRAIN_STRING: "\n$BULLET_WITH_TAB$County with Rough Terrain: #P $multiplication_sign$0.40#!"
+ WOODED_TERRAIN_STRING: "\n$BULLET_WITH_TAB$County with Wooded Terrain: #P $multiplication_sign$0.40#!"
+ JUNGLE_TERRAIN_STRING: "\n$BULLET_WITH_TAB$County with Jungle Terrain: #P $multiplication_sign$0.40#!"
+ DESERT_TERRAIN_STRING: "\n$BULLET_WITH_TAB$County with Desert Terrain: #P $multiplication_sign$0.40#!"
+ ## Other General
+ MINORITY_CULTURE_BLENDING: "[SelectLocalization( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_culture_blending_tradition').IsSet,'$CULTURE_BLENDING_STRING$','')]"
+ MINORITY_CULTURE_ROUGH: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_rough_terrain_province').IsSet,Scope.Culture.MakeScope.Var('the_culture_has_reduced_weight_in_rough_terrain').IsSet),'$ROUGH_TERRAIN_STRING$','')]"
+ MINORITY_CULTURE_WOODED: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_wooded_terrain_province').IsSet,Scope.Culture.MakeScope.Var('the_culture_has_reduced_weight_in_wooded_terrain').IsSet),'$WOODED_TERRAIN_STRING$','')]"
+ MINORITY_CULTURE_JUNGLE: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_jungle_terrain_province').IsSet,Scope.Culture.MakeScope.Var('the_culture_has_reduced_weight_in_jungle_terrain').IsSet),'$JUNGLE_TERRAIN_STRING$','')]"
+ MINORITY_CULTURE_DESERT: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_desert_terrain_province').IsSet,Scope.Culture.MakeScope.Var('the_culture_has_reduced_weight_in_desert_terrain').IsSet),'$DESERT_TERRAIN_STRING$','')]"
+ #Small Culture
+ SMALL_CULTURE_BREAKDOWN: "$CULTURE_OPENING$$SMALL_CULTURE_BASE$$MINORITY_CULTURE_BLENDING$$MINORITY_CULTURE_ROUGH$$MINORITY_CULTURE_WOODED$$MINORITY_CULTURE_JUNGLE$$MINORITY_CULTURE_DESERT$"
  SMALL_CULTURE_BASE: "\n$BULLET_WITH_TAB$Base Value: [EmptyScope.ScriptValue('base_small_minority_weight')|2]"
- SMALL_CULTURE_ROUGH: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_rough_terrain_province').IsSet,Scope.Culture.MakeScope.Var('the_culture_has_reduced_weight_in_rough_terrain').IsSet),'$ROUGH_TERRAIN_STRING$','')]"
- SMALL_CULTURE_BLENDING: "[SelectLocalization( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_culture_blending_tradition').IsSet,'$CULTURE_BLENDING_STRING$','')]"
  #Large Culture
- LARGE_CULTURE_BREAKDOWN: "$CULTURE_OPENING$$LARGE_CULTURE_BASE$$LARGE_CULTURE_ROUGH$$LARGE_CULTURE_BLENDING$"
+ LARGE_CULTURE_BREAKDOWN: "$CULTURE_OPENING$$LARGE_CULTURE_BASE$$MINORITY_CULTURE_BLENDING$$MINORITY_CULTURE_ROUGH$$MINORITY_CULTURE_WOODED$$MINORITY_CULTURE_JUNGLE$$MINORITY_CULTURE_DESERT$"
  LARGE_CULTURE_BASE: "\n$BULLET_WITH_TAB$Base Value: [EmptyScope.ScriptValue('base_large_minority_weight')|2]"
- LARGE_CULTURE_ROUGH: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_rough_terrain_province').IsSet,Scope.Culture.MakeScope.Var('the_culture_has_reduced_weight_in_rough_terrain').IsSet),'$ROUGH_TERRAIN_STRING$','')]"
- LARGE_CULTURE_BLENDING: "[SelectLocalization( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_culture_blending_tradition').IsSet,'$CULTURE_BLENDING_STRING$','')]"
- 
+ #Debugging
  CULTURE_SUPPORT: "Culture Support: [Multiply_CFixedPoint(Scope.Culture.MakeScope.Var('support').GetValue,'(CFixedPoint)1')|2]"
  CULTURE_FEEDING: "Culture Feeding: [Multiply_CFixedPoint(Scope.Culture.MakeScope.Var('feeding').GetValue,'(CFixedPoint)1')|2]"
  
@@ -41,17 +43,18 @@
  FAITH_OPENING: "Minority Capacity Utilization: [Scope.Faith.MakeScope.Var('net_size').GetValue|2]"
  DHARMIC_STRING: "\n$BULLET_WITH_TAB$County Majority Faith Dharmic: #P $multiplication_sign$0.66#!"
  FAITH_BLENDING_STRING: "\n$BULLET_WITH_TAB$County Majority Culture (#V $tradition_religion_blending_name$#!): #P $multiplication_sign$0.75#!"
+ FAITH_ADAPTIVE_STRING: "\n$BULLET_WITH_TAB$#V $tenet_adaptive_name$#! faith: #P $multiplication_sign$0.75#!"
+ ## Other General
+ MINORITY_FAITH_DHARMIC: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_dharmic_faith').IsSet,Scope.Faith.MakeScope.Var('the_faith_has_reduced_weight_in_dharmic_counties').IsSet),'$DHARMIC_STRING$','')]"
+ MINORITY_FAITH_BLENDING: "[SelectLocalization( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_religion_blending_tradition').IsSet,'$FAITH_BLENDING_STRING$','')]"
+ MINORITY_FAITH_ADAPTIVE: "[SelectLocalization( Scope.Faith.MakeScope.Var('the_faith_is_adaptive').IsSet,'$FAITH_ADAPTIVE_STRING$','')]"
  #Small Faith
- SMALL_FAITH_BREAKDOWN: "$FAITH_OPENING$$SMALL_FAITH_BASE$$SMALL_FAITH_DHARMIC$$SMALL_FAITH_BLENDING$"
+ SMALL_FAITH_BREAKDOWN: "$FAITH_OPENING$$SMALL_FAITH_BASE$$MINORITY_FAITH_DHARMIC$$MINORITY_FAITH_BLENDING$$MINORITY_FAITH_ADAPTIVE$"
  SMALL_FAITH_BASE: "\n$BULLET_WITH_TAB$Base Value: [EmptyScope.ScriptValue('base_small_minority_weight')|2]"
- SMALL_FAITH_DHARMIC: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_dharmic_faith').IsSet,Scope.Faith.MakeScope.Var('the_faith_has_reduced_weight_in_dharmic_counties').IsSet),'$DHARMIC_STRING$','')]"
- SMALL_FAITH_BLENDING: "[SelectLocalization( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_religion_blending_tradition').IsSet,'$FAITH_BLENDING_STRING$','')]"
  #Large Faith
- LARGE_FAITH_BREAKDOWN: "$FAITH_OPENING$$LARGE_FAITH_BASE$$LARGE_FAITH_DHARMIC$$LARGE_FAITH_BLENDING$"
+ LARGE_FAITH_BREAKDOWN: "$FAITH_OPENING$$LARGE_FAITH_BASE$$MINORITY_FAITH_DHARMIC$$MINORITY_FAITH_BLENDING$$MINORITY_FAITH_ADAPTIVE$"
  LARGE_FAITH_BASE: "\n$BULLET_WITH_TAB$Base Value: [EmptyScope.ScriptValue('base_large_minority_weight')|2]"
- LARGE_FAITH_DHARMIC: "[SelectLocalization( And( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_dharmic_faith').IsSet,Scope.Faith.MakeScope.Var('the_faith_has_reduced_weight_in_dharmic_counties').IsSet),'$DHARMIC_STRING$','')]"
- LARGE_FAITH_BLENDING: "[SelectLocalization( HoldingView.GetCountyTitle.MakeScope.Var('the_county_has_a_religion_blending_tradition').IsSet,'$FAITH_BLENDING_STRING$','')]"
- 
+ #Debugging
  FAITH_SUPPORT: "Faith Support: [Multiply_CFixedPoint(Scope.Faith.MakeScope.Var('support').GetValue,'(CFixedPoint)1')|2]"
  FAITH_FEEDING: "Faith Feeding: [Multiply_CFixedPoint(Scope.Faith.MakeScope.Var('feeding').GetValue,'(CFixedPoint)1')|2]"
  
