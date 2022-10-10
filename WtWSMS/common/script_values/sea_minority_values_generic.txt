@@ -18,7 +18,8 @@ base_large_minority_weight = 2
 dharmic_minorities_in_dharmic_counties_multiplier = 0.66
 tradition_religion_blending_multiplier = 0.75
 tradition_culture_blending_multiplier = 0.75
-tradition_rough_terrain_diversity_multiplier = 0.40
+tradition_terrain_diversity_multiplier = 0.40
+adaptive_minority_multiplier = 0.75
 
 #small minority, large minority, majority; script value in case we want to change this
 number_of_minority_levels = 3
@@ -143,11 +144,11 @@ support_of_a_minority_culture_generic = {
 		}
 		#Specific factors about the county
 		if = {
-			limit = { county_specific_large_support_culture_trigger = yes }
+			limit = { county_specific_large_support_culture_trigger = { CULTURE = scope:the_culture } }
 			add = large_minority_support_value
 		}
 		if = {
-			limit = { county_specific_small_support_culture_trigger = yes }
+			limit = { county_specific_small_support_culture_trigger = { CULTURE = scope:the_culture } }
 			add = small_minority_support_value
 		}
 	}
@@ -246,6 +247,7 @@ feeding_of_a_minority_culture_generic = {
 			subtract = small_minority_cost_value
 		}
 	}
+	#The holders culture should always be fed
 	if = {
 		limit = { scope:the_county.holder.culture = scope:the_culture }
 		add = majority_province_support_value
@@ -308,8 +310,14 @@ support_of_a_minority_faith_generic = {
 	}
 	#Generic Item Specific Effects
 	scope:the_faith = {
-		if = { limit = { large_minority_support_faith_aspect_trigger = yes } add = large_minority_support_value }
-		if = { limit = { small_minority_support_faith_aspect_trigger = yes } add = small_minority_support_value }
+		if = {
+			limit = { large_minority_support_faith_aspect_trigger = yes }
+			add = large_minority_support_value
+		}
+		if = {
+			limit = { small_minority_support_faith_aspect_trigger = yes }
+			add = small_minority_support_value
+		}
 		if = {
 			limit = { minority_always_supported_faith_aspect_trigger = { THE_COUNTY = scope:the_county } }
 			add = minority_always_supported_value

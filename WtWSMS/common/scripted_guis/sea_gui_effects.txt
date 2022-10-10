@@ -30,14 +30,39 @@ open_minority_tooltip = {
 				set_variable = the_county_has_a_rough_terrain_province
 			}
 			if = {
+				limit = { has_a_wooded_terrain_province_trigger = yes }
+				set_variable = the_county_has_a_wooded_terrain_province
+			}
+			if = {
+				limit = { has_a_jungle_terrain_province_trigger = yes }
+				set_variable = the_county_has_a_jungle_terrain_province
+			}
+			if = {
+				limit = { has_a_desert_terrain_province_trigger = yes }
+				set_variable = the_county_has_a_desert_terrain_province
+			}
+			
+			if = {
 				limit = { has_variable_list = culture_minorities_small }
 				every_in_list = {
 					variable = culture_minorities_small
 					this = {
 						set_variable = the_culture_is_small
 						if = {
-							limit = { has_reduced_weight_in_rough_terrain_trigger = yes }
+							limit = { has_reduced_weight_in_rough_terrain_trigger = { CULTURE = this } }
 							set_variable = the_culture_has_reduced_weight_in_rough_terrain
+						}
+						if = {
+							limit = { has_reduced_weight_in_wooded_terrain_trigger = { CULTURE = this } }
+							set_variable = the_culture_has_reduced_weight_in_wooded_terrain
+						}
+						if = {
+							limit = { has_reduced_weight_in_jungle_terrain_trigger = { CULTURE = this } }
+							set_variable = the_culture_has_reduced_weight_in_jungle_terrain
+						}
+						if = {
+							limit = { has_reduced_weight_in_desert_terrain_trigger = { CULTURE = this } }
+							set_variable = the_culture_has_reduced_weight_in_desert_terrain
 						}
 						root = { save_temporary_scope_as = the_county }
 						this = { save_temporary_scope_as = the_culture }
@@ -62,8 +87,20 @@ open_minority_tooltip = {
 					variable = culture_minorities_large
 					this = {
 						if = {
-							limit = { has_reduced_weight_in_rough_terrain_trigger = yes }
+							limit = { has_reduced_weight_in_rough_terrain_trigger = { CULTURE = this } }
 							set_variable = the_culture_has_reduced_weight_in_rough_terrain
+						}
+						if = {
+							limit = { has_reduced_weight_in_wooded_terrain_trigger = { CULTURE = this } }
+							set_variable = the_culture_has_reduced_weight_in_wooded_terrain
+						}
+						if = {
+							limit = { has_reduced_weight_in_jungle_terrain_trigger = { CULTURE = this } }
+							set_variable = the_culture_has_reduced_weight_in_jungle_terrain
+						}
+						if = {
+							limit = { has_reduced_weight_in_desert_terrain_trigger = { CULTURE = this } }
+							set_variable = the_culture_has_reduced_weight_in_desert_terrain
 						}
 						root = { save_temporary_scope_as = the_county }
 						this = { save_temporary_scope_as = the_culture }
@@ -78,33 +115,6 @@ open_minority_tooltip = {
 						set_variable = {
 							name = net_size
 							value = culture_large_minority_weight_value
-						}
-					}
-				}
-				#Calculate the net size of each culture; should mirror culture_large_minority_weight_value
-				every_in_list = {
-					variable = culture_minorities_large
-					this = {
-						set_variable = {
-							name = net_size
-							value = base_large_minority_weight
-						}
-						if = {
-							limit = { root = { has_variable = the_county_has_a_culture_blending_tradition } }
-							change_variable = {
-								name = net_size
-								multiply = tradition_culture_blending_multiplier
-							}
-						}
-						if = {
-							limit = {
-								this = { has_variable = the_culture_has_reduced_weight_in_rough_terrain }
-								root = { has_variable = the_county_has_a_rough_terrain_province }
-							}
-							change_variable = {
-								name = net_size
-								multiply = tradition_rough_terrain_diversity_multiplier
-							}
 						}
 					}
 				}
@@ -128,6 +138,10 @@ open_minority_tooltip = {
 						if = {
 							limit = { has_reduced_weight_in_dharmic_counties_trigger = yes }
 							set_variable = the_faith_has_reduced_weight_in_dharmic_counties
+						}
+						if = {
+							limit = { has_adaptive_type_tenet_trigger = yes }
+							set_variable = the_faith_is_adaptive
 						}
 						root = { save_temporary_scope_as = the_county }
 						this = { save_temporary_scope_as = the_faith }
@@ -154,6 +168,10 @@ open_minority_tooltip = {
 						if = {
 							limit = { has_reduced_weight_in_dharmic_counties_trigger = yes }
 							set_variable = the_faith_has_reduced_weight_in_dharmic_counties
+						}
+						if = {
+							limit = { has_adaptive_type_tenet_trigger = yes }
+							set_variable = the_faith_is_adaptive
 						}
 						root = { save_temporary_scope_as = the_county }
 						this = { save_temporary_scope_as = the_faith }
