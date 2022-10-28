@@ -1,0 +1,34 @@
+﻿namespace = BP_raiding
+
+# Loot delivered.
+BP_raiding.0001 = {
+	hidden = yes
+	scope = army
+
+	immediate = {
+		set_variable = {
+			name = raid_loot
+			value = root.raid_loot
+		}
+		if = {
+			limit = {
+				scope:raider.faith = { has_doctrine_parameter = gains_piety_raiding_infidels }
+				NOT = { scope:county.faith = scope:raider.faith }
+			}
+			scope:raider = {
+				send_interface_message = {
+					type = event_raid_good
+					title = BP_raiding.0001.t
+					desc = BP_raiding.0001.desc_piety_gain
+					right_icon = root.army_commander
+					hidden_effect = {
+						add_piety = {
+							value = root.var:raid_loot
+							multiply = piety_from_infidel_raiding_multiplier
+						}
+					}
+				}
+			}
+		}
+	}
+}
