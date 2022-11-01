@@ -349,43 +349,42 @@ minority_growth_effect = {
 			position = 0
 			save_scope_as = candidate_minority_to_promote
 		}
-		
-		#If the fastest growing minority **is** the majority, we remove it from the list and
-		# pick again, using promote_minority_but_not_to_majority_effect; otherwise use 
-		# promote_minority_effect (conditions have changed that the minority should flip this time)
+		#Only do something if the list is non-empty
 		if = {
-			limit = {
-				exists = scope:candidate_minority_to_promote
-				$SOURCE_COUNTY$.$CULTURE_OR_FAITH$ = scope:candidate_minority_to_promote
-			}
-			scope:candidate_minority_to_promote = { remove_from_list = growing_minority }
-				ordered_in_list = {
-				list = growing_minority
-				order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
-				position = 0
-				save_scope_as = candidate_minority_to_promote
-			}
-			promote_minority_but_not_to_majority_effect = {
-				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
-				ITEM = scope:candidate_minority_to_promote
-			}
-			notify_characters_of_minority_growth_effect = {
-				THE_SOURCE_COUNTY = $SOURCE_COUNTY$
-				EVENT_TITLE = minority_$CULTURE_OR_FAITH$_growing_title
-				EVENT_TOOLTIP = minority_$CULTURE_OR_FAITH$_growing_tt
-			}
-		}
-		else_if = {
 			limit = { exists = scope:candidate_minority_to_promote }
-			this.culture = { save_scope_as = old_culture }
-			this.faith = { save_scope_as = old_faith }
-			promote_minority_effect = {
-				CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
-				ITEM = scope:candidate_minority_to_promote
+			#If the fastest growing minority **is** the majority, we remove it from the list and
+			# pick again, using promote_minority_but_not_to_majority_effect; otherwise use 
+			# promote_minority_effect (conditions have changed that the minority should flip this time)
+			if = {
+				limit = { $SOURCE_COUNTY$.$CULTURE_OR_FAITH$ = scope:candidate_minority_to_promote }
+				scope:candidate_minority_to_promote = { remove_from_list = growing_minority }
+				ordered_in_list = {
+					list = growing_minority
+					order_by = support_of_a_$CULTURE_OR_FAITH$_minority_in_county
+					position = 0
+					save_scope_as = candidate_minority_to_promote
+				}
+				promote_minority_but_not_to_majority_effect = {
+					CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+					ITEM = scope:candidate_minority_to_promote
+				}
+				notify_characters_of_minority_growth_effect = {
+					THE_SOURCE_COUNTY = $SOURCE_COUNTY$
+					EVENT_TITLE = minority_$CULTURE_OR_FAITH$_growing_title
+					EVENT_TOOLTIP = minority_$CULTURE_OR_FAITH$_growing_tt
+				}
 			}
-			notify_characters_of_county_change_growth_effect = { THE_SOURCE_COUNTY = $SOURCE_COUNTY$ }
-		}
+			else = {
+				this.culture = { save_scope_as = old_culture }
+				this.faith = { save_scope_as = old_faith }
+				promote_minority_effect = {
+					CULTURE_OR_FAITH = $CULTURE_OR_FAITH$
+					ITEM = scope:candidate_minority_to_promote
+				}
+				notify_characters_of_county_change_growth_effect = { THE_SOURCE_COUNTY = $SOURCE_COUNTY$ }
+			}
 		#else, do nothing (growing_minority list is empty)
+		}
 	}
 }
 #Requires scope:source_county
