@@ -47,14 +47,14 @@ class CharacterStruct(NamedTuple):
 def basic_inputs():
     return InputValues(\
         #Char id string and post-fix number
-        'test_char',\
+        'GalindianGalindian',\
         0,\
         #Character data
-        'test_dynn',\
-        'nicene',\
-        'roman',\
+        'galindian_dynn_galindian',\
+        'baltic_pagan',\
+        'galindian',\
         #Starting year and end year
-        400,\
+        440,\
         700,\
         #Child-bearing ages; be careful to avoid overlap with death ages
         16.,\
