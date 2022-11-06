@@ -47,14 +47,14 @@ class CharacterStruct(NamedTuple):
 def basic_inputs():
     return InputValues(\
         #Char id string and post-fix number
-        'PrussianSasna',\
+        'SudovianYotvingian',\
         0,\
         #Character data
-        'przeworsk_dynn_',\
-        'germanic_pagan',\
-        'przeworsk',\
+        'sudovian_dynn_yotvingians',\
+        'baltic_pagan',\
+        'sudovian',\
         #Starting year and end year
-        440,\
+        430,\
         700,\
         #Child-bearing ages; be careful to avoid overlap with death ages
         16.,\
@@ -81,6 +81,8 @@ def create_character_file(family_pole,character_file='char_data.txt'):
             f.write( '\tdynasty = '+char.dynasty+EOLChar )
             f.write( '\treligion = '+char.religion+EOLChar )
             f.write( '\tculture = '+char.culture+EOLChar )
+            if len(char.father)!=0:
+                f.write( '\tfather = '+char.father+EOLChar )
             f.write( '\t'+str(char.birth_year)+'.1.1 = { birth = yes }'+EOLChar )
             f.write( '\t'+str(char.death_year)+'.1.1 = { death = yes }'+EOLChar )
             f.write('}'+EOLChar)
