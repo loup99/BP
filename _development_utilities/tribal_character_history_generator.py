@@ -47,12 +47,12 @@ class CharacterStruct(NamedTuple):
 def basic_inputs():
     return InputValues(\
         #Char id string and post-fix number
-        'GalindianGalindian',\
+        'PrussianSasna',\
         0,\
         #Character data
-        'galindian_dynn_galindian',\
-        'baltic_pagan',\
-        'galindian',\
+        'przeworsk_dynn_',\
+        'germanic_pagan',\
+        'przeworsk',\
         #Starting year and end year
         440,\
         700,\
