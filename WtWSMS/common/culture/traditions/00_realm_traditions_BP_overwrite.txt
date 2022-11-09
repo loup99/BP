@@ -795,6 +795,128 @@ tradition_mountain_homes = {
 	}
 }
 
+##### Changed from Vanilla; Made some impact for plains, tribals will pick this if their culture already has it
+tradition_agrarian = {
+	category = realm
+
+	layers = {
+		0 = steward
+		1 = indian
+		4 = farmland.dds
+	}
+	
+	can_pick = {
+		custom_tooltip = {
+			text = culture_in_farmlands_or_floodplains_or_plains_terrain_desc
+			any_culture_county = {
+				any_county_province = {
+					OR = {
+						terrain = farmlands
+						terrain = floodplains
+						terrain = plains
+					}
+				}
+			}
+		}
+	}
+	
+	parameters = {
+		content_trait_more_common = yes
+		martial_education_worse_outcomes = yes
+		hard_working_traits_more_valued = yes
+	}
+	character_modifier = {
+		men_at_arms_recruitment_cost = 0.25
+		prowess = -2
+	}
+	county_modifier = {
+		plains_development_growth_factor = 0.15
+		plains_construction_gold_cost = -0.1
+		farmlands_development_growth_factor = 0.3
+		farmlands_construction_gold_cost = -0.2
+		floodplains_development_growth_factor = 0.3
+		floodplains_construction_gold_cost = -0.2
+		farmlands_levy_size = 0.1
+		floodplains_levy_size = 0.1
+		plains_levy_size = 0.05
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					any_in_list = { list = traits this = flag:ethos_bellicose }
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = culture_not_bellicose
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							count >= 5
+							any_county_province = {
+								OR = {
+									terrain = farmlands
+									terrain = floodplains
+									terrain = plains
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = culture_in_farmlands_or_floodplains_or_plains_terrain_count_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							count >= 2
+							culture = scope:character.culture
+							any_county_province = {
+								OR = {
+									terrain = farmlands
+									terrain = floodplains
+									terrain = plains
+								}
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+		if = {
+			limit = {
+				scope:character = {
+					has_government = tribal_government
+					culture = { NOT = { has_cultural_tradition = tradition_agrarian } }
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+
 ##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
 
 ##### Changed from Vanilla: Made transitively unselectable with new traditions

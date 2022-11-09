@@ -618,6 +618,13 @@ scripted_trigger meets_transition_date_requirements = {
 	}
 }
 
+scripted_trigger has_option_for_clan_trigger = {
+	OR = {
+		culture = { has_cultural_parameter = right_to_rule_clan }
+		faith = { has_doctrine_parameter = right_to_rule_clan }
+	}
+}
+
 # Sub-Roman ruler has accumulated feudal values and is no longer Sub-Roman, converting to feudalism
 BP_subroman_events.0060 = {
 	type = character_event
@@ -637,8 +644,10 @@ BP_subroman_events.0060 = {
 		animation = personality_rational
 	}
 	
-	option = {
-		name = BP_subroman_events.0060.a
+	option = { #Feudal government
+		trigger = { faith = { has_doctrine_parameter = right_to_rule_feudal } }
+		fallback = yes #Should always have this as an option
+		name = BP_subroman_events.0060.feudal
 		#Remove all extant variables from the title
 		ROOT.primary_title = {
 			if = {
@@ -670,6 +679,55 @@ BP_subroman_events.0060 = {
 		#1 week and 1 year, to make transition more gradual
 		custom_description = {
 			text = creates_chance_for_vassals_to_convert_to_feudal
+			every_vassal = {
+				limit = { basic_character_requirements_trigger =yes }
+				trigger_event = { id = BP_subroman_events.0060 days = { 7 360 } }
+			}
+		}
+		
+		#AI chars will not do this if clan is available
+		ai_chance = {
+			base = 50
+			modifier = {
+				has_option_for_clan_trigger = yes
+				subtract = 50
+			}
+		}
+	}
+	option = { #Clan government
+		trigger = { has_option_for_clan_trigger = yes }
+		name = BP_subroman_events.0060.clan
+		#Remove all extant variables from the title
+		ROOT.primary_title = {
+			if = {
+				limit = { has_variable = landed_army }
+				remove_variable = landed_army
+			}
+			if = {
+				limit = { has_variable = changed_military_cultural_values }
+				remove_variable = changed_military_cultural_values
+			}
+			if = {
+				limit = { has_variable = changed_ecclesiastic_cultural_values }
+				remove_variable = changed_ecclesiastic_cultural_values
+			}
+		}
+		convert_realm_to_clan_effect = yes
+		#Every direct baron of your title should convert to feudalism as well
+		custom_tooltip = {
+			text = all_direct_barons_convert_to_clan
+			every_vassal = {
+				limit = {
+					has_government = subroman_government
+					primary_title = { tier = tier_barony }
+				}
+				convert_realm_to_clan_effect = yes
+			}
+		}
+		#Every vassal and below gets a chance to have this fire as well between
+		#1 week and 1 year, to make transition more gradual
+		custom_tooltip = {
+			text = creates_chance_for_vassals_to_convert_to_clan
 			every_vassal = {
 				limit = { basic_character_requirements_trigger =yes }
 				trigger_event = { id = BP_subroman_events.0060 days = { 7 360 } }
