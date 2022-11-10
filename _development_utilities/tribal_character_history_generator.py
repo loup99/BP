@@ -47,15 +47,15 @@ class CharacterStruct(NamedTuple):
 def basic_inputs():
     return InputValues(\
         #Char id string and post-fix number
-        'SakanSyrDarya',\
+        'BanuBakr',\
         0,\
         #Character data
-        'sakan_dynn_syrDarya',\
-        'scythian_pagan',\
-        'sakan',\
+        '10424465',\
+        'semitic_pagan',\
+        'adnanite',\
         #Starting year and end year
         400+randint(0,55),\
-        700,\
+        500,\
         #Child-bearing ages; be careful to avoid overlap with death ages
         16.,\
         50.,\
