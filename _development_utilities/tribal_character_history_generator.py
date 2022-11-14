@@ -44,15 +44,16 @@ class CharacterStruct(NamedTuple):
     birth_year: int
     death_year: int
 
+#TODO: Empty dynasties shouldn't be printed
 def basic_inputs():
     return InputValues(\
         #Char id string and post-fix number
-        'UpperDanubeScirii',\
+        'GallicMaine',\
         0,\
         #Character data
         '',\
-        'germanic_pagan',\
-        'skirian',\
+        'celtic_pagan',\
+        'gallic',\
         #Starting year and end year
         400+randint(0,31),\
         500,\
