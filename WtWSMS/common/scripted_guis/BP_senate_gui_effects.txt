@@ -1,0 +1,168 @@
+﻿close_senate_view_effect = {
+	scope = character
+	effect = {
+		clear_variable_list = all_senator_list #Not used, but should be a secondary window
+		clear_variable_list = senators_in_rome_list #Not used, but should be a secondary window
+		clear_variable_list = senators_not_in_rome_list #Not used, but should be a secondary window
+		#Senate Faction Lists
+		#Rome Holder
+		clear_variable_list = senators_faction_rome_ruler_supportive
+		clear_variable_list = senators_faction_rome_ruler_neutral
+		clear_variable_list = senators_faction_rome_ruler_hostile
+		clear_variable_list = senate_family_list
+		clear_variable_list = the_counsuls
+	}
+}
+
+update_senator_list_effect = {
+	scope = character
+	effect = {
+		#Get all the Senators and add them to a list
+		every_living_character = {
+			limit = { has_trait = senator }
+			root = {
+				add_to_variable_list = {
+					name = all_senator_list
+					target = prev
+				}
+			}
+			#Get all the Senators in Rome and add them to a list
+			if = {
+				limit = { senator_in_rome_trigger = yes }
+				root = {
+					add_to_variable_list = {
+						name = senators_in_rome_list
+						target = prev
+					}
+				}
+				
+				#Rome Holder Factions
+				title:c_roma.holder.top_liege = { save_temporary_scope_as = leader_in_question }
+				if = {
+					limit = { senator_is_postive_trigger = yes }
+					root = {
+						add_to_variable_list = {
+							name = senators_faction_rome_ruler_supportive
+							target = prev
+						}
+					}
+				}
+				else_if = {
+					limit = { senator_is_neutral_trigger = yes }
+					root = {
+						add_to_variable_list = {
+							name = senators_faction_rome_ruler_neutral
+							target = prev
+						}
+					}
+				}
+				else_if = {
+					limit = { senator_is_hostile_trigger = yes }
+					root = {
+						add_to_variable_list = {
+							name = senators_faction_rome_ruler_hostile
+							target = prev
+						}
+					}
+				}
+			}
+			#Get all the Senators *not* in Rome and add them to a list
+			else = {
+				root = {
+					add_to_variable_list = {
+						name = senators_not_in_rome_list
+						target = prev
+					}
+				}
+			}
+		}
+		#Get all the Senators in Rome
+		every_living_character = {
+			limit = { has_trait = senator }
+			root = {
+				add_to_variable_list = {
+					name = all_senator_list
+					target = prev
+				}
+			}
+		}
+		#Get all the Senate Families
+		every_living_character = {
+			limit = {
+				exists = dynasty
+				this.dynasty = { has_dynasty_modifier = roman_senate_family }
+			}
+			root = {
+				add_to_variable_list = {
+					name = senate_family_list
+					target = prev.dynasty
+				}
+			}
+		}
+		#Get all the Senate Officers
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul }
+			root = {
+				add_to_variable_list = {
+					name = the_counsuls
+					target = prev
+				}
+			}
+		}
+	}
+}
+
+senator_is_in_rome = {
+	scope = character
+
+	is_valid = {
+		trigger_if = {
+			limit = { is_landed = yes }
+			this.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
+		}
+		trigger_else = {
+			exists = this.employer
+			this.employer.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
+		}
+	}
+
+	effect = {
+	}
+}
+
+senator_positive_towards_char = {
+	scope = character
+
+	is_valid = { senator_is_postive_trigger = yes }
+
+	effect = {
+	}
+}
+
+senator_neutral_towards_char = {
+	scope = character
+
+	is_valid = { senator_is_neutral_trigger = yes }
+
+	effect = {
+	}
+}
+
+senator_hostile_towards_char = {
+	scope = character
+
+	is_valid = { senator_is_hostile_trigger = yes }
+
+	effect = {
+	}
+}
+
+disestablish_senate_gui_effect = {
+	scope = character
+	
+	is_valid = {}
+	
+	effect = { #Warn players about disestablishing the Senate
+		root = { trigger_event = BP_maintenance_events.0003 }
+	}
+}

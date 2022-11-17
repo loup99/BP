@@ -278,7 +278,7 @@ unite_roman_empires = {
 		}
 	}
 }
-disestablish_senate = {
+disestablish_senate = { #AI-only decision; implemented in GUI for players
 	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
 	major = yes
 	ai_check_interval = 60
@@ -288,8 +288,20 @@ disestablish_senate = {
 	is_shown = {
 		#Only top-level rulers
 		is_independent_ruler = yes
-		#Have to have a Senate
-		any_vassal_or_below = { has_title = title:d_senate }
+		#Have to have control of the Senate
+		this = title:c_roma.holder.top_liege
+		#Can't be a Roman Empire in any way, shape, or form
+		NOR = {
+			has_title = title:e_wre
+			has_title = title:e_byzantium
+			has_title = title:e_roman_empire
+		}
+		has_global_variable = senate_is_established
+		is_ai = yes #Players should use the GUI instead
+	}
+	
+	is_valid = {
+		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
 		#Can't be Romanesque or governments or cultures or titles
 		NOR = {
 			has_government = bureaucratic_government
@@ -299,15 +311,6 @@ disestablish_senate = {
 				culture = { has_ability_to_reform_rome_directly_trigger = yes }
 			}
 		}
-		NOR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
-			has_title = title:e_roman_empire
-		}
-	}
-	
-	is_valid = {
-		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
 	}
 	
 	is_valid_showing_failures_only = {
@@ -317,50 +320,7 @@ disestablish_senate = {
 	
 	cost = {}
 	
-	effect = {
-		add_prestige = 500
-		root = { set_variable = disestablished_senate }
-		#The Senate Hates You
-		title:d_senate.holder = {
-			add_opinion = {
-				target = root
-				modifier = hate_opinion
-				opinion = -100
-			}
-		}
-		#As do the Emperors (if they exist)
-		if = {
-			limit = { exists = title:e_roman_empire.holder } 
-			title:e_roman_empire.holder = {
-				add_opinion = {
-					target = root
-					modifier = hate_opinion
-					opinion = -100
-				}
-			}
-		}
-		if = {
-			limit = { exists = title:e_wre.holder } 
-			title:e_wre.holder = {
-				add_opinion = {
-					target = root
-					modifier = hate_opinion
-					opinion = -100
-				}
-			}
-		}
-		if = { #East hates you less
-			limit = { exists = title:e_byzantium.holder } 
-			title:e_byzantium.holder = {
-				add_opinion = {
-					target = root
-					modifier = hate_opinion
-					opinion = -50
-				}
-			}
-		}
-		destroy_title = title:d_senate
-	}
+	effect = { disestablished_senate_effect = yes }
 	
 	ai_potential = { always = yes }
 	

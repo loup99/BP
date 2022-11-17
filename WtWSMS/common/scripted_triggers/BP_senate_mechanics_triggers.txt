@@ -1,0 +1,33 @@
+﻿senator_in_rome_trigger = {
+	trigger_if = {
+		limit = { is_landed = yes }
+		this.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
+	}
+	trigger_else = {
+		exists = this.employer
+		this.employer.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
+	}
+}
+
+#NB: Be careful with these or you can overlap conditions
+senator_is_postive_trigger = { #scope:this is the senator
+	OR = {
+		opinion = { #Is reasonably disposed
+			target = scope:leader_in_question
+			value >= 30
+		}
+		scope:leader_in_question = { has_hook = prev } #Has a hook on them
+		has_dread_level_towards = { target = scope:leader_in_question level >= 2 } #Or is terrified
+	}
+}
+senator_is_neutral_trigger = { #scope:this is the senator
+	senator_is_postive_trigger = no
+	senator_is_hostile_trigger = no
+}
+senator_is_hostile_trigger = { #scope:this is the senator
+	opinion = { #Pretty much hates you
+		target = scope:leader_in_question
+		value <= -30
+	}
+	senator_is_postive_trigger = no
+}
