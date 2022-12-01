@@ -165,6 +165,16 @@ independence_faction = {
 		common_character_validity_trigger = { FACTION_TARGET = scope:faction.faction_target }
 	}
 
+	can_character_create_ui = {
+		common_can_character_create_trigger = {
+			FACTION_TARGET = scope:target
+		}
+
+		liege = {
+			is_independent_ruler = yes
+		}
+	}
+
 	##### Changed from Vanilla vvvvv
 	can_character_create = {
 		common_character_validity_trigger = {
@@ -183,24 +193,27 @@ independence_faction = {
 			is_independent_ruler = yes
 		}
 
-	    OR = {
-	        is_ai = no
-	        NOT = { culture = scope:target.culture }
-	        NOT = { faith = scope:target.faith }
-	        NOT = {
-	            is_rightful_liege_of_trigger = {
-	                VASSAL = root
-	                LIEGE = scope:target
-	            }
-	        }
-	        any_sub_realm_county = {
-	            percent <= 0.5
-	            save_temporary_scope_as = current_county
-	            scope:target.primary_title = {
-	                any_in_de_jure_hierarchy = { this = scope:current_county }
-	            }
-	        }
-    	}
+		custom_description = {
+			text = character_blocked_from_joining # will never be displayed but without it, errors are triggered
+			OR = {
+		        is_ai = no
+		        NOT = { culture = scope:target.culture }
+		        NOT = { faith = scope:target.faith }
+		        NOT = {
+		            is_rightful_liege_of_trigger = {
+		                VASSAL = root
+		                LIEGE = scope:target
+		            }
+		        }
+		        any_sub_realm_county = {
+		            percent <= 0.5
+		            save_temporary_scope_as = current_county
+		            scope:target.primary_title = {
+		                any_in_de_jure_hierarchy = { this = scope:current_county }
+		            }
+		        }
+	    	}
+		}
 		
 		character_can_create_independence_faction_trigger = yes
 	}
@@ -312,6 +325,21 @@ liberty_faction = {
 			FACTION_TARGET = scope:faction.faction_target
 		}
 	}
+
+	##### Changed from Vanilla vvvvv
+	can_character_create_ui = {
+		common_can_character_create_trigger = {
+			FACTION_TARGET = scope:target
+		}
+
+		custom_description = {
+			text = has_lowest_crown_authority
+			subject = scope:target
+			scope:target = { realm_law_supports_liberty_faction_trigger = yes }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+
 
 	##### Changed from Vanilla vvvvv
 	can_character_create = {
