@@ -48,15 +48,15 @@ class CharacterStruct(NamedTuple):
 def basic_inputs():
     return InputValues(\
         #Char id string and post-fix number
-        'GallicMaine',\
+        'RomanoBritishGwinntguic',\
         0,\
         #Character data
         '',\
-        'celtic_pagan',\
-        'gallic',\
+        'insular_celtic',\
+        'romano_british',\
         #Starting year and end year
-        400+randint(0,31),\
-        500,\
+        400+randint(0,20),\
+        550,\
         #Child-bearing ages; be careful to avoid overlap with death ages
         16.,\
         50.,\
