@@ -396,6 +396,8 @@ window = {
 				}
 			}
 
+			##### T4N Section vvvvv
+
 			#################
 			### Suzerain ####
 			#################
@@ -481,7 +483,7 @@ window = {
 					}
 				}
 			}
-			# End Suzerain
+			##### T4N Section ^^^^^
 
 			### Host
 			container = {
@@ -788,6 +790,26 @@ window = {
 							texture = "gfx/interface/icons/focuses/hud_icon_mask.dds"
 							blend_mode = alphamultiply
 						}
+					}
+				}
+
+				button_normal = {
+					name = "open_memories"
+
+					size = { 35 35 }
+					datacontext = "[Character]"
+					tooltip = "OPEN_MEMORIES_TOOLTIP"
+					using = tooltip_es
+
+					icon = {
+						texture = "gfx/interface/buttons/button_lifestyles_base.dds"
+						size = { 100% 100% }
+					}
+
+					button_memories = {
+						onclick = "[ToggleGameViewData( 'memories', Character.GetID  )]"
+						size = { 25 25 }
+						parentanchor = center
 					}
 				}
 
@@ -2048,10 +2070,7 @@ window = {
 					layoutpolicy_horizontal = expanding
 
 					onclick = "[CharacterWindow.SetTab('family')]"
-					# Clear Custom Tab visbility
-					onclick = "[GetVariableSystem.Clear('char_gui_tabs')]"
-					# Do not show selected if custom tab is selected
-					down = "[And(CharacterWindow.IsTabShown('family'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					down = "[CharacterWindow.IsTabShown('family')]"
 
 					using = tooltip_above
 
@@ -2081,10 +2100,7 @@ window = {
 					layoutpolicy_horizontal = expanding
 
 					onclick = "[CharacterWindow.SetTab('relations')]"
-					# Clear Custom Tab visbility
-					onclick = "[GetVariableSystem.Clear('char_gui_tabs')]"
-					# Do not show selected if custom tab is selected
-					down = "[And(CharacterWindow.IsTabShown('relations'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					down = "[CharacterWindow.IsTabShown('relations')]"
 
 					using = tooltip_above
 
@@ -2115,10 +2131,7 @@ window = {
 					layoutpolicy_horizontal = expanding
 
 					onclick = "[CharacterWindow.SetTab('court')]"
-					# Clear Custom Tab visbility
-					onclick = "[GetVariableSystem.Clear('char_gui_tabs')]"
-					# Do not show selected if custom tab is selected
-					down = "[And(CharacterWindow.IsTabShown('court'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					down = "[CharacterWindow.IsTabShown('court')]"
 
 					using = tooltip_above
 
@@ -2150,10 +2163,7 @@ window = {
 					layoutpolicy_horizontal = expanding
 
 					onclick = "[CharacterWindow.SetTab('vassals')]"
-					# Clear Custom Tab visbility
-					onclick = "[GetVariableSystem.Clear('char_gui_tabs')]"
-					# Do not show selected if custom tab is selected
-					down = "[And(CharacterWindow.IsTabShown('vassals'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					down = "[CharacterWindow.IsTabShown('vassals')]"
 
 					using = tooltip_above
 
@@ -2176,8 +2186,8 @@ window = {
 						}
 					}
 				}
-
-				# Custom tab
+				
+				##### T4N Section vvvvv
 				button_tab = {
 					name = "tribs_button"
 					datacontext = "[CharacterWindow.GetCharacter]"
@@ -2210,6 +2220,7 @@ window = {
 						}
 					}
 				}
+				##### T4N Section ^^^^^
 			}
 
 			spacer = { size = { 0 2 } }
@@ -2228,8 +2239,7 @@ window = {
 
 				widget = {
 					name = "family"
-					# Modify visbility to include custom tab variable
-					visible = "[And(CharacterWindow.IsTabShown('family'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					visible = "[CharacterWindow.IsTabShown('family')]"
 					size = { 100% 100% }
 
 					using = Animation_Tab_Switch
@@ -2594,8 +2604,7 @@ window = {
 
 				widget = {
 					name = "relations"
-					# Modify visbility to include custom tab variable
-					visible = "[And(CharacterWindow.IsTabShown('relations'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					visible = "[CharacterWindow.IsTabShown('relations')]"
 					size = { 100% 100% }
 
 					using = Animation_Tab_Switch
@@ -2705,7 +2714,7 @@ window = {
 									}
 								}
 
-								vbox_character_row_item = {
+								vbox_character_row_relationship_item = {
 									name = "lovers"
 									visible = "[CharacterWindow.GetCharacter.IsAdult]"
 									layoutpolicy_vertical = expanding
@@ -2732,7 +2741,6 @@ window = {
 										visible = "[GreaterThan_int32( GetDataModelSize( CharacterWindow.GetRelationsOfType( GetRelation( 'lover' ) ) ), '(int32)5' )]"
 										onclick = "[CharacterWindow.ToggleExpandedRelation( 'lovers' )]"
 									}
-
 								}
 
 								vbox_character_row_item = {
@@ -2748,6 +2756,7 @@ window = {
 									{
 										text = "GUARDIAN_LABEL"
 									}
+
 
 									blockoverride "expand_button" {}
 
@@ -2855,7 +2864,7 @@ window = {
 							scissor = yes
 
 							hbox = {
-								vbox_character_row_item = {
+								vbox_character_row_relationship_item = {
 									name = "friends"
 									layoutpolicy_vertical = expanding
 									layoutpolicy_horizontal = expanding
@@ -2876,7 +2885,7 @@ window = {
 									}
 
 									blockoverride "expand_button_inside" {
-										visible = "[GreaterThan_int32( GetDataModelSize(CharacterWindow.GetRelationsOfType( GetRelation( 'friend' ) )), '(int32)7' )]"
+										visible = "[GreaterThan_int32( GetDataModelSize( CharacterWindow.GetRelationsOfType( GetRelation( 'friend' ) ) ), '(int32)7' )]"
 										onclick = "[CharacterWindow.ToggleExpandedRelation( 'friends' )]"
 									}
 								}
@@ -2893,9 +2902,8 @@ window = {
 							scissor = yes
 
 							hbox = {
-								vbox_character_row_item = {
+								vbox_character_row_relationship_item = {
 									name = "rivals"
-									visible = "[CharacterWindow.GetCharacter.IsAdult]"
 									layoutpolicy_vertical = expanding
 									layoutpolicy_horizontal = expanding
 
@@ -2969,7 +2977,7 @@ window = {
 						size = { 100% 100% }
 
 						blockoverride "scrollbox_replace_vbox" {
-							vbox_character_row_item = {
+							vbox_character_row_relationship_item = {
 								name = "rivals"
 								margin_top = 10
 								spacing = 5
@@ -3001,7 +3009,7 @@ window = {
 						size = { 100% 100% }
 
 						blockoverride "scrollbox_replace_vbox" {
-							vbox_character_row_item = {
+							vbox_character_row_relationship_item = {
 								name = "friends"
 								margin_top = 10
 								spacing = 5
@@ -3033,7 +3041,7 @@ window = {
 						size = { 100% 100% }
 
 						blockoverride "scrollbox_replace_vbox" {
-							vbox_character_row_item = {
+							vbox_character_row_relationship_item = {
 								name = "friends"
 								margin_top = 10
 								spacing = 5
@@ -3064,8 +3072,8 @@ window = {
 
 				vbox_character_list = {
 					datacontext = "[CharacterWindow.GetCourt]"
-					# Modify visbility to include custom tab variable
-					visible = "[And(CharacterWindow.IsTabShown('court'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					visible = "[CharacterWindow.IsTabShown('court')]"
+
 					blockoverride "sort_dropdown" {
 						dropdown_sort_characterlist = {
 							# unique name needed to distinct from vassal sort options
@@ -3144,8 +3152,7 @@ window = {
 				####################################
 
 				vbox_character_list = {
-					# Modify visbility to include custom tab variable
-					visible = "[And(CharacterWindow.IsTabShown('vassals'),Not(GetVariableSystem.Exists('char_gui_tabs')))]"
+					visible = "[CharacterWindow.IsTabShown('vassals')]"
 					datacontext = "[CharacterWindow.GetVassals]"
 
 					blockoverride "sort_dropdown" {
@@ -3178,6 +3185,7 @@ window = {
 							}
 						}
 					}
+
 					blockoverride "character_count"
 					{
 						hbox = {
@@ -3209,6 +3217,9 @@ window = {
 						}
 					}
 				}
+			}
+
+				##### T4N Section vvvvv
 
 				####################################
 				######### CUSTOM TRIBS TAB #########
@@ -3245,8 +3256,7 @@ window = {
 						visible = "[IsDataModelEmpty(Character.MakeScope.GetList('all_tributaries'))]"
 					}
 				}
-				# End custom tribs tab section
-			}
+				##### T4N Section ^^^^^
 
 			### EXPANDED VIEWS
 
@@ -3524,7 +3534,6 @@ window = {
 									tooltip = "[DiplomacyItem.GetTooltip]"
 									using = tooltip_se
 
-
 									hbox = {
 										spacing = 20
 
@@ -3766,6 +3775,7 @@ window = {
 		}
 	}
 
+
 	######################################################
 	################ TYPES AND TEMPLATES #################
 	######################################################
@@ -3908,6 +3918,99 @@ window = {
 
 						item = {
 							portrait_head_small = {
+								blockoverride "portrait_button"
+								{
+									using = tooltip_ne
+								}
+								blockoverride "glow_visible"
+								{
+									visible = no
+								}
+							}
+						}
+					}
+				}
+
+				block "find_partner" {}
+
+				expand = {}
+			}
+
+			expand = {}
+		}
+
+		### Modified character row for relationship tab
+		type vbox_character_row_relationship_item = vbox {
+			spacing = -3
+
+			widget = {
+				layoutpolicy_horizontal = expanding
+				size = { 0 25 }
+				min_width = 110
+
+				block "expand_button" {
+					button_standard_hover = {
+						size = { 100% 100% }
+
+						block "expand_button_inside" {}
+					}
+				}
+
+				hbox = {
+					margin = { 10 0 }
+
+					background = {
+						using = Text_Label_Background
+						alpha = 0.5
+						margin = { 0 -2 }
+					}
+
+					text_single = {
+						align = nobaseline
+						fontsize = 14
+
+						block "header_text"
+						{
+							raw_text = "#D NEEDS TEXT#!"
+						}
+					}
+
+					expand = {}
+
+					text_single = {
+						align = nobaseline
+						default_format = "#weak"
+
+						block "remaining_items" {
+							visible = no
+						}
+					}
+				}
+			}
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+
+				using = Animation_Character_Window_Refresh
+
+				block "gridbox" {
+					fixedgridbox = {
+						flipdirection = yes
+						addcolumn = 85
+						addrow = 90
+						datamodel_wrap = 7
+
+						block "gridbox_slots"
+						{
+							maxverticalslots = 1
+						}
+
+						block "portrait_datamodel" {
+							datamodel = "[CharacterWindow.GetParents]"
+						}
+
+						item = {
+							portrait_head_small_relationship = {
 								blockoverride "portrait_button"
 								{
 									using = tooltip_ne
@@ -4350,5 +4453,22 @@ window = {
 		state = {
 			using = Animation_Refresh_FadeIn
 			duration = 0.25
+		}
+	}
+
+	template Character_Window_Relation_Icon
+	{
+		size = { 24 24 }
+		framesize = { 40 40 }
+
+		visible = "[ScriptedRelation.HasRelationBetween( CharacterWindow.GetCharacter, Character.Self )]"
+
+		tooltipwidget = {
+			scripted_relation_tooltip = {
+				blockoverride "description_text"
+				{
+					text = "[GetScriptedRelationTooltip( ScriptedRelation, CharacterWindow.GetCharacter, Character )]"
+				}
+			}
 		}
 	}
