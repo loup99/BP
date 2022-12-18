@@ -6,10 +6,13 @@ standard_claimant_status_trigger = {
 	is_available_adult = yes
 }
 has_a_roman_empire_trigger = {
-	OR = {
-		you_or_a_liege_has_title_trigger = { TITLE = title:e_roman_empire }
-		you_or_a_liege_has_title_trigger = { TITLE = title:e_wre }
-		you_or_a_liege_has_title_trigger = { TITLE = title:e_byzantium }
+	custom_tooltip = {
+		text = has_a_roman_empire_text
+		OR = {
+			you_or_a_liege_has_title_trigger = { TITLE = title:e_roman_empire }
+			you_or_a_liege_has_title_trigger = { TITLE = title:e_wre }
+			you_or_a_liege_has_title_trigger = { TITLE = title:e_byzantium }
+		}
 	}
 }
 #Byzantium
@@ -54,13 +57,16 @@ creation_trigger_k_moesia_inferior_trigger = {
 creation_trigger_italian_kingdoms_trigger = {
 	OR = {
 		#Keeps the Ostrogoths and Skirians and other East Germans from changing from k_italy
-		NAND = {
-			OR = {
-				culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:gothic } }
-				culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:skirian } }
-				culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:heruli } }
+		trigger_if = {
+			limit = { is_ai = yes }
+			NAND = {
+				OR = {
+					culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:gothic } }
+					culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:skirian } }
+					culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:heruli } }
+				}
+				primary_title.tier < tier_empire
 			}
-			primary_title.tier < tier_empire
 		}
 		has_a_roman_empire_trigger = yes
 	}
@@ -633,9 +639,12 @@ general_kingdom_title_creation_trigger = {
 }
 general_empire_title_creation_trigger = {
 	standard_claimant_status_trigger = yes
-	custom_description = { #Can't if I already have an empire
-		text = already_have_an_empire
-		NOT = { any_held_title = { tier = tier_empire } }
+	trigger_if = {
+		limit = { has_game_rule = can_not_freely_create_empires }
+		custom_description = { #Can't if I already have an empire
+			text = already_have_an_empire
+			NOT = { any_held_title = { tier = tier_empire } }
+		}
 	}
 	trigger_if = { #Goths Gotta make Gothica if available
 		limit = { culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:gothic } } }
