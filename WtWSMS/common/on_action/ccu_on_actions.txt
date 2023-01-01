@@ -11,7 +11,18 @@ ccu_culture_created = {
 				set_variable = { name = language_group value = prev.var:language_group }
 				set_variable = { name = language_family value = prev.var:language_family }
 				set_variable = { name = language_union value = prev.var:language_union }
-				set_variable = { name = language_dialect_continuum value = prev.var:language_dialect_continuum }
+			}
+			#Do this only once to avoid duplication with list
+			random_parent_culture = {
+				limit = { has_same_culture_language = prev }
+				if = {
+					limit = { has_variable_list = dialect_continuum }
+					every_in_list = {
+						variable = dialect_continuum
+						save_temporary_scope_as = parent_dialect_continuum
+						root = { add_to_variable_list = { name = dialect_continuum target = scope:parent_dialect_continuum } }
+					}
+				}
 			}
 		}
 		every_parent_culture = {
