@@ -1,0 +1,113 @@
+﻿### Culture/Language shift stuff
+generic_shift_culture_event = { #Cf. Vanilla common/on_actions/yearly_on_actions.txt:yearly_global_pulse
+	save_temporary_scope_value_as = { name = shift_start_year value = $SHIFT_START_YEAR$ }
+	save_temporary_scope_value_as = { name = shift_period_years value = $SHIFT_PERIOD_YEARS$ }
+	
+	#Now do some additional considerations
+	random = {
+		#Chances influenced by similar factors to WTWSMS/events/WtWSMS_melting_pots_events.txt factors
+		chance = 0
+		
+		### Baseline Probability...
+		#... depends on the current date (Fibonacci-like sequence gives up exponentially increasing odds per annum)
+		
+		#Probability breakdown assumes the same culture is picked every year
+		modifier = { add = 1 current_year >= shift_start_year_0_period }  #01%/year = 22.21% per 25 years
+		modifier = { add = 1 current_year >= shift_start_year_1_period }  #02%/year = 39.65% per 25 years
+		modifier = { add = 1 current_year >= shift_start_year_2_period }  #03%/year = 53.30% per 25 years
+		modifier = { add = 2 current_year >= shift_start_year_3_period }  #05%/year = 72.27% per 25 years
+		modifier = { add = 3 current_year >= shift_start_year_4_period }  #08%/year = 87.56% per 25 years
+		modifier = { add = 5 current_year >= shift_start_year_5_period }  #13%/year = 96.92% per 25 years
+		modifier = { add = 8 current_year >= shift_start_year_6_period }  #21%/year = 99.72% per 25 years
+		modifier = { add = 13 current_year >= shift_start_year_7_period } #34%/year = 99.99+% per 25 years
+		
+		### Culture Situation....
+		#... modifies the odds (how likely the peasants and the elites mix)
+		#More common if the dominant religions of county holders are shared
+		modifier = {
+			factor = 2.0
+			scope:shift_culture = {
+				calc_culture_dominant_religion = { save_temporary_scope_as = shift_culture_dominant_religion }
+				any_culture_county = {
+					percent >= 0.50
+					holder = { religion = scope:shift_culture_dominant_religion }
+				}
+			}
+		}
+		#More common if the dominant faiths of county holders are shared (cumulative with religion)
+		modifier = {
+			factor = 2.0
+			scope:shift_culture = {
+				calc_culture_dominant_faith = { save_temporary_scope_as = shift_culture_dominant_faith }
+				any_culture_county = {
+					percent >= 0.50
+					holder = { faith = scope:shift_culture_dominant_faith }
+				}
+			}
+		}
+		
+		### Government effects
+		#Being dominated by an advanced government reduces the odds
+		modifier = {
+			factor = 0.707 #SQRT(1/2)
+			scope:shift_culture = {
+				any_culture_county = {
+					percent >= 0.50
+					holder = { has_advanced_government_trigger = yes }
+				}
+			}
+		}
+		modifier = {
+			factor = 0.707 #SQRT(1/2)
+			scope:shift_culture = {
+				any_culture_county = {
+					percent = 1.00
+					holder = { has_advanced_government_trigger = yes }
+				}
+			}
+		}
+		#Every county being held by tribals/quasi-tribals increases the odds
+		modifier = {
+			factor = 1.414 #SQRT(2)
+			scope:shift_culture = {
+				any_culture_county = {
+					percent >= 0.50
+					holder = { has_a_primitive_type_of_government_trigger = yes }
+				}
+			}
+		}
+		modifier = {
+			factor = 1.414 #SQRT(2)
+			scope:shift_culture = {
+				any_culture_county = {
+					percent = 1.00
+					holder = { has_a_primitive_type_of_government_trigger = yes }
+				}
+			}
+		}
+		
+		### BLOCKERS
+		#Most counties of cultures with this language/heritage being under a single polity
+		#which speak the language should stop the process
+		modifier = {
+			factor = 0
+			any_ruler = {
+				this = { save_temporary_scope_as = ruler }
+				primary_title.tier = tier_empire
+				culture = { has_same_culture_$HERITAGE_OR_LANGUAGE$ = scope:shift_culture }
+				any_county = {
+					percent >= 0.60
+					this.culture = { has_same_culture_$HERITAGE_OR_LANGUAGE$ = scope:shift_culture }
+					holder = {
+						OR = {
+							this = scope:ruler
+							this = { any_liege_or_above = { this = scope:ruler } }
+						}
+					}
+				}
+			}
+		}
+		
+		scope:shift_culture = { trigger_event = { id = $EVENT_ID$ } }
+	}
+}
