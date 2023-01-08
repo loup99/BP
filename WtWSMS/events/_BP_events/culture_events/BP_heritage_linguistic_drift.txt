@@ -7,6 +7,8 @@
 #0001-0100: Linguistic Drift Events
 #0101-0200: Heritage Drift Events
 
+##### Language
+
 scripted_effect shift_language_latin_to_protoromance_effect = {
 	scope:shift_culture = {
 		if = {
@@ -76,11 +78,16 @@ scripted_effect shift_language_latin_to_protoromance_effect = {
 			ccu_culture_created_or_changed_effect = yes
 		}
 		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corsican } }
+			set_culture_pillar = language_proto_italian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = { #Fallback
 			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:roman } }
 			set_culture_pillar = language_proto_italian_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
-		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE" }
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: LANGUAGE (LATIN=>PROTO-ROMANCE" }
 	}
 }
 
@@ -174,16 +181,86 @@ bp_heritage_linguistic_drift.0003 = {
 	}
 }
 
-##### Heritage cases: Should require culture counties under dominance of another heritage
+##### Heritage
 
-scripted_effect shift_heritage_effect = {
+scripted_effect shift_heritage_latin_to_children_effect = {
 	scope:shift_culture = {
 		if = {
-			limit = { this = culture:romano_hispanic }
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_hispanic } }
 			set_culture_pillar = heritage_iberian
 			ccu_culture_created_or_changed_effect = yes
 		}
+		else_if = { #Romano-Frank covered here
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gallic }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_frank }
+				}
+			}
+			set_culture_pillar = heritage_frankish
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_british } }
+			set_culture_pillar = heritage_romano_british
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_british } }
+			set_culture_pillar = heritage_romano_british
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_aramean } }
+			set_culture_pillar = heritage_romano_aramean
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_aramean } }
+			set_culture_pillar = heritage_romano_aramean
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_african } }
+			set_culture_pillar = heritage_romano_african
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_dacian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_pannonian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_thracian }
+				}
+			}
+			set_culture_pillar = heritage_vlach
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_illyrian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_raetian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:sardinian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corsican }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gothic }
+				}
+			}
+			set_culture_pillar = heritage_italian
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = { #Fallback
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:roman } }
+			set_culture_pillar = heritage_italian
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: HERITAGE (LATIN=>CHILDREN" }
 	}
+}
+
+scripted_effect shift_heritage_effect = {
+	shift_heritage_latin_to_children_effect = yes
 }
 
 bp_heritage_linguistic_drift.0101 = {
