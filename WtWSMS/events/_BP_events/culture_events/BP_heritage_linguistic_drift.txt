@@ -7,54 +7,19 @@
 #0001-0100: Linguistic Drift Events
 #0101-0200: Heritage Drift Events
 
-scripted_effect shift_language_effect = {
+scripted_effect shift_language_latin_effect = {
 	scope:shift_culture = {
 		if = {
-			limit = { this = culture:romano_african }
-			custom_tooltip = {
-				text = african_romance_language
-				subject = scope:shift_culture
-				set_culture_pillar = language_african_romance
-			}
-			custom_tooltip = {
-				text = african_romance_name_list
-				subject = scope:shift_culture
-				set_name_list = name_list_african_romance
-			}
-		}
-		else_if = {
-			limit = {
-				OR = {
-					this = culture:romano_noric
-					this = culture:romano_raetian
-				}
-			}
-			custom_tooltip = {
-				text = rhaeto_romance_language
-				subject = scope:shift_culture
-				set_culture_pillar = language_rhaeto_romance
-			}
-			custom_tooltip = {
-				text = romansh_name_list
-				subject = scope:shift_culture
-				set_name_list = name_list_romansh
-			}
-		}
-		else_if = {
-			limit = { this = culture:romano_british }
-			custom_tooltip = {
-				text = british_romance_language
-				subject = scope:shift_culture
-				set_culture_pillar = language_british_romance
-			}
-			custom_tooltip = {
-				text = british_romance_name_list
-				subject = scope:shift_culture
-				set_name_list = name_list_british_romance
-			}
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_hispanic } }
+			set_culture_pillar = language_proto_ibero_romance
+			scope:shift_culture = { ccu_culture_created_or_changed_effect = yes }
 		}
 		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE" }
 	}
+}
+
+scripted_effect shift_language_effect = {
+	shift_language_latin_effect = yes
 }
 
 bp_heritage_linguistic_drift.0001 = {
@@ -71,7 +36,10 @@ bp_heritage_linguistic_drift.0001 = {
 		#Otherwise, directly change the culture and tell everyone
 		else = {
 			shift_language_effect = yes
-			every_player = { trigger_event = { id = bp_heritage_linguistic_drift.0003 } }
+			every_ruler = { #Informational event
+				limit = { is_ai = no }
+				trigger_event = { id = bp_heritage_linguistic_drift.0003 }
+			}
 		}
 	}
 }
@@ -146,11 +114,7 @@ scripted_effect shift_heritage_effect = {
 	scope:shift_culture = {
 		if = {
 			limit = { this = culture:romano_hispanic }
-			custom_tooltip = {
-				text = iberian_heritage_tt
-				subject = scope:shift_culture
-				set_culture_pillar = heritage_iberian
-			}
+			set_culture_pillar = heritage_iberian
 		}
 	}
 }
