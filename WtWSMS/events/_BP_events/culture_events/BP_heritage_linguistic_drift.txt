@@ -9,6 +9,29 @@
 
 ##### Language
 
+##### TRIGGERS
+scripted_trigger is_a_iberian_romance_hybrid_culture_trigger = {
+	NOT = { any_parent_culture = { this = culture:romano_hispanic } }
+}
+
+#Mostly we want this case to be where cultures are "well packed (i.e., small)" to allow differences to build
+scripted_trigger is_culture_mostly_in_linguistic_region_trigger = {
+	any_culture_county = {
+		percent >= 0.50
+		any_province = { geographical_region = $REGION$ }
+	}
+}
+
+scripted_trigger a_culture_parent_is_a_germanic_culture_trigger = {
+	OR = {
+		any_parent_culture = { has_cultural_pillar = heritage_central_germanic }
+		any_parent_culture = { has_cultural_pillar = heritage_east_germanic }
+		any_parent_culture = { has_cultural_pillar = heritage_north_germanic }
+		any_parent_culture = { has_cultural_pillar = heritage_west_germanic }
+	}
+}
+
+###### EFFECTS
 scripted_effect shift_language_latin_to_protoromance_effect = {
 	scope:shift_culture = {
 		if = {
@@ -90,10 +113,45 @@ scripted_effect shift_language_latin_to_protoromance_effect = {
 		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: LANGUAGE (LATIN=>PROTO-ROMANCE" }
 	}
 }
+shift_language_proto_ibero_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { is_a_iberian_romance_hybrid_culture_trigger = yes }
+			if = {
+				limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
+				set_culture_pillar = language_germano_iberian_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else_if = {
+				limit = { any_parent_culture = { has_cultural_pillar = heritage_arabic } }
+				set_culture_pillar = language_mozarabic
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = { #FALLBACK
+				set_culture_pillar = language_iberian_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+		else = {
+			if = {
+				limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_doc_region } }
+				set_culture_pillar = language_doc_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_iberian_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+	}
+}
 
 scripted_effect shift_language_effect = {
 	shift_language_latin_to_protoromance_effect = yes
+	shift_language_proto_ibero_romance_to_children_effect = yes
 }
+
+####### ACTUAL EVENTS
 
 bp_heritage_linguistic_drift.0001 = {
 	type = empty
