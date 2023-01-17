@@ -119,6 +119,7 @@ scripted_effect shift_language_latin_to_protoromance_effect = {
 		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: LANGUAGE (LATIN=>PROTO-ROMANCE" }
 	}
 }
+
 scripted_effect shift_language_proto_ibero_romance_to_children_effect = {
 	scope:shift_culture = {
 		if = {
@@ -152,10 +153,40 @@ scripted_effect shift_language_proto_ibero_romance_to_children_effect = {
 	}
 }
 
+scripted_effect shift_language_proto_gallo_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_doc_region } }
+			set_culture_pillar = language_doc_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = {
+			if = {
+				limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
+				set_culture_pillar = language_french
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_gallic_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+	}
+}
+
 scripted_effect shift_language_effect = {
-	shift_language_latin_to_protoromance_effect = yes
-	shift_language_proto_ibero_romance_to_children_effect = yes
-	#Gallo-Romance
+	if = {
+		limit = { has_cultural_pillar = language_latin }
+		shift_language_latin_to_protoromance_effect = yes
+	}
+	if = {
+		limit = { has_cultural_pillar = language_proto_ibero_romance }
+		shift_language_proto_ibero_romance_to_children_effect = yes
+	}
+	if = {
+		limit = { has_cultural_pillar = language_proto_gallo_romance }
+		shift_language_proto_gallo_romance_to_children_effect = yes
+	}
 	#Brito-Romance
 	#Italo-Romance
 	#Africo-Romance
