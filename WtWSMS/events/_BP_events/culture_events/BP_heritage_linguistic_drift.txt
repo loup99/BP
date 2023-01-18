@@ -2,6 +2,8 @@
 
 ##### TODO (Immediate): Gate announcement events to rulers in diplo range only
 ##### TODO (Immediate): Add name-list shifts where appropriate
+##### TODO (Immediate): Romano-Gothic/Romano-Vandalic variant
+##### TODO (Immediate): Venetian namelist from WtWSMS.
 
 #Design Notes:
 # For 0.2.0, this will be a simple binary, but later we'll want to make the linguistic/heritage drifts
@@ -103,7 +105,12 @@ scripted_effect shift_language_latin_to_protoromance_effect = {
 			ccu_culture_created_or_changed_effect = yes
 		}
 		else_if = { #TODO: Remove Romano-Gothic as an option?
-			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gothic } }
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gothic }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_vandalic }
+				}
+			}
 			set_culture_pillar = language_proto_italian_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
@@ -178,11 +185,43 @@ scripted_effect shift_language_proto_gallo_romance_to_children_effect = {
 	}
 }
 
-shift_language_proto_british_romance_to_children_effect = {
+scripted_effect shift_language_proto_british_romance_to_children_effect = {
 	scope:shift_culture = {
 		set_culture_pillar = language_british_romance
 		set_name_list = name_list_british_romance
 		ccu_culture_created_or_changed_effect = yes
+	}
+}
+
+scripted_effect shift_language_proto_italian_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_gallo_italic } }
+			if = {
+				limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
+				set_culture_pillar = language_germano_italian_romance
+				set_name_list = name_list_cisalpine
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_venetian
+				#set_name_list = name_list_venetian
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+		else = {
+			if = {
+				limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_sicilian } }
+				set_culture_pillar = language_sicilian
+				set_name_list = name_list_sicilian
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_italian
+				#set_name_list = name_list_venetian
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
 	}
 }
 
@@ -203,12 +242,16 @@ scripted_effect shift_language_effect = {
 		limit = { has_cultural_pillar = language_proto_british_romance }
 		shift_language_proto_british_romance_to_children_effect = yes
 	}
-	#Italo-Romance
+	if = {
+		limit = { has_cultural_pillar = language_proto_italian_romance }
+		shift_language_proto_italian_romance_to_children_effect = yes
+	}
 	#Africo-Romance
 	#Illyro-Romance
 	#Raeto-Norico-Romance
 	#Eastern-Romance
 	#Syrian-Romance
+	#Sardinian Romance
 }
 
 ####### ACTUAL EVENTS
