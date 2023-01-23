@@ -198,7 +198,7 @@ ccu_initialize_dialect_continua_effect = {
 
 #Additional language effects
 
-#For Creoles (like Celtiberian)
+#For Creoles (like Celtiberian & Mozarabic)
 #NB: Make sure value matches the desired language group, otherwise it'll be a problem
 #NB: If negative numbers are assigned to language groups above, this will break
 ccu_initialize_language_creole_effect = {
@@ -219,6 +219,19 @@ ccu_initialize_language_union_effect = {
 ### Additional Effects
 
 #Root is culture in question
+ccu_update_variable_list = {
+	random_parent_culture = {
+		limit = { has_same_culture_language = $CULTURE$ }
+		if = {
+			limit = { has_variable_list = $THE_LIST$ }
+			every_in_list = {
+				variable = $THE_LIST$
+				save_temporary_scope_as = parent_list_item
+				root = { add_to_variable_list = { name = $THE_LIST$ target = scope:parent_list_item } }
+			}
+		}
+	}
+}
 ccu_culture_created_or_changed_effect = {
 	every_parent_culture = {
 		limit = { has_same_culture_language = prev }
@@ -226,25 +239,26 @@ ccu_culture_created_or_changed_effect = {
 			set_variable = { name = language_union value = prev.var:language_union }
 			set_variable = { name = language_family value = prev.var:language_family }
 			set_variable = { name = language_branch value = prev.var:language_branch }
+			set_variable = { name = language_group value = prev.var:language_group }
+			set_variable = { name = language_creole value = prev.var:language_creole }
 		}
 		#Do this only once to avoid duplication with list
-		random_parent_culture = {
-			limit = { has_same_culture_language = prev }
-			if = {
-				limit = { has_variable_list = dialect_continuum }
-				every_in_list = {
-					variable = dialect_continuum
-					save_temporary_scope_as = parent_dialect_continuum
-					root = { add_to_variable_list = { name = dialect_continuum target = scope:parent_dialect_continuum } }
-				}
-			}
+		ccu_update_variable_list = {
+			CULTURE = prev
+			THE_LIST = dialect_continuum
 		}
 	}
 	every_parent_culture = {
 		limit = { has_same_culture_heritage = prev }
-		prev = { 
-			set_variable = { name = heritage_group value = prev.var:heritage_group }
-			set_variable = { name = heritage_family value = prev.var:heritage_family }
+		prev = {
+			ccu_update_variable_list = {
+				CULTURE = prev
+				THE_LIST = heritage_group
+			}
+			ccu_update_variable_list = {
+				CULTURE = prev
+				THE_LIST = heritage_family
+			}
 		}
 	}
 	
