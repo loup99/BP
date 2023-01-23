@@ -1,7 +1,7 @@
 ﻿namespace = bp_heritage_linguistic_drift
 
-##### FIXME: Regional Gating seems broken; Romano-Gallic/Roman shifting to d'Oc/Venetian whilst not being self-contained
-##### FIXME: Cultures keep their previous dialect continua; fix event chain to remove these before shifting language!
+##### FIXME: Event localization needs to be generalized
+##### FIXME: Remove Character portrait for cultures w/o a head
 
 ##### TODO (Immediate): Gate announcement events to rulers in diplo range only
 ##### TODO (Immediate): Add name-list shifts where appropriate
@@ -27,7 +27,7 @@ scripted_trigger is_a_iberian_romance_hybrid_culture_trigger = {
 scripted_trigger is_culture_mostly_in_linguistic_region_trigger = {
 	any_culture_county = {
 		percent >= 0.50
-		any_province = { geographical_region = $REGION$ }
+		title_province = { geographical_region = $REGION$ }
 	}
 }
 
@@ -48,7 +48,12 @@ scripted_trigger a_culture_parent_speaks_a_semitic_language_trigger = {
 scripted_effect shift_language_latin_to_protoromance_effect = {
 	scope:shift_culture = {
 		if = {
-			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_hispanic } }
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_hispanic }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:lusitanian }
+				}
+			}
 			set_culture_pillar = language_proto_ibero_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
@@ -138,7 +143,7 @@ scripted_effect shift_language_proto_ibero_romance_to_children_effect = {
 			limit = { is_a_iberian_romance_hybrid_culture_trigger = yes }
 			if = {
 				limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
-				set_culture_pillar = language_germano_iberian_romance
+				set_culture_pillar = language_iberian
 				ccu_culture_created_or_changed_effect = yes
 			}
 			else_if = {
@@ -304,6 +309,32 @@ scripted_effect shift_language_proto_african_romance_to_children_effect = {
 
 #Main Language Shift Effect
 scripted_effect shift_language_effect = {
+	#Remove all current effects
+	hidden_effect = {
+		scope:shift_culture = {
+			if = {
+				limit = { exists = var:language_union }
+				remove_variable = language_union
+			}
+			if = {
+				limit = { exists = var:language_family }
+				remove_variable = language_family
+			}
+			if = {
+				limit = { exists = var:language_branch }
+				remove_variable = language_branch
+			}
+			if = {
+				limit = { exists = var:language_creole }
+				remove_variable = language_creole
+			}
+			if = {
+				limit = { has_variable_list = dialect_continuum }
+				clear_variable_list = dialect_continuum
+			}
+		}
+	}
+	#Then apply the new language effect
 	scope:shift_culture = {
 		#if/else-if prevents possible chain reaction
 		if = {
@@ -388,11 +419,10 @@ bp_heritage_linguistic_drift.0002 = {
 	theme = culture_change
 	left_portrait = root
 	
-	immediate = {}
+	immediate = { hidden_effect = { shift_language_effect = yes } }
 	
 	option = {
 		name = bp_heritage_linguistic_drift.0002.accept
-		shift_language_effect = yes
 		every_ruler = {
 			limit = {
 				OR = {
