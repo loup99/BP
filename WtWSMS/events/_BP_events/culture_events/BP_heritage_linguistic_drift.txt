@@ -1,18 +1,13 @@
 ﻿namespace = bp_heritage_linguistic_drift
 
-##### FIXME: Event localization needs to be generalized
-##### FIXME: Remove Character portrait for cultures w/o a head
+##### FIXME: Make portraits code et al. for heritages match the style of the language code
+##### FIXME: Generalization of heritage shift localization
 
 ##### TODO (Immediate): Gate announcement events to rulers in diplo range only
-##### TODO (Immediate): Add name-list shifts where appropriate
-##### TODO (Immediate): Romano-Gothic/Romano-Vandalic variant
-##### TODO (Immediate): Venetian namelist from WtWSMS.
-##### TODO (Immediate): Pannonian Romance Name List from WtWSMS.
+##### TODO (Immediate): Romano-Gothic/Romano-Vandalic variant?
+##### TODO (Immediate): Venetian, Pannonian-Romance namelist from WtWSMS.
 
 #Design Notes:
-# For 0.2.0, this will be a simple binary, but later we'll want to make the linguistic/heritage drifts
-# more gradual.
-
 #0001-0100: Linguistic Drift Events
 #0101-0200: Heritage Drift Events
 
@@ -113,13 +108,8 @@ scripted_effect shift_language_latin_to_protoromance_effect = {
 			set_culture_pillar = language_proto_syrian_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
-		else_if = { #TODO: Remove Romano-Gothic as an option?
-			limit = {
-				OR = {
-					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gothic }
-					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_vandalic }
-				}
-			}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gothic } }
 			set_culture_pillar = language_proto_italian_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
@@ -309,31 +299,6 @@ scripted_effect shift_language_proto_african_romance_to_children_effect = {
 
 #Main Language Shift Effect
 scripted_effect shift_language_effect = {
-	#Remove all current effects
-	hidden_effect = {
-		scope:shift_culture = {
-			if = {
-				limit = { exists = var:language_union }
-				remove_variable = language_union
-			}
-			if = {
-				limit = { exists = var:language_family }
-				remove_variable = language_family
-			}
-			if = {
-				limit = { exists = var:language_branch }
-				remove_variable = language_branch
-			}
-			if = {
-				limit = { exists = var:language_creole }
-				remove_variable = language_creole
-			}
-			if = {
-				limit = { has_variable_list = dialect_continuum }
-				clear_variable_list = dialect_continuum
-			}
-		}
-	}
 	#Then apply the new language effect
 	scope:shift_culture = {
 		#if/else-if prevents possible chain reaction
@@ -415,9 +380,35 @@ bp_heritage_linguistic_drift.0001 = {
 bp_heritage_linguistic_drift.0002 = {
 	type = character_event
 	title = bp_heritage_linguistic_drift.0002.t
+	desc = {
+		first_valid = {
+			#Latin to Proto-Romance
+			triggered_desc = {
+				trigger = {
+					OR = {
+						scope:shift_culture = { has_cultural_pillar = language_proto_ibero_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_gallo_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_british_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_italian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_raetonorican_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_illyrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_pannonian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_eastern_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_syrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_african_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_sardinian }
+					}
+				}
+				desc = bp_heritage_linguistic_drift.0002.desc.latin
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0002.desc
+		}
+	}
+	
 	desc = bp_heritage_linguistic_drift.0002.desc
 	theme = culture_change
-	left_portrait = root
+	right_portrait = root
 	
 	immediate = { hidden_effect = { shift_language_effect = yes } }
 	
@@ -440,9 +431,34 @@ bp_heritage_linguistic_drift.0002 = {
 bp_heritage_linguistic_drift.0003 = {
 	type = character_event
 	title = bp_heritage_linguistic_drift.0003.t
-	desc = bp_heritage_linguistic_drift.0003.desc
+	desc = {
+		first_valid = {
+			#Latin to Proto-Romance
+			triggered_desc = {
+				trigger = {
+					OR = {
+						scope:shift_culture = { has_cultural_pillar = language_proto_ibero_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_gallo_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_british_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_italian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_raetonorican_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_illyrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_pannonian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_eastern_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_syrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_african_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_sardinian }
+					}
+				}
+				desc = bp_heritage_linguistic_drift.0003.desc.latin
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0003.desc
+		}
+	}
 	theme = culture_change
 	left_portrait = scope:chosen_character
+	right_portrait = root
 	
 	immediate = {
 		if = {
@@ -456,8 +472,7 @@ bp_heritage_linguistic_drift.0003 = {
 				save_scope_as = chosen_character
 			}
 		}
-		#Fallback
-		else = { root = { save_scope_as = chosen_character } }
+		#Fallback, don't show anything
 	}
 	
 	#For other rulers of the culture

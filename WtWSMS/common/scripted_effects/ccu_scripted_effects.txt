@@ -217,9 +217,7 @@ ccu_initialize_language_union_effect = {
 }
 
 ### Additional Effects
-
-#Root is culture in question
-ccu_update_variable_list = {
+ccu_update_variable_list_effect = { #Just a little helper tool
 	random_parent_culture = {
 		limit = { has_same_culture_language = $CULTURE$ }
 		if = {
@@ -232,8 +230,23 @@ ccu_update_variable_list = {
 		}
 	}
 }
+ccu_unset_culture_variables_effect = { #Culture scope
+	#Languages
+	if = { limit = { exists = var:language_union } remove_variable = language_union }
+	if = { limit = { exists = var:language_family } remove_variable = language_family }
+	if = { limit = { exists = var:language_branch } remove_variable = language_branch }
+	if = { limit = { exists = var:language_creole } remove_variable = language_creole }
+	if = { limit = { has_variable_list = dialect_continuum } clear_variable_list = dialect_continuum }
+	#Heritages
+	if = { limit = { has_variable_list = heritage_group } clear_variable_list = heritage_group }
+	if = { limit = { has_variable_list = heritage_family } clear_variable_list = heritage_family }
+}
+#Root is culture in question
 ccu_culture_created_or_changed_effect = {
-	every_parent_culture = {
+	#If we're changing a culture feature, we'll first need to unset everything
+	root = { ccu_unset_culture_variables_effect = yes }
+	#THen update everything
+	random_parent_culture = {
 		limit = { has_same_culture_language = prev }
 		prev = {
 			set_variable = { name = language_union value = prev.var:language_union }
@@ -243,19 +256,19 @@ ccu_culture_created_or_changed_effect = {
 			set_variable = { name = language_creole value = prev.var:language_creole }
 		}
 		#Do this only once to avoid duplication with list
-		ccu_update_variable_list = {
+		ccu_update_variable_list_effect = {
 			CULTURE = prev
 			THE_LIST = dialect_continuum
 		}
 	}
-	every_parent_culture = {
+	random_parent_culture = {
 		limit = { has_same_culture_heritage = prev }
 		prev = {
-			ccu_update_variable_list = {
+			ccu_update_variable_list_effect = {
 				CULTURE = prev
 				THE_LIST = heritage_group
 			}
-			ccu_update_variable_list = {
+			ccu_update_variable_list_effect = {
 				CULTURE = prev
 				THE_LIST = heritage_family
 			}
