@@ -107,51 +107,6 @@ BP_set_minorities_universal = {
 		
 		# Religions
 		#========================
-		#Abrahamics
-		## Christians
-		### Nestorians
-		every_county = { #Large Concentrations
-			limit = {
-				OR = {
-					this.duchy = title:d_soghd
-					this = title:c_tib
-					this = title:c_merv
-				}
-				NOT = { this = title:c_kishsh }
-				NOT = { this = title:c_otrar }
-			}
-			add_large_faith_to_county_effect = { FAITH = faith:nestorian }
-		}
-		every_county = { #Small Concentrations
-			limit = {
-				OR = {
-					this.duchy = title:d_osrushana
-					this.duchy = title:d_ferghana
-					this.duchy = title:d_chah
-					this = title:c_zamm
-					this = title:c_amol
-					this = title:c_kishsh
-				}
-			}
-			add_small_faith_to_county_effect = { FAITH = faith:nestorian }
-		}
-		### Marcionism
-		every_county = { #Large Concentrations
-			limit = {
-				OR = {
-					this = title:c_ardabil
-					this = title:c_zanjan
-					this = title:c_gilan
-					this = title:c_maragha
-				}
-			}
-			add_large_faith_to_county_effect = { FAITH = faith:marcionism }
-		}
-		every_county = { #Small Concentrations
-			limit = { this = title:c_talish }
-			add_small_faith_to_county_effect = { FAITH = faith:marcionism }
-		}
-		
 		## Jews
 		### Juhuro Tzadikites (Mountain Jews)
 		every_county = {
@@ -227,53 +182,6 @@ BP_set_minorities_universal = {
 				NOT = { this = title:c_otrar }
 			}
 			add_small_faith_to_county_effect = { FAITH = faith:khurmazta }
-		}
-		### Mazdyasna
-		## Dualists
-		###Manicheans
-		every_county = {
-			limit = { this.duchy = title:d_soghd }
-			add_large_faith_to_county_effect = { FAITH = faith:manichean }
-		}
-		every_county = {
-			limit = {
-				OR = {
-					#Central Asia
-					this.duchy = title:d_osrushana
-					this.duchy = title:d_ferghana
-					this.duchy = title:d_chah
-					#Asoristan [2]
-					this.duchy = title:d_asoristan
-					this.duchy = title:d_beth_garami
-					this.duchy = title:d_mesan
-					this.duchy = title:d_hira
-					this.duchy = title:d_euphrates
-					#Persia
-					this = title:c_tustar
-				}
-			}
-			if = {
-				limit = { this = { has_a_non_tribal_holding_trigger = yes } }
-				add_small_faith_to_county_effect = { FAITH = faith:manichean }
-			}
-		}
-		###Mandeans
-		every_county = {
-			limit = {
-				OR = {
-					this = title:c_rusafa
-					this = title:c_ubulla
-					this = title:c_abbadan
-					this = title:c_ahvaz
-					this = title:c_wasit
-					this = title:c_badaraya
-					this = title:c_batiha
-					this = title:c_akhadid
-					this = title:c_basra
-					this = title:c_baghdad
-				}
-			}
-			add_small_faith_to_county_effect = { FAITH = faith:mandeaism }
 		}
 		# Dharmics
 		## Buddhists
@@ -533,7 +441,7 @@ BP_set_minorities_universal = {
 		title:c_odishi ={ add_small_culture_to_county_effect = { CULTURE = culture:svan } }
 		## India and it's religious diversity
 		#========================
-		add_dharmic_faith_minorities = yes
+		add_dharmic_faith_minorities_to_region = { REGION = world_india }
 	}
 }
 
@@ -635,7 +543,7 @@ BP_set_minorities_by_date = {
 				if = {
 					limit = {
 						valid_county_faith_status_trigger = yes
-						valid_county_holding_status_trigger = yes
+						#Explicitly should *not* care about tribal status
 					}
 					add_minority_faith_granular_universal_effect = { FAITH = faith:georgian_orthodox }
 				}
@@ -717,7 +625,7 @@ BP_set_minorities_by_date = {
 				add_small_faith_to_county_effect = { FAITH = faith:ebionite }
 			}
 			###Nestorians
-			every_county = {
+			every_county = { #Granular Region
 				limit = {
 					OR = {
 						this.culture = culture:assyrian
@@ -735,16 +643,8 @@ BP_set_minorities_by_date = {
 					add_minority_faith_granular_universal_effect = { FAITH = faith:nestorian }
 				}
 			}
-			every_county = {
-				limit = {
-					OR = {
-						this.duchy = title:d_mesan
-						this.duchy = title:d_khuzestan
-						this.duchy = title:d_asoristan
-						this.duchy = title:d_tabaristan
-						this = title:c_urmiya
-					}
-				}
+			every_county = { #Minority Region
+				limit = { this = title:c_urmiya }
 				if = {
 					limit = {
 						valid_county_faith_status_trigger = yes
@@ -754,12 +654,15 @@ BP_set_minorities_by_date = {
 				}
 			}
 			### Marcionism
-			every_county = {
+			every_county = { #Granular Region
 				limit = {
 					OR = {
 						this = title:c_edessa
 						this = title:c_aintab
 						this = title:c_kaisereia
+						this = title:c_sebasteia
+						this = title:c_colonea
+						this = title:c_amida
 						AND = {
 							this.kingdom = title:k_armenia_inferior
 							this.faith = faith:armenian_apostolic
@@ -774,6 +677,34 @@ BP_set_minorities_by_date = {
 					add_minority_faith_granular_universal_effect = { FAITH = faith:marcionism }
 				}
 			}
+			every_county = { #Large Concentrations
+				limit = {
+					OR = {
+						this = title:c_ardabil
+						this = title:c_zanjan
+						this = title:c_gilan
+						this = title:c_maragha
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_large_faith_to_county_effect = { FAITH = faith:marcionism }
+				}
+			}
+			every_county = { #Small Concentrations
+				limit = { this = title:c_talish }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:marcionism }
+				}
+			}
+			
 			### Audianism
 			every_county = {
 				limit = {
@@ -832,30 +763,90 @@ BP_set_minorities_by_date = {
 				add_small_faith_to_county_effect = { FAITH = faith:patripassianism }
 			}
 			
-			##### NOT RE-REVIEWED vvvvv
-			
 			#Mazdans
-			##Dualists
+			## Dualists
 			### Manicheans
-			every_county = {
+			
+			###Manicheans
+			every_county = { #Universal Granular Regions
 				limit = {
 					OR = {
+						#Central Asia
+						this.duchy = title:d_soghd
+						this.duchy = title:d_osrushana
+						this.duchy = title:d_ferghana
+						this.duchy = title:d_chah
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:manichean }
+				}
+			}
+			every_county = { #Granular Regions
+				limit = { this.kingdom = title:k_septem_provincae }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:manichean }
+				}
+			}
+			every_county = { #Minority-only regions
+				limit = {
+					OR = {
+						#Asoristan [2]
+						this.duchy = title:d_asoristan
+						this.duchy = title:d_beth_garami
+						this.duchy = title:d_mesan
+						this.duchy = title:d_hira
+						this.duchy = title:d_euphrates
+						#Persia
+						this = title:c_tustar
+						this = title:c_talish
+						#Rome
+						this = title:c_roma
+						this = title:c_tunis
+						this = title:c_byzantion
+						this = title:c_alexandria
+						#Tarim Basin
 						this = title:c_kara_khoja
 						this = title:c_turpan
 					}
 				}
-				add_large_faith_to_county_effect = { FAITH = faith:manichean }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:manichean }
+				}
 			}
-			#Probably extant, minimally, by this point, in parts of the West
-			every_county = {
+			###Mandeans
+			every_county = { #Minority-only region
 				limit = {
 					OR = {
-						this = title:c_roma
-						this = title:c_byzantion
-						this = title:c_tunis
+						this.duchy = title:d_asoristan
+						this.duchy = title:d_mesan
+						this.duchy = title:d_khuzestan
+						this.duchy = title:d_hira
+						#Khuzestan
+						this = title:c_abbadan
+						this = title:c_ahvaz
+						this = title:c_dawraq
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:manichean }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:mandeaism }
+				}
 			}
 			###Valentinians
 			every_county = {
@@ -875,7 +866,7 @@ BP_set_minorities_by_date = {
 						}
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:valentinianism }
+				add_minority_faith_granular_universal_effect = { FAITH = faith:valentinianism }
 			}
 			##Zoroastrians
 			###Arewordiks
@@ -888,13 +879,11 @@ BP_set_minorities_by_date = {
 						this = title:c_bakriya
 						this = title:c_mayyafariqin
 					}
-					#Northern reaches of Armenia were more likely thoroughly Christanized
-					NOT = { this = title:c_gugark }
 				}
 				if = {
 					limit = {
 						OR = {
-							this = title:c_bagrewand #Major center in Ascarid Armenia
+							this = title:c_bagrewand #Major centre in Ascarid Armenia
 							any_neighboring_county = { religion = religion:zoroastrianism_religion }
 						}
 					}
@@ -902,24 +891,86 @@ BP_set_minorities_by_date = {
 				}
 				else = { add_small_faith_to_county_effect = { FAITH = faith:urartuism } }
 			}
-			
-			#Dharmics
-			##Buddhists
-			###Dharmagutaka
+			###Mazdayasna
 			every_county = {
 				limit = {
 					OR = {
-						this.duchy = title:d_karashar
-						this.duchy = title:d_kashgar
-						this = title:c_kara_khoja
-						this = title:c_turpan
+						this.kingdom = title:k_persia
+						this.kingdom = title:k_daylam
+						this.kingdom = title:k_parthia
+						#Various minorities
+						this = title:c_ghazza
+						this = title:c_baghdad
+						this = title:c_derbent
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:dharmaguptaka }
-				add_small_faith_to_county_effect = { FAITH = faith:sarvastivada }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+						NOT = { this.religion = religion:zoroastrianism_religion }
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:mazdayasna }
+				}
+			}
+			
+			#Dharmics
+			##Buddhists
+			###Dharmagutakan
+			every_county = {
+				limit = {
+					OR = {
+						this.kingdom = title:k_bactria
+						this.kingdom = title:k_khotan
+						this.kingdom = title:k_transoxiana
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:dharmaguptaka }
+				}
+			}
+			###Sarvastivadan
+			every_county = {
+				limit = {
+					OR = {
+						this.kingdom = title:k_bactria
+						this.kingdom = title:k_khotan
+						this.kingdom = title:k_transoxiana
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:sarvastivada }
+				}
 			}
 			#Mahayana
-			title:c_karghalik = { add_small_faith_to_county_effect = { FAITH = faith:mahayana } }
+			every_county = {
+				limit = {
+					OR = {
+						this.kingdom = title:k_bactria
+						this.kingdom = title:k_khotan
+						this.kingdom = title:k_transoxiana
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:mahayana }
+				}
+			}
+			### Greater India region for Dharmics
+			add_dharmic_faith_minorities_to_region = { REGION = custom_western_indian_sphere }
+			
+			##### NOT RE-REVIEWED vvvvv
 			
 			#Hypsisterians
 			##Hypsisterians
@@ -1498,10 +1549,6 @@ BP_set_minorities_by_date = {
 				REGIONAL_TRIGGER = zoroastrian_persian_location_trigger
 				CULTURE = culture:persian
 			}
-			add_faith_to_region_granular_effect = {
-				REGIONAL_TRIGGER = zoroastrian_persian_location_trigger
-				FAITH = faith:mazdayasna
-			}
 			### Balkh Khurmazta/Dharmagutaka Bactrians
 			every_county = { #Large Concentrations
 				limit = { this.duchy = title:d_balkh }
@@ -1736,7 +1783,6 @@ BP_set_minorities_by_date = {
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:nestorian }
 			}
-			title:c_talish = { add_large_faith_to_county_effect = { FAITH = faith:manichean } }
 			### Spain
 			title:c_porto = {
 				add_small_culture_and_faith_to_county_effect = {
