@@ -90,6 +90,21 @@ set_minorities_game_start = {
 
 BP_set_minorities_universal = {
 	effect = {
+		### Nicene
+		every_county = { #The Pentarchy
+			limit = {
+				OR = {
+					this = title:c_alexandria
+					this = title:c_roma
+					this = title:c_antiocheia
+					this = title:c_jerusalem
+					this = title:c_byzantion
+				}
+			}
+			add_large_faith_to_county_effect = { FAITH = faith:nicene }
+		}
+		##### NOT RE-REVIEWED vvvvv
+		
 		# Religions
 		#========================
 		#Abrahamics
@@ -507,13 +522,6 @@ BP_set_minorities_universal = {
 				CULTURE = culture:caucasian_albanian
 			}
 		}
-		#Georgian-Armenian border
-		title:c_lori = {
-			add_large_culture_and_faith_to_county_effect = {
-				FAITH = faith:georgian_orthodox
-				CULTURE = culture:georgian
-			}
-		}
 		#Svan-Lazic border
 		title:c_odishi ={
 			add_small_culture_and_faith_to_county_effect = {
@@ -538,46 +546,82 @@ BP_set_minorities_by_date = {
 			# Abrahamics
 			## Christians
 			### Nicene
-			every_county = {
+			every_county = { #Universal Region
 				limit = {
 					OR = {
-						#West Asia Minor
+						#Eastern Roman Empire
+						##West Asia Minor
 						this.kingdom = title:k_asia
 						this.kingdom = title:k_galatia
 						this.kingdom = title:k_byzantium
-						#Pentopolis
+						this.kingdom = title:k_pontus
+						this.kingdom = title:k_cilicia
+						##Oriens
+						
+						##Egypt (Nile)
+						this.duchy = title:d_alexandria
+						this.duchy = title:d_augustamnica
+						this.duchy = title:d_arcadia
+						##Pentopolis
 						this = title:c_barqa
 						this = title:c_derna
-						#Thrace
-						this = title:c_turnovo
+						##Thrace and Greece
+						this.kingdom = title:k_thracia
+						this.kingdom = title:k_achaia
+						## Italy
+						this.kingdom = title:k_annonaria
+						this.kingdom = title:k_italia
+						this.kingdom = title:k_raetia
+						this.kingdom = title:k_noricum
+						#Handled Separately:
+						#e_gaul, e_north_africa, e_spain
 					}
 				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
 				if = {
 					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
 						OR = {
-							NOT = { this.religion = religion:christianity_religion }
-							any_neighboring_county = { faith = faith:nicene }
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
 						}
 					}
-					add_large_faith_to_county_effect = { FAITH = faith:nicene }
+					add_minority_faith_granular_universal_effect = { FAITH = faith:nicene }
 				}
-				else = { add_small_faith_to_county_effect = { FAITH = faith:nicene } }
 			}
-			every_county = {
+			every_county = { #Granular Region
 				limit = {
 					OR = {
-						#Cappadocia
-						this = title:c_ablastha
-						this = title:c_azysia
-						this = title:c_lycandus
+						#Eastern Roman Empire
+						##West Asia Minor
+						this.kingdom = title:k_armenia_inferior
+						##Oriens
+						this.kingdom = title:k_oriens
+						##Italy
+						this.kingdom = title:k_dalmatia
+						#Handled Separately:
+						#e_gaul, e_north_africa, e_spain
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:nicene }
-			}
-			#Italy and Raetia Noricum
-			add_faith_to_region_effect = {
-				REGIONAL_TRIGGER = annonaria_italy_noricum_trigger
-				FAITH = faith:nicene
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+						OR = {
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
+						}
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:nicene }
+				}
 			}
 			### Georgian Orthodox
 			every_county = {
@@ -585,33 +629,38 @@ BP_set_minorities_by_date = {
 					OR = {
 						this = title:c_svaneti
 						this = title:c_abkhazia
+						this = title:c_lori
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:georgian_orthodox }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:georgian_orthodox }
+				}
 			}
 			### Armenian Church
 			every_county = {
-				limit = {
-					AND = {
-						this.faith = faith:marcionism
-						this.culture = culture:armenian
+				limit = { this.culture = culture:armenian }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
 					}
-					NOT = { this = title:c_samosata }
+					add_minority_faith_granular_universal_effect = { FAITH = faith:armenian_apostolic }
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:armenian_apostolic }
 			}
 			### Albanian Church
 			every_county = {
-				limit = {
-					OR = {
-						this = title:c_aran
-						this = title:c_shaki
-						this = title:c_khachen
-						this = title:c_shirvan
-						this = title:c_mugan
+				limit = { this.culture = culture:caucasian_albanian }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
 					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:albanian_apostolic }
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:albanian_apostolic }
 			}
 			### Maronites
 			every_county = {
@@ -628,51 +677,39 @@ BP_set_minorities_by_date = {
 					}
 					NOT = { this = title:c_acre }
 				}
-				add_large_faith_to_county_effect = { FAITH = faith:maronite_church }
-			}
-			every_county = {
-				limit = { this = title:c_marash }
-				add_small_faith_to_county_effect = { FAITH = faith:maronite_church }
-			}
-			###Apollinarism
-			every_county = {
-				limit = {
-					OR = {
-						this = title:c_beirut
-						this = title:c_tripoli
-						this = title:c_antiocheia
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
 					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:maronite_church }
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:apollinarism }
 			}
 			###Syrian Orthodox
 			every_county = {
 				limit = {
 					OR = {
-						this = title:c_palmyra
-						this = title:c_qaryatan
+						this.duchy = title:d_syria
+						this.duchy = title:d_euphratensis
 						this = title:c_homs
 						this = title:c_tripoli
 						#Orontes Valley
 						this = title:c_hama
 						this = title:c_shayzar
 						this = title:c_homs
-					}
-				}
-				add_large_faith_to_county_effect = { FAITH = faith:syrian_orthodox }
-			}
-			every_county = {
-				limit = {
-					OR = {
-						this = title:c_marash
-						this = title:c_samosata
+						#Euphrates border
+						this = title:c_edessa
+						this = title:c_amida
 						this = title:c_dausar
-						#Lower Syrian
-						this = title:c_damascus
-						this = title:c_hauran
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:syrian_orthodox }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:syrian_orthodox }
+				}
 			}
 			###Ebionites
 			every_county = {
@@ -684,14 +721,37 @@ BP_set_minorities_by_date = {
 				limit = {
 					OR = {
 						this.culture = culture:assyrian
-						this = title:c_rusafa
+						this.duchy = title:d_mesan
+						this.duchy = title:d_khuzestan
+						this.duchy = title:d_asoristan
+						this.duchy = title:d_tabaristan
 					}
 				}
-				add_large_faith_to_county_effect = { FAITH = faith:nestorian }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:nestorian }
+				}
 			}
 			every_county = {
-				limit = { this.duchy = title:d_tabaristan }
-				add_small_faith_to_county_effect = { FAITH = faith:nestorian }
+				limit = {
+					OR = {
+						this.duchy = title:d_mesan
+						this.duchy = title:d_khuzestan
+						this.duchy = title:d_asoristan
+						this.duchy = title:d_tabaristan
+						this = title:c_urmiya
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:nestorian }
+				}
 			}
 			### Marcionism
 			every_county = {
@@ -699,34 +759,26 @@ BP_set_minorities_by_date = {
 					OR = {
 						this = title:c_edessa
 						this = title:c_aintab
+						this = title:c_kaisereia
 						AND = {
 							this.kingdom = title:k_armenia_inferior
 							this.faith = faith:armenian_apostolic
 						}
 					}
 				}
-				add_large_faith_to_county_effect = { FAITH = faith:marcionism }
-			}
-			every_county = {
-				limit = {
-					OR = {
-						this = title:c_kaisereia
-						this = title:c_sebasteia
-						this = title:c_colonea
-						#NOT kilikia & kyzistria because it was too developed and later Marcionism seemed to exist in the
-						#"no-man's land" between Armenia and Rome
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
 					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:marcionism }
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:marcionism }
 			}
-			### Audians
-			title:c_damascus = { #Site of Jubb'adin "Well of Audius"
-				add_small_faith_to_county_effect = { FAITH = faith:audianism }
-			}
+			### Audianism
 			every_county = {
 				limit = {
 					OR = {
-						this.duchy = title:d_libanensis
+						this.duchy = title:d_libanensis #Damascus: Site of Jubb'adin "Well of Audius"
 						this.duchy = title:d_syria
 						this.duchy = title:d_syria_salutaris
 						this.duchy = title:d_osrhoene
@@ -737,7 +789,33 @@ BP_set_minorities_by_date = {
 					this.religion = religion:christianity_religion
 					NOT = { this = title:c_damascus }
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:audianism }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:audianism }
+				}
+			}
+			
+			#(Minority Christian faiths; no granularity)
+			
+			###Apollinarism
+			every_county = {
+				limit = {
+					OR = {
+						this = title:c_beirut
+						this = title:c_tripoli
+						this = title:c_antiocheia
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:apollinarism }
+				}
 			}
 			### Patripassianists
 			every_county = {
@@ -750,10 +828,11 @@ BP_set_minorities_by_date = {
 						this = title:c_suriya
 						this = title:c_amida
 					}
-					this.religion = religion:christianity_religion
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:patripassianism }
 			}
+			
+			##### NOT RE-REVIEWED vvvvv
 			
 			#Mazdans
 			##Dualists
