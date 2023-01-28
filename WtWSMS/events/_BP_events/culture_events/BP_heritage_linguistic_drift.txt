@@ -39,7 +39,13 @@ scripted_trigger a_culture_parent_speaks_a_semitic_language_trigger = {
 	any_parent_culture = { has_cultural_parameter = language_branch_semitic }
 }
 
+scripted_trigger the_culture_borders_a_specific_heritage_trigger = {
+	any_culture_county = { any_neighboring_county = { this.culture = { has_cultural_pillar = $HERITAGE$ } } }
+}
+
 ###### EFFECTS
+
+#Latin to Children
 scripted_effect shift_language_latin_to_protoromance_effect = {
 	scope:shift_culture = {
 		if = {
@@ -126,7 +132,6 @@ scripted_effect shift_language_latin_to_protoromance_effect = {
 		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: LANGUAGE (LATIN=>PROTO-ROMANCE" }
 	}
 }
-
 scripted_effect shift_language_proto_ibero_romance_to_children_effect = {
 	scope:shift_culture = {
 		if = {
@@ -160,7 +165,6 @@ scripted_effect shift_language_proto_ibero_romance_to_children_effect = {
 		}
 	}
 }
-
 scripted_effect shift_language_proto_gallo_romance_to_children_effect = {
 	scope:shift_culture = {
 		if = {
@@ -188,7 +192,6 @@ scripted_effect shift_language_proto_gallo_romance_to_children_effect = {
 		}
 	}
 }
-
 scripted_effect shift_language_proto_british_romance_to_children_effect = {
 	scope:shift_culture = {
 		set_culture_pillar = language_british_romance
@@ -196,7 +199,6 @@ scripted_effect shift_language_proto_british_romance_to_children_effect = {
 		ccu_culture_created_or_changed_effect = yes
 	}
 }
-
 scripted_effect shift_language_proto_italian_romance_to_children_effect = {
 	scope:shift_culture = {
 		if = {
@@ -228,7 +230,6 @@ scripted_effect shift_language_proto_italian_romance_to_children_effect = {
 		}
 	}
 }
-
 scripted_effect shift_language_proto_raetonorican_romance_to_children_effect = {
 	scope:shift_culture = {
 		if = {
@@ -243,7 +244,6 @@ scripted_effect shift_language_proto_raetonorican_romance_to_children_effect = {
 		}
 	}
 }
-
 scripted_effect shift_language_proto_illyrian_romance_to_children_effect = {
 	scope:shift_culture = {
 		set_culture_pillar = language_dalmatian
@@ -251,7 +251,6 @@ scripted_effect shift_language_proto_illyrian_romance_to_children_effect = {
 		ccu_culture_created_or_changed_effect = yes
 	}
 }
-
 scripted_effect shift_language_proto_pannonian_romance_to_children_effect = {
 	scope:shift_culture = {
 		set_culture_pillar = language_pannonian_romance
@@ -259,7 +258,6 @@ scripted_effect shift_language_proto_pannonian_romance_to_children_effect = {
 		ccu_culture_created_or_changed_effect = yes
 	}
 }
-
 scripted_effect shift_language_proto_eastern_romance_to_children_effect = {
 	scope:shift_culture = {
 		set_culture_pillar = language_wallachian
@@ -267,14 +265,12 @@ scripted_effect shift_language_proto_eastern_romance_to_children_effect = {
 		ccu_culture_created_or_changed_effect = yes
 	}
 }
-
 scripted_effect shift_language_proto_syrian_romance_to_children_effect = {
 	scope:shift_culture = {
 		set_culture_pillar = language_syrian_romance
 		ccu_culture_created_or_changed_effect = yes
 	}
 }
-
 scripted_effect shift_language_proto_african_romance_to_children_effect = {
 	scope:shift_culture = {
 		if = {
@@ -289,7 +285,7 @@ scripted_effect shift_language_proto_african_romance_to_children_effect = {
 		}
 	}
 }
-
+#Later Romance Languages
 scripted_effect shift_language_doc_romance_to_children_effect = {
 	scope:shift_culture = {
 		if = {
@@ -310,11 +306,36 @@ scripted_effect shift_language_doc_romance_to_children_effect = {
 		}
 	}
 }
-
 scripted_effect shift_language_french_to_children_effect = {
 	scope:shift_culture = {
 		set_culture_pillar = language_arpitan
 		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_iberian_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:suebi } }
+			set_culture_pillar = language_galician
+			set_name_list = name_list_galician
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_borders_a_specific_heritage_trigger = { HERITAGE = heritage_frankish }
+					the_culture_borders_a_specific_heritage_trigger = { HERITAGE = heritage_vasconic }
+				}
+			}
+			set_culture_pillar = language_asturleonese
+			set_name_list = name_list_asturleonese
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = {
+			set_culture_pillar = language_castilian
+			set_name_list = name_list_castilian
+			ccu_culture_created_or_changed_effect = yes
+		}
 	}
 }
 
@@ -375,6 +396,10 @@ scripted_effect shift_language_effect = {
 		else_if = { #French to Arpitan
 			limit = { has_cultural_pillar = language_french }
 			shift_language_french_to_children_effect = yes
+		}
+		else_if = { #Iberian Vulgar to children
+			limit = { has_cultural_pillar = language_iberian }
+			shift_language_iberian_to_children_effect = yes
 		}
 	}
 }
