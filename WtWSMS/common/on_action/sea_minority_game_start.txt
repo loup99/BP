@@ -401,8 +401,6 @@ BP_set_minorities_universal = {
 		title:c_jerusalem = { add_small_faith_to_county_effect = { FAITH = faith:miaphysitism } }
 		title:c_harran = {
 			#Faiths
-			add_small_faith_to_county_effect = { FAITH = faith:platonism }
-			add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
 			add_small_faith_to_county_effect = { FAITH = faith:assyrian_pagan }
 			#Cultures
 			add_small_culture_to_county_effect = { CULTURE = culture:greek }
@@ -509,8 +507,6 @@ BP_set_minorities_by_date = {
 						this.kingdom = title:k_armenia_inferior
 						##Oriens
 						this.kingdom = title:k_oriens
-						##Italy
-						this.kingdom = title:k_dalmatia
 						#Handled Separately:
 						#e_gaul, e_north_africa, e_spain
 					}
@@ -633,6 +629,7 @@ BP_set_minorities_by_date = {
 						this.duchy = title:d_khuzestan
 						this.duchy = title:d_asoristan
 						this.duchy = title:d_tabaristan
+						this = title:c_urmiya
 					}
 				}
 				if = {
@@ -643,14 +640,36 @@ BP_set_minorities_by_date = {
 					add_minority_faith_granular_universal_effect = { FAITH = faith:nestorian }
 				}
 			}
-			every_county = { #Minority Region
-				limit = { this = title:c_urmiya }
+			every_county = { #Large Minority Region
+				limit = {
+					OR = {
+						this = title:c_bukhara
+						this = title:c_samarkand
+					}
+				}
 				if = {
 					limit = {
 						valid_county_faith_status_trigger = yes
 						valid_county_holding_status_trigger = yes
 					}
-					add_minority_faith_granular_universal_effect = { FAITH = faith:nestorian }
+					add_small_faith_to_county_effect = { FAITH = faith:nestorian }
+				}
+			}
+			every_county = { #Small Minority Region
+				limit = {
+					OR = {
+						this.duchy = title:d_soghd
+						this.duchy = title:d_osrushana
+						this.duchy = title:d_merv
+					}
+					NOT = { this = title:c_bukhara }
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:nestorian }
 				}
 			}
 			### Marcionism
@@ -970,13 +989,11 @@ BP_set_minorities_by_date = {
 			### Greater India region for Dharmics
 			add_dharmic_faith_minorities_to_region = { REGION = custom_western_indian_sphere }
 			
-			##### NOT RE-REVIEWED vvvvv
-			
 			#Hypsisterians
 			##Hypsisterians
 			###Hypsisterians
 			#see [1]
-			every_county = {
+			every_county = { #Large Minorities
 				#I select the locations Mueller notes as at least tangentially connected to the
 				#cult of Oenoanda, with a few other places that he's more ambivalent
 				limit = {
@@ -996,15 +1013,17 @@ BP_set_minorities_by_date = {
 						this = title:c_honorias
 						this = title:c_pompeiopolis
 						this = title:c_sinope
-						#Bosporan Kingdom
-						this = title:c_khumar
-						this = title:c_azov
-						this = title:c_tana #Was a major center, even if it had been reduced by Bolghars
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:bosporan_faith }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:bosporan_faith }
+				}
 			}
-			every_county = {
+			every_county = { #Small Minorities
 				#I select the locations Mueller notes as at least tangentially connected to the
 				#cult of Oenoanda, with a few other places that he's more ambivalent
 				limit = {
@@ -1013,35 +1032,103 @@ BP_set_minorities_by_date = {
 						this = title:c_kalos_limen
 					}
 				}
-				add_large_faith_to_county_effect = { FAITH = faith:bosporan_faith }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_large_faith_to_county_effect = { FAITH = faith:bosporan_faith }
+				}
 			}
 			
 			#Pagans
 			##Hellenics
 			### Hellenism
-			every_county = {
+			every_county = { #Granular Region
 				limit = {
 					OR = {
-						this = title:c_baalbek #Still heavily pagan in the late IVth into Vth century
+						#Italia
+						this.kingdom = title:k_italia
+						this.kingdom = title:k_annonaria
+						this.kingdom = title:k_raetia
+						#Gaul
+						this.kingdom = title:k_septem_provincae
+						this.kingdom = title:k_lugdunensis
+						this.kingdom = title:k_belgica
+						#Spain
+						this.kingdom = title:k_tarraconensis
+						this.kingdom = title:k_cartaginensis
+						#Greece
+						this.kingdom = title:k_achaia
+						this.kingdom = title:k_macedonia
 					}
 				}
-				add_large_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:hellenic_pagan }
+				}
 			}
-			every_county = {
+			every_county = { #Large disparate minorities
 				limit = {
 					OR = {
 						this = title:c_alexandria
+						this = title:c_antiocheia
+						this = title:c_byzantion
+						this = title:c_baalbek #Major pagan site into the Vth century
 					}
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_large_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
+				}
 			}
-			#Italy and Raetia Noricum
-			add_faith_to_region_granular_effect = {
-				REGIONAL_TRIGGER = annonaria_italy_noricum_trigger
-				FAITH = faith:hellenic_pagan
+			every_county = { #Small disparate minorities
+				limit = {
+					OR = {
+						any_neighboring_county = { this = title:c_alexandria }
+						any_neighboring_county = { this = title:c_antiocheia }
+						any_neighboring_county = { this = title:c_byzantion }
+						any_neighboring_county = { this = title:c_baalbek }
+						this = title:c_tustar #Greco-Roman prisoners of war
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
+				}
+			}
+			###Mithraism
+			every_county = { #Small disparate minorities
+				limit = {
+					OR = {
+						#Cumont, Franz (1903). McCormack, Thomas J. (trans.) (ed.). The Mysteries of Mithra. Chicago: Open Court. ISBN 0-486-20323-9
+						#https://www.sacred-texts.com/cla/mom/mom09.htm
+						this = title:c_berchtesgaden
+						this = title:c_eschenlohe
+						this = title:c_innsbruck
+						#4th century temple to Mithra
+						this = title:c_donjikraji
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:mithraic_pagan }
+				}
 			}
 			###Cybellians
-			every_county = {
+			every_county = { #Small Minorities
 				limit = { #Cybellian holy sites
 					OR = {
 						this = title:c_phrygia
@@ -1050,6 +1137,19 @@ BP_set_minorities_by_date = {
 				}
 				add_small_faith_to_county_effect = { FAITH = faith:cybelian }
 			}
+			###Platonism
+			every_county = { #Small Minorities
+				limit = {
+					OR = {
+						this = title:c_attica #Platonic Academy
+						this = title:c_byzantion #Byzantine court
+					}
+				}
+				add_small_faith_to_county_effect = { FAITH = faith:platonism }
+			}
+			
+			##### NOT RE-REVIEWED vvvvv
+			
 			##Iranian Pagans
 			###Iranian Pagans
 			title:c_mugan = { add_small_faith_to_county_effect = { FAITH = faith:iranian_pagan_faith } }
@@ -1729,11 +1829,6 @@ BP_set_minorities_by_date = {
 					CULTURE = culture:lazic
 				}
 			}
-			### Hellas
-			title:c_attica = {
-				add_small_faith_to_county_effect = { FAITH = faith:platonism }
-				add_large_faith_to_county_effect = { FAITH = faith:hellenic_pagan }
-			}
 			### Asia
 			#Remnant Phrygians
 			title:c_phrygia = { add_large_culture_to_county_effect = { CULTURE = culture:phrygian } }
@@ -1770,7 +1865,6 @@ BP_set_minorities_by_date = {
 				#Faith
 				add_large_faith_to_county_effect = { FAITH = faith:nestorian }
 				add_small_faith_to_county_effect = { FAITH = faith:nicene } #Roman captives after Shapur II rebuilt the city
-				add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan } #Roman captives after Shapur II rebuilt the city
 				#Culture
 				add_small_culture_to_county_effect = { CULTURE = culture:roman } #Roman captives after Shapur II rebuilt the city
 				add_small_culture_to_county_effect = { CULTURE = culture:greek } #Ancient Greek settlement in Susa
