@@ -277,20 +277,6 @@ BP_set_minorities_universal = {
 				add_small_culture_to_county_effect = { CULTURE = culture:greek }
 			}
 		}
-		#North African religious admixture of Donatists/Nicenes in Carthage/Numidia/Sitifensis
-		every_county = {
-			limit = {
-				OR = {
-					this.duchy = title:d_carthago
-					this.duchy = title:d_numidia
-					this.duchy = title:d_sitifensis
-					this = title:c_gabes
-					this = title:c_souf
-				}
-			}
-			add_small_faith_to_county_effect = { FAITH = faith:african_church }
-			add_small_faith_to_county_effect = { FAITH = faith:donatism }
-		}
 		###Arewordiks
 		every_county = {
 			limit = {
@@ -304,36 +290,6 @@ BP_set_minorities_universal = {
 			add_small_culture_and_faith_to_county_effect = {
 				CULTURE = culture:armenian
 				FAITH = faith:urartuism
-			}
-		}
-		###Miaphysite Copts
-		every_county = {
-			limit = {
-				OR = {
-					this.kingdom = title:k_egypt
-					this.duchy = title:d_palestinia_salutaris
-				}
-				#Needs one of these conditions
-				OR = {
-					any_neighboring_county = { culture = culture:coptic }
-					this = title:c_al-gharbiya #Separated by water
-					this = title:c_siwa
-				}
-				#Always must be true
-				has_a_non_tribal_holding_trigger = yes
-			}
-			if = {
-				limit = { this.culture = culture:helleno_coptic }
-				add_large_culture_and_faith_to_county_effect = {
-					CULTURE = culture:coptic
-					FAITH = faith:miaphysitism
-				}
-			}
-			else = {
-				add_small_culture_and_faith_to_county_effect = {
-					CULTURE = culture:coptic
-					FAITH = faith:miaphysitism
-				}
 			}
 		}
 		### Persians
@@ -398,7 +354,6 @@ BP_set_minorities_universal = {
 		
 		# Other Specific Counties
 		#========================
-		title:c_jerusalem = { add_small_faith_to_county_effect = { FAITH = faith:miaphysitism } }
 		title:c_harran = {
 			#Faiths
 			add_small_faith_to_county_effect = { FAITH = faith:assyrian_pagan }
@@ -451,6 +406,7 @@ BP_set_minorities_by_date = {
 			#========================
 			# Abrahamics
 			## Christians
+			#(Nicene Block)
 			### Nicene
 			every_county = { #Universal Region
 				limit = {
@@ -472,7 +428,7 @@ BP_set_minorities_by_date = {
 						this = title:c_barqa
 						this = title:c_derna
 						##Thrace and Greece
-						this.kingdom = title:k_thracia
+						this.kingdom = title:k_thrace
 						this.kingdom = title:k_achaia
 						## Italy
 						this.kingdom = title:k_annonaria
@@ -481,6 +437,13 @@ BP_set_minorities_by_date = {
 						this.kingdom = title:k_noricum
 						#Handled Separately:
 						#e_gaul, e_north_africa, e_spain
+					}
+					NOR = { #Separately handled
+						this = title:c_alexandria
+						this = title:c_roma
+						this = title:c_antiocheia
+						this = title:c_jerusalem
+						this = title:c_byzantion
 					}
 				}
 				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
@@ -510,6 +473,13 @@ BP_set_minorities_by_date = {
 						#Handled Separately:
 						#e_gaul, e_north_africa, e_spain
 					}
+					NOR = { #Separately handled
+						this = title:c_alexandria
+						this = title:c_roma
+						this = title:c_antiocheia
+						this = title:c_jerusalem
+						this = title:c_byzantion
+					}
 				}
 				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
 				if = {
@@ -527,6 +497,253 @@ BP_set_minorities_by_date = {
 					add_minority_faith_granular_effect = { FAITH = faith:nicene }
 				}
 			}
+			every_county = { #Small Minorities
+				limit = { this = title:c_tustar } #Greco-Roman POWs
+				if = {
+					limit = {
+						#Explicitly should *not* care about ethnic religion
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:nicene }
+				}
+			}
+			### Gallican Church
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_septem_provincae
+						this.kingdom = title:k_lugdunensis
+						this.kingdom = title:k_belgica
+						this.kingdom = title:k_germania_inferior
+						this.kingdom = title:k_maxima_sequanorum
+					}
+				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+						OR = {
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
+						}
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:gallican_church }
+				}
+			}
+			### Hispanic Church
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_tarraconensis
+						this.kingdom = title:k_cartaginensis
+						this.kingdom = title:k_baetica
+						this.kingdom = title:k_lusitania
+						this.kingdom = title:k_gallaecia
+					}
+				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						#Explicitly should *not* care about cthonic redoubts
+						valid_county_holding_status_trigger = yes
+						OR = {
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
+						}
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:mozarabic_church }
+				}
+			}
+			every_county = { #Granular Region (2)
+				limit = {
+					OR = {
+						this.kingdom = title:k_tarraconensis
+						this.kingdom = title:k_cartaginensis
+						this.kingdom = title:k_baetica
+						this.kingdom = title:k_lusitania
+						this.kingdom = title:k_gallaecia
+					}
+					this.culture = culture:romano_hispanic
+					this.faith = faith:priscillianism
+				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						#Explicitly should *not* care about cthonic redoubts
+						valid_county_holding_status_trigger = yes
+						OR = {
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
+						}
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:mozarabic_church }
+				}
+			}
+			every_county = { #Small Minorities
+				limit = {
+					OR = {
+						this = title:c_porto
+						this = title:c_monterrei
+						this = title:c_viseu
+					}
+				}
+				if = {
+					limit = {
+						#Explicitly should *not* care about ethnic religion
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:mozarabic_church }
+				}
+			}
+			### African Church
+			every_county = { #Universal Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_africa
+						this.kingdom = title:k_mauretania
+						this = title:c_gabes
+						this = title:c_souf
+					}
+					is_coastal_county = yes
+				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+						OR = {
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
+						}
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:african_church }
+				}
+			}
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_africa
+						this.kingdom = title:k_mauretania
+						this = title:c_gabes
+						this = title:c_souf
+					}
+					is_coastal_county = no
+				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+						OR = {
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
+						}
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:african_church }
+				}
+			}
+			### Maronites
+			every_county = {
+				limit = {
+					OR = {
+						this.duchy = title:d_phoenice
+						this = title:c_juwair
+						this = title:c_qaryatan
+						#In the North Mountains
+						this = title:c_aintab
+						this = title:c_antiocheia
+						this = title:c_alexandretta
+						this = title:c_tall_hamid
+					}
+					NOT = { this = title:c_acre }
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:maronite_church }
+				}
+			}
+			### Celtic
+			every_county = { #Universal Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_britannia_secunda
+						this.kingdom = title:k_britannia_prima
+						this.kingdom = title:k_england
+						this.kingdom = title:k_ireland
+					}
+				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						#Explicitly should *not* care about tribal status
+						OR = {
+							NOT = { exists = this.faith.religious_head }
+							AND = {
+								exists = this.faith.religious_head
+								NOT = { this.faith.religious_head = faith:nicene.religious_head }
+							}
+						}
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:insular_celtic }
+				}
+			}
+			#(Miaphysite Block)
+			####Miaphysite
+			every_county = { #Universal Region
+				limit = { this.kingdom = title:k_egypt }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_universal_effect = { FAITH = faith:miaphysitism }
+				}
+			}
+			every_county = { #Granular Region
+				limit = { this.kingdom = title:k_oriens }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:miaphysitism }
+				}
+			}
+			every_county = { #Small Minorities
+				limit = {
+					OR = {
+						this = title:c_byzantion
+						this = title:c_jerusalem
+					}
+				}
+				if = {
+					limit = {
+						#Explicitly should *not* care about ethnic religion
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:miaphysitism }
+				}
+			}
 			### Georgian Orthodox
 			every_county = {
 				limit = {
@@ -538,8 +755,9 @@ BP_set_minorities_by_date = {
 				}
 				if = {
 					limit = {
-						valid_county_faith_status_trigger = yes
+						#Explicitly should *not* care about cthonic redoubts
 						#Explicitly should *not* care about tribal status
+						always = yes
 					}
 					add_minority_faith_granular_universal_effect = { FAITH = faith:georgian_orthodox }
 				}
@@ -564,29 +782,6 @@ BP_set_minorities_by_date = {
 						valid_county_holding_status_trigger = yes
 					}
 					add_minority_faith_granular_universal_effect = { FAITH = faith:albanian_apostolic }
-				}
-			}
-			### Maronites
-			every_county = {
-				limit = {
-					OR = {
-						this.duchy = title:d_phoenice
-						this = title:c_juwair
-						this = title:c_qaryatan
-						#In the North Mountains
-						this = title:c_aintab
-						this = title:c_antiocheia
-						this = title:c_alexandretta
-						this = title:c_tall_hamid
-					}
-					NOT = { this = title:c_acre }
-				}
-				if = {
-					limit = {
-						valid_county_faith_status_trigger = yes
-						valid_county_holding_status_trigger = yes
-					}
-					add_minority_faith_granular_universal_effect = { FAITH = faith:maronite_church }
 				}
 			}
 			###Syrian Orthodox
@@ -615,12 +810,14 @@ BP_set_minorities_by_date = {
 					add_minority_faith_granular_universal_effect = { FAITH = faith:syrian_orthodox }
 				}
 			}
-			###Ebionites
-			every_county = {
-				limit = { this.culture = culture:hebrew }
-				add_small_faith_to_county_effect = { FAITH = faith:ebionite }
-			}
-			###Nestorians
+			####Ethiopian
+			
+			#(Arian Block)
+			### Arians
+			#Closely linked with cultures, so done as a ethno-cultural block
+			
+			#(Nestorian Block)
+			### Nestorians
 			every_county = { #Granular Region
 				limit = {
 					OR = {
@@ -671,6 +868,41 @@ BP_set_minorities_by_date = {
 					}
 					add_small_faith_to_county_effect = { FAITH = faith:nestorian }
 				}
+			}
+			
+			#(Monophysite Block)
+			### Monophysites
+			every_county = { #Granular Region
+				limit = { this.kingdom = title:k_oriens }
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:monophysitism }
+				}
+			}
+			every_county = { #Small Minorities
+				limit = {
+					OR = {
+						this = title:c_byzantion
+						this = title:c_jerusalem
+					}
+				}
+				if = {
+					limit = {
+						#Explicitly should *not* care about ethnic religion
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:monophysitism }
+				}
+			}
+			
+			#(Other Block)
+			### Ebionites
+			every_county = {
+				limit = { this.culture = culture:hebrew }
+				add_small_faith_to_county_effect = { FAITH = faith:ebionite }
 			}
 			### Marcionism
 			every_county = { #Granular Region
@@ -723,7 +955,25 @@ BP_set_minorities_by_date = {
 					add_small_faith_to_county_effect = { FAITH = faith:marcionism }
 				}
 			}
-			
+			### Donatists
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_africa
+						this.duchy = title:d_sitifensis
+						this = title:c_gabes
+						this = title:c_souf
+					}
+				}
+				#Only apply minorities in non-shared HOF counties; shared HOF interacts differently with minorities
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:donatism }
+				}
+			}
 			### Audianism
 			every_county = {
 				limit = {
@@ -747,9 +997,95 @@ BP_set_minorities_by_date = {
 					add_minority_faith_granular_universal_effect = { FAITH = faith:audianism }
 				}
 			}
+			### Pneumatomachianism
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_asia
+						this.kingdom = title:k_thrace
+						this.kingdom = title:k_byzantium
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:pneumatomachianism }
+				}
+			}
+			### Melchisdechianism
+			every_county = { #Small Minorities
+				limit = { this = title:c_qus } #Nag Hammadi
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:melchisdechianism }
+				}
+			}
+			### Doceticism
 			
-			#(Minority Christian faiths; no granularity)
+			### Priscilianists
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_tarraconensis
+						this.kingdom = title:k_cartaginensis
+						this.kingdom = title:k_baetica
+						this.kingdom = title:k_lusitania
+						this.kingdom = title:k_gallaecia
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:priscillianism }
+				}
+			}
+			### Montanism
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_asia
+						this.kingdom = title:k_galatia
+						this.kingdom = title:k_pontus
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:montanism }
+				}
+			}
 			
+			#(Minority Christian faiths; no map presence, no granularity)
+			
+			###Pelagianism
+			every_county = {
+				limit = {
+					OR = {
+						#Present in Ostrogothic Italy; Cohen, Samuel (2016). "Religious Diversity". In Jonathan J. Arnold; M. Shane Bjornlie; Kristina Sessa (eds.). A Companion to Ostrogothic Italy. Leiden, Boston: Brill Publishers. pp. 503–532. ISBN 978-9004-31376-7.
+						this.duchy = title:d_picenum_suburbicarium
+						AND = {
+							this.kingdom = title:k_dalmatia
+							is_coastal_county = yes
+						}
+					}
+				}
+				if = {
+					limit = {
+						valid_county_faith_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:pelagianism }
+				}
+			}
 			###Apollinarism
 			every_county = {
 				limit = {
@@ -1404,35 +1740,8 @@ BP_set_minorities_by_date = {
 				REGIONAL_TRIGGER = e_gaul_romance_trigger
 				CULTURE = culture:romano_gallic
 			}
-			add_faith_to_region_granular_effect = {
-				REGIONAL_TRIGGER = e_gaul_nicene_trigger
-				FAITH = faith:gallican_church
-			}
 			### North Africa
 			#Western North Africa should have populations of Romano-African African Rite Nicenes
-			every_county = {
-				limit = {
-					this.duchy = title:d_caesariensis
-					is_coastal_county = yes
-				}
-				add_large_culture_and_faith_to_county_effect = {
-					FAITH = faith:african_church
-					CULTURE = culture:romano_african
-				}
-			}
-			every_county = {
-				limit = {
-					OR = {
-						this = title:c_melilla
-						this = title:c_gharb
-						this = title:c_tlemcen
-					}
-				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:african_church
-					CULTURE = culture:romano_african
-				}
-			}
 			#Libyan Gurzils
 			every_county = {
 				limit = {
@@ -1543,14 +1852,12 @@ BP_set_minorities_by_date = {
 						FAITH = faith:scythian_pagan
 						CULTURE = culture:romano_alan
 					}
-					add_small_faith_to_county_effect = { FAITH = faith:gallican_church }
 				}
 				else = {
 					add_small_culture_and_faith_to_county_effect = {
 						FAITH = faith:scythian_pagan
 						CULTURE = culture:romano_alan
 					}
-					add_small_faith_to_county_effect = { FAITH = faith:gallican_church }
 				}
 			}
 			### Visigothic Settlement
@@ -1596,29 +1903,6 @@ BP_set_minorities_by_date = {
 				}
 			}
 			
-			### Nicene Christians amongst the Priscillianists & Hellenics in Hispania
-			every_county = { #Large populations
-				limit = {
-					OR = {
-						this.faith = faith:priscillianism
-						this.faith = faith:hellenic_pagan
-					}
-					this.culture = culture:romano_hispanic
-					any_neighboring_county = { this.faith = faith:mozarabic_church }
-				}
-				add_large_faith_to_county_effect = { FAITH = faith:mozarabic_church }
-			}
-			every_county = { #Small populations
-				limit = {
-					OR = {
-						this.faith = faith:priscillianism
-						this.faith = faith:hellenic_pagan
-					}
-					this.culture = culture:romano_hispanic
-					NOT = { any_neighboring_county = { this.faith = faith:mozarabic_church } }
-				}
-				add_small_faith_to_county_effect = { FAITH = faith:mozarabic_church }
-			}
 			## Cyrtian Pagans
 			every_county = {
 				limit = {
@@ -1768,44 +2052,6 @@ BP_set_minorities_by_date = {
 					CULTURE = culture:irish
 				}
 			}
-			#Romano-Brits
-			every_county = {
-				#Transition was gradual instead of sudden, so Romano-Brits were still present in the region
-				limit = { this.kingdom = title:k_england }
-				add_large_culture_and_faith_to_county_effect = {
-					FAITH = faith:insular_celtic
-					CULTURE = culture:romano_british
-				}
-			}
-			#Limited Romanization based on this map: https://upload.wikimedia.org/wikipedia/commons/2/2b/Britain.4th.century.Roman.infrastructure.jpg
-			#To avoid sharp Romanization cut-off
-			every_county = {
-				limit = {
-					OR = {
-						this = title:c_glamorgan
-						this = title:c_monmouthshire
-						this = title:c_worcestershire
-						this = title:c_warwickshire
-						this = title:c_staffordshire
-						this = title:c_derby
-						this = title:c_west_riding
-						this = title:c_north_riding
-					}
-				}
-				if = {
-					limit = { any_neighboring_county = { this.culture = culture:romano_british } }
-					add_large_culture_and_faith_to_county_effect = {
-						FAITH = faith:insular_celtic
-						CULTURE = culture:romano_british
-					}
-				}
-				else = {
-					add_small_culture_and_faith_to_county_effect = {
-						FAITH = faith:insular_celtic
-						CULTURE = culture:romano_british
-					}
-				}
-			}
 			title:c_ulster = { add_large_culture_to_county_effect = { CULTURE = culture:irish } }
 			
 			# Other Specific Counties
@@ -1813,7 +2059,6 @@ BP_set_minorities_by_date = {
 			### Byzantium
 			title:c_byzantion = {
 				add_large_culture_to_county_effect = { CULTURE = culture:roman }
-				add_small_faith_to_county_effect = { FAITH = faith:miaphysitism }
 			}
 			### Thrace
 			title:c_nikopolis = {
@@ -1847,7 +2092,6 @@ BP_set_minorities_by_date = {
 			}
 			title:c_jerusalem = {
 				add_small_culture_to_county_effect = { CULTURE = culture:roman }
-				add_small_faith_to_county_effect = { FAITH = faith:monophysitism }
 			}
 			### Egypt
 			title:c_alexandria = { add_small_culture_to_county_effect = { CULTURE = culture:roman } }
@@ -1862,9 +2106,6 @@ BP_set_minorities_by_date = {
 			title:c_tunis = { add_small_culture_to_county_effect = { CULTURE = culture:punic } }
 			### Asoristan
 			title:c_tustar = { #Gondishapur, Susa, &c. a Cosmopolitan region
-				#Faith
-				add_large_faith_to_county_effect = { FAITH = faith:nestorian }
-				add_small_faith_to_county_effect = { FAITH = faith:nicene } #Roman captives after Shapur II rebuilt the city
 				#Culture
 				add_small_culture_to_county_effect = { CULTURE = culture:roman } #Roman captives after Shapur II rebuilt the city
 				add_small_culture_to_county_effect = { CULTURE = culture:greek } #Ancient Greek settlement in Susa
@@ -1883,10 +2124,6 @@ BP_set_minorities_by_date = {
 					FAITH = faith:arian
 					CULTURE = culture:buri
 				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:mozarabic_church
-					CULTURE = culture:romano_hispanic
-				}
 			}
 			title:c_santiago = {
 				add_small_culture_and_faith_to_county_effect = {
@@ -1894,18 +2131,11 @@ BP_set_minorities_by_date = {
 					CULTURE = culture:marcomanni
 				}
 			}
-			title:c_viseu = {
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:mozarabic_church
-					CULTURE = culture:romano_hispanic
-				}
-			}
 			title:c_monterrei = {
 				add_large_culture_and_faith_to_county_effect = {
 					FAITH = faith:priscillianism
 					CULTURE = culture:romano_hispanic
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:mozarabic_church }
 			}
 		}
 	}
