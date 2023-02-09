@@ -1630,6 +1630,23 @@ BP_set_minorities_by_date = {
 			#========================
 			#West Iranian Heritage
 			##Persians
+			every_county = { #Granular Region
+				limit = {
+					OR = {
+						this.kingdom = title:k_persia
+						this.kingdom = title:k_daylam
+						this.kingdom = title:k_parthia
+						this.kingdom = title:k_makran
+					}
+				}
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_culture_granular_effect = { CULTURE = culture:persian }
+				}
+			}
 			every_county = { #Disparate Small Minorities
 				limit = {
 					OR = {
@@ -1643,7 +1660,7 @@ BP_set_minorities_by_date = {
 						valid_county_culture_status_trigger = yes
 						valid_county_holding_status_trigger = yes
 					}
-					add_minority_culture_granular_universal_effect = { CULTURE = culture:persian }
+					add_small_culture_to_county_effect = { CULTURE = culture:persian }
 				}
 			}
 			##Medians
@@ -2188,9 +2205,6 @@ BP_set_minorities_by_date = {
 					add_minority_culture_granular_universal_effect = { CULTURE = culture:coptic }
 				}
 			}
-			
-			##### NOT RE-REVIEWED vvvvv
-			
 			#Caucasian Heritage
 			##Aghwank
 			every_county = {
@@ -2202,21 +2216,9 @@ BP_set_minorities_by_date = {
 				}
 				add_large_culture_to_county_effect = { CULTURE = culture:caucasian_albanian }
 			}
-			every_county = {
-				limit = {
-					OR = {
-						this = title:c_odishi
-						this = title:c_guria
-						this = title:c_acampse
-					}
-				}
-				add_small_culture_to_county_effect = { CULTURE = culture:georgian }
-			}
 			
-			## Other Special Regions
+			## Culture/Religion blocks
 			#========================
-			### North Africa
-			#Western North Africa should have populations of Romano-African African Rite Nicenes
 			#Libyan Gurzils
 			every_county = {
 				limit = {
@@ -2225,35 +2227,13 @@ BP_set_minorities_by_date = {
 						this = title:c_tripolitana
 					}
 				}
-				add_small_culture_and_faith_to_county_effect = {
+				add_minority_culture_faith_granular_effect = {
 					FAITH = faith:gurzil
 					CULTURE = culture:libyan
 				}
 			}
-			### Vandal Settlement in North Africa & Hispaniae
-			every_county = {
-				limit = {
-					OR = {
-						#Leftovers from Hispaniae
-						this = title:c_algeciras
-						this = title:c_cadiz
-						#Settlement of the Kingdom
-						AND = {
-							OR = {
-								this.duchy = title:d_carthago
-								this.duchy = title:d_tripolitania
-							}
-							NOT = { this = title:c_tripolitana }
-							is_coastal_county = yes
-						}
-					}
-				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:arian
-					CULTURE = culture:vandalic
-				}
-			}
-			### Alan settlement
+			#Alans
+			###Vandalo-Alans
 			every_county = { #Respendialids
 				limit = {
 					OR = {
@@ -2268,36 +2248,18 @@ BP_set_minorities_by_date = {
 						#North Africa
 						this = title:c_bejaia
 						this = title:c_algier
-						#Scythia Minor& Moesia Inferior; see Jordanes & Getica
-						this = title:c_constanta
-						this = title:c_tropaeum
 					}
 				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:arian
-					CULTURE = culture:alan
-				}
-				add_small_faith_to_county_effect = { FAITH = faith:scythian_pagan }
-			}
-			#Alans in Gaul and Italy
-			every_county = { #Gokarids & Related Gallic Settlement
-				limit = {
-					OR = {
-						#North Italy (Sarmato-Alan Laeti settlements)
-						this = title:c_pavia
-						this = title:c_novara
-						this = title:c_treviso
-						#Deformed Skull Burials
-						this = title:c_bern
-						this = title:c_viennois
-						this = title:c_lyon
-						this = title:c_savoie
-						this = title:c_aosta
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						valid_county_holding_status_trigger = yes
 					}
-				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:scythian_pagan
-					CULTURE = culture:alan
+					add_minority_culture_faith_granular_universal_effect = {
+						FAITH = faith:arian
+						CULTURE = culture:alano_vandalic
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:scythian_pagan }
 				}
 			}
 			### Romanized Alans (Gorakids)
@@ -2322,24 +2284,85 @@ BP_set_minorities_by_date = {
 					}
 				}
 				if = {
-					limit = { this = { any_neighboring_county = { count >= 2 this.culture = culture:romano_alan } } }
-					add_small_culture_and_faith_to_county_effect = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_culture_faith_granular_universal_effect = {
 						FAITH = faith:scythian_pagan
 						CULTURE = culture:romano_alan
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:scythian_pagan }
+				}
+			}
+			#Other Alans
+			every_county = { #Gokarids & Related Gallic Settlement
+				limit = {
+					OR = {
+						#North Italy (Sarmato-Alan Laeti settlements)
+						this = title:c_pavia
+						this = title:c_novara
+						this = title:c_treviso
+						#Deformed Skull Burials
+						this = title:c_bern
+						this = title:c_viennois
+						this = title:c_lyon
+						this = title:c_savoie
+						this = title:c_aosta
+						#Scythia Minor& Moesia Inferior; see Jordanes & Getica
+						this = title:c_constanta
+						this = title:c_tropaeum
 					}
 				}
-				else = {
-					add_small_culture_and_faith_to_county_effect = {
-						FAITH = faith:scythian_pagan
-						CULTURE = culture:romano_alan
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						valid_county_holding_status_trigger = yes
 					}
+					add_minority_culture_faith_granular_universal_effect = {
+						FAITH = faith:scythian_pagan
+						CULTURE = culture:alan
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:scythian_pagan }
+				}
+			}
+			#East Germanics
+			### Vandal Settlement in North Africa & Hispania
+			every_county = {
+				limit = {
+					OR = {
+						#Leftovers from Hispania
+						this = title:c_algeciras
+						this = title:c_cadiz
+						#Settlement of the Kingdom
+						AND = {
+							OR = {
+								this.duchy = title:d_carthago
+								this.duchy = title:d_tripolitania
+								this.duchy = title:d_byzacena
+							}
+							NOT = { this = title:c_tripolitana }
+							is_coastal_county = yes
+						}
+					}
+				}
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_culture_and_faith_to_county_effect = {
+						FAITH = faith:arian
+						CULTURE = culture:vandalic
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:germanic_pagan }
 				}
 			}
 			### Visigothic Settlement
 			#The Iberian conquests are _very_ recent, so there really shouldn't be much Gothic
 			#settlement in Iberia at this time. Some of the various nucleus of later settlement should
 			#exist, but not actual majorities
-			every_county = {
+			every_county = { #Disparate Minorites
 				limit = {
 					OR = {
 						#Major urban nucleus under Visigoths directly in 476
@@ -2348,17 +2371,34 @@ BP_set_minorities_by_date = {
 						#Campi Gothorum
 						this = title:c_burgos
 						this = title:c_valladolid
-						#France
-						this = title:c_bordeaux
 					}
 				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:gothic_church
-					CULTURE = culture:visigothic
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_small_culture_and_faith_to_county_effect = {
+						FAITH = faith:gothic_church
+						CULTURE = culture:visigothic
+					}
+				}
+			}
+			every_county = { #Granular Region
+				limit = { this.kingdom = title:k_septem_provincae }
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						valid_county_holding_status_trigger = yes
+					}
+					add_minority_culture_faith_granular_effect = {
+						FAITH = faith:gothic_church
+						CULTURE = culture:visigothic
+					}
 				}
 			}
 			### Skiri Settlement
-			every_county = {
+			every_county = { #Disparate Minorites
 				limit = {
 					OR = {
 						#Remnant of the Scirii Kingdom
@@ -2372,49 +2412,70 @@ BP_set_minorities_by_date = {
 						this = title:c_tropaeum
 					}
 				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:germanic_pagan
-					CULTURE = culture:skirian
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						#Explicitly include tribal regions
+					}
+					add_small_culture_and_faith_to_county_effect = {
+						FAITH = faith:germanic_pagan
+						CULTURE = culture:skirian
+					}
 				}
-			}
-			## Persians
-			add_culture_to_region_granular_effect = {
-				REGIONAL_TRIGGER = zoroastrian_persian_location_trigger
-				CULTURE = culture:persian
 			}
 			### Balkh Khurmazta/Dharmagutaka Bactrians
 			every_county = { #Large Concentrations
 				limit = { this.duchy = title:d_balkh }
-				add_large_culture_and_faith_to_county_effect = {
-					FAITH = faith:khurmazta
-					CULTURE = culture:bactrian
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						#Explicitly include tribal regions
+					}
+					add_large_culture_and_faith_to_county_effect = {
+						FAITH = faith:khurmazta
+						CULTURE = culture:bactrian
+					}
+					add_small_faith_to_county_effect = { FAITH = faith:dharmaguptaka }
 				}
-				add_small_faith_to_county_effect = { FAITH = faith:dharmaguptaka }
 			}
+			
 			### Odoacer's merry band of misfits [4]
 			### Mixture of Heruls, Rygirs, and Skirians
 			### Unfortunately, we're not told _where_ precisely they were quartered,
 			### so this is a guess based on Placentia falling quickly [4] and Ravenna
 			### shortly thereafter
-			title:c_mantua = {
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:arian
-					CULTURE = culture:skirian
+			every_county = { #Skirians
+				limit = { this = title:c_mantua }
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						#Explicitly include tribal regions
+					}
+					add_small_culture_and_faith_to_county_effect = {
+						FAITH = faith:germanic_pagan
+						CULTURE = culture:skirian
+					}
 				}
 			}
-			every_county = {
+			every_county = { #Rygirs
 				limit = {
 					OR = {
 						this = title:c_verona
 						this = title:c_polesine
 					}
 				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:germanic_pagan
-					CULTURE = culture:rygir
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						#Explicitly include tribal regions
+					}
+					add_small_culture_and_faith_to_county_effect = {
+						FAITH = faith:germanic_pagan
+						CULTURE = culture:rygir
+					}
 				}
 			}
-			every_county = {
+			every_county = { #Herulis
 				limit = {
 					OR = {
 						this = title:c_cremona
@@ -2422,11 +2483,20 @@ BP_set_minorities_by_date = {
 						this = title:c_pavia
 					}
 				}
-				add_small_culture_and_faith_to_county_effect = {
-					FAITH = faith:germanic_pagan
-					CULTURE = culture:heruli
+				if = {
+					limit = {
+						valid_county_culture_status_trigger = yes
+						#Explicitly include tribal regions
+					}
+					add_small_culture_and_faith_to_county_effect = {
+						FAITH = faith:germanic_pagan
+						CULTURE = culture:heruli
+					}
 				}
 			}
+			
+			##### NOT RE-REVIEWED vvvvv
+			
 			### Britannia:
 			#Give the Germans a bit of a boost in lands they control
 			
