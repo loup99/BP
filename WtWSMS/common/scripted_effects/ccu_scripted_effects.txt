@@ -243,53 +243,19 @@ ccu_unset_culture_variables_effect = { #Culture scope
 }
 #Root is culture in question
 ccu_culture_created_or_changed_effect = {
-	#If we're changing a culture feature, we'll first need to unset everything
-	root = { ccu_unset_culture_variables_effect = yes }
-	#THen update everything
-	random_parent_culture = {
-		limit = { has_same_culture_language = prev }
-		prev = {
-			set_variable = { name = language_union value = prev.var:language_union }
-			set_variable = { name = language_family value = prev.var:language_family }
-			set_variable = { name = language_branch value = prev.var:language_branch }
-			set_variable = { name = language_group value = prev.var:language_group }
-			set_variable = { name = language_creole value = prev.var:language_creole }
-		}
-		#Do this only once to avoid duplication with list
-		ccu_update_variable_list_effect = {
-			CULTURE = prev
-			THE_LIST = dialect_continuum
-		}
-	}
-	random_parent_culture = {
-		limit = { has_same_culture_heritage = prev }
-		prev = {
-			ccu_update_variable_list_effect = {
-				CULTURE = prev
-				THE_LIST = heritage_group
-			}
-			ccu_update_variable_list_effect = {
-				CULTURE = prev
-				THE_LIST = heritage_family
-			}
-		}
-	}
+	#If we're changing a culture feature, we'll first need to unset everything, then reset the values
+	#Simpler than checking parentage; doubtful we'll see actual performance impact
 	
-	# Failsafe in case the heritage or language of the divergent culture doesn't match either parent
-	# I didn't think that was possible but it was observed to happen in-game
-	if = {
-		limit = { NOT = { has_variable = heritage_group } }
-		ccu_initialize_heritage_group_effect = yes
-		ccu_initialize_heritage_family_effect = yes
-	}
-	if = {
-		limit = { NOT = { has_variable = language_branch } }
-		ccu_initialize_language_family_effect = yes
-		ccu_initialize_language_branch_effect = yes
-		ccu_initialize_language_group_effect = yes
-		ccu_initialize_dialect_continua_effect = yes
-		#Other Language Effects
-		ccu_initialize_language_union_effect = yes
-		ccu_initialize_language_creole_effect = yes
-	}
+	#Unset everything
+	ccu_unset_culture_variables_effect = yes
+	#Heritage
+	ccu_initialize_heritage_group_effect = yes
+	ccu_initialize_heritage_family_effect = yes
+	#Language
+	ccu_initialize_language_family_effect = yes
+	ccu_initialize_language_branch_effect = yes
+	ccu_initialize_language_group_effect = yes
+	ccu_initialize_dialect_continua_effect = yes
+	ccu_initialize_language_union_effect = yes
+	ccu_initialize_language_creole_effect = yes
 }
