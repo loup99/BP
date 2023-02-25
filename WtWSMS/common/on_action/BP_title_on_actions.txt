@@ -31,6 +31,7 @@ on_title_gain = {
 		#Government Handling stuff
 		BP_set_government_id_effect_on_title_gain
 		BP_handle_bureaucratic_succession
+		BP_check_bureaucratic_state
 		BP_prevent_title_grant_boostrapping
 		BP_apply_title_laws
 		BP_degrade_roman_government
@@ -102,6 +103,22 @@ BP_handle_bureaucratic_succession = {
 	}
 }
 
+BP_check_bureaucratic_state = {
+	effect = {
+		if = { #If we were demoted but not independent, just swap governments
+			limit = {
+				has_government = bureaucratic_government
+				valid_bureaucratic_status_trigger = no
+			}
+			if = {
+				limit = { valid_gubernatorial_status_trigger = yes }
+				convert_realm_to_gubernatorial_effect = yes
+			}
+			else = { convert_realm_to_subroman_direct_effect = yes }
+		}
+	}
+}
+
 #Give gubernatorial_government the correct title succession law
 BP_apply_title_laws = {
 	effect = {
@@ -128,7 +145,7 @@ BP_apply_title_laws = {
 	}
 }
 
-#Prevent government boostraping effect
+#Prevent government bootstrapping effect
 BP_prevent_title_grant_boostrapping = {
 	effect = {
 		if = {
@@ -167,7 +184,7 @@ BP_degrade_roman_government = {
 	effect = { degrade_roman_government_effect = yes }
 }
 
-#Keep Gupta and Bureaucratic Cout Languages
+#Keep Gupta and Bureaucratic Court Languages
 BP_set_court_langauge = {
 	effect = {
 		if = {
@@ -222,7 +239,7 @@ BP_fall_of_rome = {
 	}
 }
 
-#Cleanup migration modifiers on certain transfers
+#Clean up migration modifiers on certain transfers
 BP_remove_migration_modifiers = {
 	effect = {
 		if = {
@@ -283,6 +300,7 @@ BP_swap_wre_for_italy = {
 	effect = {
 		if = {
 			limit = {
+				NOT = { exists = title:e_wre.holder }
 				any_kingdom = {
 					count <= 1
 					de_jure_liege = title:e_wre

@@ -25,6 +25,7 @@ on_game_start = {
 				every_vassal = {
 					limit = {
 						vassal_contract_has_modifiable_obligations = yes
+						is_ai = yes
 					}
 					vassal_contract_decrease_obligation_level = feudal_government_taxes
 					vassal_contract_decrease_obligation_level = feudal_government_levies
@@ -327,6 +328,9 @@ on_game_start_after_lobby = {
 			limit = { NOT = { has_game_rule = sexuality_distribution_default } }
 			game_rule_sexuality_distribution_effect = yes
 		}
+		else = { # So that children 10+ starts with a sexuality
+			child_sexuality_distribution_effect = yes
+		}
 
 		##### Changed from Vanilla: Removed "ACHIEVEMENT: FROM RAGS TO RICHES"
 		
@@ -421,6 +425,21 @@ on_game_start_after_lobby = {
 				target = culture:sami
 				value = 20
 				desc = cultural_acceptance_historical_relations
+			}
+		}
+		# Custom ruler under the HRE should have lowered feudal obligations
+		if = {
+			limit = { exists = title:e_hre.holder }
+			title:e_hre.holder = {
+				every_vassal = {
+					limit = {
+						is_ai = no
+						vassal_contract_has_modifiable_obligations = yes
+					}
+					vassal_contract_decrease_obligation_level = feudal_government_taxes
+					vassal_contract_decrease_obligation_level = feudal_government_levies
+					set_vassal_contract_modification_blocked = no
+				}
 			}
 		}
 	}

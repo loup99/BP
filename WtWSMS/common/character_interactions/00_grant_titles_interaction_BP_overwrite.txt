@@ -1,4 +1,5 @@
-﻿grant_titles_interaction = {
+﻿##### Changed from Vanilla: Modified is_valid_showing_failures_only, can_be_picked_title
+grant_titles_interaction = {
 
 	category = interaction_category_vassal
 	common_interaction = yes
@@ -31,9 +32,12 @@
 	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
 		scope:recipient = {
-			OR = {
-				can_be_granted_titles_by = { RULER = scope:actor }
-				can_be_granted_theocratic_titles_by = { RULER = scope:actor }
+			custom_tooltip = {
+				text = can_be_granted_titles_interaction_tt
+				OR = {
+					can_be_granted_titles_by = { RULER = scope:actor }
+					can_be_granted_theocratic_titles_by = { RULER = scope:actor }
+				}
 			}
 		}
 		NOT = { scope:actor = { is_at_war_with = scope:recipient } }
@@ -59,7 +63,7 @@
 				count > 1
 			}
 		}
-		scope:recipient = { is_diplomatically_available = yes }
+		scope:recipient = { is_busy_in_events_localised = yes }
 		trigger_if = {
 			limit = {
 				scope:recipient = {
@@ -150,6 +154,10 @@
 	can_be_picked_title = {
 		scope:target = {
 			is_leased_out = no
+			custom_tooltip = {
+				is_head_of_faith = no
+				text = GRANT_TITLES_ITEM_CANT_HEAD_OF_FAITH
+			}
 			trigger_if = {
 				limit = {
 					scope:recipient = scope:actor.player_heir
@@ -168,7 +176,7 @@
 		}
 
 		custom_description = {
-			text = grant_titles_interaction_children_not_allowed_temple 
+			text = grant_titles_interaction_children_not_allowed_temple
 			subject = scope:recipient
 			NOR = {
 				AND = {
@@ -207,7 +215,10 @@
 		#Eranshar can only give "Eran" counties to followers of Ahura Mazda
 		trigger_if = {
 			limit = {
-				scope:actor = { has_government = eranshar_government }
+				scope:actor = {
+					has_government = eranshar_government
+					religion = religion:zoroastrianism_religion
+				}
 				scope:target = {
 					tier = tier_county
 					religion = religion:zoroastrianism_religion
@@ -265,8 +276,9 @@
 						}
 					}
 					progress_towards_friend_effect = {
+						REASON = friend_granted_title
 						CHARACTER = scope:actor
-						OPINION = no
+						OPINION = 0
 					}
 				}
 			}
@@ -405,6 +417,10 @@
 				}
 			}
 		}
+
+		# Iterate over all given titles
+		#  - Add opinion modifiers
+		#  - Collect titles that discontent reduction can later be derived from
 		every_in_list = {
 			list = target_titles
 			save_temporary_scope_as = this_title
@@ -426,15 +442,6 @@
 						}
 
 						scope:this_title = { add_to_temporary_list = titles_to_grant }
-
-						hidden_effect = {
-							if = {
-								limit = {
-									is_a_faction_member = yes
-								}
-								add_joined_faction_discontent = -5
-							}
-						}
 					}
 
 					else_if = {
@@ -450,15 +457,6 @@
 						}
 
 						scope:this_title = { add_to_temporary_list = titles_to_grant }
-
-						hidden_effect = {
-							if = {
-								limit = {
-									is_a_faction_member = yes
-								}
-								add_joined_faction_discontent = -10
-							}
-						}
 					}
 
 					else_if = {
@@ -474,15 +472,6 @@
 						}
 
 						scope:this_title = { add_to_temporary_list = titles_to_grant }
-
-						hidden_effect = {
-							if = {
-								limit = {
-									is_a_faction_member = yes
-								}
-								add_joined_faction_discontent = -20
-							}
-						}
 					}
 
 					else_if = {
@@ -498,15 +487,6 @@
 						}
 
 						scope:this_title = { add_to_temporary_list = titles_to_grant }
-
-						hidden_effect = {
-							if = {
-								limit = {
-									is_a_faction_member = yes
-								}
-								add_joined_faction_discontent = -40
-							}
-						}
 					}
 
 					else_if = {
@@ -515,15 +495,6 @@
 						add_opinion = {
 							target = scope:actor
 							modifier = received_title_empire
-						}
-
-						hidden_effect = {
-							if = {
-								limit = {
-									is_a_faction_member = yes
-								}
-								add_joined_faction_discontent = -60
-							}
 						}
 
 						scope:this_title = { add_to_temporary_list = titles_to_grant }
@@ -561,6 +532,17 @@
 					}
 				}
 				custom_tooltip = grant_title_to_bastard_dynasty_warning
+			}
+		} # every_in_list
+
+
+		# The accumulated discontent reduction of the recipient
+		scope:recipient = {
+			if = {
+				limit = {
+					is_a_faction_member = yes
+				}
+				add_joined_faction_discontent = grant_title_opinion_sum_discontent_calc
 			}
 		}
 
@@ -609,11 +591,51 @@
 			}
 			custom_tooltip = grant_title_modifier_stack_baronies
 		}
+
+		# Jealousy check
 		if = {
 			limit = {
-				scope:recipient = { is_a_faction_member = yes }
+				any_in_list = {
+					list = titles_to_grant
+					any_claimant = { grant_title_rivalry_trigger = yes }
+				}
 			}
-			custom_tooltip = grant_title_modifier_stack_discontent
+			hidden_effect = {
+				random = {
+					chance = 25
+					ordered_in_list = {
+						list = titles_to_grant
+						limit = {
+							any_claimant = { grant_title_rivalry_trigger = yes }
+						}
+						order_by = tier
+						save_scope_as = claim_title
+						ordered_claimant = {
+							limit = { grant_title_rivalry_trigger = yes }
+							order_by = primary_title.tier
+							save_scope_as = claim_vassal
+							if = {
+								limit = {
+									scope:recipient = { is_lowborn = yes }
+								}
+								scope:recipient = { save_scope_as = lowborn_scope }
+							}
+							else_if = {
+								limit = {
+									scope:recipient = { has_claim_on = scope:claim_title }
+								}
+								scope:recipient = { save_scope_as = claimant_scope }
+							}
+							scope:actor = {
+								trigger_event = {
+									id = bp1_yearly.8070
+									days = 5
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		#Stress impact
@@ -630,6 +652,14 @@
 						}
 						count >= 1
 					}
+				}
+				
+				# Generous characters enjoy giving away titles
+				if = {
+					limit = {
+						has_trait = generous
+					}
+					add_stress = generous_title_grant_value
 				}
 
 				# Gnostics lose stress for giving away titles.

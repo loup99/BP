@@ -9,9 +9,13 @@ found_kingdom_decision = {
 	is_shown = {
 		highest_held_title_tier = tier_duchy
 		NOT = { has_game_rule = off_custom_kingdoms }
-		AND = { #Franks should try to form Francia first
-			root.culture = culture:old_frankish
-			has_global_variable = formed_frankish_kingdom
+		#Additional WtWSMS custom kingdom creation blockers
+		trigger_if = {
+			limit = { has_game_rule = custom_kingdom_creation_blocked_for_specific_cases_enabled }
+			NOR = { #Franks should try to form Francia first
+				root.culture = culture:old_frankish
+				has_global_variable = formed_frankish_kingdom
+			}
 		}
 	}
 	##### Changed from Vanilla ^^^^^
@@ -87,17 +91,13 @@ found_empire_decision = {
 			}
 		}
 		NOT = { has_game_rule = off_custom_kingdoms }
-		AND = { #Goths should try to form the Gothic Empire first
-			OR = {
-				root.culture = culture:gothic
-				root.culture = {
-					AND = {
-						any_parent_culture_or_above = { this = culture:gothic }
-						this = { has_same_culture_heritage = culture:gothic }
-					}
-				}
+		#Additional WtWSMS custom empire creation blockers
+		trigger_if = {
+			limit = { has_game_rule = custom_kingdom_creation_blocked_for_specific_cases_enabled }
+			NOR = { #Goths should try to form the Gothic Empire first
+				culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:gothic } }
+				has_global_variable = formed_gothic_empire
 			}
-			has_global_variable = formed_gothic_empire
 		}
 	}
 	##### Changed from Vanilla ^^^^^
@@ -115,6 +115,37 @@ found_empire_decision = {
 					}
 				}
 				sub_realm_size >= 80
+			}
+		}
+
+		trigger_if = {
+			limit = {
+				exists = struggle:iberian_struggle
+				# only display the condition for people from relevant faiths and cultures
+				struggle:iberian_struggle = {
+					OR = {
+						is_culture_involved_in_struggle = root.culture
+						is_faith_involved_in_struggle = root.faith
+					}
+				}
+				# and living nearby
+				any_realm_county = {
+ 					title_province = {
+ 						OR = {
+ 							geographical_region = ghw_region_north_africa
+ 							geographical_region = world_europe_west
+ 							geographical_region = world_europe_south
+					 	}
+ 					}
+ 				}
+			}
+			custom_description = {
+				text = found_empire_decision_not_part_of_iberian_struggle
+				NOT = {
+					any_character_struggle = {
+						is_struggle_type = iberian_struggle
+					}
+				}
 			}
 		}
 	}

@@ -38,8 +38,14 @@ is_preferred_heresy_trigger = {
 
 ##### Changed from Vanilla: Overhauled with new faiths
 is_valid_heresy_trigger = {
-	#The origin faith can never be its own heresy.
-	NOT = { $ORIGIN_FAITH$ = $HERETICAL_FAITH$}
+	NOT = { $ORIGIN_FAITH$ = $HERETICAL_FAITH$ }
+	# A heretical faith can't be currently locked off via variable.
+	$HERETICAL_FAITH$ = {
+		NOR = {
+			has_variable = block_conversion_till_decision_taken
+			has_variable = block_conversion_till_nebulous_circumstances
+		}
+	}
 	
 	#Be very careful selecting ethnic religion types
 	valid_heretic_culture_cultural_religion_pair_trigger = {
@@ -155,7 +161,7 @@ faiths_are_in_eastern_christianity_group_trigger = {
 
 ##### Changed from Vanilla: Generalized Trigger
 valid_demand_conversion_conditions_trigger = {
-	scope:recipient = { is_diplomatically_available = yes }
+	scope:recipient = { is_busy_in_events_localised = yes }
 	scope:recipient = { NOT = { has_strong_hook = scope:actor } }
 	scope:recipient = { NOT = { has_trait = devoted } }
 	scope:recipient = { NOT = { has_trait = order_member } }
@@ -207,6 +213,22 @@ not_non_armenian_standard_christian_faith_trigger = {
 		trigger_if = {
 			limit = { BP_iconoclasm_trigger = yes }
 			this = faith:iconoclast
+		}
+	}
+}
+
+believes_in_pilgrimage_trigger = {
+	NOR = {
+		# These Faiths historically shunned going on pilgrimages, saying they were a waste of time & money.
+		##### Changed from Vanilla: Removed waldenisan
+		faith = faith:paulician
+		##### Changed from Vanilla: Removed lollard
+		faith = faith:qarmatian
+	}
+	# Also we must have an actual holy site we can visit.
+	faith = {
+		any_holy_site = {
+			exists = this
 		}
 	}
 }

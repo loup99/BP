@@ -119,53 +119,6 @@ task_conversion = {
 		}
 		##### Changed from Vanilla ^^^^^
 		
-		# Conversion speed game rules
-		if = {
-			limit = {
-				has_game_rule = slower_faith_conversion_speed
-			}
-			multiply = {
-				value = slower_game_rule_value
-				desc = GAME_RULE_SLOWER_REASON
-			}
-		}
-		if = {
-			limit = {
-				has_game_rule = significantly_slower_faith_conversion_speed
-			}
-			multiply = {
-				value = significantly_slower_game_rule_value
-				desc = GAME_RULE_SIGNIFICANTLY_SLOWER_REASON
-			}
-		}
-		if = {
-			limit = {
-				has_game_rule = faster_faith_conversion_speed
-			}
-			multiply = {
-				value = faster_game_rule_value
-				desc = GAME_RULE_FASTER_REASON
-			}
-		}
-		if = {
-			limit = {
-				has_game_rule = significantly_faster_faith_conversion_speed
-			}
-			multiply = {
-				value = significantly_faster_game_rule_value
-				desc = GAME_RULE_SIGNIFICANTLY_FASTER_REASON
-			}
-		}
-		##### Changed from Vanilla vvvvv
-		if = {
-			limit = { has_game_rule = bp_default_culture_conversion_speed }
-			multiply = {
-				value = bp_default_faith_conversion_value
-				desc = GAME_RULE_DEFAULT_BP_FAITH_CONVERSION_VALUE
-			}
-		}
-		##### Changed from Vanilla ^^^^^
-		
 		
 		# Faster conversion for certain special doctrines
 		if = {
@@ -224,6 +177,80 @@ task_conversion = {
 			multiply = {
 				value = council_toledo_conversion_modifier_value
 				desc = council_toledo_heresies_task_desc
+			}
+		}
+		
+		# Conversion speed game rules
+		if = {
+			limit = {
+				has_game_rule = slower_faith_conversion_speed
+			}
+			multiply = {
+				value = slower_game_rule_value
+				desc = GAME_RULE_SLOWER_REASON
+			}
+		}
+		if = {
+			limit = {
+				has_game_rule = significantly_slower_faith_conversion_speed
+			}
+			multiply = {
+				value = significantly_slower_game_rule_value
+				desc = GAME_RULE_SIGNIFICANTLY_SLOWER_REASON
+			}
+		}
+		if = {
+			limit = {
+				has_game_rule = faster_faith_conversion_speed
+			}
+			multiply = {
+				value = faster_game_rule_value
+				desc = GAME_RULE_FASTER_REASON
+			}
+		}
+		if = {
+			limit = {
+				has_game_rule = significantly_faster_faith_conversion_speed
+			}
+			multiply = {
+				value = significantly_faster_game_rule_value
+				desc = GAME_RULE_SIGNIFICANTLY_FASTER_REASON
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		if = {
+			limit = { has_game_rule = bp_default_culture_conversion_speed }
+			multiply = {
+				value = bp_default_faith_conversion_value
+				desc = GAME_RULE_DEFAULT_BP_FAITH_CONVERSION_VALUE
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		if = {
+			limit = {
+				exists = scope:county
+				OR = {
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = unreformed_syncretic_actor_opinion_active }
+						scope:county.faith = { has_doctrine_parameter = unreformed }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = christian_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = christianity_religion }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = islamic_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = islam_religion }
+					}
+					AND = {
+						scope:councillor.faith = { has_doctrine_parameter = jewish_syncretic_actor_opinion_active }
+						scope:county.faith = { religion_tag = judaism_religion }
+					}
+				}
+			}
+			min = {
+				value = 0.1
+				desc = minimum_conversion
 			}
 		}
 	}
@@ -478,18 +505,11 @@ task_conversion = {
 							}
 						}
 					}
-					scope:county.religion = scope:councillor_liege.religion
+					#scope:county.religion = scope:councillor_liege.religion # Excluded, as tax nonbelievers actually works for different faiths within the same religion
 					AND = { # Islamic heartlands, to help fend off encroaching faiths
 						scope:councillor_liege.religion = religion:islam_religion
 						scope:county.title_province = {
-							OR = {
-								geographical_region = ghw_region_holy_land
-								geographical_region = ghw_region_arabia
-								geographical_region = ghw_region_near_east
-								geographical_region = ghw_region_egypt
-								geographical_region = ghw_region_persia
-								geographical_region = ghw_region_north_africa
-							}
+							geographical_region = islamic_heartlands
 						}
 					}
 				}
