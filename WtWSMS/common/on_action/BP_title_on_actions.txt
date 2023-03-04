@@ -35,7 +35,6 @@ on_title_gain = {
 		#Other stuff
 		BP_prevent_title_grant_boostrapping
 		BP_apply_title_laws
-		BP_degrade_roman_government
 		BP_set_court_langauge
 		#Other On Actions
 		BP_fall_of_rome
@@ -52,70 +51,24 @@ BP_set_government_id_effect_on_title_gain = {
 #Handle Bureaucratic succession for landed chars
 BP_handle_bureaucratic_succession = {
 	effect = {
-		if = {
-			limit = {
-				exists = scope:title.holder
-				exists = scope:previous_holder
-				scope:title.tier = tier_empire
-				scope:previous_holder = { has_government = bureaucratic_government }
-			}
-			#If the previous holder was bureaucratic, I become bureauctic (if having correct government)
+		if = { #If the Empire is bureaucratic
+			limit = { scope:title = { has_variable = bureaucratic_empire } }
+			#If the holder has a valid precursor government, keep bureaucratic
 			if = {
 				limit = { valid_bureaucratic_election_precursor_governments_trigger = yes }
-				#In the case of an external/non-bureaucratic_taxation ruler,
-				#Update taxation rules after switching government
-				if = {
-					limit = { has_bureaucratic_taxation_trigger = no }
-					convert_realm_to_bureaucratic_effect = yes
-				}
-				#Otherwise, just switch government if you don't have it already (somehow)
-				else = { convert_realm_to_bureaucratic_effect = yes }
+				convert_realm_to_bureaucratic_effect = yes
 			}
-			#If an invalid government arises, then the bureaucratic edifice must collapse
-			else = { convert_realm_to_subroman_direct_effect = yes }
-			
-			#Then, change the previous holder's government if required
-			scope:previous_holder = {
-				if = {
-					limit = { is_landed = yes } #Total usurpation &c.
-					#If he's still a valid bureaucrat-type government, apply the correct laws
-					if = { #Is a gubernatorial
-						limit = {
-							has_bureaucratic_government_type_trigger = yes
-							valid_bureaucratic_government_type_status_trigger = yes
-							is_independent_ruler = no
-						}
-						convert_realm_to_gubernatorial_effect = yes
-					}
-					else_if = { #He's still an independent bureaucrat (somehow)
-						limit = {
-							has_bureaucratic_government_type_trigger = yes
-							valid_bureaucratic_government_type_status_trigger = yes
-							is_independent_ruler = yes
-						}
-						convert_realm_to_bureaucratic_effect = yes
-					}
-					#Otherwise, turn him to subroman government
-					else = { convert_realm_to_subroman_direct_effect = yes }
-				}
-			}
+			#Else, degrade government
+			else = { degrade_roman_government_effect = yes }
 		}
 	}
 }
 
+#If we have some weird edge case, handle it
 BP_check_bureaucratic_state = {
 	effect = {
-		if = { #If we were demoted but not independent, just swap governments
-			limit = {
-				has_government = bureaucratic_government
-				valid_bureaucratic_status_trigger = no
-			}
-			if = {
-				limit = { valid_gubernatorial_status_trigger = yes }
-				convert_realm_to_gubernatorial_effect = yes
-			}
-			else = { convert_realm_to_subroman_direct_effect = yes }
-		}
+		#Only will fire if invalid state
+		every_independent_ruler = { degrade_roman_government_effect = yes }
 	}
 }
 
@@ -177,11 +130,6 @@ BP_prevent_title_grant_boostrapping = {
 			}
 		}
 	}
-}
-
-#If we have an invalid state for Roman governance, degrade it.
-BP_degrade_roman_government = {
-	effect = { degrade_roman_government_effect = yes }
 }
 
 #Keep Gupta and Bureaucratic Court Languages
@@ -295,7 +243,6 @@ BP_remove_migration_modifiers = {
 # Does *not* provide scope:transfer_type
 on_title_destroyed = {
 	on_actions = {
-		BP_degrade_roman_government
 		BP_swap_wre_for_italy
 	}
 }

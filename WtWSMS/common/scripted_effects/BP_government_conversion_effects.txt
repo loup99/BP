@@ -276,8 +276,9 @@ convert_realm_to_subroman_direct_effect = { #i.e., we just go to default values
 	hidden_effect = { remove_all_realm_laws_effect = yes }
 	change_government = subroman_government
 	add_realm_law_skip_effects = subroman_taxation_3
-		add_realm_law_skip_effects = subroman_popular_opinion_0
-		add_realm_law_skip_effects = subroman_feudal_transition_0
+	add_realm_law_skip_effects = subroman_popular_opinion_0
+	add_realm_law_skip_effects = subroman_feudal_transition_0
+	every_held_title = { limit = { has_variable = bureaucratic_empire } remove_variable = bureaucratic_empire }
 	hidden_effect = {
 		remove_government_id_effect = { THE_RULER = this }
 		set_government_id_effect = { THE_RULER = this }
@@ -297,16 +298,28 @@ convert_realm_to_bureaucratic_effect = {
 	hidden_effect = { remove_all_realm_laws_effect = yes }
 	change_government = bureaucratic_government
 	every_vassal_or_below = {
-		limit = { has_government = subroman_government }
-		change_government = gubernatorial_government
+		limit = {
+			OR = {
+				has_government = subroman_government
+				has_government = bureaucratic_government
+			}
+		}
+		convert_realm_to_gubernatorial_effect = yes
 	}
-	set_taxation_law_to_value_effect = { VALUE = 2 }
+	if = {
+		limit = { has_bureaucratic_taxation_trigger = no }
+		set_taxation_law_to_value_effect = { VALUE = 2 }
+	}
 	every_held_title = {
 		limit = { this.tier = tier_empire }
 		remove_all_title_laws_effect = yes
 		if = {
 			limit = { NOT = { has_title_law = imperial_elective_succession_law } }
 			add_title_law = imperial_elective_succession_law
+		}
+		if = {
+			limit = { NOT = { has_variable = bureaucratic_empire } }
+			set_variable = bureaucratic_empire
 		}
 	}
 	hidden_effect = {
