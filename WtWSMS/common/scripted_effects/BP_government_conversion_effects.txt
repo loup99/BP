@@ -279,6 +279,7 @@ convert_realm_to_subroman_direct_effect = { #i.e., we just go to default values
 	add_realm_law_skip_effects = subroman_popular_opinion_0
 	add_realm_law_skip_effects = subroman_feudal_transition_0
 	every_held_title = { limit = { has_variable = bureaucratic_empire } remove_variable = bureaucratic_empire }
+	every_held_title = { limit = { has_variable = bureaucratic_language } remove_variable = bureaucratic_language }
 	hidden_effect = {
 		remove_government_id_effect = { THE_RULER = this }
 		set_government_id_effect = { THE_RULER = this }
@@ -317,10 +318,32 @@ convert_realm_to_bureaucratic_effect = {
 			limit = { NOT = { has_title_law = imperial_elective_succession_law } }
 			add_title_law = imperial_elective_succession_law
 		}
-		if = {
-			limit = { NOT = { has_variable = bureaucratic_empire } }
-			set_variable = bureaucratic_empire
+		if = { limit = { NOT = { has_variable = bureaucratic_empire } } set_variable = bureaucratic_empire }
+	}
+	#Handle Bureaucratic Languages
+	if = {
+		limit = { any_held_title = { has_variable = bureaucratic_language } }
+		random_held_title = {
+			limit = { has_variable = bureaucratic_language }
+			save_temporary_scope_as = the_title
+			every_held_title = {
+				limit = {
+					this.tier = tier_empire
+					NOT = { has_variable = bureaucratic_language }
+				}
+				set_variable = { name = bureaucratic_language value = scope:the_title.var:bureaucratic_language }
+			}
 		}
+	}
+	else = {
+		every_held_title = {
+			limit = { this.tier = tier_empire }
+			set_new_bureaucratic_language_effect = {
+				CHAR = this.holder
+				TITLE = this
+			}
+		}
+		bp_specific_court_language_effect = { CHAR = this.holder }
 	}
 	hidden_effect = {
 		remove_government_id_effect = { THE_RULER = this }
