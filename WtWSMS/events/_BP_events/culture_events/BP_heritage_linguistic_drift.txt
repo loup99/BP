@@ -604,7 +604,6 @@ bp_heritage_linguistic_drift.0001 = {
 	type = empty
 	hidden = yes
 	
-	#Pick one of the random valid cultures
 	immediate = {
 		#If the culture head exists, inform him/her first
 		if = {
@@ -753,22 +752,25 @@ scripted_effect shift_heritage_latin_to_children_effect = {
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_frank }
 				}
 			}
-			set_culture_pillar = heritage_frankish
-			ccu_culture_created_or_changed_effect = yes
+			
+			if = { #If ruled by Franks or a Frankish hybrid, becomes Frankish
+				limit = {
+					OR = {
+						any_parent_culture = { this = culture:old_frankish }
+						any_culture_county = { percent >= 0.50 this.holder.top_liege.culture = { any_parent_culture = { this = culture:old_frankish } } }
+					}
+				}
+				set_culture_pillar = heritage_frankish
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = { #Otherwise, Gallic Romance
+				set_culture_pillar = heritage_gallic_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
 		}
 		else_if = {
 			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_british } }
 			set_culture_pillar = heritage_romano_british
-			ccu_culture_created_or_changed_effect = yes
-		}
-		else_if = {
-			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_british } }
-			set_culture_pillar = heritage_romano_british
-			ccu_culture_created_or_changed_effect = yes
-		}
-		else_if = {
-			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_aramean } }
-			set_culture_pillar = heritage_romano_aramean
 			ccu_culture_created_or_changed_effect = yes
 		}
 		else_if = {
@@ -787,6 +789,7 @@ scripted_effect shift_heritage_latin_to_children_effect = {
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_dacian }
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_pannonian }
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_thracian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric }
 				}
 			}
 			set_culture_pillar = heritage_vlach
@@ -797,10 +800,8 @@ scripted_effect shift_heritage_latin_to_children_effect = {
 				OR = {
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_illyrian }
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_raetian }
-					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric }
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:sardinian }
 					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corsican }
-					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gothic }
 				}
 			}
 			set_culture_pillar = heritage_italian
@@ -823,7 +824,6 @@ bp_heritage_linguistic_drift.0101 = {
 	type = empty
 	hidden = yes
 	
-	#Pick one of the random valid cultures
 	immediate = {
 		#If the culture head exists, inform him/her first
 		if = {
@@ -833,7 +833,10 @@ bp_heritage_linguistic_drift.0101 = {
 		#Otherwise, directly change the culture and tell everyone
 		else = {
 			shift_heritage_effect = yes
-			every_player = { trigger_event = { id = bp_heritage_linguistic_drift.0103 } }
+			every_ruler = { #Informational event
+				limit = { is_ai = no }
+				trigger_event = { id = bp_heritage_linguistic_drift.0103 }
+			}
 		}
 	}
 }
@@ -841,15 +844,25 @@ bp_heritage_linguistic_drift.0101 = {
 bp_heritage_linguistic_drift.0102 = {
 	type = character_event
 	title = bp_heritage_linguistic_drift.0102.t
-	desc = bp_heritage_linguistic_drift.0102.desc
+	desc = {
+		first_valid = {
+			#Latin to Romance
+			triggered_desc = {
+				trigger = { scope:shift_culture = { has_cultural_pillar = heritage_latin } }
+				desc = bp_heritage_linguistic_drift.0102.desc.latin
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0102.desc
+		}
+	}
+	
 	theme = culture_change
 	left_portrait = root
 	
-	immediate = {}
+	immediate = { hidden_effect = { shift_heritage_effect = yes } }
 	
 	option = {
 		name = bp_heritage_linguistic_drift.0102.accept
-		shift_heritage_effect = yes
 		every_ruler = {
 			limit = {
 				OR = {
@@ -867,7 +880,17 @@ bp_heritage_linguistic_drift.0102 = {
 bp_heritage_linguistic_drift.0103 = {
 	type = character_event
 	title = bp_heritage_linguistic_drift.0103.t
-	desc = bp_heritage_linguistic_drift.0103.desc
+	desc = {
+		first_valid = {
+			#Latin to Romance
+			triggered_desc = {
+				trigger = { scope:shift_culture = { has_cultural_pillar = heritage_latin } }
+				desc = bp_heritage_linguistic_drift.0103.desc.latin
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0103.desc
+		}
+	}
 	theme = culture_change
 	left_portrait = scope:chosen_character
 	
@@ -877,14 +900,18 @@ bp_heritage_linguistic_drift.0103 = {
 			scope:shift_culture.culture_head = { save_scope_as = chosen_character }
 		}
 		else_if = {
-			limit = { any_ruler = { culture = scope:shift_culture } }
+			limit = {
+				any_ruler = {
+					culture = scope:shift_culture
+					NOT = { has_government = mercenary_government } #Keep it to chars on the map please
+				}
+			}
 			random_ruler = {
 				limit = { culture = scope:shift_culture }
 				save_scope_as = chosen_character
 			}
 		}
-		#Fallback
-		else = { root = { save_scope_as = chosen_character } }
+		#Fallback, don't show anything
 	}
 	
 	#For other rulers of the culture
