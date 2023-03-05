@@ -287,7 +287,7 @@ convert_realm_to_subroman_direct_effect = { #i.e., we just go to default values
 }
 convert_realm_to_gubernatorial_effect = {
 	hidden_effect = { remove_all_realm_laws_effect = yes }
-	add_realm_law = roman_administrative_law
+	if = { limit = { NOT = { has_realm_law = roman_administrative_law } }add_realm_law = roman_administrative_law }
 	change_government = gubernatorial_government
 	get_and_apply_previous_taxation_effect = { LIEGE = this.liege }
 	hidden_effect = {
@@ -326,12 +326,14 @@ convert_realm_to_bureaucratic_effect = {
 		random_held_title = {
 			limit = { has_variable = bureaucratic_language }
 			save_temporary_scope_as = the_title
-			every_held_title = {
-				limit = {
-					this.tier = tier_empire
-					NOT = { has_variable = bureaucratic_language }
+			holder = {
+				every_held_title = {
+					limit = {
+						this.tier = tier_empire
+						NOT = { has_variable = bureaucratic_language }
+					}
+					set_variable = { name = bureaucratic_language value = scope:the_title.var:bureaucratic_language }
 				}
-				set_variable = { name = bureaucratic_language value = scope:the_title.var:bureaucratic_language }
 			}
 		}
 	}
