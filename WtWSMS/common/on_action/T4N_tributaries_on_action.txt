@@ -64,61 +64,63 @@ on_title_lost = {
     }
 }
 
+#Hand off tributaries to a new suzerain
 T4N_tributaries_on_title_lost = {
-    effect = {
-        switch = {
-            trigger = exists
+	effect = {
+		switch = {
+			trigger = exists
 
-            var:my_suzerain = {
-                if = {
-                    if = {
-                        limit = {
-                            is_permanent_tributary = {
-                                SUZERAIN = this
-                                TRIBUTARY = root
-                            }
-                        }
-                        unset_tributary = {
-                            TRIBUTARY = root
-                            TRIBUTARY_BASE_TYPE = flag:permanent
-                        }                
-                    }
-                    else = {
-                        unset_tributary = {
-                            TRIBUTARY = root
-                            TRIBUTARY_BASE_TYPE = flag:non_permanent
-                        }
-                    }
-                }
-            }
-            var:suzerain = {
-                if = {
-                    limit = {
-                        OR = {
-                            is_landed = no
-                            is_independent_ruler = no
-                            liege = scope:new_holder
-                        }
-                    }
-                    every_in_list = {
-                        variable = permanent_tributaries
-                        set_variable = { 
-                            name = tributary_succ_var
-                            value = this
-                        }
-                        pass_tributary_type_to_heir = {
-                            SCOPE = var:tributary_succ_var
-                            TYPE = var:tributary_type
-                            TRIBUTARY = var:tributary_succ_var
-                            NEW_RULER = scope:new_holder
-                        }
-                        remove_variable = tributary_succ_var
-                    }
-                    clear_variable_list = non_permanent_tributaries
-                }
-            }
-        }
-    }
+			var:my_suzerain = {
+				if = {
+					if = {
+						limit = {
+							is_permanent_tributary = {
+								SUZERAIN = this
+								TRIBUTARY = root
+							}
+						}
+						unset_tributary = {
+							TRIBUTARY = root
+							TRIBUTARY_BASE_TYPE = flag:permanent
+						}
+					}
+					else = {
+						unset_tributary = {
+							TRIBUTARY = root
+							TRIBUTARY_BASE_TYPE = flag:non_permanent
+						}
+					}
+				}
+			}
+			var:suzerain = {
+				if = {
+					limit = {
+						OR = {
+							is_landed = no
+							is_independent_ruler = no
+							liege = scope:new_holder
+						}
+					}
+					#Pass off permanent tributaries; non-permanent tributaries are freed already
+					every_in_list = {
+						variable = permanent_tributaries
+						this = { save_temporary_scope_as = the_tributary }
+						pass_tributary_type_to_heir = {
+							SCOPE = scope:the_tributary
+							TYPE = var:tributary_type
+							TRIBUTARY = scope:the_tributary
+							NEW_RULER = scope:new_holder
+						}
+					}
+					#Remove related tributary variables
+					clear_variable_list = permanent_tributaries
+					clear_variable_list = non_permanent_tributaries
+					clear_variable_list = all_tributaries
+					remove_variable = suzerain
+				}
+			}
+		}
+	}
 }
 
 # character just about to die in root scope
@@ -165,7 +167,7 @@ T4N_tributaries_on_death = {
                     TRIBUTARY_BASE_TYPE = flag:non_permanent
                 }
                 remove_variable = tributary_succ_var_np
-			}	
+			}
 			remove_variable = suzerain
         }
         if = {
