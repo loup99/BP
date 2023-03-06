@@ -1,15 +1,18 @@
 ﻿@bureaucracy_cooldown_years = 25
 
+#Organization models the overall orientation of the state in the shifts of Roman/Byzantine governance between
+#split civil/military organization and combined civil/military organization.
 bureaucratic_organization = {
 	default = bureaucratic_organization_civil
 	cumulative = no
 	flag = other_law_category
-	flag = bureaucratic_law
+	flag = bureaucratic_organization
 	
 	bureaucratic_organization_civil = {
 		modifier = {}
 		
-		can_keep = { realm_law_use_bureaucratic_other_laws_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
+		can_have = { has_government = bureaucratic_government }
 		
 		can_pass = {
 			is_independent_ruler = yes
@@ -26,13 +29,18 @@ bureaucratic_organization = {
 			set_variable = {
 				name = bureaucracy_organization_cooldown
 				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law
+				apply_law_down_tree_effect = { LAW = gubernatorial_organization_civil }
 			}
 		}
 	}
 	bureaucratic_organization_mixed = {
 		modifier = {}
 		
-		can_keep = { realm_law_use_bureaucratic_other_laws_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
+		can_have = { has_government = bureaucratic_government }
 		
 		can_pass = {
 			is_independent_ruler = yes
@@ -49,13 +57,18 @@ bureaucratic_organization = {
 			set_variable = {
 				name = bureaucracy_organization_cooldown
 				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law
+				apply_law_down_tree_effect = { LAW = gubernatorial_organization_mixed }
 			}
 		}
 	}
 	bureaucratic_organization_military = {
 		modifier = {}
 		
-		can_keep = { realm_law_use_bureaucratic_other_laws_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
+		can_have = { has_government = bureaucratic_government }
 		
 		can_pass = {
 			is_independent_ruler = yes
@@ -73,6 +86,212 @@ bureaucratic_organization = {
 				name = bureaucracy_organization_cooldown
 				years = @bureaucracy_cooldown_years
 			}
+			custom_description = {
+				text = all_gubernatorials_get_law
+				apply_law_down_tree_effect = { LAW = gubernatorial_organization_military }
+			}
 		}
 	}
 }
+gubernatorial_organization = {
+	default = bureaucratic_organization_civil
+	cumulative = no
+	flag = other_law_category
+	flag = bureaucratic_organization
+	
+	gubernatorial_organization_civil = {
+		modifier = {}
+		
+		can_keep = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		can_have = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		
+		can_pass = {
+			custom_description = {
+				text = "law_is_centrally_set"
+				always = no
+			}
+		}
+		
+		on_pass = {}
+	}
+	gubernatorial_organization_mixed = {
+		modifier = {}
+		
+		can_keep = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		can_have = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		
+		can_pass = {
+			custom_description = {
+				text = "law_is_centrally_set"
+				always = no
+			}
+		}
+		
+		on_pass = {}
+	}
+	gubernatorial_organization_military = {
+		modifier = {}
+		
+		can_keep = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		can_have = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		
+		can_pass = {
+			custom_description = {
+				text = "law_is_centrally_set"
+				always = no
+			}
+		}
+		
+		on_pass = {}
+	}
+}
+
+#Civil Service models how the government has set up the government, the degree of influence that established families
+#wielded; reaching an aristocratic high point 
+bureaucratic_civil_service = {
+	default = bureaucratic_civil_service_meritocratic
+	cumulative = no
+	flag = other_law_category
+	flag = bureaucratic_civil_service
+	
+	bureaucratic_civil_service_meritocratic = {
+		modifier = {}
+		
+		can_keep = { has_government = bureaucratic_government }
+		can_have = { has_government = bureaucratic_government }
+		
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucratic_civil_service_cooldown"
+					NOT = { has_variable = bureaucracy_civil_service_cooldown }
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_civil_service_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law
+				apply_law_down_tree_effect = { LAW = gubernatorial_civil_service_meritocratic }
+			}
+		}
+	}
+	bureaucratic_civil_service_mixed = {
+		modifier = {}
+		
+		can_keep = { has_government = bureaucratic_government }
+		can_have = { has_government = bureaucratic_government }
+		
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucratic_civil_service_cooldown"
+					NOT = { has_variable = bureaucracy_civil_service_cooldown }
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_civil_service_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law
+				apply_law_down_tree_effect = { LAW = gubernatorial_civil_service_mixed }
+			}
+		}
+	}
+	bureaucratic_civil_service_aristocratic = {
+		modifier = {}
+		
+		can_keep = { has_government = bureaucratic_government }
+		can_have = { has_government = bureaucratic_government }
+		
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucratic_civil_service_cooldown"
+					NOT = { has_variable = bureaucracy_civil_service_cooldown }
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_civil_service_cooldown
+				years = @bureaucracy_cooldown_years
+			}
+			custom_description = {
+				text = all_gubernatorials_get_law
+				apply_law_down_tree_effect = { LAW = gubernatorial_civil_service_aristocratic }
+			}
+		}
+	}
+}
+gubernatorial_civil_service = {
+	default = gubernatorial_civil_service_meritocratic
+	cumulative = no
+	flag = other_law_category
+	flag = bureaucratic_civil_service
+	
+	gubernatorial_civil_service_meritocratic = {
+		modifier = {}
+		
+		can_keep = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		can_have = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		
+		can_pass = {
+			custom_description = {
+				text = "law_is_centrally_set"
+				always = no
+			}
+		}
+		
+		on_pass = {}
+	}
+	gubernatorial_civil_service_mixed = {
+		modifier = {}
+		
+		can_keep = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		can_have = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		
+		can_pass = {
+			custom_description = {
+				text = "law_is_centrally_set"
+				always = no
+			}
+		}
+		
+		on_pass = {}
+	}
+	gubernatorial_civil_service_aristocratic = {
+		modifier = {}
+		
+		can_keep = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		can_have = { realm_law_use_gubernatorial_other_laws_trigger = yes }
+		
+		can_pass = {
+			custom_description = {
+				text = "law_is_centrally_set"
+				always = no
+			}
+		}
+		
+		on_pass = {}
+	}
+}
+
+
+
+
