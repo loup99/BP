@@ -5,14 +5,10 @@
 # Scope: culture
 # Arguments: target (culture)
 # Sample Usage: culture:xxx = { has_same_heritage_family_as_trigger = { TARGET = culture:yyy } }
-
 has_same_heritage_family_as_trigger = {
-	has_variable_list = heritage_family
-	$TARGET$ = { has_variable_list = heritage_family }
-	any_in_list = {
-		variable = heritage_family
-		save_temporary_scope_as = source_heritage_family
-		$TARGET$ = { is_target_in_variable_list = { name = heritage_family target = scope:source_heritage_family } }
+	ccu_has_same_variable_list_trigger = {
+		TARGET = $TARGET$
+		VARIABLE = heritage_family
 	}
 }
 
@@ -21,14 +17,10 @@ has_same_heritage_family_as_trigger = {
 # Scope: culture
 # Arguments: target (culture)
 # Sample Usage: culture:xxx = { has_same_heritage_group_as_trigger = { TARGET = culture:yyy } }
-
 has_same_heritage_group_as_trigger = {
-	has_variable_list = heritage_group
-	$TARGET$ = { has_variable_list = heritage_group }
-	any_in_list = {
-		variable = heritage_group
-		save_temporary_scope_as = source_heritage_group
-		$TARGET$ = { is_target_in_variable_list = { name = heritage_group target = scope:source_heritage_group } }
+	ccu_has_same_variable_list_trigger = {
+		TARGET = $TARGET$
+		VARIABLE = heritage_group
 	}
 }
 
@@ -37,13 +29,11 @@ has_same_heritage_group_as_trigger = {
 # Scope: culture
 # Arguments: target (culture)
 # Sample Usage: culture:xxx = { has_same_kulturbund_as_trigger = { TARGET = culture:yyy } }
-
 has_same_kulturbund_as_trigger = {
-	NOR = {
-		var:kulturbund = -1
-		$TARGET$.var:kulturbund = -1
+	ccu_has_same_variable_with_flag_none_trigger = {
+		TARGET = $TARGET$
+		VARIABLE = kulturbund
 	}
-	var:kulturbund = $TARGET$.var:kulturbund
 }
 
 #Languages
@@ -53,9 +43,11 @@ has_same_kulturbund_as_trigger = {
 # Scope: culture
 # Arguments: target (culture)
 # Sample Usage: culture:xxx = { has_same_language_family_as_trigger = { TARGET = culture:yyy } }
-
 has_same_language_family_as_trigger = {
-	var:language_family = $TARGET$.var:language_family
+	ccu_has_same_variable_trigger = {
+		TARGET = $TARGET$
+		VARIABLE = language_family
+	}
 }
 
 ###################################################################
@@ -63,9 +55,11 @@ has_same_language_family_as_trigger = {
 # Scope: culture
 # Arguments: target (culture)
 # Sample Usage: culture:xxx = { has_same_language_branch_as_trigger = { TARGET = culture:yyy } }
-
 has_same_language_branch_as_trigger = {
-	var:language_branch = $TARGET$.var:language_branch
+	ccu_has_same_variable_trigger = {
+		TARGET = $TARGET$
+		VARIABLE = language_branch
+	}
 }
 
 ###################################################################
@@ -73,13 +67,11 @@ has_same_language_branch_as_trigger = {
 # Scope: culture
 # Arguments: target (culture)
 # Sample Usage: culture:xxx = { has_same_language_group_as_trigger = { TARGET = culture:yyy } }
-
 has_same_language_group_as_trigger = {
-	NOR = {
-		var:language_group = -1
-		$TARGET$.var:language_group = -1
+	ccu_has_same_variable_with_flag_none_trigger = {
+		TARGET = $TARGET$
+		VARIABLE = language_group
 	}
-	var:language_group = $TARGET$.var:language_group
 }
 
 ###################################################################
@@ -88,12 +80,9 @@ has_same_language_group_as_trigger = {
 # Arguments: target (culture)
 # Sample Usage: culture:xxx = { has_same_dialect_continuum_as_trigger = { TARGET = culture:yyy } }
 has_same_dialect_continuum_as_trigger = {
-	has_variable_list = dialect_continuum
-	$TARGET$ = { has_variable_list = dialect_continuum }
-	any_in_list = {
-		variable = dialect_continuum
-		save_temporary_scope_as = source_dialect_continuum
-		$TARGET$ = { is_target_in_variable_list = { name = dialect_continuum target = scope:source_dialect_continuum } }
+	ccu_has_same_variable_list_trigger = {
+		TARGET = $TARGET$
+		VARIABLE = dialect_continuum
 	}
 }
 
@@ -120,4 +109,59 @@ has_a_creole_language_trigger = {
 		$TARGET$.var:language_creole = var:language_branch
 		$TARGET$.var:language_branch = var:language_creole
 	}
+}
+
+#Generics
+
+###################################################################
+# Purpose: General check if cultures have same variabl lists
+# Scope: culture
+# Arguments: target (culture), variable (variable list name)
+ccu_has_same_variable_list_trigger = {
+	trigger_if = {
+		limit = {
+			has_variable_list = $VARIABLE$
+			$TARGET$ = { has_variable_list = $VARIABLE$ }
+		}
+		any_in_list = {
+			variable = $VARIABLE$
+			save_temporary_scope_as = source_variable_list
+			$TARGET$ = { is_target_in_variable_list = { name = $VARIABLE$ target = scope:source_variable_list } }
+		}
+	}
+	trigger_else = { always = no }
+}
+
+###################################################################
+# Purpose: General check if cultures have same variable values, with a -1 as a "no match"
+# Scope: culture
+# Arguments: target (culture), variable (variable name)
+ccu_has_same_variable_with_flag_none_trigger = {
+	trigger_if = {
+		limit = {
+			has_variable = $VARIABLE$
+			$TARGET$ = { has_variable = $VARIABLE$ }
+		}
+		NOR = {
+			var:$VARIABLE$ = flag:none
+			$TARGET$.var:$VARIABLE$ = flag:none
+		}
+		var:$VARIABLE$ = $TARGET$.var:$VARIABLE$
+	}
+	trigger_else = { always = no }
+}
+
+###################################################################
+# Purpose: General check if cultures have same variable values
+# Scope: culture
+# Arguments: target (culture), variable (variable name)
+ccu_has_same_variable_trigger = {
+	trigger_if = {
+		limit = {
+			has_variable = $VARIABLE$
+			$TARGET$ = { has_variable = $VARIABLE$ }
+		}
+		var:$VARIABLE$ = $TARGET$.var:$VARIABLE$
+	}
+	trigger_else = { always = no }
 }
