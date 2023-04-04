@@ -2,6 +2,7 @@
 
 #bp_narrative_events.0001 - Fall of Rome to Barbarians
 #bp_narrative_events.0002 - Julius Nepos becomes WRE
+#bp_narrative_events.0004 - Theodoric's Invasion of Italy
 
 #Fall of Rome
 bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
@@ -102,9 +103,9 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		#Drop everyone's fervor who's in agreement with the Imperial Church
 		faith:nicene = {
 			change_fervor = {
-					value = -25
-					desc = loss_of_rome_imperial_church
-				}
+				value = -25
+				desc = loss_of_rome_imperial_church
+			}
 		}
 		religion:christianity_religion = {
 			every_faith = {
@@ -121,6 +122,23 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		add_piety = -1000
 		add_prestige = -1000
 	}
+}
+
+scripted_trigger nepos_trigger = {
+	character:175110 = {
+		has_truce = character:63
+		has_truce = character:55
+		has_title = title:e_wre
+	}
+	OR = {
+		title:e_wre = {
+			is_de_facto_liege_or_above_target = title:c_roma
+		}
+		title:e_wre = {
+			is_de_facto_liege_or_above_target = title:c_ravenna
+		}
+	}
+	NOT = { exists = global_var:nepos_return_italy }
 }
 
 #Nepos becomes Western Emperor
@@ -142,3 +160,173 @@ bp_narrative_events.0002 = { #WTWSMS id: zusk_event.26
 	}
 }
 
+# Julius Nepos reconquers Italy
+bp_narrative_events.0003 = { #WTWSMS id: historical_wtwsms.3
+	title = bp_narrative_events.0003.name
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_title = title:e_wre
+				}
+				desc = bp_narrative_events.0003.desc.a
+			}
+			desc = bp_narrative_events.0003.desc.b
+		}
+	}
+	theme = realm
+	right_portrait = {
+		character = character:175110
+		animation = personality_honorable
+	}
+
+	immediate = {
+		if = {
+			limit = { faith = title:e_wre.holder.faith }
+			play_music_cue = "mx_cue_epic_sacral_moment"
+		}
+		else = { play_music_cue = "mx_cue_combat_2" }
+		title:k_italy.holder = { save_scope_as = king_in_italy }
+		title:k_ostrogoths.holder = { save_scope_as = king_of_the_ostrogoths }
+		title:e_wre.holder = { save_scope_as = nepos_restitutor }
+	}
+
+	trigger = {
+		nepos_trigger = yes
+	}
+	
+	option = {
+		name = bp_narrative_events.0003.a
+		trigger = {
+			has_title = title:e_wre
+		}
+		add_prestige = 100
+		if = {
+			limit = { scope:king_in_italy = { is_vassal_of = scope:nepos_restitutor }}
+			imprison = {
+				target = scope:king_in_italy
+				type = dungeon
+			}
+			hidden_effect = {
+				create_title_and_vassal_change = {
+					type = revoked
+					save_scope_as = title_change
+					add_claim_on_loss = yes
+				}
+				scope:king_in_italy = { 
+					every_held_title = {
+						change_title_holder = {
+							holder = scope:nepos_restitutor
+							change = scope:title_change
+							take_baronies = no
+						}
+					}
+					depose = yes
+				}
+			}
+			destroy_title = title:k_italy
+		}
+		if = {
+			limit = { scope:king_of_the_ostrogoths = { is_vassal_of = scope:nepos_restitutor }}
+			imprison = {
+				target = scope:king_of_the_ostrogoths
+				type = dungeon
+			}
+			hidden_effect = {
+				create_title_and_vassal_change = {
+					type = revoked
+					save_scope_as = title_change
+					add_claim_on_loss = yes
+				}
+				scope:king_of_the_ostrogoths = { 
+					every_held_title = {
+						change_title_holder = {
+							holder = scope:nepos_restitutor
+							change = scope:title_change
+							take_baronies = no
+						}
+					}
+					depose = yes
+				}
+			}
+			destroy_title = title:k_ostrogoths
+		}
+	}
+	
+	option = {
+		name = bp_narrative_events.0003.b
+		trigger = {
+			NOT = {
+				has_title = title:e_wre
+			}
+		}
+	}
+}
+
+bp_narrative_events.0004 = { #WTWSMS id: zusk_event.37
+	title = bp_narrative_events.0004.name
+	desc = bp_narrative_events.0004.desc
+	type = character_event
+	theme = stewardship_domain_focus
+	left_portrait = root
+
+	trigger = {
+		current_year >= 490
+		current_year < 550
+		NOT = { exists = global_var:ostrogoths_arrived }
+		exists = fall_of_rome
+		root = title:e_byzantium.holder
+		exists = title:k_ostrogoths.holder
+	}
+
+	option = {
+		name = bp_narrative_events.0004.a
+		ai_chance = {
+			base = 90
+		}
+		add_gold = -50
+		custom_tooltip = bp_narrative_events.0004.tooltip
+		hidden_effect = {
+			any_ruler = {
+				limit = {
+					has_title = title:k_ostrogoths
+				}
+				add_gold = 50
+				trigger_event = { id = bp_narrative_events.0005 days = 25 }
+			}
+			set_global_variable = { name = ostrogoths_arrived value = yes }
+		}
+	}
+
+	option = {
+		name = bp_narrative_events.0004.b
+		ai_chance = {
+			base = 10
+		}
+	}
+}
+
+bp_narrative_events.0005 = { #WTWSMS id: zusk_event.22
+	title = bp_narrative_events.0005.name
+	desc = bp_narrative_events.0005.desc
+	type = character_event
+	theme = war
+	left_portrait = root
+	right_portrait = title:e_byzantium.holder
+
+	option = {
+		name = bp_narrative_events.0005.a
+		ai_chance = {
+			base = 100
+		}
+		add_gold = 50
+		add_pressed_claim = title:e_italy
+	}
+
+	option = {
+		name = bp_narrative_events.0005.b
+		ai_chance = {
+			base = 0
+		}
+	}
+}
