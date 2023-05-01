@@ -294,6 +294,21 @@ tributaries.100 = {
 
 	option = {
 		name = tributaries.100.suzerain_joins_the_war
+		ai_chance = {
+			base = 150
+			modifier = {
+				add = 75
+				ai_honor >= low_positive_ai_value
+			}
+			modifier = {
+				add = 75
+				ai_honor >= medium_positive_ai_value
+			}
+			modifier = {
+				add = 75
+				ai_honor >= high_positive_ai_value
+			}
+		}
 		add_piety = minor_piety_value
 		scope:call_to_arms_tribute = {
 			if = {
@@ -320,10 +335,6 @@ tributaries.100 = {
 	}
 
 	option = {
-		name = tributaries.100.suzerain_refuses_to_join_war
-		add_prestige = major_prestige_loss
-		save_scope_as = former_suzerain
-		scope:call_to_arms_tribute = { trigger_event = { id = tributaries.101 } } #tributary gets a positive response
 		#AI Suzerain's do not get to refuse foederatus_tributary call to arms
 		trigger = {
 			trigger_if = {
@@ -334,6 +345,25 @@ tributaries.100 = {
 				}
 			}
 		}
+		name = tributaries.100.suzerain_refuses_to_join_war
+		ai_chance = {
+			base = 50
+			modifier = {
+				add = 25
+				ai_honor <= low_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= medium_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= high_negative_ai_value
+			}
+		}
+		add_prestige = major_prestige_loss
+		save_scope_as = former_suzerain
+		scope:call_to_arms_tribute = { trigger_event = { id = tributaries.101 } } #tributary gets a negative response
 	}
 }
 
@@ -374,7 +404,7 @@ tributaries.102 = {
 	option = { name = nice }
 }
 
-#Tributary calls Suzerain to war: IDs: 200-299
+#Suzerain calls tributary to war: IDs: 200-299
 
 #Call to arms received from suzerain
 #Root is tributary
@@ -387,6 +417,22 @@ tributaries.200 = {
 
 	option = {
 		name = tributaries.200.join_suzerain_war
+		ai_chance = {
+			base = 150
+			modifier = {
+				add = 75
+				ai_honor >= low_positive_ai_value
+			}
+			modifier = {
+				add = 75
+				ai_honor >= medium_positive_ai_value
+			}
+			modifier = {
+				add = 75
+				ai_honor >= high_positive_ai_value
+			}
+		}
+		
 		scope:suzerain_cta_caller = {
 			every_character_war = {
 				if = {
@@ -410,6 +456,21 @@ tributaries.200 = {
 			}
 		}
 		name = tributaries.200.do_not_join_suzerain_war
+		ai_chance = {
+			base = 50
+			modifier = {
+				add = 25
+				ai_honor <= low_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= medium_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= high_negative_ai_value
+			}
+		}
 		save_scope_as = refusing_tributary
 		scope:suzerain_cta_caller = { trigger_event = { id = tributaries.201 } }
 	}
@@ -425,6 +486,12 @@ tributaries.201 = {
 	sender = scope:refusing_tributary
 
 	immediate = {
+		scope:refusing_tributary = {
+			set_variable = {
+				name = can_be_targeted_for_punitive_war
+				value = scope:refusing_tributary.var:my_suzerain
+			}
+		}
 		unset_tributary = {
 			TRIBUTARY = scope:refusing_tributary
 			TRIBUTARY_BASE_TYPE = flag:permanent
