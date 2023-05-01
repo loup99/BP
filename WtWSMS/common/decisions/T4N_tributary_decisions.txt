@@ -33,24 +33,27 @@
 
 	effect = {
 		root = { save_scope_as = suzerain_cta_caller }
-		every_in_list = {
-			variable = all_tributaries
-			limit = {
-				exists = var:can_call_to_war_suzerain
-				var:can_call_to_war_suzerain = flag:yes
-			}
-			save_temporary_scope_as = tributary_in_question
-			
-			if = {
+		custom_tooltip = {
+			text = summon_tributaries_to_war_effect
+			every_in_list = {
+				variable = all_tributaries
 				limit = {
-					scope:suzerain_cta_caller = {
-						any_character_war = {
-							save_temporary_scope_as = the_war
-							NOT = { scope:tributary_in_question = { is_participant_in_war = scope:the_war } }
+					exists = var:can_call_to_war_suzerain
+					var:can_call_to_war_suzerain = flag:yes
+				}
+				save_temporary_scope_as = tributary_in_question
+				
+				if = {
+					limit = {
+						scope:suzerain_cta_caller = {
+							any_character_war = {
+								save_temporary_scope_as = the_war
+								NOT = { scope:tributary_in_question = { is_participant_in_war = scope:the_war } }
+							}
 						}
 					}
+					scope:tributary_in_question = { trigger_event = { id = tributaries.200 } }
 				}
-				scope:tributary_in_question = { trigger_event = { id = tributaries.200 } }
 			}
 		}
 	}
@@ -92,9 +95,12 @@ summon_suzerain_to_war = {
 	effect = {
 		root = {
 			save_scope_as = call_to_arms_tribute
-			set_variable = flag:called_my_suzerain
+			set_variable = called_my_suzerain
 		}
-		root.var:my_suzerain = { trigger_event = { id = tributaries.100 } }
+		custom_tooltip = {
+			text = summon_suzerain_to_war_effect
+			root.var:my_suzerain = { trigger_event = { id = tributaries.100 } }
+		}
 	}
 	
 	ai_potential = { always = yes }
