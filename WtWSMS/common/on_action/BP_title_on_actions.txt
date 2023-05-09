@@ -39,6 +39,7 @@ on_title_gain = {
 		#Other On Actions
 		BP_fall_of_rome
 		BP_remove_migration_modifiers
+		BP_general_title_cleanup
 	}
 }
 
@@ -243,7 +244,7 @@ BP_remove_migration_modifiers = {
 	effect = {
 		if = {
 			limit = {
-				#Only cleanup for conquests
+				#Only clean-up for conquests
 				OR = {
 					scope:transfer_type = flag:conquest
 					scope:transfer_type = flag:conquest_holy_war
@@ -282,6 +283,27 @@ BP_remove_migration_modifiers = {
 						}
 						this = { remove_county_modifier = county_modifier_minor_migration_minor_aristocracy }
 					}
+				}
+			}
+		}
+	}
+}
+
+BP_general_title_cleanup = {
+	effect = {
+		#Handle variables for task_establish_title council task
+		root = {
+			every_held_county = {
+				limit = {
+					this.holder = root
+					OR = {
+						has_variable = task_establish_title_progress
+						has_variable = task_establish_title_target
+					}
+				}
+				garbage_collect_task_establish_title_effect = {
+					HOLDER = root
+					THE_COUNTY = this
 				}
 			}
 		}
