@@ -4,6 +4,7 @@
 
 ##### Changed from Vanilla: Added some additional restrictions
 fp1_varangian_adventurer_conquest = {
+	icon = fp1_varangian_adventurer_conquest
 	group = conquest
 
 	combine_into_one = yes
@@ -47,40 +48,6 @@ fp1_varangian_adventurer_conquest = {
 		varangrian_conquest_trigger = yes
 	}
 	##### Changed from Vanilla ^^^^^
-
-	allowed_for_character_display_regardless = {
-		# Ensure that this is only done every now and then.
-		is_independent_ruler = yes
-		highest_held_title_tier <= tier_duchy
-		trigger_if = {
-			limit = { is_ai = no }
-			trigger_if = {
-				limit = {
-					culture = {
-						has_cultural_parameter = cb_lower_prestige_level_requirement
-					}
-				}
-				prestige_level >= 1
-			}
-			trigger_else = {
-				prestige_level >= 2
-			}
-		}
-		trigger_else = {
-			trigger_if = {
-				limit = {
-					culture = {
-						has_cultural_parameter = cb_lower_prestige_level_requirement
-					}
-				}
-				prestige_level >= 0
-			}
-			trigger_else = {
-				prestige_level >= 1
-			}
-		}
-		is_at_war = no
-	}
 
 	allowed_against_character = {
 		# Cannot adventure against other adventuring cultures.
@@ -470,6 +437,9 @@ fp1_varangian_adventurer_conquest = {
 	}
 
 	on_victory = {
+		#EP2 accolade glory gain for winning against higher ranked enemy
+		scope:attacker = { accolade_attacker_war_end_glory_gain_med_effect = yes }
+
 		# Organise general results for the attacker.
 		scope:attacker = {
 			# Set up titles in the new colony.
@@ -719,7 +689,7 @@ fp1_varangian_adventurer_conquest = {
 			### Otherwise, tribals go by pure levy count.
 			else_if = {
 				limit = {
-					scope:attacker = { has_government = tribal_government }
+					scope:attacker = { government_has_flag = government_is_tribal }
 				}
 				ordered_in_list = {
 					list = target_titles
@@ -968,10 +938,10 @@ fp1_varangian_adventurer_conquest = {
 			if = {
 				limit = {
 					capital_province = { has_holding_type = tribal_holding }
-					NOT = { has_government = tribal_government }
+					NOT = { government_has_flag = government_is_tribal }
 				}
 				# Change government to tribal.
-				convert_realm_to_tribal_effect = yes
+				change_government = tribal_government
 			}
 			# Conquering elsewhere as a tribal makes you feudal.
 			else_if = {
@@ -980,10 +950,10 @@ fp1_varangian_adventurer_conquest = {
 						capital_province = { has_holding_type = tribal_holding }
 					}
 					# Might have turned theocratic before from gaining a new capital holding
-					#has_government = tribal_government
+					#government_has_flag = government_is_tribal
 				}
 				# Change government to feudal.
-				convert_realm_to_feudal_effect = yes
+				change_government = feudal_government
 			}
 			## Seizing control so things *vaguely* work.
 			custom_tooltip = fp1_varangian_adventurer_conquest.summaries.control_rebate
@@ -1123,6 +1093,9 @@ fp1_varangian_adventurer_conquest = {
 	}
 
 	on_white_peace = {
+		#EP2 accolade glory gain for winning against higher ranked enemy
+		scope:defender = { accolade_defender_war_end_glory_gain_low_effect = yes }
+
 		# Prestige loss for the attacker
 		scope:attacker = {
 			add_prestige = {
@@ -1173,6 +1146,8 @@ fp1_varangian_adventurer_conquest = {
 	}
 
 	on_defeat = {
+		#EP2 accolade glory gain for winning against higher ranked enemy
+		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
 
 		# Prestige loss for the attacker
 		scope:attacker = {
@@ -1192,7 +1167,7 @@ fp1_varangian_adventurer_conquest = {
 			}
 		}
 
-# Allies on both sides get full prestige value for helping in the war, based on their war participation.
+	# Allies on both sides get full prestige value for helping in the war, based on their war participation.
 		modify_allies_of_participants_fame_values = {
 			WINNER = scope:defender
 			FAME_BASE = medium_prestige_value
@@ -1227,4 +1202,7 @@ fp1_varangian_adventurer_conquest = {
 	use_de_jure_wargoal_only = yes
 
 	attacker_wargoal_percentage = 0.8
+	
+	max_defender_score_from_occupation = 150
+	max_attacker_score_from_occupation = 150
 }

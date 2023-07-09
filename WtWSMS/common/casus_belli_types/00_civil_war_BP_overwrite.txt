@@ -1,5 +1,6 @@
 ﻿##### Changed from Vanilla: Replaced crown_authority check with new generic
 independence_faction_war = {
+	icon = independence_faction_war
 	group = civil_war
 	ai_only_against_liege = yes
 	target_titles = independence_domain
@@ -99,12 +100,16 @@ independence_faction_war = {
 			}
 			desc = independence_war_victory_desc # Desc for a third party involved
 		}
-		
+
 	}
 
 	##### Changed from Vanilla vvvvv
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#EP2 Accolade glory gain from winning against higher ranked enemy
+		scope:attacker = { accolade_attacker_war_end_glory_gain_med_effect = yes }
+
 		create_title_and_vassal_change = {
 			type = independency
 			save_scope_as = change
@@ -277,8 +282,8 @@ independence_faction_war = {
 	}
 
 	on_white_peace = {
-		scope:attacker = { 
-			show_pow_release_message_effect = yes 
+		scope:attacker = {
+			show_pow_release_message_effect = yes
 			stress_impact = {
  				ambitious = medium_stress_impact_gain
  				arrogant = medium_stress_impact_gain
@@ -383,12 +388,16 @@ independence_faction_war = {
 
 	max_attacker_score_from_battles = 100
 	max_defender_score_from_battles = 50
+	
+	max_defender_score_from_occupation = 150
+	max_attacker_score_from_occupation = 150
 
 	max_ai_diplo_distance_to_title = 500
 }
 
 ##### Changed from Vanilla: Replaced crown_authority check with new generic
 liberty_faction_war = {
+	icon = dissolution_war
 	group = civil_war
 	ai_only_against_liege = yes
 	allowed_for_character = {
@@ -426,6 +435,10 @@ liberty_faction_war = {
 	##### Changed from Vanilla vvvvv
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#EP2 Accolade glory gain from winning against higher ranked enemy
+		scope:attacker = { accolade_attacker_war_end_glory_gain_med_effect = yes }
+
 		##### Changed from Vanilla vvvvv
 		scope:defender = {
 			##### Changed from Vanilla vvvvv
@@ -516,7 +529,7 @@ liberty_faction_war = {
 			desc = liberty_war_white_peace_desc
 		}
 		desc = liberty_war_white_peace_end_desc
-		
+
 	}
 
 	on_white_peace = {
@@ -566,7 +579,7 @@ liberty_faction_war = {
 			desc = liberty_war_defeat_desc
 		}
 		desc = liberty_war_defeat_end_desc
-		
+
 	}
 
 	on_defeat = {
@@ -604,12 +617,16 @@ liberty_faction_war = {
 
 	max_attacker_score_from_battles = 100
 	max_defender_score_from_battles = 50
+	
+	max_defender_score_from_occupation = 150
+	max_attacker_score_from_occupation = 150
 
 	max_ai_diplo_distance_to_title = 500
 }
 
 ##### Changed from Vanilla: Replaced crown_authority check with new generic
 refused_liege_demand_war = {
+	icon = dissolution_war
 	group = civil_war
 	ai_only_against_liege = yes
 	allowed_for_character = {
@@ -638,22 +655,57 @@ refused_liege_demand_war = {
 	}
 
 	on_declaration = {
+		#on_declared_war = yes
+		# save the initial target and their tier for conditioning the depose effect
+		if = {
+			limit = { NOT = { exists = scope:attacker.var:initial_target } }
+			scope:attacker = {
+				set_variable = {
+					name = initial_target
+					value = scope:defender
+				}
+
+				set_variable = {
+					name = target_tier
+					value = scope:defender.primary_title.tier
+				}
+			}
+		}
 	}
 
 	on_victory_desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { scope:defender = { is_local_player = yes } }
+				trigger = {
+					scope:defender = { is_local_player = yes }
+					OR = {
+						NOT = { exists = scope:attacker.var:initial_target }
+						scope:defender = scope:attacker.var:initial_target
+						scope:defender.primary_title.tier <= scope:attacker.var:target_tier
+					}
+				}
 				desc = refused_liege_demand_war_victory_desc_defender
 			}
-			desc = refused_liege_demand_war_victory_desc
+			triggered_desc = {
+				trigger = {
+					OR = {
+						NOT = { exists = scope:attacker.var:initial_target }
+						scope:defender = scope:attacker.var:initial_target
+						scope:defender.primary_title.tier <= scope:attacker.var:target_tier
+					}
+				}
+				desc = refused_liege_demand_war_victory_desc
+			}
 		}
-		
 	}
 
 	##### Changed from Vanilla vvvvv
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#EP2 Accolade glory gain from winning against higher ranked enemy
+		scope:attacker = { accolade_attacker_war_end_glory_gain_med_effect = yes }
+
 		scope:defender = {
 			##### Changed from Vanilla vvvvv
 			reduce_crown_authority_effect = yes
@@ -689,6 +741,7 @@ refused_liege_demand_war = {
 
 	}
 	##### Changed from Vanilla ^^^^^
+	
 	on_white_peace_desc = {
 		first_valid = {
 			triggered_desc = {
@@ -697,7 +750,7 @@ refused_liege_demand_war = {
 			}
 			desc = refused_liege_demand_war_white_peace_desc
 		}
-		
+
 	}
 
 	on_white_peace = {
@@ -735,7 +788,7 @@ refused_liege_demand_war = {
 			}
 			desc = refused_liege_demand_war_defeat_desc
 		}
-		
+
 	}
 
 	on_defeat = {
@@ -746,23 +799,6 @@ refused_liege_demand_war = {
 				years = 10
 			}
 			add_dread = medium_dread_gain
-		}
-		# For revoking titles of character's imprisoned abroard who have lost a revocation war
-		hidden_effect = {
-			if = {
-				limit = {
-					scope:attacker = {
-						is_imprisoned = yes
-						NOT = { is_imprisoned_by = scope:defender }
-					}
-				}
-				scope:defender = {
-					add_opinion = {
-						target = scope:attacker
-						modifier = foreign_prison_revocation_opinion
-					}
-				}
-			}
 		}
 		on_lost_request_revolt_war = yes
 	}
@@ -789,6 +825,9 @@ refused_liege_demand_war = {
 
 	max_attacker_score_from_battles = 100
 	max_defender_score_from_battles = 50
+	
+	max_defender_score_from_occupation = 150
+	max_attacker_score_from_occupation = 150
 
 	max_ai_diplo_distance_to_title = 500
 }
