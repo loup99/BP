@@ -10,6 +10,16 @@ task_conversion = {
 
 	effect_desc = {
 		desc = task_conversion_effect_desc
+		triggered_desc = {
+			trigger = {
+				scope:councillor_liege = {
+					any_vassal = {
+						has_vassal_stance = minority
+					}
+				}
+			}
+			desc = minority_disapproves_conversion_tooltip
+		}
 		desc = {
 			desc = council_task_possible_side_effects
 			triggered_desc = {
@@ -85,6 +95,19 @@ task_conversion = {
 			}
 		}
 		add = court_chaplain_conversion_contextual_bonuses
+		
+		# Faster conversion for certain special doctrines
+		if = {
+			limit = {
+				scope:councillor_liege.faith = { has_doctrine_parameter = adoptionists_attractively_intuitive_theology }
+				exists = scope:county
+				scope:county.faith.religion = religion:christianity_religion
+			}
+			add = {
+				value = fp2_lyonese_monk_conversion_bonus_actual_value
+				desc = fp2_lyonese_monk_faith_conversion_task_desc
+			}
+		}
 
 		# Development reduces the speed. Should be the last non-multiply modifier applied to avoid negative values
 		if = {
@@ -101,9 +124,7 @@ task_conversion = {
 		}
 		
 		##### Changed from Vanilla vvvvv
-		
-		#Nerf unreformed faith impact for major migrations
-		if = {
+		if = { #Nerf unreformed faith impact for major migrations
 			limit = {
 				scope:councillor.faith = { has_doctrine_parameter = unreformed }
 				exists = scope:county
@@ -119,19 +140,18 @@ task_conversion = {
 		}
 		##### Changed from Vanilla ^^^^^
 		
-		
-		# Faster conversion for certain special doctrines
 		if = {
 			limit = {
-				scope:councillor_liege.faith = { has_doctrine_parameter = adoptionists_attractively_intuitive_theology }
-				exists = scope:county
-				scope:county.faith.religion = religion:christianity_religion
+				scope:councillor.faith = {
+					has_doctrine_parameter = unreformed
+				}
 			}
-			add = {
-				value = fp2_lyonese_monk_conversion_bonus_actual_value
-				desc = fp2_lyonese_monk_faith_conversion_task_desc
+			multiply = {
+				value = conversion_unreformed_faith_penalty
+				desc = COURT_CHAPLAIN_CONVERSION_UNREFORMED_FAITH_PENALTY
 			}
 		}
+		
 		# Faster conversion for FP2 Hostility ending, if county is in Iberia and faith was involved
 		if = {
 			limit = {
@@ -218,7 +238,7 @@ task_conversion = {
 			}
 		}
 		##### Changed from Vanilla vvvvv
-		if = {
+		if = { #Special BP conversion speed
 			limit = { has_game_rule = bp_default_culture_conversion_speed }
 			multiply = {
 				value = bp_default_faith_conversion_value
@@ -257,12 +277,15 @@ task_conversion = {
 	##### Changed from Vanilla ^^^^^
 
 	##### Changed from Vanilla vvvvv
-	potential_county = {
+	potential_county = { 
 		scope:county = {
 			NOT = { faith = scope:councillor.faith }
 			trigger_if = {
 				limit = {
-					scope:councillor_liege = { has_variable = hold_court_8120_religion_block }
+					scope:councillor_liege = {
+						is_alive = yes
+						has_variable = hold_court_8120_religion_block
+					}
 				}
 				custom_tooltip = {
 					text = hold_court_8120_conversion_tt
@@ -293,6 +316,7 @@ task_conversion = {
 					}
 				}
 			}
+			
 			##### Changed from Vanilla vvvvv
 			custom_description = {
 				text = "has_general_religious_protection_from_zoroastrian_cults"
@@ -452,7 +476,7 @@ task_conversion = {
 					scope:councillor_liege = {
 						is_ai = yes
 						faith = faith:ashari
-						capital_province = { geographical_region = world_europe_west_iberia }
+						capital_province ?= { geographical_region = world_europe_west_iberia }
 						scope:county.faith = faith:muwalladi
 					}
 					scope:county = {
@@ -542,6 +566,27 @@ task_conversion = {
 	##### Changed from Vanilla ^^^^^
 
 	on_finish_task_county = {
+		scope:councillor_liege = {
+			if = {
+				limit = {
+					any_vassal = {
+						has_vassal_stance = minority
+					}
+				}
+				custom_tooltip = minority_disapproves_conversion
+				hidden_effect = {
+					every_vassal = {
+						limit = {
+							has_vassal_stance = minority
+						}
+						add_opinion = {
+							target = scope:councillor_liege
+							modifier = minority_disapproves_of_conversion_opinion
+						}
+					}
+				}
+			}
+		}
 		scope:county = {
 			set_county_faith = scope:councillor.faith
 		}
@@ -563,7 +608,9 @@ task_conversion = {
 		value = 1000 # Always convert if possible
 
 		if = {	#Unless you're a crypto-religionist.
-			limit = { scope:councillor_liege = { has_variable = false_convert } }
+			limit = {
+				scope:councillor_liege = { has_variable = false_convert }
+			}
 			multiply = 0
 		}
 	}
