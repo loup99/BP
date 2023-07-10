@@ -1,6 +1,6 @@
 ﻿##### Changed from Vanilla: Not pickable if you have roman legacy
 tradition_republican_legacy = {
-	category = realm
+	category = regional
 
 	layers = {
 		0 = steward
@@ -11,7 +11,9 @@ tradition_republican_legacy = {
 	is_shown = {
 		OR ={
 			this = culture:roman
-			any_parent_culture_or_above = { this = culture:roman }
+			any_parent_culture_or_above = {
+				this = culture:roman
+			}
 		}
 		NOT = { has_cultural_tradition = tradition_parochialism }
 	}
@@ -31,11 +33,15 @@ tradition_republican_legacy = {
 		city_buildings_more_powerful = yes
 		city_buildings_less_control = yes
 		republican_vassals_pay_more = yes
+		more_parochial_vassals = yes
 	}
 	character_modifier = {
-		city_holding_build_gold_cost = -0.1
-		city_holding_holding_build_gold_cost = -0.1
-		republic_government_vassal_opinion = -20
+		city_holding_build_gold_cost = -0.05
+		city_holding_holding_build_gold_cost = -0.05
+		barons_and_minor_landholders_opinion = -20
+		parochial_opinion = -20
+		parochial_tax_contribution_mult = 0.1
+		parochial_levy_contribution_mult = 0.1
 	}
 	
 	cost = {
@@ -48,9 +54,9 @@ tradition_republican_legacy = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -106,7 +112,7 @@ tradition_republican_legacy = {
 					scope:character = {
 						any_vassal = {
 							primary_title.tier > tier_county
-							has_government = republic_government
+							government_has_flag = government_is_republic
 						}
 					}
 				}
@@ -160,9 +166,9 @@ tradition_roman_legacy = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_bellicose }
-						any_in_list = { list = traits this = flag:ethos_egalitarian }
-						any_in_list = { list = traits this = flag:ethos_courtly }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_egalitarian = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -196,7 +202,7 @@ tradition_roman_legacy = {
 	}
 }
 
-##### Changed from Vanilla: Made available to non-settled governments (i.e., not to nomads, tribals)
+##### Changed from Vanilla: Made *not* available to non-settled governments (i.e., not to nomads, tribals)
 tradition_castle_keepers = {
 	category = realm
 
@@ -242,9 +248,9 @@ tradition_castle_keepers = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_bellicose }
-						any_in_list = { list = traits this = flag:ethos_stoic }
-						any_in_list = { list = traits this = flag:ethos_bureaucratic }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+						culture_pillar:ethos_bureaucratic = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -284,7 +290,7 @@ tradition_castle_keepers = {
 	}
 }
 
-##### Changed from Vanilla: Made available to non-settled governments (i.e., not to nomads, tribals)
+##### Changed from Vanilla: Made *not* available to non-settled governments (i.e., not to nomads, tribals)
 tradition_city_keepers = {
 	category = realm
 
@@ -328,9 +334,9 @@ tradition_city_keepers = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_bureaucratic }
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_egalitarian }
+						culture_pillar:ethos_bureaucratic = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_egalitarian = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -380,12 +386,7 @@ tradition_hereditary_hierarchy = {
 	
 	##### Changed from Vanilla vvvvv
 	can_pick = {
-		scope:character = {
-			OR = {
-				has_government = feudal_government
-				has_government = prefeudal_government
-			}
-		}
+		scope:character = { has_a_primitive_type_of_government_trigger = no }
 		custom_tooltip = {
 			text = cannot_have_tradition_tribal_hierarchy
 			NOT = { any_in_list = { list = traits this = flag:tradition_tribal_hierarchy } }
@@ -399,17 +400,18 @@ tradition_hereditary_hierarchy = {
 	}
 	##### Changed from Vanilla vvvvv
 	character_modifier = {
-		castle_holding_holding_build_gold_cost = -0.15
+		castle_holding_holding_build_gold_cost = -0.05
 		feudal_government_tax_contribution_mult = 0.1
 		prefeudal_government_tax_contribution_mult = 0.1
 		gupta_government_tax_contribution_mult = 0.1
 		eranshar_government_tax_contribution_mult = 0.1
 		subroman_government_tax_contribution_mult = 0.1
 		long_reign_bonus_mult = 0.25
-		tyranny_loss_mult = -0.75
+		tyranny_loss_mult = -0.5
 	}
 	##### Changed from Vanilla ^^^^^
 	
+	##### Changed from Vanilla vvvvv
 	cost = {
 		prestige = {
 			add = {
@@ -420,8 +422,8 @@ tradition_hereditary_hierarchy = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -429,6 +431,7 @@ tradition_hereditary_hierarchy = {
 					desc = not_courtly_or_spiritual_desc
 				}
 			}
+			##### Changed from Vanilla vvvvv
 			if = {
 				limit = {
 					NOT = {
@@ -437,7 +440,7 @@ tradition_hereditary_hierarchy = {
 							any_vassal = {
 								count >= 10
 								primary_title.tier >= tier_county
-								has_government = feudal_government
+								has_a_primitive_type_of_government_trigger = no
 							}
 						}
 					}
@@ -447,10 +450,12 @@ tradition_hereditary_hierarchy = {
 					desc = king_with_vassals_desc
 				}
 			}
+			##### Changed from Vanilla ^^^^^
 			
 			multiply = tradition_replacement_cost_if_relevant
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 	
 	ai_will_do = {
 		value = 100
@@ -517,9 +522,9 @@ tradition_tribe_unity = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
-						any_in_list = { list = traits this = flag:ethos_stoic }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -556,8 +561,8 @@ tradition_tribe_unity = {
 				NOT = {
 					scope:character = {
 						OR = {
-							has_government = clan_government
-							has_government = tribal_government
+							government_has_flag = government_is_clan
+							government_has_flag = government_is_tribal
 						}
 					}
 				}
@@ -614,8 +619,8 @@ tradition_culture_blending = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_egalitarian }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_egalitarian = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -696,8 +701,8 @@ tradition_ruling_caste = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_spiritual }
-						any_in_list = { list = traits this = flag:ethos_courtly }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -743,6 +748,7 @@ tradition_ruling_caste = {
 	}
 }
 
+
 ##### Changed from Vanilla: Made transitively unselectable with new traditions
 tradition_staunch_traditionalists = {
 	category = realm
@@ -773,7 +779,7 @@ tradition_staunch_traditionalists = {
 	character_modifier = {
 		controlled_province_advantage = 5
 		monthly_county_control_change_add = 0.3
-		cultural_head_fascination_mult = -0.1
+		cultural_head_fascination_mult = -0.05
 	}
 	
 	cost = {
@@ -786,9 +792,9 @@ tradition_staunch_traditionalists = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
-						any_in_list = { list = traits this = flag:ethos_stoic }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -828,7 +834,7 @@ tradition_staunch_traditionalists = {
 		}
 		if = {
 			limit = {
-				any_in_list = { list = traits this = flag:ethos_egalitarian }
+				culture_pillar:ethos_egalitarian = { is_in_list = traits }
 			}
 			multiply = 0
 		}

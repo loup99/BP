@@ -31,12 +31,14 @@ tradition_chivalry = {
 		romance_scheme_penalty = yes
 		ai_romance_scheme_increase = yes
 		poet_trait_romance_bonuses = yes
+		can_host_joust_contests = yes
 	}
 	
 	character_modifier = {
 		heavy_cavalry_damage_mult = 0.1
 		heavy_cavalry_toughness_mult = 0.1
 		tyranny_gain_mult = 0.5
+		accolade_glory_gain_mult = 0.1
 	}
 	
 	cost = {
@@ -49,9 +51,9 @@ tradition_chivalry = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_bellicose }
-						any_in_list = { list = traits this = flag:ethos_egalitarian }
-						any_in_list = { list = traits this = flag:ethos_courtly }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_egalitarian = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -73,6 +75,34 @@ tradition_chivalry = {
 				add = {
 					value = tradition_unfulfilled_criteria_penalty
 					desc = knights_with_prowess_desc
+				}
+			}
+
+			if = {
+				limit = {
+					scope:character = {
+						has_variable = tradition_chivalry_travel_discount
+					}
+					
+				}
+
+				add = {
+					value = tradition_travel_discount
+					desc = tradition_travel_discount_desc
+				}
+			}
+			
+			if = {
+				limit = {
+					scope:character = {
+						has_variable = tradition_chivalry_tournament_discount
+					}
+					
+				}
+
+				add = {
+					value = tradition_tournament_discount
+					desc = tradition_tournament_discount_desc
 				}
 			}
 			
@@ -135,7 +165,7 @@ tradition_practiced_pirates = {
 			if = {
 				limit = {
 					NOT = {
-						any_in_list = { list = traits this = flag:ethos_bellicose }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -221,9 +251,9 @@ tradition_xenophilic = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_egalitarian }
-						#any_in_list = { list = traits this = flag:ethos_bureaucratic }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_egalitarian = { is_in_list = traits }
+						#culture_pillar:ethos_bureaucratic = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -247,6 +277,20 @@ tradition_xenophilic = {
 				}
 			}
 
+			if = {
+				limit = {
+					scope:character = {
+						has_variable = tradition_xenophilic_travel_discount
+					}
+					
+				}
+
+				add = {
+					value = tradition_travel_discount
+					desc = tradition_travel_discount_desc
+				}
+			}
+
 			multiply = tradition_replacement_cost_if_relevant
 		}
 	}
@@ -255,13 +299,13 @@ tradition_xenophilic = {
 		value = 100
 		if = {
 			limit = { # Avoid stacking similar traditions
-				any_in_list = { list = traits this = flag:tradition_culture_blending }
+				culture_tradition:tradition_culture_blending = { is_in_list = traits }
 			}
 			multiply = 0.25
 		}
 		if = {
 			limit = { # If you like to invade people, don't pick this tradition
-				any_in_list = { list = traits this = flag:tradition_malleable_invaders }
+				culture_tradition:tradition_malleable_invaders = { is_in_list = traits }
 			}
 			multiply = 0
 		}
@@ -272,7 +316,7 @@ tradition_xenophilic = {
 ##### Changed from Vanilla: Made transitively unselectable with new traditions
 tradition_music_theory = {
 	category = societal
-	
+
 	layers = {
 		0 = intrigue
 		1 = western
@@ -307,9 +351,9 @@ tradition_music_theory = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -343,6 +387,20 @@ tradition_music_theory = {
 					desc = rulers_with_poet_desc
 				}
 			}
+
+			if = {
+				limit = {
+					scope:character = {
+						has_variable = tradition_music_theory_travel_discount
+					}
+					
+				}
+
+				add = {
+					value = tradition_travel_discount
+					desc = tradition_travel_discount_desc
+				}
+			}
 			
 			multiply = tradition_replacement_cost_if_relevant
 		}
@@ -352,7 +410,7 @@ tradition_music_theory = {
 		value = 100
 		if = {
 			limit = { # AI should avoid stacking traditions for court positions
-				any_in_list = { list = traits this = flag:tradition_poetry }
+				culture_tradition:tradition_poetry = { is_in_list = traits }
 			}
 			multiply = 0.25
 		}
@@ -369,16 +427,20 @@ tradition_poetry = {
 		4 = quill.dds
 	}
 
+	##### Changed from Vanilla vvvvv
 	can_pick = {
 		custom_tooltip = {
 			text = cannot_have_tradition_fp1_northern_stories
 			NOT = { any_in_list = { list = traits this = flag:tradition_fp1_northern_stories } }
 		}
+		##### Changed from Vanilla vvvvv
 		custom_tooltip = {
 			text = cannot_have_tradition_tamil_thai
 			NOT = { any_in_list = { list = traits this = flag:tradition_tamil_thai } }
 		}
+		##### Changed from Vanilla ^^^^^
 	}
+	##### Changed from Vanilla ^^^^^
 	
 	parameters = {
 		poet_trait_gives_bonuses = yes
@@ -396,9 +458,9 @@ tradition_poetry = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -432,6 +494,20 @@ tradition_poetry = {
 					desc = rulers_with_poet_desc
 				}
 			}
+
+			if = {
+				limit = {
+					scope:character = {
+						has_variable = tradition_poetry_travel_discount
+					}
+					
+				}
+
+				add = {
+					value = tradition_travel_discount
+					desc = tradition_travel_discount_desc
+				}
+			}
 			
 			multiply = tradition_replacement_cost_if_relevant
 		}
@@ -441,7 +517,7 @@ tradition_poetry = {
 		value = 100
 		if = {
 			limit = { # AI should avoid stacking traditions for courtly court positions
-				any_in_list = { list = traits this = flag:tradition_music_theory }
+				culture_tradition:tradition_music_theory = { is_in_list = traits }
 			}
 			multiply = 0.25
 		}
