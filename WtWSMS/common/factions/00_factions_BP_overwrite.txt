@@ -140,29 +140,44 @@ independence_faction = {
 
 		# Small multiplier for my neighbors already in the Faction
 		modifier = {
+			desc = "FACTION_REASON_NEIGHBORS"
+
+			scope:faction = {
+				any_faction_member = { #suppress the description printout if factor is 1
+					any_neighboring_realm_same_rank_owner = {
+						this = root
+					}
+				}
+			}
+
 			factor = {
 				value = 1
-		    	every_faction_member = {
-		    		if = {
-		    			limit = {
-			    			any_neighboring_realm_same_rank_owner = {
-			    				this = root
-			    			}
-						}
-		    			add = 0.25
-		    		}		
+				scope:faction = {
+			    	every_faction_member = {
+			    		if = {
+			    			limit = {
+				    			any_neighboring_realm_same_rank_owner = {
+				    				this = root
+				    			}
+							}
+			    			add = 0.25
+			    		}		
+			    	}
 		    	}
 	    	}
 	    }
 
 	    modifier = {
+			desc = "FACTION_REASON_POWERFUL_VASSAL"
 	    	factor = 2
 			is_powerful_vassal_of = scope:faction.faction_target
 	    }
 	}
 
 	is_character_valid = {
-		common_character_validity_trigger = { FACTION_TARGET = scope:faction.faction_target }
+		common_character_validity_trigger = {
+			FACTION_TARGET = scope:faction.faction_target
+		}
 	}
 
 	can_character_create_ui = {
@@ -177,14 +192,6 @@ independence_faction = {
 
 	##### Changed from Vanilla vvvvv
 	can_character_create = {
-		common_character_validity_trigger = {
-			FACTION_TARGET = scope:target
-		}
-
-		common_can_character_join_trigger = {
-			FACTION_TARGET = scope:target
-		}
-
 		common_can_character_create_trigger = {
 			FACTION_TARGET = scope:target
 		}
@@ -215,15 +222,17 @@ independence_faction = {
 	    	}
 		}
 		
+		##### Changed from Vanilla vvvvv
 		character_can_create_independence_faction_trigger = yes
+		##### Changed from Vanilla ^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
-	##### Changed from Vanilla vvvvv
 	can_character_join = {
-		common_can_character_join_trigger = { FACTION_TARGET = scope:faction.faction_target }
+		common_can_character_join_trigger = {
+			FACTION_TARGET = scope:faction.faction_target
+		}
 	}
-	##### Changed from Vanilla ^^^^^
 
 	county_allow_join = no
 	county_allow_create = no
@@ -260,7 +269,7 @@ liberty_faction = {
 			FACTION_TYPE2 = independence_faction
 			FACTION_TYPE3 = populist_faction
 		}
-	}
+	}	
 
 	demand = {
 		save_scope_as = faction
@@ -332,35 +341,44 @@ liberty_faction = {
 			FACTION_TARGET = scope:target
 		}
 
+		##### Changed from Vanilla vvvvv
+		##### Changed from Vanilla: Replaces the crown authority law block
 		custom_description = {
 			text = has_lowest_crown_authority
 			subject = scope:target
 			scope:target = { realm_law_supports_liberty_faction_trigger = yes }
 		}
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
 
 	##### Changed from Vanilla vvvvv
 	can_character_create = {
-		common_character_validity_trigger = { FACTION_TARGET = scope:target }
-
-		common_can_character_join_trigger = { FACTION_TARGET = scope:target }
-
-		common_can_character_create_trigger = { FACTION_TARGET = scope:target }
-
-		#Invalid for bureaucrats
-		#(they **like** high taxes on the peasants and other faction preferences)
-		custom_description = {
-			text = no_liberty_faction_against_bureaucratics
-			NOT = { scope:target = { has_government = bureaucratic_government } }
+		common_can_character_create_trigger = {
+			FACTION_TARGET = scope:target
 		}
 
 		custom_description = {
 			text = has_lowest_crown_authority
 			subject = scope:target
+			scope:target = {
+				OR = {
+					has_realm_law = crown_authority_1
+					has_realm_law = crown_authority_2
+					has_realm_law = crown_authority_3
+				}
+			}
+		}
+
+		##### Changed from Vanilla vvvvv
+		##### Changed from Vanilla: Replaces the crown authority law block
+		custom_description = {
+			text = has_lowest_crown_authority
+			subject = scope:target
 			scope:target = { realm_law_supports_liberty_faction_trigger = yes }
 		}
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -368,10 +386,13 @@ liberty_faction = {
 	can_character_join = {
 		common_can_character_join_trigger = { FACTION_TARGET = scope:faction.faction_target }
 
+		##### Changed from Vanilla vvvvv
+		##### Changed from Vanilla: Replaces the crown authority law block
 		OR = {
 			is_ai = no
 			scope:faction.faction_target = { realm_law_supports_liberty_faction_trigger = yes }
 		}
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 

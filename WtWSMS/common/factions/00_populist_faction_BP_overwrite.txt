@@ -92,7 +92,9 @@ populist_faction = {
 			has_character_flag = joining_faction_block
 		}
 		
+		##### Changed from Vanilla vvvvv
 		character_can_join_populist_faction_trigger = yes
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -142,7 +144,6 @@ populist_faction = {
 		}
 	}
 
-
 	can_county_join = {
 		# Must share this faction's faith.
 		scope:faction = {
@@ -160,7 +161,6 @@ populist_faction = {
 
 	can_county_create = {
 		county_opinion < 0
-
 
 		# Can only join factions against our top liege (not direct liege)
 		scope:target = holder.top_liege
@@ -190,7 +190,6 @@ populist_faction = {
 	###########
 	# Counties/characters are *willing* to join or remain in the faction (not blocked from being in the faction, but unless these are true they will not join the faction unless forced).
 
-	##### Changed from Vanilla vvvvv
 	county_create_score = {
 		base = -160 # Counties can't create a new faction unless opinion is less than -20 (see summary below).
 
@@ -227,12 +226,19 @@ populist_faction = {
 			value = county_opinion
 			multiplier = -3.0
 		}
+		pluralism_fundamentalism_dual_modifier = {
+			ASTRAY_BASE_VALUE = faction_county_opinion_astray
+			HOSTILE_BASE_VALUE = faction_county_opinion_hostile
+			EVIL_BASE_VALUE = faction_county_opinion_evil
+			BASE_FAITH = faith
+			TARGET = scope:target
+		}
 		pluralism_fundamentalism_modifier = {
 			ASTRAY_BASE_VALUE = faction_county_opinion_astray
 			HOSTILE_BASE_VALUE = faction_county_opinion_hostile
 			EVIL_BASE_VALUE = faction_county_opinion_evil
 			BASE_FAITH = faith
-			TARGET_FAITH = scope:target.faith
+			TARGET = scope:target
 		}
 
 		# Greatly reduced chance for a character's capital county to form a faction against them (extra -25 opinion needed).
@@ -321,30 +327,58 @@ populist_faction = {
 		# 	Different Culture (Same Group) AND Astray Faith: 80% chance at -100 opinion, 1% chance at -60 opinion
 		#	Different Culture (Same Group) OR Astray Faith: Never Joins
 		compare_modifier = {
+			desc = "FACTION_REASON_CULTURAL_REASONS"
 			trigger = {
-				NOT = { this.title_province.culture = scope:faction.faction_target.culture }
-				this.title_province.culture = { has_same_culture_heritage = scope:faction.faction_target.culture }
+				NOR = {
+					this.title_province.culture = scope:faction.faction_target.culture
+					AND = {
+						scope:faction.faction_target = { has_active_diarchy = yes }
+						this.title_province.culture = scope:faction.faction_target.diarch.culture
+					}
+				}
+				OR = {
+					this.title_province.culture = { has_same_culture_heritage = scope:faction.faction_target.culture }
+					AND = {
+						scope:faction.faction_target = { has_active_diarchy = yes }
+						this.title_province.culture = { has_same_culture_heritage = scope:faction.faction_target.diarch.culture }
+					}
+				}
 			}
 			value = county_opinion
 			multiplier = -1.0
 		}
 		compare_modifier = {
+			desc = "FACTION_REASON_CULTURAL_REASONS"
 			trigger = {
-				NOT = { this.title_province.culture = { has_same_culture_heritage = scope:faction.faction_target.culture } }
+				NOR = {
+					this.title_province.culture = scope:faction.faction_target.culture
+					AND = {
+						scope:faction.faction_target = { has_active_diarchy = yes }
+						this.title_province.culture = scope:faction.faction_target.diarch.culture
+					}
+				}
 			}
 			value = county_opinion
 			multiplier = -3.0
+		}
+		pluralism_fundamentalism_dual_modifier = {
+			ASTRAY_BASE_VALUE = faction_county_opinion_astray
+			HOSTILE_BASE_VALUE = faction_county_opinion_hostile
+			EVIL_BASE_VALUE = faction_county_opinion_evil
+			BASE_FAITH = faith
+			TARGET = scope:faction.faction_target
 		}
 		pluralism_fundamentalism_modifier = {
 			ASTRAY_BASE_VALUE = faction_county_opinion_astray
 			HOSTILE_BASE_VALUE = faction_county_opinion_hostile
 			EVIL_BASE_VALUE = faction_county_opinion_evil
 			BASE_FAITH = faith
-			TARGET_FAITH = scope:faction.faction_target.faith
+			TARGET = scope:faction.faction_target
 		}
 
 		# Reduced chance for a character's capital county to join a faction against them (extra -10 opinion needed).
 		modifier = {
+			desc = "FACTION_REASON_CAPITAL_COUNTY"
 			add = -80
 			exists = scope:faction.faction_target.capital_province
 			this.title_province = scope:faction.faction_target.capital_province
@@ -362,6 +396,7 @@ populist_faction = {
 
 		# Ruling Caste
 		modifier = {
+			desc = "FACTION_REASON_RULING_CASTE"
 			add = -25
 			NOT = {
 				culture = scope:faction.faction_target.culture
@@ -370,6 +405,7 @@ populist_faction = {
 				has_cultural_parameter = peasant_and_populist_factions_less_common
 			}
 		}
+		
 		##### Changed from Vanilla vvvv
 		modifier = { #Mauraders
 			add = 25
@@ -380,19 +416,36 @@ populist_faction = {
 
 		# Realm Stability Settings
 		modifier = {
+			desc = "FACTION_REASON_GAME_RULE_REALM_STABILITY_LESSER"
 			add = 50
 			has_game_rule = lesser_realm_stability
 		}
 		modifier = {
+			desc = "FACTION_REASON_GAME_RULE_REALM_STABILITY_HIGHER"
 			add = -100
 			has_game_rule = higher_realm_stability
 		}
 		modifier = {
+			desc = "FACTION_REASON_GAME_RULE_REALM_STABILITY_EXTREME"
 			add = -200
 			has_game_rule = extreme_realm_stability
 		}
 
-		# Struggle interaction
+		# Regent
+		modifier = {
+			desc = "FACTION_REASON_REGENT_CULTURAL_REASONS"
+			add = -100
+			NOT = { scope:faction.faction_target.culture = culture }
+			scope:faction.faction_target = { has_active_diarchy = yes }
+			scope:faction.faction_target.diarch.culture ?= culture
+		}
+		modifier = {
+			desc = "FACTION_REASON_REGENT_FAITH_REASONS"
+			add = -100
+			NOT = { scope:faction.faction_target.faith = faith }
+			scope:faction.faction_target = { has_active_diarchy = yes }
+			scope:faction.faction_target.diarch.faith ?= faith
+		}
 
 	}
 	##### Changed from Vanilla ^^^^
@@ -444,6 +497,7 @@ populist_faction = {
 
 		# Not a de jure vassal or consequent part of the realm is out of the De Jure
 		modifier = {
+			desc = "FACTION_REASON_RIGHTFUL"
 			add =	{
 				value = 125
 				# Larger realms are inherently more rebellious.
@@ -473,6 +527,7 @@ populist_faction = {
 
 		# Cultural and religious differences with liege
 		modifier = { # Between +50 and +100 based on culture
+			desc = "FACTION_REASON_CULTURAL_REASONS"
 			NOT = { culture = { has_same_culture_heritage = scope:faction.faction_target.culture } }
 			NOT = { culture = { has_cultural_parameter = doesnt_care_about_culture_faith_in_factions } }
 			culture = { has_same_culture_heritage = scope:faction.var:faction_culture }
@@ -488,12 +543,20 @@ populist_faction = {
 			}
 		}
 
-		pluralism_fundamentalism_modifier = { # Can range from +17.5 to +250 depending on hostility and pluralism/fundamentalism levels.
+		# Base values can range from +17.5 to +250 depending on hostility and pluralism/fundamentalism levels.
+		pluralism_fundamentalism_dual_modifier = {
 			ASTRAY_BASE_VALUE = 35
 			HOSTILE_BASE_VALUE = 75
 			EVIL_BASE_VALUE = 125
 			BASE_FAITH = faith
-			TARGET_FAITH = scope:faction.faction_target.faith
+			TARGET = scope:faction.faction_target
+		}
+		pluralism_fundamentalism_modifier = {
+			ASTRAY_BASE_VALUE = 35
+			HOSTILE_BASE_VALUE = 75
+			EVIL_BASE_VALUE = 125
+			BASE_FAITH = faith
+			TARGET = scope:faction.faction_target
 		}
 
 		legalism_virtue_and_sin_modifier = {
@@ -508,6 +571,7 @@ populist_faction = {
 
 		# The AI is almost always unwilling to join a faction against their friends and lovers.
 		modifier = {
+			desc = "FACTION_REASON_TARGET_FRIEND_LOVER"
 			add = -250
 			OR = {
 				has_relation_lover = scope:faction.faction_target
@@ -524,12 +588,14 @@ populist_faction = {
 
 		# Leader never leaves
 		modifier = {
+			desc = "FACTION_REASON_FACTION_LEADER"
 			has_variable = rebel_leader_peasants
 			add =  10000
 		}
 
 		# Ruling Caste
 		modifier = {
+			desc = "FACTION_REASON_RULING_CASTE"
 			add = -20
 			NOT = {
 				culture = scope:faction.faction_target.culture
@@ -549,14 +615,17 @@ populist_faction = {
 
 		# Realm Stability Settings
 		modifier = {
+			desc = "FACTION_REASON_GAME_RULE_REALM_STABILITY_LESSER"
 			add = 25
 			has_game_rule = lesser_realm_stability
 		}
 		modifier = {
+			desc = "FACTION_REASON_GAME_RULE_REALM_STABILITY_HIGHER"
 			add = -50
 			has_game_rule = higher_realm_stability
 		}
 		modifier = {
+			desc = "FACTION_REASON_GAME_RULE_REALM_STABILITY_EXTREME"
 			add = -100
 			has_game_rule = extreme_realm_stability
 		}
@@ -564,6 +633,7 @@ populist_faction = {
 		##########################
 		# Faction 'Stacking' Factors, attempts to cluster AI rulers into several powerful factions instead of many weak ones.
 		modifier = {
+			desc = "FACTION_REASON_POWER_MINIMAL"
 			scope:faction.faction_power < scope:faction.faction_power_minimal
 			liege = {
 				any_targeting_faction = {
@@ -574,20 +644,24 @@ populist_faction = {
 			factor = faction_weight_factor_power_minimal_penalty
 		}
 		modifier = {
+			desc = "FACTION_REASON_POWER_HALFWAY_THRESHOLD"
 			scope:faction.faction_power >= scope:faction.faction_power_halfway_threshold
 			factor = faction_weight_factor_power_halfway_threshold
 		}
 		modifier = {
+			desc = "FACTION_REASON_POWER_PUSHING_THRESHOLD"
 			scope:faction.faction_power >= scope:faction.faction_power_pushing_threshold
 			factor = faction_weight_factor_power_pushing_threshold
 		}
 		modifier = {
+			desc = "FACTION_REASON_POWER_THRESHOLD"
 			scope:faction.faction_power >= scope:faction.faction_power_threshold
 			factor = faction_weight_factor_power_exceeds_threshold
 		}
 
 		# Small multiplier for my neighbors already in the Faction
 		modifier = {
+			desc = "FACTION_REASON_NEIGHBORS"
 			factor = {
 				value = 1
 		    	every_faction_member = {
@@ -604,6 +678,7 @@ populist_faction = {
 	    }
 
 	     modifier = {
+			desc = "FACTION_REASON_POWERFUL_VASSAL"
 	    	factor = 2
 			is_powerful_vassal_of = scope:faction.faction_target
 	    }
