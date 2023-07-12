@@ -26,9 +26,10 @@ bp_game_start = {
 		#Other Title effects
 		other_title_effects
 		#Religious Stuff
-		set_autocephalous_church_flags
 		convert_christian_chars_to_rites
+		change_vanilla_religion_doctrines
 		set_ethnic_religion_flags
+		set_autocephalous_church_flags
 		other_religion_effects
 		#Family Stuff
 		set_dead_dynasty_renown
@@ -1242,6 +1243,67 @@ convert_christian_chars_to_rites = {
 		character:109769 = { set_character_faith_history = faith:nicene } #Make Erikos the Massalian Nicene
 	}
 }
+change_vanilla_religion_doctrines = {
+	effect = {
+		#Modify Vanilla faiths to fit our design setup (for maximal Vanilla compatibility)
+		every_religion_global = {
+			limit = {
+				OR = {
+					this = religion:akom_religion
+					this = religion:baltic_religion
+					this = religion:finno_ugric_religion
+					this = religion:jainism_religion
+					this = religion:paganism_religion
+					this = religion:siberian_religion
+					this = religion:west_african_bori_religion
+					this = religion:west_african_roog_religion
+				}
+			}
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+			}
+		}
+		every_religion_global = {
+			every_faith = {
+				if = {
+					limit = { has_doctrine = pagan_hostility_doctrine }
+					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_pagan_faith }
+				}
+			}
+		}
+		religion:jainism_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_pluralism_righteous
+					NEW_DOCTRINE = doctrine_pluralism_pluralistic
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_polygamy
+					NEW_DOCTRINE = doctrine_concubines
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = special_doctrine_is_eastern_faith
+					NEW_DOCTRINE = special_doctrine_is_jainism_faith
+				}
+				faith:svetambara = {
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_monasticism
+						NEW_DOCTRINE = tenet_adaptive
+					}
+				}
+				faith:yapaniya = {
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_asceticism
+						NEW_DOCTRINE = tenet_consolamentum
+					}
+				}
+			}
+		}
+	}
+}
 set_autocephalous_church_flags = {
 	effect = {
 		faith:armenian_apostolic = { set_variable = { name = church_culture value = culture:armenian } }
@@ -1284,26 +1346,6 @@ other_religion_effects = {
 		if = { #Treaty of Nvarsak
 			limit = { current_date >= 484.1.1 }
 			legalize_caucasian_christianity_global_effect = yes
-		}
-		#Modify Vanilla faiths to fit our design setup (for maximal Vanilla compatibility)
-		every_religion_global = {
-			limit = {
-				OR = {
-					this = religion:finno_ugric_religion
-					this = religion:paganism_religion
-					this = religion:siberian_religion
-					this = religion:west_african_bori_religion
-					this = religion:west_african_roog_religion
-				}
-			}
-			every_faith = {
-				if = {
-					limit = { has_doctrine = doctrine_theocracy_temporal }
-					remove_doctrine = doctrine_theocracy_temporal
-					add_doctrine = doctrine_theocracy_lay_clergy
-				}
-				add_doctrine = special_doctrine_is_pagan_faith
-			}
 		}
 	}
 }
