@@ -1,4 +1,5 @@
-﻿elector_voting_pattern_circumstances_feudal_elective_modifier = {
+﻿##### Changed from Vanilla: Tweaked Barbarism conditions
+elector_voting_pattern_circumstances_feudal_elective_modifier = {
 	##########################	Elector voting patterns (circumstances)	##########################
 	#Sexism
 	modifier = { #Gender weights
@@ -409,33 +410,39 @@
 			}
 		}
 	}
-	
+
 	##### Changed from Vanilla vvvvv
-	
+
 	#Barbarism
 	modifier = {
 		add = -15
 		desc = tooltip_feudal_elector_vote_uncivilized
 		OR = {
-			has_government = feudal_government
-			has_government = republic_government
+			government_has_flag = government_is_feudal
+			government_has_flag = government_is_republic
 			has_advanced_government_trigger = yes
 		}
 		scope:candidate = {
 			OR = {
-				has_government = clan_government
-				has_a_primitive_type_of_government_trigger = yes
+				government_has_flag = government_is_clan
+				government_has_flag = government_is_tribal
 			}
 		}
 	}
 	modifier = {
 		add = -15
 		desc = tooltip_feudal_elector_vote_settled
-		has_government = clan_government
-		scope:candidate = { NOT = { has_government = clan_government } }
+		OR = {
+			government_has_flag = government_is_clan
+			has_a_primitive_type_of_government_trigger = yes
+		}
+		scope:candidate = {
+			NOT = { government_has_flag = government_is_clan }
+		}
 	}
+
 	##### Changed from Vanilla ^^^^^
-	
+
 	#Nepotism
 	modifier = {
 		add = 10
@@ -566,5 +573,20 @@
 		desc = tooltip_feudal_elector_vote_weak_claimant
 		NOT = { this = scope:candidate }
 		scope:candidate = { has_weak_claim_on = scope:title }
+	}
+	# Political Circumstances
+	modifier = {
+		add = {
+			if = {
+				limit = {
+					scope:holder = { has_diarchy_parameter = diarchy_type_is_temporary_regency }
+				}
+				add = 20
+			}
+			else = { add = 40 }
+		}
+		desc = tooltip_feudal_elector_vote_regent_already_governs
+		NOT = { this = scope:candidate }
+		scope:candidate = { is_diarch_of_target = scope:holder }
 	}
 }
