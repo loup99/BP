@@ -68,7 +68,8 @@ petition_liege_decision = {
 					}
 					any_claim = { petition_liege_title_vassal_trigger = yes }
 				}
-				##### Changed from Vanilla: Added new innovation triggers
+				##### Changed from Vanilla vvvvv
+				
 				# Construct City
 				AND = {
 					city_holding_level_01_trigger = yes
@@ -76,7 +77,6 @@ petition_liege_decision = {
 					any_held_title = { petition_liege_construct_city_trigger = yes }
 					liege.gold > main_building_tier_1_cost
 				}
-				##### Changed from Vanilla: Added new innovation triggers
 				# Construct Temple
 				AND = {
 					temple_holding_level_01_trigger = yes
@@ -84,6 +84,7 @@ petition_liege_decision = {
 					any_held_title = { petition_liege_construct_temple_trigger = yes }
 					liege.gold > main_building_tier_1_cost
 				}
+				##### Changed from Vanilla ^^^^^
 				liege.capital_province.county.development_level >= petitioner_development_difference_decision_value
 			}
 		}
@@ -101,7 +102,6 @@ petition_liege_decision = {
 				AND = {
 					scope:petition_liege_council_seat = yes 
 					is_councillor = no 
-
 				}
 			}
 			custom_tooltip = {
@@ -272,7 +272,7 @@ petition_liege_decision = {
 			is_valid = {
 				custom_tooltip = { # In debt
 					text = petition_liege_pay_debt_me_tt
-					debt_level >= 1
+					gold <= -100
 				}
 				custom_tooltip = { # Liege can afford your debt
 					text = petition_liege_pay_debt_liege_tt
@@ -429,6 +429,7 @@ petition_liege_decision = {
 			icon = "gfx/interface/icons/message_feed/marshal_job.dds"
 			ai_chance = { value = 0 } # Currently unused
 		}
+		##### Changed from Vanilla vvvvv
 		item = { # Construct City
 			value = petition_liege_construct_city
 			is_valid = {
@@ -477,6 +478,7 @@ petition_liege_decision = {
 			icon = "gfx/interface/icons/message_feed/religious.dds"
 			ai_chance = { value = 0 } # Currently unused
 		}
+		##### Changed from Vanilla ^^^^^
 		item = { # Development
 			value = petition_liege_development
 			is_valid = {
@@ -494,17 +496,19 @@ petition_liege_decision = {
 	##### Changed from Vanilla ^^^^^
 
 	effect = {
-		set_variable = {
-			name = petition_liege_scope
-			value = liege
-			months = 3
-		}
 		custom_tooltip = petition_liege_decision_effects
 		if = {
 			limit = {
 				liege = { is_ai = yes }
 			}
 			custom_description_no_bullet = { text = petition_liege_warning_effect }
+		}
+		show_as_tooltip = {
+			switch = {
+				trigger = has_trait 
+				shy = { add_stress = medium_stress_impact_gain }
+				arrogant = { add_stress = medium_stress_impact_gain }
+			}
 		}
 		if = { # Council
 			limit = { scope:petition_liege_council_seat = yes }
@@ -604,18 +608,12 @@ petition_liege_decision = {
 				value = flag:development
 			}
 		}
-		stress_impact = {
-			shy = medium_stress_impact_gain
-			arrogant = medium_stress_impact_gain
-		}
-		hidden_effect = {
-			# Spawn the Petition Liege activity
-			liege.capital_province = {
-				spawn_activity = {
-					type = activity_petition_liege
-					owner = root
-				}
-			}
+		start_travel_plan = {
+			destination = liege.capital_province
+			on_start_on_action = petition_liege_start
+			on_travel_planner_cancel_on_action = petition_liege_travel_planner_exit 
+			on_arrival_event = petition_liege.9000
+			on_arrival_destinations = all_but_last
 		}
 	}
 	
