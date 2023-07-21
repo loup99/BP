@@ -1,0 +1,265 @@
+﻿set_war_memory_casus_belli_effect = {
+	save_scope_as = memory
+	scope:war = {
+		casus_belli = {
+			if = {
+				limit = {
+					any_target_title = { count >= 1 }
+				}
+				ordered_target_title = {
+					order_by = tier
+					save_scope_as = war_target
+				}
+				scope:memory = {
+					set_variable = { name = war_title value = scope:war_target }
+				}
+			}
+			if = {
+				limit = { exists = claimant }
+				claimant = { save_scope_as = war_claimant }
+				scope:memory = {
+					set_variable = { name = war_claimant value = scope:war_claimant }
+				}
+			}
+		}
+		scope:memory = {
+			set_variable = {
+				name = war_attacker
+				value = scope:war.primary_attacker
+			}
+		}
+		if = { # claim
+			limit = {
+				OR = {
+					using_cb = claim_cb
+					using_cb = claimant_faction_war
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_claim }
+			}
+		}	
+		else_if = { # conquest
+			limit = {
+				OR = {
+					using_cb = county_conquest_cb
+					using_cb = duchy_conquest_cb
+					using_cb = county_struggle_cb
+					using_cb = fp2_mediterranean_conquest_cb
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_conquest }
+			}
+		}
+		else_if = { # holy
+			limit = {
+				OR = {
+					using_cb = minor_religious_war
+					using_cb = religious_war
+					using_cb = major_religious_war
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_holy_war }
+				set_variable = { name = war_faith value = scope:war.primary_defender.faith }
+				set_variable = { name = war_faith_attacker value = scope:war.primary_attacker.faith }
+			}
+		}
+		else_if = { # de jure
+			limit = {
+				OR = {
+					using_cb = de_jure_cb
+					using_cb = individual_county_de_jure_cb
+					using_cb = individual_duchy_de_jure_cb
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_de_jure }
+				scope:war_target = {
+					ordered_this_title_or_de_jure_above = {
+						limit = { holder.top_liege = scope:war.primary_attacker }
+						order_by = tier
+						save_scope_as = war_liege
+					}
+				}
+				if = {
+					limit = { exists = scope:war_liege }
+					set_variable = { name = war_liege value = scope:war_liege }
+				}
+			}
+		}
+		else_if = { # invasion
+			limit = {
+				OR = {
+					using_cb = invasion_war
+					using_cb = clan_invasion_war
+					using_cb = mongol_invasion_war
+					using_cb = mongol_realm_invasion_war
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_invasion }
+			}
+		}
+		else_if = { # ghw
+			limit = {
+				OR = {
+					using_cb = undirected_great_holy_war
+					using_cb = directed_great_holy_war
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_ghw }
+				set_variable = { name = war_faith value = scope:war.primary_defender.faith }
+				set_variable = { name = war_faith_attacker value = scope:war.primary_attacker.faith }
+			}
+		}
+		else_if = { # independence
+			limit = {
+				OR = {
+					using_cb = independence_war
+					using_cb = independence_faction_war
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_independence }
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					using_cb = artifact_war
+					using_cb = reclaim_relic_artifact_war
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_artifact }
+			}
+		}
+		else = {
+			switch = {
+				trigger = using_cb
+				liberty_faction_war = { # liberty
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_liberty }
+					}
+				}
+				depose_war = { # depose
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_depose }
+					}
+				}
+				refused_liege_demand_war = { # tyranny
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_tyranny }
+					}
+				}
+				nation_fracturing_faction_war = { # fracture
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_fracture }
+					}
+				}
+				ducal_conquest_cb = { # ducal conquest
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_ducal_conquest }
+					}
+				}
+				##### Changed from Vanilla: Removed imperial_reconquest_cb
+				##### Changed from Vanilla: Removed dismantle_holy_pretender_cb
+				##### Changed from Vanilla: Removed dismantle_byz_pretender_cb
+				excommunication_war = { # excommunicate
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_excommunicate }
+					}
+				}
+				flowery_war_cb = { # flower
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_flower }
+					}
+				}
+				tribal_subjugation_cb = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_subjugation }
+					}
+				}
+				vassalization_cb = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_vassalization }
+					}
+				}
+				fp1_varangian_adventurer_conquest = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_varangian }
+					}
+				}
+				fp1_scandi_adventurer_conquest = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_varangian }
+					}
+				}
+				fp2_border_raid = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_border }
+					}
+				}
+				fp2_expel_interloper = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_expel }
+					}
+				}
+				diarch_vassalisation_cb = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_vassalization }
+					}
+				}
+				remove_regent_cb = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_regent }
+					}
+				}
+				##### Changed from Vanilla: Removed norman_conquest_cb
+				##### Changed from Vanilla: Removed norwegian_invasion_cb 
+				##### Changed from Vanilla: Removed hungarian_migration_cb
+				##### Changed from Vanilla: Removed sons_of_lothbrok_invasion_cb
+				fallback = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_fallback }
+					}
+				}
+			}
+		}
+	}
+	if = { # Error culler
+		limit = {
+			exists = scope:memory.var:war_cb
+			OR = {
+				scope:memory.var:war_cb = flag:war_memory_cb_fallback
+				scope:memory.var:war_cb = flag:war_memory_cb_holy_war
+				scope:memory.var:war_cb = flag:war_memory_cb_imperial_reconquest
+				scope:memory.var:war_cb = flag:war_memory_cb_conquest
+				scope:memory.var:war_cb = flag:war_memory_cb_claim
+				scope:memory.var:war_cb = flag:war_memory_cb_de_jure
+				scope:memory.var:war_cb = flag:war_memory_cb_ducal_conquest
+				##### Changed from Vanilla: Removed war_memory_cb_holy_pretender
+				##### Changed from Vanilla: Removed war_memory_cb_byz_pretender
+				scope:memory.var:war_cb = flag:war_memory_cb_invasion
+				scope:memory.var:war_cb = flag:war_memory_cb_independence
+				scope:memory.var:war_cb = flag:war_memory_cb_liberty
+				scope:memory.var:war_cb = flag:war_memory_cb_depose
+				scope:memory.var:war_cb = flag:war_memory_cb_fracture
+				scope:memory.var:war_cb = flag:war_memory_cb_excommunicate
+				scope:memory.var:war_cb = flag:war_memory_cb_flower
+				scope:memory.var:war_cb = flag:war_memory_cb_ghw
+				scope:memory.var:war_cb = flag:war_memory_cb_artifact
+				scope:memory.var:war_cb = flag:war_memory_cb_subjugation
+				scope:memory.var:war_cb = flag:war_memory_cb_vassalization
+				scope:memory.var:war_cb = flag:war_memory_cb_varangian
+				scope:memory.var:war_cb = flag:war_memory_cb_border
+				scope:memory.var:war_cb = flag:war_memory_cb_expel
+				scope:memory.var:war_cb = flag:war_memory_cb_regent
+				scope:memory.var:war_cb = flag:war_memory_cb_tyranny
+			}
+		}
+	}
+}
