@@ -12,9 +12,12 @@ parthenon_hellenism = {
 		building_requirement_tribal = no
 	}
 	
-	can_construct = { scope:holder = { religion = religion:hellenism_religion } }
+	can_construct = {
+		scope:holder.religion = religion:hellenism_religion
+		special_holy_building_trigger = yes
+	}
 	
-	is_enabled = { scope:holder = { religion = religion:hellenism_religion } }
+	is_enabled = { scope:holder.religion = religion:hellenism_religion }
 	
 	show_disabled = yes
 	
@@ -52,9 +55,12 @@ parthenon_christian = {
 		building_requirement_tribal = no
 	}
 	
-	can_construct = { scope:holder = { religion = religion:christianity_religion } }
+	can_construct = {
+		scope:holder.religion = religion:christianity_religion
+		special_holy_building_trigger = yes
+	}
 	
-	is_enabled = { scope:holder = { religion = religion:christianity_religion } }
+	is_enabled = { scope:holder.religion = religion:christianity_religion }
 	
 	show_disabled = yes
 	
@@ -93,9 +99,12 @@ temple_of_zeus = { ##### TODO (Beta): Change from clone of Grand Temple
 		building_requirement_tribal = no
 	}
 	
-	can_construct = { scope:holder = { religion = religion:hellenism_religion } }
+	can_construct = {
+		scope:holder.religion = religion:hellenism_religion
+		special_holy_building_trigger = yes
+	}
 	
-	is_enabled = { scope:holder = { religion = religion:hellenism_religion } }
+	is_enabled = { scope:holder.religion = religion:hellenism_religion }
 	
 	show_disabled = yes
 	
@@ -139,13 +148,9 @@ hexamilion_wall = {
 	can_construct_potential = {
 		barony = title:b_corinth
 		building_requirement_tribal = no
-		scope:holder.culture = {
-			OR = {
-				bp_superior_culture_innovation_trigger = yes
-				has_innovation = innovation_motte
-			}
-		}
 	}
+	
+	can_construct = { special_wall_building_trigger = yes }
 	
 	cost_gold = 1000
 	
@@ -184,12 +189,7 @@ port_of_carthage = {
 			scope:holder.culture = culture:punic
 			scope:holder.culture = { any_parent_culture_or_above = { this = culture:punic } }
 		}
-		scope:holder.culture = {
-			OR = {
-				bp_superior_culture_innovation_trigger = yes
-				has_innovation = innovation_settlements
-			}
-		}
+		special_commerical_building_trigger = yes
 	}
 	
 	is_enabled = {}
@@ -232,22 +232,11 @@ mausoleum_harlicarnassus = {
 	}
 	
 	can_construct = {
-		scope:holder = {
-			OR = {
-				religion = religion:zoroastrianism_religion
-				religion = religion:hellenism_religion
-				culture = {
-					OR = {
-						has_cultural_pillar = heritage_byzantine
-						has_cultural_pillar = heritage_iranian
-					}
-					OR = {
-						bp_superior_culture_innovation_trigger = yes
-						has_innovation = innovation_settlements
-					}
-				}
-			}
+		OR = {
+			scope:holder.religion = religion:zoroastrianism_religion
+			scope:holder.religion = religion:hellenism_religion
 		}
+		special_general_building_trigger = yes
 	}
 	
 	is_enabled = {
@@ -255,12 +244,9 @@ mausoleum_harlicarnassus = {
 			OR = {
 				religion = religion:zoroastrianism_religion
 				religion = religion:hellenism_religion
-				culture = {
-					OR = {
-						has_cultural_pillar = heritage_byzantine
-						has_cultural_pillar = heritage_iranian
-					}
-				}
+				culture = { has_cultural_pillar = heritage_byzantine }
+				culture = { has_cultural_pillar = heritage_iranian }
+				culture = { has_cultural_pillar = heritage_anatolian }
 			}
 		}
 	}
@@ -294,6 +280,8 @@ taq_kasra = { #cloaned Aurelian walls
 		barony = title:b_an-nahrawan
 		building_requirement_tribal = no
 	}
+	
+	can_construct = { special_wall_building_trigger = yes }
 	
 	show_disabled = yes
 	
@@ -336,15 +324,7 @@ great_lighthouse = {
 	}
 	
 	can_construct = {
-		scope:holder = {
-			culture = {
-				OR = {
-					has_innovation = innovation_battlements
-					has_innovation = innovation_roman_concrete
-					has_innovation = innovation_persian_urbanization
-				}
-			}
-		}
+		special_commerical_building_trigger = yes
 	}
 	
 	is_enabled = { always = yes }
@@ -384,24 +364,17 @@ diocletian_palace = {
 	}
 	
 	can_construct = {
-		scope:holder = {
-			culture = {
-				OR = {
-					has_cultural_pillar = heritage_latin
-					has_cultural_pillar = heritage_byzantine
-				}
-			}
+		OR = {
+			scope:holder.culture = { has_cultural_pillar = heritage_latin }
+			scope:holder.culture = { has_cultural_pillar = heritage_byzantine }
 		}
+		special_general_building_trigger = yes
 	}
 	
 	is_enabled = {
-		scope:holder = {
-			culture = {
-				OR = {
-					has_cultural_pillar = heritage_latin
-					has_cultural_pillar = heritage_byzantine
-				}
-			}
+		OR = {
+			scope:holder.culture = { has_cultural_pillar = heritage_latin }
+			scope:holder.culture = { has_cultural_pillar = heritage_byzantine }
 		}
 	}
 	
@@ -484,6 +457,9 @@ the_constantinople_forum_02 = { #Restored to Greatness
 		barony = title:b_constantinople
 		building_requirement_tribal = no
 	}
+	
+	can_construct = { special_general_building_trigger = yes }
+	
 	show_disabled = yes
 	
 	
@@ -511,32 +487,89 @@ the_constantinople_forum_02 = { #Restored to Greatness
 	type = special
 }
 
-
 ##########
-# Silk Weavers
+# The Colosseum
 ##########
 
-##### TODO (Beta): Implement Silk Weavers and Silke Trade Mission Event/Decision
-silk_weavers = {
+##### Changed from Vanilla: Added next_building, can_construct
+the_colosseum_01 = {
 
-	construction_time = slow_construction_time
+	asset = {
+		type = pdxmesh
+		name = "building_special_colosseum_mesh"
+	}
 
-	type_icon = "icon_structure_stonehenge.dds"
+	construction_time = very_slow_construction_time
 
-	#can_construct_potential = {
-	#	building_requirement_tribal = no
-	#	building_requirement_castle_city_church = { LEVEL = 03 }
-	#}
-	can_construct_potential = { always = no }
+	type_icon = "icon_structure_colosseum.dds"
 	
-	cost_gold = 250
+	can_construct_potential = {
+		building_requirement_tribal = no
+	}
 	
-	province_modifier = { monthly_income = 4 }
+	#Should only occur during very damaging wars instead of regular building
+	can_construct = { always = no }
+	
+	cost_gold = 3000
+
+	character_modifier = {
+		army_maintenance_mult = -0.05 # 'Stealing' the metal from the colosseum building itself
+	}
+	
+	province_modifier = {
+		build_speed = -0.1 # 'Stealing' the metal from the colosseum building itself
+	}
+	
+	ai_value = {
+		base = 100
+		modifier = { # Fill all building slots before going for special buildings
+			factor = 0
+			free_building_slots > 0
+		}
+	}
+	
+	next_building = the_colosseum_02
+	
+	type = special
+}
+##### Changed from Vanilla: Added to game
+the_colosseum_02 = { #Restored to Greatness
+
+	asset = {
+		type = pdxmesh
+		name = "building_special_colosseum_mesh"
+	}
+
+	construction_time = very_slow_construction_time
+
+	type_icon = "icon_structure_colosseum.dds"
+	
+	can_construct_potential = {
+		building_requirement_tribal = no
+	}
+	
+	can_construct = { special_general_building_trigger = yes }
+	
+	cost_gold = 3000
+
+	character_modifier = {
+		monthly_prestige = 1.0
+		gubernatorial_government_vassal_opinion = 5
+	}
+	
+	county_modifier = {
+		county_opinion_add = 5
+		development_growth = 0.3
+		development_growth_factor = 0.2
+		levy_size = 3
+		tax_mult = 3
+	}
 	
 	ai_value = {
 		base = 100
 	}
 	
+	flag = chariot_races
+	
 	type = special
 }
-
