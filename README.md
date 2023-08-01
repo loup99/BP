@@ -1,5 +1,5 @@
 # BP
-WtWSMS for CK3; built on top of 1.6.1.2
+WtWSMS for CK3; built on top of 1.9.2.1
 
 Note: Only push error fixes to master/main. All other features should be on their own branch prior to merge.
 
