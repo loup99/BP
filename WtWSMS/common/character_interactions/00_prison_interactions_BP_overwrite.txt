@@ -25,7 +25,7 @@ imprison_interaction = {
 	on_decline_summary = imprison_decline_summary
 	
 	ai_potential = {
-		NOT = { has_realm_law = tribal_authority_0 }
+		NOT = { has_realm_law_flag = cannot_imprison }
 		is_imprisoned = no
 	}
 
@@ -50,25 +50,13 @@ imprison_interaction = {
 	}
 
 	is_valid_showing_failures_only = {
-		scope:recipient = {
-			is_busy_in_events_localised = yes
-		}
 		scope:actor = {
-			allowed_to_imprison_character_trigger = {
-				CHARACTER = scope:recipient
-			}
+			allowed_to_imprison_character_trigger = { CHARACTER = scope:recipient }
 		}
-		scope:actor = {
-			NOT = { has_realm_law = tribal_authority_0 }
-		}
-
-		scope:actor = {
-			is_imprisoned = no
-		}
-		custom_description = {
-			text = cannot_imprison_almohad_leader
-			subject = scope:recipient
-			NOT = { scope:recipient = { has_character_modifier = almohad_leader_modifier } }
+		imprison_neutral_is_valid_showing_failures_only_triggers_trigger = yes
+		custom_tooltip = {
+			text = cannot_take_overt_hostile_actions_against_diarch.tt
+			NOT = { scope:recipient ?= scope:actor.diarch }
 		}
 	}
 
@@ -107,6 +95,11 @@ imprison_interaction = {
 	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
 
 	send_options_exclusive = no
+
+	cost = {
+		# Usually, this action is free, but during certain diarchies, we want it to cost.
+		prestige = liege_diarchy_surcharge_interaction_imprison_interaction_value
+	}
 
 	on_send = {
 		scope:actor = {
@@ -190,46 +183,8 @@ imprison_interaction = {
 			TARGET = scope:recipient
 			IMPRISONER = scope:actor
 		}
-		scope:recipient = {
-			if = { #If they recently revoked your title, or asked for your excommunication, they become your rival
-				limit = {
-					OR = {
-						has_opinion_modifier = {
-							target = scope:actor
-							modifier = revoked_title
-						}
-						AND = {
-							exists = var:requested_my_excommunication
-							var:requested_my_excommunication = scope:actor
-						}
-					}
-					NOT = {
-						has_relation_rival = scope:actor
-					}
-				}
-				hidden_effect = {
-					if = {
-						limit = {
-							has_relation_potential_rival = scope:actor
-						}
-						remove_relation_potential_rival = scope:actor
-					}
-				}
-				set_relation_rival = {
-					target = scope:actor
-					reason = rival_imprisoned_and_robbed_me
-				}
-			}
-			else = {
-				hidden_effect = {
-					progress_towards_rival_effect = {
-						CHARACTER = scope:actor
-						REASON = rival_imprisoned
-						OPINION = 0
-					}
-				}
-			}
-		}
+		# If they recently revoked your title, or asked for your excommunication, they become your rival
+		imprison_attempt_escalates_rivalry_effect = yes
 		scope:actor = {
 			trigger_event = char_interaction.0231
 			if = {
@@ -481,7 +436,7 @@ imprison_interaction = {
 	##### Changed from Vanilla vvvvv
 	ai_accept = {
 		base = 0 # Try to make it 0 for most interactions
-		
+
 		modifier = {
 			add = {
 				value = scope:actor.intrigue
@@ -496,6 +451,7 @@ imprison_interaction = {
 			}
 			desc = IMPRISON_INTRIGUE_RECIPIENT
 		}
+
 		modifier = {
 			add = 30
 			scope:hook = yes
@@ -518,7 +474,6 @@ imprison_interaction = {
 					value = -0.5
 				}
 			}
-			##### Changed from Vanilla vvvvv
 			ai_honor = {
 				if = {
 					limit = {
@@ -533,11 +488,7 @@ imprison_interaction = {
 					value = 0.75
 				}
 			}
-			##### Changed from Vanilla ^^^^^
 		}
-		##### Changed from Vanilla ^^^^^
-		
-		##### Changed from Vanilla vvvvv
 		modifier = {
 			add = 20
 			scope:actor = {
@@ -756,6 +707,25 @@ imprison_interaction = {
 			}
 			add = 500
 		}
+		# Thug accolade increases imprison chance because they scary
+		modifier = {
+			scope:actor = {
+				any_active_accolade = {
+					has_accolade_parameter = accolade_imprisonment_chance
+				}
+			}
+			desc = THUG_REASON
+			add = accolade_imprisonment_chance_value
+		}
+		modifier = {
+			scope:actor = {
+				any_active_accolade = {
+					has_accolade_parameter = accolade_imprisonment_chance_high
+				}
+			}
+			desc = THUG_REASON_HIGH
+			add = accolade_imprisonment_chance_value_high
+		}
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -795,7 +765,7 @@ imprison_interaction = {
 				is_landed = yes
 			}
 		}
-		
+
 		modifier = { # Avoid imprisonments in certain circumstances
 			add = -190
 			scope:actor = {
@@ -850,7 +820,7 @@ imprison_interaction = {
 				gold < minimum_ai_gold_value_for_tyranny_wars
 			}
 		}
-		
+
 		modifier = { # Don't imprison people you like
 			scope:actor = {
 				NOT = {
@@ -1028,6 +998,16 @@ imprison_interaction = {
 					}
 					add = -100
 				}
+			}
+		}
+
+		modifier = { # Avoid triggering Tyranny wars mid-grand activity
+			factor = 0
+			scope:actor = {
+				has_ongoing_grand_activity_trigger = yes
+			}
+			scope:recipient = {
+				highest_held_title_tier >= tier_county
 			}
 		}
 	}

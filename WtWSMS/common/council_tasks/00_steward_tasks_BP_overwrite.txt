@@ -1,4 +1,4 @@
-﻿##### Changed from Vanilla: Removed -50% Steward Effectiveness for tribals; it's a flat 50% for the government
+﻿##### Changed from Vanilla: Add nomad development penalty
 task_develop_county = {
 	position = councillor_steward
 
@@ -180,22 +180,17 @@ task_develop_county = {
 				desc = COUNCILLOR_IS_YOUR_NEMESIS
 			}
 		}
-		##### Changed from Vanilla vvvvv
 		if = { #Tribal penalty
-			limit = { scope:councillor_liege = { should_apply_tribal_development_penalty_trigger = yes } }
+			limit = {
+				scope:councillor_liege = {
+					should_apply_tribal_development_penalty_trigger = yes	
+				}
+			}
 			add = {
 				value = scope:councillor.steward_develop_county_tribal_penalty
 				desc = DEVELOP_COUNTY_TRIBAL_PENALTY_VALUE
 			}
-		}
-		if = { #Nomad penalty
-			limit = { scope:councillor_liege = { should_apply_nomad_development_penalty_trigger = yes } }
-			add = {
-				value = scope:councillor.steward_develop_county_nomad_penalty
-				desc = DEVELOP_COUNTY_NOMAD_PENALTY_VALUE
-			}
-		}
-		##### Changed from Vanilla ^^^^^
+		}	
 		if = { # Development reduces the speed.
 			limit = {
 				exists = scope:county
@@ -280,19 +275,24 @@ task_develop_county = {
 		scale = { value = scope:councillor.current_development_penalty divide = 100 }
 	}
 
-	##### Changed from Vanilla vvvvv
 	county_modifier = {
 		name = steward_develop_county_tribal_penalty_modifier
 		development_growth = 100
 		scale = {
 			value = 0
 			if = {
-				limit = { scope:councillor_liege = { should_apply_tribal_development_penalty_trigger = yes } }
+				limit = {
+					scope:councillor_liege = {
+						should_apply_tribal_development_penalty_trigger = yes
+					}
+				}
 				value = scope:councillor.steward_develop_county_tribal_penalty
 				divide = 100
 			}
 		}
 	}
+
+	##### Changed from Vanilla vvvvv
 	county_modifier = {
 		name = steward_develop_county_nomad_penalty_modifier
 		development_growth = 100
@@ -495,6 +495,16 @@ task_promote_culture = {
 			desc = task_promote_culture_effect_desc
 			triggered_desc = {
 				trigger = {
+					scope:councillor_liege = {
+						any_vassal = {
+							has_vassal_stance = minority
+						}
+					}
+				}
+				desc = minority_disapproves_conversion_tooltip
+			}
+			triggered_desc = {
+				trigger = {
 					trigger_if = {
 						limit = { exists = scope:county }
 						scope:county = {
@@ -652,7 +662,6 @@ task_promote_culture = {
 			}
 		}
 		#### Changed from Vanilla ^^^^^
-		
 		# Faster conversion for FP2 Hostility ending, if county is in Iberia and culture was involved
 		if = {
 			limit = {

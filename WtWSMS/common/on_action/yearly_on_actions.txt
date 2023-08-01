@@ -1,12 +1,112 @@
-﻿##### Changed from Vanilla vvvvv
+﻿##### Changed from Vanilla: Removed Visigothic Culture Split
+##### Changed from Vanilla: Removed Norse Culture split
+##### Changed from Vanilla: Removed Anglo-Saxon -> Scottish Culture Shift
+##### Changed from Vanilla: Removed lyonese_monk_events
 
 # Called every Jan 1st
 # Root does not exist
 yearly_global_pulse = {
 	effect = {
-		##### Changed from Vanilla: Removed Visigothic Culture Split
-		##### Changed from Vanilla: Removed Norse Culture Split
-		##### Changed from Vanilla: Removed  Anglo-Saxon -> Scottish Culture Shift
+	##### Changed from Vanilla: Removed Visigothic Culture Split
+####		# Visigothic culture split
+####		## Deprecated; to reenable, remove always = no line & decomment the trigger_event section.
+####		if = {
+####			limit = {
+####				always = no
+####				current_date <= 920.1.1 # No need to check this in later starts
+####				NOT = { has_global_variable = visigothic_culture_split }
+####				current_date >= 850.1.1
+####			}
+####			random = {
+####				chance = 0 # No chance the first year of play if starting in 867
+####				modifier = {
+####					add = 10
+####					current_date >= 868.1.1
+####				}
+####				modifier = {
+####					add = 10 # 20% chance
+####					current_date >= 875.1.1
+####				}
+####				modifier = {
+####					add = 10 # 30% chance
+####					current_date >= 890.1.1
+####				}
+####				set_global_variable = {
+####					name = visigothic_culture_split
+####					value = yes
+####				}
+####				#trigger_event = {
+####					#id = global_culture.0001
+####					#days = { 60 300 }
+####				#}
+####			}
+####		}
+	
+	##### Changed from Vanilla: Removed Norse Culture split
+####		# Norse culture split.
+####		if = {
+####			limit = {
+####				current_date < 990.1.1
+####				NOT = { has_global_variable = norse_culture_split }
+####				current_date >= 950.1.1
+####			}
+####			random = {
+####				chance = 10
+####				modifier = {
+####					add = 20 # 30% chance
+####					current_date >= 960.1.1
+####				}
+####				modifier = {
+####					add = 30 # 60% chance
+####					current_date >= 970.1.1
+####				}
+####				modifier = {
+####					add = 40 # 100% chance
+####					current_date >= 980.1.1
+####				}
+####				set_global_variable = {
+####					name = norse_culture_split
+####					value = yes
+####				}
+####				trigger_event = {
+####					id = global_culture.0011
+####					days = { 60 300 }
+####				}
+####			}
+####		}
+
+	##### Changed from Vanilla: Removed Anglo-Saxon -> Scottish Culture Shift
+####		# Anglo-Saxon -> Scottish Culture Shift
+####		if = {
+####			limit = {
+####				current_date <= 1066.1.1 # No need to check this in later starts
+####				NOT = { has_global_variable = scottish_culture_creation }
+####				current_date >= 867.1.1
+####			}
+####			random = {
+####				chance = 0 # No chance the first year of play if starting in 867
+####				modifier = {
+####					add = 2 # 2% chance per year
+####					current_date >= 900.1.1
+####				}
+####				modifier = {
+####					add = 8 # 10% chance per year
+####					current_date >= 950.1.1
+####				}
+####				modifier = {
+####					add = 15 # 25% chance per year
+####					current_date >= 1000.1.1
+####				}
+####				set_global_variable = {
+####					name = scottish_culture_creation
+####					value = yes
+####				}
+####				trigger_event = {
+####					id = global_culture.0031
+####					days = { 60 300 }
+####				}
+####			}
+####		}
 		# Mongol Invasion
 		if = {
 			limit = {
@@ -157,13 +257,150 @@ yearly_global_pulse = {
 				}
 			}
 		}
-		##### Changed from Vanilla: Removed Lyonese Monk Events
+
+	##### Changed from Vanilla: Removed lyonese_monk_events
+####		# A wandering French monk appears.
+####		if = {
+####			limit = {
+####				# Do we have the correct flavour pack?
+####				has_fp2_dlc_trigger = yes
+####				# Must be before the monk would likely die.
+####				current_date <= 880.1.1
+####				# The monk hasn't already tried to turn up somewhere.
+####				NOT = {
+####					is_target_in_global_variable_list = {
+####						name = unavailable_unique_events
+####						target = flag:lyonese_monk_event
+####					}
+####				}
+####			}
+####			# If there's a player in this region, we wait for one to become eligible.
+####			if = {
+####				limit = {
+####					any_player = {
+####						capital_province = { geographical_region = dlc_fp2_lyonese_monk_region }
+####					}
+####				}
+####				if = {
+####					limit = {
+####						OR = {
+####							any_player = {
+####								capital_province = { geographical_region = dlc_fp2_lyonese_monk_region }
+####								fp2_lyonese_monk_0002_valid_character_configuration_trigger = yes
+####							}
+####							current_date = 880.1.1
+####						}
+####					}
+####					# Fire the event.
+####					trigger_event = {
+####						id = fp2_lyonese_monk.0002
+####						days = { 30 90 }
+####					}
+####				}
+####			}
+####			# Otherwise, we roll randomly per year immediately.
+####			else_if = {
+####				limit = {
+####					any_county_in_region = {
+####						region = dlc_fp2_lyonese_monk_region
+####						holder = { fp2_lyonese_monk_0002_valid_court_trigger = yes }
+####					}
+####				}
+####				random = {
+####					# Low initial chance, to give the player time.
+####					chance = 5
+####					# Slowly ramp up the chance till *someone* is selected, assuming we have any valid candidates.
+####					modifier = {
+####						add = 20
+####						current_date >= 870.1.1
+####					}
+####					modifier = {
+####						add = 25
+####						current_date >= 873.1.1
+####					}
+####					modifier = {
+####						add = 25
+####						current_date >= 876.1.1
+####					}
+####					modifier = {
+####						add = 25
+####						current_date = 880.1.1
+####					}
+####					# Fire the event.
+####					trigger_event = {
+####						id = fp2_lyonese_monk.0002
+####						days = { 30 90 }
+####					}
+####				}
+####			}
+####		}
+		
+		# Rabbinicism becomes Monogamous
+		if = {
+			limit = {
+				# Rabbi Gershom bans polygamy sometime in the 11th century
+				current_date > "1000.01.01"
+				# Make sure this hasn't happened already
+				faith:rabbinism = {
+					has_doctrine = doctrine_polygamy
+					NOT = {
+						has_variable = rabbinicism_accepted_monogamy
+						has_variable = rabbinicism_rejected_monogamy
+					}
+				}
+			}
+			religion:judaism_religion = {
+				every_faith = {
+					limit = {
+						has_doctrine = doctrine_polygamy
+						has_doctrine = temple_authority_rabbinic_doctrine
+					}
+					if = {
+						limit = {
+							exists = religious_head
+						}
+						if = {
+							limit = {
+								religious_head = { is_independent_ruler = no }
+								religious_head.top_liege.faith = this
+							}
+							religious_head.top_liege = { trigger_event = jewish_events.0001 }
+						}
+						else_if = {
+							limit = {
+								religious_head = { is_independent_ruler = no }
+								religious_head.liege.faith = this
+							}
+							religious_head.liege = { trigger_event = jewish_events.0001 }
+						}
+						else = {
+							religious_head = { trigger_event = jewish_events.0001 }
+						}
+					}
+					else_if = {
+						limit = {
+							any_player = { # Checking players is more performant than checking faith characters and limiting it to players
+								faith = prev
+							}
+						}
+						random_player = {
+							limit = { faith = prev }
+							trigger_event = jewish_events.0001
+						}
+					}
+					else = {
+						random_faith_character = {
+							trigger_event = jewish_events.0001
+						}
+					}
+				}
+			}
+		}
 	}
 	on_actions = {
 		inspiration_maintenance_global_pulse
 	}
 }
-##### Changed from Vanilla ^^^^^
 
 # Called from code once a year for "playable" (count+) characters.
 # Root is the character
@@ -172,7 +409,7 @@ yearly_playable_pulse = {
 		ai_budget_manipulation_effect = yes
 		if = {
 			limit = {
-				has_government = mercenary_government
+				government_has_flag = government_is_mercenary
 				culture = {
 					has_cultural_parameter = mercenary_courtiers_gain_extra_skills
 				}
@@ -207,7 +444,8 @@ yearly_playable_pulse = {
 	}
 }
 
-##### Changed from Vanilla vvvvv
+##### Changed from Vanilla: Removed Norse/French => Norman Event
+##### Changed from Vanilla: Removed Sicilian spread event
 
 # Called from code once every three years for "playable" (count+) characters.
 # Root is the character
@@ -218,13 +456,13 @@ three_year_playable_pulse = {
 		##### Changed from Vanilla: Removed Sicilian spread event
 	}
 }
-##### Changed from Vanilla ^^^^^
 
 # Called from code once every five years for "playable" (count+) characters.
 # Root is the character
 five_year_playable_pulse = {
 	effect = {
 		root = {
+			chance_for_random_nickname_effect = yes
 			if = {
 				limit = {
 					has_royal_court = yes
@@ -348,6 +586,35 @@ five_year_playable_pulse = {
 					}
 				}
 			}
+			if = {
+				limit = {
+					cp:councillor_court_chaplain ?= {
+						is_theocratic_lessee = yes
+						NOT = {
+							knows_language_of_culture = root.culture
+						}
+					}
+				}
+				cp:councillor_court_chaplain = {
+					random_list = {
+						10 = {
+							modifier = {
+								add = learning
+							}
+							learn_language_of_culture = root.culture
+						}
+						5 = {
+							trigger = {
+								can_start_scheme = { type = learn_language target = root }
+							}
+							start_scheme = {
+								type = learn_language
+								target = root
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	events = {
@@ -409,6 +676,7 @@ random_yearly_playable_pulse = {
 		4 = fp1_yearly_events
 		3 = fp2_yearly_events
 		1 = bp1_yearly_events
+		2 = hunt_sighting_on_action
 	}
 	on_actions = {
 		delay = { days = { 45 75 } }
@@ -461,6 +729,7 @@ five_year_everyone_pulse = {
 					is_married = no
 					is_lowborn = no
 					can_marry_trigger = yes
+					is_concubine = no
 				}
 				
 				if = {
@@ -626,6 +895,15 @@ on_yearly_common_events = {
 	}
 }
 
+# Accolades yearly events
+three_year_playable_pulse = {
+	events = {
+		ep2_accolade_events.0100 #Huntsmaster gives you or heir Hunter trait event
+		ep2_accolade_events.0200 #Blademaster gives you or heir Blademaster trait event
+		ep2_accolade_events.0300 #Master of Revels gives you or heir Reveler trait event
+	}
+}
+
 on_yearly_invisible_events = {
 	random_events = {
 		chance_to_happen = 5
@@ -686,6 +964,8 @@ on_yearly_events = {
 		100 = yearly.7001	#Faction attempts a coup or kidnapping
 
 		10 = yearly.7010	#Opportunity to participate in a football game
+		
+		200 = major_decisions.2011	#Gain a scholar character if you have a University in your sub-realm
 		
 		#'Nice' events (positive effects)
 		100 = yearly.8000 	# Vassal offers liege a gift
@@ -953,7 +1233,6 @@ on_yearly_events = {
 		100 = artifact.4080 # A Master Dueler's Weapon
 		100 = artifact.4090 # A Relic and Weapon Combined
 
-
 		#EP1 Courtly Events
 		100 = court_yearly.1000 # Growing Debauchery
 		100 = court_yearly.2001 # Competitive Cronying
@@ -987,7 +1266,6 @@ on_yearly_events = {
 		100 = culture_tradition_events.0131	# A mendicant is repulsed by your sins, and invokes the wrath of HighGodName against you.
 		100 = culture_tradition_events.0141	# A mendicant of your culture, but not your faith, offers tutelage if you'll convert.
 
-
 		#Trait Events
 		100 = trait_specific.8501 # Someone mocks your lisp
 		
@@ -995,11 +1273,11 @@ on_yearly_events = {
 		180 = fp2_yearly.2020	# Horchata colonialism event
 		160 = fp2_yearly.8000	# Burning the Vineyards
 		180 = fp2_yearly.8001	# Assembling the Cortes
-		180 = fp2_yearly.8002	# A Dietary Dilemma
+		180 = fp2_yearly.8002	# A Dietary Dilemma 
 		180 = fp2_yearly.8003	# Flight of Fancy
-		180 = fp2_yearly.8004	# Translation School
-		180 = fp2_yearly.8005	# Under the Stone Pine
-		180 = fp2_yearly.8006	# Saqaliba Settlers
+		180 = fp2_yearly.8004	# Translation School 
+		180 = fp2_yearly.8005	# Under the Stone Pine 
+		180 = fp2_yearly.8006	# Saqaliba Settlers 
 		180 = fp2_struggle.1002	# Xenophilic Advancment
 		160 = fp2_struggle.1050	# Dreams of Destruction
 		150 = fp2_struggle.2000	# Disorderly Market
@@ -1015,14 +1293,15 @@ on_yearly_events = {
 		300 = fp2_yearly.4009 	# Visiting the Malato Tree
 		150 = fp2_yearly.4010 	# Finding a Verraco
 		300 = fp2_yearly.3000 	# Neighboring Muslims are growing rice, adopt the practice yourself?
+		150 = fp2_yearly.3001 	# Choosing your epitaph
+		150 = fp2_yearly.3002 	# And They Were Roommates
+		150 = fp2_yearly.3003 	# A Flavorful Evening
 		150 = fp2_yearly.4007 	# Finding a shell on the road to Santiago
 		150 = fp2_yearly.4008 	# Folk stories around the fireside
 		300 = fp2_yearly.4009 	# Visiting the Malato Tree
 		150 = fp2_yearly.4010 	# Finding a Verraco
-		150 = fp2_yearly.3002 	# And They Were Roommates
-		150 = fp2_yearly.3003 	# A Flavorful Evening 
-		150 = fp2_yearly.3001	# Choosing your epitaph
-		#BP1 Events
+
+		#BP1 - Bontent Pack One Events
 		100 = bp1_yearly.1000 # Best friend introduces you to a new hobby
 		200 = bp1_yearly.1010 # A friend offers to mediate with your HoF who has excommunicated you
 		500 = bp1_yearly.1020 # A friend visits you on your dying bed
@@ -1138,5 +1417,13 @@ on_yearly_events = {
 
 		# Guardianship Events
 		200 = childhood.2400 # Ward approaches guardian with theological doubts
+
+		# Hunt
+		50 = hunt.2000 # Dog salesman
+		50 = hunt.2001 # Falcon salesman
+
+		# Pilgrimage / Hajj
+		50 = pilgrimage.0500 # Promise your dying religious relative to go on a Pilgrimage
+		50 = hajj.0500 # Promise your dying Hajjaj relative to go on the Hajj
 	}
 }

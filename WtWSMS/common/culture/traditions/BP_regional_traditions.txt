@@ -82,8 +82,8 @@ tradition_marauders = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_bellicose }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -181,8 +181,8 @@ tradition_marauders_non_dlc = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_bellicose }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -200,6 +200,62 @@ tradition_marauders_non_dlc = {
 		if = {
 			limit = { NOT = { any_in_list = { list = traits this = flag:ethos_bellicose } } }
 			multiply = 0.5
+		}
+	}
+}
+
+#For various Traditional City Building cultures of note without otherwise specialized traditions
+tradition_city_builders = {
+	category = regional
+
+	layers = {
+		0 = steward
+		1 = mediterranean
+		4 = temple.dds
+	}
+	
+	is_shown = { always = no }
+	can_pick = { traditions_heritage_tradition_is_in_list_trigger = no }
+	can_pick_for_hybridization = { traditions_heritage_tradition_is_in_list_trigger = no }
+	
+	parameters = {
+		can_build_cities_in_classical_antiquity = yes
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_bureaucratic = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bureaucratic_communal_or_courtly_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { NOT = { is_divergent_culture = yes } }
+			multiply = 0
+		}
+		if = {
+			limit = { any_in_list = { list = traits this = flag:ethos_bellicose } }
+			multiply = 0
 		}
 	}
 }
@@ -240,7 +296,7 @@ tradition_asturian_hierarchy = {
 				limit = {
 					NOR = {
 						has_game_rule = inversed_gender_equality
-						any_in_list = { list = traits this = flag:ethos_egalitarian }
+						culture_pillar:ethos_egalitarian = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -321,8 +377,8 @@ tradition_greek_succession = { #Byzantine Succession Variant for non-Roman Refor
 		eunuch_trait_bonuses = yes
 		can_appoint_chief_eunuch = yes
 		physical_disfigurement_blocks_inheritance = yes #Actually only blocks claimants and reduce score in elective. Also includes infertility for tooltip reasons.
-		can_build_cities_in_late_antiquity = yes
 		disloyal_trait_more_common = yes
+		unlock_innovation_roman_civil = yes
 	}
 	
 	cost = {
@@ -335,8 +391,8 @@ tradition_greek_succession = { #Byzantine Succession Variant for non-Roman Refor
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_communal }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -410,11 +466,9 @@ tradition_roman_succession = { #For Roman Political Aspects (innovations &c)
 		is_a_heritage_tradition = yes
 		physical_disfigurement_blocks_inheritance = yes
 		disloyal_trait_more_common = yes
-		unlock_innovation_roman_civil_late_antiquity = yes
-		unlock_innovation_roman_civil_early_migration = yes
-		unlock_innovation_roman_civil_late_migration = yes
 		subroman_characters_cant_seek_independence = yes
 		can_restore_roman_empire = yes
+		unlock_innovation_roman_civil = yes
 	}
 	character_modifier = {
 		eligible_child_opinion = 20
@@ -434,8 +488,8 @@ tradition_roman_succession = { #For Roman Political Aspects (innovations &c)
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_communal }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -494,11 +548,9 @@ tradition_latin_succession = { #For Roman Political Aspects (innovations &c w/o 
 	parameters = {
 		is_a_heritage_tradition = yes
 		disloyal_trait_more_common = yes
-		unlock_innovation_roman_civil_late_antiquity = yes
-		unlock_innovation_roman_civil_early_migration = yes
-		unlock_innovation_roman_civil_late_migration = yes
 		subroman_characters_cant_seek_independence = yes
 		can_restore_roman_empire = yes
+		unlock_innovation_roman_civil = yes
 	}
 	
 	cost = {
@@ -511,8 +563,8 @@ tradition_latin_succession = { #For Roman Political Aspects (innovations &c w/o 
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_communal }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -574,9 +626,9 @@ tradition_armenian_traditions = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
-						any_in_list = { list = traits this = flag:ethos_stoic }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -655,9 +707,9 @@ tradition_armenian_traditions_non_dlc = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
-						any_in_list = { list = traits this = flag:ethos_stoic }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -734,7 +786,7 @@ tradition_hebrew_traditions = {
 		harder_to_convert_county_culture_without_heritage = yes
 		populist_factions_more_common_against_foreigners = yes
 		same_religion_inheritance_only = yes
-		can_build_cities_in_late_antiquity = yes
+		can_build_cities_in_classical_antiquity = yes
 		#Invisible Effect
 		blocks_vanilla_culture_emergence_events = yes
 	}
@@ -752,8 +804,8 @@ tradition_hebrew_traditions = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -827,7 +879,7 @@ tradition_hebrew_traditions_non_dlc = {
 		harder_to_convert_county_culture_without_heritage = yes
 		populist_factions_more_common_against_foreigners = yes
 		same_religion_inheritance_only = yes
-		can_build_cities_in_late_antiquity = yes
+		can_build_cities_in_classical_antiquity = yes
 		#Invisible Effect
 		blocks_vanilla_culture_emergence_events = yes
 	}
@@ -845,8 +897,8 @@ tradition_hebrew_traditions_non_dlc = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -920,7 +972,7 @@ tradition_egyptian_traditions = {
 		increased_divergence_hybrid_cost_hellenization = yes
 		limitation_on_divergence_hybridization_culture_head = yes
 		harder_to_convert_county_culture_without_heritage = yes
-		can_build_cities_in_late_antiquity = yes
+		can_build_cities_in_classical_antiquity = yes
 		#Invisible Effect
 		blocks_vanilla_culture_emergence_events = yes
 	}
@@ -951,9 +1003,9 @@ tradition_egyptian_traditions = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -1026,7 +1078,7 @@ tradition_egyptian_traditions_non_dlc = {
 		increased_divergence_hybrid_cost_hellenization = yes
 		limitation_on_divergence_hybridization_culture_head = yes
 		harder_to_convert_county_culture_without_heritage = yes
-		can_build_cities_in_late_antiquity = yes
+		can_build_cities_in_classical_antiquity = yes
 		#Invisible Effect
 		blocks_vanilla_culture_emergence_events = yes
 	}
@@ -1055,9 +1107,9 @@ tradition_egyptian_traditions_non_dlc = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -1147,9 +1199,9 @@ tradition_persian_traditions = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
-						any_in_list = { list = traits this = flag:ethos_courtly }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -1234,9 +1286,9 @@ tradition_persian_traditions_non_dlc = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -1299,7 +1351,7 @@ tradition_levantine_traditions = {
 		increased_divergence_hybrid_cost_hellenization = yes
 		limitation_on_divergence_hybridization_culture_head = yes
 		harder_to_convert_county_culture_without_heritage = yes
-		can_build_cities_in_late_antiquity = yes
+		can_build_cities_in_classical_antiquity = yes
 		#Invisible Effect
 		blocks_vanilla_culture_emergence_events = yes
 	}
@@ -1321,9 +1373,9 @@ tradition_levantine_traditions = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -1381,7 +1433,7 @@ tradition_levantine_traditions_non_dlc = {
 	
 	parameters = {
 		is_a_heritage_tradition = yes
-		can_build_cities_in_late_antiquity = yes
+		can_build_cities_in_classical_antiquity = yes
 		#Invisible Effect
 		blocks_vanilla_culture_emergence_events = yes
 	}
@@ -1403,9 +1455,9 @@ tradition_levantine_traditions_non_dlc = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_communal }
-						any_in_list = { list = traits this = flag:ethos_courtly }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {
@@ -1503,8 +1555,8 @@ tradition_frankish_traditions = {
 			if = {
 				limit = {
 					NOR = {
-						any_in_list = { list = traits this = flag:ethos_bellicose }
-						any_in_list = { list = traits this = flag:ethos_spiritual }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
 					}
 				}
 				add = {

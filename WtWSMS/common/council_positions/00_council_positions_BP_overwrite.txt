@@ -167,9 +167,96 @@ councillor_court_chaplain = {
 	}
 
 	##### Changed from Vanilla vvvvv
-	##### Changed from Vanilla: Make Buddhist, Jain monks/nuns bald, Cybellians Eunuchs
 	on_get_position = {
 		got_council_position_effect = yes
+		if = {
+			limit = {
+				years_from_game_start >= 1
+			}
+			if = {
+				limit = {
+					is_ruler = no
+					liege = {
+						faith = { has_doctrine = doctrine_clerical_succession_spiritual_fixed_appointment }
+						any_vassal = {
+							is_physically_able_adult = yes
+							is_councillor = no
+							government_has_flag = government_is_theocracy
+							can_be_court_chaplain_trigger = { COURT_OWNER = liege }
+							faith = liege.faith
+						}
+					}
+				}
+				liege = {
+					random_vassal = {
+						limit = {
+							is_physically_able_adult = yes
+							is_councillor = no
+							government_has_flag = government_is_theocracy
+							can_be_court_chaplain_trigger = { COURT_OWNER = liege }
+							faith = liege.faith
+						}
+						weight = {
+							base = 1
+							modifier = {
+								add = 1000
+								faith.religious_head ?= this
+							}
+							modifier = {
+								add = learning
+							}
+							modifier = {
+								add = primary_title.tier
+							}
+						}
+						liege = {
+							assign_councillor_type = {
+								type = councillor_court_chaplain
+								remove_existing_councillor = yes
+								target = prev
+							}
+						}
+					}
+				}
+				move_to_pool = yes
+			}
+			if = {
+				limit = {
+					exists = this
+					exists = liege.culture
+					NOT = {
+						knows_language_of_culture = liege.culture
+					}
+				}
+				random_list = {
+					10 = {
+						modifier = {
+							add = learning
+						}
+						learn_language_of_culture = liege.culture
+					}
+					5 = {
+						trigger = {
+							can_start_scheme = { type = learn_language target = liege }
+						}
+						start_scheme = {
+							type = learn_language
+							target = liege
+						}
+					}
+					5 = {
+						trigger = {
+							OR = {
+								has_trait = arrogant
+								has_trait = arbitrary
+								has_trait = lazy
+								has_trait = fickle
+							}
+						}
+					}
+				}
+			}
+		}
 		
 		##### Changed from Vanilla vvvvv
 		if = { #Buddhists and Jains are always monastic holders
@@ -180,30 +267,19 @@ councillor_court_chaplain = {
 					faith = { religion_tag = jainism_religion }
 				}
 			}
-			add_trait = devoted
+			if = { limit = { NOT = { has_trait = devoted } } add_trait = devoted }
 		}
-		if = { #Sacred Eunuchs are always sacred monks
-			limit = {
-				NOT = { has_trait = devoted }
-				faith = { has_doctrine = special_doctrine_sacred_eunuchs }
-			}
-			add_trait = devoted
-			add_trait = eunuch
+		if = { #Sacred Eunuchs
+			limit = { faith = { has_doctrine = special_doctrine_sacred_eunuchs } }
+			if = { limit = { NOT = { has_trait = devoted } } add_trait = devoted }
+			if = { limit = { NOT = { has_trait = eunuch } } add_trait = eunuch }
 		}
 		if = { #Scythian Pagan Court Chaplains are Enarei trait
 			limit = {
-				NOT = { has_trait = devoted }
 				faith = { has_doctrine_parameter = utilizes_enarei }
 				is_male = yes
 			}
-			add_trait = enarei
-		}
-		if = { #Magyar Pagan Court Chaplains should have mystic_3 if spawned from pool
-			limit = {
-				NOT = { has_trait = mystic_3 }
-				faith = { has_doctrine_parameter = mystic_birthright_active }
-			}
-			add_trait = mystic_3
+			if = { limit = { NOT = { has_trait = enarei } } add_trait = enarei }
 		}
 		##### Changed from Vanilla ^^^^^
 	}
@@ -214,4 +290,9 @@ councillor_court_chaplain = {
 	}
 
 	portrait_animation = chaplain
+
+	barbershop_data = {
+		position = { 1618.0 172.0  }
+		click_to_front = no
+	}
 }

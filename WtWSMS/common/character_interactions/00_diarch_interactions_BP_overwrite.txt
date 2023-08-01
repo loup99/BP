@@ -1,0 +1,639 @@
+﻿##### Changed from Vanilla: Generalized feudal-like retractions
+
+# Diarch (actor) takes a vassal from a vassal (recipient) of their liege with an optional veto for the liege (third_party).
+diarch_retract_vassal_interaction = {
+	category = interaction_category_diarch
+	diarch_interaction = yes
+	highlighted_reason = HIGHLIGHTED_CAN_DIARCH_RETRACT
+	notification_text = RETRACT_VASSAL_PROPOSAL
+	intermediary_notification_text = diarch_interaction_requesting_sign_off.tt
+	intermediary_breakdown_yes = ANSWER_TRILATERAL_INTERMEDIARY_LIEGE_YES
+	intermediary_breakdown_no = ANSWER_TRILATERAL_INTERMEDIARY_LIEGE_NO
+	intermediary_breakdown_maybe = ANSWER_TRILATERAL_INTERMEDIARY_LIEGE_MAYBE
+	intermediary_answer_accept_key = REPLY_ANSWER_ALLOW
+	intermediary_answer_reject_key = REPLY_ANSWER_VETO
+	pre_answer_yes_breakdown_key = ANSWER_TRILATERAL_RECIPIENT_YES
+	pre_answer_no_breakdown_key = ANSWER_TRILATERAL_RECIPIENT_NO
+	pre_answer_maybe_breakdown_key = ANSWER_TRILATERAL_RECIPIENT_MAYBE
+	icon = icon_liege
+	redirect = {
+		scope:actor.liege ?= { save_scope_as = intermediary }
+	}
+
+	desc = diarch_retract_vassal_interaction_desc
+
+	special_interaction = retract_vassal_interaction
+	interface = transfer_vassal
+	ai_maybe = yes
+	ai_intermediary_maybe = yes
+	can_send_despite_rejection = yes
+	popup_on_receive = yes
+	pause_on_receive = yes
+	
+	interface_priority = 55
+	ai_min_reply_days = 4
+	ai_max_reply_days = 9
+	
+	on_decline_summary = diarch_rebel_or_crime_summary.retract
+
+	is_shown = {
+		# The obvious.
+		NOT = { scope:actor = scope:recipient }
+		# Diarchy checks for scope:actor.
+		scope:actor = {
+			# If you're not in a diarchy, we don't care.
+			OR = {
+				AND = {
+					exists = liege
+					is_diarch_of_target = liege
+				}
+				is_designated_diarch = yes
+			}
+			# Plus you need to be landed for this.
+			is_landed = yes
+		}
+		# Make sure scope:recipient is suitable.
+		scope:recipient = {
+			# We only target vassals of the liege...
+			liege = scope:actor.liege
+			NOT = { this = scope:actor.liege }
+			# ... who are appropriately landed.
+			is_landed = yes
+			scope:recipient.highest_held_title_tier >= tier_duchy
+		}
+	}
+	
+	is_valid = {
+		# Here to correct for some dodgy inheritance situations.
+		NOT = { scope:actor = scope:intermediary }
+	}
+	##### Changed from Vanilla vvvvv
+	is_valid_showing_failures_only = {
+		# Standard validity checks.
+		vassal_retraction_standard_valid_showing_failures_only_trigger = yes
+		# Diarch must be able to act.
+		diarch_cannot_be_disabled_trigger = { DIARCH = scope:actor }
+		# Scope:recipient must hold at least one of scope:actor's de jure vassals.
+		scope:actor = {
+			custom_description = {
+				text = "you_must_have_a_de_jure_vassal_to_retract"
+				object = scope:recipient
+				any_held_title = {
+					tier >= tier_duchy
+					any_direct_de_jure_vassal_title = {
+						exists = holder
+						holder.liege = scope:recipient
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		
+		# Plus make sure there's a legal right to retract.
+		scope:actor.liege = {
+			trigger_if = {
+				limit = { government_has_flag = government_is_tribal }
+				custom_description = {
+					text = "liege_has_law_allowing_vassal_retraction_tribal"
+					has_realm_law_flag = vassal_retraction_allowed
+				}
+			}
+			##### Changed from Vanilla vvvvv
+			trigger_if = {
+				limit = {
+					NOT = { government_has_flag = government_is_tribal }
+				}
+				custom_description = {
+					text = "liege_has_law_allowing_vassal_retraction_crown"
+					can_retract_vassal_trigger = yes
+				}
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+		##### Changed from Vanilla ^^^^^
+		
+		# Must be in an actual diarchy — we show most interactions greyed out for designated diarchs.
+		custom_tooltip = {
+			text = diarch_interactions.tt.you_must_be_in_an_entrenched_regency_to_access
+			scope:actor = { is_diarch = yes }
+		}
+		# And, relatedly, there's some checks that we don't show you unless you *are* already in a diarchy.
+		trigger_if = {
+			limit = {
+				scope:actor = { is_diarch = yes }
+			}	
+			# Diarchs must have unlocked the appropriate power.
+			scope:actor.liege = { has_diarchy_active_parameter = unlock_diarch_retract_vassal_interaction }
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	cooldown = { years = 1 }
+	cooldown_against_recipient = { years = 3 }
+
+	can_send = {
+		scope:actor = {
+			custom_description = {
+				text = "character_interactions_hostile_actions_disabled_delay"
+				NOT = { has_character_flag = flag_hostile_actions_disabled_delay }
+			}
+		}
+	}
+
+	is_highlighted = {
+		# Diarch retractions require a de jure claim - this is uncommon, so we always highlight it.
+		diarch_retraction_is_de_jure_liege_trigger = yes
+	}
+
+	populate_recipient_list = {
+		scope:actor = {
+			every_held_title = {
+				limit = { tier >= tier_duchy }
+				every_direct_de_jure_vassal_title = {
+					limit = { exists = holder }
+					holder = {
+						if = {
+							limit = { liege = scope:recipient }
+							add_to_list = characters
+						}
+					}
+				}
+			}
+		}
+	}
+
+	# Hooks can be used to force this through.
+	## We don't force-force this on/for the player (so no pain but less benefits), but AI regard weak hooks as compulsory from/for other AI.
+	send_option = {
+		is_valid = {
+			scope:actor = { has_usable_hook = scope:recipient }
+		}
+		flag = hook
+		localization = SCHEME_HOOK
+	}
+	should_use_extra_icon = {
+		scope:actor = { has_usable_hook = scope:recipient }
+	}
+	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+
+	send_options_exclusive = no
+	
+	on_send = {
+		scope:actor = {
+			add_character_flag = {
+				flag = flag_hostile_actions_disabled_delay
+				days = 10
+			}
+		}
+	}
+
+	on_auto_accept = {
+		scope:recipient = { trigger_event = char_interaction.0271 }
+	}
+	
+	on_accept = {
+		# Follow the standard flow for retraction.
+		save_scope_value_as = {
+			name = use_strife_not_tyranny
+			value = yes
+		}
+		retract_vassal_interaction_effect = yes
+		scope:actor = {
+			# Tell them that the retraction went through fine.
+			trigger_event = char_interaction.0272
+			# Scope:actor can be hostile again.
+			clear_hostile_actions_lock_flag_effect = yes
+		}
+
+		# Debug logging.
+		debug_log = debug_log.diarch_retract_vassal.accepted
+		# Object explorer logging.
+		scope:actor = {
+			diarch_interaction_set_or_update_global_variable_effect = { VARIABLE = di_track_retract_accept }
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_accept_actor_list }
+		}
+		scope:recipient = {
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_accept_recipient_list }
+		}
+		scope:intermediary = {
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_accept_intermediary_list }
+		}
+	}
+
+	on_intermediary_decline = {
+		# Scope:intermediary eats a prestige cost for their veto.
+		scope:intermediary = { add_prestige = liege_diarchy_veto_prestige_cost_high }
+		scope:actor = {
+			# Inform scope:actor that their liege has vetoed them.
+			## First, we log which interaction this is for the event's effects.
+			save_scope_value_as = {
+				name = diarch_interaction
+				value = flag:vassal_retract
+			}
+			## Then, fire the event.
+			trigger_event = char_interaction.0291
+			# Scope:actor can be hostile again.
+			clear_hostile_actions_lock_flag_effect = yes
+		}
+		# Inform scope:recipient that scope:intermediary has their back.
+		scope:recipient = {
+			send_interface_toast = {
+				title = diarch_action_vetoed.tt
+				left_icon = scope:actor
+				right_icon = scope:intermediary
+				custom_tooltip = diarch_retract_vassal_interaction.tt.inform_recipient
+			}
+		}
+		# Flick out some opinions.
+		diarch_retract_vassal_interaction_intermediary_fail_opinions_effect = yes
+
+		# Object explorer logging.
+		scope:actor = {
+			diarch_interaction_set_or_update_global_variable_effect = { VARIABLE = di_track_retract_veto }
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_veto_actor_list }
+		}
+		scope:recipient = {
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_veto_recipient_list }
+		}
+		scope:intermediary = {
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_veto_intermediary_list }
+		}
+	}
+	
+	on_decline = {
+		scope:actor = {
+			# Tell them that the retraction ran into issues.
+			trigger_event = char_interaction.0273
+			# And give a crime reason for both them and their liege.
+			show_as_tooltip = {
+				random_list = {
+					50 = {
+						show_chance = no
+						desc = char_interaction.0273.result.criminal
+						diarch_declare_recipient_criminal_effect = yes
+					}
+					50 = {
+						show_chance = no
+						desc = char_interaction.0273.result.war
+						diarch_declare_vassalisation_war_effect = yes
+					}
+				}
+			}
+			# Scope:actor can be hostile again.
+			clear_hostile_actions_lock_flag_effect = yes
+		}
+		# Flick out some opinions.
+		## Scope:recipient is annoyed with scope:actor.
+		scope:recipient = {
+			add_opinion = {
+				target = scope:actor
+				modifier = retracted_vassal
+			}
+		}
+
+		# Debug logging.
+		debug_log = debug_log.diarch_retract_vassal.rejected
+		# Object explorer logging.
+		scope:actor = {
+			diarch_interaction_set_or_update_global_variable_effect = { VARIABLE = di_track_retract_decline }
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_decline_actor_list }
+		}
+		scope:recipient = {
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_decline_recipient_list }
+		}
+		scope:intermediary = {
+			diarch_interaction_add_to_global_list_effect = { VARIABLE_LIST = di_track_retract_decline_intermediary_list }
+		}
+	}
+	
+	auto_accept = {
+		OR = {
+			scope:recipient = {
+				is_imprisoned_by = scope:actor
+			}
+			custom_description = {
+				text = "spending_hook"
+				subject = scope:actor
+				object = scope:recipient
+				scope:hook = yes
+				scope:actor = { has_strong_hook = scope:recipient }
+			}
+		}
+	}
+
+	ai_intermediary_accept = {
+		# The AI should be inclined to trust their regent, at least a little.
+		base = 0
+		modifier = { add = liege_trust_diarch_trilateral_interaction_default_value }
+
+		# Standard modifiers.
+		intermediary_liege_will_accept_standard_modifiers = { PRESTIGE_COST = liege_diarchy_veto_prestige_cost_high }
+		# Misc important reasons.
+		## Retracting vassal with own capital.
+		modifier = {
+			add = 50
+			desc = AI_VASSAL_HOLDS_REALM_CAPITAL
+			exists = scope:actor.primary_title.title_capital_county
+			scope:secondary_recipient = {
+				OR = {
+					any_sub_realm_county = {
+						this = scope:actor.primary_title.title_capital_county
+					}
+					any_sub_realm_duchy = {
+						this = scope:actor.primary_title.title_capital_county.de_jure_liege
+					}
+				}
+			}
+		}
+	}
+	ai_accept = {
+		base = 0 # Try to make it 0 for most interactions
+	
+		# Hook used
+		modifier = {
+			add = 40
+			desc = SCHEME_WEAK_HOOK_USED
+			scope:hook = yes
+		}
+		# Opinion Factor
+		opinion_modifier = {
+			who = scope:recipient
+			opinion_target = scope:actor
+			multiplier = 1.0
+			desc = AI_OPINION_REASON
+		}
+		#
+		modifier = {
+			add = 25
+			desc = AI_REFUSAL_IS_TREASON
+			scope:actor = { has_realm_law_flag = vassal_refusal_is_treason }
+		}
+	
+		ai_value_modifier = {
+			who = scope:recipient
+			ai_greed = {
+				if = {
+					limit = {
+						scope:recipient = { NOT = { ai_greed = 0 } }
+					}
+					value = -0.25
+				}
+			}
+			ai_honor = {
+				if = {
+					limit = {
+						scope:recipient = { #If AI is honorable and the law compels to obey the liege, AI will be more likely to obey.
+							ai_honor > 0
+						}
+						scope:actor = {
+							has_realm_law_flag = vassal_refusal_is_treason
+						}
+					}
+					value = 0.75
+				}
+			}
+		}
+		modifier = {
+			add = 50
+			desc = AI_VASSAL_HOLDS_REALM_CAPITAL
+			exists = scope:actor.primary_title.title_capital_county
+			scope:secondary_recipient = {
+				OR = {
+					any_sub_realm_county = {
+						this = scope:actor.primary_title.title_capital_county
+					}
+					any_sub_realm_duchy = {
+						this = scope:actor.primary_title.title_capital_county.de_jure_liege
+					}
+				}
+			}
+		}
+	
+		modifier = { #Sub-Vassal is NOT De jure of current Vassal.
+			add = 25
+			desc = AI_REFUSAL_IS_NOT_DE_JURE_LIEGE
+			NOT = {
+				scope:recipient = {
+					any_held_title = {
+						is_de_jure_liege_or_above_target = scope:secondary_recipient.primary_title
+					}
+				}
+			}
+		}
+		modifier = { #Sub-Vassal is De jure of liege title.
+			add = 15
+			desc = AI_REFUSAL_IS_DE_JURE_LIEGE
+			scope:actor = {
+				any_held_title = {
+					this = scope:secondary_recipient.primary_title.de_jure_liege
+				}
+			}
+		}
+		modifier = {
+			add = intimidated_halved_reason_value
+			desc = INTIMIDATED_REASON
+			scope:recipient = {
+				has_dread_level_towards = {
+					target = scope:actor
+					level = 1
+				}
+			}
+		}
+		modifier = {
+			add = cowed_halved_reason_value
+			desc = COWED_REASON
+			scope:recipient = {
+				has_dread_level_towards = {
+					target = scope:actor
+					level = 2
+				}
+			}
+		}
+		modifier = { #Comparative military strength.
+			add = {
+				value = 1
+					subtract = {
+					value = scope:recipient.max_military_strength
+					divide = { value = scope:actor.max_military_strength min = 1 }
+					}
+				multiply = 100
+			}
+			desc = offer_vassalization_interaction_aibehavior_power_tt
+		}
+		modifier = { #Different faith, no pluralism.
+			add = {
+				value = -25
+				if = {
+					limit = {
+						scope:actor.faith = {
+							faith_hostility_level = {
+								target = scope:recipient.faith
+								value >= faith_hostile_level
+							}
+						}
+					}
+					add = -10
+				}
+				if = {
+					limit = {
+						scope:actor.faith = {
+							faith_hostility_level = {
+								target = scope:recipient.faith
+								value >= faith_evil_level
+							}
+						}
+					}
+					add = -25
+				}
+			}
+			desc = AI_REFUSAL_SPLITTING_SAME_FAITH_VASSALS
+			scope:actor.faith = scope:secondary_recipient.faith #Will not care as much if the vassal being retracted is of a different faith.
+			scope:actor = {
+				NOR = { #Of two different faiths AND the potential vassal's faith is not pluralistic.
+					faith = scope:recipient.faith
+					faith = { has_doctrine = doctrine_pluralism_pluralistic }
+				}
+			}
+		}
+	}
+	
+	can_send_despite_rejection = yes
+	
+	# AI
+	ai_targets = { ai_recipients = peer_vassals }
+	ai_frequency = 24
+	
+	ai_potential = {
+		is_diarch = yes
+		has_realm_law_flag = title_revocation_allowed
+		primary_title.tier > tier_county
+		# Loyal diarchs don't engage in skullduggery.
+		diarch_loyalty < diarch_loyalty_visibly_loyal_threshold
+	}
+	
+	ai_will_do = {
+		# We're generally ruthless here.
+		base = @ai_secondary_powers_base_value
+
+		# Additions.
+		## Opinion.
+		opinion_modifier = {
+			opinion_target = scope:recipient
+			multiplier = 0.25
+		}
+		## Personality.
+		ai_value_modifier = {
+			ai_boldness = 0.75
+			ai_honor = -0.5
+		}
+		## Traits.
+		### +++ Ambitious.
+		modifier = {
+			add = diarch_ai_desire_plus_3_value
+			has_trait = ambitious
+		}
+		### +++ Greedy.
+		modifier = {
+			add = diarch_ai_desire_plus_3_value
+			has_trait = greedy
+		}
+		### +++ Vengeful (under certain criteria).
+		modifier = {
+			add = diarch_ai_desire_plus_3_value
+			has_trait = vengeful
+			has_opinion_modifier = {
+				modifier = revoked_title
+				target = scope:recipient
+			}
+		}
+		### ++ Arbitrary.
+		modifier = {
+			add = diarch_ai_desire_plus_2_value
+			has_trait = arbitrary
+		}
+		### - Generous.
+		modifier = {
+			add = diarch_ai_desire_minus_1_value
+			has_trait = generous
+		}
+		### -- Just.
+		modifier = {
+			add = diarch_ai_desire_minus_2_value
+			has_trait = just
+		}
+		### --- Content.
+		modifier = {
+			add = diarch_ai_desire_minus_3_value
+			has_trait = content
+		}
+		## Always revoke preferred capital and capital duchy
+		modifier = {
+			add = 1000
+			exists = scope:actor.primary_title.title_capital_county
+			OR = {
+				scope:actor = {
+					any_held_title = { this = scope:actor.primary_title.title_capital_county.de_jure_liege }
+				}
+				scope:actor.primary_title.title_capital_county.de_jure_liege = { is_title_created = no }
+			}
+			scope:secondary_recipient = {
+				any_sub_realm_county = { this = scope:actor.primary_title.title_capital_county }
+			}
+		}
+		# Always retract preferred capital duchy
+		modifier = {
+			add = 1000
+			exists = scope:actor.primary_title.title_capital_county
+			scope:secondary_recipient = {
+				any_sub_realm_duchy = { this = scope:actor.primary_title.title_capital_county.de_jure_liege }
+			}
+		}
+		## Slight preference for higher-tier titles
+		modifier = {
+			add = {
+				value = scope:secondary_recipient.highest_held_title_tier
+				multiply = 10
+			}
+		}
+		## We avoid wars here too, but only in the resulting event.
+		# Factors.
+		## Relationships.
+		### + Do pick on people we hate.
+		modifier = {
+			factor = 1.5
+			should_prioritise_hostile_action_against_due_to_personal_relations_trigger = {
+				ACTOR = scope:actor
+				RECIPIENT = scope:recipient
+			}
+		}
+		### - Try not to pick on allies of our liege.
+		modifier = {
+			factor = 0.25
+			should_avoid_hostile_action_against_due_to_liege_relations_trigger = {
+				ACTOR = scope:actor
+				RECIPIENT = scope:recipient
+			}
+		}
+		### x0 Don't pick on our friends or allies.
+		modifier = {
+			factor = 0
+			should_avoid_hostile_action_against_due_to_personal_relations_trigger = {
+				ACTOR = scope:actor
+				RECIPIENT = scope:recipient
+			}
+		}
+		### x0 Don't pick on players unless they're of at least a decent size.
+		modifier = {
+			factor = 0
+			scope:recipient = {
+				is_ai = no
+				any_held_county = { count <= 3 }
+			}
+		}
+		### x0 Exempt the party baron.
+		modifier = {
+			factor = 0
+			scope:recipient = { has_character_flag = is_party_baron }
+		}
+	}
+}

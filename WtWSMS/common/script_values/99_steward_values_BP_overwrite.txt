@@ -84,6 +84,22 @@ steward_promote_culture_contextual_bonuses = {
 	if = {
 		limit = {
 			exists = scope:county
+			scope:councillor_liege.culture = {
+				is_divergent_culture = yes
+				culture_age < culture_hybrid_cooldown # Intentional
+				any_parent_culture = {
+					this = scope:county.culture
+				}
+			}
+		}
+		add = {
+			value = scope:councillor.promote_culture_divergent_culture_vs_parents_bonus
+			desc = STEWARD_PROMOTE_CULTURE_DIVERGENT_VS_PARENTS_BONUS_MODIFIER
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
 			scope:councillor_liege.faith = {
 				has_doctrine_parameter = same_faith_promote_culture_bonus_active
 			}
@@ -92,6 +108,25 @@ steward_promote_culture_contextual_bonuses = {
 		add = {
 			value = scope:councillor.promote_culture_communal_identity_bonus
 			desc = STEWARD_PROMOTE_CULTURE_COMMUNAL_IDENTITY_BONUS_MODIFIER
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:councillor_liege.faith = { has_doctrine_parameter = easier_to_convert_culture_in_same_faith_mountains }
+			scope:county = {
+				faith = scope:councillor_liege.faith
+				any_county_province = {
+					OR = {
+						terrain = mountains
+						terrain = desert_mountains
+					}
+				}
+			}
+		}
+		add = {
+			value = scope:councillor.promote_culture_easier_to_convert_culture_in_same_faith_mountains_bonus
+			desc = STEWARD_PROMOTE_CULTURE_EASIER_TO_CONVERT_CULTURE_IN_SAME_FAITH_MOUNTAINS_BONUS
 		}
 	}
 	if = {
@@ -115,6 +150,7 @@ steward_promote_culture_contextual_bonuses = {
 			desc = COURT_CHAPLAIN_CONVERSION_LOCAL_COUNTY_MODIFIERS
 		}
 	}
+	
 	##### Changed from Vanilla vvvvv
 	if = { #Recent Emmigration
 		limit = {
@@ -163,6 +199,7 @@ steward_promote_culture_contextual_bonuses = {
 			desc = TRADITION_HARDER_TO_CULTURE_CONVERT_WITHOUT_HERITAGE_MODIFIER
 		}
 	}
+	
 	##### Changed from Vanilla vvvvv
 	if = {
 		limit = {
@@ -274,6 +311,7 @@ steward_promote_culture_contextual_bonuses = {
 			desc = COURT_CHAPLAIN_CONVERSION_LOCAL_COUNTY_MODIFIERS
 		}
 	}
+	
 	##### Changed from Vanilla vvvvv
 	if = { #Minor Migration Effects
 		limit = {
@@ -302,4 +340,68 @@ conversion_culture_resistant_to_culture_change_without_adjacent = {
 	value = 0
 	subtract = steward_promote_culture_base
 	multiply = 1.00
+}
+
+# Fully modified to support new innovations
+current_development_penalty = {
+	value = 0
+	if = {
+		limit = {
+			exists = scope:county
+		}
+		add = scope:councillor.steward_develop_county_base_total
+		add = scope:councillor.steward_develop_county_perk_bonus_monthly_increase
+		add = scope:councillor.steward_develop_county_tribal_penalty
+		multiply = {
+			subtract = scope:county.development_level
+			multiply = {
+				value = 9.13 # Due to the way the development penalty is calculated, this means you reach maximum penalty at Development Level 10.
+				# If you want really mathy-stuff, the formula is: Monthly Increase - (Monthly Increase(Development Level/100)*Above Number)
+				if = {
+					limit = { culture = { has_innovation = innovation_development_04 } }
+					multiply = 0.1111 # With Rennisance Thought, this is increased to Development Level 90.
+				}
+				else_if = {
+					limit = { culture = { has_innovation = innovation_development_03 } }
+					multiply = 0.1818 # With Urbanization, Development Level 55.
+				}
+				else_if = {
+					limit = {
+						culture = {
+							#Special Urbanizations
+							OR = {
+								has_innovation = innovation_roman_concrete
+								has_innovation = innovation_persian_urbanization
+								has_innovation = innovation_chinese_urbanization
+								has_innovation = innovation_indian_urbanization
+								has_innovation = innovation_ancient_urbanites
+							}
+						}
+					}
+					multiply = 0.25 #With these, development Level 40
+				}
+				else_if = {
+					limit = { culture = { has_innovation = innovation_development_02 } }
+					multiply = 0.2856 # With Communal Government, Development Level 35.
+				}
+				else_if = {
+					limit = { culture = { has_innovation = innovation_crop_rotation } }
+					multiply = 0.3846 # With Crop Rotation, Development Level 26.
+				}
+				else_if = {
+					limit = { culture = { has_innovation = innovation_development_bp_01 } }
+					multiply = 0.5555 # With Public Works, Development Level 18.
+				}
+				else_if = {
+					limit = { culture = { has_innovation = innovation_development_bp_00 } }
+					multiply = 0.5555 # With Land Clearing, Development Level 10.
+				}
+				else = {#i.e., no innovations, max DL is 5
+					multiply = 2.000
+				}
+			}
+			divide = 100
+			min = -0.875 # This is the maximum penalty.
+		}
+	}
 }

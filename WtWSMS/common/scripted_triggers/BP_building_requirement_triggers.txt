@@ -1,203 +1,457 @@
-﻿#General trigger
-bp_special_culture_innovation_trigger = { #All but Ancient Urbanites
+﻿#In can_construct:
+# * root is province
+# * scope:holder is the holder of the province
+# * county is the county title the province belongs to
+
+#### TODO: Rename Parameters upto building_holding_specific_level_03_with_next_level_param_trigger
+#### for clarity
+
+#General Triggers
+early_urbanization_trigger = { #Culture Scope
 	OR = {
 		has_innovation = innovation_roman_concrete
 		has_innovation = innovation_persian_urbanization
 		has_innovation = innovation_indian_urbanization
 		has_innovation = innovation_chinese_urbanization
-	}
-}
-bp_superior_culture_innovation_trigger = { #Includes Ancient Urbanites
-	OR = {
-		bp_special_culture_innovation_trigger = yes
 		has_innovation = innovation_ancient_urbanites
 	}
 }
-
-#Economic Buildings
-
-#Tribal Era
-economic_building_innovation_requirement_level_00_trigger = {
+holding_level_01_general_trigger = {
 	OR = {
-		scope:holder.culture = { bp_superior_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_development_00 } #Land Clearing
+		#Special Urbanization Innovations
+		culture = { early_urbanization_trigger = yes }
+		#Advanced Governments in Classical Antiquity
+		AND = {
+			$CHAR$ = { has_advanced_government_trigger = yes }
+			culture = { has_innovation = $ADVANCED_GOVERNMENT_UNLOCK_INNOVATION$ }
+		}
+		#Else, Late Antiquity
+		culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
 	}
 }
-#Late Antiquity Era
-economic_building_innovation_requirement_level_01_trigger = {
+holding_level_02_general_trigger = {
 	OR = {
-		scope:holder.culture = { bp_superior_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_development_01 } #Public Works
-	}
-}
-#Early Migration Era
-economic_building_innovation_requirement_level_02_trigger = {
-	OR = {
-		scope:holder.culture = { bp_special_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_tenant_farming }
-	}
-}
-#Late Migration Era
-economic_building_innovation_requirement_level_03_trigger = {
-	scope:holder.culture = { has_innovation = innovation_development_03 } #Crop Rotation
-}
-#Early Medevial Era
-economic_building_innovation_requirement_level_04_trigger = {
-	scope:holder.culture = { has_innovation = innovation_manorialism }
-}
-
-#Military Buildings
-
-#Tribal Era
-military_building_innovation_requirement_level_00_trigger = {
-	OR = {
-		scope:holder.culture = { bp_superior_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_castrae }
-	}
-}
-#Late Antiquity Era
-military_building_innovation_requirement_level_01_trigger = {
-	OR = {
-		scope:holder.culture = { bp_superior_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_standing_army }
-	}
-}
-#Early Migration Era
-military_building_innovation_requirement_level_02_trigger = {
-	OR = {
-		scope:holder.culture = { bp_special_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_migratory_tactics }
-	}
-}
-#Late Migration Era
-military_building_innovation_requirement_level_03_trigger = {
-	scope:holder.culture = { has_innovation = innovation_barracks }
-}
-#Early Medevial Era
-military_building_innovation_requirement_level_04_trigger = {
-	scope:holder.culture = { has_innovation = innovation_burhs }
-}
-
-#Fortification Buildings
-
-#Tribal Era
-fortification_building_innovation_requirement_level_00_trigger = {
-	OR = {
-		scope:holder.culture = { bp_superior_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_castrae }
-	}
-}
-#Late Antiquity Era
-fortification_building_innovation_requirement_level_01_trigger = {
-	OR = {
-		scope:holder.culture = { bp_superior_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_muri }
-	}
-}
-#Early Migration Era
-fortification_building_innovation_requirement_level_02_trigger = {
-	OR = {
-		scope:holder.culture = { bp_special_culture_innovation_trigger = yes }
-		scope:holder.culture = { has_innovation = innovation_migratory_defenses }
-	}
-}
-#Late Migration Era
-fortification_building_innovation_requirement_level_03_trigger = {
-	scope:holder.culture = { has_innovation = innovation_motte }
-}
-#Early Medevial Era
-fortification_building_innovation_requirement_level_04_trigger = {
-	scope:holder.culture = { has_innovation = innovation_battlements }
-}
-
-### Holding Triggers
-castle_holding_level_01_trigger = {
-	culture = {
-		OR = {
-			has_innovation = innovation_motte
-			AND = {
-				bp_special_culture_innovation_trigger = yes
-				has_innovation = innovation_muri
-			}
-			AND = {
-				has_innovation = innovation_ancient_urbanites
-				has_innovation = innovation_muri
+		#Special Urbanization Innovations: Depends on the development & Era
+		#Development Value is 75% of the max
+		culture = {
+			early_urbanization_trigger = yes
+			OR = {
+				AND = {
+					has_cultural_era_or_later = culture_era_classical_antiquity
+					root.county.development_level >= 14
+				}
+				AND = {
+					has_cultural_era_or_later = culture_era_late_antiquity
+					root.county.development_level >= 20
+				}
 			}
 		}
+		#Advanced Governments in Late Antiquity
+		AND = {
+			$CHAR$ = { has_advanced_government_trigger = yes }
+			culture = { has_innovation = $ADVANCED_GOVERNMENT_UNLOCK_INNOVATION$ }
+		}
+		#Else, Early Medevial
+		culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+	}
+}
+#Building triggers
+building_holding_specific_general_trigger = {
+	has_building_or_higher = $HOLDING$_$NUM$
+	OR = {
+		culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		culture = { early_urbanization_trigger = yes }
+	}
+}
+building_holding_specific_level_00_trigger = {
+	building_holding_specific_general_trigger = {
+		HOLDING = $HOLDING$
+		NUM = 01
+		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
+	}
+}
+building_holding_specific_level_01_trigger = {
+	building_holding_specific_general_trigger = {
+		HOLDING = $HOLDING$
+		NUM = 01
+		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
+	}
+}
+building_holding_specific_level_02_trigger = {
+	building_holding_specific_general_trigger = {
+		HOLDING = $HOLDING$
+		NUM = 02
+		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
+	}
+}
+building_holding_specific_level_03_trigger = {
+	building_holding_specific_general_trigger = {
+		HOLDING = $HOLDING$
+		NUM = 02
+		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
+	}
+}
+#For cases like guild halls where one unlocks a level early
+building_holding_specific_level_01_with_next_level_param_trigger = {
+	has_building_or_higher = $HOLDING$_01
+	OR = {
+		culture = { early_urbanization_trigger = yes }
+		trigger_if = {
+			limit = { NOT = { culture = { has_cultural_parameter = $NEXT_LEVEL_TYPE$ } } }
+			culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		}
+		trigger_else = {
+			culture = { has_innovation = $NEXT_LEVEL_UNLOCK_INNOVATION$ }
+		}
+	}
+}
+building_holding_specific_level_02_with_next_level_param_trigger = {
+	building_holding_specific_level_01_trigger = {
+		HOLDING = $HOLDING$
+		NEXT_LEVEL_TYPE = $NEXT_LEVEL_TYPE$
+		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
+		NEXT_LEVEL_UNLOCK_INNOVATION = $NEXT_LEVEL_UNLOCK_INNOVATION$
+	}
+}
+building_holding_specific_level_03_with_next_level_param_trigger = {
+	trigger_if = {
+		limit = { NOT = { culture = { has_cultural_parameter = $NEXT_LEVEL_TYPE$ } } }
+		OR = {
+			culture = { has_innovation = $NEXT_LEVEL_UNLOCK_INNOVATION$ }
+			culture = { early_urbanization_trigger = yes }
+		}
+		has_building_or_higher = $HOLDING$_02
+	}
+	trigger_else = {
+		culture = { has_cultural_parameter = next_level_guild_halls }
+		OR = {
+			culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+			culture = { early_urbanization_trigger = yes }
+		}
+		has_building_or_higher = $HOLDING$_01
+	}
+}
+#Trade Buildings
+general_trade_building_can_construct_potential_trigger = {
+		trigger_if = {
+			limit = { NOT = { culture = { has_cultural_parameter = trade_ports_enabled_for_tribals } } }
+			building_requirement_castle_city_church = { LEVEL = 01 }
+		}
+		trigger_else = {
+			OR = {
+				has_building_or_higher = tribe_01
+				building_requirement_castle_city_church = { LEVEL = 01 }
+			}
+		}
+}
+general_trade_building_trigger = {
+	#If we get early access
+	OR = {
+		trigger_if = {
+			limit = { NOT = { scope:holder.culture = { has_cultural_parameter = next_level_trade_ports } } }
+			OR = {
+				scope:holder.culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+				scope:holder.culture = { early_urbanization_trigger = yes }
+			}
+			building_requirement_castle_city_church = { LEVEL = $GENERAL_UNLOCK_LEVEL$ }
+		}
+		trigger_else = {
+			scope:holder.culture = { has_cultural_parameter = next_level_trade_ports }
+			OR = {
+				scope:holder.culture = { has_innovation = $EARLY_UNLOCK_INNOVATION$ }
+				scope:holder.culture = { early_urbanization_trigger = yes }
+			}
+			building_requirement_castle_city_church = { LEVEL = $EARLY_UNLOCK_LEVEL$ }
+		}
+	}
+}
+#General Economy Buildings
+general_economy_building_trigger = {
+	OR = {
+		scope:holder.culture = { early_urbanization_trigger = yes }
+		scope:holder.culture = { has_innovation = $INNOVATION$ }
+	}
+}
+#General Military Buildings
+general_military_building_trigger = {
+	OR = {
+		scope:holder.culture = { early_urbanization_trigger = yes }
+		scope:holder.culture = { has_innovation = $INNOVATION$ }
+	}
+}
+
+# Holding Triggers
+
+## Castle Holdings
+castle_holding_level_01_trigger = {
+	holding_level_01_general_trigger = {
+		CHAR = $CHAR$
+		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_muri
+		GENERAL_UNLOCK_INNOVATION = innovation_motte
 	}
 }
 castle_holding_level_02_trigger = {
-	culture = {
-		OR = {
-			has_innovation = innovation_battlements
-			AND = {
-				bp_special_culture_innovation_trigger = yes
-				has_innovation = innovation_migratory_defenses
-			}
-			AND = {
-				has_innovation = innovation_ancient_urbanites
-				has_innovation = innovation_motte
-			}
-		}
+	holding_level_02_general_trigger = {
+		CHAR = $CHAR$
+		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_motte
+		GENERAL_UNLOCK_INNOVATION = innovation_burhs
 	}
 }
+## City Holdings
 city_holding_level_01_trigger = {
-	culture = {
-		OR = {
-			has_innovation = innovation_settlements
-			AND = {
-				bp_special_culture_innovation_trigger = yes
-				has_innovation = innovation_fora
-			}
-			AND = {
-				has_innovation = innovation_ancient_urbanites
-				has_innovation = innovation_fora
-			}
-		}
+	holding_level_01_general_trigger = {
+		CHAR = $CHAR$
+		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_fora
+		GENERAL_UNLOCK_INNOVATION = innovation_city_planning
 	}
 }
 city_holding_level_02_trigger = {
-	culture = {
-		OR = {
-			has_innovation = innovation_development_04 #Communal Government
-			AND = {
-				bp_special_culture_innovation_trigger = yes
-				has_innovation = innovation_development_02 #City Planning
-			}
-			AND = {
-				has_innovation = innovation_ancient_urbanites
-				has_innovation = innovation_settlements
-			}
-		}
+	holding_level_02_general_trigger = {
+		CHAR = $CHAR$
+		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_city_planning
+		GENERAL_UNLOCK_INNOVATION = innovation_manorialism
 	}
 }
+## Temple Holdings
 temple_holding_level_01_trigger = {
-	culture = {
-		OR = {
-			has_innovation = innovation_scriptural_cannon
-			AND = {
-				bp_special_culture_innovation_trigger = yes
-				has_innovation = innovation_state_religion
-			}
-			AND = {
-				has_innovation = innovation_ancient_urbanites
-				has_innovation = innovation_state_religion
-			}
-		}
+	holding_level_01_general_trigger = {
+		CHAR = $CHAR$
+		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_state_religion
+		GENERAL_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
 	}
 }
 temple_holding_level_02_trigger = {
-	culture = {
-		OR = {
-			has_innovation = innovation_established_faith
-			AND = {
-				bp_special_culture_innovation_trigger = yes
-				has_innovation = innovation_doctrine_and_dogma
-			}
-			AND = {
-				has_innovation = innovation_ancient_urbanites
-				has_innovation = innovation_scriptural_cannon
-			}
-		}
+	holding_level_02_general_trigger = {
+		CHAR = $CHAR$
+		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
+		GENERAL_UNLOCK_INNOVATION = innovation_scriptural_cannon
 	}
+}
+
+# Buildings
+
+## Holdings-specific buildings
+
+### City Buildings
+city_building_level_00_trigger = {
+	building_holding_specific_level_00_trigger = {
+		HOLDING = city
+		GENERAL_UNLOCK_INNOVATION = innovation_barter
+	}
+}
+city_building_level_01_trigger = {
+	building_holding_specific_level_01_with_next_level_param_trigger = {
+		HOLDING = city
+		NEXT_LEVEL_TYPE = next_level_guild_halls
+		NEXT_LEVEL_UNLOCK_INNOVATION = innovation_barter
+		GENERAL_UNLOCK_INNOVATION = innovation_fora
+	}
+}
+city_building_level_02_trigger = {
+	building_holding_specific_level_02_with_next_level_param_trigger = {
+		HOLDING = city
+		NEXT_LEVEL_TYPE = next_level_guild_halls
+		NEXT_LEVEL_UNLOCK_INNOVATION = innovation_fora
+		GENERAL_UNLOCK_INNOVATION = innovation_city_planning
+	}
+}
+city_building_level_03_trigger = {
+	building_holding_specific_level_03_with_next_level_param_trigger = {
+		HOLDING = city
+		NEXT_LEVEL_TYPE = next_level_guild_halls
+		NEXT_LEVEL_UNLOCK_INNOVATION = innovation_city_planning
+		GENERAL_UNLOCK_INNOVATION = innovation_manorialism
+	}
+}
+## Temple Buildings
+temple_building_level_00_trigger = {
+	building_holding_specific_level_00_trigger = {
+		HOLDING = temple
+		GENERAL_UNLOCK_INNOVATION = innovation_social_stratification
+	}
+}
+temple_building_level_01_trigger = {
+	building_holding_specific_level_01_trigger = {
+		HOLDING = temple
+		GENERAL_UNLOCK_INNOVATION = innovation_state_religion
+	}
+}
+temple_building_level_02_trigger = {
+	building_holding_specific_level_02_trigger = {
+		HOLDING = temple
+		GENERAL_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
+	}
+}
+temple_building_level_03_trigger = {
+	building_holding_specific_level_02_trigger = {
+		HOLDING = temple
+		GENERAL_UNLOCK_INNOVATION = innovation_scriptural_cannon
+	}
+}
+temple_building_level_04_trigger = {
+	building_holding_specific_level_03_trigger = {
+		HOLDING = temple
+		GENERAL_UNLOCK_INNOVATION = innovation_scriptural_cannon
+	}
+}
+
+## Fortifications
+fortification_level_00_trigger = {
+	scope:holder.culture = { has_innovation = innovation_castrae }
+}
+fortification_level_01_trigger = {
+	scope:holder.culture = { has_innovation = innovation_muri }
+}
+fortification_level_02_trigger = {
+	scope:holder.culture = { has_innovation = innovation_motte }
+}
+fortification_level_03_trigger = {
+	scope:holder.culture = { has_innovation = innovation_battlements }
+}
+fortification_level_04_trigger = {
+	scope:holder.culture = { has_innovation = innovation_battlements }
+}
+## Trade Buildings
+trade_building_level_00_can_construct_potential_trigger = {
+	general_trade_building_can_construct_potential_trigger = yes
+}
+trade_building_level_00_trigger = {
+	general_trade_building_trigger = {
+		GENERAL_UNLOCK_INNOVATION = innovation_barter
+		GENERAL_UNLOCK_LEVEL = 01
+		EARLY_UNLOCK_INNOVATION = innovation_barter
+		EARLY_UNLOCK_LEVEL = 01
+	}
+}
+trade_building_level_01_can_construct_potential_trigger = {
+	general_trade_building_can_construct_potential_trigger = yes
+}
+trade_building_level_01_trigger = {
+	general_trade_building_trigger = {
+		GENERAL_UNLOCK_INNOVATION = innovation_fora
+		GENERAL_UNLOCK_LEVEL = 01
+		EARLY_UNLOCK_INNOVATION = innovation_barter
+		EARLY_UNLOCK_LEVEL = 01
+	}
+}
+trade_building_level_02_can_construct_potential_trigger = {
+	general_trade_building_can_construct_potential_trigger = yes
+}
+trade_building_level_02_trigger = {
+	general_trade_building_trigger = {
+		GENERAL_UNLOCK_INNOVATION = innovation_city_planning
+		GENERAL_UNLOCK_LEVEL = 01
+		EARLY_UNLOCK_INNOVATION = innovation_fora
+		EARLY_UNLOCK_LEVEL = 01
+	}
+}
+trade_building_level_03_trigger = {
+	general_trade_building_trigger = {
+		GENERAL_UNLOCK_INNOVATION = innovation_manorialism
+		GENERAL_UNLOCK_LEVEL = 01
+		EARLY_UNLOCK_INNOVATION = innovation_city_planning
+		EARLY_UNLOCK_LEVEL = 01
+	}
+}
+trade_building_level_04_trigger = {
+	general_trade_building_trigger = {
+		GENERAL_UNLOCK_INNOVATION = innovation_manorialism
+		GENERAL_UNLOCK_LEVEL = 01
+		EARLY_UNLOCK_INNOVATION = innovation_manorialism
+		EARLY_UNLOCK_LEVEL = 01
+	}
+}
+## Economy Buildings
+economy_building_level_00_trigger = {
+	general_economy_building_trigger = { INNOVATION = innovation_development_bp_00 }
+}
+economy_building_level_01_trigger = {
+	general_economy_building_trigger = { INNOVATION = innovation_development_bp_01 }
+}
+economy_building_level_02_trigger = {
+	general_economy_building_trigger = { INNOVATION = innovation_crop_rotation }
+}
+economy_building_level_03_trigger = {
+	general_economy_building_trigger = { INNOVATION = innovation_manorialism }
+}
+economy_building_level_04_trigger = {
+	general_economy_building_trigger = { INNOVATION = innovation_manorialism }
+}
+## Military Buildings
+military_building_level_00_trigger = {
+	general_military_building_trigger = { INNOVATION = innovation_tribal_warfare }
+}
+military_building_level_01_trigger = {
+	general_military_building_trigger = { INNOVATION = innovation_barracks }
+}
+military_building_level_02_trigger = {
+	general_military_building_trigger = { INNOVATION = innovation_late_antique_warfare }
+}
+military_building_level_03_trigger = {
+	general_military_building_trigger = { INNOVATION = innovation_burhs }
+}
+military_building_level_04_trigger = {
+	general_military_building_trigger = { INNOVATION = innovation_burhs }
+}
+## Mines
+mine_building_level_01_trigger = {
+	OR = {
+		culture = { early_urbanization_trigger = yes }
+		culture = { has_innovation = innovation_development_bp_01 }
+	}
+}
+## Special Buildings
+special_holy_building_trigger = {
+	OR = {
+		scope:holder.culture = { early_urbanization_trigger = yes }
+		scope:holder.culture = { has_innovation = innovation_state_religion }
+	}
+}
+special_commerical_building_trigger = {
+	OR = {
+		scope:holder.culture = { early_urbanization_trigger = yes }
+		scope:holder.culture = { has_innovation = innovation_state_religion }
+	}
+}
+special_wall_building_trigger = {
+	OR = {
+		scope:holder.culture = { early_urbanization_trigger = yes }
+		scope:holder.culture = { has_innovation = innovation_muri }
+	}
+}
+special_military_building_trigger = {
+	OR = {
+		scope:holder.culture = { early_urbanization_trigger = yes }
+		scope:holder.culture = { has_innovation = innovation_barracks }
+	}
+}
+special_general_building_trigger = {
+	OR = {
+		scope:holder.culture = { early_urbanization_trigger = yes }
+		scope:holder.culture = { has_innovation = innovation_development_bp_01 }
+	}
+}
+## Duchy Buildings
+duchy_building_economic_level_01_trigger = {
+	OR = {
+		culture = { has_innovation = innovation_manorialism }
+		early_urbanization_trigger = yes
+	}
+}
+duchy_building_military_level_01_trigger = {
+	OR = {
+		culture = { has_innovation = innovation_burhs }
+		early_urbanization_trigger = yes
+	}
+}
+duchy_building_religion_level_01_trigger = {
+	OR = {
+		culture = { has_innovation = innovation_social_stratification }
+		early_urbanization_trigger = yes
+	}
+}
+
+## Terrain Abilities
+can_build_early_desert_buildings_trigger = {
+	scope:holder.culture = { has_innovation = innovation_qanat_irrigation }
 }

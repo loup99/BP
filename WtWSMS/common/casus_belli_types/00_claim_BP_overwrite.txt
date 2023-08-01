@@ -1,5 +1,6 @@
 ﻿##### Changed from Vanilla: Handle Government bootstrapping, make always available for advanced governments
 claim_cb = {
+	icon = claim_cb
 	group = claim
 	##### Changed from Vanilla vvvvv
 	mutually_exclusive_titles = {
@@ -287,17 +288,21 @@ claim_cb = {
 		}
 	}
 
+	##### Changed from Vanilla: Added some government bootstrapping-prevention code for safety at start and end
 	##### Changed from Vanilla vvvvv
 	on_victory = {
-		scope:attacker = { show_pow_release_message_effect = yes }
-		
 		##### Changed from Vanilla vvvvv
 		save_government_type_effect = {
 			THE_NEW_HOLDER = scope:claimant
 			THE_PREVIOUS_HOLDER = scope:defender
 		}
 		##### Changed from Vanilla ^^^^^
-		
+
+		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#EP2 Accolade glory gain from winning against higher ranked enemy
+		scope:attacker = { accolade_attacker_war_end_glory_gain_med_effect = yes }
+
 		create_title_and_vassal_change = {
 			type = conquest_claim
 			save_scope_as = change
@@ -407,6 +412,9 @@ claim_cb = {
  			}
 		}
 
+		#EP2 accolade glory gain for defender doing alright
+		scope:defender = { accolade_defender_war_end_glory_gain_low_effect = yes }
+
 		# press claims
 		every_in_list = {
 			list = target_titles
@@ -492,6 +500,9 @@ claim_cb = {
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 
+		#EP2 accolade glory gain for winning against higher ranked enemy
+		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
+
 		# lose claims
 		every_in_list = {
 			list = target_titles
@@ -570,6 +581,9 @@ claim_cb = {
 	should_show_war_goal_subview = yes
 
 	attacker_wargoal_percentage = 0.8
+	
+	max_defender_score_from_occupation = 150
+	max_attacker_score_from_occupation = 150
 
 	max_ai_diplo_distance_to_title = 1000
 }
