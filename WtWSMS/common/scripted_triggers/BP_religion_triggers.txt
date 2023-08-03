@@ -40,6 +40,112 @@ truly_hellenic_faith_plus_christianity_trigger = {
 	}
 }
 
+uses_eucharistic_rite_trigger = {
+	custom_tooltip = {
+		text = has_a_eucharistic_rite
+		OR = {
+			has_doctrine = doctrine_christian_communion_transubstantiation
+			has_doctrine = doctrine_christian_communion_consubstantiation
+			has_doctrine = doctrine_christian_communion_memorialism
+			has_doctrine = doctrine_christian_communion_unstated
+		}
+		NOT = { has_doctrine = doctrine_christian_communion_repudiation }
+	}
+}
+has_western_liturgical_rite_trigger = {
+	OR = {
+		has_doctrine = doctrine_christian_liturgical_rite_imperial_rite
+		has_doctrine = doctrine_christian_liturgical_rite_gallican_rite
+		has_doctrine = doctrine_christian_liturgical_rite_moazarbic_rite
+		has_doctrine = doctrine_christian_liturgical_rite_celtic_rite
+		has_doctrine = doctrine_christian_liturgical_rite_african_rite
+	}
+}
+has_eastern_liturgical_rite_trigger = {
+	OR = {
+		has_doctrine = doctrine_christian_liturgical_rite_west_syriac_rite
+		has_doctrine = doctrine_christian_liturgical_rite_armenian_rite
+		has_doctrine = doctrine_christian_liturgical_rite_alexandrian_rite
+		has_doctrine = doctrine_christian_liturgical_rite_east_syriac_rite
+	}
+}
+has_same_liturgical_rite_trigger = {
+	OR = {
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_imperial_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_imperial_rite }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_gallican_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_gallican_rite }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_moazarbic_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_moazarbic_rite }
+		}
+		AND = {
+			$FAITH_1$ = {has_doctrine =  doctrine_christian_liturgical_rite_celtic_rite }
+			$FAITH_2$ = {has_doctrine =  doctrine_christian_liturgical_rite_celtic_rite }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_african_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_african_rite }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_west_syriac_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_west_syriac_rite }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_armenian_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_armenian_rite }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_alexandrian_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_alexandrian_rite }
+		}
+		AND = {
+			$FAITH_1$ = { has_doctrine = doctrine_christian_liturgical_rite_east_syriac_rite }
+			$FAITH_2$ = { has_doctrine = doctrine_christian_liturgical_rite_east_syriac_rite }
+		}
+	}
+}
+#Note that this relations are not equivalent; 
+#e.g.; Imperial Rite is related to Gallican but not the other way around. This in part models how the Roman Rite readily
+#became dominate over the other formulations
+has_related_liturgical_rite_trigger = {
+	OR = {
+		#Imperial Rite
+		AND = {
+			$FAITH_CONVERTER$ = { has_doctrine = doctrine_christian_liturgical_rite_imperial_rite }
+			$FAITH_CONVERTEE$ = {
+				OR = {
+					has_doctrine = doctrine_christian_liturgical_rite_gallican_rite
+					has_doctrine = doctrine_christian_liturgical_rite_moazarbic_rite
+					has_doctrine = doctrine_christian_liturgical_rite_celtic_rite
+					has_doctrine = doctrine_christian_liturgical_rite_african_rite
+				}
+			}
+		}
+		#Gallican, Hispanic, and Celtic Rites
+		AND = {
+			$FAITH_CONVERTER$ = {
+				OR = {
+					has_doctrine = doctrine_christian_liturgical_rite_gallican_rite
+					has_doctrine = doctrine_christian_liturgical_rite_moazarbic_rite
+					has_doctrine = doctrine_christian_liturgical_rite_celtic_rite
+				}
+			}
+			$FAITH_CONVERTEE$ = {
+				OR = {
+					has_doctrine = doctrine_christian_liturgical_rite_gallican_rite
+					has_doctrine = doctrine_christian_liturgical_rite_moazarbic_rite
+					has_doctrine = doctrine_christian_liturgical_rite_celtic_rite
+				}
+			}
+		}
+	}
+}
+
 ##### HERESY TRIGGERS
 
 #Prevent selection of heretic cultures unless the heresiarch is of a faith culture or faith child culture
@@ -413,8 +519,8 @@ kept_christian_doctrines_trigger = {
 			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_antinomianism }
 		}
 		trigger_if = {
-			limit = { doctrine:doctrine_christian_soteriology_gnostic = { is_in_list = selected_doctrines } }
-			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_gnostic }
+			limit = { doctrine:doctrine_christian_soteriology_gnosis = { is_in_list = selected_doctrines } }
+			religious_head.faith = { has_doctrine = doctrine_christian_soteriology_gnosis }
 		}
 	}
 	##Judaic Role
