@@ -1,4 +1,6 @@
-﻿##### Changed from Vanilla: Updated progress with various modifiers for BP, updated targets, added new game rule effects
+﻿##### Changed from Vanilla: Updated progress with various modifiers for BP
+##### Changed from Vanilla: Updated targets, added new game rule effects
+##### Changed from Vanilla: shared_hof_converts_counties_to_hof_religion effect
 task_conversion = {
 	position = councillor_court_chaplain
 
@@ -565,6 +567,7 @@ task_conversion = {
 	}
 	##### Changed from Vanilla ^^^^^
 
+	##### Changed from Vanilla vvvvv
 	on_finish_task_county = {
 		scope:councillor_liege = {
 			if = {
@@ -588,7 +591,14 @@ task_conversion = {
 			}
 		}
 		scope:county = {
-			set_county_faith = scope:councillor.faith
+			if = {
+				limit = {
+					scope:councillor.faith = { has_doctrine_parameter = shared_hof_converts_counties_to_hof_religion }
+					exists = scope:councillor.faith.religious_head
+				}
+				set_county_faith = scope:councillor.faith.religious_head.faith
+			}
+			else = { set_county_faith = scope:councillor.faith }
 		}
 		if = {
 			limit = {
@@ -601,6 +611,7 @@ task_conversion = {
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	monthly_on_action = task_convert_side_effects
 
