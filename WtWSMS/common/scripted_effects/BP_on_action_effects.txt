@@ -647,22 +647,57 @@ boostrap_prevention_effect = {
 	}
 }
 
-#Checks whether the kingdom should be "Vandals" or "Vandals and Alans"
-update_name_of_vandal_kingdom_effect = {
+#Mostly for our game-start on action stuff
+change_faith_if_alive = {
 	if = {
-		limit = { exists = title:k_vandalica.holder }
+		limit = { exists = $CHARACTER$ }
+		$CHARACTER$ = {
+			if = {
+				limit = { is_alive = yes }
+				set_character_faith_history = $FAITH$
+			}
+		}
+	}
+}
+
+#### Council Tasks
+
+garbage_collect_task_establish_title_effect = {
+	if = {
+		limit = {
+			OR = {
+				$THE_COUNTY$ = { has_variable = task_establish_title_progress }
+				$THE_COUNTY$ = { has_variable = task_establish_title_target }
+			}
+		}
+		#If we only have one of these variables, something went wrong; purge them
 		if = {
 			limit = {
-				#If at least one count is a vandal, use both
-				title:k_vandalica.holder = {
-					any_vassal_or_below = {
-						primary_title.tier >= tier_county
-						culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:alan } }
+				OR = { #XOR
+					AND = {
+						NOT = { $THE_COUNTY$ = { has_variable = task_establish_title_progress } }
+						$THE_COUNTY$ = { has_variable = task_establish_title_target }
+					}
+					AND = {
+						$THE_COUNTY$ = { has_variable = task_establish_title_progress }
+						NOT = { $THE_COUNTY$ = { has_variable = task_establish_title_target } }
 					}
 				}
 			}
-			title:k_vandalica = { set_title_name = "k_vandals_and_alans" }
+			if = { limit = { has_variable = task_establish_title_progress } remove_variable = task_establish_title_progress }
+			if = { limit = { has_variable = task_establish_title_target } remove_variable = task_establish_title_target }
 		}
-		else = { title:k_vandalica = { reset_title_name = yes } }
+		#If this is *not* my capital, purge it regardless
+		else_if = {
+			limit = { NOT = { $THE_COUNTY$ = $HOLDER$.capital_county } }
+			if = { limit = { has_variable = task_establish_title_progress } remove_variable = task_establish_title_progress }
+			if = { limit = { has_variable = task_establish_title_target } remove_variable = task_establish_title_target }
+		}
+		#Otherwise, purge if the target is *not* my primary title
+		else_if = {
+			limit = { NOT = { $THE_COUNTY$.var:task_establish_title_target = $HOLDER$.primary_title } }
+			if = { limit = { has_variable = task_establish_title_progress } remove_variable = task_establish_title_progress }
+			if = { limit = { has_variable = task_establish_title_target } remove_variable = task_establish_title_target }
+		}
 	}
 }

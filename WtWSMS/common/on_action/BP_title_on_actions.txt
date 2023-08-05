@@ -39,7 +39,7 @@ on_title_gain = {
 		#Other On Actions
 		BP_fall_of_rome
 		BP_remove_migration_modifiers
-		BP_other_title_effects
+		BP_general_title_cleanup
 	}
 }
 
@@ -244,7 +244,7 @@ BP_remove_migration_modifiers = {
 	effect = {
 		if = {
 			limit = {
-				#Only cleanup for conquests
+				#Only clean-up for conquests
 				OR = {
 					scope:transfer_type = flag:conquest
 					scope:transfer_type = flag:conquest_holy_war
@@ -267,17 +267,43 @@ BP_remove_migration_modifiers = {
 					#If counties under aristocracy/recent immigration modifiers are conquered by others,
 					#remove the modifiers
 					if = {
-						limit = { this = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy } }
-						this = { remove_county_modifier = county_modifier_minor_migration_minor_aristocracy }
-					}
-					else_if = {
 						limit = { this = { has_county_modifier = county_modifier_migration_recent_emigration } }
 						this = { remove_county_modifier = county_modifier_migration_recent_emigration }
 					}
-					else_if = {
+					if = {
 						limit = { this = { has_county_modifier = county_modifier_migration_recent_immigration } }
 						this = { remove_county_modifier = county_modifier_migration_recent_immigration }
 					}
+					#Minor Aristocracy should be a little different
+					if = {
+						limit = {
+							this = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy }
+							NOT = { this.holder.capital_county = { has_county_modifier = county_modifier_minor_migration_minor_aristocracy } }
+							NOT = { this.holder.top_liege = this.previous_holder.top_liege }
+						}
+						this = { remove_county_modifier = county_modifier_minor_migration_minor_aristocracy }
+					}
+				}
+			}
+		}
+	}
+}
+
+BP_general_title_cleanup = {
+	effect = {
+		#Handle variables for task_establish_title council task
+		root = {
+			every_held_county = {
+				limit = {
+					this.holder = root
+					OR = {
+						has_variable = task_establish_title_progress
+						has_variable = task_establish_title_target
+					}
+				}
+				garbage_collect_task_establish_title_effect = {
+					HOLDER = root
+					THE_COUNTY = this
 				}
 			}
 		}
@@ -362,12 +388,5 @@ BP_remove_title_related_character_modifiers = {
 				remove_character_modifier = ignored_the_senate
 			}
 		}
-	}
-}
-
-BP_other_title_effects = {
-	effect = {
-		#Check the state of k_vandalica's name
-		update_name_of_vandal_kingdom_effect = yes
 	}
 }
