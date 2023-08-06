@@ -115,6 +115,110 @@ tradition_chivalry = {
 	}
 }
 
+##### Changed from Vanilla: Enables vegetarianism trait, removed passive health modifier
+tradition_vegetarianism = {
+	category = societal
+
+	layers = {
+		0 = intrigue
+		1 = mediterranean
+		4 = food.dds
+	}
+	
+	is_shown = {
+		OR = {
+			has_cultural_pillar = heritage_indo_aryan
+			has_cultural_pillar = heritage_dravidian
+		}
+	}
+	can_pick = {
+		OR = {
+			has_cultural_pillar = heritage_indo_aryan
+			has_cultural_pillar = heritage_dravidian
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_sacred_hunts
+			NOT = { culture_tradition:tradition_sacred_hunts = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_hunters
+			NOT = { culture_tradition:tradition_hunters = { is_in_list = traits } }
+		}
+	}
+	can_pick_for_hybridization = {
+		custom_tooltip = {
+			text = cannot_have_vegetarianism_and_sacred_hunts
+			NOT = { culture_tradition:tradition_sacred_hunts = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_vegetarianism_and_hunters
+			NOT = { culture_tradition:tradition_hunters = { is_in_list = traits } }
+		}
+	}
+	
+	parameters = {
+		cannot_hunt = yes
+		enables_vegetarianism = yes
+	}
+	county_modifier = {
+		plains_development_growth_factor = 0.1
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_spiritual_or_stoic_desc
+				}
+			}
+
+			if = {
+				limit = {
+					scope:character = {
+						has_variable = tradition_vegetarianism_travel_discount
+					}
+					
+				}
+
+				add = {
+					value = tradition_travel_discount
+					desc = tradition_travel_discount_desc
+				}
+			}
+
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 75
+		if = {
+			limit = {
+				NOT = {
+					scope:character.faith = {
+						has_doctrine = tenet_dharmic_pacifism
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
 ##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
 
 ##### Changed from Vanilla: Made transitively unselectable with new traditions
