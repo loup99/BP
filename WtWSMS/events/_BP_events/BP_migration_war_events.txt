@@ -1,8 +1,11 @@
-﻿####################
+﻿namespace = migration_war
+
+# 0001-0099: Major Migration Events
+# 0100-0199: Government conversion events
+
+####################
 # ALLIANCE INTERACTIONS
 ####################
-
-namespace = migration_war
 
 #Liege Event
 migration_war.0001 = {
@@ -88,6 +91,196 @@ migration_war.0002 = {
 			modifier = { #Alans are always down to migrate
 				add = -1000
 				has_culture = culture:alan
+			}
+		}
+	}
+}
+
+scripted_trigger nomad_government_conversion_requirements = {
+	any_realm_province = { percent >= 0.75 geographical_region = world_steppe }
+}
+#Need at least one important social innovation to update your government dynamically
+scripted_trigger high_tribal_government_conversion_requirements = {
+	scope:the_old_ruler = { has_advanced_government_trigger = yes }
+}
+scripted_trigger high_tribal_government_is_unavailable_requirements = {
+	OR = {
+		scope:target_char.culture = { has_innovation = innovation_writing }
+		scope:target_char.culture = { has_innovation = innovation_social_stratification }
+		scope:target_char.culture = { has_innovation = innovation_leges_barbarorum }
+	}
+}
+scripted_trigger subroman_government_requirements = {
+	scope:target_char.culture = { has_innovation = innovation_writing }
+}
+scripted_trigger subroman_government_is_unavailable_requirements = {
+	scope:the_old_ruler = { has_bureaucratic_government_type_trigger = yes }
+	#You need the most basic social organization to have a hope of holding on...
+	scope:target_char.culture = { has_innovation = innovation_social_stratification }
+	scope:target_char.culture = { has_innovation = innovation_leges_barbarorum }
+}
+#AI weighting
+scripted_trigger nomadic_cultures = { #If historic nomads end up back on the plains, they should adopt the saddle
+	OR = {
+		scope:target_char.culture = { has_cultural_pillar = heritage_turkic }
+		scope:target_char.culture = { has_cultural_pillar = heritage_mongolic }
+		scope:target_char.culture = { has_cultural_pillar = heritage_sakan }
+		scope:target_char.culture = { has_cultural_pillar = heritage_sarmatian }
+	}
+}
+#Weight adopting Roman practices by what happened historically
+scripted_trigger historically_did_not_adopt_roman_practices = {
+	scope:target_char.culture = { has_cultural_pillar = heritage_west_germanic }
+	scope:target_char.culture = { has_cultural_pillar = heritage_north_germanic }
+}
+scripted_trigger historically_did_adopt_roman_practices = {
+	OR = {
+		scope:target_char.culture = { has_cultural_pillar = heritage_central_germanic }
+		scope:target_char.culture = { has_cultural_pillar = heritage_east_germanic }
+		scope:target_char.culture = { has_cultural_pillar = heritage_sarmatian }
+	}
+}
+scripted_trigger historically_would_not_adopt_roman_practices = {
+	OR = {
+		scope:target_char.culture = { has_cultural_pillar = heritage_common_slavic }
+		scope:target_char.culture = { has_cultural_pillar = heritage_east_slavic }
+		scope:target_char.culture = { has_cultural_pillar = heritage_west_slavic }
+		scope:target_char.culture = { has_cultural_pillar = heritage_south_slavic }
+	}
+}
+
+#Chance for government to upgrade
+migration_war.0100 = {
+	type = character_event
+	theme = stewardship_domain_focus
+	
+	title = migration_war.0100.t
+	desc = migration_war.0100.desc
+	
+	#Must _actually_ be possible to change your government in some way
+	trigger = {
+		trigger_if = {
+			limit = { has_government = nomad_government }
+			nomad_government_conversion_requirements = no
+		}
+		trigger_else = {
+			OR = {
+				nomad_government_conversion_requirements = yes
+				high_tribal_government_conversion_requirements = yes
+				AND = {
+					subroman_government_requirements = yes
+					subroman_government_is_unavailable_requirements = yes
+				}
+			}
+		}
+	}
+	
+	right_portrait = {
+		character = scope:target_char
+		animation = personality_rational
+	}
+	
+	option = {
+		fallback = yes
+		name = migration_war.0100.keep_current
+		flavor = migration_war.0100.keep_current.flavor
+		ai_chance = {
+			base = 10
+			modifier = {
+				add = -10
+				scope:target_char = { has_government = nomad_government }
+				nomad_government_conversion_requirements = no
+			}
+		}
+	}
+	option = {
+		trigger = {
+			has_government = nomad_government
+			nomad_government_conversion_requirements = no
+		}
+		name = migration_war.0100.adopt_tribalism
+		convert_realm_to_tribal_effect = yes
+		ai_chance = {
+			base = 10
+			modifier = {
+				add = 1000
+				scope:target_char = { has_government = nomad_government }
+				nomad_government_conversion_requirements = no
+			}
+		}
+	}
+	option = {
+		trigger = {
+			has_government = tribal_government
+			nomad_government_conversion_requirements = yes
+		}
+		name = migration_war.0100.adopt_nomadism
+		convert_realm_to_nomad_effect = yes
+		ai_chance = {
+			base = 10
+			modifier = { #We Ride!
+				add = 1000
+				nomadic_cultures = yes
+			}
+			modifier = { #Well, as long as we're here...
+				add = 10
+				nomadic_cultures = no
+			}
+		}
+	}
+	option = {
+		trigger = {
+			high_tribal_government_conversion_requirements = yes
+			NOT = { has_government = nomad_government }
+		}
+		show_as_unavailable = {
+			high_tribal_government_is_unavailable_requirements = yes
+		}
+		name = migration_war.0100.adopt_high_tribal
+		convert_realm_to_high_tribal_effect = yes
+		ai_chance = {
+			base = 10
+			#The more techs we have, the more likely we'll do it
+			modifier = {
+				add = 20
+				scope:target_char.culture = { has_innovation = innovation_writing }
+			}
+			modifier = {
+				add = 10
+				scope:target_char.culture = { has_innovation = innovation_leges_barbarorum }
+			}
+			modifier = {
+				add = 10
+				scope:target_char.culture = { has_innovation = innovation_social_stratification }
+			}
+		}
+	}
+	option = {
+		#A little squirrely; `show_as_unavailable` desc is:
+		#    If the option is invalid, but this [i.e., show_as_unavailable] trigger is,
+		#    the option will be shown, but disabled.
+		trigger = {
+			subroman_government_requirements = yes
+			NOT = { has_government = nomad_government }
+		}
+		show_as_unavailable = { subroman_government_is_unavailable_requirements = yes }
+		name = migration_war.0100.adopt_sub_roman
+		convert_realm_to_subroman_direct_effect = yes
+		
+		ai_chance = {
+			base = 20
+			#Weight by historical outcomes
+			modifier = {
+				add = -10
+				historically_did_not_adopt_roman_practices = yes
+			}
+			modifier = {
+				add = -20
+				historically_would_not_adopt_roman_practices = yes
+			}
+			modifier = {
+				add = 30
+				historically_did_adopt_roman_practices = yes
 			}
 		}
 	}

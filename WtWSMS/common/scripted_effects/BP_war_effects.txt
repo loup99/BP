@@ -154,86 +154,87 @@ update_number_of_migrations_effect = {
 }
 
 #Migration CB Title Shenanigans
-migration_cb_title_management_effect = {
-	create_title_and_vassal_change = {
+minor_migration_cb_title_management_effect = {
+	create_title_and_vassal_change = { #Titles taken from the defender
 		type = conquest
-		save_scope_as = change_titles_taken
+		save_scope_as = change_seized_defender_titles
 		add_claim_on_loss = yes
 	}
-	create_title_and_vassal_change = {
+	create_title_and_vassal_change = { #Attacker's old title
 		type = granted
-		save_scope_as = change_grant_title_to_other_chars
+		save_scope_as = change_transfered_old_attacker_titles
+		add_claim_on_loss = no
+	}
+	create_title_and_vassal_change = { #Vassals going to the liege
+		type = granted
+		save_scope_as = change_attacker_vassals_to_liege
 		add_claim_on_loss = no
 	}
 	create_title_and_vassal_change = {
 		type = independency
-		save_scope_as = change_vassal_status
+		save_scope_as = change_attacker_vassals_to_independent
 		add_claim_on_loss = no
 	}
-	#Seize all holdings in the target kingdom
-	every_in_list = {
-		list = $TARGET_TITLES$
-		
-		#Go over counties to seize
-		every_in_de_jure_hierarchy = {
-			limit = {
-				tier = tier_county
-				exists = holder
-				holder = {
-					OR = {
-						target_is_liege_or_above = $DEFENDER$
-						this = $DEFENDER$
-					}
-				}
-			}
-			add_to_temporary_list = titles_taken
-		}
+	create_title_and_vassal_change = {
+		type = independency
+		save_scope_as = change_attacker_becomes_independent
+		add_claim_on_loss = no
 	}
-	#Mark titles for later separation and mark independence if needed
+	#Mark all the attacker's titles as to be handed over (either to liege or independents)
+	#Mark all vassals to be made independent or transfer to your liege
 	$ATTACKER$ = {
 		every_held_title = {
 			limit = { tier = tier_county }
-			add_to_temporary_list = attackers_counties
+			add_to_temporary_list = attacker_old_counties
 		}
-		if = {
-			limit = { is_independent_ruler = no }
-			becomes_independent = { change = scope:change_grant_title_to_other_chars }
+		every_vassal = {
+			limit = { this.primary_title.tier > tier_barony }
+			if = {
+				limit = { $ATTACKER$ = { is_independent_ruler = yes } }
+				add_to_temporary_list = attacker_vassals_to_independent
+			}
+			else = { add_to_temporary_list = attacker_vassals_to_liege }
 		}
 	}
-	#Seize titles
+	#Mark all the defender's titles as seized
 	every_in_list = {
-		list = titles_taken
+		list = $TARGET_TITLES$
+		
+		every_in_de_jure_hierarchy = {
+			limit = {
+				tier = tier_county
+				OR = {
+					this.holder = $DEFENDER$
+					this.holder = { target_is_liege_or_above = $DEFENDER$ }
+				}
+			}
+			add_to_temporary_list = defender_titles_taken
+		}
+	}
+	#Now seize the defender titles
+	every_in_list = {
+		list = defender_titles_taken
 		change_title_holder = {
 			holder = $ATTACKER$
-			change = scope:change_titles_taken
+			change = scope:change_seized_defender_titles
 			take_baronies = yes
 		}
 	}
-	#Liberate vassals, or hand them to your liege if not independent
-	$ATTACKER$ = {
-		if = {
-			limit = { is_independent_ruler = yes }
-			every_vassal = {
-				limit = { primary_title.tier > tier_barony }
-				becomes_independent = { change = scope:change_vassal_status }
-			}
-		}
-		else = {
-			every_vassal = {
-				limit = { primary_title.tier > tier_barony }
-				change_liege = {
-					liege = $ATTACKER$.liege
-					change = scope:change_vassal_status
-				}
-			}
+	#Handle attacker's vassals
+	every_in_list = {
+		list = attacker_vassals_to_liege
+		change_liege = {
+			liege = $ATTACKER$.liege
+			change = scope:change_attacker_vassals_to_liege
 		}
 	}
-	#If I am an independent ruler, make new holders for my counties
-	if = {
-		limit = { $ATTACKER$ = { is_independent_ruler = yes } }
-		every_in_list = {
-			list = attackers_counties
-			
+	#Handle attackers old counties
+	every_in_list = {
+		list = attacker_old_counties
+		#For an independent ruler, give counties to random new chars
+		if = {
+			limit = { $ATTACKER$ = { is_independent_ruler = yes } }
+			#Create a new holder
 			create_character = {
 				location = $ATTACKER$.location
 				culture = this.culture
@@ -251,41 +252,54 @@ migration_cb_title_management_effect = {
 				}
 				save_scope_as = new_char
 			}
+			scope:new_char = { add_to_list = new_holders }
 			change_title_holder = {
 				holder = scope:new_char
-				change = scope:change_grant_title_to_other_chars
+				change = scope:change_transfered_old_attacker_titles
 				take_baronies = yes
 			}
-			scope:new_char = { becomes_independent = { change = scope:change_vassal_status } }
+			scope:new_char = {
+				becomes_independent = { change = scope:change_attacker_vassals_to_independent }
+			}
 		}
-	}
-	#Otherwise give my counties to my liege
-	else = {
-		every_in_list = {
-			list = attackers_counties
-			
+		else = {
 			change_title_holder = {
 				holder = $ATTACKER$.liege
-				change = scope:change_grant_title_to_other_chars
+				change = scope:change_transfered_old_attacker_titles
 				take_baronies = yes
 			}
 		}
 	}
-	resolve_title_and_vassal_change = scope:change_titles_taken
-	resolve_title_and_vassal_change = scope:change_grant_title_to_other_chars
-	resolve_title_and_vassal_change = scope:change_vassal_status
-	#Prevent title bootstrapping
-	hidden_effect = {
-		every_in_list = {
-			list = attackers_counties
-			this.holder = {
-				boostrap_prevention_effect = {
-					THE_LANDED_TITLE = this.capital_county
-					THE_PREVIOUS_HOLDER = $ATTACKER$
-				}
+	#Now handle the attackers old vassals
+	every_in_list = {
+		list = attacker_vassals_to_independent
+		becomes_independent = { change = scope:change_attacker_vassals_to_independent }
+	}
+	$ATTACKER$ = { becomes_independent = { change = scope:change_attacker_becomes_independent } }
+	#Resolve everything in order
+	resolve_title_and_vassal_change = scope:change_seized_defender_titles
+	resolve_title_and_vassal_change = scope:change_transfered_old_attacker_titles
+	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_liege
+	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_independent
+	resolve_title_and_vassal_change = scope:change_attacker_becomes_independent
+	
+	##### TODO (Beta): This will spam several cases of Scoped object of type 'character' is not valid,
+	#####    but its not clear why; the if statement should be appropriately checking
+	every_in_list = {
+		list = new_holders
+		save_temporary_scope_as = the_holder
+		if = {
+			limit = {
+				scope:the_holder ?= { is_landed = yes }
+				exists = $ATTACKER$
+			}
+			boostrap_prevention_effect = {
+				THE_LANDED_TITLE = scope:the_holder.capital_county
+				THE_PREVIOUS_HOLDER = $ATTACKER$
 			}
 		}
 	}
+	
 	#Apply county effects
 	hidden_effect = { #apply county modifiers to new counties
 		#text = "minor_migration_apply_modifiers_to_new_counties"
@@ -314,6 +328,7 @@ migration_cb_title_management_effect = {
 		}
 	}
 }
+
 #Migration CB Titular Title Shenanigans
 create_titular_title_if_needed_effect = {
 	#If our primary title **isn't** titular, create a new one of the same rank
@@ -360,15 +375,6 @@ create_titular_title_if_needed_effect = {
 			}
 			set_primary_title_to = scope:new_title
 			destroy_title = scope:old_title
-		}
-	}
-}
-#Add migratory invasion flag
-add_migration_flag_effect = {
-	$ATTACKER$ = {
-		add_character_flag = {
-			flag = launched_migration_war_recently
-			years = $YEARS$
 		}
 	}
 }
