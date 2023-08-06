@@ -126,32 +126,36 @@ task_establish_title = {
 		}
 	}
 
-	on_cancel_task_county = { #Garbage Collect
-		scope:county = {
-			remove_variable = task_establish_title_progress
-			remove_variable = task_establish_title_target
-		}
-	}
+	on_cancel_task_county = {}
 
 	on_start_task_county = {
-		#Garbage Collect
-		if = {
-			limit = { scope:county = { has_variable = task_establish_title_progress } }
-			remove_variable = task_establish_title_progress
-		}
-		if = {
-			limit = { scope:county = { has_variable = task_establish_title_target } }
-			remove_variable = task_establish_title_target
-		}
-		#And initialize the progress
-		scope:county = {
-			set_variable = {
-				name = task_establish_title_progress
-				value = establish_title_base_value
+		#Garbage Collect, on the off chance we're moving capitals around
+		scope:councillor_liege = {
+			every_held_county = {
+				garbage_collect_task_establish_title_effect = {
+					HOLDER = scope:councillor_liege
+					THE_COUNTY = scope:county
+				}
 			}
-			set_variable = {
-				name = task_establish_title_target
-				value = scope:councillor_liege.primary_title
+		}
+		
+		#And initialize the progress if it does not exist
+		if = {
+			limit = {
+				NAND = {
+					scope:county = { has_variable = task_establish_title_progress }
+					scope:county = { has_variable = task_establish_title_target }
+				}
+			}
+			scope:county = {
+				set_variable = {
+					name = task_establish_title_progress
+					value = establish_title_base_value
+				}
+				set_variable = {
+					name = task_establish_title_target
+					value = scope:councillor_liege.primary_title
+				}
 			}
 		}
 	}
