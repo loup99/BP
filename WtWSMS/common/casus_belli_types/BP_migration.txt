@@ -100,11 +100,6 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 		
-		#Create Titular title if primary isn't titular
-		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
-		#and counties that have been handed out become independent
-		create_titular_title_if_needed_effect = { ATTACKER = scope:attacker }
-		
 		save_government_type_effect = {
 			THE_NEW_HOLDER = scope:attacker
 			THE_PREVIOUS_HOLDER = scope:defender
@@ -117,15 +112,10 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 			TARGET_TITLES = target_titles
 		}
 		
-		#Move the capital
-		hidden_effect = { setup_new_capital_effect = { ATTACKER = scope:attacker } }
-		#Block new migrations for a while
-		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = minor_migration_wait_time } }
-		#Fire event to upgrade gov't (possibly)
-		scope:defender = { save_scope_as = the_old_ruler }
-		scope:attacker = {
-			save_scope_as = target_char
-			trigger_event = { id = migration_war.0100 days = {2 7} }
+		other_successful_migration_effects = {
+			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			WAIT_TIME = minor_migration_wait_time
 		}
 		#### END TITLE MANAGEMENT
 		
@@ -374,11 +364,6 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 		
-		#Create Titular title if primary isn't titular
-		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
-		#and counties that have been handed out become independent
-		create_titular_title_if_needed_effect = { ATTACKER = scope:attacker }
-		
 		save_government_type_effect = {
 			THE_NEW_HOLDER = scope:attacker
 			THE_PREVIOUS_HOLDER = scope:defender
@@ -391,15 +376,10 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 			TARGET_TITLES = target_titles
 		}
 		
-		#Move the capital
-		hidden_effect = { setup_new_capital_effect = { ATTACKER = scope:attacker } }
-		#Block new migrations for a while
-		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = minor_migration_kingdom_wait_time } }
-		#Fire event to upgrade gov't (possibly)
-		scope:defender = { save_scope_as = the_old_ruler }
-		scope:attacker = {
-			save_scope_as = target_char
-			trigger_event = { id = migration_war.0100 days = {2 7} }
+		other_successful_migration_effects = {
+			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			WAIT_TIME = minor_migration_kingdom_wait_time
 		}
 		#### END TITLE MANAGEMENT
 		
@@ -658,26 +638,19 @@ major_migration_war = {
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 		
-		#Create Titular title if primary isn't titular
-		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
-		#and counties that have been handed out become independent
-		create_titular_title_if_needed_effect = { ATTACKER = scope:attacker }
-		
-		#Handle nomads possibly flipping
-		major_migration_improve_government_form_effect_effect = {
-			ATTACKER = scope:attacker
-			DEFENDER = scope:defender
-		}
-		
-		#Handle the title changes
+		#### START TITLE MANAGEMENT
 		major_migration_cb_title_management_effect_effect = {
-			TARGET_TITLES = target_titles
-			DEFENDER = scope:defender
 			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			TARGET_TITLES = target_titles
 		}
 		
-		#Move the capital
-		hidden_effect = { setup_new_capital_effect = { ATTACKER = scope:attacker } }
+		other_successful_migration_effects = {
+			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			WAIT_TIME = major_migration_wait_time
+		}
+		#### END TITLE MANAGEMENT
 		
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
 		modify_all_participants_fame_values = {
@@ -696,9 +669,6 @@ major_migration_war = {
 
 		# FP1: note the victory for future memorialisation via stele (if applicable).
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
-		
-		#Add migratory invasion flag
-		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
 	}
 	
 	on_white_peace_desc = {

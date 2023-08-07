@@ -1,0 +1,235 @@
+﻿#### Migration War Stuff
+migration_war_fame_base = major_prestige_value
+
+#Migration Constants
+migration_levies = {
+	value = county.development_level
+	multiply = 100
+
+	#Sensible max-mins.
+	min = 100
+	max = 1000
+
+	#Give a whole number.
+	floor = yes
+}
+migration_depopulation = {
+	value = county.development_level
+	multiply = -0.33
+	#Give a whole number.
+	floor = yes
+}
+
+#Migration Costs & Variables
+
+## Minor Migrations
+minor_migration_wait_time = 10
+minor_migration_war_prestige_level = 1
+minor_migration_war_prestige_base_cost = 200
+minor_migration_war_prestige_cost = {
+	value = minor_migration_war_prestige_base_cost
+	multiply = {
+		value = 1
+		if = {
+			limit = { scope:attacker = { has_variable = number_of_migrations_attempted } }
+			add = scope:attacker.var:number_of_migrations_attempted
+		}
+	}
+}
+minor_migration_kingdom_wait_time = 15
+minor_migration_war_kingdom_prestige_level = 2
+minor_migration_war_kingdom_prestige_base_cost = 200
+minor_migration_war_kingdom_prestige_cost = {
+	value = minor_migration_war_kingdom_prestige_base_cost
+	multiply = {
+		value = 1
+		if = {
+			limit = { scope:attacker = { has_variable = number_of_migrations_attempted } }
+			add = scope:attacker.var:number_of_migrations_attempted
+		}
+	}
+}
+
+#Used in ai_score_mult scope; top scope refers to a target title
+minor_migration_number_of_tribal_holdings = {
+	value = 0
+	every_province = {
+		limit = {
+			OR = {
+				this.duchy = prev
+				this.kingdom = prev
+			}
+			has_holding = yes
+			has_holding_type = tribal_holding
+		}
+		add = 1
+	}
+}
+minor_migration_number_of_nontribals = {
+	value = 0
+	every_province = {
+		limit = {
+			OR = {
+				this.duchy = prev
+				this.kingdom = prev
+			}
+			has_holding = yes
+			NOT = { has_holding_type = tribal_holding }
+		}
+		add = 1
+	}
+}
+total_target_development = {
+	value = 0
+	every_county = {
+		limit = {
+			OR = {
+				this.duchy = prev
+				this.kingdom = prev
+			}
+		}
+		add = this.development_level
+	}
+}
+target_size = {
+	value = 0
+	every_county = {
+		limit = {
+			OR = {
+				this.duchy = prev
+				this.kingdom = prev
+			}
+		}
+		add = 1
+	}
+}
+
+## Major Migrations
+major_migration_wait_time = 20
+major_migration_prestige_level = 3
+major_migration_war_prestige_base_cost = 200
+major_migration_war_prestige_cost = {
+	value = major_migration_war_prestige_base_cost
+	multiply = {
+		value = 1
+		if = {
+			limit = { scope:attacker = { has_variable = number_of_migrations_attempted } }
+			add = scope:attacker.var:number_of_migrations_attempted
+		}
+	}
+}
+
+#Major Migration county modifier periods (all in years)
+major_migration_immigration_emigration_conversion_period = 10 #How long we get bonuses to convert/promote cultures
+major_migration_immigration_emigration_impact_period = 25 #How long taxes/development/levies are impacted
+major_migration_max_development_for_settling = 20 #Lowest level of development before settlement buffs won't be applied
+major_migration_new_char_county_control_loss = -50 #How much control is lost when giving former counties to newly made chars
+
+#Determination of how to hand out target counties
+major_migration_duchy_average_development_level = {
+	value = 0
+	this.duchy = { every_county = { add = this.development_level } }
+	divide = 100 #Scale value from 0 to 1
+	multiply = 100
+}
+major_migration_county_development_level_scale = {
+	value = 0
+	add = this.development_level
+	divide = 100 #Scale value from 0 to 1
+	multiply = 10
+}
+major_migration_duchy_proximity = {
+	value = 1
+	#Chain of neighboring counties
+	#Anything that traces back to the presumed_capital has high priority
+	#More than this leads to noticable lags in the CB window when switching targets
+	if = { #Neighbors-1
+		limit = {
+			this.duchy = {
+				any_county = {
+					any_neighboring_county={any_neighboring_county={this=scope:presumed_capital}}
+				}
+			}
+		}
+		multiply = 2
+	}
+	if = { #Neighbors
+		limit = {
+			this.duchy = {
+				any_county = {
+					any_neighboring_county={this=scope:presumed_capital}
+				}
+			}
+		}
+		multiply = 2
+	}
+	divide = 4 #Scale value from 0 to 1
+	multiply = 1000
+}
+major_migration_selection_value = {
+	value = 0
+	
+	## Emphasize being next to to presumed_capital or in whole duchy
+	
+	#If I am in the same duchy as the presumed capital, I have the highest priority
+	if = {
+		limit = { this.duchy = scope:presumed_capital.duchy }
+		add = 10000
+	}
+	else = { #Otherwise, select duchies by closeness to capital
+		add = major_migration_duchy_proximity
+	}
+	
+	#Preference more developed equidistanct duchies
+	add = major_migration_duchy_average_development_level
+	
+	#Tie breaker/emphasis improvement
+	add = major_migration_county_development_level_scale
+}
+major_migration_max_number_of_leader_counties = {
+	#Count up fraction of target counties going to the leader
+	value = 0
+	every_in_list = {
+		list = full_list_of_target_counties
+		add = 1
+	}
+	divide = 2
+	subtract = 1
+	ceiling = yes
+}
+major_migration_number_of_vassals = {
+	value = 0
+	every_in_list = {
+		list = participating_vassals
+		add = 1
+	}
+}
+major_migration_max_number_of_vassal_counties = {
+	#Count up fraction of target counties going to the leader
+	value = 0
+	every_in_list = {
+		list = full_list_of_target_counties
+		add = 1
+	}
+	subtract = major_migration_max_number_of_leader_counties
+	divide = major_migration_number_of_vassals
+	subtract = 1
+	ceiling = yes
+	#check_range_bounds = no
+}
+
+# Determination of whether a county flips religion & culture or not
+major_migration_county_flip_chance = 30
+major_migration_max_valid_development_for_flip = 10
+major_migration_negative_development_level_modifier = {
+	value = this.development_level
+	divide = major_migration_max_valid_development_for_flip
+	multiply = -1.00
+	multiply = major_migration_county_flip_chance
+	#Give a whole number.
+	floor = yes
+}
+major_migration_county_negative_flip_chance = {
+	value = major_migration_county_flip_chance
+	multiply = -1.00
+}
