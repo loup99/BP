@@ -1,6 +1,7 @@
 ﻿##### Changed from Vanilla: Updated progress with various modifiers for BP
 ##### Changed from Vanilla: Updated targets, added new game rule effects
 ##### Changed from Vanilla: shared_hof_converts_counties_to_hof_religion effect
+##### Changed from Vanilla: integrated SEA minorities stuff
 task_conversion = {
 	position = councillor_court_chaplain
 
@@ -275,13 +276,50 @@ task_conversion = {
 				desc = minimum_conversion
 			}
 		}
+		### SEA Minorities stuff vvv
+		
+		# Because the task needs to complete 3 times with the minority system
+		multiply = 3
+
+		if = {
+			limit = { scope:county.faith = scope:councillor_liege.faith }
+			multiply = {
+				value = 0.5
+				desc = converting_minority_desc
+			}
+		}
+		### SEA Minorities stuff ^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
+	### SEA Minorities stuff vvv
+	county_modifier = {
+		name = court_chaplain_convert_county_modifier
+		county_opinion_add = -10
+	}
+	### SEA Minorities stuff ^^^
+
 	##### Changed from Vanilla vvvvv
-	potential_county = { 
+	potential_county = {
 		scope:county = {
-			NOT = { faith = scope:councillor.faith }
+			### Minority stuff (Replaces simple `NOT = { faith = scope:councillor.faith }`) vvv
+			scope:councillor_liege = { has_realm_law_flag = may_convert_faith }
+			trigger_if = {
+				limit = { faith = scope:councillor_liege.faith }
+				trigger_if = {
+					limit = {
+						county_has_astray_or_worse_minority_faith_trigger = { FAITH = scope:councillor.faith }
+					}
+					custom_tooltip = {
+						text = "not_has_expel_minorities_unlocked"
+						scope:councillor_liege = { has_realm_law_flag = unlock_expel_religious_minorities }
+					}
+				}
+				trigger_else = {
+					NOT = { faith = scope:councillor_liege.faith }
+				}
+			}
+			### End Minority stuff ^^^
 			trigger_if = {
 				limit = {
 					scope:councillor_liege = {
@@ -569,6 +607,25 @@ task_conversion = {
 
 	##### Changed from Vanilla vvvvv
 	on_finish_task_county = {
+		### Minorities & BP stuff vvv
+		scope:county = {
+			if = {
+				limit = { the_county_faith_is_what_is_expected_trigger = yes }
+				demote_random_faith_minority_effect = yes
+			}
+			else = {
+				if = {
+					limit = { the_county_should_convert_to_hof_faith_trigger = yes } #Special Zoro thing
+					promote_faith_minority_effect = { FAITH = scope:councillor.faith.religious_head.faith }
+				}
+				else = { promote_faith_minority_effect = { FAITH = scope:councillor.faith } }
+				if = {
+					limit = { the_county_faith_is_what_is_expected_trigger = yes }
+					scope:councillor = { start_default_task = yes }
+				}
+			}
+		}
+		### Minorities & BP stuff ^^^
 		scope:councillor_liege = {
 			if = {
 				limit = {
@@ -588,26 +645,6 @@ task_conversion = {
 						}
 					}
 				}
-			}
-		}
-		scope:county = {
-			if = {
-				limit = {
-					scope:councillor.faith = { has_doctrine_parameter = shared_hof_converts_counties_to_hof_religion }
-					exists = scope:councillor.faith.religious_head
-				}
-				set_county_faith = scope:councillor.faith.religious_head.faith
-			}
-			else = { set_county_faith = scope:councillor.faith }
-		}
-		if = {
-			limit = {
-				scope:councillor = {
-					has_council_position = councillor_court_chaplain
-				}
-			}
-			scope:councillor = {
-				start_default_task = yes
 			}
 		}
 	}
