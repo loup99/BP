@@ -1,0 +1,139 @@
+﻿#Wrappers for various game start on actions
+add_small_culture_to_county_effect = {
+	if = {
+		limit = { NOT = { this.title_province = { has_holding_type = tribal_holding } } }
+		add_culture_minority_effect = {
+			CULTURE = $CULTURE$
+			SIZE = small
+			COUNTY = this
+		}
+	}
+}
+add_small_faith_to_county_effect = {
+	if = {
+		limit = { NOT = { this.title_province = { has_holding_type = tribal_holding } } }
+		add_faith_minority_effect = {
+			FAITH = $FAITH$
+			SIZE = small
+			COUNTY = this
+		}
+	}
+}
+add_small_culture_and_faith_to_county_effect = {
+	add_small_culture_to_county_effect = { CULTURE = $CULTURE$ }
+	add_small_faith_to_county_effect = { FAITH = $FAITH$ }
+}
+add_large_culture_to_county_effect = {
+	if = {
+		limit = { NOT = { this.title_province = { has_holding_type = tribal_holding } } }
+		add_culture_minority_effect = {
+			CULTURE = $CULTURE$
+			SIZE = large
+			COUNTY = this
+		}
+	}
+}
+add_large_faith_to_county_effect = {
+	if = {
+		limit = { NOT = { this.title_province = { has_holding_type = tribal_holding } } }
+		add_faith_minority_effect = {
+			FAITH = $FAITH$
+			SIZE = large
+			COUNTY = this
+		}
+	}
+}
+add_large_culture_and_faith_to_county_effect = {
+	add_large_culture_to_county_effect = { CULTURE = $CULTURE$ }
+	add_large_faith_to_county_effect = { FAITH = $FAITH$ }
+}
+#Generate Indian Diversity
+add_dharmic_faith_minorities_to_region = {
+	every_county = {
+		limit = {
+			this.title_province = { geographical_region = $REGION$ }
+			this.faith = {
+				has_doctrine = eastern_hostility_doctrine
+				NOT = { has_doctrine = tenet_ethnic_religion }
+			}
+		}
+		this = { save_temporary_scope_as = the_county_temp }
+		every_neighboring_county = {
+			if = {
+				limit = {
+					faith = {
+						has_doctrine = eastern_hostility_doctrine
+						NOT = { has_doctrine = tenet_ethnic_religion }
+						NOT = { this = scope:the_county_temp.faith }
+					}
+				}
+				faith = { add_to_list = neighboring_faiths }
+			}
+		}
+		every_in_list = {
+			list = neighboring_faiths
+			this = { save_temporary_scope_as = the_faith_temp }
+			scope:the_county_temp = {
+				add_to_variable_list = {
+					name = faith_minorities_small
+					target = scope:the_faith_temp
+				}
+			}
+			this = { remove_from_list = neighboring_faiths }
+		}
+		scope:the_county_temp.holder.faith = {
+			if = {
+				limit = {
+					has_doctrine = eastern_hostility_doctrine
+					NOT = { has_doctrine = tenet_ethnic_religion }
+					NOT = { this = scope:the_county_temp.faith }
+				}
+				add_to_variable_list = {
+					name = faith_minorities_small
+					target = scope:the_faith_temp
+				}
+			}
+		}
+	}
+}
+
+#This adds faith minorities in a "granular" sense, but at least a small minority everywhere
+add_minority_faith_granular_minimum_effect = {
+	if = {
+		limit = { any_neighboring_county = { count > 1 faith = $FAITH$} }
+		add_large_faith_to_county_effect = { FAITH = $FAITH$ }
+	}
+	else = { add_small_faith_to_county_effect = { FAITH = $FAITH$ } }
+
+}
+#This adds faith minorities in a "granular" sense
+add_minority_faith_granular_effect = {
+	if = {
+		limit = { any_neighboring_county = { count > 1 faith = $FAITH$} }
+		add_large_faith_to_county_effect = { FAITH = $FAITH$ }
+	}
+	else_if = {
+		limit = { any_neighboring_county = { count = 1 faith = $FAITH$} }
+		add_small_faith_to_county_effect = { FAITH = $FAITH$ }
+	}
+}
+#This adds culture minorities in a "granular" sense, but at least a small minority everywhere
+add_minority_culture_granular_minimum_effect = {
+	if = {
+		limit = { any_neighboring_county = { count > 1 culture = $CULTURE$} }
+		add_large_culture_to_county_effect = { CULTURE = $CULTURE$ }
+	}
+	else = { add_small_culture_to_county_effect = { CULTURE = $CULTURE$ } }
+
+}
+#This adds faith minorities in a "granular" sense
+add_minority_culture_granular_effect = {
+	if = {
+		limit = { any_neighboring_county = { count > 1 culture = $CULTURE$} }
+		add_large_culture_to_county_effect = { CULTURE = $CULTURE$ }
+	}
+	else_if = {
+		limit = { any_neighboring_county = { count = 1 culture = $CULTURE$} }
+		add_small_culture_to_county_effect = { CULTURE = $CULTURE$ }
+	}
+}
