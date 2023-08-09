@@ -1,4 +1,11 @@
-﻿on_game_start = {
+﻿#Sources:
+#[1] M. Mueller, HYPSISTOS CULTS IN THE GREEK WORLD DURING THE ROMAN IMPERIUM. Hamilton, Ontario: McMaster University, 2014.
+#[2] Abu Muhammad 'Abd Allah Ruzbih ibn Daduya wrote a number of anti-monotheist, pro-dualist tracts early in Muslim rules (ca 760s); weren't stamped out until the 790s
+#[3] https://en.wikipedia.org/wiki/Aquitanian_language#/media/File:Euskararen_aztarna_geografikoak.svg
+#[4] https://penelope.uchicago.edu/Thayer/E/Roman/Texts/secondary/BURLAT/12*.html
+#[5] H. Niliacus, The Hieroglyphics of Horapollo. Princeton, NJ: Princeton University Press, 2020. (Translated George Boas). Chapter 1
+
+on_game_start = {
 	on_actions = {
 		BP_set_minorities_universal
 		BP_set_minorities_by_date
@@ -393,6 +400,143 @@ BP_start_date_minorities_476_effect = {
 		}
 		
 		#Byzantium
+		every_county = {
+			limit = { this.empire = title:e_byzantium }
+			#North of the Empire (Asia Minor and Europe)
+			if = {
+				limit = {
+					OR = {
+						this.kingdom = title:k_byzantium
+						this.kingdom = title:k_cilicia
+						this.kingdom = title:k_galatia
+						this.kingdom = title:k_pontus
+						this.kingdom = title:k_asia
+						this.kingdom = title:k_thrace
+						this.kingdom = title:k_achaia
+						this.kingdom = title:k_macedonia
+						this.kingdom = title:k_moesia_superior
+						this.kingdom = title:k_cilicia
+						this.kingdom = title:k_armenia_inferior
+					}
+				}
+				## Faiths: Spread faiths out a bit
+				add_minority_faith_granular_effect = { FAITH = faith:melchisdechianism }
+				add_minority_faith_granular_effect = { FAITH = faith:hellenic_pagan }
+				add_minority_faith_granular_effect = { FAITH = faith:pneumatomachianism }
+				add_minority_faith_granular_effect = { FAITH = faith:montanism }
+				add_minority_faith_granular_effect = { FAITH = faith:bosporan_faith }
+				add_minority_faith_granular_minimum_effect = { FAITH = faith:nicene }
+				#Cultures
+				if = {
+					limit = {
+						OR = {
+							this = title:c_phrygia
+							this = title:c_hadrianeia
+						}
+					}
+					add_minority_culture_granular_effect = { CULTURE = culture:phrygian }
+				}
+				if = { #Armenian faiths
+					limit = { this.culture = culture:armenian }
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:armenian_apostolic }
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:urartuism }
+				}
+				if = { #Marcionism
+					limit = { this.religion = religion:christianity_religion }
+					add_minority_faith_granular_effect = { FAITH = faith:marcionism }
+				}
+				#Let the Tsakonians have *some* presence...
+				add_minority_culture_granular_effect = { CULTURE = culture:tsakonian }
+			}
+			#Oriens; the nightmare....
+			if = {
+				limit = {
+					OR = {
+						this.kingdom = title:k_oriens
+						this.kingdom = title:k_cilicia
+					}
+				}
+				
+				if = { #The Syrian Orthodox vs. the Maronites
+					limit = {
+						OR = {
+							this.culture = culture:aramean
+							this.culture = culture:helleno_aramean
+						}
+						NOT = { this.duchy = title:d_cyprus }
+					}
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:maronite_church }
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:syrian_orthodox }
+				}
+				if = { #Audianism
+					limit = {
+						OR = {
+							this.duchy = title:d_libanensis #Damascus: Site of Jubb'adin "Well of Audius"
+							this.duchy = title:d_syria
+							this.duchy = title:d_syria_salutaris
+							this.duchy = title:d_osrhoene
+							this = title:c_aintab
+							this = title:c_alexandretta
+							this = title:c_tall_hamid
+						}
+						this.religion = religion:christianity_religion
+						NOT = { this = title:c_damascus }
+					}
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:audianism }
+				}
+				if = {
+					limit = {
+						OR = {
+							this = title:c_beirut
+							this = title:c_antiocheia
+							this = title:c_alexandretta
+						}
+					}
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:valentinianism }
+				}
+				#Hebrew territory
+				if = {
+					limit = { this.culture = culture:hebrew }
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:ebionite }
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:rabbinism }
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:samaritan }
+				}
+				#A few Monophysites...
+				add_minority_faith_granular_effect = { FAITH = faith:monophysitism }
+			}
+			#Egypt
+			if = {
+				limit = { this.kingdom = title:k_egypt }
+				add_minority_faith_granular_minimum_effect = { FAITH = faith:miaphysitism } #miaphysitism everywhere
+				if = { #Nicene Christianity among the Helleno-Libyans
+					limit = { this.culture = culture:helleno_libyan }
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:nicene }
+				}
+				if = { #Extant Egyptian paganism; in decline
+					limit = {
+						this.duchy = title:d_thebais #Upper Egypt
+						this.duchy = title:d_nobatia #Lower Nubia
+						#[5] Horapollo in the late 5th century was one of the last major figures of
+						#Egyptian paganism
+						this = title:c_alexandria
+						this = title:c_al-buhaira
+						this = title:c_al-gharbiya
+						this = title:c_damietta
+					}
+					add_minority_faith_granular_minimum_effect = { FAITH = faith:miaphysitism }
+				}
+				if = { #Mandulism
+					limit = {
+						this = title:c_aswan
+						this = title:c_qus
+					}
+					add_minority_faith_granular_effect = { FAITH = faith:kushitism_pagan }
+				}
+			}
+		}
+		#And a few special cases
+		title:c_ghazza = { add_small_faith_to_county_effect = { FAITH = faith:mazdayasna } }
+		title:c_baalbek = { add_small_faith_to_county_effect = { FAITH = faith:hellenic_pagan } } #Major pagan temple until ca. 490s or so...
 		
 		
 		
@@ -407,10 +551,8 @@ BP_start_date_minorities_476_effect = {
 		
 		
 		
-		
-		
-		
-		
-		
+		#Mandulism
+		#this = title:c_qurta
+		#this = title:c_kalabsha
 	}
 }
