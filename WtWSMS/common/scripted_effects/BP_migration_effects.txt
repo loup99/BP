@@ -145,6 +145,40 @@ spawn_armies_from_development_effect = { #Spawn armies based on development
 
 # TITLE MANAGEMENT
 
+## GENERAL
+propagate_government_down_tree_effect = { #Scope the top liege
+	every_vassal_or_below = {
+		save_temporary_scope_as = the_vassal
+		if = {
+			limit = {
+				OR = {
+					scope:the_vassal.capital_barony.title_province = { has_holding_type = castle_holding }
+					trigger_if = {
+						limit = { scope:the_vassal.faith = { has_doctrine = doctrine_theocracy_lay_clergy } }
+						scope:scope:the_vassal.capital_barony.title_province = { has_holding_type = church_holding }
+					}
+				}
+			}
+			boostrap_prevention_effect = {
+				THE_LANDED_TITLE = scope:the_vassal.capital_barony
+				THE_PREVIOUS_HOLDER = $THE_PREVIOUS_HOLDER$
+			}
+		}
+	}
+}
+nomadic_boostrap_prevention_effect = {
+	if = {
+		limit = {
+			$ATTACKER$ = { has_government = nomad_government }
+			any_in_list = {
+				list = $LIST_OF_TITLES$
+				title_province = { has_holding_type = castle_holding }
+			}
+		}
+		$ATTACKER$ = { convert_realm_to_tribal_effect = yes }
+	}
+}
+
 ## MINOR MIGRATIONS
 minor_migration_cb_title_management_effect = {
 	create_title_and_vassal_change = { #Titles taken from the defender
@@ -203,6 +237,13 @@ minor_migration_cb_title_management_effect = {
 			add_to_temporary_list = defender_titles_taken
 		}
 	}
+	
+	#Change Nomadic government if _any_ captured holding is not tribal/church
+	nomadic_boostrap_prevention_effect = {
+		ATTACKER = $ATTACKER$
+		LIST_OF_TITLES = defender_titles_taken
+	}
+	
 	#Now seize the defender titles
 	every_in_list = {
 		list = defender_titles_taken
@@ -275,21 +316,23 @@ minor_migration_cb_title_management_effect = {
 	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_independent
 	resolve_title_and_vassal_change = scope:change_attacker_becomes_independent
 	
-	##### TODO (Beta): This will spam several cases of Scoped object of type 'character' is not valid,
-	#####    but its not clear why; the if statement should be appropriately checking
-	every_in_list = {
-		list = new_holders
-		save_temporary_scope_as = the_holder
-		if = {
-			limit = {
-				scope:the_holder ?= { is_landed = yes }
-				exists = $ATTACKER$
-			}
-			boostrap_prevention_effect = {
-				THE_LANDED_TITLE = scope:the_holder.capital_county
-				THE_PREVIOUS_HOLDER = $ATTACKER$
+	hidden_effect = {
+		##### TODO (Beta): This will spam several cases of Scoped object of type 'character' is not valid,
+		#####    but its not clear why; the if statement should be appropriately checking
+		every_in_list = {
+			list = new_holders
+			save_temporary_scope_as = the_holder
+			
+			scope:the_holder = {
+				boostrap_prevention_effect = {
+					THE_LANDED_TITLE = scope:the_holder.capital_county
+					THE_PREVIOUS_HOLDER = $ATTACKER$
+				}
+				propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
 			}
 		}
+		#Ensure no gov't trickery here, as things can go sideways fast
+		$ATTACKER$ = { propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ } }
 	}
 	
 	#Apply county effects
@@ -395,7 +438,7 @@ major_migration_title_split_general = {
 		}
 	}
 }
-major_migration_cb_title_management_effect_effect = {
+major_migration_cb_title_management_effect = {
 	create_title_and_vassal_change = { #Titles taken from the defender
 		type = conquest
 		save_scope_as = change_seized_defender_titles
@@ -411,6 +454,7 @@ major_migration_cb_title_management_effect_effect = {
 		save_scope_as = change_attacker_vassals_to_independent
 		add_claim_on_loss = no
 	}
+	
 	#Mark all the attacker's titles as to be handed over (either to liege or independents)
 	#Mark all vassals to be made independent or transfer to your liege
 	$ATTACKER$ = {
@@ -468,6 +512,13 @@ major_migration_cb_title_management_effect_effect = {
 			}
 		}
 	}
+	
+	#Change Nomadic government if _any_ captured holding is not tribal/church
+	nomadic_boostrap_prevention_effect = {
+		ATTACKER = $ATTACKER$
+		LIST_OF_TITLES = all_seized_titles
+	}
+	
 	#Now seize the defender titles
 	
 	##Start with de jure counties (because of how the GUI works)
@@ -525,21 +576,23 @@ major_migration_cb_title_management_effect_effect = {
 	resolve_title_and_vassal_change = scope:change_transfered_old_attacker_titles
 	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_independent
 	
-	##### TODO (Beta): This will spam several cases of Scoped object of type 'character' is not valid,
-	#####    but its not clear why; the if statement should be appropriately checking
-	every_in_list = {
-		list = new_holders
-		save_temporary_scope_as = the_holder
-		if = {
-			limit = {
-				scope:the_holder ?= { is_landed = yes }
-				exists = $ATTACKER$
-			}
-			boostrap_prevention_effect = {
-				THE_LANDED_TITLE = scope:the_holder.capital_county
-				THE_PREVIOUS_HOLDER = $ATTACKER$
+	hidden_effect = {
+		##### TODO (Beta): This will spam several cases of Scoped object of type 'character' is not valid,
+		#####    but its not clear why; the if statement should be appropriately checking
+		every_in_list = {
+			list = new_holders
+			save_temporary_scope_as = the_holder
+			
+			scope:the_holder = {
+				boostrap_prevention_effect = {
+					THE_LANDED_TITLE = scope:the_holder.capital_county
+					THE_PREVIOUS_HOLDER = $ATTACKER$
+				}
+				propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
 			}
 		}
+		#Ensure no gov't trickery here, as things can go sideways fast
+		$ATTACKER$ = { propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ } }
 	}
 	
 	#Apply county effects
