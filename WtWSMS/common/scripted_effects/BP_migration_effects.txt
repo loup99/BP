@@ -98,6 +98,14 @@ other_successful_migration_effects = {
 }
 
 ## MINOR
+spawn_minorities_minor_migration_effect = {
+	$ATTACKER$.capital_county = {
+		add_small_culture_and_faith_to_county_effect = {
+			CULTURE = $ATTACKER$.culture
+			FAITH = $ATTACKER$.faith
+		}
+	}
+}
 
 ## MAJOR MIGRATIONS
 create_migratory_army_effect = {
@@ -292,10 +300,6 @@ minor_migration_cb_title_management_effect = {
 			add_county_modifier = {
 				modifier = county_recently_migrated_to_minor_modifier
 				years = 10
-			}
-			add_county_modifier = {
-				modifier = county_modifier_minor_migration_minor_aristocracy
-				years = 25
 			}
 		}
 	}
@@ -546,27 +550,6 @@ major_migration_cb_title_management_effect_effect = {
 				modifier = county_recently_migrated_to_modifier
 				years = major_migration_immigration_emigration_impact_period
 			}
-			if = {
-				limit = { this.development_level < major_migration_max_development_for_settling }
-				add_county_modifier = {
-					modifier = county_modifier_migration_recent_immigration
-					years = major_migration_immigration_emigration_conversion_period
-				}
-			}
-			#Change county culture/faiths; 30% chance per county, modified by development/culture
-			random = {
-				chance = major_migration_county_flip_chance
-				modifier = { add = this.major_migration_negative_development_level_modifier } #Modify chance by development
-				modifier = { #Sharing **either** faith or culture => no chance
-					add = major_migration_county_negative_flip_chance
-					OR = {
-						this.culture = holder.culture
-						this.faith = holder.faith
-					}
-				}
-				set_county_faith = holder.faith
-				set_county_culture = holder.culture
-			}
 		}
 	}
 	hidden_effect = { #apply county modifiers to old counties
@@ -580,10 +563,61 @@ major_migration_cb_title_management_effect_effect = {
 				modifier = county_recently_migrated_away_modifier
 				years = major_migration_immigration_emigration_conversion_period
 			}
-			add_county_modifier = {
-				modifier = county_modifier_migration_recent_emigration
-				years = major_migration_immigration_emigration_impact_period
+		}
+	}
+}
+flip_culture_major_migration_effect = {
+	#Apply minorities as appropriate
+	custom_tooltip = {
+		text = major_migration_culture_changes_tt
+		$ATTACKER$ = {
+			every_realm_county = {
+				this = { save_temporary_scope_as = the_county }
+				random_list = {
+					#Basic Odds:
+					#without considering any other factors:
+					#50% - No Effect
+					#30% - Small Minority
+					#15% - Large Minority
+					#05% - Majority
+					# Effect of development of probability can be found in the `BP/_developer_documentation/`
+					# folder in the corresponding octave code and *.png
+					50 = { # No Effect
+						#Something *must* happen for purely adjacent counties
+						modifier = {
+							factor = 0
+							scope:the_county = {
+								any_neighboring_county = {
+									this.culture = holder.culture
+									this.faith = holder.faith
+								}
+							}
+						}
+						#Something *must* happen in a tribal holding
+						modifier = {
+							factor = 0
+							this.title_province = { has_holding_type = tribal_holding }
+						}
+						modifier = { factor = development_level_no_effect_modifier } #How development effects odds
+					}
+					30 = { # Small Minority
+						modifier = { factor = development_level_small_minority_modifier } 
+						add_small_culture_to_county_effect = { CULTURE = holder.culture }
+						add_small_faith_to_county_effect = { FAITH = holder.faith }
+					}
+					15 = { # Large Minority
+						modifier = { factor = development_level_large_minority_modifier }
+						add_large_culture_to_county_effect = { CULTURE = holder.culture }
+						add_large_faith_to_county_effect = { FAITH = holder.faith }
+					}
+					05 = { # Population Flip
+						modifier = { factor = development_level_majority_modifier }
+						displace_majority_culture_effect = { CULTURE = holder.culture }
+						displace_majority_faith_effect = { FAITH = holder.faith }
+					}
+				}
 			}
 		}
 	}
 }
+
