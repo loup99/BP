@@ -98,28 +98,90 @@ window = {
 					onclick = "[AddWatchWindow( FaithWindow.GetFaith.MakeScope )]"
 				}
 
-				vbox = {
-					margin_top = 30
-					margin_left = 10
+				hbox = {
+					maximumsize = { 150 5 }
+					vbox = {
+						margin_top = 30
+						margin_left = 10
 
-					icon = {
-						name = "faith_icon"
-						size = { 100 100 }
-						texture = "[Faith.GetIcon]"
-						using = tooltip_se
-						tooltipwidget = {
-							faith_tooltip = {}
-						}
+						icon = {
+							name = "faith_icon"
+							size = { 100 100 }
+							texture = "[Faith.GetIcon]"
+							using = tooltip_se
+							tooltipwidget = {
+								faith_tooltip = {}
+							}
 
-						state = {
-							name = "faith_view_refresh"
-							using = Animation_Refresh_FadeOut
-						}
+							state = {
+								name = "faith_view_refresh"
+								using = Animation_Refresh_FadeOut
+							}
 
-						state = {
-							using = Animation_Refresh_FadeIn
+							state = {
+								using = Animation_Refresh_FadeIn
+							}
 						}
 					}
+					
+					##### Changed from Vanilla vvvvvv
+					vbox = {
+						min_width = 50
+						ignoreinvisible = yes
+						#Minorities Map Mode
+						button_round = {
+							name = "culture_minority_map_mode"
+							visible = "[And(CanChangeMapMode,Not(GetGlobalVariable('custom_map_mode').IsSet))]"
+
+							size = { 50 50 }
+							
+							datacontext = "[GetScriptedGui('minority_faith_map_effect')]"
+
+							onclick = "[SetMapMode('minority_faiths_map_mode')]"
+							onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( FaithWindow.GetFaith.MakeScope ).End )]"
+							down = "[And( GetScriptedGui('minority_faith_map_effect').IsShown(GuiScope.End), IsMapMode('minority_faiths_map_mode') )]"
+							enabled = "[GetScriptedGui('minority_faith_map_effect').IsValid(GuiScope.End)]"
+
+							texture = "gfx/interface/buttons/button_round_frame.dds"
+
+							tooltip = "faith_minority_map_mode_tooltip"
+							using = tooltip_ws
+							
+							icon = {
+								parentanchor = hcenter|vcenter
+								texture = "gfx/interface/icons/modifiers/sea_faith_minority_large.dds"
+								size = { 30 30 }
+							}
+						}
+						#Reset Minorities Map Mode
+						button_round = {
+							name = "culture_minority_map_revert_mode"
+							visible = "[And(CanChangeMapMode,GetGlobalVariable('custom_map_mode').IsSet)]"
+
+							size = { 50 50 }
+							
+							onclick = "[GetScriptedGui('reset_custom_map_mode_effect').Execute(GuiScope.End)]"
+							onclick = "[SetMapMode('religions')]"
+
+							texture = "gfx/interface/buttons/button_round_frame.dds"
+
+							tooltip = "faith_minority_map_mode_revert_tooltip"
+							using = tooltip_ws
+							
+							icon = {
+								parentanchor = hcenter|vcenter
+								texture = "gfx/interface/icons/modifiers/sea_faith_minority_large.dds"
+								size = { 30 30 }
+							}
+							icon = {
+								parentanchor = hcenter|vcenter
+								texture = "gfx/interface/icons/modifiers/no_modifier.dds"
+								size = { 30 30 }
+							}
+						}
+					}
+
+					##### Changed from Vanilla ^^^^^
 				}
 
 				vbox = {
@@ -130,74 +192,6 @@ window = {
 
 					hbox = {
 						layoutpolicy_horizontal = expanding
-
-						##### Changed from Vanilla vvvvvv
-						vbox = {
-							min_width = 85
-							ignoreinvisible = yes
-							#Minorities Map Mode
-							button_round = {
-								name = "culture_minority_map_mode"
-								visible = "[And(CanChangeMapMode,Not(GetGlobalVariable('custom_map_mode').IsSet))]"
-
-								size = { 50 50 }
-								
-								datacontext = "[GetScriptedGui('minority_faith_map_effect')]"
-
-								onclick = "[SetMapMode('minority_faiths_map_mode')]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( FaithWindow.GetFaith.MakeScope ).End )]"
-								down = "[And( GetScriptedGui('minority_faith_map_effect').IsShown(GuiScope.End), IsMapMode('minority_faiths_map_mode') )]"
-								enabled = "[GetScriptedGui('minority_faith_map_effect').IsValid(GuiScope.End)]"
-
-								texture = "gfx/interface/buttons/button_round_frame.dds"
-
-								tooltip = "faith_minority_map_mode_tooltip"
-								using = tooltip_ws
-								
-								icon = {
-									parentanchor = hcenter|vcenter
-									texture = "gfx/interface/icons/modifiers/sea_faith_minority_large.dds"
-									size = { 30 30 }
-								}
-							}
-							#Reset Minorities Map Mode
-							button_round = {
-								name = "culture_minority_map_revert_mode"
-								visible = "[And(CanChangeMapMode,GetGlobalVariable('custom_map_mode').IsSet)]"
-
-								size = { 50 50 }
-								
-								onclick = "[GetScriptedGui('reset_custom_map_mode_effect').Execute(GuiScope.End)]"
-								onclick = "[SetMapMode('religions')]"
-
-								texture = "gfx/interface/buttons/button_round_frame.dds"
-
-								tooltip = "faith_minority_map_mode_revert_tooltip"
-								using = tooltip_ws
-								
-								icon = {
-									parentanchor = hcenter|vcenter
-									texture = "gfx/interface/icons/modifiers/sea_faith_minority_large.dds"
-									size = { 30 30 }
-								}
-								icon = {
-									parentanchor = hcenter|vcenter
-									texture = "gfx/interface/icons/modifiers/no_modifier.dds"
-									size = { 30 30 }
-								}
-							}
-						}
-
-						spacer = {
-							visible = "[ObjectsEqual( GetPlayer.GetFaith, Faith.Self )]"
-							size = { 40 0 }
-						}
-						spacer = {
-							visible = "[Not(ObjectsEqual( GetPlayer.GetFaith, Faith.Self ))]"
-							size = { -10 0 }
-						}
-
-						##### Changed from Vanilla ^^^^^
 
 						expand = {}
 
