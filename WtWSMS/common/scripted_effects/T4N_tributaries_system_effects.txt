@@ -164,7 +164,15 @@ define_tributary = {
 		set_variable = {
 			name = can_call_to_war_tributary
 			value = $CAN_CALL_TO_WAR_TRIBUTARY_FLAG$
-		}		
+		}
+		
+		if = { #This should *only* need to be called in cases where the tributary is not passing to the heir (aka new tributaries)
+			limit = {
+				exists = this.primary_title
+				exists = this.var:my_suzerain
+			}
+			primary_title = { set_color_from_title = prev.var:my_suzerain.primary_title }
+		}
 	}
 
 	#calulate income
@@ -254,7 +262,7 @@ ruler_offer_tribute_to_recipient_effect = {
 				TYPE = tributary_non_permanent
 				TRIBUTARY = scope:recipient
 				SUZERAIN = scope:actor
-			}				
+			}
 		}	
 		if = {
 			limit = {
@@ -264,7 +272,7 @@ ruler_offer_tribute_to_recipient_effect = {
 				TYPE = tributary_permanent
 				TRIBUTARY = scope:recipient
 				SUZERAIN = scope:actor
-			}					
+			}
 		}
 	}
 }
@@ -279,7 +287,7 @@ offer_tribute_effect = {
 				TYPE = tributary_non_permanent
 				TRIBUTARY = scope:recipient
 				SUZERAIN = scope:actor
-			}				
+			}
 		}	
 		if = {
 			limit = {
@@ -289,7 +297,7 @@ offer_tribute_effect = {
 				TYPE = tributary_permanent
 				TRIBUTARY = scope:recipient
 				SUZERAIN = scope:actor
-			}					
+			}
 		}
 	}
 }
@@ -333,7 +341,9 @@ unset_tributary = {
 		#can call to war Suzerain
 		#can call to war Tributary flags
 		remove_variable = can_declare_war_on_trib
-		remove_variable = can_call_to_war_suzerain	
-		remove_variable = can_call_to_war_tributary	
+		remove_variable = can_call_to_war_suzerain
+		remove_variable = can_call_to_war_tributary
+		
+		primary_title = { reset_color_effect = yes }
 	}
 }
