@@ -166,6 +166,8 @@ define_tributary = {
 			value = $CAN_CALL_TO_WAR_TRIBUTARY_FLAG$
 		}
 		
+		set_trib_char_modifier_effect = { TYPE = $TYPE$ }
+		
 		if = { #This should *only* need to be called in cases where the tributary is not passing to the heir (aka new tributaries)
 			limit = {
 				exists = this.primary_title
@@ -217,6 +219,26 @@ define_tributary = {
 					}
 				}
 			}
+		}
+	}
+}
+
+#In case of tributaries having some special modifiers attached
+remove_trib_char_modifier_effect = { #Char scope
+	if = {
+		limit = { has_character_modifier = foederatus_char_mod }
+		remove_character_modifier = foederatus_char_mod
+	}
+}
+set_trib_char_modifier_effect = { #Char scope
+	this = {
+		switch = {
+			trigger = $TYPE$
+			
+			flag:karling_tributary = {}
+			flag:china_tributary = {}
+			flag:permanent_tributary = {}
+			flag:foederatus_tributary = { add_character_modifier = foederatus_char_mod }
 		}
 	}
 }
@@ -350,6 +372,8 @@ unset_tributary = {
 		remove_variable = can_declare_war_on_trib
 		remove_variable = can_call_to_war_suzerain
 		remove_variable = can_call_to_war_tributary
+		
+		remove_trib_char_modifier_effect = yes
 		
 		#Because unset is called *whenever* it is passed/terminated, we need this check
 		if = {
