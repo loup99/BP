@@ -4,7 +4,7 @@
 
 ## Jamie-san: tributaries.1 and tributaries.2 now placed directly in on action to make sure that variable lists are removed from dead character before becoming invalid
 
-#Attacker may or may mot become new suzerain
+#Attacker may or may not become new suzerain
 #Root = scope:tributaries_slash_suzerain_war_winner
 #scope:tributary_slash_suzerain_loser = scope:defender
 tributaries.3 = {
@@ -110,7 +110,6 @@ tributaries.4 = {
 	}
 }
 
-
 #Monthly income from tributes
 #on_monthly_tribute
 #Root is suzerain
@@ -192,92 +191,6 @@ tributaries.5 = {
 	}
 }
 
-#Suzerain is called to permanent tributary war
-#on_war_started
-#Root is suzerain
-#call_to_arms_tribute is defender
-#UNUSED RN to readd in 1.2.1
-tributaries.6 = {
-	type = letter_event
-	opening = {
-		desc = tributary_6_tit
-	}
-	desc = tributary_6_desc
-	sender = {
-		character = scope:call_to_arms_tribute
-		animation = war_defender
-	}
-
-	option = {
-		name = suzerain_joins_the_war
-		add_piety = minor_piety_value
-		scope:call_to_arms_tribute = {
-			if = {
-				limit = {
-					root = {
-						NOR = {
-							is_at_war_as_defender = yes
-							is_at_war_with = scope:call_to_arms_tribute
-						}
-					}
-				}
-				if = {
-					limit = {
-						scope:call_to_arms_tribute = {
-							is_at_war_as_attacker = yes
-						}
-					}
-					add_attacker = root
-				}
-				else_if = {
-					limit = {
-						scope:call_to_arms_tribute = {
-							is_at_war_as_defender = yes
-						}
-					}
-					add_defender = root
-				}
-				else = {
-					debug_log = "Something broke, report to typical"
-				}
-			}
-			trigger_event = { id = tributaries.8 } #tributary gets a positive response
-		}	
-	}
-
-	option = {
-		name = suzerain_refuses_to_join_war
-		add_prestige = major_prestige_loss
-		save_scope_as = former_suzerain
-		scope:call_to_arms_tribute = {
-			trigger_event = { id = tributaries.7 } #tributary gets a negative response
-		}
-	}
-}
-
-#Tribute gets negative a response from suzerain
-#root is defender and former tribute
-tributaries.7 = {
-	type = letter_event
-	opening = {
-		desc = tributary_7_tit
-	}
-	desc = tributary_7_desc
-	sender = {
-		character = scope:former_suzerain
-		animation = personality_dishonorable
-	}
-
-	option = { #stop paying tribute
-		name = tribute_stop_war
-		scope:former_suzerain = {
-			remove_list_variable = { name = permanent_tributaries target = prev }
-			remove_list_variable = { name = all_tributaries target = prev }
-		}
-		remove_variable = my_suzerain
-	}
-}
-
 #Tributary is informed that it no longer needs to pay tribute
 tributaries.8 = {
 	type = letter_event
@@ -293,7 +206,7 @@ tributaries.8 = {
 
 	option = {
 		name = nice
-	}	
+	}
 }
 
 #Response from new trib
@@ -363,35 +276,175 @@ tributaries.12 = {
 	}
 }	
 
-#Call to arms recived from suzerain
-#Root is tributary
-#UNUSED RN to readd in 1.2.1
-tributaries.13 = {
+#Tributary calls Suzerain to war: IDs: 100-199
+
+#Suzerain is called to permanent tributary war
+#on_war_started
+#Root is suzerain
+#call_to_arms_tribute is defender
+tributaries.100 = {
+	type = letter_event
+	opening = { desc = tributaries.100.tit }
+	title = tributaries.100.tit
+	desc = tributaries.100.desc
+	sender = {
+		character = scope:call_to_arms_tribute
+		animation = war_defender
+	}
+
+	option = {
+		name = tributaries.100.suzerain_joins_the_war
+		ai_chance = {
+			base = 250
+			modifier = {
+				add = 125
+				ai_honor >= low_positive_ai_value
+			}
+			modifier = {
+				add = 125
+				ai_honor >= medium_positive_ai_value
+			}
+			modifier = {
+				add = 125
+				ai_honor >= high_positive_ai_value
+			}
+		}
+		add_piety = minor_piety_value
+		scope:call_to_arms_tribute = {
+			if = {
+				limit = {
+					root = {
+						NOR = {
+							is_at_war_as_defender = yes
+							is_at_war_with = scope:call_to_arms_tribute
+						}
+					}
+				}
+				#Add to all valid defensive wars
+				every_character_war = {
+					limit = {
+						this = { is_civil_war = no }
+						scope:call_to_arms_tribute = { is_defender_in_war = prev }
+						this = { is_war_leader = scope:call_to_arms_tribute }
+					}
+					add_defender = root
+				}
+			}
+			else = { debug_log = "Something broke, report to typical" }
+			trigger_event = { id = tributaries.102 } #tributary gets a positive response
+		}
+	}
+
+	option = {
+		#AI Suzerain's do not get to refuse foederatus_tributary call to arms
+		trigger = {
+			trigger_if = {
+				limit = { is_ai = yes }
+				NAND = {
+					exists = scope:call_to_arms_tribute.var:tributary_type
+					scope:call_to_arms_tribute.var:tributary_type = flag:foederatus_tributary
+				}
+			}
+		}
+		name = tributaries.100.suzerain_refuses_to_join_war
+		ai_chance = {
+			base = 50
+			modifier = {
+				add = 25
+				ai_honor <= low_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= medium_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= high_negative_ai_value
+			}
+		}
+		add_prestige = major_prestige_loss
+		save_scope_as = former_suzerain
+		scope:call_to_arms_tribute = { trigger_event = { id = tributaries.101 } } #tributary gets a negative response
+	}
+}
+
+#Tribute gets negative a response from suzerain
+#root is defender and former tribute
+tributaries.101 = {
+	type = letter_event
+	opening = { desc = tributaries.101.tit }
+	desc = tributaries.101.desc
+	sender = {
+		character = scope:former_suzerain
+		animation = personality_dishonorable
+	}
+
+	immediate = { root = { remove_variable = already_called_my_suzerain } }
+
+	option = { #stop paying tribute
+		name = tributaries.101.tribute_stop_war
+		unset_tributary = {
+			TRIBUTARY = root
+			TRIBUTARY_BASE_TYPE = flag:permanent
+			PASSING_TO_HEIR = no
+		}
+		remove_variable = my_suzerain
+	}
+}
+
+#Tribute gets positive response
+tributaries.102 = {
 	type = letter_event
 	opening = {
-		desc = tributaries.13_opening
+		desc = tributaries.102.opening
 	}
-	desc = tributaries.13_opening
+	desc = tributaries.102.desc
+	sender = scope:call_to_arms_tribute.var:my_suzerain
+
+	immediate = {
+		scope:call_to_arms_tribute.var:my_suzerain = { save_scope_as = the_suzerain }
+		root = { remove_variable = already_called_my_suzerain }
+	}
+
+	option = { name = nice }
+}
+
+#Suzerain calls tributary to war: IDs: 200-299
+
+#Call to arms received from suzerain
+#Root is tributary
+tributaries.200 = {
+	type = letter_event
+	opening = { desc = tributaries.200.opening }
+	desc = tributaries.200.desc
 	sender = scope:suzerain_cta_caller
 
 	option = {
-		name = join_suzerain_war
+		name = tributaries.200.join_suzerain_war
+		ai_chance = {
+			base = 150
+			modifier = {
+				add = 75
+				ai_honor >= low_positive_ai_value
+			}
+			modifier = {
+				add = 75
+				ai_honor >= medium_positive_ai_value
+			}
+			modifier = {
+				add = 75
+				ai_honor >= high_positive_ai_value
+			}
+		}
+		
 		scope:suzerain_cta_caller = {
-			ordered_character_war = {
+			every_character_war = {
 				if = {
-					limit = {
-						prev = {
-							is_attacker_in_war = prev
-						}
-					}
+					limit = { prev = { is_attacker_in_war = prev } }
 					add_attacker = root
 				}
-				if = {
-					limit = {
-						prev = {
-							is_defender_in_war = prev
-						}
-					}
+				else_if = {
+					limit = { prev = { is_defender_in_war = prev } }
 					add_defender = root
 				}
 			}
@@ -399,6 +452,56 @@ tributaries.13 = {
 	}
 
 	option = {
-		name = do_not_join_suzerain_war
+		#Foederati do not get to refuse call to arms
+		trigger = {
+			NAND = {
+				exists = root.var:tributary_type
+				root.var:tributary_type = flag:foederatus_tributary
+			}
+		}
+		name = tributaries.200.do_not_join_suzerain_war
+		ai_chance = {
+			base = 50
+			modifier = {
+				add = 25
+				ai_honor <= low_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= medium_negative_ai_value
+			}
+			modifier = {
+				add = 25
+				ai_honor <= high_negative_ai_value
+			}
+		}
+		save_scope_as = refusing_tributary
+		scope:suzerain_cta_caller = { trigger_event = { id = tributaries.201 } }
 	}
+}
+
+#Tributary refuses call to arms
+tributaries.201 = {
+	type = letter_event
+	opening = {
+		desc = tributaries.201.opening
+	}
+	desc = tributaries.201.desc
+	sender = scope:refusing_tributary
+
+	immediate = {
+		scope:refusing_tributary = {
+			set_variable = {
+				name = can_be_targeted_for_punitive_war
+				value = scope:refusing_tributary.var:my_suzerain
+			}
+		}
+		unset_tributary = {
+			TRIBUTARY = scope:refusing_tributary
+			TRIBUTARY_BASE_TYPE = flag:permanent
+			PASSING_TO_HEIR = no
+		}
+	}
+
+	option = { name = tributaries.201.how_dare_they }
 }
