@@ -231,21 +231,28 @@ pass_tributary_type_to_heir = {
 					TYPE = tributary_karling
 					TRIBUTARY = $TRIBUTARY$
 					SUZERAIN = $NEW_RULER$
-				}				
+				}
 			}
 			flag:china_tributary = {
 				make_tributary = {
 					TYPE = tributary_china
 					TRIBUTARY = $TRIBUTARY$
 					SUZERAIN = $NEW_RULER$
-				}	
+				}
 			}
 			flag:permanent_tributary = {
 				make_tributary = {
 					TYPE = tributary_permanent
 					TRIBUTARY = $TRIBUTARY$
 					SUZERAIN = $NEW_RULER$
-				}	
+				}
+			}
+			flag:foederatus_tributary = {
+				make_tributary = {
+					TYPE = foederatus_tributary
+					TRIBUTARY = $TRIBUTARY$
+					SUZERAIN = $NEW_RULER$
+				}
 			}
 		}
 	}
@@ -308,7 +315,7 @@ unset_tributary = {
 			trigger = $TRIBUTARY_BASE_TYPE$
 			flag:permanent = {
 				var:my_suzerain = {
-					remove_list_variable = { name = permanent_tributaries target = prev }			
+					remove_list_variable = { name = permanent_tributaries target = prev }
 				}
 				remove_variable = possible_vasalisation_year
 			}
@@ -344,6 +351,10 @@ unset_tributary = {
 		remove_variable = can_call_to_war_suzerain
 		remove_variable = can_call_to_war_tributary
 		
-		primary_title = { reset_color_effect = yes }
+		#Because unset is called *whenever* it is passed/terminated, we need this check
+		if = {
+			limit = { NOT = { always = $PASSING_TO_HEIR$ } } #NB: This is right; read carefully
+			primary_title = { reset_color_effect = yes }
+		}
 	}
 }

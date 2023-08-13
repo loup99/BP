@@ -29,17 +29,25 @@ is_suzerain = {
 
 has_tributaries = {
 	OR = {
-		variable_list_size = { name = non_permanent_tributaries value > 0 }
-		variable_list_size = { name = permanent_tributaries value > 0 }
+		has_permanent_tributaries = yes 
+		has_non_permanent_tributaries = yes
 	}
 }
 
 has_permanent_tributaries = {
-	variable_list_size = { name = permanent_tributaries value > 0 }
+	trigger_if = {
+		limit = { has_variable_list = permanent_tributaries }
+		variable_list_size = { name = permanent_tributaries value > 0 } #target
+	}
+	trigger_else = { always = no }
 }
 
 has_non_permanent_tributaries = {
-	variable_list_size = { name = non_permanent_tributaries value > 0 } #target
+	trigger_if = {
+		limit = { has_variable_list = non_permanent_tributaries }
+		variable_list_size = { name = non_permanent_tributaries value > 0 } #target
+	}
+	trigger_else = { always = no }
 }
 
 can_declare_war_on_tributary = {
@@ -58,7 +66,7 @@ can_declare_war_on_suzerain = {
 		AND = {
 			exists = var:my_suzerain
 			var:my_suzerain = $SCOPE2$
-		}	
+		}
 	}
 }
 
