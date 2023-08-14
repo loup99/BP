@@ -68,32 +68,35 @@ T4N_tributaries_on_title_lost = {
 	effect = {
 		switch = {
 			trigger = exists
-
-			var:my_suzerain = {
-				if = {
-					if = {
-						limit = {
-							is_permanent_tributary = {
-								SUZERAIN = this
-								TRIBUTARY = root
-							}
-						}
-						unset_tributary = {
-							TRIBUTARY = root
-							TRIBUTARY_BASE_TYPE = flag:permanent
-							PASSING_TO_HEIR = no
-						}
+			var:my_suzerain = { #TRIBUTARY case
+				#Should only unset if not independent or unlanded
+				if = { #Is now a vassal; simply unset tributary status
+					limit = {
+						is_landed = yes
+						is_independent_ruler = no
 					}
-					else = {
-						unset_tributary = {
-							TRIBUTARY = root
-							TRIBUTARY_BASE_TYPE = flag:non_permanent
-							PASSING_TO_HEIR = no
-						}
+					unset_tributary_of_any_type = {
+						SUZERAIN = root.var:my_suzerain
+						TRIBUTARY = root
 					}
 				}
+				else_if = { #Abdication; alive but no titles; pass to heir
+					limit = { is_landed = no }
+					save_scope_as = the_old_tributary
+					pass_tributary_type_to_heir = {
+						SCOPE = scope:the_old_tributary
+						TYPE = scope:the_old_tributary.var:tributary_type
+						NEW_TRIBUTARY = scope:new_holder #aka, guy who holds what was my last title
+						NEW_SUZERAIN = scope:the_old_tributary.var:my_suzerain
+					}
+					unset_tributary_of_any_type = { #Remove the old coot as a tributary
+						SUZERAIN = root.var:my_suzerain
+						TRIBUTARY = root
+					}
+				}
+				#Otherwise, we're still alive and independent and landed; do nothing
 			}
-			var:suzerain = {
+			var:suzerain = { #SUZERAIN case
 				if = {
 					limit = {
 						OR = {
@@ -104,7 +107,7 @@ T4N_tributaries_on_title_lost = {
 					}
 					every_in_list = {
 						variable = permanent_tributaries
-						set_variable = { 
+						set_variable = {
 							name = tributary_succ_var
 							value = this
 						}
