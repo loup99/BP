@@ -1132,26 +1132,27 @@ annex_tributary = {
 	is_shown = {
 		scope:actor = {
 			is_target_in_variable_list = { name = permanent_tributaries target = scope:recipient }
-			NOT = {
-				this = scope:recipient
-			}
+			NOT = { this = scope:recipient }
 		}
 	}
 
-	is_valid_showing_failures_only = {
-		scope:actor.primary_title.tier > scope:recipient.primary_title.tier
-		exists = scope:recipient.var:possible_vasalisation_year
-		OR = {
+	is_valid = {
+		custom_description = {
+			text = your_title_is_greater_than_the_tributaries
+			subject = scope:recipient
+			scope:actor.primary_title.tier > scope:recipient.primary_title.tier
+		}
+		trigger_if = {
+			limit = { exists = scope:recipient.var:possible_vasalisation_year }
 			custom_description = {
-				text = trib_type_disallow_annexing_subjects
-				scope:recipient.var:possible_vasalisation_year <= -1
+				text = trib_type_does_allow_annexing_subjects
+				subject = scope:recipient
+				scope:recipient.var:possible_vasalisation_year > -1
 			}
 			custom_description = {
-				text = trib_type_allow_annexing_subjects
-				AND = {
-					scope:recipient.var:possible_vasalisation_year > -1
-					scope:recipient.var:possible_vasalisation_year <= current_year
-				}
+				text = trib_type_enough_time_to_annex
+				subject = scope:recipient
+				scope:recipient.var:possible_vasalisation_year <= current_year
 			}
 		}
 	}
