@@ -618,3 +618,50 @@ request_foederatus_interaction = {
 		scope:actor = { trigger_event = BP_char_interaction.0004 }
 	}
 }
+
+#Models Zeno granting Theodoric the right to rule Italy in his stead
+grant_right_to_rule = {
+	category = interaction_category_vassal
+	desc = grant_right_to_rule_desc
+	
+	is_shown = {
+		OR = {
+			scope:actor = { has_title = title:e_roman_empire }
+			scope:actor = { has_title = title:e_wre }
+			scope:actor = { has_title = title:e_byzantium }
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		scope:recipient = {
+			NOT = { this = scope:actor }
+			is_tributary = yes
+			var:tributary_type ?= flag:foederatus_tributary
+			var:my_suzerain ?= scope:actor
+		}
+		scope:actor = { is_at_war = no }
+	}
+	
+	auto_accept = yes
+	
+	cost = {
+		prestige = 1000
+	}
+	
+	show_effects_in_notification = no
+	
+	cooldown = { years = 25 }
+	
+	on_send = {
+		scope:recipient = {
+			add_character_modifier = foederatus_right_to_rule
+			add_truce_both_ways = {
+				character = scope:actor
+				years = 100
+				name = right_to_rule_peace
+			}
+		}
+	}
+	
+	ai_will_do = { base = 0 }
+}

@@ -311,14 +311,17 @@ successor_imperial_reconquest_cb = {
 	mutually_exclusive_titles = { always = yes }
 
 	allowed_for_character = {
-		scope:attacker = {
-			is_independent_ruler = yes
-			NOR = {
-				has_title = title:e_roman_empire
-				has_title = title:e_wre
-				has_title = title:e_byzantium
+		scope:attacker = { is_independent_ruler = yes }
+		OR = {
+			scope:attacker = {
+				NOR = {
+					has_title = title:e_roman_empire
+					has_title = title:e_wre
+					has_title = title:e_byzantium
+				}
+				valid_reconquest_culture_trigger = { CULTURE = scope:attacker.culture }
 			}
-			valid_reconquest_culture_trigger = { CULTURE = scope:attacker.culture }
+			scope:attacker = { has_character_modifier = foederatus_right_to_rule }
 		}
 	}
 	
@@ -354,6 +357,10 @@ successor_imperial_reconquest_cb = {
 			value = scope:attacker.yearly_character_income
 			multiply = 0.5
 			min = successor_reconquest_war_gold_cost
+			if = { #Because tribals won't have much money
+				limit = { has_character_modifier = foederatus_right_to_rule }
+				multiply = 0
+			}
 		}
 		prestige = successor_reconquest_war_fame_cost
 	}
@@ -472,6 +479,15 @@ successor_imperial_reconquest_cb = {
 			}
 		}
 		resolve_title_and_vassal_change = scope:change
+		
+		#If a Foederatus does this sort of conquest, let them upgrade their government if possible
+		if = {
+			limit = { scope:attacker = { has_character_modifier = foederatus_right_to_rule } }
+			scope:attacker = {
+				scope:defender = { save_scope_as = the_old_ruler }
+				trigger_event = { id = migration_war.0100 days = {2 7} }
+			}
+		}
 		
 		# truce
 		add_truce_attacker_victory_effect = yes
