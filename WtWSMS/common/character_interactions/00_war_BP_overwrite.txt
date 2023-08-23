@@ -3,13 +3,14 @@ end_war_attacker_victory_interaction = {
 	special_interaction = end_war_attacker_victory_interaction
 	hidden = yes
 	use_diplomatic_range = no
+	secondary_scopes_optional = yes
 
 	ai_targets = {
 		ai_recipients = primary_war_enemies
 	}
-	
+
 	ai_frequency = 1
-	
+
 	# Depending on who was the attacker, we need to send a different notification message to the recipient.
 	notification_text = {
 		first_valid = {
@@ -21,11 +22,58 @@ end_war_attacker_victory_interaction = {
 								primary_attacker = scope:actor
 							}
 						}
-					}				}
+					}
+				}
 				desc = end_war_attacker_victory_attacker_desc
 			}
 			desc = end_war_attacker_victory_defender_desc
 		}
+	}
+
+	populate_actor_list = {
+		scope:actor = {
+			every_close_family_member = {
+				limit = {
+					# Unlanded, at sender's court, child/sibling/nibling/grandchild
+					bp2_valid_to_offer_as_hostage_trigger = { SENDER = scope:actor }
+				}
+				add_to_list = characters
+			}
+		}
+	}
+
+	populate_recipient_list = {
+		scope:recipient = {
+			every_close_family_member = {
+				limit = {
+					# Unlanded, at sender's court, child/sibling/nibling/grandchild
+					bp2_valid_to_offer_as_hostage_trigger = { SENDER = scope:recipient }
+				}
+				add_to_list = characters
+			}
+		}
+	}
+
+	can_be_picked = {
+		scope:war ?= {
+			custom_tooltip = {
+				text = hostage_exchange_invalid_for_crusade_tt
+				NOR = {
+					using_cb = undirected_great_holy_war
+					using_cb = directed_great_holy_war
+				}
+			}
+			custom_tooltip = {
+				text = hostage_exchange_invalid_for_cb_tt
+				bp2_hostage_exchange_invalid_cb_trigger = no
+			}
+		}
+	}
+
+	redirect = {
+		# secondary recipient is always set, so we need to clear it
+		# if can_send condition depends on the scope being empty
+		clear_saved_scope = secondary_recipient
 	}
 
 	on_accept = {
@@ -39,6 +87,52 @@ end_war_attacker_victory_interaction = {
 		}
 
 		release_prisoners_of_war_effect = yes
+
+		# Hostages
+		# Save scopes for clarity
+		if = {
+			limit = {
+				scope:war ?= {
+					NOR = {
+						using_cb = undirected_great_holy_war
+						using_cb = directed_great_holy_war
+					}
+					bp2_hostage_exchange_invalid_cb_trigger = no
+				}
+			}
+			if = {
+				limit = { exists = scope:secondary_actor }
+				scope:secondary_actor ?= { save_scope_as = hostage_1 }
+			}
+			scope:actor = { save_scope_as = hostage_sender_1 }
+			if = {
+				limit = { exists = scope:secondary_recipient }
+				scope:secondary_recipient ?= { save_scope_as = hostage_2 }
+			}
+			scope:recipient = { save_scope_as = hostage_sender_2 }
+			if = {
+				limit = {
+					exists = scope:hostage_1
+					scope:hostage_sender_2 = { is_landed = yes }
+				}
+				hostage_depart_effect = {
+					HOSTAGE = scope:hostage_1
+					WARDEN = scope:hostage_sender_2
+					HOME_COURT = scope:hostage_sender_1
+				}
+			}
+			if = {
+				limit = {
+					exists = scope:hostage_2
+					scope:hostage_sender_1 = { is_landed = yes }
+				}
+				hostage_depart_effect = {
+					HOSTAGE = scope:hostage_2
+					WARDEN = scope:hostage_sender_1
+					HOME_COURT = scope:hostage_sender_2
+				}
+			}
+		}
 
 		#Send notification to vassals
 		scope:attacker_winner = {
@@ -78,14 +172,14 @@ end_war_attacker_victory_interaction = {
 			}
 		}
 
-		##### Changed from Vanilla: Removed bookmark_867_northmen_aellas_capture_war_imprisonment_effect = yes
+		##### Changed from Vanilla: Removed bookmark_867_northmen_aellas_capture_war_imprisonment_effect
 
 		end_war = attacker
 	}
-	
+
 	on_decline = {
 	}
-	
+
 	ai_potential = {
 		is_at_war = yes
 		any_character_war = {
@@ -107,7 +201,7 @@ end_war_attacker_victory_interaction = {
 
 	ai_will_do = {
 		base = 0
-		
+
 		modifier = {
 			scope:war = {
 				primary_attacker = scope:actor
@@ -122,20 +216,20 @@ end_war_attacker_victory_interaction = {
 							is_ai = yes
 						}
 					}
-				}			
-			}			
+				}
+			}
 			add = 100
 		}
 		modifier = {
 			scope:war = {
 				primary_defender = scope:actor
 				attacker_war_score >= 100
-				days_since_max_war_score >= 180			
-			}			
+				days_since_max_war_score >= 180
+			}
 			add = 100
 		}
 	}
-	
+
 	ai_accept = {
 		base = -99
 
@@ -151,13 +245,25 @@ end_war_attacker_victory_interaction = {
 					NOT = { this = scope:recipient }
 				}
 			}
-			
+
 			add = peacemaker_value
-			
+
 			desc = "PEACEMAKER_PERK_MODIFIER"
 		}
+
+		# Hostages
+		modifier = {
+			exists = scope:secondary_actor
+			add = war_actor_hostage_value
+			desc = WAR_OVERVIEW_HOSTAGE_OFFER_VALUE
+		}
+		modifier = {
+			exists = scope:secondary_recipient
+			add = war_recipient_hostage_value
+			desc = WAR_OVERVIEW_HOSTAGE_DEMAND_VALUE
+		}
 	}
-	
+
 	auto_accept = {
 		OR = {
 			scope:war = {
@@ -169,10 +275,35 @@ end_war_attacker_victory_interaction = {
 			}
 		}
 	}
-	
+
 	is_valid_showing_failures_only = {
 		scope:war = {
 			has_valid_casus_belli = yes
+			trigger_if = { # Cannot exchange hostages with soon to be landless
+				limit = {
+					OR = {
+						exists = scope:secondary_actor
+						exists = scope:secondary_recipient
+					}
+					casus_belli = {
+						any_target_title = {
+							count >= 1
+							add_to_temporary_list = target_titles
+						}
+					}
+				}
+				custom_tooltip = {
+					text = hostage_no_land_after_war_tt
+					scope:recipient = {
+						any_held_title = {
+							tier = tier_county
+							NOT = {
+								any_this_title_or_de_jure_above = { is_in_list = target_titles }
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }

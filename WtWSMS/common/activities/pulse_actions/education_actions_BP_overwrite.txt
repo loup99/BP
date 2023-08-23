@@ -1,0 +1,137 @@
+﻿##### Changed from Vanilla: Removed inapplicable faiths
+
+#Activity Pulse Actions for Pilgrimages
+#
+#Adult education means guests are always AI and unlanded, some of these are therefore only for the host
+#There won't always be an entourage of more than a caravan master
+#There will be other students, and teachers. These are identified with flags and are generated/picked out by the activity.
+#APAs marked with * involve or can happen to characters other than the host
+
+#Study Hard Intent:
+#apa_leveraging_language_skills
+
+#Revelry Intent:
+#
+
+#Stress - University life requires work
+#apa_procrastination
+
+##Lifestyles, etc
+#apa_studying_scripture - Shared/From other File
+#apa_visited_markets - Shared/From other File
+#apa_foreign_custom - Shared/From other File
+
+##Random Education APAs
+#apa_sight_seeing_group - Shared/From other File
+#apa_university_discussions - Pick up lifestyle xp from teacher
+
+#Character knows liturgical language of the religion of the university
+#We are using the location here - rather than the religion of the teachers - which could differ
+apa_leveraging_language_skills = {
+	icon = public
+	is_valid = {
+		is_current_phase_active = yes
+		scope:host = {
+			location = scope:province
+			has_activity_intent = study_hard_intent
+			OR = {
+				AND = {
+					scope:province.faith.religion = religion:islam_religion
+					knows_language = language_arabic
+				}
+				AND = {
+					scope:province = {
+						OR = {
+							faith = faith:catholic
+							##### Changed from Vanilla: Removed faith:conversos
+							##### Changed from Vanilla: Removed faith:lollard
+							faith = faith:insular_celtic
+							faith = faith:mozarabic_church
+						}
+					}
+					knows_language = language_latin
+				}
+				##### Changed from Vanilla: Removed Cathar
+				AND = {
+					scope:province.faith = faith:armenian_apostolic
+					knows_language = language_armenian
+				}
+				AND = {
+					scope:province.faith = faith:nestorian
+					knows_language = language_aramaic
+				}
+				AND = {
+					scope:province.faith = faith:lamaism
+					knows_language = language_tibetan
+				}
+				AND = {
+					scope:province.religion = religion:bon_religion
+					knows_language = language_tibetan
+				}
+				AND = {
+					scope:province.religion = religion:taoism_religion
+					knows_language = language_chinese
+				}
+				AND = {
+					scope:province = {
+						religion = religion:christianity_religion
+						NOR = { #Non-Greek
+							faith = faith:catholic
+							##### Changed from Vanilla: Removed faith:conversos
+							##### Changed from Vanilla: Removed faith:lollard
+							faith = faith:insular_celtic
+							faith = faith:mozarabic_church
+							faith = faith:armenian_apostolic
+							##### Changed from Vanilla: Removed faith:cathar
+						}
+					}
+					knows_language = language_greek #General Christian Fallback
+				}
+				#For dead languages we check that you belong to the religion and have sufficient learning to be expected to know a liturgical language:
+				AND = {
+					religion = scope:province.religion
+					scope:province = { #these have specific languages to learn
+						NOR = {
+							religion = religion:christianity_religion
+							religion = religion:islam_religion
+							religion = religion:taoism_religion
+							faith = faith:lamaism
+						}
+					}
+					learning > 15 #Well educated
+				}
+				AND = { #Dharmic Faiths knows Sanskrit
+					scope:province = {
+						is_dharmic_faith_trigger = yes
+					}
+					is_dharmic_faith_trigger = yes
+					learning > 15 #Well educated
+				}
+			}
+		}
+	}
+
+	weight = { value = 1 }
+
+	effect = {
+		scope:host = {
+			save_scope_as = first
+		}
+		scope:province = {
+			save_scope_as = second
+		}
+
+		add_activity_log_entry = {
+			key = apa_leveraging_language_skills
+			tags = { pulse_action }
+			character = scope:first
+
+			scope:activity = { activity_special_type_progression_tiny = yes }
+			
+			scope:first = {
+				custom_tooltip = adult_education_tt_positive_tiny
+				add_prestige = minor_prestige_gain
+			}
+		}
+	}
+}
