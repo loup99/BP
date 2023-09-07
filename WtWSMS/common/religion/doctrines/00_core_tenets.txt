@@ -400,6 +400,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: Unavailable to Christians (they use "Gnosis" Christian doctrine), consider each other astray
 	tenet_gnosticism = {
 		icon = core_tenet_gnosticism
 		piety_cost = {
@@ -449,8 +450,8 @@
 		}
 
 		parameters = {
-			hostility_override_tenet_gnosticism = 0
-			hostility_override_special_doctrine_is_gnostic_faith = 0
+			hostility_override_tenet_gnosticism = 1
+			hostility_override_special_doctrine_is_gnostic_faith = 1
 			granting_titles_gives_stress = yes
 		}
 
@@ -461,6 +462,7 @@
 
 		is_shown = {
 			NOT = { has_doctrine = special_doctrine_is_gnostic_faith } # Can't be Gnostic if ye already are Gnostic
+			NOT = { religion_tag = christianity_religion } #Christians use Gnosis Christian doctrine
 		}
 	}
 
@@ -1244,7 +1246,7 @@
 		}
 	}
 
-	##### Changed from Vanilla: No longer available to Dharmics (it's implicit)
+	##### Changed from Vanilla: No longer available to Dharmics (it's implicit), Jews and Christians must have Gnosticism or Gnosis to pick
 	tenet_reincarnation = {
 		icon = core_tenet_reincarnation
 		piety_cost = {
@@ -1280,12 +1282,27 @@
 
 		is_shown = {
 			NOR = {
-				religion_tag = christianity_religion
-				religion_tag = judaism_religion
 				religion_tag = zoroastrianism_religion
 				religion_tag = buddhism_religion
 				religion_tag = hinduism_religion
 				religion_tag = jainism_religion
+			}
+		}
+		
+		can_pick = {
+			trigger_if = {
+				limit = { religion_tag = christianity_religion }
+				custom_description = {
+					text = doctrine_gnosis_trigger
+					doctrine:doctrine_christian_soteriology_gnosis = { is_in_list = selected_doctrines }
+				}
+			}
+			trigger_if = {
+				limit = { religion_tag = judaism_religion }
+				custom_description = {
+					text = doctrine_tenet_gnosticism_trigger
+					doctrine:tenet_gnosticism = { is_in_list = selected_doctrines }
+				}
 			}
 		}
 
@@ -2727,8 +2744,30 @@
 		}
 	}
 
+	#Changed from Vanilla: Added new custom localization/description
 	tenet_polyamory = {
 		icon = core_tenet_polyamory
+		
+		name = {
+			first_valid = {
+				triggered_desc = {
+					trigger = { religion_tag = christianity_religion }
+					desc = tenet_polyamory_christian_name
+				}
+				desc = tenet_polyamory_name
+			}
+		}
+		
+		desc = {
+			first_valid = {
+				triggered_desc = {
+					trigger = { religion_tag = christianity_religion }
+					desc = tenet_polyamory_christian_desc
+				}
+				desc = tenet_polyamory_desc
+			}
+		}
+		
 		piety_cost = {
 			if = {
 				limit = {
@@ -2968,7 +3007,6 @@
 		}
 		parameters = {
 			hostility_override_eastern_hostility_doctrine = 2
-			hostility_override_eastern_pagan_hostility_doctrine = 2
 			#For loc:
 			is_eastern_faith_bilateral_loc_override = 1
 			eastern_syncretic_actor_opinion_active = yes
@@ -3228,10 +3266,7 @@
 
 		is_shown = {
 			NOT = { religion = religion:hellenism_religion }
-			OR = {
-				has_doctrine = pagan_hostility_doctrine
-				has_doctrine = eastern_pagan_hostility_doctrine
-			}
+			has_doctrine = pagan_hostility_doctrine
 		}
 		can_pick = {
 			custom_description = {
@@ -3318,10 +3353,7 @@
 	tenet_egyptian_syncretism = {
 		icon = eye_of_horus
 		is_shown = {
-			OR = {
-				has_doctrine = pagan_hostility_doctrine
-				has_doctrine = eastern_pagan_hostility_doctrine
-			}
+			has_doctrine = pagan_hostility_doctrine
 			NOT = { religion = religion:egyptian_religion }
 		}
 		
@@ -3668,7 +3700,7 @@
 	#####################
 
 	tenet_complex_exegesis = {
-		icon = core_tenet_legal_pronouncements ##### TODO (Beta): Needs Unique Icon
+		icon = core_tenet_literalism ##### TODO (Beta): Needs Unique Icon
 		
 		is_shown = { religion_tag = dualism_religion }
 		
@@ -3849,9 +3881,8 @@
 		}
 		
 		parameters = {
-			hostility_override_special_doctrine_is_pagan_faith = 1
+			hostility_override_pagan_hostility_doctrine = 1
 			hostility_override_eastern_hostility_doctrine = 1
-			hostility_override_eastern_pagan_hostility_doctrine = 1
 		}
 		
 		character_modifier = { different_faith_county_opinion_mult = 1 }
@@ -3910,7 +3941,6 @@
 			holy_wars_forbidden = yes
 			hostility_override_abrahamic_hostility_doctrine = 1
 			hostility_override_pagan_hostility_doctrine = 1
-			hostility_override_eastern_pagan_hostility_doctrine = 1
 			hostility_override_eastern_hostility_doctrine = 1
 			hostility_override_mazdan_hostility_doctrine = 1
 		}

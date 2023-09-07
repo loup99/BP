@@ -1,0 +1,229 @@
+﻿### Ritual decisions
+become_a_vegetarian = {
+	picture = "gfx/interface/illustrations/decisions/vegetarianism.dds"
+	desc = become_a_vegetarian_desc
+	selection_tooltip = become_a_vegetarian_tooltip
+	
+	is_shown = {
+		OR = {
+			faith = { has_doctrine_parameter = enables_vegetarianism }
+			culture = { has_cultural_parameter = enables_vegetarianism }
+		}
+		NOT = { has_trait = vegetarian }
+	}
+	
+	is_valid = {}
+	
+	is_valid_showing_failures_only = {
+		prestige >= 0
+		piety >= 0
+		is_imprisoned = no
+		custom_description = {
+			subject = root
+			text = "has_recently_abandoned_vegetarianism_cooldown"
+			NAND = { has_variable = recently_abandoned_vegetarianism }
+		}
+	}
+	
+	cost = {
+		prestige = 25
+		piety = 25
+	}
+	
+	effect = {
+		add_trait = vegetarian
+		hidden_effect = {
+			root = {
+				set_variable = {
+					name = recently_became_vegetarian
+					days = 366
+				}
+			}
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {}
+	
+	ai_will_do = {
+		base = 10 #Odds they will do it
+		
+		#Won't do if they can't pay
+		modifier = {
+			factor = 0
+			NOT = { gold >= 25 }
+			NOT = { piety >= 25 }
+		}
+		#Won't do it if they eat meat in some way
+		modifier = {
+			factor = 0
+			OR = {
+				has_trait = lifestyle_hunter
+				has_trait = cannibal
+			}
+		}
+		#Partying reduces chance
+		modifier = {
+			factor = 0.5
+			OR = {
+				has_trait = lifestyle_reveler
+			}
+		}
+		# 100% chance at 50 zeal
+		ai_value_modifier = {
+			ai_zeal = 2
+			trigger = {
+				OR = {
+					faith = { has_doctrine = doctrine_ritual_vegetarianism_required }
+					AND = {
+						faith = { has_doctrine = doctrine_ritual_vegetarianism_clerics }
+						is_clergy = yes
+					}
+				}
+			}
+		}
+		# 100% chance at 67 zeal for less focused faiths
+		ai_value_modifier = {
+			ai_zeal = 1.5
+			trigger = {
+				AND = {
+					faith = { has_doctrine = doctrine_ritual_vegetarianism_clerics }
+					is_clergy = no
+				}
+			}
+		}
+		
+		#Personality Trait impacts (cribbed from CK2 VIET)
+		modifier = {
+			factor = 2
+			OR = {
+				has_trait = zealous
+				has_trait = temperate
+			}
+		}
+		modifier = {
+			factor = 1.5
+			OR = {
+				has_trait = content
+				has_trait = chaste
+			}
+		}
+		modifier = {
+			factor = 0.5
+			has_trait = fickle
+		}
+		modifier = {
+			factor = 0.1
+			has_trait = gluttonous #There definitely are fat vegetarians...
+		}
+		modifier = {
+			factor = 0
+			has_trait = sadistic
+		}
+	}
+}
+abandon_vegetarianism = {
+	picture = "gfx/interface/illustrations/decisions/meat_eating.dds"
+	desc = abandon_vegetarianism_desc
+	selection_tooltip = abandon_vegetarianism_tooltip
+	
+	is_shown = { has_trait = vegetarian }
+	
+	is_valid = {}
+	
+	is_valid_showing_failures_only = {
+		prestige >= 0
+		piety >= 0
+		is_imprisoned = no
+		custom_description = {
+			subject = root
+			text = "has_became_vegetarianism_cooldown"
+			NAND = { has_variable = recently_became_vegetarian }
+		}
+	}
+	
+	cost = {
+		prestige = 25
+		piety = 25
+	}
+	
+	effect = {
+		remove_trait = vegetarian
+		hidden_effect = {
+			root = {
+				set_variable = {
+					name = recently_abandoned_vegetarianism
+					days = 366
+				}
+			}
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = {}
+	
+	ai_will_do = {
+		base = 10 #Odds they will do it
+		
+		#Won't do if they can't pay
+		modifier = {
+			factor = 0
+			NOT = { gold >= 25 }
+			NOT = { piety >= 25 }
+		}
+		#Will do it if they eat meat in some way
+		modifier = {
+			factor = 10
+			OR = {
+				has_trait = lifestyle_hunter
+				has_trait = cannibal
+			}
+		}
+		#Partying increases chance
+		modifier = {
+			factor = 5
+			OR = { has_trait = lifestyle_reveler }
+		}
+		#Won't do if it's required or they are a cleric
+		modifier = {
+			factor = 0
+			OR = {
+				faith = { has_doctrine = doctrine_ritual_vegetarianism_required }
+				AND = {
+					faith = { has_doctrine = doctrine_ritual_vegetarianism_clerics }
+					is_clergy = yes
+				}
+			}
+		}
+		
+		#Personality Trait impacts (mostly inverted from the above)
+		modifier = {
+			factor = 0.5
+			OR = {
+				has_trait = zealous
+				has_trait = temperate
+			}
+		}
+		modifier = {
+			factor = 0.667
+			OR = {
+				has_trait = content
+				has_trait = chaste
+			}
+		}
+		modifier = {
+			factor = 2.0
+			has_trait = fickle
+		}
+		modifier = {
+			factor = 10.0
+			has_trait = gluttonous #There definitely are fat vegetarians...
+		}
+		modifier = {
+			factor = 10
+			has_trait = sadistic
+		}
+	}
+}

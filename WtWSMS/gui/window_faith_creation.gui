@@ -1,3 +1,6 @@
+##### Changed from Vanilla: Added additional categories in main toolbar
+##### Changed from Vanilla: Tweaked some show conditions for Ritual Traditions
+
 ######################################################
 ################## FAITH CREATION ####################
 ######################################################
@@ -336,6 +339,35 @@ window = {
 								}
 								
 								##### Changed from Vanilla vvvvv
+								vbox = {
+									layoutpolicy_horizontal = expanding
+									spacing = 10
+
+									text_label_left = {
+										layoutpolicy_horizontal = expanding
+										text = "FAITH_DOCTRINES_RITUAL"
+										default_format = "#low"
+									}
+
+									fixedgridbox = {
+										name = "doctrines_grid_ritual_group"
+										datamodel = "[FaithCreationWindow.GetGroupingHelper( 'ritual_group' ).GetGrouping]"
+
+										flipdirection = yes
+										addcolumn = 270
+										addrow = 65
+										datamodel_wrap = 2
+
+										item = {
+											widget_doctrine_selection_item = {
+												blockoverride "doctrine_icon_texture"
+												{
+													texture = "[FaithDoctrine.GetIcon]"
+												}
+											}
+										}
+									}
+								}
 								vbox = { #Christian Faiths
 									visible = "[GetPlayer.GetFaith.HasDoctrineByKey( 'special_doctrine_is_christian_faith' )]"
 									layoutpolicy_horizontal = expanding
@@ -357,29 +389,6 @@ window = {
 										datamodel_wrap = 2
 
 										item = { widget_doctrine_selection_item = {} }
-									}
-								}
-								vbox = { #Hindu Faiths
-									visible = "[GetPlayer.GetFaith.HasDoctrineByKey( 'special_doctrine_is_hinduism_faith' )]"
-									layoutpolicy_horizontal = expanding
-									spacing = 10
-
-									text_label_left = {
-										layoutpolicy_horizontal = expanding
-										text = "FAITH_DOCTRINES_HINDU_SPECIFIC"
-										default_format = "#low"
-									}
-
-									fixedgridbox = { #Hindu Doctrines
-										name = "FAITH_DOCTRINES_HINDU_SPECIFIC"
-										datamodel = "[FaithCreationWindow.GetGroupingHelper( 'hindu_doctrines' ).GetGrouping]"
-
-										flipdirection = yes
-										addcolumn = 270
-										addrow = 65
-										datamodel_wrap = 2
-
-										item = { widget_doctrine_selection_item_unique = {} }
 									}
 								}
 								##### Changed from Vanilla ^^^^^
@@ -1053,9 +1062,10 @@ window = {
 											down = "[GuiFaithCreationDoctrineItem.IsSelected]"
 											tooltip = "FAITH_WINDOW_DOCTRINE_SELECT_TOOLTIP"
 
+											##### Changed from Vanilla vvvvv
 											icon_doctrine = {
 												name = "doctrine_icon_main"
-												visible = "[EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' )]"
+												visible = "[Or( EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' ),EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'ritual_group' ) )]"
 												texture = "[FaithDoctrine.GetIcon]"
 												size = { 60 60 }
 												position = { 5 10 }
@@ -1063,11 +1073,12 @@ window = {
 
 											icon_doctrine = {
 												name = "doctrine_icon_other"
-												visible = "[And(Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' )), Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' )))]"
+												visible = "[And(And(Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'main_group' )), Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'core_tenets' ))),Not(EqualTo_string( FaithDoctrine.GetGroup.GetGroupingKey, 'ritual_group' )))]"
 												texture = "[FaithDoctrine.GetGroup.GetIcon]"
 												size = { 60 60 }
 												position = { 5 10 }
 											}
+											##### Changed from Vanilla ^^^^^
 
 											widget = {
 												name = "doctrine_icon_core_bg"

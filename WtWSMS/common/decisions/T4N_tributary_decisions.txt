@@ -1,0 +1,122 @@
+﻿summon_tributaries_to_war = {
+	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	major = yes
+
+	ai_check_interval = 1
+
+	desc = summon_tributaries_to_war_desc
+
+	is_shown = {
+		is_suzerain = yes
+		is_at_war = yes
+		
+		#Need to have a tributary that's not part of your wars that *could* be part of your wars
+		any_in_list = {
+			variable = all_tributaries
+			this.var:can_call_to_war_suzerain = flag:yes
+			save_temporary_scope_as = temp_trib_war
+			
+			root = {
+				any_character_war = {
+					save_temporary_scope_as = temp_war
+					NOT = { scope:temp_trib_war = { is_participant_in_war = scope:temp_war } }
+				}
+			}
+		}
+	}
+	
+	is_valid = {}
+
+	is_valid_showing_failures_only = {}
+
+	cost = {}
+
+	effect = {
+		root = { save_scope_as = suzerain_cta_caller }
+		custom_tooltip = {
+			text = summon_tributaries_to_war_effect
+			every_in_list = {
+				variable = all_tributaries
+				limit = {
+					exists = var:can_call_to_war_suzerain
+					var:can_call_to_war_suzerain = flag:yes
+				}
+				save_temporary_scope_as = tributary_in_question
+				
+				if = {
+					limit = {
+						scope:suzerain_cta_caller = {
+							any_character_war = {
+								save_temporary_scope_as = the_war
+								NOT = { scope:tributary_in_question = { is_participant_in_war = scope:the_war } }
+							}
+						}
+					}
+					scope:tributary_in_question = { trigger_event = { id = tributaries.200 } }
+				}
+			}
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 1000 } #AI will do so immediately!
+}
+
+summon_suzerain_to_war = {
+	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	major = yes
+
+	ai_check_interval = 1
+
+	desc = summon_suzerain_to_war_desc
+
+	is_shown = {
+		is_tributary = yes
+		is_at_war = yes
+		
+		#Suzerain must not be part of your current war
+		exists = root.var:my_suzerain
+		exists = var:can_call_to_war_tributary
+		var:can_call_to_war_tributary = flag:yes
+		any_character_war = {
+			save_temporary_scope_as = temp_war
+			NOT = { root.var:my_suzerain = { is_participant_in_war = scope:temp_war } }
+		}
+		NOT = { has_variable = already_called_my_suzerain }
+	}
+	
+	is_valid = {}
+
+	is_valid_showing_failures_only = {
+		custom_tooltip = {
+			text = must_be_an_external_war
+			any_character_war = { is_civil_war = no }
+		}
+		custom_tooltip = {
+			text = has_a_defensive_war
+			any_character_war = { root = { is_defender_in_war = prev } }
+		}
+		custom_tooltip = {
+			text = must_be_a_war_leader
+			any_character_war = { is_war_leader = root }
+		}
+	}
+
+	cost = {}
+
+	effect = {
+		root = {
+			save_scope_as = call_to_arms_tribute
+			set_variable = called_my_suzerain
+		}
+		custom_tooltip = {
+			text = summon_suzerain_to_war_effect
+			root.var:my_suzerain = { trigger_event = { id = tributaries.100 } }
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 1000 } #AI will do so immediately!
+}

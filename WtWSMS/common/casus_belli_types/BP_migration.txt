@@ -8,6 +8,8 @@
 minor_migration_war = { #Cribbed from Vanilla Invasions
 	group = migration
 	icon = invasion
+	
+	allow_hostages = no
 
 	combine_into_one = yes
 	should_show_war_goal_subview = yes
@@ -100,22 +102,24 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 		
-		#Create Titular title if primary isn't titular
-		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
-		#and counties that have been handed out become independent
-		create_titular_title_if_needed_effect = { ATTACKER = scope:attacker }
-		
 		save_government_type_effect = {
 			THE_NEW_HOLDER = scope:attacker
 			THE_PREVIOUS_HOLDER = scope:defender
 		}
 		
-		#Handle the title changes
-		migration_cb_title_management_effect = {
-			TARGET_TITLES = target_titles
-			DEFENDER = scope:defender
+		#### START MIGRATION EFFECTS MANAGEMENT
+		minor_migration_cb_title_management_effect = {
 			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			TARGET_TITLES = target_titles
 		}
+		other_successful_migration_effects = {
+			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			WAIT_TIME = minor_migration_wait_time
+		}
+		spawn_minorities_minor_migration_effect = { ATTACKER = scope:attacker }
+		#### END MIGRATION EFFECTS MANAGEMENT
 		
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
 		modify_all_participants_fame_values = { ##### TODO (Beta): Dynamize the FAME_BASE to title tier
@@ -128,9 +132,6 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 			WINNER_ALLY_FAME_SCALE = 1
 			LOSER_ALLY_FAME_SCALE = 1
 		}
-		
-		#Move the capital
-		hidden_effect = { setup_new_capital_effect = { ATTACKER = scope:attacker } }
 
 		# Truce
 		add_truce_attacker_victory_effect = yes
@@ -138,24 +139,6 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 		# FP1: note the victory for future memorialisation via stele (if applicable).
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
 		
-		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = minor_migration_wait_time
-		}
-		#Prevent title bootstrapping
-		every_in_list = {
-			list = attackers_counties
-			convert_government_type_without_check_effect = {
-				THE_PREVIOUS_HOLDER = scope:attacker
-				THE_NEW_HOLDER = this.holder
-			}
-		}
-		#If the target was advanced, bootstrap improvement to government form
-		improve_government_form_effect = {
-			ATTACKER = scope:attacker
-			DEFENDER = scope:defender
-		}
 		scope:attacker = { government_transition_garbage_collect_effect = yes }
 		scope:defender = { government_transition_garbage_collect_effect = yes }
 	}
@@ -205,10 +188,7 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = minor_migration_wait_time
-		}
+		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = minor_migration_wait_time } }
 	}
 
 	on_defeat_desc = {
@@ -267,10 +247,7 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = minor_migration_wait_time
-		}
+		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = minor_migration_wait_time } }
 	}
 	
 	transfer_behavior = transfer
@@ -297,6 +274,8 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 	group = migration
 	icon = invasion
+
+	allow_hostages = no
 
 	combine_into_one = yes
 	should_show_war_goal_subview = yes
@@ -389,25 +368,24 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 		
-		#Create Titular title if primary isn't titular
-		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
-		#and counties that have been handed out become independent
-		create_titular_title_if_needed_effect = { ATTACKER = scope:attacker }
-		
 		save_government_type_effect = {
 			THE_NEW_HOLDER = scope:attacker
 			THE_PREVIOUS_HOLDER = scope:defender
 		}
 		
-		#Handle the title changes
-		migration_cb_title_management_effect = {
-			TARGET_TITLES = target_titles
-			DEFENDER = scope:defender
+		#### START MIGRATION EFFECTS MANAGEMENT
+		minor_migration_cb_title_management_effect = {
 			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			TARGET_TITLES = target_titles
 		}
-		
-		#Move the capital
-		hidden_effect = { setup_new_capital_effect = { ATTACKER = scope:attacker } }
+		other_successful_migration_effects = {
+			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			WAIT_TIME = minor_migration_wait_time
+		}
+		spawn_minorities_minor_migration_effect = { ATTACKER = scope:attacker }
+		#### END MIGRATION EFFECTS MANAGEMENT
 		
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
 		modify_all_participants_fame_values = {
@@ -427,24 +405,6 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 		# FP1: note the victory for future memorialisation via stele (if applicable).
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
 		
-		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = minor_migration_kingdom_wait_time
-		}
-		#Prevent title bootstrapping
-		every_in_list = {
-			list = attackers_counties
-			convert_government_type_without_check_effect = {
-				THE_PREVIOUS_HOLDER = scope:attacker
-				THE_NEW_HOLDER = this.holder
-			}
-		}
-		#If the target was advanced, bootstrap improvement to government form
-		improve_government_form_effect = {
-			ATTACKER = scope:attacker
-			DEFENDER = scope:defender
-		}
 		scope:attacker = { government_transition_garbage_collect_effect = yes }
 		scope:defender = { government_transition_garbage_collect_effect = yes }
 	}
@@ -494,10 +454,7 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = minor_migration_kingdom_wait_time
-		}
+		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = minor_migration_kingdom_wait_time } }
 	}
 
 	on_defeat_desc = {
@@ -556,10 +513,7 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = minor_migration_kingdom_wait_time
-		}
+		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = minor_migration_kingdom_wait_time } }
 	}
 	
 	transfer_behavior = transfer
@@ -688,26 +642,26 @@ major_migration_war = {
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 		
-		#Create Titular title if primary isn't titular
-		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
-		#and counties that have been handed out become independent
-		create_titular_title_if_needed_effect = { ATTACKER = scope:attacker }
-		
-		#Handle nomads possibly flipping
-		major_migration_improve_government_form_effect_effect = {
-			ATTACKER = scope:attacker
-			DEFENDER = scope:defender
+		save_government_type_effect = {
+			THE_NEW_HOLDER = scope:attacker
+			THE_PREVIOUS_HOLDER = scope:defender
 		}
 		
-		#Handle the title changes
-		major_migration_cb_title_management_effect_effect = {
+		#### START MIGRATION EFFECTS MANAGEMENT
+		major_migration_cb_title_management_effect = {
+			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
 			TARGET_TITLES = target_titles
-			DEFENDER = scope:defender
-			ATTACKER = scope:attacker
 		}
 		
-		#Move the capital
-		hidden_effect = { setup_new_capital_effect = { ATTACKER = scope:attacker } }
+		other_successful_migration_effects = {
+			ATTACKER = scope:attacker
+			DEFENDER = scope:defender
+			WAIT_TIME = major_migration_wait_time
+		}
+		
+		flip_culture_major_migration_effect = { ATTACKER = scope:attacker }
+		#### END MIGRATION EFFECTS MANAGEMENT
 		
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
 		modify_all_participants_fame_values = {
@@ -727,11 +681,8 @@ major_migration_war = {
 		# FP1: note the victory for future memorialisation via stele (if applicable).
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
 		
-		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = major_migration_wait_time
-		}
+		scope:attacker = { government_transition_garbage_collect_effect = yes }
+		scope:defender = { government_transition_garbage_collect_effect = yes }
 	}
 	
 	on_white_peace_desc = {
@@ -806,10 +757,7 @@ major_migration_war = {
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = major_migration_wait_time
-		}
+		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
 	}
 	
 	on_defeat_desc = {
@@ -895,10 +843,7 @@ major_migration_war = {
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		add_migration_flag_effect = {
-			ATTACKER = scope:attacker
-			YEARS = major_migration_wait_time
-		}
+		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
 	}
 	
 	transfer_behavior = transfer

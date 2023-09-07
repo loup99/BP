@@ -1,3 +1,6 @@
+##### Changed from Vanilla: Tweaked the law plotting to avoid printing hidden laws
+##### Changed from Vanilla: Integrated changes from Minorities Mod
+
 ######################################################
 ##################### MY REALM #######################
 ######################################################
@@ -322,17 +325,17 @@ window = {
 					name = "open_future_diarchy_tutorial_uses_this"
 					layoutpolicy_horizontal = expanding
 					size = { 0 60 }
-					
+
 					onclick = "[ToggleGameViewData( 'diarchy', GetPlayer.GetID )]"
-					
+
 					tooltip = "DIARCHY_WINDOW_OPEN_TOOLTIP"
 
 					hbox = {
 						datacontext = "[Character.GetDiarchy]"
 						layoutpolicy_horizontal = expanding
-						
+
 						margin = { 15 0 }
-						
+
 						icon_flat_standard = {
 							size = { 40 40 }
 							texture = "gfx/interface/window_regency/scale_of_power.dds"
@@ -357,7 +360,7 @@ window = {
 								visible = "[Diarchy.IsValid]"
 								layoutpolicy_horizontal = expanding
 								alwaystransparent = yes
-								
+
 								text = "MY_REALM_WINDOW_ACTIVE_DIARCHY"
 								align = left|nobaseline
 								max_width = 480
@@ -367,7 +370,7 @@ window = {
 								visible = "[Not( Diarchy.IsValid )]"
 								layoutpolicy_horizontal = expanding
 								alwaystransparent = yes
-								
+
 								text = "MY_REALM_WINDOW_STATUS_INACTIVE_DIARCHY"
 								align = left|nobaseline
 								max_width = 480
@@ -388,6 +391,7 @@ window = {
 						layoutpolicy_horizontal = expanding
 						layoutpolicy_vertical = expanding
 						onclick = "[MyRealmWindow.ShowDomain]"
+						onclick = "[GetVariableSystem.Clear('law_window_toggle')]" #关闭
 						down = "[MyRealmWindow.IsShowingDomain]"
 
 						text = "MY_REALM_WINDOW_DOMAIN_TAB"
@@ -398,6 +402,7 @@ window = {
 						layoutpolicy_horizontal = expanding
 						layoutpolicy_vertical = expanding
 						onclick = "[MyRealmWindow.ShowVassals]"
+						onclick = "[GetVariableSystem.Clear('law_window_toggle')]" #关闭
 						down = "[MyRealmWindow.IsShowingVassals]"
 
 						text = "MY_REALM_WINDOW_VASSALS_TAB"
@@ -408,9 +413,21 @@ window = {
 						layoutpolicy_horizontal = expanding
 						layoutpolicy_vertical = expanding
 						onclick = "[MyRealmWindow.ShowSuccession]"
-						down = "[MyRealmWindow.IsShowingSuccession]"
+						onclick = "[GetVariableSystem.Clear('law_window_toggle')]" #关闭
+						down = "[And(MyRealmWindow.IsShowingSuccession,Not(GetVariableSystem.Exists( 'law_window_toggle' )))]"
 
 						text = "MY_REALM_WINDOW_SUCCESSION_TAB"
+					}
+
+					button_tab = {
+						name = "tutorial_highlight_law_tab"
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						onclick = "[GetVariableSystem.Toggle( 'law_window_toggle' )]"
+						onclick = "[MyRealmWindow.ShowSuccession]"
+						down = "[GetVariableSystem.Exists( 'law_window_toggle' )]"
+
+						text = "MY_REALM_WINDOW_LAW_TAB"
 					}
 				}
 
@@ -419,7 +436,7 @@ window = {
 					name = "tab_domain"
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
-					visible = "[MyRealmWindow.IsShowingDomain]"
+					visible = "[And(MyRealmWindow.IsShowingDomain,Not(GetVariableSystem.Exists( 'law_window_toggle' )))]"
 
 					using = Animation_Tab_Switch
 
@@ -835,7 +852,7 @@ window = {
 					name = "tab_vassals"
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
-					visible = "[MyRealmWindow.IsShowingVassals]"
+					visible = "[And(MyRealmWindow.IsShowingVassals,Not(GetVariableSystem.Exists( 'law_window_toggle' )))]"
 
 					state = {
 						name = _show
@@ -849,7 +866,7 @@ window = {
 
 					hbox = {
 						name = "vassal_filters_container"
-						margin = { 0 4 }
+						margin = { 0 5 }
 						layoutpolicy_horizontal = expanding
 
 						dropdown_menu_standard = {
@@ -914,7 +931,7 @@ window = {
 						layoutpolicy_vertical = expanding
 
 						blockoverride "scrollbox_margins" {
-							margin = { 4 4 }
+							margin = { 5 5 }
 						}
 
 						blockoverride "scrollbox_content"
@@ -975,33 +992,37 @@ window = {
 
 					vbox = {
 						layoutpolicy_horizontal = expanding
-						margin = { 16 16 }
+						margin = { 15 0 }
+						margin_top = 10
+						margin_bottom = 15
 
 						vbox = {
 							layoutpolicy_horizontal = expanding
-							margin = { 8 4 }
-							spacing = 4
+							margin = { 35 3 }
+							spacing = 6
+
 
 							background = {
 								using = Background_Area
-								margin_bottom = 8
-								margin_top = 4
+								margin = { -20 0 }
+								margin_bottom = 10
+								margin_top = 3
 							}
 
 							hbox = {
 								layoutpolicy_horizontal = expanding
-								margin = { 8 0 }
 
 								text_single = {
 									default_format = "#high"
 									text = "MY_REALM_WINDOW_VASSAL_OPINION"
-									max_width = 170
+									max_width = 160
 									tooltip = "MY_REALM_WINDOW_VASSAL_OPINION_TT"
 								}
 
 								expand = {}
 
 								hbox = {
+
 									tooltip = "[GetPlayer.GetDreadBreakdown]"
 
 									icon = {
@@ -1014,17 +1035,16 @@ window = {
 										name = "dread_name"
 										text = "[dread|E]: [GetPlayer.GetDread|0]"
 										default_format = "#high"
-										max_width = 90
+										max_width = 80
 									}
 								}
 
 								expand = {}
 
 								hbox = {
-									name = "tutorial_highlight_vassal_limit"
-									spacing = 4
-									
+									spacing = 2
 									tooltip = "[Character.GetVassalLimitTooltip]"
+									name = "tutorial_highlight_vassal_limit"
 
 									background = {
 										visible = "[GreaterThan_int32( Character.GetNumVassalsTowardsLimit, Character.GetVassalLimit )]"
@@ -1038,7 +1058,7 @@ window = {
 
 									text_single = {
 										text = "MY_REALM_WINDOW_VASSAL_LIMIT"
-										max_width = 130
+										max_width = 120
 									}
 
 									text_single = {
@@ -1050,27 +1070,22 @@ window = {
 
 							hbox = {
 								layoutpolicy_horizontal = expanding
-								margin = { 8 0 }
 
 								text_single = {
 									margin_bottom = 4
 									text = MY_REALM_WINDOW_VASSAL_STANCES
 								}
-
-								spacing = 8
-								
+								spacing = 10
 								hbox = {
 									datamodel = "[GetAllVassalStances]"
-									spacing = 8
-									
+									spacing = 10
 									item = {
 										hbox = {
 											visible = "[NotEqualTo_int32( MyRealmWindow.GetNumVassalsWithStance( VassalStance.Self ), '(int32)0' )]"
-											
 											text_single = {
-												margin_bottom = 4
-												margin_right = 4
-												margin_left = 4
+												margin_bottom = 5
+												margin_right = 5
+												margin_left = 5
 												using = Background_Area_Border
 												text = "MY_REALM_WINDOW_VASSAL_STANCE_COUNT"
 												tooltip = "MY_REALM_WINDOW_VASSAL_STANCE_COUNT_TT"
@@ -1088,7 +1103,7 @@ window = {
 				### SUCCESSION TAB
 				vbox = {
 					name = "tab_succession"
-					visible = "[MyRealmWindow.IsShowingSuccession]"
+					visible = "[And(MyRealmWindow.IsShowingSuccession,Not(GetVariableSystem.Exists( 'law_window_toggle' )))]"
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
 
@@ -1121,7 +1136,7 @@ window = {
 
 							item = {
 								hbox = {
-									visible = "[And( Not( GuiLawGroup.GetLawGroup.HasFlag( 'realm_law' ) ), GuiLawGroup.IsAvailable )]"
+									visible = "[And( And(Not( GuiLawGroup.GetLawGroup.HasFlag( 'realm_law' )),Not( GuiLawGroup.GetLawGroup.HasFlag( 'religion_culture_law' ))), GuiLawGroup.IsAvailable )]"
 									layoutpolicy_horizontal = growing
 
 									vbox = {
@@ -1357,7 +1372,7 @@ window = {
 
 										button_standard = {
 											size = { 510 28 }
-											
+
 											modify_texture = {
 												texture = "gfx/interface/component_masks/mask_fade_horizontal.dds"
 												blend_mode = alphamultiply
@@ -2065,6 +2080,9 @@ window = {
 						}
 					}
 				}
+
+				### LAW TAB
+				hbox_law_text = {} ###法律 TAB
 			}
 		}
 	}

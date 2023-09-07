@@ -1,0 +1,930 @@
+﻿namespace = bp_heritage_linguistic_drift
+
+##### FIXME: Make portraits code et al. for heritages match the style of the language code
+##### FIXME: Generalization of heritage shift localization
+
+##### TODO (Immediate): Gate announcement events to rulers in diplo range only
+##### TODO (Immediate): Romano-Gothic/Romano-Vandalic variant?
+##### TODO (Immediate): Venetian, Pannonian-Romance namelist from WtWSMS.
+
+#Design Notes:
+#0001-0100: Linguistic Drift Events
+#0101-0200: Heritage Drift Events
+
+##### Language
+
+##### TRIGGERS
+scripted_trigger is_a_iberian_romance_hybrid_culture_trigger = {
+	NOT = { any_parent_culture = { this = culture:romano_hispanic } }
+}
+
+#Mostly we want this case to be where cultures are "well packed (i.e., small)" to allow differences to build
+scripted_trigger is_culture_mostly_in_linguistic_region_trigger = {
+	any_culture_county = {
+		percent >= 0.50
+		title_province = { geographical_region = $REGION$ }
+	}
+}
+
+scripted_trigger a_culture_parent_is_a_germanic_culture_trigger = {
+	OR = {
+		any_parent_culture = { has_cultural_pillar = heritage_central_germanic }
+		any_parent_culture = { has_cultural_pillar = heritage_east_germanic }
+		any_parent_culture = { has_cultural_pillar = heritage_north_germanic }
+		any_parent_culture = { has_cultural_pillar = heritage_west_germanic }
+	}
+}
+
+scripted_trigger a_culture_parent_speaks_a_semitic_language_trigger = {
+	any_parent_culture = { has_cultural_parameter = language_branch_semitic }
+}
+
+scripted_trigger the_culture_borders_a_specific_heritage_trigger = {
+	any_culture_county = { any_neighboring_county = { this.culture = { has_cultural_pillar = $HERITAGE$ } } }
+}
+
+###### EFFECTS
+
+#Latin to Children
+scripted_effect shift_language_latin_to_protoromance_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_hispanic }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:lusitanian }
+				}
+			}
+			set_culture_pillar = language_proto_ibero_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gallic }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_frank }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:massalian }
+				}
+			}
+			set_culture_pillar = language_proto_gallo_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_british } }
+			set_culture_pillar = language_proto_british_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_african } }
+			set_culture_pillar = language_proto_african_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_illyrian } }
+			set_culture_pillar = language_proto_illyrian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_raetian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric }
+				}
+			}
+			set_culture_pillar = language_proto_raetonorican_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_dacian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_thracian }
+				}
+			}
+			set_culture_pillar = language_proto_eastern_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_pannonian } }
+			set_culture_pillar = language_proto_pannonian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_aramean } }
+			set_culture_pillar = language_proto_syrian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gothic } }
+			set_culture_pillar = language_proto_italian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corsican } }
+			set_culture_pillar = language_proto_italian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = { #Fallback
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:roman } }
+			set_culture_pillar = language_proto_italian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: LANGUAGE (LATIN=>PROTO-ROMANCE" }
+	}
+}
+#Proto-Romance to Romance
+scripted_effect shift_language_proto_ibero_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { is_a_iberian_romance_hybrid_culture_trigger = yes }
+			if = {
+				limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
+				set_culture_pillar = language_iberian
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else_if = {
+				limit = { a_culture_parent_speaks_a_semitic_language_trigger = yes }
+				set_culture_pillar = language_mozarabic
+				set_name_list = name_list_andalusian
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = { #FALLBACK
+				set_culture_pillar = language_iberian_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+		else = {
+			if = {
+				limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_doc_region } }
+				set_culture_pillar = language_doc_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_iberian_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+	}
+}
+scripted_effect shift_language_proto_gallo_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_doc_region } }
+			set_culture_pillar = language_doc_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = {
+			if = { #French!
+				limit = { any_parent_culture_or_above = { this = culture:old_frankish } }
+				set_culture_pillar = language_french
+				set_name_list = name_list_frankish
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else_if = { #Other Germans; d'Oil Vulgar
+				limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
+				set_culture_pillar = language_french
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_gallic_romance
+				set_name_list = name_list_gallo_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+	}
+}
+scripted_effect shift_language_proto_british_romance_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_british_romance
+		set_name_list = name_list_british_romance
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_proto_italian_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_gallo_italic } }
+			if = {
+				limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
+				set_culture_pillar = language_germano_italian_romance
+				set_name_list = name_list_cisalpine
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_venetian
+				##### TODO (Immediate): Venetian namelist from WtWSMS.
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+		else = {
+			if = {
+				limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_sicilian } }
+				set_culture_pillar = language_sicilian
+				set_name_list = name_list_sicilian
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = {
+				set_culture_pillar = language_italian
+				set_name_list = name_list_italian
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+	}
+}
+scripted_effect shift_language_proto_raetonorican_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+			set_culture_pillar = language_noric_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = {
+			set_culture_pillar = language_rhaeto_romance
+			set_name_list = name_list_romansh
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+scripted_effect shift_language_proto_illyrian_romance_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_dalmatian
+		set_name_list = name_list_dalmatian
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_proto_pannonian_romance_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_pannonian_romance
+		##### TODO (Immediate): Pannonian Romance Name List from WtWSMS.
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_proto_eastern_romance_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_wallachian
+		set_name_list = name_list_vlach
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_proto_syrian_romance_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_syrian_romance
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_proto_african_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { a_culture_parent_is_a_germanic_culture_trigger = yes }
+			set_culture_pillar = language_germano_african_romance
+			set_name_list = name_list_african_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = {
+			set_culture_pillar = language_african_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+#Later Romance Languages
+scripted_effect shift_language_doc_romance_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_hispanic } }
+			set_culture_pillar = language_catalan
+			set_name_list = name_list_catalan
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { is_culture_mostly_in_linguistic_region_trigger = { REGION = custom_arpitan } }
+			set_culture_pillar = language_arpitan
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = {
+			set_culture_pillar = language_occitano_romance
+			set_name_list = name_list_occitan
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+scripted_effect shift_language_french_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_arpitan
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_iberian_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:suebi } }
+			set_culture_pillar = language_galician
+			set_name_list = name_list_galician
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_borders_a_specific_heritage_trigger = { HERITAGE = heritage_frankish }
+					the_culture_borders_a_specific_heritage_trigger = { HERITAGE = heritage_vasconic }
+				}
+			}
+			set_culture_pillar = language_asturleonese
+			set_name_list = name_list_asturleonese
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = {
+			set_culture_pillar = language_castilian
+			set_name_list = name_list_castilian
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+#Indo-Aryan
+scripted_effect shift_language_magadhan_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bengali } }
+			set_culture_pillar = language_bengali
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:oriya }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:sambalpuri }
+				}
+			}
+			set_culture_pillar = language_oriya
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:maithil }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:nagpuri }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bihari }
+				}
+			}
+			set_culture_pillar = language_bihari
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { #Fallback
+			set_culture_pillar = language_bihari
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+scripted_effect shift_language_kamarupan_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_assamese
+		set_name_list = name_list_assamese
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+scripted_effect shift_language_sauraseni_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:awadhi } }
+			set_culture_pillar = language_awadhi
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:braj } }
+			set_culture_pillar = language_braj
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:kannauji } }
+			set_culture_pillar = language_kannauji
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { #Fallback
+			set_culture_pillar = language_awadhi
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+scripted_effect shift_langauge_apabhramsa_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:rajput }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:malvi }
+				}
+			}
+			set_culture_pillar = language_rajasthani
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bhil } }
+			set_culture_pillar = language_bhil
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:gujarati }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:saurashtri }
+				}
+			}
+			set_culture_pillar = language_gujarati
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { #Fallback
+			set_culture_pillar = language_rajasthani
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+scripted_effect shift_language_vrachada_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:sindhi } }
+			set_culture_pillar = language_sindhi
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:punjabi } }
+			set_culture_pillar = language_punjabi
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { #Fallback
+			set_culture_pillar = language_punjabi
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+scripted_effect shift_language_maharashtri_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:marathi } }
+			set_culture_pillar = language_marathi
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:konkani } }
+			set_culture_pillar = language_konkani
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { #Fallback
+			set_culture_pillar = language_marathi
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+scripted_effect shift_language_elu_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_sinhalese
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+#Iranian
+scripted_effect shift_language_parthian_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:indo_parthian } }
+			set_culture_pillar = language_balochi
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:parthian } }
+			set_culture_pillar = language_pahlavi
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { #Fallback
+			set_culture_pillar = language_pahlavi
+			ccu_culture_created_or_changed_effect = yes
+		}
+	}
+}
+
+#Main Language Shift Effect
+scripted_effect shift_language_effect = {
+	#Then apply the new language effect
+	scope:shift_culture = {
+		#if/else-if prevents possible chain reaction
+		if = {
+			limit = { has_cultural_pillar = language_latin }
+			shift_language_latin_to_protoromance_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_ibero_romance }
+			shift_language_proto_ibero_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_gallo_romance }
+			shift_language_proto_gallo_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_british_romance }
+			shift_language_proto_british_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_italian_romance }
+			shift_language_proto_italian_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_raetonorican_romance }
+			shift_language_proto_raetonorican_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_illyrian_romance }
+			shift_language_proto_illyrian_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_pannonian_romance }
+			shift_language_proto_pannonian_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_eastern_romance }
+			shift_language_proto_eastern_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_syrian_romance }
+			shift_language_proto_syrian_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_african_romance }
+			shift_language_proto_african_romance_to_children_effect = yes
+		}
+		#Later Romance Block
+		else_if = {
+			limit = { has_cultural_pillar = language_doc_romance }
+			shift_language_doc_romance_to_children_effect = yes
+		}
+		else_if = { #French to Arpitan
+			limit = { has_cultural_pillar = language_french }
+			shift_language_french_to_children_effect = yes
+		}
+		else_if = { #Iberian Vulgar to children
+			limit = { has_cultural_pillar = language_iberian }
+			shift_language_iberian_to_children_effect = yes
+		}
+		#Indo-Aryan
+		else_if = { #Magadhan Prakrit to Children
+			limit = { has_cultural_pillar = language_magadhan }
+			shift_language_magadhan_to_children_effect = yes
+		}
+		else_if = { #Kamarupan Prakrit to Children
+			limit = { has_cultural_pillar = language_kamarupan }
+			shift_language_kamarupan_to_children_effect = yes
+		}
+		else_if = { #Sauraseni Prakrit to Children
+			limit = { has_cultural_pillar = language_sauraseni }
+			shift_language_sauraseni_to_children_effect = yes
+		}
+		else_if = { #Aprabasma Prakrit to Children
+			limit = { has_cultural_pillar = langauge_apabhramsa }
+			shift_langauge_apabhramsa_to_children_effect = yes
+		}
+		else_if = { #Paichisi Prakrit to Children
+			limit = { has_cultural_pillar = language_vrachada }
+			shift_language_vrachada_to_children_effect = yes
+		}
+		else_if = { #Maharashtri Prakrit to Children
+			limit = { has_cultural_pillar = language_maharashtri }
+			shift_language_maharashtri_to_children_effect = yes
+		}
+		else_if = { #Elu Prakrit to Children
+			limit = { has_cultural_pillar = language_elu }
+			shift_language_elu_to_children_effect = yes
+		}
+		#Iranian
+		else_if = { #Parthian to Pahlavi/Balochi
+			limit = { has_cultural_pillar = language_parthian }
+			shift_language_parthian_to_children_effect = yes
+		}
+	}
+}
+
+####### ACTUAL EVENTS
+
+bp_heritage_linguistic_drift.0001 = {
+	scope = none
+	hidden = yes
+	
+	immediate = {
+		#If the culture head exists, inform him/her first
+		if = {
+			limit = { exists = scope:shift_culture.culture_head }
+			scope:shift_culture.culture_head = { trigger_event = { id = bp_heritage_linguistic_drift.0002 } }
+		}
+		#Otherwise, directly change the culture and tell everyone
+		else = {
+			shift_language_effect = yes
+			every_ruler = { #Informational event
+				limit = { is_ai = no }
+				trigger_event = { id = bp_heritage_linguistic_drift.0003 }
+			}
+		}
+	}
+}
+
+bp_heritage_linguistic_drift.0002 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0002.t
+	desc = {
+		first_valid = {
+			#Latin to Proto-Romance
+			triggered_desc = {
+				trigger = {
+					OR = {
+						scope:shift_culture = { has_cultural_pillar = language_proto_ibero_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_gallo_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_british_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_italian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_raetonorican_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_illyrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_pannonian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_eastern_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_syrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_african_romance }
+					}
+				}
+				desc = bp_heritage_linguistic_drift.0002.desc.latin
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0002.desc
+		}
+	}
+	
+	theme = culture_change
+	right_portrait = root
+	
+	immediate = { hidden_effect = { shift_language_effect = yes } }
+	
+	option = {
+		name = bp_heritage_linguistic_drift.0002.accept
+		every_ruler = {
+			limit = {
+				OR = {
+					this = { in_diplomatic_range = root }
+					this.culture = { has_same_culture_language = scope:shift_culture }
+				}
+				NOT = { this = root }
+			}
+			trigger_event = { id = bp_heritage_linguistic_drift.0003 }
+		}
+		flavor = bp_heritage_linguistic_drift.0002.accept.tooltip
+	}
+}
+
+bp_heritage_linguistic_drift.0003 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0003.t
+	desc = {
+		first_valid = {
+			#Latin to Proto-Romance
+			triggered_desc = {
+				trigger = {
+					OR = {
+						scope:shift_culture = { has_cultural_pillar = language_proto_ibero_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_gallo_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_british_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_italian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_raetonorican_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_illyrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_pannonian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_eastern_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_syrian_romance }
+						scope:shift_culture = { has_cultural_pillar = language_proto_african_romance }
+					}
+				}
+				desc = bp_heritage_linguistic_drift.0003.desc.latin
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0003.desc
+		}
+	}
+	theme = culture_change
+	left_portrait = scope:chosen_character
+	right_portrait = root
+	
+	immediate = {
+		if = {
+			limit = { exists = scope:shift_culture.culture_head }
+			scope:shift_culture.culture_head = { save_scope_as = chosen_character }
+		}
+		else_if = {
+			limit = {
+				any_ruler = {
+					culture = scope:shift_culture
+					NOT = { has_government = mercenary_government } #Keep it to chars on the map please
+				}
+			}
+			random_ruler = {
+				limit = { culture = scope:shift_culture }
+				save_scope_as = chosen_character
+			}
+		}
+		#Fallback, don't show anything
+	}
+	
+	#For other rulers of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0003.accept_same_culture
+		flavor = bp_heritage_linguistic_drift.0003.accept_same_culture.tooltip
+		trigger = { root.culture = scope:shift_culture }
+	}
+	#For other rulers not of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0003.accept_different_culture
+		flavor = bp_heritage_linguistic_drift.0003.accept_different_culture.tooltip
+		trigger = { NOT = { root.culture = scope:shift_culture } }
+		fallback = yes
+	}
+}
+
+##### Heritage
+
+scripted_effect shift_heritage_latin_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_hispanic } }
+			set_culture_pillar = heritage_iberian
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = { #Romano-Frank covered here
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_gallic }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_frank }
+				}
+			}
+			
+			if = { #If ruled by Franks or a Frankish hybrid, becomes Frankish
+				limit = {
+					OR = {
+						any_parent_culture = { this = culture:old_frankish }
+						any_culture_county = { percent >= 0.50 this.holder.top_liege.culture = { any_parent_culture = { this = culture:old_frankish } } }
+					}
+				}
+				set_culture_pillar = heritage_frankish
+				ccu_culture_created_or_changed_effect = yes
+			}
+			else = { #Otherwise, Gallic Romance
+				set_culture_pillar = heritage_gallic_romance
+				ccu_culture_created_or_changed_effect = yes
+			}
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_british } }
+			set_culture_pillar = heritage_romano_british
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_aramean } }
+			set_culture_pillar = heritage_romano_aramean
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_african } }
+			set_culture_pillar = heritage_romano_african
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_dacian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_pannonian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_thracian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric }
+				}
+			}
+			set_culture_pillar = heritage_vlach
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_illyrian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_raetian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:sardinian }
+					the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corsican }
+				}
+			}
+			set_culture_pillar = heritage_italian
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else_if = { #Fallback
+			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:roman } }
+			set_culture_pillar = heritage_italian
+			ccu_culture_created_or_changed_effect = yes
+		}
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: HERITAGE (LATIN=>CHILDREN" }
+	}
+}
+
+scripted_effect shift_heritage_effect = {
+	shift_heritage_latin_to_children_effect = yes
+}
+
+bp_heritage_linguistic_drift.0101 = {
+	scope = none
+	hidden = yes
+	
+	immediate = {
+		#If the culture head exists, inform him/her first
+		if = {
+			limit = { exists = scope:shift_culture.culture_head }
+			scope:shift_culture.culture_head = { trigger_event = { id = bp_heritage_linguistic_drift.0102 } }
+		}
+		#Otherwise, directly change the culture and tell everyone
+		else = {
+			shift_heritage_effect = yes
+			every_ruler = { #Informational event
+				limit = { is_ai = no }
+				trigger_event = { id = bp_heritage_linguistic_drift.0103 }
+			}
+		}
+	}
+}
+
+bp_heritage_linguistic_drift.0102 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0102.t
+	desc = {
+		first_valid = {
+			#Latin to Romance
+			triggered_desc = {
+				trigger = { scope:shift_culture = { has_cultural_pillar = heritage_latin } }
+				desc = bp_heritage_linguistic_drift.0102.latin.desc
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0102.desc
+		}
+	}
+	
+	theme = culture_change
+	left_portrait = root
+	
+	immediate = { hidden_effect = { shift_heritage_effect = yes } }
+	
+	option = {
+		name = bp_heritage_linguistic_drift.0102.accept
+		every_ruler = {
+			limit = {
+				OR = {
+					this = { in_diplomatic_range = root }
+					this.culture = { has_same_culture_language = scope:shift_culture }
+				}
+				NOT = { this = root }
+			}
+			trigger_event = { id = bp_heritage_linguistic_drift.0103 }
+		}
+		flavor = bp_heritage_linguistic_drift.0102.accept.tooltip
+	}
+}
+
+bp_heritage_linguistic_drift.0103 = {
+	type = character_event
+	title = bp_heritage_linguistic_drift.0103.t
+	desc = {
+		first_valid = {
+			#Latin to Romance
+			triggered_desc = {
+				trigger = { scope:shift_culture = { has_cultural_pillar = heritage_latin } }
+				desc = bp_heritage_linguistic_drift.0103.latin.desc
+			}
+			#Default
+			desc = bp_heritage_linguistic_drift.0103.desc
+		}
+	}
+	theme = culture_change
+	left_portrait = scope:chosen_character
+	
+	immediate = {
+		if = {
+			limit = { exists = scope:shift_culture.culture_head }
+			scope:shift_culture.culture_head = { save_scope_as = chosen_character }
+		}
+		else_if = {
+			limit = {
+				any_ruler = {
+					culture = scope:shift_culture
+					NOT = { has_government = mercenary_government } #Keep it to chars on the map please
+				}
+			}
+			random_ruler = {
+				limit = { culture = scope:shift_culture }
+				save_scope_as = chosen_character
+			}
+		}
+		#Fallback, don't show anything
+	}
+	
+	#For other rulers of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0103.accept_same_culture
+		flavor = bp_heritage_linguistic_drift.0103.accept_same_culture.tooltip
+		trigger = { root.culture = scope:shift_culture }
+	}
+	#For other rulers not of the culture
+	option = {
+		name = bp_heritage_linguistic_drift.0103.accept_different_culture
+		flavor = bp_heritage_linguistic_drift.0103.accept_different_culture.tooltip
+		trigger = { NOT = { root.culture = scope:shift_culture } }
+		fallback = yes
+	}
+}

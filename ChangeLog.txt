@@ -1,38 +1,272 @@
-Next v0.1.X
+2023-09-07 v0.1.4
 -----------
 
-Updated the mod for 1.10.0
+Mechanics:
+- Improved CCU model:
+   - Languages:
+      - Introduced notion of dialect continua to provide more granularity to languages
+         - A language can have multiple continua, helping provide a better model for languages at the lowest levels
+      - Introduce notion of creoles to allow genetically unrelated languages to have some degree of relation to each other
+   - Heritages:
+      - Allowed heritages to have multiple heritage groups and families, in line with the generally fuzzy notion of what a heritage is
+      - Added "Kulturbund" concept to capture the relative heritage closeness of some heritages that are still distinct
+         - Example: Altaic Kulturbund for Turkic and Mongolic heritage, Scythian Kulturbund for Sarmatian and Scythian heritages
+- Implemented heritage and language drift events to model the evolution of culture and language during the period
+  - Implemented for Latin heritage and languages
+  - Implemented for Indo-Aryan languages
+- Integrated Nezaros' Minority system and adapted it to WtWSMS
+  - Added new minority map modes to be able to see distribution of minorities on the map
+  - Integrated with council tasks
+    - "Promote Culture" and "Convert County" tasks increase minority level by one (none -> small minority -> large minority -> majority)
+    - By default, the tasks will continue until the majority of the county is changed
+  - Integrated with Migrations
+    - Instead of county modifiers, migrations (major and minor) will spawn minorities based on development and migration type
+- Integrated Typical's Tributary system and adapted it to WtWSMS
+  - Disabled tributary income at the moment, as the tributary income system is broken
+  - General Changes:
+    - Tributaries can call their suzerain to war if being attacked by an external power via decision
+    - Suzerain can always call tributaries to war via decision
+    - Made it possible to refuse a suzerain call to arms, breaking the tribute contract and making tributaries target-able with punitive CBs (reinforce Tribute and depose the punished ruler)
+    - Made it possible to refuse a tributary's call to arms, breaking the tribute contract
+  - New Tributary Types:
+    - Foederatus Tributary
+      - A permanent tributary, but (ai) will never refuse a call to arms, either as a foederatus or a suzerain
+      - Has some additional modifiers for this tribute type
+      - Created "Right to Rule" interaction for Roman Emperors with federates
+        - Enables foederatus to conquer former Roman lands as if Roman Successor
+        - Costs 1000 prestige for the Emperor but grants a 100 year truce (preventing raiding, among other things)
 
-CULTURE:
-- Reduced number of eras by one and renamed: Tribal, Classical Antiquity, Late Antiquity are the new eras
-- Overhauled innovations for a cleaner, more natural progression; every era of the above has 11 innovations now
-- Redistributed Vanilla Tribal innovations 7 effects across the new Tribal, Classical Antiquity, Late Antiquity eras
+Bookmarks:
+- Added New "Rise of the White Huns" bookmark to 476 group
+
+Causus Belli:
+- Minor Migrations
+  - Overhauled code for minor Migrations
+  - The player's capital now gets a small minority of the player's faith and culture if successful
+  - Removed some of the old modifiers that blocked conversion for a limited time
+  - An event now fires a few days after winning a war, allowing players to choose keeping their old government or adopting new ones
+- Major migrations
+  - Counties still have a chance to flip to the migrator's culture & faith
+  - If not, there's a chance to spawn large or small minorities
+  - The probability of these minorities spawning is inversely related to the county's development
+  - Removed some of the old modifiers that allowed rapid conversion for a limited time
+  - An event now fires a few days after winning a war, allowing players to choose keeping their old government or adopting new ones
+- Extended Sub-Roman reconquest CB to Federates with "Right to Rule" character modifier
+  - An event now fires a few days after winning a war, allowing players with "Right to Rule" modifier to choose keeping their old government or adopting new ones
+
+Culture Pillars:
 - Added new heritages:  Common Slavic, Peristani, Sakan, Sarmatian
 - Moved Old Slavic to Common Slavic heritage
 - Broke up East Iranian heritage into several different heritages
     - Sarmatian Heritage: Sarmatian, Alan, Iazyges
     - Sakan Heritage: Sakan, Dahi Scythian, Indo-Scythian
     - Peristani Heritage: Nuristani
-    - Tocharian Heritage: Sogdian, Bactrian, Khwarezmian
-    - Iranian Heritage: Amardian, Afghan
+    - Tocharian Heritage (Now Serindian): Sogdian
+    - Iranian Heritage: Afghan, Khwarezmian, Bactrian, Mazanderani (Amardian)
+- Overhauled languages in line with with the improved CCU model
 
-BUILDINGS:
+Traditions:
+- Added concept of Greco-Roman Social Traditions, raising baseline acceptance between Greek and Roman cultures _but_ preventing their hybridization
+- Added increased baseline acceptance between cultures sharing a Heritage Tradition
+- Caucasian Wolves is tied back to Georgian instead of Colchiscan
+- "Right to Rule"-type changes:
+  - Strong Kinship unlocks the ability to adopt clan government (if neither your culture nor your religion supports your current government type)
+  - Persian Traditions unlocks the ability to adopt Eranshar government (if neither your culture nor your religion supports your current government type)
+
+Culture:
+- Added a number of custom culture creation names from CK2 WtWSMS
+- Added customized culture histories that provide players with additional information regarding cultures and design decisions
+- Added New Cultures:
+  - Arabic Heritage:
+    - Qatarye: Christian coastal Arabs with significant commercial influence before Islam
+  - Baltic Heritage:
+    - Sudovian: Models the ancient people who were attested as early as Herodotus and Ptolemy
+    - East Galindian: Baltic people listed in Slavic records, likely separate from the (Western) Galindians
+    - Kolochin: Balto-Slavic Archaeological Complex between the Vth and VIIth Centuries
+    - Dneiper Baltic: Baltic Subgroup in the Dnieper river basin, extant until (possibly) as late as the XIIIth Century
+  - Caucasian Heritage:
+    - Awaral: Migration Era (Caucasian) Avars
+    - Svan: Ancient highland tribal Kartvelian culture
+  - Indo-Aryan:
+    - Mathil: Models one of the major Gangetic cultures/languages
+    - Gandhari: Early important culture in the transmission of Buddhism to Central Asia
+  - Peristani:
+    - Burusho: Models the non-Indo-European-speaking people in the Yaisn valley
+    - Pamiri: Models the East Iranian-speaking people of the Pamir region (Credit: cyberxkhan's RICE)
+  - Central Germanic:
+    - Suavi: Tribal Suebi that didn't migrate to Galacia (see Hunimund PLRE Vol 2)
+  - Sarmatian:
+    - Romano-Alan: Models the Romanized Alans near Orleans in the Vth Century
+    - Alano-Vandals: Models the Vandalized Alans in the African Vandal Kingdom
+  - Serindian:
+    - Khotanese: Models the Sakanized Tocharian basin culture in Khotan
+  - Southeast Asian (Burman):
+    - Tripuri: Ancient Tibeto-Burman people in Tripuria (Credit: Rajas of Asia)
+    - Khasi: Austroasiatic people settled in Meghalaya (Credit: Rajas of Asia)
+  - Tibetan:
+    - Balti: Tibetan people noted by Ptolemy
+- Changed Cultures:
+  - Przeworsk moved to East Germanic heritage
+  - Brahui moved to Iranian heritage
+  - Reudignian moved to North Germanic heritage
+  - Nuristani moved to Peristani heritage
+- Removed Cultures:
+  - Aeolian (Byzantine heritage)
+  - Gruzinim (Israelite heritage)
+
+Innovations and Eras:
+- Reduced number of eras by one and renamed: Tribal, Classical Antiquity, Late Antiquity are the new eras
+- Redistributed Vanilla Tribal innovations effects across the new Tribal, Classical Antiquity, Late Antiquity eras
+- Overhauled innovations for a cleaner, more natural progression; every era of the above has 10-12 innovations now
+
+Religion Doctrines/Tenets:
+- Added Liturgical Rite Christian flavor Doctrines
+- Moved Christian Ecumenism to be a Christian Doctrine instead of main group doctrine
+- Added "Right to Rule" doctrines from Rajas of Asia, detailing the ability to change government depending on faith and culture
+- Added Buddhist Canon doctrines to Buddhist faiths, courtesy of RICE
+- Moved Hindu Sampradaya doctrines to the main group (as there is only 1 doctrine specific to Hindus)
+- Tweaked nudity doctrine so new Jain faiths can more freely adopt naked priests
+- Added new "Ritual Doctrines" category for Vegetarianism and moved Pilgrimages to the Ritual Doctrine category
+- Zunism uses Zoroastrian Syncretism instead of Ritual Hospitality (under the Zurvan-hypothesis; the links of Zhun to Shiva is handled elsewhere)
+- Donyipoloism uses Communal Identity instead of Ethnic Religion
+- Gnostic Tenets/Doctrines consider each other Astray, not Righteous
+- Doctrine Changes:
+  - Zoroastrian Asvan faiths that share a Head of Faith convert counties to their Head of Faith's faith instead of their own
+  - Iranian Pagans consider and are considered by Zoroastrians to be hostile instead of evil
+- Tenet Changes:
+  - Gnosticism is unavailable to Christians; they use the "Gnosis" Christian doctrine now
+  - Reincarnation is available to Christians with Gnosis Doctrine or Jews with Gnosticism Tenet
+
+Religion:
+- Removed Eastern Pagan family; the relations between the Eastern Faiths and Eastern pagans is now handled by a doctrine
+- Improved Vanilla compatibility and removed some unnecessary religion overwrites
+- Moved Priscilianism to Christianity (formerly Dualism)
+- Reviewed Clergy in all faiths:
+  - Jainism and Buddhism use Lay Clergy
+  - Modified some Dualist Theocracy stances; the proto-Christian faiths now use Theocracy instead of Lay Clergy
+- Scythian Paganism made a faith in the Steppe Religion
+- New religions:
+  - Indian Tribal Religion for Munda and Gondi Paganism
+  - Added Dezawism covering the religious traditions of the Peristani people
+  - Added Austroasiatic religion covering the religious traditions of the Khasi people
+  - Added Iranian Religion covering the proto-Zoroastrian beliefs of the Highland peoples that influenced later Yazidism and Yarsanism
+- New Faiths:
+  - Maronite Church added for the Chalcedon Creed accepting, West Syriac Liturgy Christians that retained their communion with Rome
+
+Buildings:
 - Overhauled buildings in light of innovation rework
+  - Level 1 unlocked in the Tribal Era
+  - Level 2 unlocked in the Classical Antiquity Era
+  - Level 3 unlocked in the Late Antiquity era
+  - Level 4-5 in Early Medieval Era, 6-7 in the High Medieval Era, 8-9 in the Late Medieval Era
 
-DECISIONS/ACTIVITIES:
+Governments:
+- Removed contract option to change non-Gubernatorial governments to Gubernatorial (temporarily, under review)
+
+Council Tasks:
+- Establish Title Task:
+  - Update Establish Title task; progress is saved in the capital and thus stays through a ruler and his councilor's deaths
+  - Moving or loosing the capital county eliminates all progress
+  - Establish Title base speed reduced to 5/3× that of title drift, down from 5/2× title drift speed in light of progress being more readily saved
+
+Decision/Activities:
 - Removed Chariot Races (Temporarily)
+- Added Government Conversion decisions from Rajas of Asia (with permission) and extended to WtWSMS governments
+- Added decisions relating to adopting/abandoning vegetarianism
+- Removed "Proclaim Gothic Empire" decision
 
-MAP/HISTORY:
+Map/History:
 - Added Theodorus, satrap of Sophanene in 502
+- Thaton and Ostrogoths made Tribal in 476 in line with history information
+- Map overhauled
+  - Added new cultures, religions to the map and adjusted them throughout in line with minority mechanics
+  - Overhauled history, especially in Britain, Gaul, Hispania, North Africa
+- Specific Region Notes (includes major cultural/religion changes):
+  - Africa (Northwest):
+    - Added Byzacena duchy to k_africa
+    - Granted Byzacena to Theodoric, son of Gaisaric as per attestation (PLRE Vol 2)
+    - Removed Aeolian and replaced with Greek
+    - Adjusted placement of Montanism, Hypsistarianism to match historical records better
+  - Arabia:
+    - Adjusted some county borders to better represent 
+    - Fixed Zarqa Jadi being alive in 476 and replaced with Monophysite Hanzalah tribe in Yamama
+    - Added Hanwazinid's as a subordinate tribe to Hajr-Amr
+    - Fixed Tamim, Taghlebi, and Al-Qays locations
+    - Removed Lebbaeus presence in Arabia, as Mesan did not extend that far south
+    - Added Christian Qatarye provinces for settled Arabic provinces in the Sassanid Empire
+  - Britannia:
+    - Added additional historic holders to various parts of British territory
+    - Added Jute presence on the Isle of Wight
+    - Added additional Pictish principalities with improved granularity
+    - Moved Pelagian counties to those under Germanic domination, in line with early references to Pelagianism being a problem for the Church in the Urban east
+    - Improved locations of Angles, Jutes, Saxons in the east of Britannia
+  - Caucasus:
+    - Abaza made a vassal of Lazica
+    - Added fictional Svan vassal of Svaneti to match the historic quasi-independence of the region
+    - Sarir moved to a more accurate location centered on Kumukh, as per best sources for its location
+    - Added fictional Durdzuk ruler under Sarir so Sarir is connected (tenuously) to the ERE
+    - Added independent Adyghes ruler in Cabardinia
+    - Adjusted Corduenian culture to better match history
+    - Added Awaral to match historic distribution
+    - Extended Adyghes counties to match historic distribution
+  - Dacia & Moesia:
+    - Added Tuldila's (PLRE Vol 2) descendents in Moesia, as records of Hunnic raiding extend to the Vth Century
+    - Added Hormidak (PLRE Vol 2) as a vassal of the Gepids as he was active during the period
+  - Gaul and Italia:
+    - Corrected the placement of Frankish tribes
+    - Expanded Frankish presence in Gaul
+    - Improved Romano-Raetian distribution
+    - Added new holders for Romano-Alan regions in Gaul
+    - Handled the division of Burgundians between the children of Gunderic (whereas they were previously unlanded)
+    - Adjusted the Roman-Germanic border along the Danube to more accurately represent the chaos of the period
+    - Gave St. Severinus a holding in Sankt Polten under Rugi dominion, to model the complexity of the period
+  - India
+    - Western Satraps moved to a more accurate location
+  - Persia
+    - Zurvanism remains the court religion of the Sassanids, but has no on-map presence
+    - Indo-Parthian used to cover the extent of future Balochi cultures
+    - Brahui brought more in line with historic presence
+  - Tarim Basin and Central Asia
+    - Fixed the horrific Bactrian/Sogdian border (the old version was to fix some CTD; no longer CTDs)
+    - Sakan replaces Sogdian in the Syr Daya basin
+  - Thrace and Hellas:
+    - Gave the Thracian Goths a Hunnic vassal in c_vratsa based on historic attestation of Hunnic settlement & activity into the Vth Century
+    - Tsakonian reduced to historical Tsakonia
+  - Balto-Slavia:
+    - Very much in progress; may be extensively changed in future versions
+    - Adjusted position of Antes and Sklaveni to closer match early Archaeological complexes
+    - Removed ahistorical Slavic tribes (Lutogostians, Berimirians) to have more accurate Balto-Slavic tribes instead
+    - Added additional East Baltic tribes in Aesti territory
+    - Adjusted general disposition of Balts and Slavs in e_russia, e_finland, e_baltic_empire
+  - Germania Magna:
+    - Adjusted borders of many tribal powers to better match historical records, include Saxony, Thuringia, Alamannia, Lombards, Venedi
+    - Added Suavi vassal in the eastern part of the Alamannian Confederation, per Jordanes
+    - Chatti moved to a more accurate region for Vth Century
+    - Cheruscii removed as they were likely no longer extant
+  - Pontic-Caspian Steppe:
+    - Improved the position of the Bolghar tribes
+    - Improved the division of Crimea between the Bosporan Kingdom, the (Crimean) Goths, and Byzantium
+  - Tibetan Plateau:
+    - Balti replaces Zhangzhung in the Kashmir area
+    - Kalash and Burusho made independent, as has more-or-less been the case in that region
+  - Turks:
+    - Turuk/Gokturk culture removed for 476
 
-RELIGION:
-- Improved Vanilla compatibility and removed some religion files
+Localization:
+- Increased number of dynasty names in Old Kamarupan culture
+- Renamed "Gupta" government to "Rajamandala" government
+- Culture Pillars:
+  - Renamed West Iranian heritage to Iranian heritage
+  - Renamed Tocharian heritage to Serindian heritage
+- Cultures:
+  - Added extensive custom culture history localizations to provide players with increased information about various proto-cultures
+  - Renamed Macronian to Lazic
+  - Renamed Galician to Gallaecian to avoid Vanilla collision
+  - Renamed Amardian to Mazanderani
+- Religion Doctrines:
+  - Renamed "Gnostic" Soteriology Doctrine to "Gnosis"
 
-LOCALIZATION:
-- Renamed West Iranian heritage to Iranian heritage
-- Renamed Tocharian heritage to Serindian heritage
-
-BUGFIXES:
+Bugfixes:
 - Fixed vassals to the Roman Empires having access to the Sub-Roman Reconquest CB
 
 2022-12-19 v0.1.3

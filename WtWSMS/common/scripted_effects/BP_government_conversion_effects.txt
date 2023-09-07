@@ -216,8 +216,8 @@ convert_realm_to_prefeudal_effect = {
 convert_realm_to_gupta_effect = {
 	hidden_effect = { remove_all_realm_laws_effect = yes }
 	convert_realm_to_general_government_effect = {
-		GOVERNMENT_TYPE = gupta_government
-		INITIAL_REALM_LAW = gupta_authority_0
+		GOVERNMENT_TYPE = rajamandala_government
+		INITIAL_REALM_LAW = rajamandala_authority_0
 	}
 	hidden_effect = {
 		remove_government_id_effect = { THE_RULER = this }
@@ -378,8 +378,8 @@ set_government_id_effect = {
 		$THE_RULER$ = { set_variable = { name = government_id value = id_prefeudal_government } }
 	}
 	else_if = {
-		limit = { $THE_RULER$ = { has_government = gupta_government } }
-		$THE_RULER$ = { set_variable = { name = government_id value = id_gupta_government } }
+		limit = { $THE_RULER$ = { has_government = rajamandala_government } }
+		$THE_RULER$ = { set_variable = { name = government_id value = id_rajamandala_government } }
 	}
 	else_if = {
 		limit = { $THE_RULER$ = { has_government = eranshar_government } }
@@ -431,55 +431,88 @@ match_government_type_effect = { #NB: For cities, it only applies to counties wi
 	}
 }
 #Migration CB Improve Government (Minor Wars only)
-improve_government_form_effect = {
+improve_government_form_effect = { #### TO REMOVE
 	#Feudal and Clan
 	if = {
 		limit = { $DEFENDER$ = { has_variable = government_id } }
 		if = {
-			limit = { $DEFENDER$.var:government_id = id_feudal_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_feudal_government
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_clan_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_clan_government 
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 		#Primitives
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_tribal_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_tribal_government
+				NOT = { $ATTACKER$ = { has_government = tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_tribal_effect = yes }
 		}
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_nomad_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_nomad_government
+				NOT = { $ATTACKER$ = { has_government = tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_tribal_effect = yes }
 		}
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_high_tribal_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_high_tribal_government
+				NOT = { $ATTACKER$ = { has_government = tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_tribal_effect = yes }
 		}
 		#Intermediate
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_prefeudal_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_prefeudal_government
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 		#Advanced
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_gupta_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_rajamandala_government
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_eranshar_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_eranshar_government
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_subroman_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_subroman_government
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_gubernatorial_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_gubernatorial_government
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 		else_if = {
-			limit = { $DEFENDER$.var:government_id = id_bureaucratic_government }
+			limit = {
+				$DEFENDER$.var:government_id = id_bureaucratic_government
+				NOT = { $ATTACKER$ = { has_government = high_tribal_government } }
+			}
 			$ATTACKER$ = { convert_realm_to_high_tribal_effect = yes }
 		}
 	}
@@ -608,7 +641,7 @@ convert_government_type_effect = { #Must be linked with the above or it won't fi
 			}
 			#Advanced
 			else_if = {
-				limit = { $THE_PREVIOUS_HOLDER$.var:government_id = id_gupta_government }
+				limit = { $THE_PREVIOUS_HOLDER$.var:government_id = id_rajamandala_government }
 				if = {
 					limit = { NOT = { $THE_NEW_HOLDER$.capital_barony.title_province = { has_holding_type = tribal_holding } } }
 					$THE_NEW_HOLDER$ = { convert_realm_to_gupta_effect = yes }
@@ -716,7 +749,7 @@ convert_government_type_without_check_effect = {
 		}
 		#Advanced
 		else_if = {
-			limit = { $THE_PREVIOUS_HOLDER$.var:government_id = id_gupta_government }
+			limit = { $THE_PREVIOUS_HOLDER$.var:government_id = id_rajamandala_government }
 			if = {
 				limit = { NOT = { $THE_NEW_HOLDER$.capital_barony.title_province = { has_holding_type = tribal_holding } } }
 				$THE_NEW_HOLDER$ = { convert_realm_to_gupta_effect = yes }

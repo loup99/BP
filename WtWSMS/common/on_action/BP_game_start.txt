@@ -27,7 +27,7 @@ bp_game_start = {
 		other_title_effects
 		#Religious Stuff
 		convert_christian_chars_to_rites
-		change_vanilla_religion_doctrines
+		change_vanilla_religion_doctrines #Must be before ethnic religion effects
 		set_ethnic_religion_flags
 		set_autocephalous_church_flags
 		other_religion_effects
@@ -438,8 +438,7 @@ setup_realm_and_title_succession_laws = {
 					OR = {
 						this = title:k_gallaecia
 						this = title:k_lombardia
-						
-						#this = title:k_suebia##### TODO (0.1.4): Re-enable
+						this = title:k_suebia
 						#Tarim Basin/Central Asia
 						this = title:k_kucha
 						this = title:d_bukhara
@@ -724,7 +723,7 @@ setup_administrative_languages = {
 		}
 		#Gupta Governments use Sanskrit
 		every_ruler = {
-			limit = { has_government = gupta_government }
+			limit = { has_government = rajamandala_government }
 			if = {
 				limit = { primary_title = { tier >= tier_kingdom } }
 				setup_the_court_language_effect = {
@@ -841,7 +840,7 @@ game_start_fix_barony_government = {
 					this.holder = { convert_realm_to_eranshar_effect = yes }
 				}
 				else_if = {
-					limit = { this.county.holder = { has_government = gupta_government } }
+					limit = { this.county.holder = { has_government = rajamandala_government } }
 					this.holder = { convert_realm_to_gupta_effect = yes }
 				}
 				else_if = {
@@ -890,7 +889,7 @@ game_start_fix_barony_government = {
 					this.holder = { convert_realm_to_eranshar_effect = yes }
 				}
 				else_if = {
-					limit = { this.county.holder = { has_government = gupta_government } }
+					limit = { this.county.holder = { has_government = rajamandala_government } }
 					this.holder = { convert_realm_to_gupta_effect = yes }
 				}
 				else_if = {
@@ -939,21 +938,20 @@ setup_vassal_contracts = {
 					level = 1
 				}
 			}
-			#Everyone under e_xiongnu is a tributary... except d_chach
 			if = { #Vassals of the Gupta Empire are militarily oriented
 				limit = {
 					liege.primary_title = title:e_rajastan
 					primary_title.tier >= tier_duchy
 					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
-					has_government = gupta_government
+					has_government = rajamandala_government
 				}
 				debug_log_scopes = no
 				vassal_contract_set_obligation_level = {
-					type = gupta_government_taxes
+					type = rajamandala_government_taxes
 					level = 1
 				}
 				vassal_contract_set_obligation_level = {
-					type = gupta_government_levies
+					type = rajamandala_government_levies
 					level = 3
 				}
 			}
@@ -972,14 +970,193 @@ setup_vassal_contracts = {
 					level = 1
 				}
 			}
-			#e_rouran Tributaries
+			#Byzantines
+			make_tributary = {
+				TYPE = foederatus_tributary
+				TRIBUTARY = title:d_thracian_goths.holder
+				SUZERAIN = title:e_byzantium.holder
+			}
+			make_tributary = {
+				TYPE = foederatus_tributary
+				TRIBUTARY = title:k_arabia_petraea.holder
+				SUZERAIN = title:e_byzantium.holder
+			}
+			make_tributary = {
+				TYPE = foederatus_tributary
+				TRIBUTARY = title:k_salihid.holder
+				SUZERAIN = title:e_byzantium.holder
+			}
+			make_tributary = {
+				TYPE = tributary_permanent
+				TRIBUTARY = title:k_sarir.holder
+				SUZERAIN = title:e_byzantium.holder
+			}
+			make_tributary = {
+				TYPE = tributary_permanent
+				TRIBUTARY = title:k_lazica.holder
+				SUZERAIN = title:e_byzantium.holder
+			}
+			make_tributary = {
+				TYPE = tributary_permanent
+				TRIBUTARY = title:c_zichia.holder
+				SUZERAIN = title:e_byzantium.holder
+			}
+			#Persians
+			if = {
+				limit = { exists = title:k_caucasian_albania.holder }
+				make_tributary = {
+					TYPE = tributary_permanent
+					TRIBUTARY = title:k_caucasian_albania.holder
+					SUZERAIN = title:e_persia.holder
+				}
+			}
+			else = {
+				make_tributary = {
+					TYPE = tributary_permanent
+					TRIBUTARY = title:d_caucasian_albania.holder
+					SUZERAIN = title:e_persia.holder
+				}
+			}
+			make_tributary = {
+				TYPE = tributary_permanent
+				TRIBUTARY = title:k_iberia.holder
+				SUZERAIN = title:e_persia.holder
+			}
+			make_tributary = {
+				TYPE = tributary_permanent
+				TRIBUTARY = title:k_al_hirah.holder
+				SUZERAIN = title:e_persia.holder
+			}
+			#Xiongnu (Hepthalites)
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_khuttal.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_samarkand.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_bukhara.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_khorezm.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_osrushana.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_ferghana.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_chah.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_muyunkum.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_kashgar.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:k_kabulistan.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:k_kucha.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_syr_darya.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_badakhshan.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_munjan.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_wakhan.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_karran.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_shughnan.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:d_suyab.holder
+				SUZERAIN = title:e_xiongnu.holder
+			}
+			#Rouran
+			make_tributary = {
+				TYPE = tributary_non_permanent
+				TRIBUTARY = title:k_gaochang.holder
+				SUZERAIN = title:e_rouran.holder
+			}
+			#Huns
+			make_tributary = { #Still tied to the Huns, for better or worse
+				TYPE = tributary_permanent
+				TRIBUTARY = title:d_acatiri.holder
+				SUZERAIN = title:e_hunnic_empire.holder
+			}
+			#Orleans Alans
+			make_tributary = {
+				TYPE = tributary_permanent#foederatus_tributary
+				TRIBUTARY = title:d_orleans_alans.holder
+				SUZERAIN = title:k_soissons.holder
+			}
+			#### Britannia
+			make_tributary = { #Deria dependence on York
+				TYPE = tributary_permanent
+				TRIBUTARY = title:d_deria.holder
+				SUZERAIN = title:d_york.holder
+			}
+			make_tributary = { #Surrey dependence on Kent (fought over by several groups)
+				TYPE = tributary_permanent
+				TRIBUTARY = title:c_surrey.holder
+				SUZERAIN = title:d_canterbury.holder
+			}
+			make_tributary = { #Middlesex dependence on Essex
+				TYPE = tributary_permanent
+				TRIBUTARY = title:c_middlesex.holder
+				SUZERAIN = title:d_esseaxena.holder
+			}
 		}
 	}
 }
 other_title_effects = {
 	effect = {
-		#Check the status of k_vandalica's name
-		update_name_of_vandal_kingdom_effect = yes
 		#Unrevokable titles
 		every_duchy = {
 			limit = { this = title:d_senate }
@@ -1030,16 +1207,8 @@ other_title_effects = {
 			limit = { current_date = 476.2.2 }
 			#Britannia
 			title:k_rheged = { set_de_jure_liege_title = title:e_britannia }
-			#African
-			title:k_abyssinia = { set_de_jure_liege_title = title:e_axum }
 			#Persia
 			title:k_mazandaran = { set_de_jure_liege_title = title:e_persia }
-		}
-		#Before the Fall of Rome, k_annonaria title should be under the WRE (to give Romulus *some* hope)
-		#and to enable de jure drift
-		if = {
-			limit = { current_date < 476.9.4 }
-			title:k_annonaria = { set_de_jure_liege_title = title:e_wre }
 		}
 		#Note specific kingdoms that are cultural titles (and thus should block creation of any de jure while titular)
 		
@@ -1160,14 +1329,145 @@ convert_christian_chars_to_rites = {
 }
 change_vanilla_religion_doctrines = {
 	effect = {
-		#Modify Vanilla faiths to fit our design setup (for maximal Vanilla compatibility)
-		every_religion_global = {
+		#Eastern Pagans
+		religion:bon_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = tibetan_sky_burials }
+			}
+			#Individual Faiths
+			faith:bon = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_eastern_syncretism
+					NEW_DOCTRINE = tenet_inner_journey
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_sky_burials
+					NEW_DOCTRINE = tenet_communal_identity
+				}
+			}
+			faith:old_bon = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_esotericism
+					NEW_DOCTRINE = tenet_bhakti
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_sky_burials
+					NEW_DOCTRINE = tenet_communal_identity
+				}
+				if = {
+					limit = { has_dlc_feature = the_northern_lords }
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_human_sacrifice
+						NEW_DOCTRINE = tenet_gruesome_festivals
+					}
+				}
+			}
+		}
+		religion:mundhum_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+				#Tenets: This is true for both of them, actually
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_eastern_syncretism
+					NEW_DOCTRINE = tenet_ethnic_religion
+				}
+			}
+		}
+		religion:qiangic_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+			}
+		}
+		#Other Pagans
+		religion:zunism_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+				#Tenets: Make hybrid between Zoroastianism and Eastern Paganism
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_eastern_syncretism
+					NEW_DOCTRINE = tenet_zoroastrian_syncretism
+				}
+			}
+		}
+		#Organized Religions
+		religion:jainism_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_pluralism_righteous
+					NEW_DOCTRINE = doctrine_pluralism_pluralistic
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_polygamy
+					NEW_DOCTRINE = doctrine_concubines
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_jainism_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_required }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_right_to_rule_rajadharma }
+				#Individual Faiths
+				faith:svetambara = {
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_monasticism
+						NEW_DOCTRINE = tenet_adaptive
+					}
+					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = nudity_doctrine_no_naked_priests }
+				}
+				faith:yapaniya = {
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_asceticism
+						NEW_DOCTRINE = tenet_consolamentum
+					}
+					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = nudity_doctrine_naked_priests }
+				}
+				faith:digambara = { if_does_not_have_doctrine_add_it_effect = { DOCTRINE = nudity_doctrine_naked_priests } }
+			}
+		}
+		#### Global Religion Effects ####
+		every_religion_global = { #If a faith is missing a ritual doctrine, give them the defaults
+			every_faith = {
+				if = {
+					limit = {
+						NOR = {
+							has_doctrine = doctrine_ritual_vegetarianism_required
+							has_doctrine = doctrine_ritual_vegetarianism_clerics
+							has_doctrine = doctrine_ritual_vegetarianism_partial
+							has_doctrine = doctrine_ritual_vegetarianism_no_statement
+						}
+					}
+					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+				}
+			}
+		}
+		every_religion_global = { #Most faiths should be lay clergy, not theocracy
 			limit = {
 				OR = {
 					this = religion:akom_religion
 					this = religion:baltic_religion
 					this = religion:finno_ugric_religion
-					this = religion:jainism_religion
 					this = religion:paganism_religion
 					this = religion:siberian_religion
 					this = religion:west_african_bori_religion
@@ -1178,39 +1478,6 @@ change_vanilla_religion_doctrines = {
 				swap_doctrine_if_it_has_it_effect = {
 					OLD_DOCTRINE = doctrine_theocracy_temporal
 					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
-				}
-			}
-		}
-		every_religion_global = {
-			every_faith = {
-				if = {
-					limit = { has_doctrine = pagan_hostility_doctrine }
-					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_pagan_faith }
-				}
-			}
-		}
-		religion:jainism_religion = {
-			every_faith = {
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = doctrine_pluralism_righteous
-					NEW_DOCTRINE = doctrine_pluralism_pluralistic
-				}
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = doctrine_polygamy
-					NEW_DOCTRINE = doctrine_concubines
-				}
-				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_jainism_faith }
-				faith:svetambara = {
-					swap_doctrine_if_it_has_it_effect = {
-						OLD_DOCTRINE = tenet_monasticism
-						NEW_DOCTRINE = tenet_adaptive
-					}
-				}
-				faith:yapaniya = {
-					swap_doctrine_if_it_has_it_effect = {
-						OLD_DOCTRINE = tenet_asceticism
-						NEW_DOCTRINE = tenet_consolamentum
-					}
 				}
 			}
 		}
@@ -1232,9 +1499,6 @@ set_ethnic_religion_flags = {
 		#Dualism
 		faith:mandeaism = { set_variable = { name = ethnic_religion_culture value = culture:aramean } }
 		faith:sabianism = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
-		#Hinduism
-		faith:kalashism = { set_variable = { name = ethnic_religion_culture value = culture:kalash } }
-		faith:nuristanism = { set_variable = { name = ethnic_religion_culture value = culture:nuristani } }
 		#Judaism
 		faith:samaritan = { set_variable = { name = ethnic_religion_culture value = culture:hebrew } }
 		faith:tzadikite = { set_variable = { name = ethnic_religion_culture value = culture:juhuro } }
@@ -1246,11 +1510,13 @@ set_ethnic_religion_flags = {
 		faith:magyar_pagan  = { set_variable = { name = ethnic_religion_culture value = culture:mogyer } }
 		#Hepthalitism
 		faith:hepthalitism  = { set_variable = { name = ethnic_religion_culture value = culture:hunas } }
-		#Mundaism
-		faith:munda_pagan = { set_variable = { name = ethnic_religion_culture value = culture:munda } }
 		#Paleo-Balkan
 		faith:illyrian_pagan = { set_variable = { name = ethnic_religion_culture value = culture:illyrian } }
 		faith:thracian_pagan = { set_variable = { name = ethnic_religion_culture value = culture:thracian } }
+		#Indian Tribal
+		faith:munda_pagan = { set_variable = { name = ethnic_religion_culture value = culture:munda } }
+		faith:gondi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:gond } }
+		faith:khasi_animism = { set_variable = { name = ethnic_religion_culture value = culture:khasi } }
 	}
 }
 other_religion_effects = {
@@ -1297,7 +1563,7 @@ set_starting_culture_acceptance = {
 					value = 90
 				}
 				set_cultural_acceptance = {
-					target = culture:amardian
+					target = culture:mazanderani
 					value = 83
 				}
 				set_cultural_acceptance = {
@@ -1360,10 +1626,6 @@ set_starting_culture_acceptance = {
 			#ERE
 			culture:greek = {
 				set_cultural_acceptance = {
-					target = culture:aeolian
-					value = 100
-				}
-				set_cultural_acceptance = {
 					target = culture:helleno_thracian
 					value = 100
 				}
@@ -1380,7 +1642,7 @@ set_starting_culture_acceptance = {
 					value = 88
 				}
 				set_cultural_acceptance = {
-					target = culture:macronian
+					target = culture:lazic
 					value = 84
 				}
 				set_cultural_acceptance = {
@@ -1584,7 +1846,7 @@ fix_custom_character_governments = {
 				limit = {
 					scope:the_previous_holder = {
 						has_variable = government_id
-						var:government_id = id_gupta_government
+						var:government_id = id_rajamandala_government
 					}
 				}
 				convert_realm_to_gupta_effect = yes

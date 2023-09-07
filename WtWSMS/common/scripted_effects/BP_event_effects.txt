@@ -72,52 +72,6 @@ form_frankish_kingdom_effect = {
 	}
 }
 
-form_gothic_empire_effect = {
-	#If you have the Visigoths or Ostrogoths, replace the COA with your kingdom title
-	if = {
-		limit = { primary_title = title:k_visigoths }
-		title:e_goths = { set_coa = title:k_visigoths }
-	}
-	else_if = {
-		limit = { primary_title = title:k_ostrogoths }
-		title:e_goths = { set_coa = title:k_ostrogoths }
-	}
-	every_held_title = { #Should shift all dejure of all Empires owned at the time.
-		limit = { tier = tier_empire }
-		every_in_de_jure_hierarchy = {
-			limit = { tier = tier_kingdom }
-			set_de_jure_liege_title = title:e_goths
-		}
-	}
-	create_title_and_vassal_change = {
-		type = created
-		save_scope_as = change
-		add_claim_on_loss = no
-	}
-	title:e_goths = {
-		change_title_holder = {
-			holder = root
-			change = scope:change
-		}
-	}
-	#Shift every kingdom that's completely controlled
-	every_realm_county = { this.kingdom = { add_to_list = possible_kingdoms } }
-	every_in_list = {
-		list = possible_kingdoms
-		limit = { root = { completely_controls = prev.kingdom } }
-		set_de_jure_liege_title = title:e_goths
-	}
-	resolve_title_and_vassal_change = scope:change
-	#Should destroy all other Empires owned at the time.
-	every_held_title = {
-		limit = {
-			tier = tier_empire
-			NOT = { this = title:e_goths }
-		}
-		root = { destroy_title = prev }
-	}
-}
-
 ### Religious Decisions
 
 ### Zoroastrian Events
