@@ -263,53 +263,62 @@ minor_migration_cb_title_management_effect = {
 		}
 	}
 	#Handle attackers old counties
-	every_in_list = {
-		list = attacker_old_counties
-		#For an independent ruler, give counties to random new chars
-		if = {
-			limit = { $ATTACKER$ = { is_independent_ruler = yes } }
-			#Create a new holder
-			create_character = {
-				location = $ATTACKER$.location
-				culture = this.culture
-				faith = this.faith
-				gender_female_chance = {
-					if = {
-						limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
-						value = 0
+	custom_tooltip = {
+		text = your_old_counties_handled
+		every_in_list = {
+			list = attacker_old_counties
+			#For an independent ruler, give counties to random new chars
+			if = {
+				limit = { $ATTACKER$ = { is_independent_ruler = yes } }
+				#Create a new holder
+				create_character = {
+					location = $ATTACKER$.location
+					culture = this.culture
+					faith = this.faith
+					gender_female_chance = {
+						if = {
+							limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
+							value = 0
+						}
+						else_if = {
+							limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
+							value = 100
+						}
+						else = { value = 50 }
 					}
-					else_if = {
-						limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
-						value = 100
-					}
-					else = { value = 50 }
+					save_scope_as = new_char
 				}
-				save_scope_as = new_char
+				scope:new_char = { add_to_list = new_holders }
+				change_title_holder = {
+					holder = scope:new_char
+					change = scope:change_transfered_old_attacker_titles
+					take_baronies = yes
+				}
+				scope:new_char = {
+					becomes_independent = { change = scope:change_attacker_vassals_to_independent }
+				}
 			}
-			scope:new_char = { add_to_list = new_holders }
-			change_title_holder = {
-				holder = scope:new_char
-				change = scope:change_transfered_old_attacker_titles
-				take_baronies = yes
-			}
-			scope:new_char = {
-				becomes_independent = { change = scope:change_attacker_vassals_to_independent }
-			}
-		}
-		else = {
-			change_title_holder = {
-				holder = $ATTACKER$.liege
-				change = scope:change_transfered_old_attacker_titles
-				take_baronies = yes
+			else = {
+				change_title_holder = {
+					holder = $ATTACKER$.liege
+					change = scope:change_transfered_old_attacker_titles
+					take_baronies = yes
+				}
 			}
 		}
 	}
 	#Now handle the attackers old vassals
-	every_in_list = {
-		list = attacker_vassals_to_independent
-		becomes_independent = { change = scope:change_attacker_vassals_to_independent }
+	custom_tooltip = {
+		text = vassals_become_independent
+		every_in_list = {
+			list = attacker_vassals_to_independent
+			becomes_independent = { change = scope:change_attacker_vassals_to_independent }
+		}
 	}
-	$ATTACKER$ = { becomes_independent = { change = scope:change_attacker_becomes_independent } }
+	custom_tooltip = { #Still causing some spamming here...
+		text = you_become_independent
+		$ATTACKER$ = { becomes_independent = { change = scope:change_attacker_becomes_independent } }
+	}
 	#Resolve everything in order
 	resolve_title_and_vassal_change = scope:change_seized_defender_titles
 	resolve_title_and_vassal_change = scope:change_transfered_old_attacker_titles
@@ -325,11 +334,14 @@ minor_migration_cb_title_management_effect = {
 			save_temporary_scope_as = the_holder
 			
 			scope:the_holder = {
-				bootstrap_prevention_effect = {
-					THE_LANDED_TITLE = scope:the_holder.capital_county
-					THE_PREVIOUS_HOLDER = $ATTACKER$
+				if = { #If-block prevents a spam of errors wrt tooltip creation
+					limit = { exists = $ATTACKER$ }
+					bootstrap_prevention_effect = {
+						THE_LANDED_TITLE = scope:the_holder.capital_county
+						THE_PREVIOUS_HOLDER = $ATTACKER$
+					}
+					propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
 				}
-				propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
 			}
 		}
 		#Ensure no gov't trickery here, as things can go sideways fast
