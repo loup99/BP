@@ -15,6 +15,7 @@
 			trigger_when = "[IsRightWindowOpen]"
 			alpha = 0
 			on_start = "[GetScriptedGui('close_senate_view_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+			on_start = "[GetVariableSystem.Clear( 'west_senate' )]"
 		}
 		state = {
 			name = _show
@@ -23,6 +24,7 @@
 			using = Window_Position_MainTab
 			alpha = 1
 			on_start = "[GetScriptedGui('update_senator_list_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+			on_start = "[GetVariableSystem.Set( 'west_senate','true' )]"
 		}
 
 		margin_widget = {
@@ -36,366 +38,264 @@
 			}
 			
 			vbox = {
-				layoutpolicy_horizontal = expanding
-
+			
 				#The header
-				vbox = {
+				header_standard = {
 					layoutpolicy_horizontal = expanding
 
-					header_standard = {
-						layoutpolicy_horizontal = expanding
+					blockoverride "header_text"
+					{
+						text = "SENATE_TITLE"
+					}
 
-						blockoverride "header_text"
-						{
-							text = "SENATE_TITLE"
-						}
-
-						blockoverride "button_close"
-						{
-							onclick = "[GetVariableSystem.Toggle('senate_window')]"
-						}
+					blockoverride "button_close"
+					{
+						onclick = "[GetVariableSystem.Toggle('senate_window')]"
 					}
 				}
 				
+				### Tabs
 				hbox = {
-					margin = { 10 5 }
 					layoutpolicy_horizontal = expanding
-					layoutpolicy_vertical = fixed
-					parentanchor = top|left
-					
-					background = {
-						texture = "gfx/interface/component_tiles/background_area_light.dds"
-						alpha = 0.6
+					name = "senate_tabs"
+
+					button_tab = {
+						layoutpolicy_horizontal = expanding
+						onclick = "[GetVariableSystem.Set( 'west_senate', 'true' )]"
+						down = "[GetVariableSystem.HasValue( 'west_senate', 'true' )]"
+						text = "WESTERN_SENATE_TAB"
+						default_format = "#high"
+
+						using = tooltip_below
 					}
-					
-					#COA
-					coa_title_big = {
-						datacontext = "[GetTitleByKey('d_senate')]"
+					button_tab = {
+						layoutpolicy_horizontal = expanding
+						onclick = "[GetVariableSystem.Set( 'west_senate', 'false' )]"
+						down = "[Not(GetVariableSystem.HasValue( 'west_senate', 'true' ))]"
+						text = "EASTERN_SENATE_TAB"
+						default_format = "#high"
+
+						using = tooltip_below
 					}
-					
-					#Emperor
-					vbox = {
-						text_label_center = {
-							text = "SENATE_EMPERORS"
+				}
+				
+				#Western Senate
+				vbox = {
+					name = "tab_west_senate"
+					layoutpolicy_horizontal = expanding
+					visible = "[GetVariableSystem.HasValue( 'west_senate','true' )]"
+
+					#Top Box
+					hbox = {
+						margin = { 10 20 }
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = fixed
+						parentanchor = top|left
+						
+						background = {
+							texture = "gfx/interface/component_tiles/background_area_light.dds"
+							alpha = 0.6
 						}
-						expand = {}
-						hbox = {
-							vbox = {
-								text_label_center = {
-									text = "SENATE_WESTERN_EMPEROR"
-								}
-								vbox = {
-									visible = "[GetTitleByKey('e_wre').HasHolder]"
-									portrait_shoulders = {
-										datacontext = "[GetTitleByKey('e_wre').GetHolder]"
-										blockoverride "opinion_box"
-										{
-											visible = "['(bool)yes']"
-										}
-									}
-									text_label_center = {
-										text = "[GetTitleByKey('e_wre').GetHolder.GetCharacterViewName]"
-									}
-								}
-								#If there's no emperor, just show an outline
-								vbox = {
-									visible = "[Not(GetTitleByKey('e_wre').HasHolder)]"
-									empty_char = {
-										block "tooltip"
-										{ tooltip = "EMPEROR_EMPTY" }
-									}
-								}
+						
+						#COA
+						coa_title_big = {
+							datacontext = "[GetTitleByKey('d_senate')]"
+						}
+						
+						#Emperor
+						vbox = {
+							text_label_center = {
+								text = "WESTERN_SENATE_EMPEROR"
 							}
 							expand = {}
-							spacer = { size = { 50 10 } }
-							vbox = {
-								text_label_center = {
-									text = "SENATE_EASTERN_EMPEROR"
-								}
+							hbox = {
 								vbox = {
-									visible = "[GetTitleByKey('e_byzantium').HasHolder]"
-									portrait_shoulders = {
-										datacontext = "[GetTitleByKey('e_byzantium').GetHolder]"
-										blockoverride "opinion_box"
-										{
-											visible = "['(bool)yes']"
+									vbox = {
+										visible = "[GetTitleByKey('e_wre').HasHolder]"
+										portrait_shoulders = {
+											datacontext = "[GetTitleByKey('e_wre').GetHolder]"
+											blockoverride "opinion_box"
+											{
+												visible = "['(bool)yes']"
+											}
+										}
+										text_label_center = {
+											text = "[GetTitleByKey('e_wre').GetHolder.GetCharacterViewName]"
 										}
 									}
-									text_label_center = {
-										text = "[GetTitleByKey('e_byzantium').GetHolder.GetCharacterViewName]"
+									#If there's no emperor, just show an outline
+									vbox = {
+										visible = "[Not(GetTitleByKey('e_wre').HasHolder)]"
+										empty_char = {
+											block "tooltip"
+											{ tooltip = "EMPEROR_EMPTY" }
+										}
 									}
 								}
-								#If there's no emperor, just show an outline
+								expand = {}
+							}
+						}
+						
+						expand = {}
+						
+						#Top Liege of Rome
+						vbox = {
+							text_label_center = {
+								text = "SENATE_TOP_LIEGE_OF_ROME"
+							}
+							portrait_shoulders = {
+								datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege]"
+								blockoverride "opinion_box"
+								{
+									visible = "['(bool)yes']"
+								}
+							}
+							text_label_center = {
+								text = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege.GetCharacterViewName]"
+							}
+						}
+						
+						expand = {}
+						
+						#Consuls
+						vbox = {
+							text_label_center = {
+								text = "WESTERN_SENATE_CONSULS"
+							}
+							
+							hbox = {
+								dynamicgridbox = {
+									datamodel = "[GetPlayer.MakeScope.GetList('the_counsuls')]"
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = expanding
+									datamodel_wrap = 2
+									
+									item = {
+										portrait_shoulders = {
+											datacontext = "[Scope.GetCharacter]"
+											blockoverride "opinion_box"
+											{
+												visible = "['(bool)yes']"
+											}
+											text_label_center = {
+												parentanchor = hcenter|bottom
+												position = { 0 25 }
+												text = "[Scope.GetCharacter.GetCharacterViewName]"
+											}
+										}
+									}
+								}
+								spacer = { size = { 50 10 } }
+								#If there's less than two, show just an outline
 								vbox = {
-									visible = "[Not(GetTitleByKey('e_byzantium').HasHolder)]"
 									empty_char = {
+										blockoverride "visible"
+										{ visible = "[LessThan_int32(GetDataModelSize(GetPlayer.MakeScope.GetList('the_counsul')),'(int32)2')]" }
 										block "tooltip"
-										{ tooltip = "EMPEROR_EMPTY" }
-									}
-								}
-							}
-						}
-					}
-					
-					expand = {}
-					
-					#Top Liege of Rome
-					vbox = {
-						text_label_center = {
-							text = "SENATE_LEADER_OF_ROME"
-						}
-						portrait_shoulders = {
-							datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege]"
-							blockoverride "opinion_box"
-							{
-								visible = "['(bool)yes']"
-							}
-						}
-						text_label_center = {
-							text = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege.GetCharacterViewName]"
-						}
-					}
-					
-					expand = {}
-					
-					#Consuls
-					vbox = { #TODO: Add char names to this
-						text_label_center = {
-							text = "SENATE_CONSUL"
-						}
-						hbox = {
-							dynamicgridbox = {
-								datamodel = "[GetPlayer.MakeScope.GetList('the_counsuls')]"
-								layoutpolicy_horizontal = expanding
-								layoutpolicy_vertical = expanding
-								datamodel_wrap = 2
-								
-								item = {
-									portrait_shoulders = {
-										datacontext = "[Scope.GetCharacter]"
-										blockoverride "opinion_box"
-										{
-											visible = "['(bool)yes']"
-										}
+										{ tooltip = "SENATE_SINE_COLLEGA" }
 										text_label_center = {
 											parentanchor = hcenter|bottom
 											position = { 0 25 }
-											text = "[Scope.GetCharacter.GetCharacterViewName]"
-										}
-									}
-								}
-							}
-							spacer = { size = { 50 10 } }
-							#If there's less than two, show just an outline
-							vbox = {
-								empty_char = {
-									blockoverride "visible"
-									{ visible = "[LessThan_int32(GetDataModelSize(GetPlayer.MakeScope.GetList('the_counsul')),'(int32)2')]" }
-									block "tooltip"
-									{ tooltip = "SENATE_SINE_COLLEGA" }
-									text_label_center = {
-										parentanchor = hcenter|bottom
-										position = { 0 25 }
-										text = "SENATE_SINE_COLLEGA_NAME"
-									}
-								}
-							}
-						}
-					}
-					
-					expand = {}
-					
-					spacer = {}
-				}
-				
-				
-				###########
-				#The Lower Lists
-				###########
-				hbox = {
-					layoutpolicy_horizontal = expanding
-					layoutpolicy_vertical = expanding
-					margin_top = 00
-					margin_right = 50
-					margin_left = 30
-					margin_bottom = 00
-					ignoreinvisible = yes
-					
-					background = {
-						texture = "gfx/interface/component_tiles/background_area_light.dds"
-						alpha = 0.6
-					}
-					
-					#Senatorial Breakdown
-					vbox = {
-						#Roman Senators in Rome List
-						vbox = {
-							layoutpolicy_horizontal = expanding
-							margin_right = 20
-							margin_left = 20
-							
-							text_label_center = {
-								text = "SENATORS_IN_ROME"
-							}
-							scrollbox = {
-								name = "senator_list"
-								parentanchor = top
-								layoutpolicy_vertical = shrinking
-								layoutpolicy_horizontal = shrinking
-								size = { 450 200 }
-								
-								background = {
-									texture = "gfx/interface/component_tiles/background_area_light.dds"
-									alpha = 0.6
-								}
-								
-								blockoverride "scrollbox_margins" {}
-								blockoverride "scrollbox_content"
-								{
-									hbox = {
-										layoutpolicy_horizontal = expanding
-										layoutpolicy_vertical = expanding
-										spacing = 0
-										
-										vbox = {
-											layoutpolicy_vertical = expanding
-											
-											dynamicgridbox = {
-												datamodel = "[GetPlayer.MakeScope.GetList('senators_in_rome_list')]"
-												layoutpolicy_horizontal = expanding
-												layoutpolicy_vertical = expanding
-												datamodel_wrap = 3
-												flipdirection = yes
-												item = {
-													portrait_shoulders = {
-														datacontext = "[Scope.GetCharacter]"
-														blockoverride "opinion_box"
-														{
-															visible = "['(bool)yes']"
-														}
-														#Actual Roman Ruler Support
-														coa_realm_tiny = {
-															datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege]"
-															parentanchor = bottom|right
-															icon = {
-																visible = "[GetScriptedGui('senator_positive_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-																size = { 20 20 }
-																parentanchor = center|right
-																texture = "gfx/interface/hud/toast_bg_good.dds"
-																tooltip = "SENATE_SENATOR_SUPPORTS"
-															}
-															icon = {
-																visible = "[GetScriptedGui('senator_neutral_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-																size = { 20 20 }
-																parentanchor = center|right
-																texture = "gfx/interface/hud/toast_bg_neutral.dds"
-																tooltip = "SENATE_SENATOR_NEUTRAL"
-															}
-															icon = {
-																visible = "[GetScriptedGui('senator_hostile_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-																size = { 20 20 }
-																parentanchor = center|right
-																texture = "gfx/interface/hud/toast_bg_bad.dds"
-																tooltip = "SENATE_SENATOR_HOSTILE"
-															}
-														}
-													}
-												}
-											}
+											text = "SENATE_SINE_COLLEGA_NAME"
 										}
 									}
 								}
 							}
 						}
-						#Senatorial Factions
+						
+						expand = {}
+					}
+					
+					spacer = { size = { 10 20 } }
+					
+					###########
+					#The Lower Lists
+					###########
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						margin_top = 00
+						margin_right = 50
+						margin_left = 30
+						margin_bottom = 00
+						ignoreinvisible = yes
+						
+						background = {
+							texture = "gfx/interface/component_tiles/background_area_light.dds"
+							alpha = 0.6
+						}
+						
+						#List of Senators & Factions (to do later...)
 						vbox = {
-							text_label_center = {
-								text = "SENATE_SENATORIAL_FACTIONS"
-							}
 							vbox = {
+								layoutpolicy_horizontal = expanding
+								margin_right = 20
+								margin_left = 20
+								
 								text_label_center = {
-									text = "SENATE_ROME_TOP_LIEGE_FACTIONS"
+									text = "WESTERN_SENATORS"
 								}
-								hbox = {
-									vbox = {
-										text_label_center = {
-											text = "SENATE_SUPPORTERS"
-										}
-										text_label_center = {
-											raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_supportive'))])"
-										}
+								scrollbox = {
+									name = "senator_list"
+									parentanchor = top
+									layoutpolicy_vertical = shrinking
+									layoutpolicy_horizontal = shrinking
+									size = { 450 200 }
+									
+									background = {
+										texture = "gfx/interface/component_tiles/background_area_light.dds"
+										alpha = 0.6
 									}
-									spacer = { size = { 30 0 } }
-									vbox = {
-										text_label_center = {
-											text = "SENATE_NEUTRALS"
-										}
-										text_label_center = {
-											raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_neutral'))])"
-										}
-									}
-									spacer = { size = { 30 0 } }
-									vbox = {
-										text_label_center = {
-											text = "SENATE_HOSTILES"
-										}
-										text_label_center = {
-											raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_hostile'))])"
-										}
-									}
-								}
-							}
-							
-						}
-					}
-					
-					expand = {}
-					
-					#Houses List
-					vbox = {
-						vbox = {
-							layoutpolicy_horizontal = expanding
-							margin_right = 20
-							margin_left = 20
-							
-							text_label_center = {
-								text = "SENATE_HOUSES"
-							}
-							scrollbox = {
-								name = "house_list"
-								parentanchor = top
-								layoutpolicy_vertical = shrinking
-								layoutpolicy_horizontal = shrinking
-								size = { 450 300 }
-								
-								blockoverride "scrollbox_margins" {}
-								blockoverride "scrollbox_content"
-								{
-									hbox = {
-										layoutpolicy_horizontal = expanding
-										layoutpolicy_vertical = expanding
-										spacing = 0
-										
-										vbox = {
+									
+									blockoverride "scrollbox_margins" {}
+									blockoverride "scrollbox_content"
+									{
+										hbox = {
+											layoutpolicy_horizontal = expanding
 											layoutpolicy_vertical = expanding
+											spacing = 0
 											
-											dynamicgridbox = {
-												datamodel = "[GetPlayer.MakeScope.GetList('senate_family_list')]"
-												layoutpolicy_horizontal = expanding
+											vbox = {
 												layoutpolicy_vertical = expanding
-												datamodel_wrap = 3
-												flipdirection = yes
-												item = {
-													coa_dynasty_big = {
-														datacontext = "[Scope.Dynasty]"
-														blockoverride "opinion_box"
-														{
-															visible = "['(bool)yes']"
-														}
-														blockoverride "coa_tooltip"
-														{
-															tooltipwidget = {
-																using = SenateDynastyTooltip
+												
+												dynamicgridbox = {
+													datamodel = "[GetPlayer.MakeScope.GetList('senators_in_rome_list')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													datamodel_wrap = 3
+													flipdirection = yes
+													item = {
+														portrait_shoulders = {
+															datacontext = "[Scope.GetCharacter]"
+															blockoverride "opinion_box"
+															{
+																visible = "['(bool)yes']"
+															}
+															#Actual Roman Ruler Support
+															coa_realm_tiny = {
+																datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege]"
+																parentanchor = bottom|right
+																####    icon = {
+																####    	visible = "[GetScriptedGui('senator_positive_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
+																####    	size = { 20 20 }
+																####    	parentanchor = center|right
+																####    	texture = "gfx/interface/hud/toast_bg_good.dds"
+																####    	tooltip = "SENATE_SENATOR_SUPPORTS"
+																####    }
+																####    icon = {
+																####    	visible = "[GetScriptedGui('senator_neutral_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
+																####    	size = { 20 20 }
+																####    	parentanchor = center|right
+																####    	texture = "gfx/interface/hud/toast_bg_neutral.dds"
+																####    	tooltip = "SENATE_SENATOR_NEUTRAL"
+																####    }
+																####    icon = {
+																####    	visible = "[GetScriptedGui('senator_hostile_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
+																####    	size = { 20 20 }
+																####    	parentanchor = center|right
+																####    	texture = "gfx/interface/hud/toast_bg_bad.dds"
+																####    	tooltip = "SENATE_SENATOR_HOSTILE"
+																####    }
 															}
 														}
 													}
@@ -405,42 +305,545 @@
 									}
 								}
 							}
+							####    #Senatorial Factions
+							####    vbox = {
+							####    	text_label_center = {
+							####    		text = "SENATE_SENATORIAL_FACTIONS"
+							####    	}
+							####    	vbox = {
+							####    		text_label_center = {
+							####    			text = "SENATE_ROME_TOP_LIEGE_FACTIONS"
+							####    		}
+							####    		hbox = {
+							####    			vbox = {
+							####    				text_label_center = {
+							####    					text = "SENATE_SUPPORTERS"
+							####    				}
+							####    				text_label_center = {
+							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_supportive'))])"
+							####    				}
+							####    			}
+							####    			spacer = { size = { 30 0 } }
+							####    			vbox = {
+							####    				text_label_center = {
+							####    					text = "SENATE_NEUTRALS"
+							####    				}
+							####    				text_label_center = {
+							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_neutral'))])"
+							####    				}
+							####    			}
+							####    			spacer = { size = { 30 0 } }
+							####    			vbox = {
+							####    				text_label_center = {
+							####    					text = "SENATE_HOSTILES"
+							####    				}
+							####    				text_label_center = {
+							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_hostile'))])"
+							####    				}
+							####    			}
+							####    		}
+							####    	}
+							####    }
 						}
 						
-						spacer = { size = { 10 10 } }
+						expand = {}
 						
-						#Senate Interactions
-						hbox = {
-							size = { 450 100 }
+						#Houses List
+						vbox = {
+							vbox = {
+								layoutpolicy_horizontal = expanding
+								margin_right = 20
+								margin_left = 20
+								
+								text_label_center = {
+									text = "WESTERN_SENATE_DYNASTIES"
+								}
+								scrollbox = {
+									name = "house_list"
+									parentanchor = top
+									layoutpolicy_vertical = shrinking
+									layoutpolicy_horizontal = shrinking
+									size = { 450 300 }
+									
+									blockoverride "scrollbox_margins" {}
+									blockoverride "scrollbox_content"
+									{
+										hbox = {
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = expanding
+											spacing = 0
+											
+											vbox = {
+												layoutpolicy_vertical = expanding
+												
+												dynamicgridbox = {
+													datamodel = "[GetPlayer.MakeScope.GetList('senate_family_list')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													datamodel_wrap = 3
+													flipdirection = yes
+													item = {
+														coa_dynasty_big = {
+															datacontext = "[Scope.Dynasty]"
+															blockoverride "opinion_box"
+															{
+																visible = "['(bool)yes']"
+															}
+															blockoverride "coa_tooltip"
+															{
+																tooltipwidget = {
+																	using = SenateDynastyTooltip
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 							
+							spacer = { size = { 10 10 } }
+						}
+					}
+					
+					spacer = { size = { 10 20 } }
+					
+					#Senate Interactions
+					vbox = {
+						layoutpolicy_horizontal = expanding
+						
+						background = {
+							texture = "gfx/interface/component_tiles/background_area_light.dds"
+							alpha = 0.6
+						}
+						
+						text_label_center = {
+							text = "WEST_SENTATE_INTERACTIONS"
+						}
+						
+						hbox = {
 							button_standard = {
 								parentanchor = left|top
 								layoutpolicy_horizontal = expanding
-								size = { 200 30 }
+								size = { 250 30 }
 								
-								text = "REQUEST_SENATE_RECOGNITION"
+								text = "REQUEST_WESTERN_SENATE_RECOGNITION"
+								
+								enabled = "[And(ObjectsEqual(GetTitleByKey('c_roma').GetHolder.GetTopLiege.GetTopLiege,GetPlayer),Not(GetPlayer.MakeScope.Var('already_asked_the_senate').IsSet))]"
+								tooltip = "REQUEST_WESTERN_SENATE_RECOGNITION_TOOLTIP"
+								
+								onclick = "[GetScriptedGui('request_western_senate_recognition_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+								onclick = "[GetVariableSystem.Toggle('senate_window')]"
+								down = "[GetScriptedGui('request_western_senate_recognition_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
 							}
 							spacer = { size = { 50 10 } }
 							button_standard = {
 								parentanchor = left|top
 								layoutpolicy_horizontal = expanding
-								size = { 200 30 }
+								size = { 250 30 }
 								#Enabled under the following conditions:
 								# 1). Actually has Rome under control
-								#   Or(ObjectsEqual(GetPlayer,GetTitleByKey('c_roma').GetHolder),ObjectsEqual(GetPlayer,GetTitleByKey('c_roma').GetHolder.GetTopLiege))
+								#   ObjectsEqual(GetTitleByKey('c_roma').GetHolder.GetTopLiege.GetTopLiege,GetPlayer)
 								# 2). Doesn't have a Roman Empire
 								#   Not(Or(Or(ObjectsEqual(GetPlayer,GetTitleByKey('e_wre').GetHolder),ObjectsEqual(GetPlayer,GetTitleByKey('e_byzantium').GetHolder)),ObjectsEqual(GetPlayer,GetTitleByKey('e_roman_empire').GetHolder)))
 								# 3). Is not bureaucratic/gubernatorial, or subroman government
 								#   Not(Or(Or(GetPlayer.GetGovernment.IsType('bureaucratic_government'),GetPlayer.GetGovernment.IsType('gubernatorial_government')),GetPlayer.GetGovernment.IsType('subroman_government')))
 								
-								enabled = "[And(And(Or(ObjectsEqual(GetPlayer,GetTitleByKey('c_roma').GetHolder),ObjectsEqual(GetPlayer,GetTitleByKey('c_roma').GetHolder.GetTopLiege)),Not(Or(Or(ObjectsEqual(GetPlayer,GetTitleByKey('e_wre').GetHolder),ObjectsEqual(GetPlayer,GetTitleByKey('e_byzantium').GetHolder)),ObjectsEqual(GetPlayer,GetTitleByKey('e_roman_empire').GetHolder)))),Not(Or(Or(GetPlayer.GetGovernment.IsType('bureaucratic_government'),GetPlayer.GetGovernment.IsType('gubernatorial_government')),GetPlayer.GetGovernment.IsType('subroman_government'))))]"
+								enabled = "[And(ObjectsEqual(GetTitleByKey('c_roma').GetHolder.GetTopLiege.GetTopLiege,GetPlayer),And(Not(Or(Or(ObjectsEqual(GetPlayer,GetTitleByKey('e_wre').GetHolder),ObjectsEqual(GetPlayer,GetTitleByKey('e_byzantium').GetHolder)),ObjectsEqual(GetPlayer,GetTitleByKey('e_roman_empire').GetHolder))),Not(Or(Or(GetPlayer.GetGovernment.IsType('bureaucratic_government'),GetPlayer.GetGovernment.IsType('gubernatorial_government')),GetPlayer.GetGovernment.IsType('subroman_government')))))]"
 								
-								text = "DISBAND_THE_SENATE"
+								text = "DISBAND_WESTERN_SENATE"
 								
-								onclick = "[GetScriptedGui('disestablish_senate_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+								onclick = "[GetScriptedGui('disestablish_western_senate_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
 								onclick = "[GetVariableSystem.Toggle('senate_window')]"
-								down = "[GetScriptedGui('disestablish_senate_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
-								tooltip = "ROMAN_SENATE_DISBAND_TOOLTIP"
+								down = "[GetScriptedGui('disestablish_western_senate_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+								tooltip = "DISBAND_WESTERN_SENATE_TOOLTIP"
+							}
+						}
+					}
+				}
+				
+				#Eastern Senate
+				vbox = {
+					name = "tab_east_senate"
+					layoutpolicy_horizontal = expanding
+					visible = "[Not(GetVariableSystem.HasValue( 'west_senate','true' ))]"
+
+					#Top Box
+					hbox = {
+						margin = { 10 20 }
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = fixed
+						parentanchor = top|left
+						
+						background = {
+							texture = "gfx/interface/component_tiles/background_area_light.dds"
+							alpha = 0.6
+						}
+						
+						#COA
+						coa_title_big = {
+							datacontext = "[GetTitleByKey('d_senate')]"
+						}
+						
+						#Emperor
+						vbox = {
+							text_label_center = {
+								text = "EASTERN_SENATE_EMPEROR"
+							}
+							expand = {}
+							hbox = {
+								vbox = {
+									vbox = {
+										visible = "[GetTitleByKey('e_byzantium').HasHolder]"
+										portrait_shoulders = {
+											datacontext = "[GetTitleByKey('e_byzantium').GetHolder]"
+											blockoverride "opinion_box"
+											{
+												visible = "['(bool)yes']"
+											}
+										}
+										text_label_center = {
+											text = "[GetTitleByKey('e_byzantium').GetHolder.GetCharacterViewName]"
+										}
+									}
+									#If there's no emperor, just show an outline
+									vbox = {
+										visible = "[Not(GetTitleByKey('e_byzantium').HasHolder)]"
+										empty_char = {
+											block "tooltip"
+											{ tooltip = "EMPEROR_EMPTY" }
+										}
+									}
+								}
+								expand = {}
+							}
+						}
+						
+						expand = {}
+						
+						#Top Liege of Rome
+						vbox = {
+							text_label_center = {
+								text = "SENATE_TOP_LIEGE_OF_CONSTANINOPLE"
+							}
+							portrait_shoulders = {
+								datacontext = "[GetTitleByKey('c_byzantion').GetHolder.GetTopLiege]"
+								blockoverride "opinion_box"
+								{
+									visible = "['(bool)yes']"
+								}
+							}
+							text_label_center = {
+								text = "[GetTitleByKey('c_byzantion').GetHolder.GetTopLiege.GetCharacterViewName]"
+							}
+						}
+						
+						expand = {}
+						
+						#Consuls
+						vbox = {
+							text_label_center = {
+								text = "EASTERN_SENATE_CONSULS"
+							}
+							
+							hbox = {
+								dynamicgridbox = {
+									datamodel = "[GetPlayer.MakeScope.GetList('the_counsuls')]"
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = expanding
+									datamodel_wrap = 2
+									
+									item = {
+										portrait_shoulders = {
+											datacontext = "[Scope.GetCharacter]"
+											blockoverride "opinion_box"
+											{
+												visible = "['(bool)yes']"
+											}
+											text_label_center = {
+												parentanchor = hcenter|bottom
+												position = { 0 25 }
+												text = "[Scope.GetCharacter.GetCharacterViewName]"
+											}
+										}
+									}
+								}
+								spacer = { size = { 50 10 } }
+								#If there's less than two, show just an outline
+								vbox = {
+									empty_char = {
+										blockoverride "visible"
+										{ visible = "[LessThan_int32(GetDataModelSize(GetPlayer.MakeScope.GetList('the_counsul')),'(int32)2')]" }
+										block "tooltip"
+										{ tooltip = "SENATE_SINE_COLLEGA" }
+										text_label_center = {
+											parentanchor = hcenter|bottom
+											position = { 0 25 }
+											text = "SENATE_SINE_COLLEGA_NAME"
+										}
+									}
+								}
+							}
+						}
+						
+						expand = {}
+					}
+					
+					spacer = { size = { 10 20 } }
+					
+					###########
+					#The Lower Lists
+					###########
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						margin_top = 00
+						margin_right = 50
+						margin_left = 30
+						margin_bottom = 00
+						ignoreinvisible = yes
+						
+						background = {
+							texture = "gfx/interface/component_tiles/background_area_light.dds"
+							alpha = 0.6
+						}
+						
+						#List of Senators & Factions (to do later...)
+						vbox = {
+							vbox = {
+								layoutpolicy_horizontal = expanding
+								margin_right = 20
+								margin_left = 20
+								
+								text_label_center = {
+									text = "EASTERN_SENATORS"
+								}
+								scrollbox = {
+									name = "senator_list"
+									parentanchor = top
+									layoutpolicy_vertical = shrinking
+									layoutpolicy_horizontal = shrinking
+									size = { 450 200 }
+									
+									background = {
+										texture = "gfx/interface/component_tiles/background_area_light.dds"
+										alpha = 0.6
+									}
+									
+									blockoverride "scrollbox_margins" {}
+									blockoverride "scrollbox_content"
+									{
+										hbox = {
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = expanding
+											spacing = 0
+											
+											vbox = {
+												layoutpolicy_vertical = expanding
+												
+												dynamicgridbox = {
+													datamodel = "[GetPlayer.MakeScope.GetList('senators_in_rome_list')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													datamodel_wrap = 3
+													flipdirection = yes
+													item = {
+														portrait_shoulders = {
+															datacontext = "[Scope.GetCharacter]"
+															blockoverride "opinion_box"
+															{
+																visible = "['(bool)yes']"
+															}
+															#Actual Roman Ruler Support
+															coa_realm_tiny = {
+																datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege]"
+																parentanchor = bottom|right
+																####    icon = {
+																####    	visible = "[GetScriptedGui('senator_positive_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
+																####    	size = { 20 20 }
+																####    	parentanchor = center|right
+																####    	texture = "gfx/interface/hud/toast_bg_good.dds"
+																####    	tooltip = "SENATE_SENATOR_SUPPORTS"
+																####    }
+																####    icon = {
+																####    	visible = "[GetScriptedGui('senator_neutral_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
+																####    	size = { 20 20 }
+																####    	parentanchor = center|right
+																####    	texture = "gfx/interface/hud/toast_bg_neutral.dds"
+																####    	tooltip = "SENATE_SENATOR_NEUTRAL"
+																####    }
+																####    icon = {
+																####    	visible = "[GetScriptedGui('senator_hostile_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
+																####    	size = { 20 20 }
+																####    	parentanchor = center|right
+																####    	texture = "gfx/interface/hud/toast_bg_bad.dds"
+																####    	tooltip = "SENATE_SENATOR_HOSTILE"
+																####    }
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+							####    #Senatorial Factions
+							####    vbox = {
+							####    	text_label_center = {
+							####    		text = "SENATE_SENATORIAL_FACTIONS"
+							####    	}
+							####    	vbox = {
+							####    		text_label_center = {
+							####    			text = "SENATE_ROME_TOP_LIEGE_FACTIONS"
+							####    		}
+							####    		hbox = {
+							####    			vbox = {
+							####    				text_label_center = {
+							####    					text = "SENATE_SUPPORTERS"
+							####    				}
+							####    				text_label_center = {
+							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_supportive'))])"
+							####    				}
+							####    			}
+							####    			spacer = { size = { 30 0 } }
+							####    			vbox = {
+							####    				text_label_center = {
+							####    					text = "SENATE_NEUTRALS"
+							####    				}
+							####    				text_label_center = {
+							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_neutral'))])"
+							####    				}
+							####    			}
+							####    			spacer = { size = { 30 0 } }
+							####    			vbox = {
+							####    				text_label_center = {
+							####    					text = "SENATE_HOSTILES"
+							####    				}
+							####    				text_label_center = {
+							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_hostile'))])"
+							####    				}
+							####    			}
+							####    		}
+							####    	}
+							####    }
+						}
+						
+						expand = {}
+						
+						#Houses List
+						vbox = {
+							vbox = {
+								layoutpolicy_horizontal = expanding
+								margin_right = 20
+								margin_left = 20
+								
+								text_label_center = {
+									text = "EASTERN_SENATE_DYNASTIES"
+								}
+								scrollbox = {
+									name = "house_list"
+									parentanchor = top
+									layoutpolicy_vertical = shrinking
+									layoutpolicy_horizontal = shrinking
+									size = { 450 300 }
+									
+									blockoverride "scrollbox_margins" {}
+									blockoverride "scrollbox_content"
+									{
+										hbox = {
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = expanding
+											spacing = 0
+											
+											vbox = {
+												layoutpolicy_vertical = expanding
+												
+												dynamicgridbox = {
+													datamodel = "[GetPlayer.MakeScope.GetList('senate_family_list')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													datamodel_wrap = 3
+													flipdirection = yes
+													item = {
+														coa_dynasty_big = {
+															datacontext = "[Scope.Dynasty]"
+															blockoverride "opinion_box"
+															{
+																visible = "['(bool)yes']"
+															}
+															blockoverride "coa_tooltip"
+															{
+																tooltipwidget = {
+																	using = SenateDynastyTooltip
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+							
+							spacer = { size = { 10 10 } }
+						}
+					}
+					
+					spacer = { size = { 10 20 } }
+					
+					#Senate Interactions
+					vbox = {
+						layoutpolicy_horizontal = expanding
+						
+						background = {
+							texture = "gfx/interface/component_tiles/background_area_light.dds"
+							alpha = 0.6
+						}
+						
+						text_label_center = {
+							text = "EASTERN_SENTATE_INTERACTIONS"
+						}
+						
+						hbox = {
+							button_standard = {
+								parentanchor = left|top
+								layoutpolicy_horizontal = expanding
+								size = { 250 30 }
+								
+								text = "REQUEST_EASTERN_SENATE_RECOGNITION"
+								
+								enabled = "[And(ObjectsEqual(GetTitleByKey('c_byzantion').GetHolder.GetTopLiege.GetTopLiege,GetPlayer),Not(GetPlayer.MakeScope.Var('already_asked_the_senate').IsSet))]"
+								tooltip = "REQUEST_EASTERN_SENATE_RECOGNITION_TOOLTIP"
+								
+								onclick = "[GetScriptedGui('request_western_senate_recognition_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+								onclick = "[GetVariableSystem.Toggle('senate_window')]"
+								down = "[GetScriptedGui('request_western_senate_recognition_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+							}
+							spacer = { size = { 50 10 } }
+							button_standard = {
+								parentanchor = left|top
+								layoutpolicy_horizontal = expanding
+								size = { 250 30 }
+								#Enabled under the following conditions:
+								# 1). Actually has Rome under control
+								#   ObjectsEqual(GetTitleByKey('c_byzantion').GetHolder.GetTopLiege.GetTopLiege,GetPlayer)
+								# 2). Doesn't have a Roman Empire
+								#   Not(Or(Or(ObjectsEqual(GetPlayer,GetTitleByKey('e_wre').GetHolder),ObjectsEqual(GetPlayer,GetTitleByKey('e_byzantium').GetHolder)),ObjectsEqual(GetPlayer,GetTitleByKey('e_roman_empire').GetHolder)))
+								# 3). Is not bureaucratic/gubernatorial, or subroman government
+								#   Not(Or(Or(GetPlayer.GetGovernment.IsType('bureaucratic_government'),GetPlayer.GetGovernment.IsType('gubernatorial_government')),GetPlayer.GetGovernment.IsType('subroman_government')))
+								
+								enabled = "[And(ObjectsEqual(GetTitleByKey('c_byzantion').GetHolder.GetTopLiege.GetTopLiege,GetPlayer),And(Not(Or(Or(ObjectsEqual(GetPlayer,GetTitleByKey('e_wre').GetHolder),ObjectsEqual(GetPlayer,GetTitleByKey('e_byzantium').GetHolder)),ObjectsEqual(GetPlayer,GetTitleByKey('e_roman_empire').GetHolder))),Not(Or(Or(GetPlayer.GetGovernment.IsType('bureaucratic_government'),GetPlayer.GetGovernment.IsType('gubernatorial_government')),GetPlayer.GetGovernment.IsType('subroman_government')))))]"
+								
+								text = "DISBAND_EASTERN_SENATE"
+								
+								onclick = "[GetScriptedGui('disestablish_western_senate_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+								onclick = "[GetVariableSystem.Toggle('senate_window')]"
+								down = "[GetScriptedGui('disestablish_western_senate_gui_effect').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End)]"
+								tooltip = "DISBAND_EASTERN_SENATE_TOOLTIP"
 							}
 						}
 					}
