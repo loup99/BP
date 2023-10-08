@@ -1,6 +1,12 @@
 ﻿namespace = BP_roman_government_events
 
-#0001-0020: Senate deliberates on a new ruler
+#0001-0999: Western Senate Stuff
+##0001-0010: Disestablishment/Reestablishment of the Senate Effects
+##0011-0050: Senate deliberates on recognizing a new ruler
+
+#1000-1999: Eastern Senate Stuff
+##1001-1010: Disestablishment of the Senate Effects
+##1011-1050: Senate deliberates on recognizing a new ruler
 
 scripted_trigger always_dismiss_senate_trigger = {
 	OR = {
@@ -8,11 +14,41 @@ scripted_trigger always_dismiss_senate_trigger = {
 	}
 }
 
-#Ask the Senate for Approval
-BP_roman_government_events.0001 = {
+#0001-0999: Western Senate Stuff
+
+##0001-0010: Disestablishment/Reestablishment of the Senate Effects
+
+BP_roman_government_events.0001 = { #Informational Event on Disestablishing the Senate
 	type = character_event
+	theme = realm
+	
+	immediate = {
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul }
+			save_scope_as = the_consul
+		}
+	}
+	
+	left_portrait = { character = ROOT }
+	right_portrait = { character = scope:the_consul }
+	
 	title = BP_roman_government_events.0001.t
+	
 	desc = BP_roman_government_events.0001.desc
+	
+	option = {
+		name = BP_roman_government_events.0001.do_it
+		disestablished_senate_effect = yes
+	}
+	option = { name = BP_roman_government_events.0001.dont_do_it }
+}
+
+##0011-0050: West Senate deliberates on recognizing a new ruler
+
+BP_roman_government_events.0011 = { #Ask the Senate for Approval
+	type = character_event
+	title = BP_roman_government_events.0011.t
+	desc = BP_roman_government_events.0011.desc
 	theme = realm
 	
 	left_portrait = {
@@ -41,8 +77,8 @@ BP_roman_government_events.0001 = {
 	}
 	
 	option = { #Ask to get Senate Approval
-		name = BP_roman_government_events.0001.seek_approval
-		custom_tooltip = BP_roman_government_events.0001.seek_approval.tootip
+		name = BP_roman_government_events.0011.seek_approval
+		custom_tooltip = BP_roman_government_events.0011.seek_approval.tootip
 		add_prestige = -250
 		add_prestige_level = -1
 		title:d_senate.holder = {
@@ -50,7 +86,7 @@ BP_roman_government_events.0001 = {
 				target = root
 				modifier = sought_senate_approval
 			}
-			trigger_event = { id = BP_roman_government_events.0002 days = 3 }
+			trigger_event = { id = BP_roman_government_events.0012 days = 3 }
 		}
 		ai_chance = {
 			factor = 10
@@ -62,8 +98,8 @@ BP_roman_government_events.0001 = {
 	}
 	
 	option = { #Ignore the Senate
-		name = BP_roman_government_events.0001.dismiss_the_senate
-		custom_tooltip = BP_roman_government_events.0001.dismiss_the_senate.tooltip
+		name = BP_roman_government_events.0011.dismiss_the_senate
+		custom_tooltip = BP_roman_government_events.0011.dismiss_the_senate.tooltip
 		add_prestige = 250
 		title:d_senate.holder = {
 			add_opinion = {
@@ -85,37 +121,35 @@ BP_roman_government_events.0001 = {
 	}
 }
 
-#The Senate deliberates
-BP_roman_government_events.0002 = {
+BP_roman_government_events.0012 = { #The Senate deliberates
 	type = character_event
-	title = BP_roman_government_events.0002.t
-	desc = BP_roman_government_events.0002.desc
+	title = BP_roman_government_events.0012.t
+	desc = BP_roman_government_events.0012.desc
 	theme = realm
 	
 	option = { #Approve of the emperor
-		name = BP_roman_government_events.0002.approve
-		scope:the_liege = { trigger_event = { id = BP_roman_government_events.0003 days = 3 } }
+		name = BP_roman_government_events.0012.approve
+		scope:the_liege = { trigger_event = { id = BP_roman_government_events.0013 days = 3 } }
 	}
 	
 	option = { #Disapprove of the emperor
-		name = BP_roman_government_events.0002.disapprove
+		name = BP_roman_government_events.0012.disapprove
 		trigger = { is_ai = no } ##### TODO (Beta): Make the Senate actually negotiate for the crown
 		scope:the_liege = { trigger_event = { id = BP_roman_government_events.0004 days = 3 } }
 	}
 }
 
-#The Senate Approves!
-BP_roman_government_events.0003 = {
+BP_roman_government_events.0013 = { #The Senate Approves!
 	type = letter_event
-	opening = { desc = BP_roman_government_events.0003.opening }
-	desc = BP_roman_government_events.0003.desc
+	opening = { desc = BP_roman_government_events.0013.opening }
+	desc = BP_roman_government_events.0013.desc
 	
 	sender = title:d_senate.holder
 	
 	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
 	
 	option = { #Disapprove of the emperor
-		name = BP_roman_government_events.0003.a
+		name = BP_roman_government_events.0013.a
 		scope:the_liege = {
 			add_character_modifier = approved_by_the_senate
 			add_opinion = {
@@ -126,17 +160,182 @@ BP_roman_government_events.0003 = {
 	}
 }
 
-#The Senate Rejects!
-BP_roman_government_events.0004 = {
+BP_roman_government_events.0014 = { #The Senate Rejects!
 	type = letter_event
-	opening = { desc =  BP_roman_government_events.0004.opening }
-	desc = BP_roman_government_events.0004.desc
+	opening = { desc =  BP_roman_government_events.0014.opening }
+	desc = BP_roman_government_events.0014.desc
 	sender = title:d_senate.holder
 	
 	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
 	
 	option = { #Boo!
-		name = BP_roman_government_events.0004.a
+		name = BP_roman_government_events.0014.a
+		scope:the_liege = {
+			add_character_modifier = rejected_by_the_senate
+			add_opinion = {
+				target = title:d_senate.holder
+				modifier = insulted_opinion
+			}
+		}
+	}
+}
+
+#1001-1999: Eastern Senate Stuff
+
+##1001-1010: Disestablishment of the Senate Effects
+
+BP_roman_government_events.1001 = { #Informational Event on Disestablishing the Senate
+	type = character_event
+	theme = realm
+	
+	immediate = {
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul }
+			save_scope_as = the_consul
+		}
+	}
+	
+	left_portrait = { character = ROOT }
+	right_portrait = { character = scope:the_consul }
+	
+	title = BP_roman_government_events.1001.t
+	
+	desc = BP_roman_government_events.1001.desc
+	
+	option = {
+		name = BP_roman_government_events.1001.do_it
+		disestablished_senate_effect = yes
+	}
+	option = { name = BP_roman_government_events.1001.dont_do_it }
+}
+
+##1011-1050: East Senate deliberates on recognizing a new ruler
+
+BP_roman_government_events.1011 = { #Ask the Senate for Approval
+	type = character_event
+	title = BP_roman_government_events.1011.t
+	desc = BP_roman_government_events.1011.desc
+	theme = realm
+	
+	left_portrait = {
+		character = ROOT
+		animation = personality_rational
+	}
+	
+	right_portrait = {
+		character = title:d_senate.holder
+		animation = personality_rational
+	}
+	
+	trigger = {
+		#Only fires if the Senate exists
+		any_vassal = { has_title = title:d_senate }
+		#And you're the top liege
+		root = title:d_senate.holder.top_liege
+		#And you don't own the Senate
+		NOT = { root = { has_title = title:d_senate } }
+		#And you haven't had this fire before
+		NOT = { has_variable = already_asked_the_senate }
+	}
+	
+	immediate = {
+		root = { save_scope_as = the_liege }
+	}
+	
+	option = { #Ask to get Senate Approval
+		name = BP_roman_government_events.1011.seek_approval
+		custom_tooltip = BP_roman_government_events.1011.seek_approval.tootip
+		add_prestige = -250
+		add_prestige_level = -1
+		title:d_senate.holder = {
+			add_opinion = {
+				target = root
+				modifier = sought_senate_approval
+			}
+			trigger_event = { id = BP_roman_government_events.1012 days = 3 }
+		}
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = yes
+			}
+		}
+	}
+	
+	option = { #Ignore the Senate
+		name = BP_roman_government_events.1011.dismiss_the_senate
+		custom_tooltip = BP_roman_government_events.1011.dismiss_the_senate.tooltip
+		add_prestige = 250
+		title:d_senate.holder = {
+			add_opinion = {
+				target = root
+				modifier = did_not_seek_senate_approval
+			}
+		}
+		
+		add_character_modifier = ignored_the_senate
+		add_prestige_level = 1
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = no
+			}
+		}
+	}
+}
+
+BP_roman_government_events.1012 = { #The Senate deliberates
+	type = character_event
+	title = BP_roman_government_events.1012.t
+	desc = BP_roman_government_events.1012.desc
+	theme = realm
+	
+	option = { #Approve of the emperor
+		name = BP_roman_government_events.0012.approve
+		scope:the_liege = { trigger_event = { id = BP_roman_government_events.1013 days = 3 } }
+	}
+	
+	option = { #Disapprove of the emperor
+		name = BP_roman_government_events.0012.disapprove
+		trigger = { is_ai = no } ##### TODO (Beta): Make the Senate actually negotiate for the crown
+		scope:the_liege = { trigger_event = { id = BP_roman_government_events.1014 days = 3 } }
+	}
+}
+
+BP_roman_government_events.1013 = { #The Senate Approves!
+	type = letter_event
+	opening = { desc = BP_roman_government_events.0013.opening }
+	desc = BP_roman_government_events.1013.desc
+	
+	sender = title:d_senate.holder
+	
+	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
+	
+	option = { #Disapprove of the emperor
+		name = BP_roman_government_events.1013.a
+		scope:the_liege = {
+			add_character_modifier = approved_by_the_senate
+			add_opinion = {
+				target = title:d_senate.holder
+				modifier = pacified_opinion
+			}
+		}
+	}
+}
+
+BP_roman_government_events.1014 = { #The Senate Rejects!
+	type = letter_event
+	opening = { desc =  BP_roman_government_events.1014.opening }
+	desc = BP_roman_government_events.1014.desc
+	sender = title:d_senate.holder
+	
+	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
+	
+	option = { #Boo!
+		name = BP_roman_government_events.1014.a
 		scope:the_liege = {
 			add_character_modifier = rejected_by_the_senate
 			add_opinion = {
