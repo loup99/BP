@@ -1,33 +1,28 @@
 ﻿senator_in_rome_trigger = {
+	senator_in_location_trigger = {
+		THE_CITY = b_roma
+		THE_REGION = custom_western_senate
+	}
+}
+senator_in_constantinople_trigger = {
+	senator_in_location_trigger = {
+		THE_CITY = b_constantinople
+		THE_REGION = custom_eastern_senate
+	}
+}
+senator_in_location_trigger = {
 	trigger_if = {
 		limit = { is_landed = yes }
-		this.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
+		OR = {
+			this.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			this.capital_barony.title_province = { geographical_region = $THE_REGION$ }
+		}
 	}
 	trigger_else = {
 		exists = this.employer
-		this.employer.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
-	}
-}
-
-#NB: Be careful with these or you can overlap conditions
-senator_is_postive_trigger = { #scope:this is the senator
-	OR = {
-		opinion = { #Is reasonably disposed
-			target = scope:leader_in_question
-			value >= 30
+		OR = {
+			this.employer.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			this.employer.capital_barony.title_province = { geographical_region = $THE_REGION$ }
 		}
-		scope:leader_in_question = { has_hook = prev } #Has a hook on them
-		has_dread_level_towards = { target = scope:leader_in_question level >= 2 } #Or is terrified
 	}
-}
-senator_is_neutral_trigger = { #scope:this is the senator
-	senator_is_postive_trigger = no
-	senator_is_hostile_trigger = no
-}
-senator_is_hostile_trigger = { #scope:this is the senator
-	opinion = { #Pretty much hates you
-		target = scope:leader_in_question
-		value <= -30
-	}
-	senator_is_postive_trigger = no
 }

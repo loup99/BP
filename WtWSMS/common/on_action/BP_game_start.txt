@@ -43,7 +43,7 @@ bp_game_start_after_lobby = {
 		# Culture stuff
 		set_starting_culture_acceptance
 		#Senate Stuff
-		give_senatorial_families_land
+		#give_senatorial_families_land
 		#Other Events
 		trigger_needed_events
 		set_global_variables
@@ -1193,13 +1193,26 @@ setup_roman_senate_families = {
 			limit = { current_date < 603.1.1 }
 			set_global_variable = west_senate_is_established
 		}
-		#Individual Senators
-		
-		#Constantinus Gens
-		character:74411 = { #Marcianus
-			add_trait = senator
-			add_character_modifier = roman_consul
+		#Senators by bookmark
+		if = {
+			limit = { current_date = 476.2.2 }
+			
+			character:74411 = { #Marcianus
+				add_trait = senator
+				add_character_modifier = roman_consul_west
+			}
+			character:145226 = { #Basilicus
+				add_trait = senator
+				add_character_modifier = roman_consul_east
+			}
 		}
+		#Senatorial Families (West)
+		dynasty:1042312 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Anicius Gens
+		dynasty:1022195 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Constantinus Gens
+		dynasty:1042303 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Decius Gens
+		dynasty:roman_dynn_ferreolus = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Ferreolus Gens
+		dynasty:1042302 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Symmachus Gens
+		#Senators (West)
 		#Avitus Gens (1042302)
 		character:74403 = { add_trait = senator } #Avitus of Flamina
 		character:36603 = { add_trait = senator } #Ecdicius
@@ -1224,12 +1237,14 @@ setup_roman_senate_families = {
 		character:1003513 = { add_trait = senator } #Flavius Constantinus (low born?)
 		#Others
 		character:1006014 = { add_trait = senator } #Anicius Probus
-		### Families (alphabetical)
-		dynasty:1042312 = { add_dynasty_modifier = { modifier = roman_senate_family } } #Anicius Gens
-		dynasty:1022195 = { add_dynasty_modifier = { modifier = roman_senate_family } } #Constantinus Gens
-		dynasty:1042303 = { add_dynasty_modifier = { modifier = roman_senate_family } } #Decius Gens
-		dynasty:roman_dynn_ferreolus = { add_dynasty_modifier = { modifier = roman_senate_family } } #Ferreolus Gens
-		dynasty:1042302 = { add_dynasty_modifier = { modifier = roman_senate_family } } #Symmachus Gens
+		
+		#Senatorial Families (East)
+		dynasty:1022189 = { add_dynasty_modifier = { modifier = roman_senate_family_east } } #Basilicus' family
+		dynasty:1022187 = { add_dynasty_modifier = { modifier = roman_senate_family_east } } #Zenon's family
+		dynasty:10424447 = { add_dynasty_modifier = { modifier = roman_senate_family_east } } #Illus' family
+		#Individual Senators (East)
+		character:41722 = { add_trait = senator } #Illus
+		character:70515 = { add_trait = senator } #Zenon
 	}
 }
 other_title_effects = {
@@ -1798,84 +1813,88 @@ set_starting_culture_acceptance = {
 		}
 	}
 }
+
 #Senate Events
-give_senatorial_families_land = {
-	effect = {
-		#The Senatorial Families should be awash in Senators
-		every_living_character = {
-			limit = {
-				exists = dynasty
-				dynasty = { has_dynasty_modifier = roman_senate_family }
-				is_male = yes
-				is_adult = yes
-			}
-			if = {
-				limit = { NOT = { has_trait = senator } }
-				add_trait = senator
-			}
-		}
-		#Get all the non-capital city baronies in the top realm that holds Rome
-		title:b_roma.holder.top_liege = {
-			every_sub_realm_county = {
-				limit = {
-					any_barony = {
-						this.title_province = { has_holding_type = city_holding }
-						is_capital_barony = no
-						#So that holdings in republics aren't seized
-						NOT = { this.county.holder = { has_government = republic_government } }
-					}
-				}
-				add_to_temporary_list = counties_with_city_holdings
-			}
-		}
-		#Get all the unlanded senators from senate families
-		every_living_character = {
-			limit = {
-				exists = dynasty
-				dynasty = { has_dynasty_modifier = roman_senate_family }
-				is_male = yes
-				is_adult = yes
-				is_landed = no
-				has_trait = senator
-			}
-			add_to_temporary_list = senators_without_land
-		}
-		#Land every senator
-		every_in_list = {
-			list = senators_without_land
-			this = { save_temporary_scope_as = the_landless_senator }
-			random_in_list = {
-				list = counties_with_city_holdings
-				save_scope_as = the_county_with_available_city_holdings
-			}
-			scope:the_county_with_available_city_holdings = {
-				every_barony = {
-					limit = {
-						this.county = scope:the_county_with_available_city_holdings
-						this.title_province = { has_holding_type = city_holding }
-						is_capital_barony = no
-					}
-					scope:the_landless_senator = { get_title = prev }
-				}
-			}
-		}
-		#Change up the governments
-		every_in_list = {
-			list = senators_without_land
-			if = {
-				limit = { is_landed = yes }
-				if = {
-					limit = { this.liege = { has_bureaucratic_government_type_trigger = yes } }
-					this = { convert_realm_to_gubernatorial_effect = yes }
-				}
-				else_if = {
-					limit = { this.liege = { has_government = subroman_government } }
-					this = { convert_realm_to_subroman_effect = yes }
-				}
-			}
-		}
-	}
-}
+####give_senatorial_families_land = {
+####	effect = {
+####		#The Senatorial Families should be awash in Senators
+####		every_living_character = {
+####			limit = {
+####				exists = dynasty
+####				dynasty = { has_dynasty_modifier = roman_senate_family }
+####				is_male = yes
+####				is_adult = yes
+####			}
+####			if = {
+####				limit = { NOT = { has_trait = senator } }
+####				add_trait = senator
+####			}
+####		}
+####		#Get all the non-capital city baronies in the top realm that holds Rome
+####		title:b_roma.holder.top_liege = {
+####			every_sub_realm_county = {
+####				limit = {
+####					any_barony = {
+####						this.title_province = { has_holding_type = city_holding }
+####						is_capital_barony = no
+####						#So that holdings in republics aren't seized
+####						NOT = { this.county.holder = { has_government = republic_government } }
+####					}
+####				}
+####				add_to_temporary_list = counties_with_city_holdings
+####			}
+####		}
+####		#Get all the unlanded senators from senate families
+####		every_living_character = {
+####			limit = {
+####				exists = dynasty
+####				dynasty = { has_dynasty_modifier = roman_senate_family }
+####				is_male = yes
+####				is_adult = yes
+####				is_landed = no
+####				has_trait = senator
+####			}
+####			add_to_temporary_list = senators_without_land
+####		}
+####		#Land every senator
+####		every_in_list = {
+####			list = senators_without_land
+####			this = { save_temporary_scope_as = the_landless_senator }
+####			random_in_list = {
+####				list = counties_with_city_holdings
+####				save_scope_as = the_county_with_available_city_holdings
+####			}
+####			scope:the_county_with_available_city_holdings = {
+####				every_barony = {
+####					limit = {
+####						this.county = scope:the_county_with_available_city_holdings
+####						this.title_province = { has_holding_type = city_holding }
+####						is_capital_barony = no
+####					}
+####					scope:the_landless_senator = { get_title = prev }
+####				}
+####			}
+####		}
+####		##### #Change up the governments
+####		##### every_in_list = {
+####		##### 	list = senators_without_land
+####		##### 	if = {
+####		##### 		limit = {
+####		##### 			is_landed = yes
+####		##### 			NOT = { this.top_liege = this }
+####		##### 		}
+####		##### 		if = {
+####		##### 			limit = { this.liege = { has_bureaucratic_government_type_trigger = yes } }
+####		##### 			this = { convert_realm_to_gubernatorial_effect = yes }
+####		##### 		}
+####		##### 		else_if = {
+####		##### 			limit = { this.liege = { has_government = subroman_government } }
+####		##### 			this = { convert_realm_to_subroman_effect = yes }
+####		##### 		}
+####		##### 	}
+####		##### }
+####	}
+####}
 #Other Events
 trigger_needed_events = {
 	effect = {

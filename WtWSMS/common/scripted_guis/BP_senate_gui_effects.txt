@@ -1,16 +1,17 @@
 ﻿close_senate_view_effect = {
 	scope = character
 	effect = {
-		clear_variable_list = all_senator_list #Not used, but should be a secondary window
-		clear_variable_list = senators_in_rome_list #Not used, but should be a secondary window
-		clear_variable_list = senators_not_in_rome_list #Not used, but should be a secondary window
-		#Senate Faction Lists
-		#Rome Holder
-		clear_variable_list = senators_faction_rome_ruler_supportive
-		clear_variable_list = senators_faction_rome_ruler_neutral
-		clear_variable_list = senators_faction_rome_ruler_hostile
-		clear_variable_list = senate_family_list
-		clear_variable_list = the_counsuls
+		clear_variable_list = all_senator_list
+		
+		#West Senate
+		clear_variable_list = senators_in_rome_list
+		clear_variable_list = senate_family_list_west
+		clear_variable_list = west_consul
+		
+		#East Senate
+		clear_variable_list = senators_in_constantinople_list
+		clear_variable_list = senate_family_list_east
+		clear_variable_list = east_consul
 	}
 }
 
@@ -35,42 +36,13 @@ update_senator_list_effect = {
 						target = prev
 					}
 				}
-				
-				#Rome Holder Factions
-				title:c_roma.holder.top_liege = { save_temporary_scope_as = leader_in_question }
-				if = {
-					limit = { senator_is_postive_trigger = yes }
-					root = {
-						add_to_variable_list = {
-							name = senators_faction_rome_ruler_supportive
-							target = prev
-						}
-					}
-				}
-				else_if = {
-					limit = { senator_is_neutral_trigger = yes }
-					root = {
-						add_to_variable_list = {
-							name = senators_faction_rome_ruler_neutral
-							target = prev
-						}
-					}
-				}
-				else_if = {
-					limit = { senator_is_hostile_trigger = yes }
-					root = {
-						add_to_variable_list = {
-							name = senators_faction_rome_ruler_hostile
-							target = prev
-						}
-					}
-				}
 			}
-			#Get all the Senators *not* in Rome and add them to a list
-			else = {
+			#Get all the Senators in Rome and add them to a list
+			if = {
+				limit = { senator_in_constantinople_trigger = yes }
 				root = {
 					add_to_variable_list = {
-						name = senators_not_in_rome_list
+						name = senators_in_constantinople_list
 						target = prev
 					}
 				}
@@ -90,70 +62,48 @@ update_senator_list_effect = {
 		every_living_character = {
 			limit = {
 				exists = dynasty
-				this.dynasty = { has_dynasty_modifier = roman_senate_family }
+				this.dynasty = { has_dynasty_modifier = roman_senate_family_west }
 			}
 			root = {
 				add_to_variable_list = {
-					name = senate_family_list
+					name = senate_family_list_west
 					target = prev.dynasty
+				}
+			}
+		}
+		every_living_character = {
+			limit = {
+				exists = dynasty
+				this.dynasty = { has_dynasty_modifier = roman_senate_family_east }
+			}
+			root = {
+				add_to_variable_list = {
+					name = senate_family_list_east
+					target = prev.dynasty
+				}
+			}
+		}
+		
+		#Get all the Senate Officers
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_west }
+			root = {
+				add_to_variable_list = {
+					name = west_consul
+					target = prev
 				}
 			}
 		}
 		#Get all the Senate Officers
 		every_living_character = {
-			limit = { has_character_modifier = roman_consul }
+			limit = { has_character_modifier = roman_consul_east }
 			root = {
 				add_to_variable_list = {
-					name = the_counsuls
+					name = east_consul
 					target = prev
 				}
 			}
 		}
-	}
-}
-
-senator_is_in_rome = {
-	scope = character
-
-	is_valid = {
-		trigger_if = {
-			limit = { is_landed = yes }
-			this.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
-		}
-		trigger_else = {
-			exists = this.employer
-			this.employer.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
-		}
-	}
-
-	effect = {
-	}
-}
-
-senator_positive_towards_char = {
-	scope = character
-
-	is_valid = { senator_is_postive_trigger = yes }
-
-	effect = {
-	}
-}
-
-senator_neutral_towards_char = {
-	scope = character
-
-	is_valid = { senator_is_neutral_trigger = yes }
-
-	effect = {
-	}
-}
-
-senator_hostile_towards_char = {
-	scope = character
-
-	is_valid = { senator_is_hostile_trigger = yes }
-
-	effect = {
 	}
 }
 
