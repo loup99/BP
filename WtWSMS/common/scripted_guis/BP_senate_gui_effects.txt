@@ -4,12 +4,16 @@
 		clear_variable_list = all_senator_list
 		
 		#West Senate
+		clear_variable_list = all_west_senator_list
 		clear_variable_list = senators_in_rome_list
+		clear_variable_list = senators_out_of_rome_list
 		clear_variable_list = senate_family_list_west
 		clear_variable_list = west_consul
 		
 		#East Senate
+		clear_variable_list = all_east_senator_list
 		clear_variable_list = senators_in_constantinople_list
+		clear_variable_list = senators_out_of_constantinople_list
 		clear_variable_list = senate_family_list_east
 		clear_variable_list = east_consul
 	}
@@ -18,12 +22,13 @@
 update_senator_list_effect = {
 	scope = character
 	effect = {
-		#Get all the Senators and add them to a list
+		#Put the Senators in Lists
 		every_living_character = {
-			limit = { has_trait = senator }
+			limit = { has_trait = senator_west }
+			
 			root = {
 				add_to_variable_list = {
-					name = all_senator_list
+					name = all_west_senator_list
 					target = prev
 				}
 			}
@@ -37,6 +42,24 @@ update_senator_list_effect = {
 					}
 				}
 			}
+			else = {
+				root = {
+					add_to_variable_list = {
+						name = senators_out_of_rome_list
+						target = prev
+					}
+				}
+			}
+		}
+		every_living_character = {
+			limit = { has_trait = senator_east }
+			
+			root = {
+				add_to_variable_list = {
+					name = all_east_senator_list
+					target = prev
+				}
+			}
 			#Get all the Senators in Rome and add them to a list
 			if = {
 				limit = { senator_in_constantinople_trigger = yes }
@@ -47,14 +70,12 @@ update_senator_list_effect = {
 					}
 				}
 			}
-		}
-		#Get all the Senators in Rome
-		every_living_character = {
-			limit = { has_trait = senator }
-			root = {
-				add_to_variable_list = {
-					name = all_senator_list
-					target = prev
+			else = {
+				root = {
+					add_to_variable_list = {
+						name = senators_out_of_constantinople_list
+						target = prev
+					}
 				}
 			}
 		}
@@ -94,7 +115,6 @@ update_senator_list_effect = {
 				}
 			}
 		}
-		#Get all the Senate Officers
 		every_living_character = {
 			limit = { has_character_modifier = roman_consul_east }
 			root = {

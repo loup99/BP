@@ -1,7 +1,7 @@
 ﻿types senatewidgets {
 	type senatewindow = window {
 		layer = middle
-		size = { 1100 800 }
+		size = { 1100 850 }
 		parentanchor = center
 		position = { 1500 100 }
 		datacontext = "[GetPlayer]"
@@ -42,6 +42,7 @@
 				#The header
 				header_standard = {
 					layoutpolicy_horizontal = expanding
+					parentanchor = top|left
 
 					blockoverride "header_text"
 					{
@@ -222,22 +223,27 @@
 							alpha = 0.6
 						}
 						
-						#List of Senators & Factions (to do later...)
+						#Senators of the West
 						vbox = {
-							vbox = {
+							size = { 1100 670 }
+							
+							text_label_center = {
+								text = "WESTERN_SENATORS"
+							}
+							vbox = { #Senators in Rome
 								layoutpolicy_horizontal = expanding
 								margin_right = 20
 								margin_left = 20
 								
 								text_label_center = {
-									text = "WESTERN_SENATORS"
+									text = "WESTERN_SENATORS_IN_ROME"
 								}
 								scrollbox = {
 									name = "senator_list"
 									parentanchor = top
 									layoutpolicy_vertical = shrinking
 									layoutpolicy_horizontal = shrinking
-									size = { 450 200 }
+									size = { 450 150 }
 									
 									background = {
 										texture = "gfx/interface/component_tiles/background_area_light.dds"
@@ -268,32 +274,6 @@
 															{
 																visible = "['(bool)yes']"
 															}
-															#####Actual Roman Ruler Support
-															####coa_realm_tiny = {
-															####	datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege]"
-															####	parentanchor = bottom|right
-															####	####    icon = {
-															####	####    	visible = "[GetScriptedGui('senator_positive_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-															####	####    	size = { 20 20 }
-															####	####    	parentanchor = center|right
-															####	####    	texture = "gfx/interface/hud/toast_bg_good.dds"
-															####	####    	tooltip = "SENATE_SENATOR_SUPPORTS"
-															####	####    }
-															####	####    icon = {
-															####	####    	visible = "[GetScriptedGui('senator_neutral_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-															####	####    	size = { 20 20 }
-															####	####    	parentanchor = center|right
-															####	####    	texture = "gfx/interface/hud/toast_bg_neutral.dds"
-															####	####    	tooltip = "SENATE_SENATOR_NEUTRAL"
-															####	####    }
-															####	####    icon = {
-															####	####    	visible = "[GetScriptedGui('senator_hostile_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-															####	####    	size = { 20 20 }
-															####	####    	parentanchor = center|right
-															####	####    	texture = "gfx/interface/hud/toast_bg_bad.dds"
-															####	####    	tooltip = "SENATE_SENATOR_HOSTILE"
-															####	####    }
-															####}
 														}
 													}
 												}
@@ -302,45 +282,58 @@
 									}
 								}
 							}
-							####    #Senatorial Factions
-							####    vbox = {
-							####    	text_label_center = {
-							####    		text = "SENATE_SENATORIAL_FACTIONS"
-							####    	}
-							####    	vbox = {
-							####    		text_label_center = {
-							####    			text = "SENATE_ROME_TOP_LIEGE_FACTIONS"
-							####    		}
-							####    		hbox = {
-							####    			vbox = {
-							####    				text_label_center = {
-							####    					text = "SENATE_SUPPORTERS"
-							####    				}
-							####    				text_label_center = {
-							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_supportive'))])"
-							####    				}
-							####    			}
-							####    			spacer = { size = { 30 0 } }
-							####    			vbox = {
-							####    				text_label_center = {
-							####    					text = "SENATE_NEUTRALS"
-							####    				}
-							####    				text_label_center = {
-							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_neutral'))])"
-							####    				}
-							####    			}
-							####    			spacer = { size = { 30 0 } }
-							####    			vbox = {
-							####    				text_label_center = {
-							####    					text = "SENATE_HOSTILES"
-							####    				}
-							####    				text_label_center = {
-							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_hostile'))])"
-							####    				}
-							####    			}
-							####    		}
-							####    	}
-							####    }
+							vbox = { #Senators away from Rome
+								layoutpolicy_horizontal = expanding
+								margin_right = 20
+								margin_left = 20
+								
+								text_label_center = {
+									text = "WESTERN_SENATORS_AWAY_FROM_ROME"
+								}
+								scrollbox = {
+									name = "senator_list"
+									parentanchor = top
+									layoutpolicy_vertical = shrinking
+									layoutpolicy_horizontal = shrinking
+									size = { 450 150 }
+									
+									background = {
+										texture = "gfx/interface/component_tiles/background_area_light.dds"
+										alpha = 0.6
+									}
+									
+									blockoverride "scrollbox_margins" {}
+									blockoverride "scrollbox_content"
+									{
+										hbox = {
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = expanding
+											spacing = 0
+											
+											vbox = {
+												layoutpolicy_vertical = expanding
+												
+												dynamicgridbox = {
+													datamodel = "[GetPlayer.MakeScope.GetList('senators_out_of_rome_list')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													datamodel_wrap = 3
+													flipdirection = yes
+													item = {
+														portrait_shoulders = {
+															datacontext = "[Scope.GetCharacter]"
+															blockoverride "opinion_box"
+															{
+																visible = "['(bool)yes']"
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 						}
 						
 						expand = {}
@@ -389,7 +382,7 @@
 															blockoverride "coa_tooltip"
 															{
 																tooltipwidget = {
-																	using = SenateDynastyTooltip
+																	using = SenateDynastyTooltipWest
 																}
 															}
 														}
@@ -409,6 +402,7 @@
 					
 					#Senate Interactions
 					vbox = {
+						parentanchor = bottom|center
 						layoutpolicy_horizontal = expanding
 						
 						background = {
@@ -604,22 +598,27 @@
 							alpha = 0.6
 						}
 						
-						#List of Senators & Factions (to do later...)
+						#Senators of the East
 						vbox = {
-							vbox = {
+							size = { 1100 670 }
+							
+							text_label_center = {
+								text = "EASTERN_SENATORS"
+							}
+							vbox = { #Senators in Rome
 								layoutpolicy_horizontal = expanding
 								margin_right = 20
 								margin_left = 20
 								
 								text_label_center = {
-									text = "EASTERN_SENATORS"
+									text = "EASTERN_SENATORS_IN_CONSTANTINOPLE"
 								}
 								scrollbox = {
 									name = "senator_list"
 									parentanchor = top
 									layoutpolicy_vertical = shrinking
 									layoutpolicy_horizontal = shrinking
-									size = { 450 200 }
+									size = { 450 150 }
 									
 									background = {
 										texture = "gfx/interface/component_tiles/background_area_light.dds"
@@ -650,32 +649,6 @@
 															{
 																visible = "['(bool)yes']"
 															}
-															#####Actual Roman Ruler Support
-															####coa_realm_tiny = {
-															####	datacontext = "[GetTitleByKey('c_byzantion').GetHolder.GetTopLiege]"
-															####	parentanchor = bottom|right
-															####	####    icon = {
-															####	####    	visible = "[GetScriptedGui('senator_positive_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-															####	####    	size = { 20 20 }
-															####	####    	parentanchor = center|right
-															####	####    	texture = "gfx/interface/hud/toast_bg_good.dds"
-															####	####    	tooltip = "SENATE_SENATOR_SUPPORTS"
-															####	####    }
-															####	####    icon = {
-															####	####    	visible = "[GetScriptedGui('senator_neutral_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-															####	####    	size = { 20 20 }
-															####	####    	parentanchor = center|right
-															####	####    	texture = "gfx/interface/hud/toast_bg_neutral.dds"
-															####	####    	tooltip = "SENATE_SENATOR_NEUTRAL"
-															####	####    }
-															####	####    icon = {
-															####	####    	visible = "[GetScriptedGui('senator_hostile_towards_char').IsValid( GuiScope.SetRoot( Scope.GetCharacter.MakeScope ).AddScope('leader_in_question', GetTitleByKey('c_roma').GetHolder.GetTopLiege.MakeScope ).End ) ]"
-															####	####    	size = { 20 20 }
-															####	####    	parentanchor = center|right
-															####	####    	texture = "gfx/interface/hud/toast_bg_bad.dds"
-															####	####    	tooltip = "SENATE_SENATOR_HOSTILE"
-															####	####    }
-															####}
 														}
 													}
 												}
@@ -684,45 +657,58 @@
 									}
 								}
 							}
-							####    #Senatorial Factions
-							####    vbox = {
-							####    	text_label_center = {
-							####    		text = "SENATE_SENATORIAL_FACTIONS"
-							####    	}
-							####    	vbox = {
-							####    		text_label_center = {
-							####    			text = "SENATE_ROME_TOP_LIEGE_FACTIONS"
-							####    		}
-							####    		hbox = {
-							####    			vbox = {
-							####    				text_label_center = {
-							####    					text = "SENATE_SUPPORTERS"
-							####    				}
-							####    				text_label_center = {
-							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_supportive'))])"
-							####    				}
-							####    			}
-							####    			spacer = { size = { 30 0 } }
-							####    			vbox = {
-							####    				text_label_center = {
-							####    					text = "SENATE_NEUTRALS"
-							####    				}
-							####    				text_label_center = {
-							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_neutral'))])"
-							####    				}
-							####    			}
-							####    			spacer = { size = { 30 0 } }
-							####    			vbox = {
-							####    				text_label_center = {
-							####    					text = "SENATE_HOSTILES"
-							####    				}
-							####    				text_label_center = {
-							####    					raw_text = "([GetDataModelSize(GetPlayer.MakeScope.GetList('senators_faction_rome_ruler_hostile'))])"
-							####    				}
-							####    			}
-							####    		}
-							####    	}
-							####    }
+							vbox = { #Senators away from Rome
+								layoutpolicy_horizontal = expanding
+								margin_right = 20
+								margin_left = 20
+								
+								text_label_center = {
+									text = "EASTERN_SENATORS_AWAY_FROM_CONSTANTINOPLE"
+								}
+								scrollbox = {
+									name = "senator_list"
+									parentanchor = top
+									layoutpolicy_vertical = shrinking
+									layoutpolicy_horizontal = shrinking
+									size = { 450 150 }
+									
+									background = {
+										texture = "gfx/interface/component_tiles/background_area_light.dds"
+										alpha = 0.6
+									}
+									
+									blockoverride "scrollbox_margins" {}
+									blockoverride "scrollbox_content"
+									{
+										hbox = {
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = expanding
+											spacing = 0
+											
+											vbox = {
+												layoutpolicy_vertical = expanding
+												
+												dynamicgridbox = {
+													datamodel = "[GetPlayer.MakeScope.GetList('senators_out_of_constantinople_list')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													datamodel_wrap = 3
+													flipdirection = yes
+													item = {
+														portrait_shoulders = {
+															datacontext = "[Scope.GetCharacter]"
+															blockoverride "opinion_box"
+															{
+																visible = "['(bool)yes']"
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 						}
 						
 						expand = {}
@@ -771,7 +757,7 @@
 															blockoverride "coa_tooltip"
 															{
 																tooltipwidget = {
-																	using = SenateDynastyTooltip
+																	using = SenateDynastyTooltipEast
 																}
 															}
 														}
@@ -859,7 +845,7 @@ types SenateViewTypes {
 }
 
 #Cribbed from gui/shared/cooltip.gui
-template SenateDynastyTooltip {
+template SenateDynastyTooltipWest {
 	object_tooltip_pop_out = {
 
 		blockoverride "header_additions" {
@@ -909,12 +895,74 @@ template SenateDynastyTooltip {
 
 			cooltip_paragraph = {
 				datacontext = [Dynasty]
-				text = "DYNASTY_TT_NUMBER_OF_SENATORS"
+				text = "DYNASTY_TT_NUMBER_OF_SENATORS_WEST"
 			}
 
 			cooltip_paragraph = {
 				datacontext = [Dynasty]
-				text = "DYNASTY_TT_NUMBER_OF_HOLDINGS"
+				text = "DYNASTY_TT_NUMBER_OF_HOLDINGS_WEST"
+			}
+
+		}
+	}
+}
+
+template SenateDynastyTooltipEast {
+	object_tooltip_pop_out = {
+
+		blockoverride "header_additions" {
+			margin_top = 6
+			margin_bottom = -10
+
+			coa_dynasty_small = {
+				blockoverride "coa_tooltip" {}
+			}
+		}
+
+		blockoverride "title_text" {
+			#margin = { 0 8 }
+			margin_right = 16
+			text = "[dynasty|E] [Dynasty.GetNameNoTooltip]"
+			align = nobaseline
+		}
+
+		blockoverride "concept_link" {
+			text = [dynasty|E]
+		}
+
+		blockoverride "extra_data" {
+			cooltip_paragraph = {
+				text = "DYNASTY_VIEW_MY_DYNASTY"
+				visible = "[Dynasty.IsMyDynasty(GetPlayer)]"
+			}
+
+			cooltip_paragraph = {
+				datacontext = [Dynasty]
+				text = "DYNASTY_TT_DYNAST"
+			}
+
+			cooltip_paragraph = {
+				datacontext = [Dynasty]
+				text = "DYNASTY_TT_SPLENDOR_LEVEL"
+			}
+
+			cooltip_paragraph = {
+				text = "DYNASTY_VIEW_PRESTIGE"
+			}
+
+			cooltip_paragraph = {
+				datacontext = [Dynasty]
+				text = "DYNASTY_TT_MEMBERS"
+			}
+
+			cooltip_paragraph = {
+				datacontext = [Dynasty]
+				text = "DYNASTY_TT_NUMBER_OF_SENATORS_EAST"
+			}
+
+			cooltip_paragraph = {
+				datacontext = [Dynasty]
+				text = "DYNASTY_TT_NUMBER_OF_HOLDINGS_EAST"
 			}
 
 		}
