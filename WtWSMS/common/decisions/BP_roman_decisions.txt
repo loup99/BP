@@ -278,174 +278,6 @@ unite_roman_empires = {
 		}
 	}
 }
-disestablish_senate = { #AI-only decision; implemented in GUI for players
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
-	ai_check_interval = 60
-	desc = disestablish_senate_desc
-	selection_tooltip = disestablish_senate_tooltip
-	
-	is_shown = {
-		#Only top-level rulers
-		is_independent_ruler = yes
-		#Have to have control of the Senate
-		this = title:c_roma.holder.top_liege
-		#Can't be a Roman Empire in any way, shape, or form
-		NOR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
-			has_title = title:e_roman_empire
-		}
-		has_global_variable = senate_is_established
-		is_ai = yes #Players should use the GUI instead
-	}
-	
-	is_valid = {
-		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
-		#Can't be Romanesque or governments or cultures or titles
-		NOR = {
-			has_government = bureaucratic_government
-			has_government = gubernatorial_government
-			AND = {
-				has_government = subroman_government
-				culture = { has_ability_to_reform_rome_directly_trigger = yes }
-			}
-		}
-	}
-	
-	is_valid_showing_failures_only = {
-		is_available_adult = yes
-		is_at_war = no
-	}
-	
-	cost = {}
-	
-	effect = { disestablished_senate_effect = yes }
-	
-	ai_potential = { always = yes }
-	
-	ai_will_do = {
-		base = 100 #%100 chance
-		
-		#AI won't do this if they are Sub-Roman, even if they  don't have a Romance culture
-		modifier = {
-			factor = 0
-			has_government = subroman_government
-		}
-	}
-}
-establish_senate = {
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
-	ai_check_interval = 60
-	desc = establish_senate_desc
-	selection_tooltip = establish_senate_tooltip
-	
-	is_shown = {
-		#Only top-level rulers
-		is_independent_ruler = yes
-		#Have to have a Senate
-		NOT = { exists = title:d_senate.holder }
-		#Can't be Romanesque or governments or cultures or titles
-		OR = {
-			has_government = bureaucratic_government
-			has_government = gubernatorial_government
-			AND = {
-				has_government = subroman_government
-				culture = { has_ability_to_reform_rome_directly_trigger = yes }
-			}
-		}
-		OR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
-			has_title = title:e_roman_empire
-		}
-	}
-	
-	is_valid = {
-		#Have to hold Rome
-		custom_description = {
-			text = roma_is_within_the_empire
-			OR = {
-				root = title:c_roma.holder
-				any_vassal_or_below = { this = title:c_roma.holder }
-			}
-		}
-		#Have to hold Tibur (because Roma might be your capital)
-		custom_description = {
-			text = tibur_is_within_the_empire
-			OR = {
-				root = title:c_tivoli.holder
-				any_vassal_or_below = { this = title:c_tivoli.holder }
-			}
-		}
-		#Rome's Glory
-		title:b_roma.title_province = { has_building = the_colosseum_02 }
-		#Have to be of some note
-		prestige_level >= 3
-		NOT = { has_variable = disestablished_senate }
-	}
-	
-	is_valid_showing_failures_only = {
-		is_available_adult = yes
-		is_at_war = no
-	}
-	
-	cost = { gold = 1000 }
-	
-	effect = {
-		add_prestige = 500
-		root = { save_scope_as = emperor }
-		custom_description = {
-			text = the_senate_is_reestablished
-			hidden_effect = {
-				create_character = {
-					template = pool_repopulate_diplomacy
-					location = root.location
-					save_scope_as = new_senate_head
-				}
-				create_title_and_vassal_change = {
-					type = created
-					save_scope_as = change
-					add_claim_on_loss = no
-				}
-				title:d_senate = {
-					change_title_holder = {
-						holder = scope:new_senate_head
-						change = scope:change
-					}
-				}
-				title:c_tivoli = {
-					change_title_holder = {
-						holder = scope:new_senate_head
-						change = scope:change
-					}
-				}
-				scope:new_senate_head = { change_liege = { liege = root change = scope:change } }
-				resolve_title_and_vassal_change = scope:change
-				scope:new_senate_head = { convert_realm_to_republic_effect = yes }
-			}
-		}
-		hidden_effect = {
-			every_player = {
-				limit = { in_diplomatic_range = root }
-				trigger_event = { id = BP_roman_decisions.0020 }
-			}
-		}
-	}
-	
-	ai_potential = { always = yes }
-	
-	ai_will_do = {
-		base = 100 #%100 chance
-		
-		#AI won't do this if they are not a Roman-descended culture, even if they are bureaucrats
-		modifier = {
-			factor = 0
-			NOT = { has_cultural_parameter = can_restore_roman_empire }
-		}
-	}
-}
 restore_western_roman_empire = {
 	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
 	major = yes
@@ -575,6 +407,137 @@ restore_eastern_roman_empire = {
 		}
 	}
 }
+### AI-Only Major Decisions
+disestablish_west_senate = { #AI-only decision; implemented in GUI for players
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = disestablish_senate_desc
+	selection_tooltip = disestablish_senate_tooltip
+	
+	is_shown = {
+		#Only top-level rulers
+		is_independent_ruler = yes
+		#Have to have control of the Senate
+		this = title:c_roma.holder.top_liege
+		#Can't be a Roman Empire in any way, shape, or form
+		NOR = {
+			has_title = title:e_wre
+			has_title = title:e_byzantium
+			has_title = title:e_roman_empire
+		}
+		has_global_variable = senate_is_established
+		is_ai = yes #Players should use the GUI instead
+	}
+	
+	is_valid = {
+		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
+		#Can't be Romanesque or governments or cultures or titles
+		NOR = {
+			has_government = bureaucratic_government
+			has_government = gubernatorial_government
+			AND = {
+				has_government = subroman_government
+				culture = { has_ability_to_reform_rome_directly_trigger = yes }
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {}
+	
+	effect = {
+		disestablished_senate_effect = {
+			REGION = west
+			MAIN_EMPIRE = e_wre
+			OPPOSITE_EMPIRE = e_byzantium
+		}
+		root = { save_scope_as = the_destroyer }
+		every_player = { trigger_event = { id = BP_roman_government_events.0002 } }
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = {
+		base = 100 #%100 chance
+		
+		#AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
+		modifier = {
+			factor = 0
+			has_government = subroman_government
+		}
+	}
+}
+disestablish_east_senate = { #AI-only decision; implemented in GUI for players
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = disestablish_senate_desc
+	selection_tooltip = disestablish_senate_tooltip
+	
+	is_shown = {
+		#Only top-level rulers
+		is_independent_ruler = yes
+		#Have to have control of the Senate
+		this = title:c_byzantion.holder.top_liege
+		#Can't be a Roman Empire in any way, shape, or form
+		NOR = {
+			has_title = title:e_wre
+			has_title = title:e_byzantium
+			has_title = title:e_roman_empire
+		}
+		has_global_variable = senate_is_established
+		is_ai = yes #Players should use the GUI instead
+	}
+	
+	is_valid = {
+		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
+		#Can't be Romanesque or governments or cultures or titles
+		NOR = {
+			has_government = bureaucratic_government
+			has_government = gubernatorial_government
+			AND = {
+				has_government = subroman_government
+				culture = { has_ability_to_reform_rome_directly_trigger = yes }
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {}
+	
+	effect = {
+		disestablished_senate_effect = {
+			REGION = east
+			MAIN_EMPIRE = e_byzantium
+			OPPOSITE_EMPIRE = e_wre
+		}
+		root = { save_scope_as = the_destroyer }
+		every_player = { trigger_event = { id = BP_roman_government_events.1002 } }
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = {
+		base = 100 #%100 chance
+		
+		#AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
+		modifier = {
+			factor = 0
+			has_government = subroman_government
+		}
+	}
+}
+request_west_senate_recognition = {}
+request_east_senate_recognition = {}
 
 ### Minor Decisions
 support_greens = {
