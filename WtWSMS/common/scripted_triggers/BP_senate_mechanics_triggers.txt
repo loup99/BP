@@ -26,3 +26,24 @@ senator_in_location_trigger = {
 		}
 	}
 }
+
+valid_to_senator_age = {
+	$CHAR$ = { age >= 25 }
+}
+valid_to_be_senator = {
+	OR = {
+		valid_to_senator_age = { CHAR = $RECIPIENT$ }
+		scope:recipient = { age >= 25 }
+		OR = { #Emperors could be consuls
+			$RECIPIENT$.primary_title = title:e_wre
+			$RECIPIENT$.primary_title = title:e_byzantium
+			$RECIPIENT$.primary_title = title:e_roman_empire
+		}
+		AND = { #Title Holder top liege who's an adult
+			age >= 16
+			$ACTOR$ = $RECIPIENT$
+			$RECIPIENT$ = title:$THE_CITY$.holder.top_liege
+			$RECIPIENT$.primary_title.tier >= tier_kingdom
+		}
+	}
+}
