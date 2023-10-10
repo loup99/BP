@@ -71,15 +71,82 @@ on_birthday = {
 
 #Age for Senators based on Augustus' law (last I can see it changing)
 senate_on_25th_birthday = {
-	trigger = { age = 25 }
+	trigger = {
+		exists = root.dynasty
+		valid_to_be_senator_sex = { CHAR = root }
+		valid_to_be_senator_age = { CHAR = root }
+	}
 	effect = {
 		if = {
 			limit = { dynasty = { has_dynasty_modifier = roman_senate_family_west } }
-			add_trait = senator_west
+			trigger_event = { id = BP_roman_government_events.0051 }
 		}
 		if = {
 			limit = { dynasty = { has_dynasty_modifier = roman_senate_family_east } }
+			trigger_event = { id = BP_roman_government_events.1051 }
+		}
+	}
+}
+
+
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	events = {}
+	on_actions = {
+		BP_emperors_get_early_senate_hood
+	}
+}
+
+#Roman Emperors are automatically Senators, regardless of age.
+BP_emperors_get_early_senate_hood = {
+	trigger = { valid_to_be_senator_roman_empires = { CHAR = root } }
+	effect = {
+		if = {
+			limit = {
+				any_sub_realm_barony = { this = title:b_roma }
+				NOT = { has_trait = senator_west }
+			}
+			add_trait = senator_west
+		}
+		if = {
+			limit = {
+				any_sub_realm_barony = { this = title:b_constantinople }
+				NOT = { has_trait = senator_east }
+			}
 			add_trait = senator_east
+		}
+	}
+}
+
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
+on_title_lost = {
+	on_actions = { BP_no_longer_supported_by_the_senate }
+}
+
+BP_no_longer_supported_by_the_senate = {
+	trigger = { root = { has_character_modifier = approved_by_the_senate } }
+	effect = {
+		if = { #If a player game overs, remove the support; no need for event in this case
+			limit = { is_landed = no }
+			remove_character_modifier = approved_by_the_senate
+		}
+		else_if = {
+			limit = { is_independent_ruler = no }
+			trigger_event = { id = BP_roman_government_events.2001 days = { 1 3 } }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					NOT = { any_sub_realm_barony = { this = title:b_roma } }
+					NOT = { any_sub_realm_barony = { this = title:b_constantinople } }
+				}
+			}
+			trigger_event = { id = BP_roman_government_events.2002 days = { 3 7 } }
 		}
 	}
 }
