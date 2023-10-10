@@ -63,3 +63,32 @@
 	
 	remove_global_variable = $REGION$_senate_is_established
 }
+
+senate_election_effect = {
+	every_living_character = { #Remove the old Consul
+		limit = { has_character_modifier = roman_consul_$REGION$ }
+		remove_character_modifier = roman_consul_$REGION$
+		save_scope_as = old_consul_$REGION$
+	}
+	if = { #Elevate the nominee if he exists
+		limit = { any_living_character = { has_character_modifier = roman_consul_nominee_$REGION$ } }
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_nominee_$REGION$ }
+			remove_character_modifier = roman_consul_nominee_$REGION$
+			add_character_modifier = roman_consul_$REGION$
+		}
+	}
+	#Otherwise, pick a random senator
+	else = {
+		random_living_character = {
+			limit = {
+				NOT = { has_character_modifier = roman_consul_$REGION$ }
+				NOT = { this = scope:old_consul_$REGION$ }
+				has_trait = senator_$REGION$
+				senator_in_$LOCATION$_trigger = yes
+			}
+			add_character_modifier = roman_consul_$REGION$
+		}
+	}
+}
+
