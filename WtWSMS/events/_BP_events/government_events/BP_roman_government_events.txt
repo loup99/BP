@@ -75,35 +75,29 @@ BP_roman_government_events.0011 = { #Ask the Senate for Approval
 	desc = BP_roman_government_events.0011.desc
 	theme = realm
 	
+	immediate = {
+		root = { save_scope_as = the_liege_west }
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_west }
+			save_scope_as = the_consul_west
+		}
+	}
+	
 	left_portrait = {
 		character = ROOT
 		animation = personality_rational
 	}
 	
 	right_portrait = {
-		character = title:d_senate.holder
+		character = scope:the_consul_west
 		animation = personality_rational
-	}
-	
-	trigger = {
-		#Only fires if the Senate exists
-		any_vassal = { has_title = title:d_senate }
-		#And you're the top liege
-		root = title:d_senate.holder.top_liege
-		#And you don't own the Senate
-		NOT = { root = { has_title = title:d_senate } }
-	}
-	
-	immediate = {
-		root = { save_scope_as = the_liege }
 	}
 	
 	option = { #Ask to get Senate Approval
 		name = BP_roman_government_events.0011.seek_approval
 		custom_tooltip = BP_roman_government_events.0011.seek_approval.tootip
-		add_prestige = -250
-		add_prestige_level = -1
-		title:d_senate.holder = {
+		add_prestige = senate_approval_prestige_cost_west
+		scope:the_consul_west = {
 			add_opinion = {
 				target = root
 				modifier = sought_senate_approval
@@ -122,8 +116,8 @@ BP_roman_government_events.0011 = { #Ask the Senate for Approval
 	option = { #Ignore the Senate
 		name = BP_roman_government_events.0011.dismiss_the_senate
 		custom_tooltip = BP_roman_government_events.0011.dismiss_the_senate.tooltip
-		add_prestige = 250
-		title:d_senate.holder = {
+		add_prestige = senate_refusal_prestige_gain_west
+		scope:the_consul_west = {
 			add_opinion = {
 				target = root
 				modifier = did_not_seek_senate_approval
@@ -131,7 +125,6 @@ BP_roman_government_events.0011 = { #Ask the Senate for Approval
 		}
 		
 		add_character_modifier = ignored_the_senate
-		add_prestige_level = 1
 		
 		ai_chance = {
 			factor = 10
@@ -140,6 +133,12 @@ BP_roman_government_events.0011 = { #Ask the Senate for Approval
 				always_dismiss_senate_trigger = no
 			}
 		}
+	}
+	
+	option = { #Wait, let me think...
+		name = BP_roman_government_events.0011.wait
+		custom_tooltip = BP_roman_government_events.0011.wait.tooltip
+		remove_variable = already_asked_the_senate
 	}
 }
 
@@ -151,13 +150,13 @@ BP_roman_government_events.0012 = { #The Senate deliberates
 	
 	option = { #Approve of the emperor
 		name = BP_roman_government_events.0012.approve
-		scope:the_liege = { trigger_event = { id = BP_roman_government_events.0013 days = 3 } }
+		scope:the_liege_west = { trigger_event = { id = BP_roman_government_events.0013 days = 3 } }
 	}
 	
 	option = { #Disapprove of the emperor
 		name = BP_roman_government_events.0012.disapprove
 		trigger = { is_ai = no } ##### TODO (Beta): Make the Senate actually negotiate for the crown
-		scope:the_liege = { trigger_event = { id = BP_roman_government_events.0014 days = 3 } }
+		scope:the_liege_west = { trigger_event = { id = BP_roman_government_events.0014 days = 3 } }
 	}
 }
 
@@ -166,16 +165,16 @@ BP_roman_government_events.0013 = { #The Senate Approves!
 	opening = { desc = BP_roman_government_events.0013.opening }
 	desc = BP_roman_government_events.0013.desc
 	
-	sender = title:d_senate.holder
+	sender = scope:the_consul_west
 	
-	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
+	immediate = {}
 	
 	option = { #Disapprove of the emperor
 		name = BP_roman_government_events.0013.a
-		scope:the_liege = {
+		scope:the_liege_west = {
 			add_character_modifier = approved_by_the_senate
 			add_opinion = {
-				target = title:d_senate.holder
+				target = scope:the_consul_west
 				modifier = pacified_opinion
 			}
 		}
@@ -186,16 +185,16 @@ BP_roman_government_events.0014 = { #The Senate Rejects!
 	type = letter_event
 	opening = { desc =  BP_roman_government_events.0014.opening }
 	desc = BP_roman_government_events.0014.desc
-	sender = title:d_senate.holder
+	sender = scope:the_consul_west
 	
-	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
+	immediate = {}
 	
 	option = { #Boo!
 		name = BP_roman_government_events.0014.a
-		scope:the_liege = {
+		scope:the_liege_west = {
 			add_character_modifier = rejected_by_the_senate
 			add_opinion = {
-				target = title:d_senate.holder
+				target = scope:the_consul_west
 				modifier = insulted_opinion
 			}
 		}
@@ -277,35 +276,29 @@ BP_roman_government_events.1011 = { #Ask the Senate for Approval
 	desc = BP_roman_government_events.1011.desc
 	theme = realm
 	
+	immediate = {
+		root = { save_scope_as = the_liege_east }
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_east }
+			save_scope_as = the_consul_east
+		}
+	}
+	
 	left_portrait = {
 		character = ROOT
 		animation = personality_rational
 	}
 	
 	right_portrait = {
-		character = title:d_senate.holder
+		character = scope:the_consul_east
 		animation = personality_rational
-	}
-	
-	trigger = {
-		#Only fires if the Senate exists
-		any_vassal = { has_title = title:d_senate }
-		#And you're the top liege
-		root = title:d_senate.holder.top_liege
-		#And you don't own the Senate
-		NOT = { root = { has_title = title:d_senate } }
-	}
-	
-	immediate = {
-		root = { save_scope_as = the_liege }
 	}
 	
 	option = { #Ask to get Senate Approval
 		name = BP_roman_government_events.1011.seek_approval
 		custom_tooltip = BP_roman_government_events.1011.seek_approval.tootip
-		add_prestige = -250
-		add_prestige_level = -1
-		title:d_senate.holder = {
+		add_prestige = senate_approval_prestige_cost_east
+		scope:the_consul_east = {
 			add_opinion = {
 				target = root
 				modifier = sought_senate_approval
@@ -324,8 +317,8 @@ BP_roman_government_events.1011 = { #Ask the Senate for Approval
 	option = { #Ignore the Senate
 		name = BP_roman_government_events.1011.dismiss_the_senate
 		custom_tooltip = BP_roman_government_events.1011.dismiss_the_senate.tooltip
-		add_prestige = 250
-		title:d_senate.holder = {
+		add_prestige = senate_refusal_prestige_gain_east
+		scope:the_consul_east = {
 			add_opinion = {
 				target = root
 				modifier = did_not_seek_senate_approval
@@ -333,7 +326,6 @@ BP_roman_government_events.1011 = { #Ask the Senate for Approval
 		}
 		
 		add_character_modifier = ignored_the_senate
-		add_prestige_level = 1
 		
 		ai_chance = {
 			factor = 10
@@ -342,6 +334,12 @@ BP_roman_government_events.1011 = { #Ask the Senate for Approval
 				always_dismiss_senate_trigger = no
 			}
 		}
+	}
+	
+	option = { #Wait, let me think...
+		name = BP_roman_government_events.1011.wait
+		custom_tooltip = BP_roman_government_events.1011.wait.tooltip
+		remove_variable = already_asked_the_senate
 	}
 }
 
@@ -353,13 +351,13 @@ BP_roman_government_events.1012 = { #The Senate deliberates
 	
 	option = { #Approve of the emperor
 		name = BP_roman_government_events.0012.approve
-		scope:the_liege = { trigger_event = { id = BP_roman_government_events.1013 days = 3 } }
+		scope:the_liege_east = { trigger_event = { id = BP_roman_government_events.1013 days = 3 } }
 	}
 	
 	option = { #Disapprove of the emperor
 		name = BP_roman_government_events.0012.disapprove
 		trigger = { is_ai = no } ##### TODO (Beta): Make the Senate actually negotiate for the crown
-		scope:the_liege = { trigger_event = { id = BP_roman_government_events.1014 days = 3 } }
+		scope:the_liege_east = { trigger_event = { id = BP_roman_government_events.1014 days = 3 } }
 	}
 }
 
@@ -368,16 +366,16 @@ BP_roman_government_events.1013 = { #The Senate Approves!
 	opening = { desc = BP_roman_government_events.0013.opening }
 	desc = BP_roman_government_events.1013.desc
 	
-	sender = title:d_senate.holder
+	sender = scope:the_consul_east
 	
-	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
+	immediate = {}
 	
 	option = { #Disapprove of the emperor
 		name = BP_roman_government_events.1013.a
-		scope:the_liege = {
+		scope:the_liege_east = {
 			add_character_modifier = approved_by_the_senate
 			add_opinion = {
-				target = title:d_senate.holder
+				target = scope:the_consul_east
 				modifier = pacified_opinion
 			}
 		}
@@ -388,16 +386,16 @@ BP_roman_government_events.1014 = { #The Senate Rejects!
 	type = letter_event
 	opening = { desc =  BP_roman_government_events.1014.opening }
 	desc = BP_roman_government_events.1014.desc
-	sender = title:d_senate.holder
+	sender = scope:the_consul_east
 	
-	immediate = { title:d_senate.holder = { save_scope_as = senate_holder } }
+	immediate = {}
 	
 	option = { #Boo!
 		name = BP_roman_government_events.1014.a
-		scope:the_liege = {
+		scope:the_liege_east = {
 			add_character_modifier = rejected_by_the_senate
 			add_opinion = {
-				target = title:d_senate.holder
+				target = scope:the_consul_east
 				modifier = insulted_opinion
 			}
 		}

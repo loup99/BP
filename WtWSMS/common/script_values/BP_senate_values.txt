@@ -91,6 +91,379 @@ number_of_east_senators_total = {
 	}
 }
 
+##### Interaction Costs
+nominate_senator_base_prestige_cost = 10
+nominate_senator_prestige_cost = {
+	#### Primary Cost
+	value = nominate_senator_base_prestige_cost
+	if = { #A small elevation...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 4 }
+		}
+		add = nominate_senator_base_prestige_cost
+		
+	}
+	else_if = { #Okay, this is moving up in the world...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 3 }
+		}
+		add = {
+			value = nominate_senator_base_prestige_cost
+			multiply = 2
+		}
+	}
+	else_if = { #This is a big promotion...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 2 }
+		}
+		add = {
+			value = nominate_senator_base_prestige_cost
+			multiply = 3
+		}
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 1 }
+		}
+		add = {
+			value = nominate_senator_base_prestige_cost
+			multiply = 4
+		}
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 0 }
+		}
+		add = {
+			value = nominate_senator_base_prestige_cost
+			multiply = 5
+		}
+	}
+	else_if = { #Oh Lord, what's happening...?
+		limit = { NOT = { exists = scope:recipient.dynasty } }
+		add = {
+			value = nominate_senator_base_prestige_cost
+			multiply = 6
+		}
+	}
+	
+	if = { #We're barbarians, you and I...
+		limit = { NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } } }
+		multiply = 2
+	}
+	
+	#The Top Liege doing to himself...
+	if = { #Much cheaper for the Emperor to do for himself regardless...
+		limit = {
+			OR = {
+				scope:recipient.primary_title = title:e_roman_empire
+				scope:recipient.primary_title = title:e_wre
+				scope:recipient.primary_title = title:e_byzantium
+			}
+			scope:actor = scope:recipient
+		}
+		divide = 5
+	}
+	else_if = { #If not emperor, cheaper for the Primary Holder to do
+		limit = {
+			OR = {
+				scope:actor = title:b_roma.holder.top_liege
+				scope:actor = title:b_constantinople.holder.top_liege
+			}
+			scope:actor = scope:recipient
+		}
+		divide = 2
+	}
+	
+	#Further cost reductions so non-top liege consuls can afford this
+	
+	if = { #Noticeably cheaper non-top_liege's consuls to do; should discourage micromanagement
+		limit = {
+			NOR = {
+				scope:actor = title:b_roma.holder.top_liege
+				scope:actor = title:b_constantinople.holder.top_liege
+			}
+		}
+		divide = 5
+	}
+}
+nominate_consul_base_prestige_cost = 100
+nominate_consul_prestige_cost = {
+	#### Primary Cost
+	value = nominate_consul_base_prestige_cost
+	if = { #A small elevation...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 4 }
+		}
+		add = nominate_consul_base_prestige_cost
+		
+	}
+	else_if = { #Okay, this is moving up in the world...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 3 }
+		}
+		add = {
+			value = nominate_consul_base_prestige_cost
+			multiply = 2
+		}
+	}
+	else_if = { #This is a big promotion...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 2 }
+		}
+		add = {
+			value = nominate_consul_base_prestige_cost
+			multiply = 3
+		}
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 1 }
+		}
+		add = {
+			value = nominate_consul_base_prestige_cost
+			multiply = 4
+		}
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 0 }
+		}
+		add = {
+			value = nominate_consul_base_prestige_cost
+			multiply = 5
+		}
+	}
+	else_if = { #Oh Lord, what's happening...?
+		limit = { NOT = { exists = scope:recipient.dynasty } }
+		add = {
+			value = nominate_consul_base_prestige_cost
+			multiply = 6
+		}
+	}
+	
+	#### Primary Cost Scaling here
+	
+	if = { #We're barbarians, you and I...
+		limit = { NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } } }
+		multiply = 2
+	}
+	
+	#The Top Liege doing to himself...
+	if = { #Much cheaper for the Emperor to do for himself regardless...
+		limit = {
+			OR = {
+				scope:recipient.primary_title = title:e_roman_empire
+				scope:recipient.primary_title = title:e_wre
+				scope:recipient.primary_title = title:e_byzantium
+			}
+			scope:actor = scope:recipient
+		}
+		divide = 5
+	}
+	else_if = { #If not emperor, cheaper for the Primary Holder to do
+		limit = {
+			OR = {
+				scope:actor = title:b_roma.holder.top_liege
+				scope:actor = title:b_constantinople.holder.top_liege
+			}
+			scope:actor = scope:recipient
+		}
+		divide = 2
+	}
+	
+	#Cost of making the consul a senator gets baked in AFTER scaling
+	if = { #He's not even a senator, so you need to spend this as well...
+		limit = {
+			NOR = {
+				scope:recipient = { has_trait = senator_west }
+				scope:recipient = { has_trait = senator_east }
+			}
+		}
+		add = nominate_senator_prestige_cost
+	}
+	
+	#Further cost reductions so non-top liege consuls can afford this
+	
+	if = { #Noticeably cheaper non-top_liege's consuls to do; should discourage micromanagement
+		limit = {
+			NOR = {
+				scope:actor = title:b_roma.holder.top_liege
+				scope:actor = title:b_constantinople.holder.top_liege
+			}
+		}
+		divide = 5
+	}
+}
+elevate_dynasty_to_senate_base_cost = 500
+elevate_dynasty_to_senate_cost = {
+	value = elevate_dynasty_to_senate_base_cost
+	if = { #A small elevation...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 4 }
+		}
+		add = elevate_dynasty_to_senate_base_cost
+		
+	}
+	else_if = { #Okay, this is moving up in the world...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 3 }
+		}
+		add = {
+			value = elevate_dynasty_to_senate_base_cost
+			multiply = 2
+		}
+	}
+	else_if = { #This is a big promotion...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 2 }
+		}
+		add = {
+			value = elevate_dynasty_to_senate_base_cost
+			multiply = 3
+		}
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 1 }
+		}
+		add = {
+			value = elevate_dynasty_to_senate_base_cost
+			multiply = 4
+		}
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 0 }
+		}
+		add = {
+			value = elevate_dynasty_to_senate_base_cost
+			multiply = 5
+		}
+	}
+	
+	if = { #We're barbarians, you and I...
+		limit = { NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } } }
+		multiply = 2
+	}
+	
+	#### Primary Cost Scaling here
+	
+	#The Top Liege doing to himself...
+	if = { #Much cheaper for the Emperor to do for himself regardless...
+		limit = {
+			OR = {
+				scope:recipient.primary_title = title:e_roman_empire
+				scope:recipient.primary_title = title:e_wre
+				scope:recipient.primary_title = title:e_byzantium
+			}
+			#NB: this is intentional; the Emperor might not have enough land to be the actual dynast,
+			# so apply this scaling if it's the Emperor's dynasty
+			scope:actor.dynasty.dynast = scope:recipient.dynasty.dynast
+		}
+		divide = 5
+	}
+	else_if = { #If not emperor, cheaper for the Primary Holder to do
+		limit = {
+			OR = {
+				scope:actor = title:b_roma.holder.top_liege
+				scope:actor = title:b_constantinople.holder.top_liege
+			}
+			#NB: this is intentional; the Emperor might not have enough land to be the actual dynast,
+			# so apply this scaling if it's the Emperor's dynasty
+			scope:actor.dynasty.dynast = scope:recipient.dynasty.dynast
+		}
+		divide = 2
+	}
+	
+	#### Further cost reductions so non-top liege consuls can afford this
+	
+	if = { #Noticeably cheaper non-top_liege's consuls to do; should discourage micromanagement
+		limit = {
+			NOR = {
+				scope:actor = title:b_roma.holder.top_liege
+				scope:actor = title:b_constantinople.holder.top_liege
+			}
+		}
+		divide = 5
+	}
+}
+#Groveling for Senatorial Approval...
+senate_approval_base_cost = 100
+senate_approval_per_senator_cost = 10
+senate_approval_prestige_cost_west_base = { #used in both approving and ignoring the Senate
+	value = senate_approval_base_cost
+	
+	every_living_character = {
+		limit = {
+			has_trait = senator_west
+			senator_in_rome_trigger = yes
+		}
+		add = senate_approval_per_senator_cost
+	}
+	
+	if = { #You're a barbarian...
+		limit = { NOT = { scope:the_liege_west.culture = { has_cultural_parameter = can_restore_roman_empire } } }
+		multiply = 2
+	}
+
+}
+senate_approval_prestige_cost_west = {
+	value = senate_approval_prestige_cost_west_base
+	
+	max = scope:the_liege_west.prestige #Never more than all your prestige...
+	min = 250 #But you still need some nominal prestige to try
+	multiply = -1 #It's a cost and there's no "remove_prestige"
+}
+senate_refusal_prestige_gain_west = {
+	value = senate_approval_prestige_cost_west_base
+	
+	min = 250 #But you still need some nominal prestige to try
+}
+senate_approval_prestige_cost_east_base = {
+	value = senate_approval_base_cost
+	
+	every_living_character = {
+		limit = {
+			has_trait = senator_east
+			senator_in_constantinople_trigger = yes
+		}
+		add = senate_approval_per_senator_cost
+	}
+	
+	if = { #You're a barbarian...
+		limit = { NOT = { scope:the_liege_east.culture = { has_cultural_parameter = can_restore_roman_empire } } }
+		multiply = 2
+	}
+}
+senate_approval_prestige_cost_east = {
+	value = senate_approval_prestige_cost_east_base
+	
+	max = scope:the_liege_east.prestige #Never more than all your prestige...
+	min = 250 #But you still need some nominal prestige to try
+	multiply = -1 #It's a cost and there's no "remove_prestige"
+}
+senate_refusal_prestige_gain_east = {
+	value = senate_approval_prestige_cost_east_base
+	
+	min = 250 #But you still need some nominal prestige to try
+}
+
 ##### Senatorial Opinions
 
 #NB: These can't be consolidated because script values can't take template arguments
