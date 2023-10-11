@@ -114,3 +114,66 @@ senate_election_effect = {
 		}
 	}
 }
+
+made_a_senator_effect = { #recipient scope
+	add_trait = senator_$REGION$
+	add_opinion = {
+		modifier = respect_opinion
+		target = $ACTOR$
+		opinion = nominated_senator_opinion_gain
+	}
+}
+
+elevated_a_dynasty_effect = {
+	$RECIPIENT$ = {
+		dynasty = { add_dynasty_modifier = roman_senate_family_$REGION$ }
+		if = {
+			limit = { NOT = { has_trait = senator_$REGION$ } }
+			add_trait = senator_$REGION$
+		}
+		if = {
+			limit = { NOT = { $ACTOR$ = $RECIPIENT$ } }
+			add_opinion = {
+				modifier = respect_opinion
+				target = scope:actor
+				opinion = nominated_dynasty_opinion_gain
+			}
+		}
+	}
+	every_living_character = {
+		limit = {
+			this.dynasty = $RECIPIENT$.dynasty
+			NOT = { this = $RECIPIENT$ }
+			valid_to_be_senator = {
+				ACTOR = $ACTOR$
+				RECIPIENT = this
+				THE_CITY = $THE_CITY$
+			}
+		}
+		if = {
+			limit = { NOT = { has_trait = senator_$REGION$ } }
+			add_trait = senator_$REGION$
+		}
+		
+		add_opinion = {
+			modifier = respect_opinion
+			target = $ACTOR$
+			opinion = nominated_dynasty_opinion_gain
+		}
+	}
+}
+
+fire_senate_interface_toast_to_human_senators = {
+	every_ruler = {
+		limit = {
+			is_ai = no
+			has_trait = senator_$REGION$
+		}
+		send_interface_toast = {
+			type = event_generic_neutral
+			title = senate_$REGION$_$EVENT_TYPE$_title
+			custom_tooltip = senate_$REGION$_$EVENT_TYPE$_tt
+			right_icon = title:d_senate
+		}
+	}
+}

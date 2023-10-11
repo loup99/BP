@@ -523,13 +523,20 @@ BP_nominate_western_senator = {
 	
 	on_accept = {
 		scope:recipient = {
-			add_trait = senator_west
 			if = {
-				limit = { NOT = { scope:actor = scope:recipient } }
-				add_opinion = {
-					modifier = respect_opinion
-					target = scope:recipient
-					opinion = nominated_senator_opinion_gain
+				limit = { scope:actor = scope:recipient }
+				add_trait = senator_west
+			}
+			else = {
+				show_as_tooltip = {
+					made_a_senator_effect = {
+						ACTOR = scope:actor
+						REGION = west
+					}
+				}
+				hidden_effect = {
+					scope:actor = { save_scope_as = the_sender }
+					scope:recipient = { trigger_event = { id = BP_roman_government_events.0052 } }
 				}
 			}
 		}
@@ -577,6 +584,12 @@ BP_nominate_western_senator = {
 					target = scope:recipient
 					opinion = senator_general_in_city_opinion_of_new_senator
 				}
+			}
+		}
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators = {
+				REGION = west
+				EVENT_TYPE = nominated_senator
 			}
 		}
 	}
@@ -712,13 +725,20 @@ BP_nominate_eastern_senator = {
 	
 	on_accept = {
 		scope:recipient = {
-			add_trait = senator_east
 			if = {
-				limit = { NOT = { scope:actor = scope:recipient } }
-				add_opinion = {
-					modifier = respect_opinion
-					target = scope:actor
-					opinion = nominated_senator_opinion_gain
+				limit = { scope:actor = scope:recipient }
+				add_trait = senator_east
+			}
+			else = {
+				show_as_tooltip = {
+					made_a_senator_effect = {
+						ACTOR = scope:actor
+						REGION = east
+					}
+				}
+				hidden_effect = {
+					scope:actor = { save_scope_as = the_sender }
+					scope:recipient = { trigger_event = { id = BP_roman_government_events.1052 } }
 				}
 			}
 		}
@@ -766,6 +786,12 @@ BP_nominate_eastern_senator = {
 					target = scope:recipient
 					opinion = senator_general_in_city_opinion_of_new_senator
 				}
+			}
+		}
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators = {
+				REGION = east
+				EVENT_TYPE = nominated_senator
 			}
 		}
 	}
@@ -907,38 +933,27 @@ BP_elevate_dynasty_to_western_senate = {
 	auto_accept = yes
 	
 	on_accept = {
-		scope:recipient = {
-			dynasty = { add_dynasty_modifier = roman_senate_family_west }
-			if = {
-				limit = { NOT = { has_trait = senator_west } }
-				add_trait = senator_west
-			}
-			
-			add_opinion = {
-				modifier = respect_opinion
-				target = scope:actor
-				opinion = nominated_dynasty_opinion_gain
+		if = {
+			limit = { scope:actor = scope:recipient }
+			elevated_a_dynasty_effect = {
+				ACTOR = scope:actor
+				RECIPIENT = scope:recipient
+				REGION = west
+				THE_CITY = b_roma
 			}
 		}
-		every_living_character = {
-			limit = {
-				this.dynasty = scope:recipient.dynasty
-				NOT = { this = scope:recipient }
-				valid_to_be_senator = {
+		else = {
+			show_as_tooltip = {
+				elevated_a_dynasty_effect = {
 					ACTOR = scope:actor
 					RECIPIENT = scope:recipient
+					REGION = west
 					THE_CITY = b_roma
 				}
 			}
-			if = {
-				limit = { NOT = { has_trait = senator_west } }
-				add_trait = senator_west
-			}
-			
-			add_opinion = {
-				modifier = respect_opinion
-				target = scope:actor
-				opinion = nominated_dynasty_opinion_gain
+			hidden_effect = {
+				scope:actor = { save_scope_as = the_sender }
+				scope:recipient = { trigger_event = { id = BP_roman_government_events.0053 } }
 			}
 		}
 		
@@ -1010,6 +1025,12 @@ BP_elevate_dynasty_to_western_senate = {
 					target = scope:recipient
 					opinion = nominated_dynasty_senator_not_in_rome_opinion_loss
 				}
+			}
+		}
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators = {
+				REGION = west
+				EVENT_TYPE = elevated_dynasty
 			}
 		}
 	}
@@ -1142,12 +1163,12 @@ BP_elevate_dynasty_to_eastern_senate = {
 		valid_to_be_senator = {
 			ACTOR = scope:actor
 			RECIPIENT = scope:recipient
-			THE_CITY = b_roma
+			THE_CITY = b_constantinople
 		}
 		OR = {
 			scope:recipient = {
-				has_trait = senator_west
-				senator_in_rome_trigger = yes
+				has_trait = senator_east
+				senator_in_constantinople_trigger = yes
 			}
 			scope:actor = scope:recipient.top_liege
 			scope:actor = scope:recipient.liege_or_court_owner
@@ -1161,38 +1182,27 @@ BP_elevate_dynasty_to_eastern_senate = {
 	auto_accept = yes
 	
 	on_accept = {
-		scope:recipient = {
-			dynasty = { add_dynasty_modifier = roman_senate_family_west }
-			if = {
-				limit = { NOT = { has_trait = senator_west } }
-				add_trait = senator_west
-			}
-			
-			add_opinion = {
-				modifier = respect_opinion
-				target = scope:actor
-				opinion = nominated_dynasty_opinion_gain
+		if = {
+			limit = { scope:actor = scope:recipient }
+			elevated_a_dynasty_effect = {
+				ACTOR = scope:actor
+				RECIPIENT = scope:recipient
+				REGION = east
+				THE_CITY = b_constantinople
 			}
 		}
-		every_living_character = {
-			limit = {
-				this.dynasty = scope:recipient.dynasty
-				NOT = { this = scope:recipient }
-				valid_to_be_senator = {
+		else = {
+			show_as_tooltip = {
+				elevated_a_dynasty_effect = {
 					ACTOR = scope:actor
 					RECIPIENT = scope:recipient
+					REGION = east
 					THE_CITY = b_constantinople
 				}
 			}
-			if = {
-				limit = { NOT = { has_trait = senator_west } }
-				add_trait = senator_west
-			}
-			
-			add_opinion = {
-				modifier = respect_opinion
-				target = scope:actor
-				opinion = nominated_dynasty_opinion_gain
+			hidden_effect = {
+				scope:actor = { save_scope_as = the_sender }
+				scope:recipient = { trigger_event = { id = BP_roman_government_events.1053 } }
 			}
 		}
 		
@@ -1201,7 +1211,7 @@ BP_elevate_dynasty_to_eastern_senate = {
 		#The Consul is annoyed your stealing the Senate's perogative...
 		every_living_character = {
 			limit = {
-				has_character_modifier = roman_consul_west
+				has_character_modifier = roman_consul_east
 				NOT = { this = scope:recipient } #Oh, thank you!
 				NOT = { this = scope:actor }
 			}
@@ -1222,9 +1232,9 @@ BP_elevate_dynasty_to_eastern_senate = {
 		}
 		every_living_character = {
 			limit = {
-				NOT = { has_character_modifier = roman_consul_west }
-				has_trait = senator_west
-				senator_in_rome_trigger = yes
+				NOT = { has_character_modifier = roman_consul_east }
+				has_trait = senator_east
+				senator_in_constantinople_trigger = yes
 				NOT = { this = scope:recipient } #Oh, thank you!
 				NOT = { this = scope:actor }
 			}
@@ -1245,9 +1255,9 @@ BP_elevate_dynasty_to_eastern_senate = {
 		}
 		every_living_character = {
 			limit = {
-				NOT = { has_character_modifier = roman_consul_west }
-				has_trait = senator_west
-				senator_in_rome_trigger = no
+				NOT = { has_character_modifier = roman_consul_east }
+				has_trait = senator_east
+				senator_in_constantinople_trigger = no
 				NOT = { this = scope:recipient } #Oh, thank you!
 				NOT = { this = scope:actor }
 			}
@@ -1264,6 +1274,12 @@ BP_elevate_dynasty_to_eastern_senate = {
 					target = scope:recipient
 					opinion = nominated_dynasty_senator_not_in_rome_opinion_loss
 				}
+			}
+		}
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators = {
+				REGION = east
+				EVENT_TYPE = elevated_dynasty
 			}
 		}
 	}
