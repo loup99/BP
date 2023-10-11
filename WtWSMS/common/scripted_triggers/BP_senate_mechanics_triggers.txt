@@ -14,14 +14,21 @@ senator_in_location_trigger = {
 	trigger_if = {
 		limit = { is_landed = yes }
 		OR = {
-			this.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			custom_description = {
+				text = the_city_is_part_of_the_realm
+				this.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			}
 			this.capital_barony.title_province = { geographical_region = $THE_REGION$ }
 		}
 	}
 	trigger_else = {
 		exists = this.employer
 		OR = {
-			this.employer.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			custom_description = {
+				text = the_city_is_part_of_the_employers_realm
+				object = this
+				this.employer.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			}
 			this.employer.capital_barony.title_province = { geographical_region = $THE_REGION$ }
 		}
 	}
@@ -34,22 +41,54 @@ valid_to_be_senator_sex = {
 	$CHAR$ = { is_male = yes }
 }
 valid_to_be_senator_roman_empires = {
-	OR = { #Emperors could be consuls
-		$CHAR$.primary_title = title:e_wre
-		$CHAR$.primary_title = title:e_byzantium
-		$CHAR$.primary_title = title:e_roman_empire
+	custom_description = {
+		text = has_a_roman_empire_as_a_primary_title
+		OR = { #Emperors could be consuls
+			$CHAR$.primary_title = title:e_wre
+			$CHAR$.primary_title = title:e_byzantium
+			$CHAR$.primary_title = title:e_roman_empire
+		}
 	}
 }
 valid_to_be_senator = {
 	valid_to_be_senator_sex = { CHAR = $RECIPIENT$ }
-	OR = {
-		valid_to_be_senator_age = { CHAR = $RECIPIENT$ }
-		valid_to_be_senator_roman_empires = { CHAR = $RECIPIENT$ }
-		AND = { #Title Holder top liege who's an adult
-			age >= 16
+	#Top Liege awarding to _themselves_:  they either 25, are a child Emperor, OR adult king
+	trigger_if = {
+		limit = {
 			$ACTOR$ = $RECIPIENT$
-			$RECIPIENT$ = title:$THE_CITY$.holder.top_liege
-			$RECIPIENT$.primary_title.tier >= tier_kingdom
+			$ACTOR$ = title:$THE_CITY$.holder.top_liege
+		}
+		OR = {
+			valid_to_be_senator_age = { CHAR = $RECIPIENT$ }
+			valid_to_be_senator_roman_empires = { CHAR = $RECIPIENT$ }
+			AND = {
+				$RECIPIENT$ = { age >= 16 }
+				custom_description = {
+					text = is_the_top_liege_of_the_required_city
+					subject = $THE_CITY$
+					$RECIPIENT$ = title:$THE_CITY$.holder.top_liege
+				}
+				custom_description = {
+					text = primary_title_is_kingdom_or_greater
+					$RECIPIENT$.primary_title.tier >= tier_kingdom
+				}
+			}
+		}
+	}
+	#Otherwise, have to be at least 25 and in a valid location
+	trigger_else = { valid_to_be_senator_age = { CHAR = $RECIPIENT$ } }
+}
+valid_location_to_be_senator = {
+	OR = {
+		AND = {
+			$RECIPIENT$ = { has_trait = senator_$REGION$ }
+			$RECIPIENT$ = { senator_in_$LOCATION$_trigger = yes }
+		}
+		custom_description = {
+			text = you_are_part_of_the_city_holders_realm
+			$ACTOR$ = $RECIPIENT$.top_liege
+			$ACTOR$ = $RECIPIENT$.liege_or_court_owner
 		}
 	}
 }
+
