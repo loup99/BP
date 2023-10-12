@@ -173,6 +173,7 @@ BP_roman_government_events.0013 = { #The Senate Approves!
 		name = BP_roman_government_events.0013.a
 		scope:the_liege_west = {
 			add_character_modifier = approved_by_the_senate
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
 			add_opinion = {
 				target = scope:the_consul_west
 				modifier = pacified_opinion
@@ -193,11 +194,75 @@ BP_roman_government_events.0014 = { #The Senate Rejects!
 		name = BP_roman_government_events.0014.a
 		scope:the_liege_west = {
 			add_character_modifier = rejected_by_the_senate
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
 			add_opinion = {
 				target = scope:the_consul_west
 				modifier = insulted_opinion
 			}
 		}
+	}
+}
+
+#You now rule Rome, so the Senate bugs you about it...
+BP_roman_government_events.0020 = { #The Consul (or representative) of the Western Senate requests you ask the Senate
+	type = letter_event
+	opening = { desc = BP_roman_government_events.0020.opening }
+	desc = BP_roman_government_events.0020.desc
+	
+	sender = scope:the_consul_west
+	
+	immediate = { root = { save_scope_as = the_liege_west } }
+	
+	option = { #Seek approval
+		name = BP_roman_government_events.0020.seek_approval
+		custom_tooltip = BP_roman_government_events.0020.seek_approval.tootip
+		add_prestige = senate_approval_prestige_cost_west
+		scope:the_consul_west = {
+			add_opinion = {
+				target = root
+				modifier = sought_senate_approval
+			}
+			trigger_event = { id = BP_roman_government_events.0012 days = 3 }
+		}
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = yes
+			}
+		}
+	}
+	option = { #Reject approval
+		name = BP_roman_government_events.0020.ignore_the_senate
+		custom_tooltip = BP_roman_government_events.0020.dismiss_the_senate.tooltip
+		add_prestige = senate_refusal_prestige_gain_west
+		scope:the_consul_west = {
+			add_opinion = {
+				target = root
+				modifier = did_not_seek_senate_approval
+			}
+		}
+		
+		add_character_modifier = ignored_the_senate
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = no
+			}
+		}
+	}
+	option = { #Stall the Senate
+		name = BP_roman_government_events.0020.stall
+		if = { limit = { NOT = { has_character_modifier = stalled_the_senate } } add_character_modifier = stalled_the_senate }
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		add_prestige = -50
 	}
 }
 
@@ -425,6 +490,7 @@ BP_roman_government_events.1013 = { #The Senate Approves!
 		name = BP_roman_government_events.1013.a
 		scope:the_liege_east = {
 			add_character_modifier = approved_by_the_senate
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
 			add_opinion = {
 				target = scope:the_consul_east
 				modifier = pacified_opinion
@@ -445,11 +511,75 @@ BP_roman_government_events.1014 = { #The Senate Rejects!
 		name = BP_roman_government_events.1014.a
 		scope:the_liege_east = {
 			add_character_modifier = rejected_by_the_senate
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
 			add_opinion = {
 				target = scope:the_consul_east
 				modifier = insulted_opinion
 			}
 		}
+	}
+}
+
+#You now rule Rome, so the Senate bugs you about it...
+BP_roman_government_events.1020 = { #The Consul (or representative) of the Western Senate requests you ask the Senate
+	type = letter_event
+	opening = { desc = BP_roman_government_events.1020.opening }
+	desc = BP_roman_government_events.1020.desc
+	
+	sender = scope:the_consul_east
+	
+	immediate = { root = { save_scope_as = the_liege_east } }
+	
+	option = { #Seek approval
+		name = BP_roman_government_events.1020.seek_approval
+		custom_tooltip = BP_roman_government_events.1020.seek_approval.tootip
+		add_prestige = senate_approval_prestige_cost_west
+		scope:the_consul_east = {
+			add_opinion = {
+				target = root
+				modifier = sought_senate_approval
+			}
+			trigger_event = { id = BP_roman_government_events.1012 days = 3 }
+		}
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = yes
+			}
+		}
+	}
+	option = { #Reject approval
+		name = BP_roman_government_events.1020.ignore_the_senate
+		custom_tooltip = BP_roman_government_events.1020.dismiss_the_senate.tooltip
+		add_prestige = senate_refusal_prestige_gain_west
+		scope:the_consul_east = {
+			add_opinion = {
+				target = root
+				modifier = did_not_seek_senate_approval
+			}
+		}
+		
+		add_character_modifier = ignored_the_senate
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = no
+			}
+		}
+	}
+	option = { #Stall the Senate
+		name = BP_roman_government_events.1020.stall
+		if = { limit = { NOT = { has_character_modifier = stalled_the_senate } } add_character_modifier = stalled_the_senate }
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		add_prestige = -50
 	}
 }
 
@@ -539,7 +669,18 @@ BP_roman_government_events.2001 = { #You are now a vassal, so the senate no long
 	
 	option = {
 		name = BP_roman_government_events.2001.a
-		remove_character_modifier = approved_by_the_senate
+		if = {
+			limit = { has_character_modifier = approved_by_the_senate }
+			remove_character_modifier = approved_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = rejected_by_the_senate }
+			remove_character_modifier = rejected_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = ignored_the_senate }
+			remove_character_modifier = ignored_the_senate
+		}
 	}
 }
 
@@ -556,6 +697,17 @@ BP_roman_government_events.2002 = { #You no longer rule Rome or Constantinople
 	
 	option = {
 		name = BP_roman_government_events.2002.a
-		remove_character_modifier = approved_by_the_senate
+		if = {
+			limit = { has_character_modifier = approved_by_the_senate }
+			remove_character_modifier = approved_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = rejected_by_the_senate }
+			remove_character_modifier = rejected_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = ignored_the_senate }
+			remove_character_modifier = ignored_the_senate
+		}
 	}
 }
