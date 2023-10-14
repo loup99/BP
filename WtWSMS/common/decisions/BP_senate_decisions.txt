@@ -21,6 +21,8 @@ demand_land_for_family_west = {
 	}
 	
 	is_valid = {
+		is_incapable = no
+		is_imprisoned = no
 		#Have an unlanded member of your family who is not your child-heir in some capacity...
 		custom_description = {
 			text = your_family_has_an_unlanded_non_descendent_west
@@ -127,6 +129,143 @@ demand_land_for_family_west = {
 			}
 			title:b_roma.holder.top_liege = {
 				trigger_event = { id = BP_roman_government_events.0061 days = { 1 3 } }
+			}
+		}
+		custom_tooltip = { text = a_family_member_recieves_an_available_barony }
+	}
+	
+	ai_potential = { always = yes }
+	
+	#Senators should always want more land; it's their right!
+	ai_will_do = { base = 100 }
+}
+demand_land_for_family_east = {
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = demand_land_for_family_east_desc
+	selection_tooltip = demand_land_for_family_east_tooltip
+	
+	is_shown = {
+		root = root.dynasty.dynast
+		root.dynasty = { has_dynasty_modifier = roman_senate_family_east }
+		#Has to be under the Rome holder
+		trigger_if = {
+			limit = { is_landed = yes }
+			root.top_liege = { any_sub_realm_barony = { this = title:b_constaninople } }
+		}
+		trigger_else = { root.employer.top_liege = { any_sub_realm_barony = { this = title:b_constaninople } } }
+	}
+	
+	is_valid = {
+		is_incapable = no
+		is_imprisoned = no
+		#Have an unlanded member of your family who is not your child-heir in some capacity...
+		custom_description = {
+			text = your_family_has_an_unlanded_non_descendent_west
+			any_living_character = {
+				this.dynasty = root.dynasty
+				has_trait = senator_east
+				NOT = { is_child_of = root }
+				is_landed = no
+				NOT = { this = root }
+			}
+		}
+		#You are below the number of baronies your family could claim
+		custom_description = {
+			text = your_dynasty_has_fewer_holdings_than_expected
+			root.dynasty = { number_of_holdings_in_family < this.dynasty_prestige_level }
+		}
+		#A barony _must_ be available
+		custom_description = {
+			text = there_must_be_an_available_barony_to_give_out
+			subject = title:b_constaninople.holder.top_liege
+			title:b_constaninople.holder.top_liege = {
+				any_realm_province = {
+					#Valid holding type
+					OR = {
+						trigger_if = { #Include church holdings if both are lay clergy
+							limit = { this = { has_holding_type = church_holding } }
+							AND = {
+								this = { has_holding_type = church_holding }
+								this.barony.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+								root.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+							}
+						}
+						has_holding_type = castle_holding
+						has_holding_type = city_holding
+					}
+					#The holding type is not a capital barony
+					this.barony = { is_capital_barony = no }
+					#The holder isn't already a Senator
+					NOT = { this.barony.holder = { has_trait = senator_west } }
+				}
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		custom_description = {
+			text = recently_requested_land_transfer
+			NOT = { has_variable = requested_land_transfer_recently }
+		}
+	}
+	
+	cost = {
+		prestige = {
+			value = 100
+			if = {
+				limit = { is_ai = yes }
+				multiply = 0.5
+			}
+			if = {
+				limit = { is_landed = no }
+				multiply = 0.5
+			}
+		}
+	}
+	
+	effect = {
+		hidden_effect = {
+			root = {
+				save_scope_as = the_sender
+				set_variable = { name = requested_land_transfer_recently days = 1825 }
+			}
+			title:b_constaninople.holder.top_liege = {
+				save_scope_as = senate_seate_holder
+				random_realm_province = {
+					limit = {
+						#Valid holding type
+						OR = {
+							trigger_if = { #Include church holdings if both are lay clergy
+								limit = { this = { has_holding_type = church_holding } }
+								AND = {
+									this = { has_holding_type = church_holding }
+									this.barony.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+									root.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+								}
+							}
+							has_holding_type = castle_holding
+							has_holding_type = city_holding
+						}
+						#The holding type is not a capital barony
+						this.barony = { is_capital_barony = no }
+						#The holder isn't already a Senator
+						NOT = { this.barony.holder = { has_trait = senator_west } }
+					}
+					this.barony = { save_scope_as = target_barony }
+				}
+			}
+			random_living_character = {
+				limit = {
+					this.dynasty = root.dynasty
+					has_trait = senator_west
+					is_landed = no
+				}
+				save_scope_as = the_unlanded
+			}
+			title:b_constaninople.holder.top_liege = {
+				trigger_event = { id = BP_roman_government_events.1061 days = { 1 3 } }
 			}
 		}
 		custom_tooltip = { text = a_family_member_recieves_an_available_barony }
