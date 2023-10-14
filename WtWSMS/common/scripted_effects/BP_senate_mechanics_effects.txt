@@ -94,7 +94,7 @@ senate_election_effect = {
 				NOT = { has_character_modifier = roman_consul_$REGION$ }
 				NOT = { this = scope:old_consul_$REGION$ }
 				has_trait = senator_$REGION$
-				senator_in_$LOCATION$_trigger = yes
+				character_in_senate_$REGION$_trigger = yes
 			}
 			add_character_modifier = roman_consul_$REGION$
 			save_scope_as = new_consul_$REGION$
@@ -204,5 +204,41 @@ fire_senate_interface_toast_to_human_senators_effect = {
 			custom_tooltip = senate_$REGION$_$EVENT_TYPE$_tt
 			right_icon = title:d_senate
 		}
+	}
+}
+
+prepare_grant_land_targets_effect = {
+	title:$THE_CITY$.holder.top_liege = {
+		save_scope_as = senate_seate_holder
+		random_realm_province = {
+			limit = {
+				#Valid holding type
+				OR = {
+					trigger_if = { #Include church holdings if both are lay clergy
+						limit = { this = { has_holding_type = church_holding } }
+						AND = {
+							this = { has_holding_type = church_holding }
+							this.barony.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+							$ACTOR$.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+						}
+					}
+					has_holding_type = castle_holding
+					has_holding_type = city_holding
+				}
+				#The holding type is not a capital barony
+				this.barony = { is_capital_barony = no }
+				#The holder isn't already a Senator
+				NOT = { this.barony.holder = { has_trait = senator_$REGION$ } }
+			}
+			this.barony = { save_scope_as = target_barony }
+		}
+	}
+	random_living_character = {
+		limit = {
+			this.dynasty = $ACTOR$.dynasty
+			has_trait = senator_$REGION$
+			is_landed = no
+		}
+		save_scope_as = the_unlanded
 	}
 }
