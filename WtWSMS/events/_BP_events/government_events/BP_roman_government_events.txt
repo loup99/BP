@@ -4,6 +4,7 @@
 ##0001-0010: Disestablishment/Reestablishment of the Senate Effects
 ##0011-0050: Senate deliberates on recognizing a new ruler
 ##0051-0060: Becoming a Senator (various letter events)
+##0061-0070: Dynasty demands land
 
 #1000-1999: Eastern Senate Stuff
 ##1001-1010: Disestablishment of the Senate Effects
@@ -52,7 +53,6 @@ BP_roman_government_events.0001 = { #Informational Event on Disestablishing the 
 	}
 	option = { name = BP_roman_government_events.0001.dont_do_it }
 }
-
 BP_roman_government_events.0002 = {
 	type = character_event
 	theme = realm
@@ -141,7 +141,6 @@ BP_roman_government_events.0011 = { #Ask the Senate for Approval
 		remove_variable = already_asked_the_senate
 	}
 }
-
 BP_roman_government_events.0012 = { #The Senate deliberates
 	type = character_event
 	title = BP_roman_government_events.0012.t
@@ -159,7 +158,6 @@ BP_roman_government_events.0012 = { #The Senate deliberates
 		scope:the_liege_west = { trigger_event = { id = BP_roman_government_events.0014 days = 3 } }
 	}
 }
-
 BP_roman_government_events.0013 = { #The Senate Approves!
 	type = letter_event
 	opening = { desc = BP_roman_government_events.0013.opening }
@@ -181,7 +179,6 @@ BP_roman_government_events.0013 = { #The Senate Approves!
 		}
 	}
 }
-
 BP_roman_government_events.0014 = { #The Senate Rejects!
 	type = letter_event
 	opening = { desc =  BP_roman_government_events.0014.opening }
@@ -331,6 +328,176 @@ BP_roman_government_events.0054 = { #You've been nominated to become consul
 		nominated_consul_effect = {
 			ACTOR = scope:actor
 			REGION = west
+		}
+	}
+}
+
+#Senate Famliy Demands Land
+BP_roman_government_events.0061 = { #Top Liege recieves message
+	type = letter_event
+	opening = { desc = BP_roman_government_events.0061.opening }
+	desc = BP_roman_government_events.0061.desc
+	
+	sender = scope:the_sender
+	
+	immediate = { root = { save_scope_as = rome_holder } }
+	
+	option = {
+		name = BP_roman_government_events.0061.a
+		scope:the_sender = { trigger_event = { id = BP_roman_government_events.0062 days = { 1 3 } } }
+		
+		show_as_tooltip = {
+			scope:the_unlanded = {
+				get_title = scope:target_barony
+				add_opinion = {
+					target = root
+					modifier = granted_land_to_family
+				}
+			}
+			scope:the_unlanded.dynasty.dynast = {
+				add_opinion = {
+					target = root
+					modifier = granted_land_to_family
+				}
+			}
+			scope:target_barony.holder = {
+				every_liege_or_above = {
+					limit = {
+						NOT = { this = root }
+						NOT = { this.dynasty = scope:the_unlanded.dynasty }
+					}
+					add_opinion = {
+						target = root
+						modifier = took_land_from_under_me
+					}
+					if = {
+						limit = { this = { is_ai = no } }
+						send_interface_toast = {
+							type = event_generic_neutral
+							title = the_top_liege_took_land_from_under_you
+							custom_tooltip = the_top_liege_took_land_from_under_you_tt
+							right_icon = title:d_senate
+						}
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = BP_roman_government_events.0061.b
+		scope:the_sender = { trigger_event = { id = BP_roman_government_events.0063 days = { 1 3 } } }
+		
+		show_as_tooltip = {
+			custom_tooltip = {
+				text = every_senator_is_annoyed
+				every_living_character = {
+					limit = {
+						has_trait = senator_west
+						senator_in_rome_trigger = yes
+					}
+					add_opinion = {
+						target = root
+						modifier = refused_to_grant_land
+					}
+					if = {
+						limit = { this = { is_ai = no } }
+						send_interface_toast = {
+							type = event_generic_neutral
+							title = the_top_liege_refused_to_transfer_land
+							custom_tooltip = the_top_liege_refused_to_transfer_land_tt
+							right_icon = title:d_senate
+						}
+					}
+				}
+			}
+		}
+	}
+}
+BP_roman_government_events.0062 = { #Top Liege Says yes
+	type = letter_event
+	opening = { desc = BP_roman_government_events.0062.opening }
+	desc = BP_roman_government_events.0062.desc
+	
+	sender = scope:rome_holder
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_government_events.0062.a
+		
+		scope:the_unlanded = {
+			get_title = scope:target_barony
+			add_opinion = {
+				target = scope:rome_holder
+				modifier = granted_land_to_family
+			}
+		}
+		scope:the_unlanded.dynasty.dynast = {
+			add_opinion = {
+				target = scope:rome_holder
+				modifier = granted_land_to_family
+			}
+		}
+		scope:target_barony.holder = {
+			every_liege_or_above = {
+				limit = {
+					NOT = { this = scope:rome_holder }
+					NOT = { this.dynasty = scope:the_unlanded.dynasty }
+				}
+				add_opinion = {
+					target = scope:rome_holder
+					modifier = took_land_from_under_me
+				}
+				if = {
+					limit = { this = { is_ai = no } }
+					send_interface_toast = {
+						type = event_generic_neutral
+						title = the_top_liege_took_land_from_under_you
+						custom_tooltip = the_top_liege_took_land_from_under_you_tt
+						right_icon = title:d_senate
+					}
+				}
+			}
+		}
+	}
+}
+BP_roman_government_events.0063 = { #Top Liege Says No
+	type = letter_event
+	opening = { desc = BP_roman_government_events.0063.opening }
+	desc = BP_roman_government_events.0063.desc
+	
+	sender = scope:rome_holder
+	
+	immediate = {
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_west }
+			save_scope_as = the_consul_west
+		}
+	}
+	
+	option = {
+		name = BP_roman_government_events.0063.a
+		custom_tooltip = {
+			text = every_senator_is_annoyed
+			every_living_character = {
+				limit = {
+					has_trait = senator_west
+					senator_in_rome_trigger = yes
+				}
+				add_opinion = {
+					target = scope:rome_holder
+					modifier = refused_to_grant_land
+				}
+				if = {
+					limit = { this = { is_ai = no } }
+					send_interface_toast = {
+						type = event_generic_neutral
+						title = the_top_liege_refused_to_transfer_land
+						custom_tooltip = the_top_liege_refused_to_transfer_land_tt
+						right_icon = title:d_senate
+					}
+				}
+			}
 		}
 	}
 }
