@@ -473,10 +473,15 @@ senate_refusal_prestige_gain_east = {
 #    i.e., $ARG$
 
 #Opinions of Consul Nominee, influenced by culture and status
-consul_west_opinion_of_nominee = { #scope:recipient is the target
+consul_opinion_of_consul_nominee = { #scope:recipient is the target
 	value = -15
 	if = { #He's not even a Senator?!
-		limit = { NOT = { scope:recipient = { has_trait = senator_west } } }
+		limit = {
+			NOR = {
+				scope:recipient = { has_trait = senator_west }
+				scope:recipient = { has_trait = senator_east }
+			}
+		}
 		add = -5
 		
 		#Dynasty Prestige
@@ -568,10 +573,15 @@ consul_west_opinion_of_nominee = { #scope:recipient is the target
 		multiply = 0.5
 	}
 }
-senator_west_in_rome_opinion_of_nominee = { #scope:recipient is the target
+senator_in_city_opinion_of_consul_nominee = { #scope:recipient is the target
 	value = -10
 	if = { #He's not even a Senator?!
-		limit = { NOT = { scope:recipient = { has_trait = senator_west } } }
+		limit = {
+			NOR = {
+				scope:recipient = { has_trait = senator_west }
+				scope:recipient = { has_trait = senator_east }
+			}
+		}
 		add = -3
 		
 		#Dynasty Prestige
@@ -663,10 +673,15 @@ senator_west_in_rome_opinion_of_nominee = { #scope:recipient is the target
 		multiply = 0.5
 	}
 }
-senator_west_not_in_rome_opinion_of_nominee = { #scope:recipient is the target
+senator_not_in_city_opinion_of_consul_nominee = { #scope:recipient is the target
 	value = -5
 	if = { #He's not even a Senator?!
-		limit = { NOT = { scope:recipient = { has_trait = senator_west } } }
+		limit = {
+			NOR = {
+				scope:recipient = { has_trait = senator_west }
+				scope:recipient = { has_trait = senator_east }
+			}
+		}
 		add = -2
 		
 		#Dynasty Prestige
@@ -746,292 +761,6 @@ senator_west_not_in_rome_opinion_of_nominee = { #scope:recipient is the target
 		}
 		add = 3
 	}
-	if = { #Oh wait... it's just our beloved Emperor... (this is expected...)
-		limit = {
-			scope:recipient = { is_landed = yes }
-			OR = {
-				scope:recipient.primary_title = title:e_wre
-				scope:recipient.primary_title = title:e_byzantium
-				scope:recipient.primary_title = title:e_roman_empire
-			}
-		}
-		multiply = 0.5
-	}
-}
-consul_east_opinion_of_nominee = { #scope:recipient is the target
-	value = -15
-	if = { #He's not even a Senator?!
-		limit = { NOT = { scope:recipient = { has_trait = senator_east } } }
-		add = -5
-		
-		#Dynasty Prestige
-		if = { #A small elevation...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 4 }
-			}
-			add = -5
-		}
-		else_if = { #Okay, this is moving up in the world...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 3 }
-			}
-			add = -10
-		}
-		else_if = { #This is a big promotion...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 2 }
-			}
-			add = -15
-		}
-		else_if = { #Wait, what are you doing?
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 1 }
-			}
-			add = -20
-		}
-		else_if = { #Wait, what are you doing?
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 0 }
-			}
-			add = -25
-		}
-		else_if = { #Oh Lord, what's happening...?
-			limit = { NOT = { exists = scope:recipient.dynasty } }
-			add = -30
-		}
-	}
-	if = { #You picked an incompetant bastard?!
-		limit = {
-			OR = {
-				scope:recipient = { has_trait = education_diplomacy_1 }
-				scope:recipient = { has_trait = education_martial_1 }
-				scope:recipient = { has_trait = education_stewardship_1 }
-				scope:recipient = { has_trait = education_intrigue_1 }
-				scope:recipient = { has_trait = education_learning_1 }
-			}
-		}
-		add = -10
-	}
-	if = { #You picked a Barbarian?!
-		limit = {
-			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
-			scope:senator_in_question.culture = { has_cultural_parameter = can_restore_roman_empire }
-		}
-		add = -15
-	}
-	if = { #At least he's competant...
-		limit = {
-			OR = {
-				scope:recipient = { has_trait = education_diplomacy_4 }
-				scope:recipient = { has_trait = education_martial_4 }
-				scope:recipient = { has_trait = education_stewardship_4 }
-				scope:recipient = { has_trait = education_intrigue_4 }
-				scope:recipient = { has_trait = education_learning_4 }
-				scope:recipient = { has_trait = education_diplomacy_5 }
-				scope:recipient = { has_trait = education_martial_5 }
-				scope:recipient = { has_trait = education_stewardship_5 }
-				scope:recipient = { has_trait = education_intrigue_5 }
-				scope:recipient = { has_trait = education_learning_5 }
-			}
-		}
-		add = 10
-	}
-	if = { #Oh wait... it's just our beloved Emperor... (this is expected...)
-		limit = {
-			scope:recipient = { is_landed = yes }
-			OR = {
-				scope:recipient.primary_title = title:e_wre
-				scope:recipient.primary_title = title:e_byzantium
-				scope:recipient.primary_title = title:e_roman_empire
-			}
-		}
-		multiply = 0.5
-	}
-}
-senator_east_in_constaninople_opinion_of_nominee = { #scope:recipient is the target
-	value = -10
-	if = { #He's not even a Senator?!
-		limit = { NOT = { scope:recipient = { has_trait = senator_east } } }
-		add = -3
-		
-		#Dynasty Prestige
-		if = { #A small elevation...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 4 }
-			}
-			add = -2
-		}
-		else_if = { #Okay, this is moving up in the world...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 3 }
-			}
-			add = -4
-		}
-		else_if = { #This is a big promotion...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 2 }
-			}
-			add = -6
-		}
-		else_if = { #Wait, what are you doing?
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 1 }
-			}
-			add = -8
-		}
-		else_if = { #Wait, what are you doing?
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 0 }
-			}
-			add = -10
-		}
-		else_if = { #Oh Lord, what's happening...?
-			limit = { NOT = { exists = scope:recipient.dynasty } }
-			add = -12
-		}
-	}
-	if = { #You picked an incompetant bastard?!
-		limit = {
-			OR = {
-				scope:recipient = { has_trait = education_diplomacy_1 }
-				scope:recipient = { has_trait = education_martial_1 }
-				scope:recipient = { has_trait = education_stewardship_1 }
-				scope:recipient = { has_trait = education_intrigue_1 }
-				scope:recipient = { has_trait = education_learning_1 }
-			}
-		}
-		add = -6
-	}
-	if = { #You picked a Barbarian?!
-		limit = {
-			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
-			scope:senator_in_question.culture = { has_cultural_parameter = can_restore_roman_empire }
-		}
-		add = -10
-	}
-	if = { #At least he's competant...
-		limit = {
-			OR = {
-				scope:recipient = { has_trait = education_diplomacy_4 }
-				scope:recipient = { has_trait = education_martial_4 }
-				scope:recipient = { has_trait = education_stewardship_4 }
-				scope:recipient = { has_trait = education_intrigue_4 }
-				scope:recipient = { has_trait = education_learning_4 }
-				scope:recipient = { has_trait = education_diplomacy_5 }
-				scope:recipient = { has_trait = education_martial_5 }
-				scope:recipient = { has_trait = education_stewardship_5 }
-				scope:recipient = { has_trait = education_intrigue_5 }
-				scope:recipient = { has_trait = education_learning_5 }
-			}
-		}
-		add = 6
-	}
-	if = { #Oh wait... it's just our beloved Emperor... (this is expected...)
-		limit = {
-			scope:recipient = { is_landed = yes }
-			OR = {
-				scope:recipient.primary_title = title:e_wre
-				scope:recipient.primary_title = title:e_byzantium
-				scope:recipient.primary_title = title:e_roman_empire
-			}
-		}
-		multiply = 0.5
-	}
-}
-senator_east_not_in_constaninople_opinion_of_nominee = { #scope:recipient is the target
-	value = -5
-	if = { #He's not even a Senator?!
-		limit = { NOT = { scope:recipient = { has_trait = senator_east } } }
-		add = -2
-		
-		#Dynasty Prestige
-		if = { #A small elevation...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 4 }
-			}
-			add = -1
-		}
-		else_if = { #Okay, this is moving up in the world...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 3 }
-			}
-			add = -2
-		}
-		else_if = { #This is a big promotion...
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 2 }
-			}
-			add = -3
-		}
-		else_if = { #Wait, what are you doing?
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 1 }
-			}
-			add = -4
-		}
-		else_if = { #Wait, what are you doing?
-			limit = {
-				exists = scope:recipient.dynasty
-				scope:recipient.dynasty = { dynasty_prestige_level >= 0 }
-			}
-			add = -5
-		}
-		else_if = { #Oh Lord, what's happening...?
-			limit = { NOT = { exists = scope:recipient.dynasty } }
-			add = -6
-		}
-	}
-	if = { #You picked an incompetant bastard?!
-		limit = {
-			OR = {
-				scope:recipient = { has_trait = education_diplomacy_1 }
-				scope:recipient = { has_trait = education_martial_1 }
-				scope:recipient = { has_trait = education_stewardship_1 }
-				scope:recipient = { has_trait = education_intrigue_1 }
-				scope:recipient = { has_trait = education_learning_1 }
-			}
-		}
-		add = -3
-	}
-	if = { #You picked a Barbarian?!
-		limit = {
-			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
-			scope:senator_in_question.culture = { has_cultural_parameter = can_restore_roman_empire }
-		}
-		add = -5
-	}
-	if = { #At least he's competant...
-		limit = {
-			OR = {
-				scope:recipient = { has_trait = education_diplomacy_4 }
-				scope:recipient = { has_trait = education_martial_4 }
-				scope:recipient = { has_trait = education_stewardship_4 }
-				scope:recipient = { has_trait = education_intrigue_4 }
-				scope:recipient = { has_trait = education_learning_4 }
-				scope:recipient = { has_trait = education_diplomacy_5 }
-				scope:recipient = { has_trait = education_martial_5 }
-				scope:recipient = { has_trait = education_stewardship_5 }
-				scope:recipient = { has_trait = education_intrigue_5 }
-				scope:recipient = { has_trait = education_learning_5 }
-			}
-		}
-		add = 3
-	}
-	
 	if = { #Oh wait... it's just our beloved Emperor... (this is expected...)
 		limit = {
 			scope:recipient = { is_landed = yes }
@@ -1095,7 +824,7 @@ nominated_senator_opinion_gain = { #scope:recipient is the target
 		add = 10
 	}
 }
-consul_general_opinion_of_new_senator = { #scope:recipient is the target
+consul_opinion_of_new_senator = { #scope:recipient is the target
 	value = -5
 	#Dynasty Prestige
 	if = { #A small elevation...
@@ -1146,7 +875,7 @@ consul_general_opinion_of_new_senator = { #scope:recipient is the target
 		add = -10
 	}
 }
-senator_general_in_city_opinion_of_new_senator = { #scope:recipient is the target
+senator_in_city_opinion_of_new_senator = { #scope:recipient is the target
 	value = -2
 	if = { #A small elevation...
 		limit = {
@@ -1196,8 +925,58 @@ senator_general_in_city_opinion_of_new_senator = { #scope:recipient is the targe
 		add = -5
 	}
 }
+senator_not_in_city_opinion_of_new_senator = { #scope:recipient is the target
+	value = -1
+	if = { #A small elevation...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 4 }
+		}
+		add = -1
+	}
+	else_if = { #Okay, this is moving up in the world...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 3 }
+		}
+		add = -2
+	}
+	else_if = { #This is a big promotion...
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 2 }
+		}
+		add = -3
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 1 }
+		}
+		add = -4
+	}
+	else_if = { #Wait, what are you doing?
+		limit = {
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level >= 0 }
+		}
+		add = -5
+	}
+	else_if = { #Oh Lord, what's happening...?
+		limit = { NOT = { exists = scope:recipient.dynasty } }
+		add = -6
+	}
+	
+	if = { #You picked a Barbarian?!
+		limit = {
+			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
+			scope:senator_in_question.culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		add = -3
+	}
+}
 #Opinions of new dynasties, influenced by culture and status
-nominated_dynasty_opinion_gain = {
+elevated_dynasty_opinion_gain = {
 	value = 0
 	#Dynasty Prestige
 	if = { #A small elevation...
@@ -1244,7 +1023,7 @@ nominated_dynasty_opinion_gain = {
 		add = 30
 	}
 }
-nominated_dynasty_consul_opinion_loss = {
+consul_opinion_of_elevated_dynasty = {
 	value = 0
 	#Dynasty Prestige
 	if = { #A small elevation...
@@ -1291,7 +1070,7 @@ nominated_dynasty_consul_opinion_loss = {
 		add = -30
 	}
 }
-nominated_dynasty_senator_in_rome_opinion_loss = {
+senator_in_city_opinion_of_elevated_dynasty = {
 	value = 0
 	#Dynasty Prestige
 	if = { #A small elevation...
@@ -1338,7 +1117,7 @@ nominated_dynasty_senator_in_rome_opinion_loss = {
 		add = -15
 	}
 }
-nominated_dynasty_senator_not_in_rome_opinion_loss = {
+senator_not_in_city_opinion_of_elevated_dynasty = {
 	value = 0
 	#Dynasty Prestige
 	if = { #A small elevation...
@@ -1385,4 +1164,3 @@ nominated_dynasty_senator_not_in_rome_opinion_loss = {
 		add = -7
 	}
 }
-
