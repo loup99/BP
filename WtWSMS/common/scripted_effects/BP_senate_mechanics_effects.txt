@@ -135,6 +135,68 @@ made_a_senator_effect = { #recipient scope
 		target = $ACTOR$
 		opinion = nominated_senator_opinion_gain
 	}
+	update_senator_opinion_about_character_effect = { ACTOR = $ACTOR$ }
+}
+
+update_senator_opinion_about_character_effect = { #Senator scope
+	#Cleanup old opinion
+	if = {
+		limit = { has_opinion_modifier = { target = $ACTOR$ modifier = senate_general_opinion_approved_by_the_senate } }
+		remove_opinion = { target = $ACTOR$ modifier = senate_general_opinion_approved_by_the_senate }
+	}
+	if = {
+		limit = { has_opinion_modifier = { target = $ACTOR$ modifier = senate_general_opinion_rejected_by_the_senate } }
+		remove_opinion = { target = $ACTOR$ modifier = senate_general_opinion_rejected_by_the_senate }
+	}
+	if = {
+		limit = { has_opinion_modifier = { target = $ACTOR$ modifier = senate_general_opinion_ignored_the_senate } }
+		remove_opinion = { target = $ACTOR$ modifier = senate_general_opinion_ignored_the_senate }
+	}
+	if = {
+		limit = { has_opinion_modifier = { target = $ACTOR$ modifier = senate_general_opinion_stalled_the_senate } }
+		remove_opinion = { target = $ACTOR$ modifier = senate_general_opinion_stalled_the_senate }
+	}
+	#Update Opinion
+	if = {
+		limit = { $ACTOR$ = { has_character_modifier = approved_by_the_senate } }
+		add_opinion = {
+			modifier = senate_general_opinion_approved_by_the_senate
+			target = $ACTOR$
+		}
+	}
+	else_if = {
+		limit = { $ACTOR$ = { has_character_modifier = rejected_by_the_senate } }
+		add_opinion = {
+			modifier = senate_general_opinion_rejected_by_the_senate
+			target = $ACTOR$
+		}
+	}
+	else_if = {
+		limit = { $ACTOR$ = { has_character_modifier = ignored_the_senate } }
+		add_opinion = {
+			modifier = senate_general_opinion_ignored_the_senate
+			target = $ACTOR$
+		}
+	}
+	else_if = {
+		limit = { $ACTOR$ = { has_character_modifier = stalled_the_senate } }
+		add_opinion = {
+			modifier = senate_general_opinion_stalled_the_senate
+			target = $ACTOR$
+		}
+	}
+}
+
+update_all_senate_opinion_about_character_effect = {
+	every_living_character = {
+		limit = {
+			OR = {
+				has_trait = senator_east
+				has_trait = senator_west
+			}
+		}
+		update_senator_opinion_about_character_effect = { ACTOR = $ACTOR$ }
+	}
 }
 
 elevated_a_dynasty_effect = {
