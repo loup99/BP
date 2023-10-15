@@ -1,23 +1,25 @@
 ﻿close_senate_view_effect = {
 	scope = character
 	effect = {
-		clear_variable_list = all_senator_list
-		
 		#West Senate
-		clear_variable_list = all_west_senator_list
-		clear_variable_list = senators_in_rome_list
-		clear_variable_list = senators_out_of_rome_list
-		clear_variable_list = senate_family_list_west
-		clear_variable_list = west_consul
-		clear_variable_list = west_consul_nominee
+		title:d_senate = {
+			clear_variable_list = all_west_senator_list
+			clear_variable_list = senators_in_rome_list
+			clear_variable_list = senators_out_of_rome_list
+			clear_variable_list = senate_family_list_west
+			clear_variable_list = west_consul
+			clear_variable_list = west_consul_nominee
+		}
 		
 		#East Senate
-		clear_variable_list = all_east_senator_list
-		clear_variable_list = senators_in_constantinople_list
-		clear_variable_list = senators_out_of_constantinople_list
-		clear_variable_list = senate_family_list_east
-		clear_variable_list = east_consul
-		clear_variable_list = east_consul_nominee
+		title:d_senate_east = {
+			clear_variable_list = all_east_senator_list
+			clear_variable_list = senators_in_constantinople_list
+			clear_variable_list = senators_out_of_constantinople_list
+			clear_variable_list = senate_family_list_east
+			clear_variable_list = east_consul
+			clear_variable_list = east_consul_nominee
+		}
 	}
 }
 
@@ -28,7 +30,7 @@ update_senator_list_effect = {
 		every_living_character = {
 			limit = { has_trait = senator_west }
 			
-			root = {
+			title:d_senate = {
 				add_to_variable_list = {
 					name = all_west_senator_list
 					target = prev
@@ -37,7 +39,7 @@ update_senator_list_effect = {
 			#Get all the Senators in Rome and add them to a list
 			if = {
 				limit = { character_in_west_senate_region_trigger = yes }
-				root = {
+				title:d_senate = {
 					add_to_variable_list = {
 						name = senators_in_rome_list
 						target = prev
@@ -45,37 +47,9 @@ update_senator_list_effect = {
 				}
 			}
 			else = {
-				root = {
+				title:d_senate = {
 					add_to_variable_list = {
 						name = senators_out_of_rome_list
-						target = prev
-					}
-				}
-			}
-		}
-		every_living_character = {
-			limit = { has_trait = senator_east }
-			
-			root = {
-				add_to_variable_list = {
-					name = all_east_senator_list
-					target = prev
-				}
-			}
-			#Get all the Senators in Rome and add them to a list
-			if = {
-				limit = { character_in_east_senate_region_trigger = yes }
-				root = {
-					add_to_variable_list = {
-						name = senators_in_constantinople_list
-						target = prev
-					}
-				}
-			}
-			else = {
-				root = {
-					add_to_variable_list = {
-						name = senators_out_of_constantinople_list
 						target = prev
 					}
 				}
@@ -88,31 +62,17 @@ update_senator_list_effect = {
 				this.dynasty = { has_dynasty_modifier = roman_senate_family_west }
 				this = this.dynasty.dynast
 			}
-			root = {
+			title:d_senate = {
 				add_to_variable_list = {
 					name = senate_family_list_west
 					target = prev.dynasty
 				}
 			}
 		}
-		every_living_character = {
-			limit = {
-				exists = dynasty
-				this.dynasty = { has_dynasty_modifier = roman_senate_family_east }
-				this = this.dynasty.dynast
-			}
-			root = {
-				add_to_variable_list = {
-					name = senate_family_list_east
-					target = prev.dynasty
-				}
-			}
-		}
-		
 		#Get all the Senate Officers
 		every_living_character = {
 			limit = { has_character_modifier = roman_consul_west }
-			root = {
+			title:d_senate = {
 				add_to_variable_list = {
 					name = west_consul
 					target = prev
@@ -121,16 +81,60 @@ update_senator_list_effect = {
 		}
 		every_living_character = {
 			limit = { has_character_modifier = roman_consul_nominee_west }
-			root = {
+			title:d_senate = {
 				add_to_variable_list = {
 					name = west_consul_nominee
 					target = prev
 				}
 			}
 		}
+		
+		every_living_character = {
+			limit = { has_trait = senator_east }
+			
+			title:d_senate_east = {
+				add_to_variable_list = {
+					name = all_east_senator_list
+					target = prev
+				}
+			}
+			#Get all the Senators in Rome and add them to a list
+			if = {
+				limit = { character_in_east_senate_region_trigger = yes }
+				title:d_senate_east = {
+					add_to_variable_list = {
+						name = senators_in_constantinople_list
+						target = prev
+					}
+				}
+			}
+			else = {
+				title:d_senate_east = {
+					add_to_variable_list = {
+						name = senators_out_of_constantinople_list
+						target = prev
+					}
+				}
+			}
+		}
+		#Get all the Senate Families
+		every_living_character = {
+			limit = {
+				exists = dynasty
+				this.dynasty = { has_dynasty_modifier = roman_senate_family_east }
+				this = this.dynasty.dynast
+			}
+			title:d_senate_east = {
+				add_to_variable_list = {
+					name = senate_family_list_east
+					target = prev.dynasty
+				}
+			}
+		}
+		#Get all the Senate Officers
 		every_living_character = {
 			limit = { has_character_modifier = roman_consul_east }
-			root = {
+			title:d_senate_east = {
 				add_to_variable_list = {
 					name = east_consul
 					target = prev
@@ -139,7 +143,7 @@ update_senator_list_effect = {
 		}
 		every_living_character = {
 			limit = { has_character_modifier = roman_consul_nominee_east }
-			root = {
+			title:d_senate_east = {
 				add_to_variable_list = {
 					name = east_consul_nominee
 					target = prev
