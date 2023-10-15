@@ -21,8 +21,8 @@ character_in_senate_region_trigger = {
 			this.capital_barony.title_province = { geographical_region = $THE_REGION$ }
 		}
 	}
-	trigger_else = {
-		exists = this.employer
+	trigger_else_if = {
+		limit = { exists = this.employer }
 		OR = {
 			custom_description = {
 				text = the_city_is_part_of_the_employers_realm
@@ -30,6 +30,17 @@ character_in_senate_region_trigger = {
 				this.employer.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
 			}
 			this.employer.capital_barony.title_province = { geographical_region = $THE_REGION$ }
+		}
+	}
+	trigger_else_if = {
+		limit = { exists = this.host }
+		OR = {
+			custom_description = {
+				text = the_city_is_part_of_the_employers_realm
+				object = this
+				this.host.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			}
+			this.host.capital_barony.title_province = { geographical_region = $THE_REGION$ }
 		}
 	}
 	is_imprisoned = no
@@ -81,14 +92,19 @@ valid_to_be_senator = {
 }
 valid_location_to_be_senator = {
 	OR = {
-		AND = {
-			$RECIPIENT$ = { has_trait = senator_$REGION$ }
+		trigger_if = {
+			limit = { $RECIPIENT$ = { has_trait = senator_$REGION$ } }
 			$RECIPIENT$ = { character_in_senate_$REGION$_trigger = yes }
 		}
 		custom_description = {
 			text = you_are_part_of_the_city_holders_realm
-			$ACTOR$ = $RECIPIENT$.top_liege
-			$ACTOR$ = $RECIPIENT$.liege_or_court_owner
+			subject = $RECIPIENT$
+			OR = {
+				$ACTOR$ = $RECIPIENT$.top_liege
+				$ACTOR$ = $RECIPIENT$.liege_or_court_owner
+				$ACTOR$ = $RECIPIENT$.employer.top_liege
+				$ACTOR$ = $RECIPIENT$.liege_or_court_owner.top_liege
+			}
 		}
 	}
 }
