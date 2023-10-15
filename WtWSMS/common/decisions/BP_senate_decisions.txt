@@ -45,6 +45,12 @@ demand_land_for_family_west = {
 			subject = title:b_roma.holder.top_liege
 			title:b_roma.holder.top_liege = {
 				any_realm_province = {
+					#If it's AI, only consider the top liege capital county, otherwise, allow capital duchies
+					trigger_if = {
+						limit = { title:b_roma.holder.top_liege = { is_ai = yes } }
+						NOT = { this.county = title:b_roma.holder.capital_province.county }
+					}
+					trigger_else = { NOT = { this.duchy = title:b_roma.holder.capital_province.duchy } }
 					#Valid holding type
 					OR = {
 						trigger_if = { #Include church holdings if both are lay clergy
@@ -134,7 +140,7 @@ demand_land_for_family_east = {
 		is_imprisoned = no
 		#Have an unlanded member of your family who is not your child-heir in some capacity...
 		custom_description = {
-			text = your_family_has_an_unlanded_non_descendent_west
+			text = your_family_has_an_unlanded_non_descendent_east
 			any_living_character = {
 				this.dynasty = root.dynasty
 				has_trait = senator_east
@@ -146,7 +152,7 @@ demand_land_for_family_east = {
 		#You are below the number of baronies your family could claim
 		custom_description = {
 			text = your_dynasty_has_fewer_holdings_than_expected
-			root.dynasty = { number_of_holdings_in_family < this.dynasty_prestige_level }
+			root.dynasty = { number_of_holdings_in_family < number_of_expected_holdings_for_family }
 		}
 		#A barony _must_ be available
 		custom_description = {
@@ -154,6 +160,12 @@ demand_land_for_family_east = {
 			subject = title:b_constantinople.holder.top_liege
 			title:b_constantinople.holder.top_liege = {
 				any_realm_province = {
+					#If it's AI, only consider the top liege capital county, otherwise, allow capital duchies
+					trigger_if = {
+						limit = { title:b_constantinople.holder.top_liege = { is_ai = yes } }
+						NOT = { this.county = title:b_constantinople.holder.capital_province.county }
+					}
+					trigger_else = { NOT = { this.duchy = title:b_constantinople.holder.capital_province.duchy } }
 					#Valid holding type
 					OR = {
 						trigger_if = { #Include church holdings if both are lay clergy
@@ -170,7 +182,7 @@ demand_land_for_family_east = {
 					#The holding type is not a capital barony
 					this.barony = { is_capital_barony = no }
 					#The holder isn't already a Senator
-					NOT = { this.barony.holder = { has_trait = senator_west } }
+					NOT = { this.barony.holder = { has_trait = senator_east } }
 				}
 			}
 		}
