@@ -1029,7 +1029,9 @@ BP_roman_government_events.1063 = { #Top Liege Says No
 #2001+: General Senate Stuff
 
 ## 2001-2010: Loss of Senatorial Support
+## 2011-2020: Collapse of the Senate
 
+## 2001-2010: Loss of Senatorial Support
 BP_roman_government_events.2001 = { #You are now a vassal, so the senate no longer supports you
 	type = character_event
 	theme = realm
@@ -1058,7 +1060,6 @@ BP_roman_government_events.2001 = { #You are now a vassal, so the senate no long
 		update_senator_opinion_about_character_effect = { ACTOR = root }
 	}
 }
-
 BP_roman_government_events.2002 = { #You no longer rule Rome or Constantinople
 	type = character_event
 	theme = realm
@@ -1085,5 +1086,88 @@ BP_roman_government_events.2002 = { #You no longer rule Rome or Constantinople
 			remove_character_modifier = ignored_the_senate
 		}
 		update_senator_opinion_about_character_effect = { ACTOR = root }
+	}
+}
+
+## 2011-2020: Collapse of the Western Senate
+BP_roman_government_events.2011 = { #Yearly check that the Senate hasn't collapsed
+	scope = none
+	hidden = yes
+	
+	trigger = { #At least one of the Senates is empty
+		trigger_if = {
+			limit = { exists = scope:dying_senator }
+			OR = {
+				no_remaining_senators_after_this_one_in_west_senate_trigger = { ACTOR = scope:dying_senator }
+				no_remaining_senators_after_this_one_in_east_senate_trigger = { ACTOR = scope:dying_senator }
+			}
+		}
+		trigger_else = {
+			OR = {
+				no_remaining_senators_in_west_senate_trigger = yes
+				no_remaining_senators_in_east_senate_trigger = yes
+			}
+		}
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					no_remaining_senators_in_west_senate_trigger = yes
+					trigger_if = {
+						limit = { exists = scope:dying_senator }
+						no_remaining_senators_after_this_one_in_west_senate_trigger = { ACTOR = scope:dying_senator }
+					}
+				}
+			}
+			destroy_senate_effect = { REGION = west }
+			every_ruler = { limit = { is_ai = no } trigger_event = { id = BP_roman_government_events.2012 } }
+		}
+		if = {
+			limit = { no_remaining_senators_in_east_senate_trigger = yes }
+			limit = {
+				OR = {
+					no_remaining_senators_in_east_senate_trigger = yes
+					trigger_if = {
+						limit = { exists = scope:dying_senator }
+						no_remaining_senators_after_this_one_in_east_senate_trigger = { ACTOR = scope:dying_senator }
+					}
+				}
+			}
+			destroy_senate_effect = { REGION = east }
+			every_ruler = { limit = { is_ai = no } trigger_event = { id = BP_roman_government_events.2013 } }
+		}
+	}
+}
+
+BP_roman_government_events.2012 = { #Collapse of the Western Senate
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = {}
+	
+	title = BP_roman_government_events.2012.t
+	desc = BP_roman_government_events.2012.desc
+	
+	option = {
+		name = BP_roman_government_events.2012.a
+	}
+}
+BP_roman_government_events.2013 = { #Collapse of the Western Senate
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = {}
+	
+	title = BP_roman_government_events.2013.t
+	desc = BP_roman_government_events.2013.desc
+	
+	option = {
+		name = BP_roman_government_events.2013.a
 	}
 }

@@ -6,6 +6,9 @@ yearly_global_pulse = {
 		senatorial_election_west
 		senatorial_election_east
 	}
+	events = {
+		BP_roman_government_events.2011 #Yearly check that the Senate has at least 1 Senator available
+	}
 }
 
 senatorial_election_east = {
@@ -40,18 +43,32 @@ on_death = {
 #Consul died early, call a snap election
 snap_election = {
 	effect = {
+	root = { save_scope_as = dying_senator }
+	#NB: on_death is called *just* before a char dies, so only having 1 char in the Senate means no one can take the wheel afterwards
 		if = {
 			limit = { root = { has_character_modifier = roman_consul_east } }
-			senate_election_effect = {
-				REGION = east
-				BARONY = b_constantinople
+			if = {
+				limit = { no_remaining_senators_after_this_one_in_east_senate_trigger = { ACTOR = scope:dying_senator } }
+				trigger_event = { id = BP_roman_government_events.2011 }
+			}
+			else = {
+				senate_election_effect = {
+					REGION = east
+					BARONY = b_constantinople
+				}
 			}
 		}
 		if = {
 			limit = { root = { has_character_modifier = roman_consul_west } }
-			senate_election_effect = {
-				REGION = west
-				BARONY = b_roma
+			if = {
+				limit = { no_remaining_senators_after_this_one_in_west_senate_trigger = { ACTOR = scope:dying_senator } }
+				trigger_event = { id = BP_roman_government_events.2011 }
+			}
+			else = {
+				senate_election_effect = {
+					REGION = west
+					BARONY = b_roma
+				}
 			}
 		}
 	}
