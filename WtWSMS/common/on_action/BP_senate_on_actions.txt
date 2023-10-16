@@ -252,3 +252,120 @@ BP_new_top_liege_of_city = {
 		}
 	}
 }
+
+##### Game Start Stuff #####
+on_game_start = {
+	on_actions = {
+		setup_senate_offices_and_statuses_by_date
+		setup_roman_senate_families
+	}
+}
+setup_senate_offices_and_statuses_by_date = {
+	effect = {
+		set_global_variable = east_senate_is_established
+		if = {
+			limit = { current_date < 603.1.1 }
+			set_global_variable = west_senate_is_established
+		}
+		#Consuls & Emperors by bookmark
+		if = {
+			limit = { current_date = 476.2.2 }
+			
+			#Western Emperor and Consuls
+			character:74411 = { #Marcianus
+				add_trait = senator_west
+				add_character_modifier = roman_consul_west
+			}
+			character:96054 = { #Romulus
+				set_variable = already_asked_the_senate
+				add_trait = senator_west
+				#Approved by the Senate and can't ask again
+				set_variable = already_asked_the_senate
+				add_character_modifier = approved_by_the_senate
+			}
+			#Eastern Emperor and Consuls
+			character:145226 = { #Basilicus
+				add_trait = senator_east
+				add_character_modifier = roman_consul_east
+				#Approved by the Senate and can't ask again
+				set_variable = already_asked_the_senate
+				add_character_modifier = approved_by_the_senate
+			}
+		}
+	}
+}
+setup_roman_senate_families = {
+	effect = {
+		#Senatorial Families (West)
+		dynasty:1042312 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Anicius Gens
+		dynasty:1022195 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Constantinus Gens
+		dynasty:1042303 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Decius Gens
+		dynasty:roman_dynn_ferreolus = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Ferreolus Gens
+		dynasty:1042302 = { add_dynasty_modifier = { modifier = roman_senate_family_west } } #Symmachus Gens
+		
+		#Senatorial Families (East)
+		dynasty:1022189 = { add_dynasty_modifier = { modifier = roman_senate_family_east } } #Basilicus' family
+		dynasty:1022187 = { add_dynasty_modifier = { modifier = roman_senate_family_east } } #Zenon's family
+		dynasty:10424447 = { add_dynasty_modifier = { modifier = roman_senate_family_east } } #Illus' family
+		
+		#All men of the Senatorial Gens who are at least 25 get to be senators
+		every_living_character = {
+			limit = {
+				valid_to_be_senator_age = { CHAR = this }
+				this = { is_male = yes }
+				this.dynasty ?= { has_dynasty_modifier = roman_senate_family_west }
+			}
+			add_trait = senator_west
+		}
+		every_living_character = {
+			limit = {
+				valid_to_be_senator_age = { CHAR = this }
+				this = { is_male = yes }
+				this.dynasty ?= { has_dynasty_modifier = roman_senate_family_east }
+			}
+			add_trait = senator_east
+		}
+		
+		#Senators (West)
+		#Avitus Gens (1042302)
+		character:74403 = { add_trait = senator_west } #Avitus of Flamina
+		character:36603 = { add_trait = senator_west } #Ecdicius
+		character:190006 = { add_trait = senator_west } #Agricola
+		character:1007001 = { add_trait = senator_west } #Hesychius
+		#Decius Gnes
+		character:20786 = { add_trait = senator_west } #Caecina maximus Basilius
+		#Ferreolus Gens
+		character:1005004 = { add_trait = senator_west } #Tonantius Ferrolus
+		#Anicius Gens
+		
+		#From Roman Consul List
+		character:36612 = { add_trait = senator_west } #Dagalaiphus Areobindus
+		character:1300861 = { add_trait = senator_west } #Hermanaricus Ardaburius
+		character:1001102 = { add_trait = senator_west } #Lavius Illustrius Pusaeus Anthemius
+		character:1001101 = { add_trait = senator_west } #Flavius Messius Phoebus Severus Anthemius
+		character:190103 = { add_trait = senator_west } #Caelius Aconius Probianus
+		character:1003513 = { add_trait = senator_west } #Flavius Constantinus (low born?)
+		#Others
+		character:1006014 = { add_trait = senator_west } #Anicius Probus
+		
+		#Individual Senators (East)
+		character:41722 = { add_trait = senator_east } #Illus
+		character:70515 = { add_trait = senator_east } #Zenon
+		#Verinus Gens
+		character:1100013 = { add_trait = senator_east } #Armatus Venerius
+	}
+}
+
+on_game_start_after_lobby = {
+	on_actions = { give_senatorial_families_land }
+}
+give_senatorial_families_land = {
+	effect = {
+		#The Senatorial Families should be awash in Senators
+		give_roman_senatorial_families_traits = { REGION = west }
+		give_roman_senatorial_families_traits = { REGION = east }
+		#Get all the non-capital city baronies in territory that can be handed to the senators
+		give_roman_senators_land_in_appropriate_regions = { REGION = west }
+		give_roman_senators_land_in_appropriate_regions = { REGION = east }
+	}
+}
