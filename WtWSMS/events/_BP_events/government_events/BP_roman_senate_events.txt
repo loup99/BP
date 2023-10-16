@@ -78,6 +78,49 @@ scripted_effect refused_land_effect = {
 		}
 	}
 }
+scripted_effect sought_approval_effect = {
+	add_prestige = senate_approval_prestige_cost_$REGION$
+	scope:the_consul_$REGION$ = {
+		add_opinion = {
+			target = root
+			modifier = sought_senate_approval
+		}
+		trigger_event = { id = BP_roman_senate_events.$EVENT_ID$ days = 3 }
+	}
+	custom_tooltip = {
+		text = prestige_is_distributed_to_senators_$REGION$
+		every_living_character = {
+			limit = {
+				has_trait = senator_$REGION$
+				character_is_in_senate_$REGION$_trigger = yes
+			}
+			add_prestige = 10
+		}
+	}
+}
+scripted_effect ignored_senate_effect = {
+	add_prestige = senate_refusal_prestige_gain_$REGION$
+	scope:the_consul_$REGION$ = {
+		add_opinion = {
+			target = root
+			modifier = did_not_seek_senate_approval
+		}
+	}
+	
+	add_character_modifier = ignored_the_senate
+	update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_$REGION$ }
+	
+	custom_tooltip = {
+		text = prestige_is_taken_from_senators_$REGION$
+		every_living_character = {
+			limit = {
+				has_trait = senator_$REGION$
+				character_is_in_senate_$REGION$_trigger = yes
+			}
+			add_prestige = -10
+		}
+	}
+}
 
 #0001-0999: Western Senate Stuff
 
@@ -158,14 +201,12 @@ BP_roman_senate_events.0011 = { #Ask the Senate for Approval
 	option = { #Ask to get Senate Approval
 		name = BP_roman_senate_events.0011.seek_approval
 		custom_tooltip = BP_roman_senate_events.0011.seek_approval.tootip
-		add_prestige = senate_approval_prestige_cost_west
-		scope:the_consul_west = {
-			add_opinion = {
-				target = root
-				modifier = sought_senate_approval
-			}
-			trigger_event = { id = BP_roman_senate_events.0012 days = 3 }
+		
+		sought_approval_effect = {
+			REGION = west
+			EVENT_ID = 0012
 		}
+		
 		ai_chance = {
 			factor = 10
 			modifier = {
@@ -178,16 +219,8 @@ BP_roman_senate_events.0011 = { #Ask the Senate for Approval
 	option = { #Ignore the Senate
 		name = BP_roman_senate_events.0011.dismiss_the_senate
 		custom_tooltip = BP_roman_senate_events.0011.dismiss_the_senate.tooltip
-		add_prestige = senate_refusal_prestige_gain_west
-		scope:the_consul_west = {
-			add_opinion = {
-				target = root
-				modifier = did_not_seek_senate_approval
-			}
-		}
 		
-		add_character_modifier = ignored_the_senate
-		update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_west }
+		ignored_senate_effect = { REGION = west }
 		
 		ai_chance = {
 			factor = 10
@@ -288,16 +321,13 @@ BP_roman_senate_events.0020 = { #The Consul (or representative) of the Western S
 	option = { #Seek approval
 		name = BP_roman_senate_events.0020.seek_approval
 		custom_tooltip = BP_roman_senate_events.0020.seek_approval.tootip
-		add_prestige = senate_approval_prestige_cost_west
-		scope:the_consul_west = {
-			add_opinion = {
-				target = root
-				modifier = sought_senate_approval
-			}
-			trigger_event = { id = BP_roman_senate_events.0012 days = 3 }
-		}
 		
 		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		sought_approval_effect = {
+			REGION = west
+			EVENT_ID = 0012
+		}
 		
 		ai_chance = {
 			factor = 10
@@ -310,17 +340,10 @@ BP_roman_senate_events.0020 = { #The Consul (or representative) of the Western S
 	option = { #Reject approval
 		name = BP_roman_senate_events.0020.ignore_the_senate
 		custom_tooltip = BP_roman_senate_events.0020.dismiss_the_senate.tooltip
-		add_prestige = senate_refusal_prestige_gain_west
-		scope:the_consul_west = {
-			add_opinion = {
-				target = root
-				modifier = did_not_seek_senate_approval
-			}
-		}
-		
-		add_character_modifier = ignored_the_senate
 		
 		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ignored_senate_effect = { REGION = west }
 		
 		ai_chance = {
 			factor = 10
@@ -640,14 +663,12 @@ BP_roman_senate_events.1011 = { #Ask the Senate for Approval
 	option = { #Ask to get Senate Approval
 		name = BP_roman_senate_events.1011.seek_approval
 		custom_tooltip = BP_roman_senate_events.1011.seek_approval.tootip
-		add_prestige = senate_approval_prestige_cost_east
-		scope:the_consul_east = {
-			add_opinion = {
-				target = root
-				modifier = sought_senate_approval
-			}
-			trigger_event = { id = BP_roman_senate_events.1012 days = 3 }
+		
+		sought_approval_effect = {
+			REGION = east
+			EVENT_ID = 1012
 		}
+		
 		ai_chance = {
 			factor = 10
 			modifier = {
@@ -660,16 +681,8 @@ BP_roman_senate_events.1011 = { #Ask the Senate for Approval
 	option = { #Ignore the Senate
 		name = BP_roman_senate_events.1011.dismiss_the_senate
 		custom_tooltip = BP_roman_senate_events.1011.dismiss_the_senate.tooltip
-		add_prestige = senate_refusal_prestige_gain_east
-		scope:the_consul_east = {
-			add_opinion = {
-				target = root
-				modifier = did_not_seek_senate_approval
-			}
-		}
 		
-		add_character_modifier = ignored_the_senate
-		update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_east }
+		ignored_senate_effect = { REGION = east }
 		
 		ai_chance = {
 			factor = 10
@@ -770,16 +783,13 @@ BP_roman_senate_events.1020 = { #The Consul (or representative) of the Western S
 	option = { #Seek approval
 		name = BP_roman_senate_events.1020.seek_approval
 		custom_tooltip = BP_roman_senate_events.1020.seek_approval.tootip
-		add_prestige = senate_approval_prestige_cost_west
-		scope:the_consul_east = {
-			add_opinion = {
-				target = root
-				modifier = sought_senate_approval
-			}
-			trigger_event = { id = BP_roman_senate_events.1012 days = 3 }
-		}
 		
 		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		sought_approval_effect = {
+			REGION = east
+			EVENT_ID = 1012
+		}
 		
 		ai_chance = {
 			factor = 10
@@ -792,17 +802,10 @@ BP_roman_senate_events.1020 = { #The Consul (or representative) of the Western S
 	option = { #Reject approval
 		name = BP_roman_senate_events.1020.ignore_the_senate
 		custom_tooltip = BP_roman_senate_events.1020.dismiss_the_senate.tooltip
-		add_prestige = senate_refusal_prestige_gain_west
-		scope:the_consul_east = {
-			add_opinion = {
-				target = root
-				modifier = did_not_seek_senate_approval
-			}
-		}
-		
-		add_character_modifier = ignored_the_senate
 		
 		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ignored_senate_effect = { REGION = east }
 		
 		ai_chance = {
 			factor = 10
