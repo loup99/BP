@@ -436,7 +436,6 @@ senate_revoke_title_opinion_effect = { #As in, you are revoking titles unjustly
 	}
 }
 
-
 #Decision Events
 prepare_grant_land_targets_effect = {
 	title:$THE_CITY$.holder.top_liege = {
@@ -473,3 +472,66 @@ prepare_grant_land_targets_effect = {
 		save_scope_as = the_unlanded
 	}
 }
+
+#Game Start Effects
+give_roman_senatorial_families_traits = {
+	every_living_character = {
+		limit = {
+			exists = dynasty
+			dynasty = { has_dynasty_modifier = roman_senate_family_$REGION$ }
+			valid_to_be_senator_age = { CHAR = this }
+			valid_to_be_senator_sex = { CHAR = this }
+		}
+		if = {
+			limit = { NOT = { has_trait = senator_$REGION$ } }
+			add_trait = senator_$REGION$
+		}
+	}
+}
+give_roman_senators_land_in_appropriate_regions = {
+	every_province = { #Western Senate targets
+		limit = {
+			geographical_region = custom_$REGION$ern_senate
+			has_holding_type = city_holding
+			this.barony = { is_capital_barony = no }
+			#So that holdings in (merchant) republics aren't seized
+			NOT = { this.county.holder = { has_government = republic_government } }
+		}
+		add_to_temporary_list = provinces_with_city_holdings_in_$REGION$
+	}
+	every_living_character = {
+		limit = {
+			dynasty ?= { has_dynasty_modifier = roman_senate_family_$REGION$ }
+			is_male = yes
+			is_adult = yes
+			is_landed = no
+			has_trait = senator_$REGION$
+		}
+		add_to_temporary_list = senators_without_land_$REGION$
+	}
+	every_in_list = {
+		list = senators_without_land_$REGION$
+		this = { save_temporary_scope_as = the_landless_senator }
+		random_in_list = {
+			list = provinces_with_city_holdings_in_$REGION$
+			save_scope_as = the_province_with_available_city_holdings
+		}
+		scope:the_landless_senator = {
+			#Teleport Character
+			set_employer = scope:the_province_with_available_city_holdings.barony.holder
+			#Give them the title
+			get_title = scope:the_province_with_available_city_holdings.barony
+			#Match up governments
+			if = {
+				limit = { this.liege = { has_bureaucratic_government_type_trigger = yes } }
+				this = { convert_realm_to_gubernatorial_effect = yes }
+			}
+			else_if = {
+				limit = { this.liege = { has_government = subroman_government } }
+				this = { convert_realm_to_subroman_direct_effect = yes }
+			}
+		}
+		scope:the_province_with_available_city_holdings = { remove_from_list = the_province_with_available_city_holdings }
+	}
+}
+
