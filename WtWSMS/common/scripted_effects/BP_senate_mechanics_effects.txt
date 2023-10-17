@@ -321,14 +321,14 @@ senate_interaction_opinion_effect = {
 		}
 		this = { save_scope_as = senator_in_question }
 		add_opinion = {
-			modifier = interfered_with_the_senate
+			modifier = $OPINION_TYPE$
 			target = scope:actor
 			opinion = consul_opinion_of_$TYPE$
 		}
 		if = {
 			limit = { NOT = { scope:actor = scope:recipient } }
 			add_opinion = {
-				modifier = interfered_with_the_senate
+				modifier = $OPINION_TYPE$
 				target = scope:recipient
 				opinion = consul_opinion_of_$TYPE$
 			}
@@ -344,14 +344,14 @@ senate_interaction_opinion_effect = {
 		}
 		this = { save_scope_as = senator_in_question }
 		add_opinion = {
-			modifier = interfered_with_the_senate
+			modifier = $OPINION_TYPE$
 			target = scope:actor
 			opinion = senator_in_city_opinion_of_$TYPE$
 		}
 		if = {
 			limit = { NOT = { scope:actor = scope:recipient } }
 			add_opinion = {
-				modifier = interfered_with_the_senate
+				modifier = $OPINION_TYPE$
 				target = scope:recipient
 				opinion = senator_in_city_opinion_of_$TYPE$
 			}
@@ -367,20 +367,75 @@ senate_interaction_opinion_effect = {
 		}
 		this = { save_scope_as = senator_in_question }
 		add_opinion = {
-			modifier = interfered_with_the_senate
+			modifier = $OPINION_TYPE$
 			target = scope:actor
 			opinion = senator_not_in_city_opinion_of_$TYPE$
 		}
 		if = {
 			limit = { NOT = { scope:actor = scope:recipient } }
 			add_opinion = {
-				modifier = interfered_with_the_senate
+				modifier = $OPINION_TYPE$
 				target = scope:recipient
 				opinion = senator_not_in_city_opinion_of_$TYPE$
 			}
 		}
 	}
 }
+
+senate_interaction_opinion_only_actor_effect = { #As in, you are revoking titles unjustly
+	every_living_character = {
+		limit = {
+			has_character_modifier = roman_consul_$REGION$
+			NOT = { this = scope:recipient } #-80 opinion is plenty...
+			NOT = { this = scope:actor }
+		}
+		this = { save_scope_as = senator_in_question }
+		add_opinion = {
+			modifier = $OPINION_TYPE$
+			target = scope:actor
+			opinion = consul_opinion_of_$TYPE$
+		}
+	}
+	every_living_character = {
+		limit = {
+			NOT = { has_character_modifier = roman_consul_$REGION$ }
+			has_trait = senator_$REGION$
+			character_is_in_senate_$REGION$_trigger = yes
+			NOT = { this = scope:recipient } #-80 opinion is plenty...
+			NOT = { this = scope:actor }
+			trigger_if = { #Big land owners (besides the consul) do not care
+				limit = { is_landed = yes }
+				always = no
+			}
+		}
+		this = { save_scope_as = senator_in_question }
+		add_opinion = {
+			modifier = $OPINION_TYPE$
+			target = scope:actor
+			opinion = senator_in_city_opinion_of_$TYPE$
+		}
+	}
+	every_living_character = {
+		limit = {
+			NOT = { has_character_modifier = roman_consul_$REGION$ }
+			has_trait = senator_$REGION$
+			character_is_in_senate_$REGION$_trigger = no
+			NOT = { this = scope:recipient } #-80 opinion is plenty...
+			NOT = { this = scope:actor }
+			trigger_if = { #Big land owners (besides the consul) do not care
+				limit = { is_landed = yes }
+				always = no
+			}
+		}
+		this = { save_scope_as = senator_in_question }
+		add_opinion = {
+			modifier = $OPINION_TYPE$
+			target = scope:actor
+			opinion = senator_not_in_city_opinion_of_$TYPE$
+		}
+	}
+}
+
 
 #Decision Events
 prepare_grant_land_targets_effect = {

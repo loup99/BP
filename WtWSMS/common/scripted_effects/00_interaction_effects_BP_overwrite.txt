@@ -1,0 +1,315 @@
+﻿##### Changed from Vanilla: Added intersection of revocation and Senate interaction
+revoke_title_interaction_effect = {
+	if = {
+		limit = {
+			scope:recipient = {
+				faith = scope:actor.faith
+				government_has_flag = government_is_theocracy
+			}
+			NOT = { scope:actor = scope:actor.faith.religious_head } #No loss if actor is head of faith themselves
+		}
+		scope:actor = {
+			add_piety = major_piety_loss
+		}
+		if = {
+			limit = {
+				exists = scope:actor.faith.religious_head
+			}
+			scope:actor.faith.religious_head = {
+				add_opinion = {
+					target = scope:actor
+					modifier = impious_opinion
+					opinion = -20
+				}
+			}
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:actor.faith.religious_head
+			scope:recipient = scope:actor.faith.religious_head
+		}
+		scope:actor = {
+			add_piety_level = -2
+		}
+	}
+	if = {
+		limit = {
+			scope:landed_title.tier != tier_barony
+		}
+		scope:actor = {
+			revocation_tyranny_effect = yes
+			title_revocation_stress_effect = yes
+			consume_revoke_title_reason = scope:recipient
+		}
+		scope:recipient = {
+			add_pressed_claim = scope:landed_title
+			if = {
+				limit = {
+					is_a_faction_member = yes
+				}
+				add_joined_faction_discontent = 25
+			}
+		}
+
+		if = {
+			limit = { scope:landed_title.tier = tier_county }
+			scope:landed_title = {
+				change_county_control = {
+					value = -30
+					if = {
+						limit = {
+							NOT = { scope:recipient.culture = scope:actor.culture }
+							scope:recipient.culture = this.culture
+						}
+						multiply = 1.5
+					}
+					if = {
+						limit = {
+							NOT = { scope:recipient.faith = scope:actor.faith }
+							scope:recipient.faith = this.faith
+						}
+						multiply = 1.5
+					}
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				scope:actor.culture = { has_cultural_parameter = penalty_for_revoking_titles_from_house_members }
+				exists = scope:actor.house
+				exists = scope:recipient.house
+				scope:actor.house = scope:recipient.house
+			}
+			if = {
+				limit = {
+					scope:landed_title.tier = tier_county
+				}
+				scope:actor = {
+					add_prestige = medium_prestige_loss
+				}
+			}
+			else_if = {
+				limit = {
+					scope:landed_title.tier = tier_duchy
+				}
+				scope:actor = {
+					add_prestige = major_prestige_loss
+				}
+			}
+			else = { #Empire
+				limit = {
+					scope:landed_title.tier = tier_kingdom
+				}
+				scope:actor = {
+					add_prestige = massive_prestige_loss
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				scope:actor.culture = { has_cultural_parameter = penalty_for_revoking_titles_from_close_family }
+				exists = scope:actor
+				exists = scope:recipient
+				scope:actor = {
+					is_close_family_of = scope:recipient
+				}
+			}
+			if = {
+				limit = {
+					scope:landed_title.tier = tier_county
+				}
+				scope:actor = {
+					add_prestige = medium_prestige_loss
+				}
+			}
+			else_if = {
+				limit = {
+					scope:landed_title.tier = tier_duchy
+				}
+				scope:actor = {
+					add_prestige = major_prestige_loss
+				}
+			}
+			else = { #Empire
+				limit = {
+					scope:landed_title.tier = tier_kingdom
+				}
+				scope:actor = {
+					add_prestige = massive_prestige_loss
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				scope:actor.culture = { has_cultural_parameter = piety_penalty_for_revoking_titles_from_house_members }
+				exists = scope:actor.house
+				exists = scope:recipient.house
+				scope:actor.house = scope:recipient.house
+			}
+			if = {
+				limit = {
+					scope:landed_title.tier = tier_county
+				}
+				scope:actor = {
+					add_prestige = medium_piety_loss
+				}
+			}
+			else_if = {
+				limit = {
+					scope:landed_title.tier = tier_duchy
+				}
+				scope:actor = {
+					add_prestige = major_piety_loss
+				}
+			}
+			else = { #Can't revoke empire titles anyway
+				limit = {
+					scope:landed_title.tier = tier_kingdom
+				}
+				scope:actor = {
+					add_prestige = massive_piety_loss
+				}
+			}
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				NOT = { exists = scope:revoke_title_interaction }
+			}
+			custom_tooltip = IS_ALLOWED_TO_REVOKE_TITLE_BARONY_DESC
+			scope:actor = {
+				if = {
+					limit = {
+						any_vassal = {
+							has_vassal_stance = barons_and_minor_landholders
+						}
+					}
+					custom_tooltip = barons_and_minor_landholders_disapproves_baron_revocations
+					hidden_effect = {
+						every_vassal = {
+							limit = {
+								has_vassal_stance = barons_and_minor_landholders
+							}
+							add_opinion = {
+								target = scope:actor
+								modifier = barons_and_minor_landholders_disapproves_baron_revocations_opinion
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	scope:actor = {
+		if = {
+			limit = {
+				scope:hook = yes
+				scope:recipient = { is_alive = yes }
+			}
+			use_hook = scope:recipient
+		}
+	}
+	scope:recipient = {
+		add_opinion = {
+			target = scope:actor
+			modifier = revoked_title
+		}
+		if = { #If they recently imprisoned you, or asked for your excommunication, they become your rival
+			limit = {
+				OR = {
+					has_opinion_modifier = {
+						target = scope:actor
+						modifier = released_from_prison
+					}
+					AND = {
+						exists = var:requested_my_excommunication
+						var:requested_my_excommunication = scope:actor
+					}
+				}
+				NOT = {
+					has_relation_rival = scope:actor
+				}
+			}
+			if = {
+				limit = {
+					has_relation_potential_rival = scope:actor
+				}
+				remove_relation_potential_rival = scope:actor
+			}
+			set_relation_rival = {
+				target = scope:actor
+				reason = rival_revoked_title_reversed
+			}
+		}
+		else = {
+			progress_towards_rival_effect = {
+				CHARACTER = scope:actor
+				REASON = rival_revoked_title_progress
+				OPINION = 0
+			}
+		}
+	}
+
+	# Penalty for taking the Party Baron's last title. I mean, come on...
+	if = {
+		limit = {
+			scope:recipient = {
+				has_character_flag = is_party_baron
+				NOT = {
+					any_held_title = {
+						NOT = { this = scope:landed_title }
+					}
+				}
+			}
+		}
+		scope:actor = {
+			add_character_modifier = {
+				modifier = party_baron_ended_the_party_modifier
+				years = 10
+			}
+			random_owned_story = {
+				limit = {
+					story_type = story_party_baron
+				}
+				end_story = yes
+			}
+		}
+	}
+	##### Changed from Vanilla vvvvv
+	if = { #If you are unlanding a (barony) Senator unjustly, the Senate is mad
+		limit = {
+			scope:actor = { title_revocation_is_tyrannical_trigger = yes }
+			scope:recipient.primary_title.tier = tier_barony
+			scope:recipient = { has_trait = senator_west }
+			scope:recipient = { character_is_in_senate_west_trigger = yes }
+			scope:actor = { character_is_in_senate_west_trigger = yes }
+		}
+		senate_interaction_opinion_only_actor_effect = {
+			REGION = west
+			OPINION_TYPE = revoked_land_from_the_senate
+			TYPE = revoking_a_barony
+		}
+	}
+	if = { #If you are unlanding a (barony) Senator unjustly, the Senate is mad
+		limit = {
+			scope:actor = { title_revocation_is_tyrannical_trigger = yes }
+			scope:recipient.primary_title.tier = tier_barony
+			scope:recipient = { has_trait = senator_east }
+			scope:recipient = { character_is_in_senate_east_trigger = yes }
+			scope:actor = { character_is_in_senate_east_trigger = yes }
+		}
+		senate_interaction_opinion_only_actor_effect = {
+			REGION = east
+			OPINION_TYPE = revoked_land_from_the_senate
+			TYPE = revoking_a_barony
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+}
