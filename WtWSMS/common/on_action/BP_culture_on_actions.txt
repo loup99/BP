@@ -5,6 +5,7 @@ on_culture_created = {
 	on_actions = {
 		bp_apply_special_hybrid_cases
 		bp_devolve_certain_traditions
+		bp_remove_parent_culture_minorities
 	}
 }
 
@@ -54,6 +55,55 @@ bp_devolve_certain_traditions = {
 			limit = { has_cultural_tradition = tradition_hellenizers_non_dlc }
 			remove_culture_tradition = tradition_hellenizers_non_dlc
 			add_culture_tradition = tradition_hellenic_culture_non_dlc
+		}
+	}
+}
+
+#Clean up parent minorities in newly formed culture counties during hybridization
+bp_remove_parent_culture_minorities = {
+	effect = {
+		every_culture_county = {
+			save_temporary_scope_as = the_county
+			this.culture = {
+				every_parent_culture = {
+					save_temporary_scope_as = the_parent
+					
+					if = {
+						limit = {
+							scope:the_county = { has_variable_list = culture_minorities_small }
+							scope:the_county = {
+								is_target_in_variable_list = {
+									name = culture_minorities_small
+									target = scope:the_parent
+								}
+							}
+						}
+						scope:the_county = {
+							remove_list_variable = {
+								name = culture_minorities_small
+								target = scope:the_parent
+							}
+						}
+					}
+					if = {
+						limit = {
+							scope:the_county = { has_variable_list = culture_minorities_large }
+							scope:the_county = {
+								is_target_in_variable_list = {
+									name = culture_minorities_large
+									target = scope:the_parent
+								}
+							}
+						}
+						scope:the_county = {
+							remove_list_variable = {
+								name = culture_minorities_large
+								target = scope:the_parent
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
