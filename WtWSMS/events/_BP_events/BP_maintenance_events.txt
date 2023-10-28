@@ -1,5 +1,10 @@
 ﻿namespace = BP_maintenance_events
 
+#0001-1000: Bookmark-Related Stuff
+#1001-????: Other Stuff
+
+#0001-1000: Bookmark-Related Stuff
+
 #Informational event for players at start
 BP_maintenance_events.0001 = {
 	type = character_event
@@ -83,3 +88,58 @@ BP_maintenance_events.0002 = {
 	}
 }
 
+#1001-????: Other Stuff
+scripted_trigger weak_empire = { #Cribbed from game_rule_events
+	tier = tier_empire
+	is_titular = yes
+	is_landless_type_title = no
+	is_head_of_faith = no
+}
+
+BP_maintenance_events.1001 = { # Empire Obscurity Game Rule variant; called on death for titular empires with non-primitive governments
+	type = character_event
+	title = BP_maintenance_events.1001.t
+	desc = BP_maintenance_events.1001.desc
+	theme = realm
+	left_portrait = {
+		character = root
+		animation = grief
+	}
+
+	trigger = {
+		is_landed = yes
+		is_at_war = no
+		has_a_primitive_type_of_government_trigger = no
+		primary_title.tier >= tier_empire
+		any_held_title = { weak_empire = yes }
+	}
+
+	immediate = {
+		random_held_title = {
+			limit = { weak_empire = yes }
+			save_scope_as = falling_empire
+		}
+	}
+
+	option = { # No! I just need time!
+		name = BP_maintenance_events.1001.a
+		
+		add_prestige = -2000
+		add_prestige_experience = -2000
+		
+		ai_chance = {
+			base = 0
+		}
+	}
+
+	option = { # Farewell, dear empire...
+		name = BP_maintenance_events.1001.b
+		
+		destroy_title = scope:falling_empire
+		add_pressed_claim = scope:falling_empire
+		
+		ai_chance = {
+			base = 100
+		}
+	}
+}
