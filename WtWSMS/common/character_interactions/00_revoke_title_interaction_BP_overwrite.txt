@@ -35,14 +35,6 @@ revoke_title_interaction = {
 			target_is_liege_or_above = scope:actor
 			# is_vassal_of = scope:actor
 		}
-
-		#Bureaucratic/Gubernatorials use their own title revocation interactions
-		scope:recipient = {
-			NOR = {
-				has_government = bureaucratic_government
-				has_government = gubernatorial_government
-			}
-		}
 	}
 	##### Changed from Vanilla ^^^^^
 	
@@ -130,29 +122,10 @@ revoke_title_interaction = {
 			}
 		}
 	}
-	
-	##### Changed from Vanilla vvvvv
+		
 	can_be_picked_title = {
-		scope:target = {
-			#Unrevokable titles
-			custom_description = {
-				text = unrevokable_title
-				NOT = { this = { has_variable = unrevokable } }
-			}
-			is_contested = no
-			NOT = {
-				recent_history = {
-					type = granted
-					years = 1
-				}
-			}
-			custom_description = {
-				text = "character_interactions_not_rel_head_title"
-				is_head_of_faith = no
-			}
-		}
+		scope:target = { title_revocation_standard_can_pick_title_trigger = yes }
 	}
-	##### Changed from Vanilla ^^^^^
 
 	#Use hook
 	send_option = {
@@ -478,10 +451,15 @@ revoke_title_interaction = {
 	}
 	ai_frequency = 0 # This is handled via code instead; see REVOKE_TITLE_TICK in the AI defines. All the logic for *if* to send a revoke though is scripted below
 
+	##### Changed from Vanilla vvvvv
 	ai_potential = {
-		has_realm_law_flag = title_revocation_allowed
+		OR = {
+			has_realm_law_flag = title_revocation_allowed
+			can_revoke_title_trigger = yes
+		}
 		primary_title.tier > tier_county
 	}
+	##### Changed from Vanilla ^^^^^
 
 	ai_will_do = {
 		base = -1000

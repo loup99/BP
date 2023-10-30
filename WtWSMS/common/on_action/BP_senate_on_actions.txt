@@ -1,0 +1,352 @@
+﻿# Called every Jan 1st
+# Root does not exist
+yearly_global_pulse = {
+	on_actions = {
+		delay = { days = { 3 28 } }
+		senatorial_election_west
+		senatorial_election_east
+	}
+	events = {
+		BP_roman_senate_events.2011 #Yearly check that the Senate has at least 1 Senator available
+	}
+}
+
+senatorial_election_east = {
+	effect = {
+		#Yearly Senate Election Fires
+		senate_election_effect = {
+			REGION = east
+			BARONY = b_constantinople
+		}
+	}
+}
+
+senatorial_election_west = {
+	effect = {
+		#Yearly Senate Election Fires
+		senate_election_effect = {
+			REGION = west
+			BARONY = b_roma
+		}
+	}
+}
+
+# character just about to die in root scope
+# if a killer is known, it's set as scope:killer
+#Triggered by code
+on_death = {
+	on_actions = {
+		snap_election
+	}
+}
+
+#Consul died early, call a snap election
+snap_election = {
+	effect = {
+	root = { save_scope_as = dying_senator }
+	#NB: on_death is called *just* before a char dies, so only having 1 char in the Senate means no one can take the wheel afterwards
+		if = {
+			limit = { root = { has_character_modifier = roman_consul_east } }
+			if = {
+				limit = { no_remaining_senators_after_this_one_in_east_senate_trigger = { ACTOR = scope:dying_senator } }
+				trigger_event = { id = BP_roman_senate_events.2011 }
+			}
+			else = {
+				senate_election_effect = {
+					REGION = east
+					BARONY = b_constantinople
+				}
+			}
+		}
+		if = {
+			limit = { root = { has_character_modifier = roman_consul_west } }
+			if = {
+				limit = { no_remaining_senators_after_this_one_in_west_senate_trigger = { ACTOR = scope:dying_senator } }
+				trigger_event = { id = BP_roman_senate_events.2011 }
+			}
+			else = {
+				senate_election_effect = {
+					REGION = west
+					BARONY = b_roma
+				}
+			}
+		}
+	}
+}
+
+# character having its birthday in root scope
+# tested after age has increased
+on_birthday = {
+	on_actions = {
+		senate_on_25th_birthday
+	}
+}
+
+#Age for Senators based on Augustus' law (last I can see it changing)
+senate_on_25th_birthday = {
+	trigger = {
+		exists = root.dynasty
+		valid_to_be_senator_sex = { CHAR = root }
+		valid_to_be_senator_age = { CHAR = root }
+		OR = {
+			dynasty = { has_dynasty_modifier = roman_senate_family_west }
+			dynasty = { has_dynasty_modifier = roman_senate_family_east }
+		}
+	}
+	effect = {
+		if = {
+			limit = { dynasty = { has_dynasty_modifier = roman_senate_family_west } }
+			every_living_character = {
+				limit = { has_character_modifier = roman_consul_west }
+				save_scope_as = the_sender
+			}
+			trigger_event = { id = BP_roman_senate_events.0051 }
+		}
+		if = {
+			limit = { dynasty = { has_dynasty_modifier = roman_senate_family_east } }
+			every_living_character = {
+				limit = { has_character_modifier = roman_consul_east }
+				save_scope_as = the_sender
+			}
+			trigger_event = { id = BP_roman_senate_events.1051 }
+		}
+	}
+}
+
+
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	events = {}
+	on_actions = {
+		BP_emperors_get_early_senate_hood
+	}
+}
+
+#Roman Emperors are automatically Senators, regardless of age.
+BP_emperors_get_early_senate_hood = {
+	trigger = { valid_to_be_senator_roman_empires = { CHAR = root } }
+	effect = {
+		if = {
+			limit = {
+				any_sub_realm_barony = { this = title:b_roma }
+				NOT = { has_trait = senator_west }
+			}
+			add_trait = senator_west
+		}
+		if = {
+			limit = {
+				any_sub_realm_barony = { this = title:b_constantinople }
+				NOT = { has_trait = senator_east }
+			}
+			add_trait = senator_east
+		}
+	}
+}
+
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
+on_title_lost = {
+	on_actions = { BP_no_longer_above_the_senate }
+}
+
+BP_no_longer_above_the_senate = {
+	trigger = {
+		root = {
+			OR = {
+				has_character_modifier = approved_by_the_senate
+				has_character_modifier = rejected_by_the_senate
+				has_character_modifier = ignored_the_senate
+				has_character_modifier = stalled_the_senate
+			}
+		}
+	}
+	effect = {
+		if = { #If a player game overs, remove the support; no need for event in this case
+			limit = { is_landed = no }
+			if = { limit = { has_character_modifier = approved_by_the_senate } remove_character_modifier = approved_by_the_senate }
+			if = { limit = { has_character_modifier = rejected_by_the_senate } remove_character_modifier = rejected_by_the_senate }
+			if = { limit = { has_character_modifier = ignored_the_senate } remove_character_modifier = ignored_the_senate }
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
+		}
+		else_if = {
+			limit = { is_independent_ruler = no }
+			trigger_event = { id = BP_roman_senate_events.2001 days = { 1 3 } }
+		}
+		else_if = {
+			limit = {
+				AND = {
+					title:b_roma.holder = { is_vassal_or_below_of = root }
+					title:b_constantinople.holder = { is_vassal_or_below_of = root }
+				}
+			}
+			trigger_event = { id = BP_roman_senate_events.2002 days = { 1 3 } }
+		}
+		#Else, we're good
+	}
+}
+
+# A title is transferred to a new character
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	on_actions = { BP_new_top_liege_of_city }
+}
+
+# A character gains a vassal
+# root = character gaining vassal
+# scope:vassal = vassal being gained
+# scope:old_liege = the previous liege of the vassal. Might be the null character (vassal used to be a non-ruler or independent), so make sure to use "exists" checks where relevant
+on_vassal_gained = {
+	on_actions = { BP_new_top_liege_of_city }
+}
+
+BP_new_top_liege_of_city = {
+	trigger = {
+		OR = {
+			root = title:b_roma.holder
+			root = title:b_roma.holder.top_liege
+			root = title:b_constantinople.holder
+			root = title:b_constantinople.holder.top_liege
+		}
+		NOR = {
+			has_character_modifier = approved_by_the_senate
+			has_character_modifier = rejected_by_the_senate
+			has_character_modifier = ignored_the_senate
+			has_character_modifier = stalled_the_senate
+		}
+		NOT = { has_variable = new_top_liege_of_a_city }
+	}
+	effect = {
+		set_variable = new_top_liege_of_a_city
+		#Prefer the West over the East
+		if = {
+			limit = {
+				OR = {
+					root = title:b_roma.holder
+					any_vassal_or_below = { this = title:b_roma.holder }
+				}
+			}
+			every_living_character = {
+				limit = { has_character_modifier = roman_consul_west }
+				save_scope_as = the_consul_west
+			}
+			trigger_event = { id = BP_roman_senate_events.0020 days = { 3 7 } }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					root = title:b_constantinople.holder
+					any_vassal_or_below = { this = title:b_constantinople.holder }
+				}
+			}
+			every_living_character = {
+				limit = { has_character_modifier = roman_consul_east }
+				save_scope_as = the_consul_east
+			}
+			trigger_event = { id = BP_roman_senate_events.1020 days = { 3 7 } }
+		}
+	}
+}
+
+##### Game Start Stuff #####
+on_game_start = {
+	on_actions = {
+		setup_senate_offices_and_statuses_by_date
+		setup_roman_senate_families
+	}
+}
+setup_senate_offices_and_statuses_by_date = {
+	effect = {
+		set_global_variable = east_senate_is_established
+		if = {
+			limit = { current_date < 603.1.1 }
+			set_global_variable = west_senate_is_established
+		}
+		#Consuls & Emperors by bookmark
+		if = {
+			limit = { current_date = 476.2.2 }
+			
+			#Western Emperor and Consuls
+			character:74411 = { #Marcianus
+				add_trait = senator_west
+				add_character_modifier = roman_consul_west
+			}
+			character:96054 = { #Romulus
+				set_variable = already_asked_the_senate
+				add_trait = senator_west
+				#Approved by the Senate and can't ask again
+				set_variable = already_asked_the_senate
+				add_character_modifier = approved_by_the_senate
+			}
+			#Eastern Emperor and Consuls
+			character:145226 = { #Basilicus
+				add_trait = senator_east
+				add_character_modifier = roman_consul_east
+				#Approved by the Senate and can't ask again
+				set_variable = already_asked_the_senate
+				add_character_modifier = approved_by_the_senate
+			}
+		}
+	}
+}
+setup_roman_senate_families = {
+	effect = {
+		#Senatorial Families (West)
+		dynasty:1042312 = { make_west_senate_family_effect = yes } #Anicii Gens
+		dynasty:1042303 = { make_west_senate_family_effect = yes } #Decii Gens
+		dynasty:1042302 = { make_west_senate_family_effect = yes } #Symmachi Gens
+		dynasty:1042324 = { make_west_senate_family_effect = yes } #Rufii Gens
+		dynasty:1042300 = { make_west_senate_family_effect = yes } #Acilii Gens
+		dynasty:roman_dynasty_vettius = { make_west_senate_family_effect = yes } #Vettii Gens
+		dynasty:roman_dynasty_vibius = { make_west_senate_family_effect = yes } #Vibii Gens
+		#Imperial Gens
+		dynasty:1022195 = { make_west_senate_family_effect = yes } #Constantini Gens
+		dynasty:1042315 = { make_west_senate_family_effect = yes } #Theodesii Gens
+		#Symmachus suggested, no chars/dynasty associated in database:
+		# Egnatii, Turcii, Marii Venantii, Turranii, Synesii
+		
+		#Romano-Gallic Dynasties
+		dynasty:roman_dynn_ferreolus = { make_west_senate_family_effect = yes } #Ferreoli Gens
+		dynasty:1042298 = { make_west_senate_family_effect = yes } #Avitus Gens
+		dynasty:1042301 = { make_west_senate_family_effect = yes } #Apollinarii Gens
+		dynasty:104246202 = { make_west_senate_family_effect = yes } #Ennodii Gens
+		
+		#Symmachus suggested, no chars/dynasty associated in database:
+		# Pontii, Decimii
+		
+		#Senatorial Families (East)
+		dynasty:1042535 = { make_east_senate_family_effect = yes } #Areobindus Gens
+		#Imperial Gens
+		dynasty:1022189 = { make_east_senate_family_effect = yes } #Venerius Gens
+		dynasty:1022188 = { make_east_senate_family_effect = yes } #Leonid Gens
+		
+		#Symmachus suggested, no chars/dynasty associated in database:
+		# Theagenes
+		
+		#Build list of familes that should _not_ be given land; namely the Romano-Gallic Families
+		add_to_global_variable_list = { name = families_that_should_not_have_land target = dynasty:roman_dynn_ferreolus }
+		add_to_global_variable_list = { name = families_that_should_not_have_land target = dynasty:1042298 }
+		add_to_global_variable_list = { name = families_that_should_not_have_land target = dynasty:1042301 }
+		add_to_global_variable_list = { name = families_that_should_not_have_land target = dynasty:104246202 }
+	}
+}
+
+on_game_start_after_lobby = {
+	on_actions = { give_senatorial_families_land }
+}
+give_senatorial_families_land = {
+	effect = {
+		#The Senatorial Families should be awash in Senators
+		give_roman_senatorial_families_traits = { REGION = west }
+		give_roman_senatorial_families_traits = { REGION = east }
+		#Get all the non-capital city baronies in territory that can be handed to the senators
+		give_roman_senators_land_in_appropriate_regions = { REGION = west }
+		give_roman_senators_land_in_appropriate_regions = { REGION = east }
+		clear_global_variable_list = families_that_should_not_have_land
+	}
+}

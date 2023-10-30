@@ -1,0 +1,531 @@
+﻿##### Changed from Vanilla: Senators are more willing to join courts that put them in the Senate
+invite_to_court_interaction = {
+	category = interaction_category_vassal
+	icon = guest
+	
+	desc = invite_to_court_interaction_desc
+	
+	is_shown = {
+		scope:recipient = {
+			NOR = {
+				is_courtier_of = scope:actor
+				is_foreign_court_guest = yes
+				AND = {
+					exists = host
+					host = scope:actor
+				}
+				is_ruler = yes
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		can_recruit_character_to_court_trigger = {
+			RECRUITER = scope:actor
+			RECRUITEE = scope:recipient
+		}
+	}
+	
+	#Pay som gold to persuade a wandering character to come to your court
+	send_option = {
+		is_shown = {
+			exists = scope:recipient
+			scope:recipient = {
+				is_pool_guest = no
+				location.province_owner = {
+					OR = {
+						any_liege_or_above = { this = scope:actor }
+						this = scope:actor
+					}
+				}
+				NOR = {
+					has_relation_rival = scope:actor
+					exists = liege
+					is_child_of = scope:actor
+					has_character_modifier = lust_for_adventure
+				}
+			}
+		}
+		flag = cover_travel_expenses
+		localization = COVER_TRAVEL_EXPENSES
+	}
+
+	on_accept = {
+		hidden_effect = {
+			if = {
+				limit = {
+					exists = scope:recipient.liege
+				}
+				scope:recipient.liege = {
+					send_interface_message = {
+						type = event_generic_neutral
+						title = msg_courtier_left_court_interaction_title
+						
+						right_icon = scope:recipient
+
+						show_as_tooltip = {
+							remove_courtier_or_guest = scope:recipient
+						}
+					}
+				}
+			}
+		}
+		
+		scope:actor = {
+			send_interface_message = {
+				type = event_generic_neutral
+				title = invite_to_court_interaction_notification
+				right_icon = scope:recipient
+
+				scope:recipient = {
+					every_traveling_family_member = {
+						scope:actor = { add_courtier = prev }
+						hidden_effect = {
+							return_to_court = yes
+						}
+					}
+				}
+
+				if = {
+					limit = { always = scope:hook }
+					scope:actor = {
+						use_hook = scope:recipient
+					}
+				}
+
+				scope:actor = {
+					stress_impact = {
+						shy = minor_stress_impact_gain
+					}
+				}
+			}
+		}
+		
+		
+		if = {
+			limit = { always = scope:cover_travel_expenses }
+			scope:actor = {
+				pay_short_term_gold = {
+					gold = {
+						value = bribe_value
+						multiply = 0.5
+					}
+					target = scope:recipient
+				}
+				stress_impact = {
+					greedy = minor_stress_impact_gain
+				}
+			}
+		}
+	}
+
+	##### Changed from Vanilla vvvvv
+	ai_accept = {
+ 		base = -50
+
+ 		#Opinions
+ 		opinion_modifier = {
+ 			trigger = {
+ 				exists = liege
+ 				is_courtier_of = liege
+ 			}
+ 			opinion_target = liege
+ 			multiplier = -0.5
+ 			step = 5
+ 			max = 25
+ 		}
+ 		opinion_modifier = {
+ 			opinion_target = scope:actor
+ 			multiplier = 0.5
+ 			step = 5
+ 			max = 25
+ 		}
+
+ 		#Current roles
+ 		modifier = {
+ 			is_knight = yes
+ 			add = -20
+ 			desc = AI_MY_LIEGES_KNIGHT
+ 		}
+ 		modifier = {
+ 			is_commanding_army = yes
+ 			add = -30
+ 			desc = AI_MY_LIEGES_COMMANDER
+ 		}
+ 		modifier = {
+ 			is_councillor = yes
+ 			add = -40
+ 			desc = AI_ON_THE_COUNCIL
+ 		}
+		
+		modifier = {		
+			trigger = { scope:recipient = { has_court_position = court_physician_court_position } }			
+ 			add = -20
+ 			desc = AI_COURT_PHYSICIAN
+ 		}
+
+ 		#Relations & relatives (with actor)
+ 		modifier = {
+ 			has_relation_lover = scope:actor
+ 			add = 100
+ 			desc = AI_YOUR_LOVER
+ 		}
+
+ 		modifier = {
+ 			has_relation_friend = scope:actor
+ 			add = 75
+ 			desc = AI_YOUR_FRIEND
+ 		}
+
+ 		modifier = {
+ 			is_child_of = scope:actor
+ 			add = 160
+ 			desc = AI_YOUR_CHILD
+ 		}
+
+ 		modifier = {
+ 			this.dynasty.dynast = scope:actor
+ 			add = 30
+ 			desc = AI_YOU_ARE_THE_DYNAST
+ 		}
+
+ 		modifier = {
+ 			this.house.house_head = scope:actor
+ 			add = 30
+ 			desc = AI_YOU_ARE_THE_HOUSE_HEAD
+ 		}
+
+ 		modifier = {
+ 			NOT = { is_child_of = scope:actor }
+ 			is_close_family_of = scope:actor
+ 			add = 75
+ 			desc = AI_YOUR_RELATIVE
+ 		}
+
+ 		modifier = {
+ 			is_spouse_of = scope:actor
+ 			add = 160
+ 			desc = AI_YOUR_SPOUSE
+ 		}
+
+ 		#Relations & relatives (with host)
+ 		modifier = {
+ 			exists = liege
+ 			has_relation_lover = liege
+ 			add = -100
+ 			desc = AI_THEIR_LOVER
+ 		}
+
+ 		modifier = {
+ 			exists = liege
+ 			has_relation_friend = liege
+ 			add = -75
+ 			desc = AI_THEIR_FRIEND
+ 		}
+
+ 		modifier = {
+ 			exists = liege
+ 			is_child_of = liege
+ 			add = -100
+ 			desc = AI_THEIR_CHILD
+ 		}
+
+ 		modifier = {
+ 			exists = liege
+ 			NOT = { is_child_of = liege }
+ 			is_close_family_of = liege
+ 			add = -75
+ 			desc = AI_THEIR_RELATIVE
+ 		}
+
+ 		#Family (at location)
+ 		modifier = {
+ 			exists = location
+ 			any_consort_not_in_traveling_family_trigger = yes
+ 			desc = AI_LEAVING_MY_SPOUSE
+ 			add = -100
+ 		}
+
+ 		modifier = {
+ 			exists = location
+ 			any_child_not_in_traveling_family_trigger = yes
+ 			desc = AI_LEAVING_MY_CHILD
+ 			add = -100
+ 		}
+
+ 		modifier = {
+ 			add = -50
+ 			desc = AI_MARRIED_MATRILINIALLY
+ 			is_married = yes
+ 			is_male = yes
+ 			any_spouse = {
+ 				matrilinear_marriage = yes
+ 				host = scope:recipient.host
+ 			}
+ 		}
+
+ 		modifier = {
+ 			add = -50
+ 			desc = AI_MARRIED_PATRILINIALLY
+ 			is_married = yes
+ 			is_female = yes
+ 			any_spouse = {
+ 				patrilinear_marriage = yes
+ 				host = scope:recipient.host
+ 			}
+ 		}
+
+ 		modifier = {
+ 			add = -50
+ 			desc = AI_INSPIRED
+ 			exists = inspiration
+			inspiration = {
+				NOT = {
+					exists = inspiration_sponsor
+				}
+			}
+ 		}
+
+ 		modifier = {
+ 			add = -500
+ 			desc = AI_SPONSORED_INSPIRATION
+ 			exists = inspiration
+			inspiration = {
+				exists = inspiration_sponsor
+			}
+ 		}
+
+ 		modifier = {
+ 			add = -500
+ 			desc = AI_WANDERLUST
+			is_child_of = scope:actor
+ 			has_character_modifier = lust_for_adventure
+ 		}
+		
+		#Wandering characters (who aren't doing anything else)
+		modifier = {
+ 			add = {
+				value = 10
+				add = scope:actor.diplomacy
+				
+				if = {
+					limit = {
+						faith = scope:actor.faith
+					}
+					add = 10
+				}
+				else_if = {
+					limit = {
+						faith = { #Same religion - But faith should not be considered Hostile or Evil
+							religion = scope:actor.faith.religion
+							faith_hostility_level = {
+								target = scope:actor.faith
+								value < 2
+							}
+						}
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						culture = scope:actor.culture
+					}
+					add = 10
+				}
+				else_if = {
+					limit = {
+						culture = {
+							has_same_culture_heritage = scope:actor.culture
+						}
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						OR = {
+							has_trait = content
+							has_trait = lazy
+							has_trait = trusting
+						}
+					}
+					add = 10
+				}
+			}
+ 			desc = AI_CAN_BE_PERSUADED_TO_STAY
+			
+			is_pool_guest = no
+			location.province_owner = {
+				OR = {
+					any_liege_or_above = { this = scope:actor }
+					this = scope:actor
+				}
+			}
+			NOR = {
+				has_relation_rival = scope:actor
+				exists = liege
+				is_child_of = scope:actor
+				has_character_modifier = lust_for_adventure
+			}
+ 		}
+		
+		modifier = {
+			add = {
+				value = 20
+				if = {
+					limit = {
+						has_trait = greedy
+					}
+					multiply = 1.5
+				}
+				else_if = {
+					limit = {
+						has_trait = generous
+					}
+					multiply = 0.5
+				}
+			}
+			scope:cover_travel_expenses = yes
+			desc = AI_TRAVEL_EXPENSES
+		}
+
+ 		# Amenities impact
+ 		## Actor's amenities increases acceptance
+ 		modifier = {
+ 			add = {
+ 				value = 10
+ 				if = {
+ 					limit = {
+ 						scope:actor = {
+			 				has_royal_court = yes
+			 				amenity_level = { type = court_lodging_standards value >=  high_amenity_level }
+			 			}
+ 					}
+ 			 		add = 10
+ 				}
+ 				if = {
+ 					limit = {
+ 						scope:actor = {
+			 				amenity_level = { type = court_lodging_standards value >=  very_high_amenity_level }
+			 			}
+ 					}
+ 			 		add = 10
+ 				}
+ 				if = {
+ 					limit = {
+ 						scope:actor = {
+			 				amenity_level = { type = court_lodging_standards value >=  max_amenity_level }
+			 			}
+ 					}
+ 			 		add = 20
+ 				}
+ 			}
+ 			desc = AI_COURT_LODGING_STANDARDS_QUALITY
+			scope:actor = {
+			 	has_royal_court = yes
+				amenity_level = { type = court_lodging_standards value >=  medium_amenity_level }
+			}
+ 		}
+		## Target's liege amenities decreases acceptance 
+ 		modifier = {
+ 			add = {
+ 				value = -10
+				if = {
+					limit = {
+						liege = {
+							amenity_level = { type = court_lodging_standards value >=  high_amenity_level } 
+						}
+					}
+					add = -10
+				}
+				if = {
+					limit = {
+						liege = {
+							amenity_level = { type = court_lodging_standards value >=  very_high_amenity_level } 
+						}
+					}
+					add = -10
+				}
+				if = {
+					limit = {
+						liege = {
+							amenity_level = { type = court_lodging_standards value >=  max_amenity_level } 
+						}
+					}
+					add = -20
+				}
+ 			}
+ 			desc = AI_LIEGE_COURT_LODGING_STANDARDS_QUALITY
+			exists = liege
+			is_courtier_of = liege
+			liege = {
+				has_royal_court = yes
+				amenity_level = { type = court_lodging_standards value >=  medium_amenity_level }
+			}
+ 		}
+		
+		##### Changed from Vanilla vvvvv
+		modifier = {
+			add = 100
+			desc = I_WILL_BE_IN_THE_WEST_SENATE_AGAIN
+			scope:recipient = {
+				has_trait = senator_west
+				character_in_west_senate_region_trigger = no
+			}
+			scope:actor = { character_in_west_senate_region_trigger = yes }
+		}
+		modifier = {
+			add = 100
+			desc = I_WILL_BE_IN_THE_EAST_SENATE_AGAIN
+				scope:recipient = {
+					has_trait = senator_east
+					character_in_east_senate_region_trigger = no
+				}
+				scope:actor = { character_in_east_senate_region_trigger = yes }
+		}
+		modifier = {
+			add = -100
+			desc = I_WOULD_LEAVE_THE_WEST_SENATE
+			scope:recipient = {
+				has_trait = senator_west
+				character_in_west_senate_region_trigger = yes
+			}
+			scope:actor = { character_in_west_senate_region_trigger = no }
+		}
+		modifier = {
+			add = -100
+			desc = I_WOULD_LEAVE_THE_EAST_SENATE
+			scope:recipient = {
+				has_trait = senator_east
+				character_in_east_senate_region_trigger = yes
+			}
+			scope:actor = { character_in_east_senate_region_trigger = no }
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	auto_accept = {
+		custom_description = {
+			text = "spending_hook"
+			subject = scope:actor
+			object = scope:recipient
+			scope:hook = yes
+		}
+	}
+
+	send_option = {
+		is_valid = {
+			scope:actor = {
+				has_usable_hook = scope:recipient
+			}
+		}
+		flag = hook
+		localization = SCHEME_HOOK
+	}
+	should_use_extra_icon = {
+		scope:actor = { has_usable_hook = scope:recipient }
+	}
+	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+
+	send_options_exclusive = no
+}
