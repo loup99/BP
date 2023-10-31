@@ -1,5 +1,7 @@
 ﻿##### Changed from Vanilla: Added check against changing non-gubernatorial_government vassals
 ##### Changed from Vanilla: Gubernatorials set only a yearly instead of permanent block
+##### Changed from Vanilla: Option to propagate contract changes down the hierarchy
+##### Changed from Vanilla: Tweaked is_shown conditions for bureaucratic/gubernatorials
 liege_modify_vassal_contract_interaction = {
 	special_interaction = modify_vassal_contract
 	interface = modify_vassal_contract
@@ -13,15 +15,32 @@ liege_modify_vassal_contract_interaction = {
 	force_notification = yes
 	notification_text = MODIFY_VASSAL_CONTRACT_NOTIFICATION_TO_VASSAL
 
+	##### Changed from Vanilla vvvvv
 	is_shown = {
-		scope:recipient = {
-			NOT = { this = scope:actor }
-			exists = liege
-			liege = scope:actor
-			is_ruler = yes
-			vassal_contract_has_modifiable_obligations = yes
+		trigger_if = { #Special Gubernatorial
+			limit = {
+				scope:actor = { has_government = bureaucratic_government }
+				scope:recipient = { has_government = gubernatorial_government }
+			}
+			scope:recipient = {
+				NOT = { this = scope:actor }
+				exists = liege
+				scope:actor = { is_liege_or_above_of = scope:recipient }
+				is_ruler = yes
+				vassal_contract_has_modifiable_obligations = yes
+			}
+		}
+		trigger_else = { #Vanilla
+			scope:recipient = {
+				NOT = { this = scope:actor }
+				exists = liege
+				liege = scope:actor
+				is_ruler = yes
+				vassal_contract_has_modifiable_obligations = yes
+			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	is_valid_showing_failures_only = {
 		scope:recipient = {
@@ -256,6 +275,28 @@ liege_modify_vassal_contract_interaction = {
 		}
 		# If there's a diarch involved, and they called in their change, that gets flagged.
 		diarch_changed_own_contract_effect = yes
+		
+		##### Changed from Vanilla vvvvv
+		if = { #Apply gubernatorial obligations down the hierarchy if applicable
+			limit = { always = scope:apply_change_down_hierarchy }
+			scope:recipient = {
+				every_vassal_or_below = {
+					limit = { this.primary_title.tier >= tier_county }
+					save_temporary_scope_as = the_vassal_in_question
+					every_in_list = {
+						list = changed_obligations
+						save_scope_as = obligation
+						scope:the_vassal_in_question = {
+							vassal_contract_set_obligation_level = {
+								type = scope:obligation.vassal_contract_type
+								level = scope:obligation
+							}
+						}
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -291,6 +332,13 @@ liege_modify_vassal_contract_interaction = {
 		flag = diarch
 		localization = CALL_IN_DIARCH_RIGHTS
 	}
+	##### Changed from Vanilla vvvvv
+	send_option = {
+		is_shown = { scope:recipient = { has_government = gubernatorial_government } }
+		flag = apply_change_down_hierarchy
+		localization = APPLY_CHANGE_DOWN_HIERARCHY
+	}
+	##### Changed from Vanilla ^^^^^
 	should_use_extra_icon = {
 		scope:actor = { has_usable_hook = scope:recipient }
 	}
@@ -298,3 +346,6 @@ liege_modify_vassal_contract_interaction = {
 
 	send_options_exclusive = no
 }
+
+
+
