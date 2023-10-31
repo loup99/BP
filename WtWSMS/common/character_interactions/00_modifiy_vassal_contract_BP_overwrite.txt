@@ -1,4 +1,5 @@
 ﻿##### Changed from Vanilla: Added check against changing non-gubernatorial_government vassals
+##### Changed from Vanilla: Gubernatorials set only a yearly instead of permanent block
 liege_modify_vassal_contract_interaction = {
 	special_interaction = modify_vassal_contract
 	interface = modify_vassal_contract
@@ -32,13 +33,15 @@ liege_modify_vassal_contract_interaction = {
 	##### Changed from Vanilla vvvvv
 	can_send = {
 		trigger_if = { #If they're blocked we don't want to show anything else
-			limit = {
-				scope:recipient = {
-					vassal_contract_is_blocked_from_modification = yes
-				}
-			}
-			scope:recipient = {
-				vassal_contract_is_blocked_from_modification = no
+			limit = { scope:recipient = { vassal_contract_is_blocked_from_modification = yes } }
+			scope:recipient = { vassal_contract_is_blocked_from_modification = no }
+		}
+		trigger_else_if = {
+			limit = { scope:recipient = { has_variable = gubernatorial_contract_change_cooldown } }
+			custom_description = {
+				text = gubernatorial_government_recently_changed_obligation
+				subject = scope:recipient
+				always = no
 			}
 		}
 		trigger_else = {
@@ -103,6 +106,7 @@ liege_modify_vassal_contract_interaction = {
 	##### Changed from Vanilla ^^^^^
 
 	auto_accept = yes
+	##### Changed from Vanilla vvvvv
 	on_accept = {
 		hidden_effect = {
 			# Struggle Catalysts
@@ -227,7 +231,11 @@ liege_modify_vassal_contract_interaction = {
 				}
 
 				scope:recipient = {
-					hidden_effect = { set_vassal_contract_modification_blocked = yes }
+					if = {
+						limit = { has_government = gubernatorial_government }
+						hidden_effect = { set_variable = { name = gubernatorial_contract_change_cooldown days = 365 } }
+					}
+					else = { hidden_effect = { set_vassal_contract_modification_blocked = yes } }
 				}
 
 				every_in_list = {
@@ -247,6 +255,7 @@ liege_modify_vassal_contract_interaction = {
 		# If there's a diarch involved, and they called in their change, that gets flagged.
 		diarch_changed_own_contract_effect = yes
 	}
+	##### Changed from Vanilla ^^^^^
 
 	send_option = {
 		is_valid = {
