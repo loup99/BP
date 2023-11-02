@@ -1,0 +1,76 @@
+﻿# Called from code once a quarter for "playable" (count+) characters.
+# Root is the character
+# scope:quarter is which quarter it's for, from 1 to 4. Note that scope:quarter = 1 isn't necessarily in Q1 by calendar time
+quarterly_playable_pulse = {
+	on_actions = { peasants_abandoning_land }
+}
+
+peasants_abandoning_land = {
+	trigger = {
+		OR = {
+			has_government = bureaucratic_government
+			has_government = gubernatorial_government
+		}
+	}
+	
+	random_events = {
+		chance_to_happen = 15 #NB: cannot make this a script value, so its entirely char-based...
+		#This means at maximal taxation:
+		# Taxation | Effective | Per     | Per 5   | Per 10  |
+		# Level    | Chance    | Year    | Years   | Years   |
+		# ---------|-----------|---------|---------|---------|
+		#        0 |    00.00% |  00.00% |  00.00% |  00.00% |
+		#        1 |    01.50% |  05.87% |  26.09% |  45.37% |
+		#        2 |    03.00% |  11.47% |  45.62% |  70.43% |
+		#        3 |    07.50% |  26.79% |  78.97% |  95.58% |
+		#        4 |    10.00% |  47.80% |  96.12% |  99.85% |
+		#
+		# Therefore, we expect players to reasonably start seeing negative effects regularly
+		# around middling taxation, and it escalates as taxation becomes more oppressive
+		#
+		chance_of_no_event = { #Chance of happening depends on the taxation level
+			value = 0
+			
+			if = { #Lowest taxes, no chance
+				limit = {
+					OR = {
+						has_realm_law = bureaucratic_taxation_0
+						vassal_contract_has_flag = gubernatorial_poll_taxes_0
+					}
+				}
+				add = 100
+			}
+			else_if = { #Somewhat low taxes, fairly uncommon
+				limit = {
+					OR = {
+						has_realm_law = bureaucratic_taxation_1
+						vassal_contract_has_flag = gubernatorial_poll_taxes_1
+					}
+				}
+				add = 10
+			}
+			else_if = { #Moderate taxes, fairly uncommon
+				limit = {
+					OR = {
+						has_realm_law = bureaucratic_taxation_2
+						vassal_contract_has_flag = gubernatorial_poll_taxes_2
+					}
+				}
+				add = 20
+			}
+			else_if = { #High taxes, fairly uncommon
+				limit = {
+					OR = {
+						has_realm_law = bureaucratic_taxation_3
+						vassal_contract_has_flag = gubernatorial_poll_taxes_3
+					}
+				}
+				add = 50
+			}
+			#Extortionate Taxes, they absolutely will abandon the province
+		}
+		
+		600 = BP_bureaucratic_gubernatorial_events.0001 #Loose development progress
+		400 = BP_bureaucratic_gubernatorial_events.0002 #Loose development level
+	}
+}
