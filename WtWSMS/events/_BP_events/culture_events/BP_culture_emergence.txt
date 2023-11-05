@@ -1,0 +1,453 @@
+﻿namespace = bp_culture_emergence_events
+
+#Culture Events:
+##0001-0999: Various duplications of Vanilla
+##1000+: Specific BP events
+
+#This trigger fires specifically if we want the rulers heritage/language &c. to apply instead of
+#the populations. E.g., probably for cases like Arab conquests, we want the Arab language/heritage to apply
+#instead of the local populations. Historically, it'd be why Rome gets so many hybrids.
+#
+# Naturally, Malleable Invaders overrides the behavior (see Norse et al)
+scripted_trigger conquer_culture_trigger = {
+	culture = { has_cultural_parameter = conqueror_culture_feature }
+	NOT = { culture = { has_cultural_parameter = overrides_conqueror_culture_feature } }
+}
+
+# Opportunity for your culture to hybridize with your capital culture
+
+#Overwrite of Vanilla culture_emergence_events.0001 with newer features
+bp_culture_emergence_events.0001 = {
+	type = character_event
+	title = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { conquer_culture_trigger = yes }
+				desc = bp_culture_emergence_events.0001.t_conqueror
+			}
+			#Default
+			desc = bp_culture_emergence_events.0001.t
+		}
+	}
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { conquer_culture_trigger = yes }
+				desc = bp_culture_emergence_events.0001.desc_conqueror
+			}
+			#Default
+			desc = bp_culture_emergence_events.0001.desc
+		}
+	}
+	
+	theme = realm
+	override_background = {
+		reference = terrain_scope
+	}
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+	
+	##### Changed from Vanilla vvvvv
+	trigger = {
+		has_dlc_feature = hybridize_culture
+		NAND = {
+			is_ai = yes
+			has_game_rule = none_hybrid_culture_ai_frequency
+		}
+		NAND = {
+			is_ai = yes
+			exists = global_var:has_ai_hybrid_event_cooldown
+		}
+		is_independent_ruler = yes
+		exists = capital_county
+		capital_county = {
+			holder = root
+			NOT = {
+				culture = root.culture
+			}
+			culture = {
+				OR = {
+					cultural_acceptance = { target = root.culture value >= hybridization_threshold_flat_number_value }
+					root.culture = {
+						has_cultural_parameter = easier_to_hybridize
+					}
+				}
+			}
+		}
+		culture = {
+			NOT = { has_same_culture_heritage = root.capital_county.culture }
+			cultural_acceptance = { target = root.capital_county.culture value >= hybridization_threshold_value }
+			culture_age >= culture_hybrid_cooldown
+		}
+		OR = {
+			NOT = {
+				any_sub_realm_county = {
+					culture = root.culture
+				}
+			}
+			any_sub_realm_county = {
+				culture = root.culture
+				any_neighboring_county = {
+					culture = root.capital_county.culture
+				}
+			}
+			AND = {
+				culture = {
+					has_cultural_parameter = easier_to_hybridize
+				}
+				any_sub_realm_county = {
+					culture = root.culture
+					title_province = {
+						is_coastal = yes
+					}
+				}
+				any_sub_realm_county = {
+					culture = root.capital_county.culture
+					title_province = {
+						is_coastal = yes
+					}
+				}
+			}
+		}
+		OR = {
+			realm_size <= 6
+			any_sub_realm_county = {
+				percent >= 0.7
+				culture = root.capital_county.culture
+			}
+			AND = {
+				any_sub_realm_county = {
+					percent <= 0.3
+					NOR = {
+						culture = root.capital_county.culture
+						culture = root.culture
+					}
+				}
+				any_sub_realm_county = {
+					percent >= 0.2
+					culture = root.capital_county.culture
+				}
+				any_sub_realm_county = {
+					percent >= 0.2
+					culture = root.culture
+				}
+			}
+		}
+		NOR = {
+			##### Changed from Vanilla vvvvv
+			culture = {
+				has_cultural_parameter = traditionalist_culture_feature
+			}
+			capital_county.culture = {
+				has_cultural_parameter = traditionalist_culture_feature
+			}
+			##### Changed from Vanilla ^^^^^
+			culture = {
+				has_cultural_parameter = harder_to_hybridize
+			}
+			capital_county.culture = {
+				has_cultural_parameter = harder_to_hybridize
+			}
+			faith.religious_head = root
+			AND = {
+				culture = {
+					is_hybrid_culture = yes
+				}
+				capital_county.culture = {
+					is_hybrid_culture = yes
+				}
+			}
+			AND = { # We don't want the AI to spawn ugly hybrid cultures willy-nilly, fine for the player though
+				is_ai = yes
+				NOT = {
+					has_game_rule = very_relaxed_hybrid_culture_ai_restrictions
+				}
+				culture = {
+					is_hybrid_culture = yes
+					culture_is_not_historical_hybrid_trigger = yes
+				}
+			}
+			AND = { # We don't want the AI to spawn ugly hybrid cultures willy-nilly, fine for the player though
+				is_ai = yes
+				NOT = {
+					has_game_rule = very_relaxed_hybrid_culture_ai_restrictions
+				}
+				capital_county.culture = {
+					is_hybrid_culture = yes
+					culture_is_not_historical_hybrid_trigger = yes
+				}
+				culture = {
+					culture_is_not_historical_hybrid_trigger = yes
+				}
+			}
+			capital_county.culture = {
+				is_hybrid_culture = yes
+				any_parent_culture = {
+					OR = {
+						this = root.culture
+						has_same_culture_heritage = root.culture
+					}
+				}
+			}
+			root.culture = {
+				is_hybrid_culture = yes
+				any_parent_culture = {
+					OR = {
+						this = root.capital_county.culture
+						has_same_culture_heritage = root.capital_county.culture
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		
+		#Don't Mix Greek and Roman
+		NOR = {
+			root.culture = { has_cultural_parameter = greco_roman_social_tradition }
+			capital_county.culture = { has_cultural_parameter = greco_roman_social_tradition }
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 2
+			root.culture = {
+				has_cultural_parameter = easier_to_hybridize
+			}
+		}
+		modifier = {
+			add = 4
+			root.culture = {
+				has_cultural_parameter = easier_to_hybridize
+			}
+			root.culture = culture:norse
+			root.capital_county = {
+				title_province = { geographical_region = world_europe_west_britannia }
+			}
+		}
+		modifier = {
+			add = 2
+			has_trait = adventurer
+		}
+		modifier = {
+			factor = 0.2
+			is_ai = yes
+			has_game_rule = less_common_hybrid_culture_ai_frequency
+		}
+	}
+
+	immediate = {
+		# Global cooldowns for the lower frequency game rule settings
+		if = {
+			limit = {
+				is_ai = yes
+				has_game_rule = less_common_hybrid_culture_ai_frequency
+			}
+			set_global_variable = { name = has_ai_hybrid_event_cooldown value = yes days = 3650 }
+		}
+		root = {
+			save_scope_as = hybridizer
+		}
+		capital_county = {
+			save_scope_as = capital_county_scope
+		}
+		capital_county.culture = {
+			save_scope_as = hybdridization_offer_culture
+		}
+		
+		if = { # If a hybrid culture already exists
+			limit = {
+				any_in_global_list = {
+					variable = hybrid_cultures
+					any_parent_culture = { this = root.culture }
+					any_parent_culture = { this = root.capital_county.culture }
+				}
+			}
+			random_in_global_list = {
+				variable = hybrid_cultures
+				limit = {
+					any_parent_culture = { this = root.culture }
+					any_parent_culture = { this = root.capital_county.culture }
+				}
+				save_scope_as = existing_hybrid_culture
+			}
+		}
+	}
+
+	##### Changed from Vanilla vvvvv
+	option = {
+		trigger = { conquer_culture_trigger = no }
+		name = bp_culture_emergence_events.0001.a
+		
+		flavor = bp_new_hybrid_culture_standard_tt
+		
+		if = { # If a hybrid culture already exist, convert to that one
+			limit = {
+				exists = scope:existing_hybrid_culture
+			}
+			custom_tooltip = bp_culture_emergence_events.0001.existing_hybrid
+			custom_tooltip = bp_culture_emergence_events.0001.vassals
+			hidden_effect = {
+				new_culture_created_vassal_conversion_effect = {
+					CONVERTEE = root
+					CONVERTER = root
+					CULTURE = scope:existing_hybrid_culture
+				}
+			}
+		}
+		else = {
+			custom_tooltip = bp_culture_emergence_events.0001.new_hybrid
+			custom_tooltip = bp_culture_emergence_events.0001.vassals
+			
+			hidden_effect = {
+				root.culture = { save_scope_as = ruler_culture }
+				trigger_event = { id = bp_culture_emergence_events.1002 }
+			}
+		}
+
+		ai_chance = {
+			base = 100
+		}
+	}
+	
+	option = {
+		trigger = { conquer_culture_trigger = yes }
+		name = bp_culture_emergence_events.0001.a_conqeror
+		
+		flavor = bp_new_hybrid_culture_conqueror_tt
+		
+		if = { # If a hybrid culture already exist, convert to that one
+			limit = {
+				exists = scope:existing_hybrid_culture
+			}
+			custom_tooltip = bp_culture_emergence_events.0001.existing_hybrid
+			custom_tooltip = bp_culture_emergence_events.0001.vassals
+			hidden_effect = {
+				new_culture_created_vassal_conversion_effect = {
+					CONVERTEE = root
+					CONVERTER = root
+					CULTURE = scope:existing_hybrid_culture
+				}
+			}
+		}
+		else = {
+			custom_tooltip = bp_culture_emergence_events.0001.new_hybrid
+			custom_tooltip = bp_culture_emergence_events.0001.vassals
+			
+			hidden_effect = {
+				root.culture = { save_scope_as = ruler_culture }
+				trigger_event = { id = bp_culture_emergence_events.1003 }
+			}
+		}
+
+		ai_chance = {
+			base = 100
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+
+	option = {
+		trigger = { conquer_culture_trigger = no }
+		name = bp_culture_emergence_events.0001.b
+		
+		scope:hybdridization_offer_culture = {
+			change_cultural_acceptance = {
+				target = root.culture
+				value = 5
+				desc = cultural_acceptance_gain_event
+			}
+		}
+
+		ai_chance = {
+			base = 0
+		}
+	}
+	
+	##### Changed from Vanilla vvvvv
+	option = {
+		trigger = { conquer_culture_trigger = yes }
+		name = bp_culture_emergence_events.0001.b_conqueror
+		
+		scope:hybdridization_offer_culture = {
+			change_cultural_acceptance = {
+				target = root.culture
+				value = -5
+				desc = cultural_acceptance_gain_event
+			}
+		}
+
+		ai_chance = {
+			base = 0
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+}
+
+#Formation of Glorious East Celtic Culture!
+bp_culture_emergence_events.1001 = {
+	type = character_event
+	title = bp_culture_emergence_events.1001.t
+	desc = bp_culture_emergence_events.1001.desc
+	theme = culture_change
+	
+	right_portrait = scope:founder
+	
+	option = {
+		trigger = {
+			this = scope:founder
+			has_valid_east_celtic_ancestors_trigger = {
+				CULTURE_1 = scope:parent_1
+				CULTURE_2 = scope:parent_2
+			}
+		}
+		name = bp_culture_emergence_events.1001.response
+		
+		#Update the name list
+		custom_description = {
+			text = uses_east_celtic_name_list
+			subject = scope:founder.culture
+			scope:founder.culture = { set_name_list = name_list_east_celtic }
+		}
+	}
+}
+
+#Standard Version of hybrid event: we adopt their mannerisms
+bp_culture_emergence_events.1002 = {
+	scope = none
+	hidden = yes
+	
+	immediate = {
+		create_hybrid_culture = scope:hybdridization_offer_culture
+		
+		#Clean up traditions and pillars
+		scope:new_culture = {
+			set_ethos_from = scope:ruler_culture
+			set_heritage_from = scope:hybdridization_offer_culture
+			set_language_from = scope:hybdridization_offer_culture
+			set_martial_custom_from = scope:hybdridization_offer_culture
+		}
+	}
+}
+
+#Conqueror Version of hybrid event: they will adopt _our_ mannerisms...
+bp_culture_emergence_events.1003 = {
+	scope = none
+	hidden = yes
+	
+	immediate = {
+		create_hybrid_culture = scope:hybdridization_offer_culture
+		
+		#Clean up traditions and pillars
+		scope:new_culture = {
+			set_ethos_from = scope:hybdridization_offer_culture
+			set_heritage_from = scope:ruler_culture
+			set_language_from = scope:ruler_culture
+			set_martial_custom_from = scope:ruler_culture
+		}
+	}
+}

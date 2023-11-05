@@ -12,16 +12,90 @@ generic_shift_culture_event_effect = { #Cf. Vanilla common/on_actions/yearly_on_
 		
 		### Baseline Probability...
 		#... depends on the current date (Fibonacci-like sequence gives up exponentially increasing odds per annum)
-		
-		#Probability breakdown assumes the same culture is picked every year
-		modifier = { add = 1 current_year >= shift_start_year_0_period }  #01%/year = 22.21% per 25 years
-		modifier = { add = 1 current_year >= shift_start_year_1_period }  #02%/year = 39.65% per 25 years
-		modifier = { add = 1 current_year >= shift_start_year_2_period }  #03%/year = 53.30% per 25 years
-		modifier = { add = 2 current_year >= shift_start_year_3_period }  #05%/year = 72.27% per 25 years
-		modifier = { add = 3 current_year >= shift_start_year_4_period }  #08%/year = 87.56% per 25 years
-		modifier = { add = 5 current_year >= shift_start_year_5_period }  #13%/year = 96.92% per 25 years
-		modifier = { add = 8 current_year >= shift_start_year_6_period }  #21%/year = 99.72% per 25 years
-		modifier = { add = 13 current_year >= shift_start_year_7_period } #34%/year = 99.99+% per 25 years
+		#
+		# For the non-mathematically inclined, I've included a few charts for various periods to
+		# give a rough estimate of occurrence for choices of period. Approximate year when 50%/90%/99%
+		# cumulative chance is given at the top of each table.
+		#
+		# Here's some additional chart notes:
+		#    * Per Annum Chance: Chance of this occurring in a given year during the period
+		#    * Period Chance: Chance of this occurring in the given period
+		#    * Cumulative Chance: Chance of this occurring by the end of the period
+		#
+		# Decennial (10-year period) Odds: 40/80/90
+		# Period |  Years  | Per Annum | Period     | Cumulative |
+		#        |         | Chance    | Chance     | Chance     |
+		# -------|---------|-----------|------------|------------|
+		#      0 | 001-010 |     0.25% |     02.47% |     02.47% |
+		#      1 | 011-020 |     0.50% |     04.89% |     07.24% |
+		#      2 | 021-030 |     1.00% |     09.56% |     16.11% |
+		#      3 | 031-040 |     2.00% |     18.29% |     31.45% |
+		#      4 | 041-050 |     3.00% |     26.26% |     50.55% |
+		#      5 | 051-060 |     5.00% |     40.13% |     70.74% |
+		#      6 | 061-070 |     8.00% |     56.56% |     87.29% |
+		#      7 | 071-080 |    13.00% |     75.16% |     96.84% |
+		#     *8 | 081-090 |    13.00% |     75.16% |     99.22% |
+		#
+		# Vicennial (20-year period) Odds: 80/120/160
+		# Period |  Years  | Per Annum | Period     | Cumulative |
+		#        |         | Chance    | Chance     | Chance     |
+		# -------|---------|-----------|------------|------------|
+		#      0 | 001-020 |     0.25% |     04.88% |     04.88% |
+		#      1 | 021-040 |     0.50% |     09.54% |     13.95% |
+		#      2 | 041-060 |     1.00% |     18.21% |     29.62% |
+		#      3 | 061-080 |     2.00% |     33.24% |     53.01% |
+		#      4 | 081-100 |     3.00% |     45.62% |     74.45% |
+		#      5 | 101-120 |     5.00% |     64.15% |     90.84% |
+		#      6 | 121-140 |     8.00% |     81.13% |     98.27% |
+		#      7 | 141-160 |    13.00% |     93.83% |     99.89% |
+		#
+		# Quadranscentennial (25-year period) Odds: 100/150/175 years
+		# Period |  Years  | Per Annum | Period     | Cumulative |
+		#        |         | Chance    | Chance     | Chance     |
+		# -------|---------|-----------|------------|------------|
+		#      0 | 001-025 |     0.25% |     06.06% |     06.06% |
+		#      1 | 026-050 |     0.50% |     11.78% |     17.13% |
+		#      2 | 051-075 |     1.00% |     22.22% |     35.54% |
+		#      3 | 076-100 |     2.00% |     40.66% |     61.10% |
+		#      4 | 101-125 |     3.00% |     53.30% |     81.83% |
+		#      5 | 126-150 |     5.00% |     72.27% |     94.96% |
+		#      6 | 151-175 |     8.00% |     87.56% |     99.37% |
+		#      7 | 176-200 |    13.00% |     96.92% |     99.81% |
+		#
+		# Tricennial (30-year period) Odds: 120/180/210 years
+		# Period |  Years  | Per Annum | Period     | Cumulative |
+		#        |         | Chance    | Chance     | Chance     |
+		# -------|---------|-----------|------------|------------|
+		#      0 | 001-030 |     0.25% |     07.23% |     07.23% |
+		#      1 | 031-060 |     0.50% |     13.96% |     20.18% |
+		#      2 | 061-090 |     1.00% |     26.03% |     40.96% |
+		#      3 | 091-120 |     2.00% |     45.45% |     67.80% |
+		#      4 | 121-150 |     3.00% |     59.90% |     87.09% |
+		#      5 | 151-180 |     5.00% |     78.54% |     97.23% |
+		#      6 | 181-210 |     8.00% |     91.80% |     99.77% |
+		#      7 | 211-240 |    13.00% |     98.47% |    >99.99% |
+		#
+		# Quadracennial (40-year period) Odds: 120/200/240
+		# Period |  Years  | Per Annum | Period     | Cumulative |
+		#        |         | Chance    | Chance     | Chance     |
+		# -------|---------|-----------|------------|------------|
+		#      0 | 001-040 |     0.25% |     09.53% |     09.53% |
+		#      1 | 041-080 |     0.50% |     18.17% |     25.97% |
+		#      2 | 081-120 |     1.00% |     33.10% |     50.47% |
+		#      3 | 121-160 |     2.00% |     55.43% |     77.92% |
+		#      4 | 161-200 |     3.00% |     70.43% |     93.47% |
+		#      5 | 201-240 |     5.00% |     87.71% |     99.20% |
+		#      6 | 241-280 |     8.00% |     96.44% |     99.97% |
+		#      7 | 281-320 |    13.00% |     99.62% |    >99.99% |
+		#
+		modifier = { add = 0.25 current_year >= shift_start_year_0_period }
+		modifier = { add = 0.25 current_year >= shift_start_year_1_period }
+		modifier = { add = 0.50 current_year >= shift_start_year_2_period }
+		modifier = { add = 1.00 current_year >= shift_start_year_3_period }
+		modifier = { add = 2.00 current_year >= shift_start_year_4_period }
+		modifier = { add = 2.00 current_year >= shift_start_year_5_period }
+		modifier = { add = 3.00 current_year >= shift_start_year_6_period }
+		modifier = { add = 5.00 current_year >= shift_start_year_7_period }
 		
 		### Culture Situation....
 		#... modifies the odds (how likely the peasants and the elites mix)
@@ -93,21 +167,25 @@ generic_shift_culture_event_effect = { #Cf. Vanilla common/on_actions/yearly_on_
 		#which speak the language should stop the process
 		modifier = {
 			factor = 0
-			any_ruler = {
-				this = { save_temporary_scope_as = ruler }
-				primary_title.tier = tier_empire
-				culture = { has_same_culture_$HERITAGE_OR_LANGUAGE$ = scope:shift_culture }
-				any_county = {
-					percent >= 0.60
-					this.culture = { has_same_culture_$HERITAGE_OR_LANGUAGE$ = scope:shift_culture }
-					holder = {
-						OR = {
-							this = scope:ruler
-							this = { any_liege_or_above = { this = scope:ruler } }
+			trigger_if = {
+				limit = { always = $UNITED_POLITY_PREVENTS_SHIFT$ }
+				any_ruler = {
+					this = { save_temporary_scope_as = ruler }
+					primary_title.tier = tier_empire
+					culture = { has_same_culture_$HERITAGE_OR_LANGUAGE$ = scope:shift_culture }
+					any_county = {
+						percent >= 0.60
+						this.culture = { has_same_culture_$HERITAGE_OR_LANGUAGE$ = scope:shift_culture }
+						holder = {
+							OR = {
+								this = scope:ruler
+								this = { any_liege_or_above = { this = scope:ruler } }
+							}
 						}
 					}
 				}
 			}
+			trigger_else = { always = no }
 		}
 		
 		scope:shift_culture = { trigger_event = { id = $EVENT_ID$ } }

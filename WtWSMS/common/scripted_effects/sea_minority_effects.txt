@@ -87,6 +87,35 @@ promote_culture_minority_effect = {
 		}
 
 		set_county_culture = $CULTURE$
+		
+		#Hybrid/Divergence cultures don't leave minorities of their parents when becoming the majority,
+		#if its within the appropriate window
+		if = {
+			limit = {
+				$CULTURE$ = {
+					OR = {
+						is_hybrid_culture = yes
+						is_divergent_culture = yes
+					}
+					culture_age < culture_hybrid_cooldown #Intentional (see Vanilla)
+					any_parent_culture = { this = scope:county.culture }
+				}
+			}
+			$CULTURE$ = {
+				every_parent_culture = {
+					save_temporary_scope_as = parent_culture
+					if = {
+						limit = { is_target_in_variable_list = { name = culture_minorities_large target = scope:parent_culture } }
+						remove_list_variable = { name = culture_minorities_large target = scope:parent_culture }
+					}
+					if = {
+						limit = { is_target_in_variable_list = { name = culture_minorities_small target = scope:parent_culture } }
+						remove_list_variable = { name = culture_minorities_small target = scope:parent_culture }
+					}
+				}
+			}
+			
+		}
 	}
 	else = {
 		add_to_variable_list = {
