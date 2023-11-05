@@ -3,7 +3,7 @@
 	skill = intrigue
 	desc = tax_evasion_desc_general
 	hostile = yes
-	#icon = icon_gold
+	icon = icon_gold
 	
 	allow = {
 		always = yes
@@ -13,18 +13,18 @@
 	}
 	
 	valid = {
-		#custom_description = {
-		#	object = scope:target
-		#	text = i_have_been_caught_trying_to_murder_target
-		#	scope:target = {
-		#		NOT = {
-		#			has_opinion_modifier = {
-		#				target = prev
-		#				modifier = murder_personal_grudge_opinion
-		#			}
-		#		}
-		#	}
-		#}
+		custom_description = {
+			object = scope:target
+			text = i_have_been_caught_trying_to_forge_tax_documents
+			scope:target = {
+				NOT = {
+					has_opinion_modifier = {
+						target = prev
+						modifier = attempted_tax_evasion_recently_opinion
+					}
+				}
+			}
+		}
 		# Special AI exceptions
 		NOT = {
 			scope:owner = {
@@ -35,10 +35,24 @@
 				}
 			}
 		}
+		#Have to actually _have_ taxes to bother
+		custom_description = {
+			text = has_valid_land_taxes_to_evade
+			OR = {
+				vassal_contract_has_flag = gubernatorial_land_taxes_1
+				vassal_contract_has_flag = gubernatorial_land_taxes_2
+				vassal_contract_has_flag = gubernatorial_land_taxes_3
+				vassal_contract_has_flag = gubernatorial_land_taxes_4
+			}
+		}
 	}
 
 	valid_agent = {
 		age >= 16
+		OR = {
+			is_courtier_of = scope:target
+			is_councillor_of = scope:target
+		}
 	}
 	
 	agent_join_chance = {
@@ -78,27 +92,20 @@
 		#Default Hostile Scheme modifiers
 		hostile_murder_agent_base_join_chance_modifier = yes
 
-		#Special Modifier from events for couples that murder together
-		modifier = {
-			add = 50
-			has_opinion_modifier = {
-				target = scope:owner
-				modifier = murder_partner_opinion
-			}
-			desc = "SCHEME_MURDER_COUPLE"
-		}
-		modifier = {
-			add = -1000
-			has_variable = murder_scheme_disinterest
-			var:murder_scheme_disinterest = scope:target
-			desc = "SCHEME_MURDER_DISINTERESTED"
-		}
-
 		#Scope:target has caused internal strife in the realm
 		character_hates_scope_due_to_strife_plus_desc_modifier = { TARGET = scope:target }
 
 		#Family Feud
 		house_feud_hostile_scheme_agent_modifier = yes
+		
+		modifier = {
+			add = 10
+			OR = {
+				has_trait = senator_west
+				has_trait = senator_east
+			}
+			desc = SCHEME_TAX_EVASION_IS_A_SENATOR
+		}
 	}
 	
 	base_success_chance = {
@@ -106,106 +113,15 @@
 		
 		hostile_scheme_base_chance_modifier = yes
 
-		# Imaginar friend told you to kill them
 		modifier = {
-			add = 50
-			desc = "IMAGINARY_FRIEND_MURDER_BONUS"
-			scope:owner = {
-				exists = var:imaginary_friend_murder_target
-				var:imaginary_friend_murder_target = scope:target
-			}
-		}
-		
-		# They crowned you king/queen of fools
-		modifier = {
-			add = 20
-			desc = "MURDER_FOOL_NEMESIS_BONUS"
-			scope:owner = {
-				exists = var:festival_nemesis_fool_var
-				var:festival_nemesis_fool_var = scope:target
-			}
-		}
-		
-		# You found their escape tunnel
-		modifier = {
-			add = 100
-			desc = "SCHEME_DISCOVERED_ESCAPE_TUNNEL"
-			scope:owner = {
-				exists = var:discovered_escape_tunnel_of
-				var:discovered_escape_tunnel_of = scope:target
-			}
-		}
-		
-		# You know where their chamber is
-		modifier = {
-			add = 50
-			desc = "SCHEME_WNIGHT_VICTIM_CHAMBER"
-			scope:owner = {
-				exists = var:wnight_chandelier_murder_var
-				var:wnight_chandelier_murder_var = scope:target
-			}
-		}
-
-		modifier = {
-			add = 10
-			scope:owner = { has_trait = lifestyle_herbalist }
-			desc = MURDER_HERBALIST_BONUS
-		}
-
-		modifier = {
-			add = -50
-			scope:target = {				
+			add = -25
+			scope:target = {
 				has_opinion_modifier = {
 					target = scope:owner
-					modifier = attempted_murder_me_crime
+					modifier = attempted_tax_evasion_before_opinion
 				}
 			}
-			desc = HAS_ATTEMPTED_TO_MURDER_TARGET_BEFORE
-		}
-		# Spiritual Head of Faith
-		modifier = {
-			add = -25
-			desc = "SCHEME_VS_SPIRITUAL_HOF"
-			scope:target = {
-				faith = scope:owner.faith
-				faith = {
-					has_doctrine = doctrine_spiritual_head
-				}
-				faith = {
-					exists = religious_head
-					religious_head = {
-			 			this = scope:target
-			 		}
-				}
-			}
-		}
-		
-		# Spiritual Head of Faith
-		modifier = {
-			add = -50
-			desc = "SCHEME_VS_SPIRITUAL_HOF"
-			scope:target = {
-				faith = scope:owner.faith
-				faith = {
-					has_doctrine = doctrine_spiritual_head
-				}
-				faith = {
-					exists = religious_head
-					religious_head = {
-			 			this = scope:target
-			 		}
-				}
-			}
-		}
-
-		# Sponsored Inspiration
-		modifier = {
-			add = -25
-			desc = target_has_sponsored_inspiration
-			scope:target = {
-				exists = inspiration
-				inspiration = { exists = inspiration_sponsor }
-			}
+			desc = HAS_ATTEMPTED_TO_EVADE_TAXES_BEFORE
 		}
 
 		# Family Feud
@@ -216,18 +132,14 @@
 			modifier = {
 				add = -50
 				desc = "SCHEME_AT_WAR"
-				scope:target = {
-					is_at_war_with = scope:owner
-				}
+				scope:target = { is_at_war_with = scope:owner }
 			}
 			modifier = {
 				add = -25
 				scope:target = {
 					is_landed = no
 					exists = liege
-					liege = {
-						is_at_war_with = scope:owner
-					}
+					liege = { is_at_war_with = scope:owner }
 				}
 				desc = "SCHEME_AT_WAR_WITH_LIEGE"
 			}
@@ -236,9 +148,7 @@
 				scope:target = {
 					is_landed = yes
 					exists = liege
-					liege = {
-						is_at_war_with = scope:owner
-					}
+					liege = { is_at_war_with = scope:owner }
 				}
 				desc = "SCHEME_AT_WAR_WITH_LIEGE"
 			}
@@ -246,31 +156,6 @@
 
 		# Diarchs are better at schemes within their liege's realm
 		diarch_scheming_within_realm_bonus_modifier = yes
-
-		# Tailor
-		
-		modifier = {
-			add = 10
-			scope:owner = {
-				has_character_modifier = tournament_tailor_mixup_scheme_modifier
-				exists = var:tailor_mixup_house
-				exists = scope:target.house
-				var:tailor_mixup_house = scope:target.house
-			}
-			desc = "tournament_tailor_mixup_scheme_modifier_value"
-		}
-
-		modifier = {
-			add = 10
-			desc = feast_learnt_habits_modifier.tt
-			scope:owner = {
-				any_scheme = {
-					scheme_type = murder
-					scheme_target = scope:target
-					has_scheme_modifier = feast_learnt_habits_modifier
-				}
-			}
-		}
 	}
 	
 	agent_success_chance = {
@@ -280,25 +165,14 @@
 	}
 	
 	agent_leave_threshold = -25
-		
+	
 	cooldown = { years = 5 }
 	is_secret = yes
 	base_secrecy = 10
 
 	on_ready = {
 		scheme_owner = {
-			if = {
-				limit = {
-					has_character_flag = is_in_event_murder_outcome_0001
-				}
-				trigger_event = {
-					id = murder_outcome.0001
-					days = 1
-				}
-			}
-			else = {
-				trigger_event = murder_outcome.0001
-			}
+			trigger_event = tax_evasion_outcome.0001
 		}
 	}
 
@@ -307,11 +181,9 @@
 		if = {
 			limit = {
 				NOT = { exists = scope:discovery_event_happening }
-			}			
+			}
 			scheme_owner = {
-				trigger_event = {
-					on_action = murder_ongoing
-				}
+				trigger_event = { on_action = murder_ongoing }
 			}
 		}
 	}
