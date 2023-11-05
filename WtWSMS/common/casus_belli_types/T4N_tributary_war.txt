@@ -2,6 +2,7 @@
     group = tributary
 	icon = vassalization
 	ai_only_against_neighbors = yes
+	allow_hostages = no
 
 	war_name = trib_war_cb
 	my_war_name = trib_war_me # Used when the claimant and attacker is the same person
@@ -22,16 +23,20 @@
     allowed_against_character = {
         primary_title ?= { tier >= tier_county }
         NOT = { exists = var:my_suzerain }
-        scope:attacker.primary_title.tier >= scope:defender.primary_title.tier  
-        custom_description = {
-            text = not_a_tributary
-            subject = scope:defender
-            NOT = {
-                scope:attacker = {
-                    is_target_in_variable_list = { name = all_tributaries target = scope:defender }
-                }
-            }
-        } 
+        scope:attacker.primary_title.tier >= scope:defender.primary_title.tier
+		trigger_if = {
+			limit = { scope:attacker = { is_alive = yes } } #2023-10-26: LT-Rascek: Apparently, dead chars are being found here somehow...
+			custom_description = {
+				text = not_a_tributary
+				subject = scope:defender
+				NOT = {
+					scope:attacker = {
+						has_variable_list = all_tributaries
+						is_target_in_variable_list = { name = all_tributaries target = scope:defender }
+					}
+				}
+			}
+		}
     }
 
     cost = {
@@ -59,6 +64,7 @@
             TYPE = tributary_non_permanent
             SUZERAIN = scope:attacker
             TRIBUTARY = scope:defender
+			SET_COLOR = yes
         }
     }
 
@@ -173,6 +179,7 @@ permament_tributary_war_cb = {
             TYPE = tributary_permanent
             SUZERAIN = scope:attacker
             TRIBUTARY = scope:defender
+			SET_COLOR = yes
         }
     }
 

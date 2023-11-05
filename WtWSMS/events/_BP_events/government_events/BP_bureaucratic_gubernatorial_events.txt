@@ -1,0 +1,68 @@
+﻿namespace = BP_bureaucratic_gubernatorial_events
+
+#0001-0100: Taxation-Related Events
+
+#0001-0010: Negative Taxation events
+
+#For all of these, root is the character loosing development in a held county
+scripted_effect reduce_development_effect = {
+	random_held_title = {
+		limit = { tier = tier_county }
+		save_scope_as = the_county
+		change_development_$TYPE$ = $VALUE$
+	}
+}
+scripted_effect inform_char_of_development_loss = {
+	send_interface_message = {
+		type = event_generic_bad
+		title = the_county_lost_development_$TYPE$_t
+		custom_tooltip = the_county_lost_development_$TYPE$_desc
+		left_icon = scope:the_county
+	}
+}
+scripted_effect reduce_county_development_progress = {
+	reduce_development_effect = {
+		TYPE = progress
+		VALUE = -100
+	}
+	if = {
+		limit = { is_ai = no }
+		root = { inform_char_of_development_loss = { TYPE = progress } }
+	}
+	every_liege_or_above = {
+		limit = { is_ai = no }
+		root = { inform_char_of_development_loss = { TYPE = progress } }
+	}
+}
+scripted_effect reduce_county_development_level = {
+	reduce_development_effect = {
+		TYPE = level
+		VALUE = -1
+	}
+	if = {
+		limit = { is_ai = no }
+		root = { inform_char_of_development_loss = { TYPE = level } }
+	}
+	every_liege_or_above = {
+		limit = { is_ai = no }
+		root = { inform_char_of_development_loss = { TYPE = level } }
+	}
+}
+
+BP_bureaucratic_gubernatorial_events.0001 = { #High Poll Taxes: loose development **progress**
+	scope = character
+	hidden = yes
+	
+	immediate = { reduce_county_development_progress = yes }
+	
+	trigger = {}
+}
+
+BP_bureaucratic_gubernatorial_events.0002 = { #High Poll Taxes: loose development **level**
+	scope = character
+	hidden = yes
+	
+	immediate = { reduce_county_development_level = yes }
+	
+	trigger = {}
+}

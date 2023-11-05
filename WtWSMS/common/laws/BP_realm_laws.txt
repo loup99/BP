@@ -3,7 +3,7 @@
 @rajamandala_authority_cooldown_years = 10
 @eranshar_authority_cooldown_years = 10
 @clerical_influence_cooldown_years = 25
-@bureaucracy_cooldown_years = 10
+@bureaucracy_cooldown_years = 4
 @subroman_taxation_cooldown_years = 50
 
 high_tribal_organization = {
@@ -1158,12 +1158,12 @@ bureaucratic_taxation = {
 	
 	bureaucratic_taxation_0 = {
 		modifier = {
-			domain_tax_mult = 0.0
+			domain_tax_mult = 0.10
 			county_opinion_add = 10
 		}
 		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 		
-		can_keep = { realm_law_use_bureaucratic_taxation_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
 		
 		can_pass = {
 			is_independent_ruler = yes
@@ -1177,21 +1177,21 @@ bureaucratic_taxation = {
 		}
 		
 		on_pass = {
-			custom_description = {
-				text = all_gubernatorials_get_law_0
-				apply_taxation_down_tree_effect = { VALUE = 0 }
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
 			}
 		}
 	}
 	
 	bureaucratic_taxation_1 = {
 		modifier = {
-			domain_tax_mult = 0.05
+			domain_tax_mult = 0.20
 			county_opinion_add = 5
 		}
 		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 
-		can_keep = { realm_law_use_bureaucratic_taxation_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
 
 		can_pass = {
 			is_independent_ruler = yes
@@ -1207,14 +1207,14 @@ bureaucratic_taxation = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-			}
-			gold = {
-				if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_gold_cost
+					limit = {
+						NOR = {
+							has_realm_law = bureaucratic_taxation_2
+							has_realm_law = bureaucratic_taxation_3
+							has_realm_law = bureaucratic_taxation_4
+						}
+					}
+					add = increase_crown_authority_prestige_cost
 				}
 			}
 		}
@@ -1223,10 +1223,6 @@ bureaucratic_taxation = {
 			set_variable = {
 				name = bureaucracy_cooldown
 				years = @bureaucracy_cooldown_years
-			}
-			custom_description = {
-				text = all_gubernatorials_get_law_1
-				apply_taxation_down_tree_effect = { VALUE = 1 }
 			}
 		}
 
@@ -1239,10 +1235,10 @@ bureaucratic_taxation = {
 	}
 	
 	bureaucratic_taxation_2 = {
-		modifier = { domain_tax_mult = 0.10 }
+		modifier = { domain_tax_mult = 0.30 }
 		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 		
-		can_keep = { realm_law_use_bureaucratic_taxation_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
 
 		can_pass = {
 			is_independent_ruler = yes
@@ -1258,24 +1254,13 @@ bureaucratic_taxation = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = { has_realm_law = bureaucratic_taxation_1 }
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-			}
-			gold = {
-				if = {
-					limit = { has_realm_law = bureaucratic_taxation_1 }
-					add = increase_taxation_bureaucratic_gold_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
+					limit = {
+						NOR = {
+							has_realm_law = bureaucratic_taxation_3
+							has_realm_law = bureaucratic_taxation_4
+						}
+					}
+					add = increase_crown_authority_prestige_cost
 				}
 			}
 		}
@@ -1284,10 +1269,6 @@ bureaucratic_taxation = {
 			set_variable = {
 				name = bureaucracy_cooldown
 				years = @bureaucracy_cooldown_years
-			}
-			custom_description = {
-				text = all_gubernatorials_get_law_2
-				apply_taxation_down_tree_effect = { VALUE = 2 }
 			}
 		}
 
@@ -1301,12 +1282,12 @@ bureaucratic_taxation = {
 	
 	bureaucratic_taxation_3 = {
 		modifier = {
-			domain_tax_mult = 0.15
+			domain_tax_mult = 0.40
 			county_opinion_add = -10
 		}
 		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 		
-		can_keep = { realm_law_use_bureaucratic_taxation_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
 
 		can_pass = {
 			is_independent_ruler = yes
@@ -1322,36 +1303,8 @@ bureaucratic_taxation = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = { has_realm_law = bureaucratic_taxation_2 }
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_1 }
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-			}
-			gold = {
-				if = {
-					limit = { has_realm_law = bureaucratic_taxation_2 }
-					add = increase_taxation_bureaucratic_gold_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_1 }
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
+					limit = { NOT = { has_realm_law = bureaucratic_taxation_4 } }
+					add = increase_crown_authority_prestige_cost
 				}
 			}
 		}
@@ -1360,22 +1313,18 @@ bureaucratic_taxation = {
 			set_variable = {
 				name = bureaucracy_cooldown
 				years = @bureaucracy_cooldown_years
-			}
-			custom_description = {
-				text = all_gubernatorials_get_law_3
-				apply_taxation_down_tree_effect = { VALUE = 3 }
 			}
 		}
 	}
 	
 	bureaucratic_taxation_4 = {
 		modifier = {
-			domain_tax_mult = 0.25
+			domain_tax_mult = 0.50
 			county_opinion_add = -20
 		}
 		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
 		
-		can_keep = { realm_law_use_bureaucratic_taxation_trigger = yes }
+		can_keep = { has_government = bureaucratic_government }
 
 		can_pass = {
 			is_independent_ruler = yes
@@ -1391,50 +1340,8 @@ bureaucratic_taxation = {
 		pass_cost = {
 			prestige = {
 				if = {
-					limit = { has_realm_law = bureaucratic_taxation_3 }
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_2 }
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_1 }
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-					add = increase_taxation_bureaucratic_prestige_cost
-				}
-			}
-			gold = {
-				if = {
-					limit = { has_realm_law = bureaucratic_taxation_3 }
-					add = increase_taxation_bureaucratic_gold_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_2 }
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_1 }
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
-				}
-				else_if = {
-					limit = { has_realm_law = bureaucratic_taxation_0 }
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
-					add = increase_taxation_bureaucratic_gold_cost
+					limit = { NOT = { has_realm_law = bureaucratic_taxation_4 } }
+					add = increase_crown_authority_prestige_cost
 				}
 			}
 		}
@@ -1444,9 +1351,36 @@ bureaucratic_taxation = {
 				name = bureaucracy_cooldown
 				years = @bureaucracy_cooldown_years
 			}
-			custom_description = {
-				text = all_gubernatorials_get_law_4
-				apply_taxation_down_tree_effect = { VALUE = 4 }
+		}
+	}
+}
+gubernatorial_law = {
+	default = gubernatorial_law_0
+	cumulative = no
+	flag = realm_law
+	flag = hidden_law #Not needed to show; only for preventing titles from leaving on succession
+	
+	gubernatorial_law_0 = {
+		modifier = {}
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = { has_government = gubernatorial_government }
+		
+		can_pass = {
+			is_independent_ruler = yes
+			trigger_if = {
+				custom_description = {
+					subject = root
+					text = "has_bureaucracy_cooldown"
+					NOT = { has_variable = bureaucracy_cooldown }
+				}
+			}
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = bureaucracy_cooldown
+				years = @bureaucracy_cooldown_years
 			}
 		}
 	}

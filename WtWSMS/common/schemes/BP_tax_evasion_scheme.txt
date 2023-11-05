@@ -1,0 +1,217 @@
+﻿tax_evasion = {
+	
+	skill = intrigue
+	desc = tax_evasion_desc_general
+	hostile = yes
+	icon = icon_gold
+	
+	allow = {
+		always = yes
+		is_ruler = yes
+		is_imprisoned = no
+		has_government = gubernatorial_government
+	}
+	
+	valid = {
+		custom_description = {
+			object = scope:target
+			text = i_have_been_caught_trying_to_forge_tax_documents
+			scope:target = {
+				NOT = {
+					has_opinion_modifier = {
+						target = prev
+						modifier = attempted_tax_evasion_recently_opinion
+					}
+				}
+			}
+		}
+		# Special AI exceptions
+		NOT = {
+			scope:owner = {
+				is_ai = yes
+				has_opinion_modifier = {
+					target = scope:target
+					modifier = repentant_opinion
+				}
+			}
+		}
+		#Have to actually _have_ taxes to bother
+		custom_description = {
+			text = has_valid_land_taxes_to_evade
+			OR = {
+				vassal_contract_has_flag = gubernatorial_land_taxes_1
+				vassal_contract_has_flag = gubernatorial_land_taxes_2
+				vassal_contract_has_flag = gubernatorial_land_taxes_3
+				vassal_contract_has_flag = gubernatorial_land_taxes_4
+			}
+		}
+	}
+
+	valid_agent = {
+		age >= 16
+		OR = {
+			is_courtier_of = scope:target
+			is_councillor_of = scope:target
+		}
+	}
+	
+	agent_join_chance = {
+		base = 0
+		
+		# Base Reluctance, including negative AI Energy
+		modifier = {
+			add = {
+				value = -20
+				if = {
+					limit = {
+						ai_energy < 0
+					}
+					add = {
+						value = ai_energy
+						multiply = 0.5
+					}
+				}
+			}
+			desc = BASE_RELUCTANCE
+		}
+
+		#Is Owner sending a gift in the invite interaction?
+		modifier = {
+			add = bribe_acceptance_value
+			exists = scope:gift
+			always = scope:gift
+			NOT = {
+				OR = {
+					scope:target = { is_parent_of = root }
+					root = { is_parent_of = scope:target }
+				}
+			}
+			desc = "SCHEME_WITH_GIFT"
+		}
+
+		#Default Hostile Scheme modifiers
+		hostile_murder_agent_base_join_chance_modifier = yes
+
+		#Scope:target has caused internal strife in the realm
+		character_hates_scope_due_to_strife_plus_desc_modifier = { TARGET = scope:target }
+
+		#Family Feud
+		house_feud_hostile_scheme_agent_modifier = yes
+		
+		modifier = {
+			add = 10
+			OR = {
+				has_trait = senator_west
+				has_trait = senator_east
+			}
+			desc = SCHEME_TAX_EVASION_IS_A_SENATOR
+		}
+	}
+	
+	base_success_chance = {
+		base = 0
+		
+		hostile_scheme_base_chance_modifier = yes
+
+		modifier = {
+			add = -25
+			scope:target = {
+				has_opinion_modifier = {
+					target = scope:owner
+					modifier = attempted_tax_evasion_before_opinion
+				}
+			}
+			desc = HAS_ATTEMPTED_TO_EVADE_TAXES_BEFORE
+		}
+
+		# Family Feud
+		house_feud_hostile_scheme_success_modifier = yes
+		
+		# At War
+		first_valid = {
+			modifier = {
+				add = -50
+				desc = "SCHEME_AT_WAR"
+				scope:target = { is_at_war_with = scope:owner }
+			}
+			modifier = {
+				add = -25
+				scope:target = {
+					is_landed = no
+					exists = liege
+					liege = { is_at_war_with = scope:owner }
+				}
+				desc = "SCHEME_AT_WAR_WITH_LIEGE"
+			}
+			modifier = {
+				add = -25
+				scope:target = {
+					is_landed = yes
+					exists = liege
+					liege = { is_at_war_with = scope:owner }
+				}
+				desc = "SCHEME_AT_WAR_WITH_LIEGE"
+			}
+		}
+
+		# Diarchs are better at schemes within their liege's realm
+		diarch_scheming_within_realm_bonus_modifier = yes
+	}
+	
+	agent_success_chance = {
+		base = 0
+		
+		hostile_scheme_agent_success_chance_modifier = yes #Adds a value depending on their "closeness" to target
+	}
+	
+	agent_leave_threshold = -25
+	
+	cooldown = { years = 5 }
+	is_secret = yes
+	base_secrecy = 10
+
+	on_ready = {
+		scheme_owner = {
+			trigger_event = tax_evasion_outcome.0001
+		}
+	}
+
+	on_monthly = {
+		hostile_scheme_discovery_chance_effect = yes
+		if = {
+			limit = {
+				NOT = { exists = scope:discovery_event_happening }
+			}
+			scheme_owner = {
+				trigger_event = { on_action = murder_ongoing }
+			}
+		}
+	}
+
+	
+	on_invalidated = {
+		scheme_target = {
+			save_scope_as = target
+		}
+		scheme_owner = {
+			save_scope_as = owner
+		}
+
+		#Were your taxes lowered to the minimal value? Then trigger appropriate event...
+
+	}
+
+	
+	power_per_skill_point = 3.0
+	resistance_per_skill_point = 1.0
+	power_per_agent_skill_point = 2
+	
+	minimum_progress_chance = 10
+	maximum_progress_chance = 90
+	minimum_success = 5
+	maximum_secrecy = 90
+	maximum_success = 90
+	
+	success_desc = "TAX_EVASION_SUCCESS_DESC"
+	discovery_desc = "TAX_EVASION_DISCOVERY_DESC"
+}

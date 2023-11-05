@@ -1,0 +1,78 @@
+﻿start_tax_evasion_interaction = {
+	icon = icon_gold
+	common_interaction = yes
+	interface_priority = 90
+	category = interaction_category_hostile
+
+	ignores_pending_interaction_block = yes
+
+	scheme = tax_evasion
+
+	send_name = START_SCHEME
+
+	is_shown = {
+		scope:recipient = scope:actor.top_liege
+		scope:actor = { has_government = gubernatorial_government }
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			can_start_scheme = {
+				type = tax_evasion
+				target = scope:recipient
+			}
+		}
+		scope:recipient = { NOT = { has_strong_hook = scope:actor } }
+	}
+
+	desc = {
+		triggered_desc = {
+			trigger = {
+				scope:actor = {
+					can_start_scheme = {
+						type = tax_evasion
+						target = scope:recipient
+					}
+				}
+			}
+			desc = scheme_interaction_tt_tax_evasion_approved
+		}
+	}
+
+	on_accept = {
+		scope:actor = {
+			stress_impact = {
+				content = medium_stress_impact_gain
+				generous = medium_stress_impact_gain
+				just = major_stress_impact_gain
+			}
+		}
+		hidden_effect = {
+			scope:actor = {
+				send_interface_toast = {
+					title = start_tax_evasion_interaction_notification
+
+					left_icon = scope:actor
+					right_icon = scope:recipient
+
+					start_scheme = {
+						type = tax_evasion
+						target = scope:recipient
+					}
+
+					show_as_tooltip = {
+						stress_impact = {
+							content = medium_stress_impact_gain
+							generous = medium_stress_impact_gain
+							just = major_stress_impact_gain
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	auto_accept = yes
+
+	# AI for murders is handled in event murder_scheme_maintenance.1, fired from the five_year_playable_pulse
+}

@@ -8,24 +8,21 @@ on_court_language_changed = {
 bp_court_language_on_actions = {
 	effect = {
 		scope:target_character = {
-			if = {
-				limit = { has_government = bureaucratic_government }
-				#Update all imperial titles court languages
+			if = { #Update vassal court languages...
+				limit = { #If we meet the requiresments (court language does *not* match the variable
+					has_government = bureaucratic_government
+					primary_title = { has_variable = court_language }
+					NOT = { has_court_language_of_culture = primary_title.var:court_language }
+				}
 				every_held_title = {
-					limit = { tier = tier_empire }
+					limit = { this.tier >= this.primary_title.tier }
 					if = {
 						limit = { has_variable = court_language }
 						remove_variable = court_language
-						set_variable = {
-							name = court_language
-							value = scope:target_character.culture
-						}
 					}
-					else = { #A new empire
-						set_variable = {
-							name = court_language
-							value = scope:target_character.culture
-						}
+					set_variable = {
+						name = court_language
+						value = scope:target_character.culture
 					}
 				}
 				#And all the vassals
@@ -46,3 +43,214 @@ bp_court_language_on_actions = {
 		}
 	}
 }
+
+on_title_gain = {
+	on_actions = {
+		BP_set_court_langauge
+	}
+}
+
+#Keep Gupta and Bureaucratic Court Languages
+BP_set_court_langauge = {
+	effect = {
+		if = {
+			limit = {
+				has_royal_court = yes
+				has_government = bureaucratic_government
+				scope:title.tier >= tier_kingdom
+				scope:title = root.primary_title #Fire only once per succession
+				primary_title = { has_variable = court_language }
+			}
+			set_court_language_from_effect = {
+				CULTURE = primary_title.var:court_language
+				CHARACTER = root
+			}
+		}
+		else_if = {
+			limit = {
+				has_royal_court = yes
+				scope:title.tier >= tier_kingdom
+				has_government = rajamandala_government
+				scope:title = root.primary_title #Fire only once per succession
+			}
+			set_court_language = language_sanskrit
+		}
+	}
+}
+
+on_game_start = {
+	on_actions = { setup_administrative_languages }
+}
+
+setup_administrative_languages = {
+	effect = {
+		#Set some court langauge variables for bureaucrats
+		title:e_wre = {
+			set_variable = {
+				name = court_language
+				value = culture:roman
+			}
+		}
+		title:e_byzantium = {
+			if = {
+				limit = { current_date < 610.10.5 }
+				set_variable = {
+					name = court_language
+					value = culture:roman
+				}
+			}
+			else = {
+				set_variable = {
+					name = court_language
+					value = culture:greek
+				}
+			}
+		}
+		title:k_italy = {
+			set_variable = {
+				name = court_language
+				value = culture:roman
+			}
+			holder = {
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+		}
+		#Byzantines use Latin before Hearclius' reign
+		#Source: Davis, Leo Donald (1990). The First Seven Ecumenical Councils (325–787): Their History and Theology. Liturgical Press. p. 260. 
+		every_ruler = {
+			limit = { has_title = title:e_byzantium }
+			if = {
+					limit = { current_date < 610.10.5 }
+					setup_the_court_language_effect = {
+						CHAR = this
+						LANGUAGE = language_latin
+					}
+				}
+				else = { #Otherwise, learn Greek
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+						setup_the_court_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+					else = {
+						setup_learnt_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+				}
+			every_vassal_or_below = {
+				limit = { has_government = gubernatorial_government }
+				if = {
+					limit = { current_date < 610.10.5 }
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+							setup_the_court_language_effect = {
+							CHAR = this
+							LANGUAGE = language_latin
+						}
+					}
+					else = {
+						setup_learnt_language_effect = {
+							CHAR = this
+							LANGUAGE = language_latin
+						}
+					}
+				}
+				else = { #Otherwise, learn Greek
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+						setup_the_court_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+					else = {
+						setup_learnt_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+				}
+			}
+		}
+		#Gupta Governments use Sanskrit
+		every_ruler = {
+			limit = { has_government = rajamandala_government }
+			if = {
+				limit = { primary_title = { tier >= tier_kingdom } }
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+			}
+			else = { #Ensure every Gupta ruler knows Sanskrit
+				setup_learnt_language_effect = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+			}
+		}
+		#Sub-Romans (in 476 at least) use Latin
+		every_ruler = {
+			limit = { has_government = subroman_government }
+			if = {
+				limit = { primary_title = { tier >= tier_kingdom } }
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+			else = { #Ensure every Sub-Roman ruler knows Latin
+				setup_learnt_language_effect = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+		}
+		#Standardize use of Persian under e_persia
+		every_ruler = {
+			limit = { has_title = title:e_persia }
+			every_vassal_or_below = {
+				if = {
+					limit = { #Eranshar Zoroastrian Vassals Under Persia (only) should adopt Persian
+						primary_title = { tier >= tier_kingdom }
+						AND = {
+							has_government = eranshar_government
+							has_religion = religion:zoroastrianism_religion
+						}
+					}
+					setup_the_court_language_effect = {
+						CHAR = this
+						LANGUAGE = language_iranian
+					}
+				}
+				else = {
+					setup_learnt_language_effect = {
+						CHAR = this
+						LANGUAGE = language_iranian
+					}
+				}
+			}
+		}
+		#All learned Jewish rulers should know Hebrew
+		every_ruler = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_israelite }
+					religion = religion:judaism_religion
+				}
+			}
+			setup_learnt_language_effect = {
+				CHAR = this
+				LANGUAGE = language_israelite
+			}
+		}
+	}
+}
+
