@@ -1,0 +1,1 @@
+Please save images that are larger than 1920 by 1080 here so we can down scale as appropriate.
