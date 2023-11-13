@@ -172,6 +172,8 @@ independence_faction = {
 	    	factor = 2
 			is_powerful_vassal_of = scope:faction.faction_target
 	    }
+
+	    struggle_faction_modifiers = yes
 	}
 
 	is_character_valid = {
@@ -181,45 +183,57 @@ independence_faction = {
 	}
 
 	can_character_create_ui = {
+		base_faction_trigger = { FACTION_TYPE = independence_faction }
+
 		common_can_character_create_trigger = {
 			FACTION_TARGET = scope:target
 		}
 
 		liege = {
 			is_independent_ruler = yes
+		}
+		
+		trigger_if = {
+			limit = {
+				faith.religion = religion:islam_religion
+				liege = { has_title = title:d_sunni }
+				title:d_sunni = {
+					has_variable = dar_al_islam
+				}
+			}
+			liege = {
+				NOT = {
+					has_title = title:d_sunni
+				}
+			}
 		}
 	}
 
 	##### Changed from Vanilla vvvvv
 	can_character_create = {
+		base_faction_trigger = { FACTION_TYPE = independence_faction }
+
 		common_can_character_create_trigger = {
 			FACTION_TARGET = scope:target
 		}
-		
+
 		liege = {
 			is_independent_ruler = yes
 		}
-
-		custom_description = {
-			text = character_blocked_from_joining # will never be displayed but without it, errors are triggered
-			OR = {
-		        is_ai = no
-		        NOT = { culture = scope:target.culture }
-		        NOT = { faith = scope:target.faith }
-		        NOT = {
-		            is_rightful_liege_of_trigger = {
-		                VASSAL = root
-		                LIEGE = scope:target
-		            }
-		        }
-		        any_sub_realm_county = {
-		            percent <= 0.5
-		            save_temporary_scope_as = current_county
-		            scope:target.primary_title = {
-		                any_in_de_jure_hierarchy = { this = scope:current_county }
-		            }
-		        }
-	    	}
+		
+		trigger_if = {
+			limit = {
+				faith.religion = religion:islam_religion
+				liege = { has_title = title:d_sunni }
+				title:d_sunni = {
+					has_variable = dar_al_islam
+				}
+			}
+			liege = {
+				NOT = {
+					has_title = title:d_sunni
+				}
+			}
 		}
 		
 		##### Changed from Vanilla vvvvv
@@ -231,6 +245,21 @@ independence_faction = {
 	can_character_join = {
 		common_can_character_join_trigger = {
 			FACTION_TARGET = scope:faction.faction_target
+		}
+		
+		trigger_if = {
+			limit = {
+				faith.religion = religion:islam_religion
+				liege = { has_title = title:d_sunni }
+				title:d_sunni = {
+					has_variable = dar_al_islam
+				}
+			}
+			liege = {
+				NOT = {
+					has_title = title:d_sunni
+				}
+			}
 		}
 	}
 
@@ -342,8 +371,7 @@ liberty_faction = {
 		}
 
 		##### Changed from Vanilla vvvvv
-		##### Changed from Vanilla: Replaces the crown authority law block
-		custom_description = {
+		custom_description = { ##### Changed from Vanilla: Replaces the crown authority law block
 			text = has_lowest_crown_authority
 			subject = scope:target
 			scope:target = { realm_law_supports_liberty_faction_trigger = yes }
@@ -422,6 +450,36 @@ liberty_faction = {
 		}		
 	}
 
+	ai_create_score = {
+		base = 0 # Join Weight is set primarily based on what Crown Laws a realm has.
+
+		############
+		# BLOCKERS #
+		############
+		common_create_faction_blockers = {
+			FACTION_TARGET = scope:target
+			FLAG = recent_liberty_faction_war
+		}
+
+		#######################
+		# Standard AI Weights #
+		#
+		# Modifiers for Liberty Factions are inherently small.
+		# This is because Liberty is the 'Default Faction' that vassals are join if they don't want/can't join any other faction.
+		# 'Base Join Weight' depends on the current Crown Authority level.
+		common_faction_modifiers = {
+			FACTION_TARGET = scope:target
+			OPINION_MULTIPLIER = -1
+			MAX_OPINION = 0
+			POWER = 0
+			THRESHOLD = 80
+		}
+
+		liberty_faction_modifiers = {
+			FACTION_TARGET = scope:target
+		}		
+	}
+
 	ai_join_score = {
 		base = 0 # Join Weight is set primarily based on what Crown Laws a realm has.
 
@@ -447,6 +505,8 @@ liberty_faction = {
 		liberty_faction_modifiers = {
 			FACTION_TARGET = scope:faction.faction_target
 		}
+
+		struggle_faction_modifiers = yes
 	}
 
 	county_allow_join = no
