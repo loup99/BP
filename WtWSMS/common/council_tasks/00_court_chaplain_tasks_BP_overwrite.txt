@@ -185,6 +185,48 @@ task_conversion = {
 				desc = council_toledo_heresies_task_desc
 			}
 		}
+
+		# Faster conversion of Persian counties with the FP3 Promote Persian Scripture decision
+		if = {
+			limit = {
+				scope:councillor.liege = { 
+					has_character_modifier = fp3_promoted_persian_scripture_modifier 
+					is_ai = no #this is so that we don't get AI converting and homogenizing Persia too quickly
+				}
+				scope:county.culture = { has_cultural_pillar = heritage_iranian } 
+			}
+			multiply = {
+				value = promote_persian_scripture_conversion_modifier_value
+				desc = fp3_promote_persian_scripture_task_desc
+			}
+		}
+
+		# FP3 faster conversion struggle ending rewards
+		if = {
+			limit = {
+				exists = global_var:fp3_struggle_ending_assertion_school
+				switch = {
+					trigger = global_var:fp3_struggle_ending_assertion_school
+					flag:sunni = {
+						scope:councillor.liege.faith = { has_doctrine = muhammad_succession_sunni_doctrine }
+					}
+					flag:shia = {
+						scope:councillor.liege.faith = { has_doctrine = muhammad_succession_sunni_doctrine }
+					}
+					flag:muhakkima = {
+						scope:councillor.liege.faith = { has_doctrine = muhammad_succession_muhakkima_doctrine }
+					}
+					flag:zandaqa = {
+						scope:councillor.liege.faith = { has_doctrine = muhammad_succession_zandaqa_doctrine }
+					}
+				}
+			}
+			multiply = {
+				value = fp3_struggle_ending_conversion_modifier_value
+				desc = fp3_struggle_ending_conversion_modifier_desc
+			}
+		}
+
 		
 		# Conversion speed game rules
 		if = {
@@ -285,25 +327,7 @@ task_conversion = {
 	##### Changed from Vanilla vvvvv
 	potential_county = {
 		scope:county = {
-			### Minority stuff (Replaces simple `NOT = { faith = scope:councillor.faith }`) vvv
-			scope:councillor_liege = { has_realm_law_flag = may_convert_faith }
-			trigger_if = {
-				limit = { faith = scope:councillor_liege.faith }
-				trigger_if = {
-					limit = {
-						county_has_astray_or_worse_minority_faith_trigger = { FAITH = scope:councillor.faith }
-					}
-					custom_tooltip = {
-						text = "not_has_expel_minorities_unlocked"
-						scope:councillor_liege = { has_realm_law_flag = unlock_expel_religious_minorities }
-					}
-				}
-				trigger_else = {
-					NOT = { faith = scope:councillor_liege.faith }
-				}
-			}
-			### End Minority stuff ^^^
-			
+			NOT = { faith = scope:councillor.faith }
 			trigger_if = {
 				limit = {
 					scope:councillor_liege = {
@@ -340,58 +364,21 @@ task_conversion = {
 					}
 				}
 			}
-			
-			##### Changed from Vanilla vvvvv
-			custom_description = {
-				text = "has_general_religious_protection_from_zoroastrian_cults"
-				subject = holder
-				object = scope:councillor_liege
-				# The Shah has granted religious freedom to this faith, so holders are implicitly exempt
-				NAND = {
-					scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
-					holder = {
-						is_ruler = yes
-						is_independent_ruler = no
-						faith = { has_doctrine = special_doctrine_legalized_faith_persia }
-					}
-				}
-			}
 			trigger_if = {
-				limit = { NOT = { scope:councillor_liege.top_liege.culture = { has_innovation = innovation_state_religion } } }
-				custom_description = {
-					text = must_be_direct_vassal_without_state_religion
-					subject = scope:councillor_liege
-					object = holder
-					holder = {
-						OR = {
-							is_vassal_of = scope:councillor_liege
-							this = scope:councillor_liege
-						}
+				limit = {	
+					AND = {
+						has_variable = cannot_be_converted_by_value
+						var:cannot_be_converted_by_value = scope:councillor_liege		
 					}
 				}
-				custom_description = {
-					text = must_be_same_faith_or_tribal_if_top_liege_without_state_religion
-					subject = scope:councillor_liege
-					object = holder
-					OR = {
-						holder.faith = scope:councillor_liege.faith
-						holder = {
-							is_ruler = yes
-							is_independent_ruler = no
-							has_government = tribal_government
-						}
+				custom_tooltip = {
+					text = promised_to_not_convert_county	
+					NOR = {
+						has_variable = cannot_be_converted_by_value
+						var:cannot_be_converted_by_value = scope:councillor_liege	
 					}
 				}
 			}
-			trigger_if = {
-				limit = {
-					scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
-					exists = scope:councillor_liege.faith.religious_head.faith
-				}
-				NOT = { this.faith = scope:councillor_liege.faith.religious_head.faith }
-			}
-			##### Changed from Vanilla ^^^^^
-			
 			# Unreformed Pagans do not tend to even try conversion of non-unreformed faiths unless zealous
 			trigger_if = {
 				limit = {
@@ -592,31 +579,63 @@ task_conversion = {
 					}
 				}
 			}
+			
+			##### Changed from Vanilla vvvvv
+			custom_description = {
+				text = "has_general_religious_protection_from_zoroastrian_cults"
+				subject = holder
+				object = scope:councillor_liege
+				# The Shah has granted religious freedom to this faith, so holders are implicitly exempt
+				NAND = {
+					scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+					holder = {
+						is_ruler = yes
+						is_independent_ruler = no
+						faith = { has_doctrine = special_doctrine_legalized_faith_persia }
+					}
+				}
+			}
+			trigger_if = {
+				limit = { NOT = { scope:councillor_liege.top_liege.culture = { has_innovation = innovation_state_religion } } }
+				custom_description = {
+					text = must_be_direct_vassal_without_state_religion
+					subject = scope:councillor_liege
+					object = holder
+					holder = {
+						OR = {
+							is_vassal_of = scope:councillor_liege
+							this = scope:councillor_liege
+						}
+					}
+				}
+				custom_description = {
+					text = must_be_same_faith_or_tribal_if_top_liege_without_state_religion
+					subject = scope:councillor_liege
+					object = holder
+					OR = {
+						holder.faith = scope:councillor_liege.faith
+						holder = {
+							is_ruler = yes
+							is_independent_ruler = no
+							has_government = tribal_government
+						}
+					}
+				}
+			}
+			trigger_if = {
+				limit = {
+					scope:councillor_liege.faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult }
+					exists = scope:councillor_liege.faith.religious_head.faith
+				}
+				NOT = { this.faith = scope:councillor_liege.faith.religious_head.faith }
+			}
+			##### Changed from Vanilla ^^^^^
 		}
 	}
 	##### Changed from Vanilla ^^^^^
 
 	##### Changed from Vanilla vvvvv
 	on_finish_task_county = {
-		### Minorities & BP stuff vvv
-		scope:county = {
-			if = {
-				limit = { the_county_faith_is_what_is_expected_trigger = yes }
-				demote_random_faith_minority_effect = yes
-			}
-			else = {
-				if = {
-					limit = { the_county_should_convert_to_hof_faith_trigger = yes } #Special Zoro thing
-					promote_faith_minority_effect = { FAITH = scope:councillor.faith.religious_head.faith }
-				}
-				else = { promote_faith_minority_effect = { FAITH = scope:councillor.faith } }
-				if = {
-					limit = { the_county_faith_is_what_is_expected_trigger = yes }
-					scope:councillor = { start_default_task = yes }
-				}
-			}
-		}
-		### Minorities & BP stuff ^^^
 		scope:councillor_liege = {
 			if = {
 				limit = {
@@ -638,6 +657,38 @@ task_conversion = {
 				}
 			}
 		}
+		### Minorities & BP stuff vvv
+		scope:county = {
+			if = {
+				limit = { the_county_faith_is_what_is_expected_trigger = yes }
+				demote_random_faith_minority_effect = yes
+			}
+			else = {
+				if = {
+					limit = { the_county_should_convert_to_hof_faith_trigger = yes } #Special Zoro thing
+					promote_faith_minority_effect = { FAITH = scope:councillor.faith.religious_head.faith }
+				}
+				else = { promote_faith_minority_effect = { FAITH = scope:councillor.faith } }
+				if = {
+					limit = { the_county_faith_is_what_is_expected_trigger = yes }
+					scope:councillor = { start_default_task = yes }
+				}
+			}
+		}
+		### Minorities & BP stuff ^^^
+		
+		# Struggle parameters
+		scope:councillor_liege = {
+			if = {
+				limit = {
+					any_character_struggle = {
+						involvement = involved
+						has_struggle_phase_parameter = piety_from_converting_county
+					}
+				}
+				add_piety = medium_piety_gain
+			}
+		}
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -648,7 +699,9 @@ task_conversion = {
 
 		if = {	#Unless you're a crypto-religionist.
 			limit = {
-				scope:councillor_liege = { has_variable = false_convert }
+				scope:councillor_liege = {
+					any_secret = { secret_type = secret_crypto_religionist }
+				}
 			}
 			multiply = 0
 		}
