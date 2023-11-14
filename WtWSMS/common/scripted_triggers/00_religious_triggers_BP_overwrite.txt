@@ -25,12 +25,21 @@ is_preferred_heresy_trigger = {
 				faiths_are_in_muhakkima_islam_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
 			}
 		}
+		#If we're Zoroastrian, we don't want Sogdian faith in Armenia and vice versa 
+		AND = {
+			religion_tag = zoroastrianism_religion
+			OR = {
+				faiths_are_eastern_zoroastrian = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
+				faiths_are_western_zoroastrian = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
+			}
+		}
 
 		#Otherwise, we don't have any special preferences.
 		AND = {
 			NOT = {
 				religion_tag = islam_religion
 				religion_tag = christianity_religion
+				religion_tag = zoroastrianism_religion
 			}
 		}
 	}
@@ -68,10 +77,20 @@ is_valid_heresy_trigger = {
 				}
 			}
 		}
-		#No special requirements for Muslims, Jews, Yazidis, or Zoroastrians.
+		AND = { #FP3: for Zoroastrianism, Bedhin faiths are never heresies of each other 
+			religion_tag = zoroastrianism_religion
+			NAND = {
+				$ORIGIN_FAITH$ = {
+					has_doctrine = doctrine_major_branch_behdin
+				}
+				$HERETICAL_FAITH$ = {
+					has_doctrine = doctrine_major_branch_behdin
+				}
+			}
+		}
+		#No special requirements for Muslims, Jews, or Yazidis
 		religion_tag = islam_religion
 		religion_tag = judaism_religion
-		religion_tag = zoroastrianism_religion
 		#Eastern Faiths can shift and spread amongst each other.
 		AND = {
 			OR = {
@@ -253,3 +272,39 @@ not_non_armenian_standard_christian_faith_trigger = {
 		}
 	}
 }
+
+##### Changed from Vanilla: Removed Gayomarthanism
+faiths_are_eastern_zoroastrian = { #FP3 update - so that Armenian faith (Arewordik) don't appear as a heresy in Sogdia
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_1$ = faith:khurmazta
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
+	}
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_1$ = faith:khurmazta
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
+	}
+}
+##### Changed from Vanilla: Removed Gayomarthanism
+faiths_are_western_zoroastrian = { #FP3 update - so that Sogdian faith (Khurmazta) don't appear as a heresy in Armenia 
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
+		$FAITH_2$ = faith:urartuism
+	}
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
+		$FAITH_2$ = faith:urartuism
+	}
+}
+
