@@ -171,6 +171,11 @@ revoke_title_interaction = {
 
 	send_options_exclusive = no
 
+	cost = {
+		# Usually, this action is free, but during certain diarchies, we want it to cost.
+		prestige = liege_diarchy_surcharge_interaction_revoke_title_interaction_value
+	}
+
 	on_send = {
 		scope:actor = {
 			add_character_flag = {
@@ -187,8 +192,6 @@ revoke_title_interaction = {
 	}
 
 	on_accept = {
-		revoke_title_interaction_effect = yes
-
 		save_scope_value_as = {
 			name = revoke_title_interaction
 			value = yes
@@ -197,30 +200,13 @@ revoke_title_interaction = {
 		scope:actor = {
 			trigger_event = char_interaction.0199
 		}
+		revoke_title_interaction_effect = yes
 
 		if = {
 			limit = {
 				scope:actor = { has_character_flag = flag_hostile_actions_disabled_delay }
 			}
 			scope:actor = { remove_character_flag = flag_hostile_actions_disabled_delay }
-		}
-
-		# For revoking titles of character's imprisoned abroard who have lost a revocation war
-		hidden_effect = {
-			scope:actor = {
-				if = {
-					limit = {
-						has_opinion_modifier = {
-							target = scope:recipient
-							modifier = foreign_prison_revocation_opinion
-						}
-					}
-					remove_opinion = {
-						target = scope:recipient
-						modifier = foreign_prison_revocation_opinion
-					}
-				}
-			}
 		}
 	}
 
@@ -286,12 +272,6 @@ revoke_title_interaction = {
 					scope:recipient = {
 						is_imprisoned = yes
 						NOT = { is_imprisoned_by = scope:actor }
-					}
-					scope:actor = {
-						has_opinion_modifier = {
-							target = scope:recipient
-							modifier = foreign_prison_revocation_opinion
-						}
 					}
 				}
 			}
@@ -480,7 +460,7 @@ revoke_title_interaction = {
 
 	ai_potential = {
 		has_realm_law_flag = title_revocation_allowed
-		primary_title.tier > tier_county
+		primary_title.tier >= tier_county
 	}
 
 	ai_will_do = {
@@ -507,6 +487,69 @@ revoke_title_interaction = {
 			}
 
 			add = 990
+		}
+		# Only certain rulers won't revoke vassals who have revolted against them
+		modifier = {
+			scope:actor = {
+				ai_compassion <= 75
+				ai_greed >= -50
+				ai_honor <= 50
+				scope:recipient = {
+					is_imprisoned = yes
+					is_ai = yes # Be kinder to players
+					opinion = {
+						target = scope:actor
+						value <= 0
+					}
+				}
+				NOT = {
+					title_revocation_is_tyrannical_trigger = yes
+				}
+				OR = {
+					has_opinion_modifier = {
+						modifier = rebellious_vassal_opinion
+						target = scope:recipient
+					}
+					has_opinion_modifier = {
+						modifier = vassal_lost_faction_revolt_war
+						target = scope:recipient
+					}
+					has_opinion_modifier = {
+						modifier = vassal_wp_faction_revolt_war
+						target = scope:recipient
+					}
+				}
+			}
+			add = {
+				value = 100
+				add = scope:actor.ai_greed
+				add = {
+					value = scope:actor.ai_honor
+					multiply = -1
+				}
+				if = {
+					limit = {
+						scope:actor.ai_vengefulness > 0
+					}
+					add = scope:actor.ai_vengefulness
+				}
+			}
+		}
+		# Vengeful AI's want to revoke
+		modifier = {
+			scope:actor = {
+				ai_vengefulness > 0
+				scope:recipient = {
+					is_imprisoned = yes
+				}
+				NOT = {
+					title_revocation_is_tyrannical_trigger = yes
+				}
+			}
+			add = {
+				value = scope:actor.ai_vengefulness
+				multiply = 2
+			}
 		}
 		# Always revoke preferred capital and capital duchy
 		modifier = {
@@ -585,21 +628,21 @@ revoke_title_interaction = {
 				scope:landed_title.title_province = { has_holding_type = castle_holding } # Everyone is valid for castles
 				AND = {
 					scope:actor = {
-						has_government = tribal_government
+						government_has_flag = government_is_tribal
 					}
 					scope:landed_title.title_province = { has_holding_type = tribal_holding }
 				}
 				AND = {
 					scope:actor = {
-						has_government = republic_government
+						government_has_flag = government_is_republic
 					}
 					scope:landed_title.title_province = { has_holding_type = city_holding }
 				}
 				AND = {
 					scope:actor = {
 						OR = {
-							has_government = clan_government
-							has_government = theocracy_government
+							government_has_flag = government_is_clan
+							government_has_flag = government_is_theocracy
 						}
 					}
 					scope:landed_title.title_province = { has_holding_type = church_holding }
@@ -699,13 +742,13 @@ revoke_title_interaction = {
 				scope:landed_title.title_province = { has_holding_type = castle_holding }
 				AND = {
 					OR = {
-						scope:actor = { has_government = clan_government }
-						scope:actor = { has_government = theocracy_government }
+						scope:actor = { government_has_flag = government_is_clan }
+						scope:actor = { government_has_flag = government_is_theocracy }
 					}
 					scope:landed_title.title_province = { has_holding_type = church_holding }
 				}
 				AND = {
-					scope:actor = { has_government = republic_government }
+					scope:actor = { government_has_flag = government_is_republic }
 					scope:landed_title.title_province = { has_holding_type = city_holding }
 				}
 			}
@@ -802,16 +845,45 @@ revoke_title_interaction = {
 			scope:actor = {
 				is_at_war = yes
 			}
+			NOR = {
+				scope:recipient = {
+					is_imprisoned_by = scope:actor
+				}
+				scope:recipient = {
+					highest_held_title_tier = tier_barony
+				}
+			}
+		}
+		
+		# Clan Government: Avoid revoking titles from house members if the AI wants to have high unity
+		modifier = {
+			scope:actor = {
+				government_has_flag = government_is_clan
+				exists = house
+				ai_wants_high_unity = yes
+			}
 			scope:recipient = {
-				NOR = {
-					scope:recipient = {
-						is_imprisoned_by = scope:actor
-					}
-					scope:recipient = {
-						highest_held_title_tier = tier_barony
-					}
+				government_has_flag = government_is_clan
+				exists = house
+				house = scope:actor.house
+			}
+			add = -1000
+		}
+
+		modifier = { # Avoid triggering Tyranny wars mid-grand activity
+			factor = 0
+			scope:actor = {
+				has_ongoing_grand_activity_trigger = yes
+			}
+			NOR = {
+				scope:recipient = {
+					is_imprisoned_by = scope:actor
+				}
+				scope:recipient = {
+					highest_held_title_tier = tier_barony
 				}
 			}
 		}
 	}
 }
+

@@ -132,6 +132,15 @@ task_develop_county = {
 				desc = FAMILY_BUSINESS_BONUS_VALUE
 			}
 		}
+		if = {
+			limit = {
+				councillor_liege_has_consulted_house_bonus = yes
+			}
+			add = {
+				value = scope:councillor.steward_develop_county_consulted_house_monthly_increase
+				desc = CONSULTED_HOUSE_BONUS_VALUE
+			}
+		}
 
 		# Relation Bonuses/Penalties
 		if = { # Friend
@@ -653,15 +662,6 @@ task_promote_culture = {
 				desc = GAME_RULE_FASTER_REASON
 			}
 		}
-		#### Changed from Vanilla vvvvv
-		if = {
-			limit = { has_game_rule = bp_default_culture_conversion_speed }
-			multiply = {
-				value = bp_default_culture_conversion_value
-				desc = GAME_RULE_DEFAULT_BP_CULTURE_CONVERSION_VALUE
-			}
-		}
-		#### Changed from Vanilla ^^^^^
 		# Faster conversion for FP2 Hostility ending, if county is in Iberia and culture was involved
 		if = {
 			limit = {
@@ -693,6 +693,16 @@ task_promote_culture = {
 				desc = bp2_devoted_to_tradition_modifier_conversion_task_desc
 			}
 		}
+		
+		#### Changed from Vanilla vvvvv
+		if = {
+			limit = { has_game_rule = bp_default_culture_conversion_speed }
+			multiply = {
+				value = bp_default_culture_conversion_value
+				desc = GAME_RULE_DEFAULT_BP_CULTURE_CONVERSION_VALUE
+			}
+		}
+		#### Changed from Vanilla ^^^^^
 		
 		### Minorities stuff vvv
 		
@@ -918,12 +928,7 @@ task_promote_culture = {
 			}
 		}
 	}
-##### Changed from Vanilla ^^^^^
-
-	county_modifier = {
-		name = steward_convert_county_modifier
-		county_opinion_add = -10
-	}
+	##### Changed from Vanilla ^^^^^
 
 	on_finish_task_county = {
 		scope:councillor_liege = {
@@ -944,50 +949,39 @@ task_promote_culture = {
 					}
 					add_character_flag = {
 						flag = no_ai_culture_convert
-						years = 20 #Down from 60 as we go 3× as fast
+						years = 60
 					}
 				}
 				else = {
 					add_character_flag = {
 						flag = no_ai_culture_convert
-						years = 10 #Down from 60 as we go 3× as fast
+						years = 30
 					}
 				}
 			}
 		}
-		### Minority stuff vvv
 		scope:county = {
 			if = {
-				limit = { scope:county.culture = scope:councillor_liege.culture }
-				demote_random_culture_minority_effect = yes
-			}
-			else = {
-				if = {
-					limit = {
-						NOT = {
-							scope:councillor_liege.culture = {
-								is_hybrid_culture = yes
-								any_parent_culture = { this = scope:county.culture }
+				limit = {
+					NOT = {
+						scope:councillor_liege.culture = {
+							is_hybrid_culture = yes
+							any_parent_culture = {
+								this = scope:county.culture
 							}
 						}
 					}
-					culture = {
-						change_cultural_acceptance = {
-							target = scope:councillor_liege.culture
-							value = culture_conversion_acceptance_impact
-							desc = cultural_acceptance_loss_promote_culture
-						}
+				}
+				culture = {
+					change_cultural_acceptance = {
+						target = scope:councillor_liege.culture
+						value = culture_conversion_acceptance_impact
+						desc = cultural_acceptance_loss_promote_culture
 					}
 				}
-
-				promote_culture_minority_effect = { CULTURE = scope:councillor_liege.culture }
-				if = {
-					limit = { scope:county.culture = scope:councillor_liege.culture }
-					scope:councillor = { start_default_task = yes }
-				}
 			}
+			set_county_culture = scope:councillor_liege.culture
 		}
-		### Minority stuff ^^^
 		scope:councillor = {
 			start_default_task = yes
 		}
@@ -1090,6 +1084,7 @@ task_promote_culture = {
 						has_character_flag = agenda_towards_escalation
 						any_character_struggle = {
 							involvement = involved
+							is_struggle_type = iberian_struggle
 							is_struggle_phase = struggle_iberia_phase_hostility
 						}
 					}

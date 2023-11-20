@@ -1,15 +1,27 @@
 ﻿vassalization_cb = {
+	icon = vassalization
 	group = vassalization
 	ai_only_against_neighbors = yes
 	
+	attacker_score_from_occupation_scale = 150
+	attacker_score_from_battles_scale = 150
+	defender_score_from_battles_scale = 150
+	
 	allowed_for_character = {
-		has_perk = forced_vassalage_perk
+		OR = {
+			has_perk = forced_vassalage_perk
+			any_character_struggle = {
+				involvement = involved
+				has_struggle_phase_parameter = unlocks_forced_vassalization_casus_belli
+			}
+		}
 	}
 
 	# Root is the title
 	# scope:attacker is the attacker
 	# scope:defender is the defender
 
+	##### Changed from Vanilla vvvvv
 	allowed_against_character_display_regardless = {
 		scope:defender = {
 			custom_description = {
@@ -21,6 +33,7 @@
 					}
 				}
 			}
+			##### Changed from Vanilla vvvvv
 			custom_description = {
 				text = not_a_tributary
 				subject = scope:defender
@@ -33,8 +46,12 @@
 					}
 				}
 			}
+			##### Changed from Vanilla ^^^^^
 		}
+		### TFE EDIT
+		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
 	}
+	##### Changed from Vanilla ^^^^^
 	
 	allowed_against_character = {
 		scope:defender = {
@@ -176,7 +193,6 @@
 		
 		# Truce
 		add_truce_attacker_victory_effect = yes
-				
 	}
 
 	on_white_peace_desc = {
@@ -191,6 +207,10 @@
 	
 	on_white_peace = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#EP2 accolade glory gain for doing ok against higher ranked enemy
+		scope:defender = { accolade_defender_war_end_glory_gain_low_effect = yes }
+
 		# Prestige loss for the attacker
 		scope:attacker = {
 			add_prestige = {
@@ -243,6 +263,9 @@
 	
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#EP2 accolade glory gain for winning against higher ranked enemy
+		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
 		
 		# Prestige loss for the attacker
 		scope:attacker = {
@@ -307,10 +330,10 @@
 			if = {
 				limit = {
 					scope:attacker = {
-						NOT = { has_government = tribal_government }
+						NOT = { government_has_flag = government_is_tribal }
 					}
 					scope:defender = {
-							has_government = tribal_government
+							government_has_flag = government_is_tribal
 					}
 				}
 				add = -1000
@@ -318,3 +341,5 @@
 		}
 	}
 }
+
+# diarch_vassalisation_cb is kept in event wars due to being event-only & for performance reasons.
