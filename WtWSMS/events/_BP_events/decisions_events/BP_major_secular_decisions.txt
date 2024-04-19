@@ -1,5 +1,8 @@
 ﻿namespace = BP_major_secular_decisions
 
+#0001-0099: Special one-offs
+#0100-0199: WtWSMS Titular to De Jure Decisions
+
 #Reformation of Albania information decision
 BP_major_secular_decisions.0001 = {
 	type = character_event
@@ -110,5 +113,273 @@ BP_major_secular_decisions.0002 = {
 			this = { opinion = { target = scope:the_frankish_former value <= -30 } }
 		}
 		name = BP_major_secular_decisions.0002.bad
+	}
+}
+
+#Establishment of a new de jure kingdom/empire (of the none-Roman-related variety)
+BP_major_secular_decisions.0100 = {
+	type = character_event
+	title = BP_major_secular_decisions.0100.t
+	desc = BP_major_secular_decisions.0100.desc
+	theme = realm
+	
+	right_portrait = {
+		character = scope:new_kingdom_or_empire_former
+		animation = personality_bold
+	}
+	
+	option = {
+		trigger = { this = scope:new_kingdom_or_empire_former }
+		name = BP_major_secular_decisions.0100.the_king
+		
+		if = {
+			limit = { scope:new_kingdom_or_empire_former.primary_title.tier = tier_kingdom }
+			show_as_tooltip = { establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+		else = {
+			show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+		
+		#Every relatively close ruler gets informed
+		every_ruler = {
+			limit = {
+				OR = {
+					realm_to_title_distance_squared = { title = root.primary_title value <= squared_distance_medium }
+					trigger_if = { #Romans matter
+						limit = { scope:new_kingdom_or_empire_former.capital_county.title_province = { geographical_region = historic_roman_empire } }
+						has_title = title:e_wre
+						has_title = title:e_byzantium
+						has_title = title:e_roman_empire
+					}
+				}
+				NOT = { this = scope:new_kingdom_or_empire_former }
+			}
+			trigger_event = { id = BP_major_secular_decisions.0100 }
+		}
+	}
+	#It's happening in Roman Territory Options...
+	option = { #Good, if I'm not Roman
+		trigger = {
+			NOT = { this = scope:new_kingdom_or_empire_former }
+			scope:new_kingdom_or_empire_former.capital_county.title_province = { geographical_region = historic_roman_empire }
+			NOT = { culture = { has_cultural_parameter = can_restore_roman_empire } }
+		}
+		name = BP_major_secular_decisions.0100.good
+		if = {
+			limit = { scope:new_kingdom_or_empire_former.primary_title.tier = tier_kingdom }
+			show_as_tooltip = { establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+		else = {
+			show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+	}
+	option = { #Bad, if I'm Roman
+		trigger = {
+			NOT = { this = scope:new_kingdom_or_empire_former }
+			scope:new_kingdom_or_empire_former.capital_county.title_province = { geographical_region = historic_roman_empire }
+			culture = { has_cultural_parameter = can_restore_roman_empire }
+			NOR = {
+				has_title = title:e_wre
+				has_title = title:e_byzantium
+				has_title = title:e_roman_empire
+			}
+		}
+		name = BP_major_secular_decisions.0100.bad
+		if = {
+			limit = { scope:new_kingdom_or_empire_former.primary_title.tier = tier_kingdom }
+			show_as_tooltip = { establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+		else = {
+			show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+	}
+	option = { #"Who the hell does he think he is?" if I have the empires
+		trigger = {
+			NOT = { this = scope:new_kingdom_or_empire_former }
+			scope:new_kingdom_or_empire_former.capital_county.title_province = { geographical_region = historic_roman_empire }
+			OR = {
+				has_title = title:e_wre
+				has_title = title:e_byzantium
+				has_title = title:e_roman_empire
+			}
+		}
+		name = BP_major_secular_decisions.0100.how_dare_he
+		if = {
+			limit = { scope:new_kingdom_or_empire_former.primary_title.tier = tier_kingdom }
+			show_as_tooltip = { establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+		else = {
+			show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+	}
+	#The fallback option
+	option = {
+		fallback = yes
+		trigger = {
+			NOT = { this = scope:new_kingdom_or_empire_former }
+			NOT = { scope:new_kingdom_or_empire_former.capital_county.title_province = { geographical_region = historic_roman_empire } }
+		}
+		name = BP_major_secular_decisions.0100.neutral
+		if = {
+			limit = { scope:new_kingdom_or_empire_former.primary_title.tier = tier_kingdom }
+			show_as_tooltip = { establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+		else = {
+			show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_kingdom_or_empire_former } }
+		}
+	}
+}
+
+#Swapping a Roman province for a Titular Roman Title
+BP_major_secular_decisions.0101 = {
+	type = character_event
+	title = BP_major_secular_decisions.0101.t
+	desc = BP_major_secular_decisions.0101.desc
+	theme = realm
+	
+	right_portrait = {
+		character = scope:new_kingdom_former
+		animation = personality_bold
+	}
+	
+	option = {
+		trigger = { this = scope:new_kingdom_former }
+		name = BP_major_secular_decisions.0101.the_king
+		
+		show_as_tooltip = { swap_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_former } }
+		
+		#Every relatively close ruler gets informed
+		every_ruler = {
+			limit = {
+				OR = {
+					realm_to_title_distance_squared = { title = root.primary_title value <= squared_distance_medium }
+					has_title = title:e_wre
+					has_title = title:e_byzantium
+					has_title = title:e_roman_empire
+				}
+				NOT = { this = scope:new_kingdom_former }
+			}
+			trigger_event = { id = BP_major_secular_decisions.0101 }
+		}
+	}
+	option = { #"Who the hell does he think he is?" if I have the empires
+		trigger = {
+			NOT = { this = scope:new_kingdom_former }
+			OR = {
+				has_title = title:e_wre
+				has_title = title:e_byzantium
+				has_title = title:e_roman_empire
+			}
+		}
+		name = BP_major_secular_decisions.0101.concern
+		show_as_tooltip = { establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_former } }
+	}
+	#The fallback option
+	option = {
+		fallback = yes
+		trigger = { NOT = { this = scope:new_kingdom_former } }
+		name = BP_major_secular_decisions.0101.neutral
+		show_as_tooltip = { establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_former } }
+	}
+}
+
+#Establishment of a Roman Empire proper
+BP_major_secular_decisions.0102 = {
+	type = character_event
+	title = BP_major_secular_decisions.0102.t
+	desc = {
+		desc = BP_major_secular_decisions.0102.desc.opening
+		triggered_desc = {
+			trigger = { scope:new_empire_former.primary_title = title:e_wre }
+			desc = BP_major_secular_decisions.0102.desc.e_wre
+		}
+		triggered_desc = {
+			trigger = { scope:new_empire_former.primary_title = title:e_byzantium }
+			desc = BP_major_secular_decisions.0102.desc.e_byzantium
+		}
+		triggered_desc = {
+			trigger = { scope:new_empire_former.primary_title = title:e_roman_empire }
+			desc = BP_major_secular_decisions.0102.desc.e_roman_empire
+		}
+		desc = BP_major_secular_decisions.0102.desc.closing
+	}
+	
+	theme = realm
+	
+	right_portrait = {
+		character = scope:new_empire_former
+		animation = personality_bold
+	}
+	
+	option = { #The Emperor himself
+		trigger = { this = scope:new_empire_former }
+		name = BP_major_secular_decisions.0102.the_emperor
+		
+		show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_empire_former } }
+		
+		#Every relatively close ruler gets informed
+		every_ruler = {
+			limit = {
+				is_ai = no
+				NOT = { this = scope:new_empire_former }
+			}
+			trigger_event = { id = BP_major_secular_decisions.0102 }
+		}
+	}
+	option = { #Other Roman Emperors
+		trigger = {
+			NOT = { this = scope:new_empire_former }
+			OR = {
+				has_title = title:e_wre
+				has_title = title:e_byzantium
+				has_title = title:e_roman_empire
+			}
+		}
+		name = BP_major_secular_decisions.0102.other_emperors
+		show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_empire_former } }
+	}
+	option = { #Persians
+		trigger = {
+			NOT = { this = scope:new_empire_former }
+			has_title = title:e_persia
+		}
+		name = BP_major_secular_decisions.0102.e_persia
+		show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_empire_former } }
+	}
+	option = { #Other Romans
+		trigger = {
+			NOT = { this = scope:new_empire_former }
+			NOR = { #Roman cultures
+				has_title = title:e_wre
+				has_title = title:e_byzantium
+				has_title = title:e_roman_empire
+			}
+			culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		name = BP_major_secular_decisions.0102.good
+		show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_empire_former } }
+	}
+	option = { #Non-Romans on Roman Soil
+		trigger = {
+			NOT = { this = scope:new_empire_former }
+			NOR = { #Roman cultures
+				has_title = title:e_wre
+				has_title = title:e_byzantium
+				has_title = title:e_roman_empire
+			}
+			NOT = { culture = { has_cultural_parameter = can_restore_roman_empire } }
+			root.capital_county.title_province = { geographical_region = historic_roman_empire }
+		}
+		name = BP_major_secular_decisions.0102.bad
+		show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_empire_former } }
+	}
+	option = { #The fallback option
+		fallback = yes
+		trigger = {
+			NOT = { culture = { has_cultural_parameter = can_restore_roman_empire } }
+			NOT = { root.capital_county.title_province = { geographical_region = historic_roman_empire } }
+		}
+		name = BP_major_secular_decisions.0102.neutral
+		show_as_tooltip = { establish_de_jure_empire_decision_effect = { FORMER = scope:new_empire_former } }
 	}
 }

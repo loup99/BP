@@ -1,0 +1,43 @@
+﻿establish_de_jure_kingdom_decision_effect = {
+	#You get to be part of an empire I suppose
+	$FORMER$.primary_title = {
+		set_de_jure_liege_title = $FORMER$.capital_county.empire
+		set_capital_county = $FORMER$.capital_county
+	}
+	#Shift all controlled adjacent duchies in the same kingdom to the primary title
+	$FORMER$.capital_county.kingdom = {
+		every_duchy = {
+			limit = {
+				$FORMER$ = { completely_controls = prev }
+				this.kingdom = root.capital_county.kingdom
+				any_de_jure_county = { any_neighboring_county = { this.duchy = $FORMER$.capital_county.duchy } }
+			}
+			set_de_jure_liege_title = $FORMER$.primary_title
+		}
+	}
+}
+swap_de_jure_kingdom_decision_effect = {
+	#You get to be part of an empire I suppose
+	$FORMER$.primary_title = { set_de_jure_liege_title = $FORMER$.capital_county.empire }
+	#Shift all controlled adjacent duchies in the same kingdom to the primary title
+	$FORMER$.capital_county.kingdom = {
+		every_in_de_jure_hierarchy = {
+			limit = { this.tier = tier_duchy }
+			set_de_jure_liege_title = $FORMER$.primary_title
+		}
+	}
+}
+establish_de_jure_empire_decision_effect = {
+	$FORMER$.primary_title = { set_capital_county = $FORMER$.capital_county }
+	#Shift all controlled adjacent duchies in the same empire to the primary title
+	$FORMER$.capital_county.empire = {
+		every_kingdom = {
+			limit = {
+				$FORMER$ = { completely_controls = prev }
+				this.empire = root.capital_county.empire
+				any_de_jure_county = { any_neighboring_county = { this.kingdom = $FORMER$.capital_county.kingdom } }
+			}
+			set_de_jure_liege_title = $FORMER$.primary_title
+		}
+	}
+}

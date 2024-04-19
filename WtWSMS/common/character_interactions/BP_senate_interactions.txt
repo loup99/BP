@@ -1,0 +1,1149 @@
+﻿#Nominating Consuls
+BP_nominate_western_consul = {
+	category = interaction_senate
+	icon = council
+	desc = BP_nominate_western_consul_desc
+	
+	is_shown = {
+		scope:actor = title:b_roma.holder.top_liege
+		scope:recipient = { is_male = yes } #Female Senators are rare for a reason
+		scope:actor = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		scope:recipient = { valid_characteristics_to_interact_with_senate_trigger = yes }
+	}
+	
+	is_valid_showing_failures_only = {
+		custom_description = {
+			text = no_consul_nominee_already_exists
+			NOT = { any_living_character = { has_character_modifier = roman_consul_nominee_west } }
+			NOT = { scope:recipient = { has_character_modifier = roman_consul_west } } #Can't be Consul back-to-back...
+		}
+	}
+	
+	is_valid = { #Can only pick people reasonably in Rome or neighboring powers
+		valid_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			THE_CITY = b_roma
+		}
+		valid_location_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			REGION = west
+		}
+	}
+	
+	cost = {
+		prestige = {
+			value = nominate_consul_prestige_cost
+			if = { #Reduced cost if too few senators
+				limit = { number_of_west_senators_in_rome < min_number_of_senators }
+				multiply = 0.25
+			}
+		}
+	}
+	
+	auto_accept = yes
+	
+	on_accept = {
+		scope:recipient = {
+			if = {
+				limit = { scope:actor = scope:recipient }
+				add_character_modifier = roman_consul_nominee_west
+			}
+			else = {
+				show_as_tooltip = {
+					nominated_consul_effect = {
+						ACTOR = scope:actor
+						REGION = west
+					}
+				}
+				hidden_effect = {
+					scope:actor = { save_scope_as = the_sender }
+					scope:recipient = { trigger_event = { id = BP_roman_senate_events.0054 } }
+				}
+			}
+		}
+		
+		senate_interaction_opinion_effect = {
+			REGION = west
+			TYPE = consul_nominee
+		}
+		
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators_effect = {
+				IS_WEST = yes
+				EVENT_TYPE = nominated_consul
+			}
+		}
+	}
+	
+	ai_targets = {
+		ai_recipients = vassals
+		ai_recipients = courtiers
+		ai_recipients = family
+	}
+	ai_frequency = 36 #Only occasionally should the holder care
+	
+	ai_will_do = {
+		base = 40 #Overall, should max out at 95% chance of occurring from base values
+		
+		#Personality Modifiers
+		modifier = { #Bold characters are likely to try to bend the Senate to their will
+			add = 25
+			OR = {
+				scope:actor = { has_trait = ambitious }
+				scope:actor = { has_trait = arrogant }
+				scope:actor = { has_trait = paranoid }
+				scope:actor = { has_trait = stubborn }
+			}
+		}
+		modifier = { #Lazy, content personalities will be less likely to care about the Senate
+			add = -25
+			OR = {
+				scope:actor = { has_trait = content }
+				scope:actor = { has_trait = lazy }
+				scope:actor = { has_trait = shy }
+				scope:actor = { has_trait = trusting }
+			}
+		}
+		
+		#Opinion Modifiers
+		modifier = { #The holder should be more inclined to do this if they like the character
+			add = 30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value >= 100
+				}
+			}
+		}
+		modifier = { #The holder should be less inclined to do this if they _don't_ like the character
+			add = -30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value <= -100
+				}
+			}
+		}
+		modifier = { #AI will _never_ do this for nemesis or rival
+			factor = 0
+			OR = {
+				scope:recipient = { has_relation_rival = scope:actor }
+				scope:recipient = { has_relation_nemesis = scope:actor }
+			}
+		}
+		modifier = { #AI will tend to do this for friends
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_relation_friend = scope:actor }
+				scope:recipient = { has_relation_best_friend = scope:actor }
+			}
+		}
+		
+		#Candidate Value Impacts
+		modifier = { #Unlikely to pick incompetants, even if they are your friend; it'll piss of the Senate
+			factor = 0.25
+			OR = {
+				scope:recipient = { has_trait = education_diplomacy_1 }
+				scope:recipient = { has_trait = education_martial_1 }
+				scope:recipient = { has_trait = education_stewardship_1 }
+				scope:recipient = { has_trait = education_intrigue_1 }
+				scope:recipient = { has_trait = education_learning_1 }
+			}
+		}
+		modifier = { #Likely to pick competants; the Senate will find it more acceptable
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_trait = education_diplomacy_4 }
+				scope:recipient = { has_trait = education_martial_4 }
+				scope:recipient = { has_trait = education_stewardship_4 }
+				scope:recipient = { has_trait = education_intrigue_4 }
+				scope:recipient = { has_trait = education_learning_4 }
+				scope:recipient = { has_trait = education_diplomacy_5 }
+				scope:recipient = { has_trait = education_martial_5 }
+				scope:recipient = { has_trait = education_stewardship_5 }
+				scope:recipient = { has_trait = education_intrigue_5 }
+				scope:recipient = { has_trait = education_learning_5 }
+			}
+		}
+		
+		#Political Consideration Modifiers
+		modifier = { #AI should value non-Roman chars less for this action
+			factor = 0.5
+			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
+		}
+		modifier = { #AI should value non-Senators less for this action
+			factor = 0.5
+			NOT = { scope:recipient = { has_trait = senator_west } }
+		}
+		modifier = { #AI should value Senators more for this action
+			factor = 1.5
+			scope:recipient = { has_trait = senator_west }
+		}
+		modifier = { #AI should value Romans more for this action, if they are Roman themselves
+			factor = 1.5
+			scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire }
+			scope:actor.culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		modifier = { #Councilors should be valued
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_councillor_of = scope:actor }
+		}
+		modifier = { #Powerful Vassals should be valued (so a powerful vassal councilor is x3 for this action)
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_powerful_vassal_of = scope:actor }
+		}
+		
+		#Senate Status
+		modifier = { #AI be much more willing to do this if there's fewer than 15 senators
+			factor = 3.0
+			number_of_west_senators_in_rome < min_number_of_senators
+		}
+	}
+}
+BP_nominate_eastern_consul = {
+	category = interaction_senate
+	icon = council
+	desc = BP_nominate_eastern_consul_desc
+	
+	is_shown = {
+		scope:actor = title:b_constantinople.holder.top_liege
+		scope:recipient = { is_male = yes } #Female Senators are rare for a reason
+		scope:actor = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		scope:recipient = { valid_characteristics_to_interact_with_senate_trigger = yes }
+	}
+	
+	is_valid_showing_failures_only = {
+		custom_description = {
+			text = no_consul_nominee_already_exists
+			NOT = { any_living_character = { has_character_modifier = roman_consul_nominee_east } }
+			NOT = { scope:recipient = { has_character_modifier = roman_consul_east } } #Can't be Consul back-to-back...
+		}
+	}
+	
+	is_valid = { #Can only pick people reasonably in Rome or neighboring powers
+		valid_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			THE_CITY = b_constantinople
+		}
+		valid_location_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			REGION = east
+		}
+	}
+	
+	cost = {
+		prestige = {
+			value = nominate_consul_prestige_cost
+			if = { #Reduced cost if too few senators
+				limit = { number_of_west_senators_in_rome < min_number_of_senators }
+				multiply = 0.25
+			}
+		}
+	}
+	
+	auto_accept = yes
+	
+	on_accept = {
+		scope:recipient = {
+			if = {
+				limit = { scope:actor = scope:recipient }
+				add_character_modifier = roman_consul_nominee_east
+			}
+			else = {
+				show_as_tooltip = {
+					nominated_consul_effect = {
+						ACTOR = scope:actor
+						REGION = east
+					}
+				}
+				hidden_effect = {
+					scope:actor = { save_scope_as = the_sender }
+					scope:recipient = { trigger_event = { id = BP_roman_senate_events.1054 } }
+				}
+			}
+		}
+		
+		senate_interaction_opinion_effect = {
+			REGION = east
+			TYPE = consul_nominee
+		}
+		
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators_effect = {
+				IS_WEST = no
+				EVENT_TYPE = nominated_consul
+			}
+		}
+	}
+	
+	ai_targets = {
+		ai_recipients = vassals
+		ai_recipients = courtiers
+		ai_recipients = family
+	}
+	ai_frequency = 36 #Only occasionally should the holder care
+	
+	ai_will_do = {
+		base = 40 #Overall, should max out at 95% chance of occurring from base values
+		
+		#Personality Modifiers
+		modifier = { #Bold characters are likely to try to bend the Senate to their will
+			add = 25
+			OR = {
+				scope:actor = { has_trait = ambitious }
+				scope:actor = { has_trait = arrogant }
+				scope:actor = { has_trait = paranoid }
+				scope:actor = { has_trait = stubborn }
+			}
+		}
+		modifier = { #Lazy, content personalities will be less likely to care about the Senate
+			add = -25
+			OR = {
+				scope:actor = { has_trait = content }
+				scope:actor = { has_trait = lazy }
+				scope:actor = { has_trait = shy }
+				scope:actor = { has_trait = trusting }
+			}
+		}
+		
+		#Opinion Modifiers
+		modifier = { #The holder should be more inclined to do this if they like the character
+			add = 30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value >= 100
+				}
+			}
+		}
+		modifier = { #The holder should be less inclined to do this if they _don't_ like the character
+			add = -30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value <= -100
+				}
+			}
+		}
+		modifier = { #AI will _never_ do this for nemesis or rival
+			factor = 0
+			OR = {
+				scope:recipient = { has_relation_rival = scope:actor }
+				scope:recipient = { has_relation_nemesis = scope:actor }
+			}
+		}
+		modifier = { #AI will tend to do this for friends
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_relation_friend = scope:actor }
+				scope:recipient = { has_relation_best_friend = scope:actor }
+			}
+		}
+		
+		#Candidate Value Impacts
+		modifier = { #Unlikely to pick incompetants, even if they are your friend; it'll piss of the Senate
+			factor = 0.25
+			OR = {
+				scope:recipient = { has_trait = education_diplomacy_1 }
+				scope:recipient = { has_trait = education_martial_1 }
+				scope:recipient = { has_trait = education_stewardship_1 }
+				scope:recipient = { has_trait = education_intrigue_1 }
+				scope:recipient = { has_trait = education_learning_1 }
+			}
+		}
+		modifier = { #Likely to pick competants; the Senate will find it more acceptable
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_trait = education_diplomacy_4 }
+				scope:recipient = { has_trait = education_martial_4 }
+				scope:recipient = { has_trait = education_stewardship_4 }
+				scope:recipient = { has_trait = education_intrigue_4 }
+				scope:recipient = { has_trait = education_learning_4 }
+				scope:recipient = { has_trait = education_diplomacy_5 }
+				scope:recipient = { has_trait = education_martial_5 }
+				scope:recipient = { has_trait = education_stewardship_5 }
+				scope:recipient = { has_trait = education_intrigue_5 }
+				scope:recipient = { has_trait = education_learning_5 }
+			}
+		}
+		
+		#Political Consideration Modifiers
+		modifier = { #AI should value non-Roman chars less for this action
+			factor = 0.5
+			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
+		}
+		modifier = { #AI should value non-Senators less for this action
+			factor = 0.5
+			NOT = { scope:recipient = { has_trait = senator_east } }
+		}
+		modifier = { #AI should value Senators more for this action
+			factor = 1.5
+			scope:recipient = { has_trait = senator_east }
+		}
+		modifier = { #AI should value Romans more for this action, if they are Roman themselves
+			factor = 1.5
+			scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire }
+			scope:actor.culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		modifier = { #Councilors should be valued
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_councillor_of = scope:actor }
+		}
+		modifier = { #Powerful Vassals should be valued (so a powerful vassal councilor is x3 for this action)
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_powerful_vassal_of = scope:actor }
+		}
+		
+		#Senate Status
+		modifier = { #AI be much more willing to do this if there's fewer than 15 senators
+			factor = 3.0
+			number_of_east_senators_in_constantinople < min_number_of_senators
+		}
+	}
+}
+#Nominating Senators
+BP_nominate_western_senator = {
+	common_interaction = yes
+	category = interaction_senate
+	icon = council
+	desc = BP_nominate_western_senator_desc
+	
+	is_shown = {
+		OR = {
+			scope:actor = title:b_roma.holder.top_liege
+			scope:actor = { has_character_modifier = roman_consul_west }
+		}
+		scope:recipient = { NOT = { has_trait = senator_west } }
+		scope:recipient = { is_male = yes } #Female Senators are rare for a reason
+		scope:actor = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		scope:recipient = { valid_characteristics_to_interact_with_senate_trigger = yes }
+	}
+	
+	is_valid_showing_failures_only = {}
+	
+	is_valid = { #Can only pick people reasonably in Rome or neighboring powers
+		valid_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			THE_CITY = b_roma
+		}
+		valid_location_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			REGION = west
+		}
+	}
+	
+	cost = {
+		prestige = nominate_senator_prestige_cost
+	}
+	
+	auto_accept = yes
+	
+	on_accept = {
+		scope:recipient = {
+			if = {
+				limit = { scope:actor = scope:recipient }
+				add_trait = senator_west
+			}
+			else = {
+				show_as_tooltip = {
+					made_a_senator_effect = {
+						ACTOR = scope:actor
+						REGION = west
+					}
+				}
+				hidden_effect = {
+					scope:actor = { save_scope_as = the_sender }
+					scope:recipient = { trigger_event = { id = BP_roman_senate_events.0052 } }
+				}
+			}
+		}
+		
+		senate_interaction_opinion_effect = {
+			REGION = west
+			TYPE = new_senator
+		}
+		
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators_effect = {
+				IS_WEST = yes
+				EVENT_TYPE = nominated_senator
+			}
+		}
+	}
+	
+	ai_targets = {
+		ai_recipients = vassals
+		ai_recipients = courtiers
+		ai_recipients = family
+	}
+	ai_frequency = 12 #Check more frequently than consulship
+	
+	ai_will_do = {
+		base = 40 #Overall, should max out at 95% chance of occurring from base values
+		
+		#Personality Modifiers
+		modifier = { #Bold characters are likely to try to bend the Senate to their will
+			add = 25
+			OR = {
+				scope:actor = { has_trait = ambitious }
+				scope:actor = { has_trait = arrogant }
+				scope:actor = { has_trait = paranoid }
+				scope:actor = { has_trait = stubborn }
+			}
+		}
+		modifier = { #Lazy, content personalities will be less likely to care about the Senate
+			add = -25
+			OR = {
+				scope:actor = { has_trait = content }
+				scope:actor = { has_trait = lazy }
+				scope:actor = { has_trait = shy }
+				scope:actor = { has_trait = trusting }
+			}
+		}
+		
+		#Opinion Modifiers
+		modifier = { #The holder should be more inclined to do this if they like the character
+			add = 30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value >= 100
+				}
+			}
+		}
+		modifier = { #The holder should be less inclined to do this if they _don't_ like the character
+			add = -30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value <= -100
+				}
+			}
+		}
+		modifier = { #AI will _never_ do this for nemesis or rival
+			factor = 0
+			OR = {
+				scope:recipient = { has_relation_rival = scope:actor }
+				scope:recipient = { has_relation_nemesis = scope:actor }
+			}
+		}
+		modifier = { #AI will tend to do this for friends
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_relation_friend = scope:actor }
+				scope:recipient = { has_relation_best_friend = scope:actor }
+			}
+		}
+		
+		#Candidate Value Impacts
+		modifier = { #Unlikely to pick low-borns; it annoys the Senate; these stack so a lowborn is reduce by 1/8
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 1 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 3 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 5 }
+		}
+		
+		#Political Consideration Modifiers
+		modifier = { #AI should value non-Roman chars less for this action, unless they are his culture
+			factor = 0.5
+			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
+			NOT = { scope:actor.culture = scope:recipient.culture }
+		}
+		modifier = { #AI should want chars of his cultures in the Senate...
+			factor = 2.0
+			scope:actor.culture = scope:recipient.culture
+		}
+		modifier = { #AI should value Romans more for this action, if they are Roman themselves
+			factor = 1.5
+			scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire }
+			scope:actor.culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+	}
+}
+BP_nominate_eastern_senator = {
+	common_interaction = yes
+	category = interaction_senate
+	icon = council
+	desc = BP_nominate_eastern_senator_desc
+	
+	is_shown = {
+		OR = {
+			scope:actor = title:b_constantinople.holder.top_liege
+			scope:actor = { has_character_modifier = roman_consul_east }
+		}
+		scope:recipient = { NOT = { has_trait = senator_east } }
+		scope:recipient = { is_male = yes } #Female Senators are rare for a reason
+		scope:actor = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		scope:recipient = { valid_characteristics_to_interact_with_senate_trigger = yes }
+	}
+	
+	is_valid_showing_failures_only = {}
+	
+	is_valid = { #Can only pick people reasonably in Rome or neighboring powers
+		valid_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			THE_CITY = b_constantinople
+		}
+		valid_location_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			REGION = east
+		}
+	}
+	
+	cost = {
+		prestige = nominate_senator_prestige_cost
+	}
+	
+	auto_accept = yes
+	
+	on_accept = {
+		scope:recipient = {
+			if = {
+				limit = { scope:actor = scope:recipient }
+				add_trait = senator_east
+			}
+			else = {
+				show_as_tooltip = {
+					made_a_senator_effect = {
+						ACTOR = scope:actor
+						REGION = east
+					}
+				}
+				hidden_effect = {
+					scope:actor = { save_scope_as = the_sender }
+					scope:recipient = { trigger_event = { id = BP_roman_senate_events.1052 } }
+				}
+			}
+		}
+		
+		senate_interaction_opinion_effect = {
+			REGION = east
+			TYPE = new_senator
+		}
+		
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators_effect = {
+				IS_WEST = no
+				EVENT_TYPE = nominated_senator
+			}
+		}
+	}
+	
+	ai_targets = {
+		ai_recipients = vassals
+		ai_recipients = courtiers
+		ai_recipients = family
+	}
+	ai_frequency = 12 #Check more frequently than consulship
+	
+	ai_will_do = {
+		base = 40 #Overall, should max out at 95% chance of occurring from base values
+		
+		#Personality Modifiers
+		modifier = { #Bold characters are likely to try to bend the Senate to their will
+			add = 25
+			OR = {
+				scope:actor = { has_trait = ambitious }
+				scope:actor = { has_trait = arrogant }
+				scope:actor = { has_trait = paranoid }
+				scope:actor = { has_trait = stubborn }
+			}
+		}
+		modifier = { #Lazy, content personalities will be less likely to care about the Senate
+			add = -25
+			OR = {
+				scope:actor = { has_trait = content }
+				scope:actor = { has_trait = lazy }
+				scope:actor = { has_trait = shy }
+				scope:actor = { has_trait = trusting }
+			}
+		}
+		
+		#Opinion Modifiers
+		modifier = { #The holder should be more inclined to do this if they like the character
+			add = 30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value >= 100
+				}
+			}
+		}
+		modifier = { #The holder should be less inclined to do this if they _don't_ like the character
+			add = -30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value <= -100
+				}
+			}
+		}
+		modifier = { #AI will _never_ do this for nemesis or rival
+			factor = 0
+			OR = {
+				scope:recipient = { has_relation_rival = scope:actor }
+				scope:recipient = { has_relation_nemesis = scope:actor }
+			}
+		}
+		modifier = { #AI will tend to do this for friends
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_relation_friend = scope:actor }
+				scope:recipient = { has_relation_best_friend = scope:actor }
+			}
+		}
+		
+		#Candidate Value Impacts
+		modifier = { #Unlikely to pick low-borns; it annoys the Senate; these stack so a lowborn is reduce by 1/8
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 1 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 3 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 5 }
+		}
+		
+		#Political Consideration Modifiers
+		modifier = { #AI should value non-Roman chars less for this action, unless they are his culture
+			factor = 0.5
+			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
+			NOT = { scope:actor.culture = scope:recipient.culture }
+		}
+		modifier = { #AI should want chars of his cultures in the Senate...
+			factor = 2.0
+			scope:actor.culture = scope:recipient.culture
+		}
+		modifier = { #AI should value Romans more for this action, if they are Roman themselves
+			factor = 1.5
+			scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire }
+			scope:actor.culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+	}
+}
+#Elevating dynasties
+BP_elevate_dynasty_to_western_senate = {
+	category = interaction_senate
+	icon = council
+	desc = BP_elevate_dynasty_to_western_senate_desc
+	
+	is_shown = {
+		OR = {
+			scope:actor = title:b_roma.holder.top_liege
+			scope:actor = { has_character_modifier = roman_consul_west }
+		}
+		scope:recipient = { is_male = yes } #Female Senators are rare for a reason
+		trigger_if = {
+			limit = { exists = this.dynasty }
+			NOT = { scope:recipient.dynasty = { has_dynasty_modifier = roman_senate_family_west } }
+		}
+		scope:recipient = scope:recipient.dynasty.dynast
+		scope:actor = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		scope:recipient = { valid_characteristics_to_interact_with_senate_trigger = yes }
+	}
+	
+	is_valid_showing_failures_only = {}
+	
+	is_valid = { #Can only pick people reasonably in Rome or neighboring powers
+		exists = scope:recipient.dynasty
+		valid_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			THE_CITY = b_roma
+		}
+		valid_location_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			REGION = west
+		}
+	}
+	
+	cost = {
+		prestige = {
+			value = elevate_dynasty_to_senate_cost
+			if = { #Reduced cost if too few senate familes
+				limit = { number_of_west_senate_families < min_number_of_senate_families }
+				multiply = 0.25
+			}
+		}
+	}
+	
+	auto_accept = yes
+	
+	on_accept = {
+		if = {
+			limit = { scope:actor = scope:recipient }
+			elevated_a_dynasty_effect = {
+				ACTOR = scope:actor
+				RECIPIENT = scope:recipient
+				REGION = west
+				THE_CITY = b_roma
+			}
+		}
+		else = {
+			show_as_tooltip = {
+				elevated_a_dynasty_effect = {
+					ACTOR = scope:actor
+					RECIPIENT = scope:recipient
+					REGION = west
+					THE_CITY = b_roma
+				}
+			}
+			hidden_effect = {
+				scope:actor = { save_scope_as = the_sender }
+				scope:recipient = { trigger_event = { id = BP_roman_senate_events.0053 } }
+			}
+		}
+		
+		senate_interaction_opinion_effect = {
+			REGION = west
+			TYPE = elevated_dynasty
+		}
+		
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators_effect = {
+				IS_WEST = yes
+				EVENT_TYPE = elevated_dynasty
+			}
+		}
+	}
+	
+	ai_targets = {
+		ai_recipients = vassals
+		ai_recipients = courtiers
+		ai_recipients = family
+	}
+	ai_frequency = 72 #Only occasionally should the holder care
+	
+	ai_will_do = {
+		base = 40 #Overall, should max out at 95% chance of occurring from base values
+		
+		#Personality Modifiers
+		modifier = { #Bold characters are likely to try to bend the Senate to their will
+			add = 25
+			OR = {
+				scope:actor = { has_trait = ambitious }
+				scope:actor = { has_trait = arrogant }
+				scope:actor = { has_trait = paranoid }
+				scope:actor = { has_trait = stubborn }
+			}
+		}
+		modifier = { #Lazy, content personalities will be less likely to care about the Senate
+			add = -25
+			OR = {
+				scope:actor = { has_trait = content }
+				scope:actor = { has_trait = lazy }
+				scope:actor = { has_trait = shy }
+				scope:actor = { has_trait = trusting }
+			}
+		}
+		
+		#Opinion Modifiers
+		modifier = { #The holder should be more inclined to do this if they like the character
+			add = 30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value >= 100
+				}
+			}
+		}
+		modifier = { #The holder should be less inclined to do this if they _don't_ like the character
+			add = -30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value <= -100
+				}
+			}
+		}
+		modifier = { #AI will _never_ do this for nemesis or rival
+			factor = 0
+			OR = {
+				scope:recipient = { has_relation_rival = scope:actor }
+				scope:recipient = { has_relation_nemesis = scope:actor }
+			}
+		}
+		modifier = { #AI will tend to do this for friends
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_relation_friend = scope:actor }
+				scope:recipient = { has_relation_best_friend = scope:actor }
+			}
+		}
+		
+		#Candidate Value Impacts
+		modifier = { #Unlikely to pick low-borns; it annoys the Senate; these stack so a lowborn is reduce by 1/8
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 1 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 3 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 5 }
+		}
+		
+		#Political Consideration Modifiers
+		modifier = { #AI should value non-Roman chars less for this action
+			factor = 0.5
+			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
+		}
+		modifier = { #AI should value non-Senators less for this action
+			factor = 0.5
+			NOT = { scope:recipient = { has_trait = senator_west } }
+		}
+		modifier = { #AI should value Senators more for this action
+			factor = 1.5
+			scope:recipient = { has_trait = senator_west }
+		}
+		modifier = { #AI should value Romans more for this action, if they are Roman themselves
+			factor = 1.5
+			scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire }
+			scope:actor.culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		modifier = { #Councilors should be valued
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_councillor_of = scope:actor }
+		}
+		modifier = { #Powerful Vassals should be valued (so a powerful vassal councilor is x3 for this action)
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_powerful_vassal_of = scope:actor }
+		}
+		
+		#Senate Status
+		modifier = { #AI be much more willing to do this if there's fewer than 5 families
+			factor = 3.0
+			number_of_west_senate_families < min_number_of_senate_families
+		}
+	}
+}
+BP_elevate_dynasty_to_eastern_senate = {
+	category = interaction_senate
+	icon = council
+	desc = BP_elevate_dynasty_to_eastern_senate_desc
+	
+	is_shown = {
+		OR = {
+			scope:actor = title:b_constantinople.holder.top_liege
+			scope:actor = { has_character_modifier = roman_consul_east }
+		}
+		scope:recipient = { is_male = yes } #Female Senators are rare for a reason
+		trigger_if = {
+			limit = { exists = this.dynasty }
+			NOT = { scope:recipient.dynasty = { has_dynasty_modifier = roman_senate_family_east } }
+		}
+		scope:recipient = scope:recipient.dynasty.dynast
+		scope:actor = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		scope:recipient = { valid_characteristics_to_interact_with_senate_trigger = yes }
+	}
+	
+	is_valid_showing_failures_only = {}
+	
+	is_valid = { #Can only pick people reasonably in Rome or neighboring powers
+		exists = scope:recipient.dynasty
+		valid_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			THE_CITY = b_constantinople
+		}
+		valid_location_to_be_senator_trigger = {
+			ACTOR = scope:actor
+			RECIPIENT = scope:recipient
+			REGION = east
+		}
+	}
+	
+	cost = {
+		prestige = {
+			value = elevate_dynasty_to_senate_cost
+			if = { #Reduced cost if too few senate familes
+				limit = { number_of_east_senate_families < min_number_of_senate_families }
+				multiply = 0.25
+			}
+		}
+	}
+	
+	auto_accept = yes
+	
+	on_accept = {
+		if = {
+			limit = { scope:actor = scope:recipient }
+			elevated_a_dynasty_effect = {
+				ACTOR = scope:actor
+				RECIPIENT = scope:recipient
+				REGION = east
+				THE_CITY = b_constantinople
+			}
+		}
+		else = {
+			show_as_tooltip = {
+				elevated_a_dynasty_effect = {
+					ACTOR = scope:actor
+					RECIPIENT = scope:recipient
+					REGION = east
+					THE_CITY = b_constantinople
+				}
+			}
+			hidden_effect = {
+				scope:actor = { save_scope_as = the_sender }
+				scope:recipient = { trigger_event = { id = BP_roman_senate_events.1053 } }
+			}
+		}
+		
+		senate_interaction_opinion_effect = {
+			REGION = east
+			TYPE = elevated_dynasty
+		}
+		
+		hidden_effect = {
+			fire_senate_interface_toast_to_human_senators_effect = {
+				IS_WEST = no
+				EVENT_TYPE = elevated_dynasty
+			}
+		}
+	}
+	
+	ai_targets = {
+		ai_recipients = vassals
+		ai_recipients = courtiers
+		ai_recipients = family
+	}
+	ai_frequency = 72 #Only occasionally should the holder care
+	
+	ai_will_do = {
+		base = 40 #Overall, should max out at 95% chance of occurring from base values
+		
+		#Personality Modifiers
+		modifier = { #Bold characters are likely to try to bend the Senate to their will
+			add = 25
+			OR = {
+				scope:actor = { has_trait = ambitious }
+				scope:actor = { has_trait = arrogant }
+				scope:actor = { has_trait = paranoid }
+				scope:actor = { has_trait = stubborn }
+			}
+		}
+		modifier = { #Lazy, content personalities will be less likely to care about the Senate
+			add = -25
+			OR = {
+				scope:actor = { has_trait = content }
+				scope:actor = { has_trait = lazy }
+				scope:actor = { has_trait = shy }
+				scope:actor = { has_trait = trusting }
+			}
+		}
+		
+		#Opinion Modifiers
+		modifier = { #The holder should be more inclined to do this if they like the character
+			add = 30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value >= 100
+				}
+			}
+		}
+		modifier = { #The holder should be less inclined to do this if they _don't_ like the character
+			add = -30
+			scope:actor = {
+				opinion = {
+					target = scope:recipient
+					value <= -100
+				}
+			}
+		}
+		modifier = { #AI will _never_ do this for nemesis or rival
+			factor = 0
+			OR = {
+				scope:recipient = { has_relation_rival = scope:actor }
+				scope:recipient = { has_relation_nemesis = scope:actor }
+			}
+		}
+		modifier = { #AI will tend to do this for friends
+			factor = 1.25
+			OR = {
+				scope:recipient = { has_relation_friend = scope:actor }
+				scope:recipient = { has_relation_best_friend = scope:actor }
+			}
+		}
+		
+		#Candidate Value Impacts
+		modifier = { #Unlikely to pick low-borns; it annoys the Senate; these stack so a lowborn is reduce by 1/8
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 1 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 3 }
+		}
+		modifier = {
+			factor = 0.5
+			exists = scope:recipient.dynasty
+			scope:recipient.dynasty = { dynasty_prestige_level <= 5 }
+		}
+		
+		#Political Consideration Modifiers
+		modifier = { #AI should value non-Roman chars less for this action
+			factor = 0.5
+			NOT = { scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire } }
+		}
+		modifier = { #AI should value non-Senators less for this action
+			factor = 0.5
+			NOT = { scope:recipient = { has_trait = senator_east } }
+		}
+		modifier = { #AI should value Senators more for this action
+			factor = 1.5
+			scope:recipient = { has_trait = senator_east }
+		}
+		modifier = { #AI should value Romans more for this action, if they are Roman themselves
+			factor = 1.5
+			scope:recipient.culture = { has_cultural_parameter = can_restore_roman_empire }
+			scope:actor.culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		modifier = { #Councilors should be valued
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_councillor_of = scope:actor }
+		}
+		modifier = { #Powerful Vassals should be valued (so a powerful vassal councilor is x3 for this action)
+			factor = 1.732 #sqrt(3)
+			scope:recipient = { is_powerful_vassal_of = scope:actor }
+		}
+		
+		#Senate Status
+		modifier = { #AI be much more willing to do this if there's fewer than 5 families
+			factor = 3.0
+			number_of_east_senate_families < min_number_of_senate_families
+		}
+	}
+}

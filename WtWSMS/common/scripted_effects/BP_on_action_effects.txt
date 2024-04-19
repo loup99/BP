@@ -21,11 +21,6 @@
 		limit = { scope:old_faith = { has_doctrine = special_doctrine_arian_ecumenism } }
 		add_doctrine = special_doctrine_arian_ecumenism
 	}
-	#Zoroastrian Faiths
-	else_if = {
-		limit = { scope:old_faith = { has_doctrine = special_doctrine_zoroastrian_approved_cult } }
-		add_doctrine = special_doctrine_zoroastrian_approved_cult
-	}
 }
 
 set_court_language_from_effect = {
@@ -434,48 +429,6 @@ change_faith_if_alive_effect = {
 				limit = { is_alive = yes }
 				set_character_faith_history = $FAITH$
 			}
-		}
-	}
-}
-
-#### Council Tasks
-
-garbage_collect_task_establish_title_effect = {
-	if = {
-		limit = {
-			OR = {
-				$THE_COUNTY$ = { has_variable = task_establish_title_progress }
-				$THE_COUNTY$ = { has_variable = task_establish_title_target }
-			}
-		}
-		#If we only have one of these variables, something went wrong; purge them
-		if = {
-			limit = {
-				OR = { #XOR
-					AND = {
-						NOT = { $THE_COUNTY$ = { has_variable = task_establish_title_progress } }
-						$THE_COUNTY$ = { has_variable = task_establish_title_target }
-					}
-					AND = {
-						$THE_COUNTY$ = { has_variable = task_establish_title_progress }
-						NOT = { $THE_COUNTY$ = { has_variable = task_establish_title_target } }
-					}
-				}
-			}
-			if = { limit = { has_variable = task_establish_title_progress } remove_variable = task_establish_title_progress }
-			if = { limit = { has_variable = task_establish_title_target } remove_variable = task_establish_title_target }
-		}
-		#If this is *not* my capital, purge it regardless
-		else_if = {
-			limit = { NOT = { $THE_COUNTY$ = $HOLDER$.capital_county } }
-			if = { limit = { has_variable = task_establish_title_progress } remove_variable = task_establish_title_progress }
-			if = { limit = { has_variable = task_establish_title_target } remove_variable = task_establish_title_target }
-		}
-		#Otherwise, purge if the target is *not* my primary title
-		else_if = {
-			limit = { NOT = { $THE_COUNTY$.var:task_establish_title_target = $HOLDER$.primary_title } }
-			if = { limit = { has_variable = task_establish_title_progress } remove_variable = task_establish_title_progress }
-			if = { limit = { has_variable = task_establish_title_target } remove_variable = task_establish_title_target }
 		}
 	}
 }

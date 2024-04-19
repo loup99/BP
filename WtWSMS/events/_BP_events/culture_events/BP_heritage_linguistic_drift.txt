@@ -163,12 +163,15 @@ scripted_effect shift_language_latin_to_protoromance_effect = {
 			set_culture_pillar = language_proto_italian_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
-		else_if = { #Fallback
+		else_if = { #Fallback 1
 			limit = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:roman } }
 			set_culture_pillar = language_proto_italian_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
-		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: LANGUAGE (LATIN=>PROTO-ROMANCE" }
+		else = { #Fallback 2
+			set_culture_pillar = language_proto_italian_romance
+			ccu_culture_created_or_changed_effect = yes
+		}
 	}
 }
 #Proto-Romance to Romance
@@ -323,6 +326,12 @@ scripted_effect shift_language_proto_african_romance_to_children_effect = {
 			set_culture_pillar = language_african_romance
 			ccu_culture_created_or_changed_effect = yes
 		}
+	}
+}
+scripted_effect shift_language_proto_sardinian_to_children_effect = {
+	scope:shift_culture = {
+		set_culture_pillar = language_sardinian
+		ccu_culture_created_or_changed_effect = yes
 	}
 }
 #Later Romance Languages
@@ -542,7 +551,7 @@ scripted_effect shift_language_parthian_to_children_effect = {
 scripted_effect shift_language_effect = {
 	#Then apply the new language effect
 	scope:shift_culture = {
-		#if/else-if prevents possible chain reaction
+		#NB: if/else-if prevents possible chain reaction
 		if = {
 			limit = { has_cultural_pillar = language_latin }
 			shift_language_latin_to_protoromance_effect = yes
@@ -586,6 +595,10 @@ scripted_effect shift_language_effect = {
 		else_if = {
 			limit = { has_cultural_pillar = language_proto_african_romance }
 			shift_language_proto_african_romance_to_children_effect = yes
+		}
+		else_if = {
+			limit = { has_cultural_pillar = language_proto_sardinian }
+			shift_language_proto_sardinian_to_children_effect = yes
 		}
 		#Later Romance Block
 		else_if = {
@@ -634,6 +647,7 @@ scripted_effect shift_language_effect = {
 			limit = { has_cultural_pillar = language_parthian }
 			shift_language_parthian_to_children_effect = yes
 		}
+		else = { debug_log = "UNHANDLED LANGUAGE SHIFT!" }
 	}
 }
 
@@ -867,6 +881,11 @@ bp_heritage_linguistic_drift.0102 = {
 	title = bp_heritage_linguistic_drift.0102.t
 	desc = {
 		first_valid = {
+			#Latin to Romance, Roman addition
+			triggered_desc = {
+				trigger = { scope:shift_culture = culture:roman }
+				desc = bp_heritage_linguistic_drift.0102.roman.desc
+			}
 			#Latin to Romance
 			triggered_desc = {
 				trigger = { scope:shift_culture = { has_cultural_pillar = heritage_latin } }

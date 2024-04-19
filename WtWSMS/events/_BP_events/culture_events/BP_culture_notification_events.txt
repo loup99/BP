@@ -1,0 +1,87 @@
+﻿namespace = bp_culture_notification_events
+
+#Culture Events:
+##0001-9999: Various duplications of Vanilla
+
+bp_culture_notification_events.1011 = {
+	type = character_event
+	title = culture_notification.1011.t
+	desc = {
+		desc = culture_notification.1011.intro
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:dominant_culture = flag:parent_1 }
+				desc = culture_notification.1011.hybrid_primary_1
+			}
+			triggered_desc = {
+				trigger = { scope:dominant_culture = flag:parent_2 }
+				desc = culture_notification.1011.hybrid_primary_2
+			}
+			desc = culture_notification.1011.hybrid_no_primary
+		}
+		first_valid = {
+			triggered_desc = {
+				trigger = { this = scope:founder }
+				desc = culture_notification.1011.outro.founder
+			}
+			desc = culture_notification.1011.outro.other
+		}
+	}
+	theme = culture_change
+	major = yes
+	left_portrait = scope:founder
+
+	immediate = {
+		scope:new_culture = {
+			if = { #WtWSMS event check
+				limit = { scope:founder = { has_variable = dominant_culture } }
+				if = {
+					limit = { scope:parent_1 = scope:founder.var:dominant_culture }
+					save_scope_value_as = { name = dominant_culture value = flag:parent_1 }
+				}
+				else = { save_scope_value_as = { name = dominant_culture value = flag:parent_2 } }
+			}
+			else = { #Vanilla (and GUI) check
+				if = {
+					limit = {
+						calc_true_if = {
+							amount >= 3
+							has_same_culture_ethos = scope:parent_1
+							has_same_culture_heritage = scope:parent_1
+							has_same_culture_language = scope:parent_1
+							has_same_culture_martial_tradition = scope:parent_1
+						}
+					}
+					save_scope_value_as = { name = dominant_culture value = flag:parent_1 }
+				}
+				else_if = {
+					limit = {
+						calc_true_if = {
+							amount >= 3
+							has_same_culture_ethos = scope:parent_2
+							has_same_culture_heritage = scope:parent_2
+							has_same_culture_language = scope:parent_2 
+							has_same_culture_martial_tradition = scope:parent_2
+						}
+					}
+					save_scope_value_as = { name = dominant_culture value = flag:parent_2 }
+				}
+				else = {
+					save_scope_value_as = { name = dominant_culture value = flag:none }
+				}
+			}
+		}
+	}
+
+	option = {
+		trigger = { this = scope:founder }
+		name = culture_notification.1011.a.founder
+		custom_tooltip = culture_notification_hybrid_tooltip
+	}
+
+	option = {
+		trigger = { NOT = { this = scope:founder } }
+		name = culture_notification.1011.a.other
+		custom_tooltip = culture_notification_hybrid_tooltip
+	}
+}

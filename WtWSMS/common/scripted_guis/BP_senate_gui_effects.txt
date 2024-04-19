@@ -1,0 +1,221 @@
+﻿close_senate_view_effect = {
+	scope = character
+	effect = {
+		#West Senate
+		title:d_senate = {
+			clear_variable_list = all_west_senator_list
+			clear_variable_list = senators_in_rome_list
+			clear_variable_list = senators_out_of_rome_list
+			clear_variable_list = senate_family_list_west
+			clear_variable_list = west_consul
+			clear_variable_list = west_consul_nominee
+		}
+		
+		#East Senate
+		title:d_senate_east = {
+			clear_variable_list = all_east_senator_list
+			clear_variable_list = senators_in_constantinople_list
+			clear_variable_list = senators_out_of_constantinople_list
+			clear_variable_list = senate_family_list_east
+			clear_variable_list = east_consul
+			clear_variable_list = east_consul_nominee
+		}
+	}
+}
+
+update_senator_list_effect = {
+	scope = character
+	effect = {
+		#Put the Senators in Lists
+		ordered_living_character = {
+			limit = { has_trait = senator_west }
+			
+			order_by = this.primary_title.tier
+			min = 0
+			max = 500
+			check_range_bounds = no
+			
+			title:d_senate = {
+				add_to_variable_list = {
+					name = all_west_senator_list
+					target = prev
+				}
+			}
+			#Get all the Senators in Rome and add them to a list
+			if = {
+				limit = { character_is_in_senate_west_trigger = yes }
+				title:d_senate = {
+					add_to_variable_list = {
+						name = senators_in_rome_list
+						target = prev
+					}
+				}
+			}
+			else = {
+				title:d_senate = {
+					add_to_variable_list = {
+						name = senators_out_of_rome_list
+						target = prev
+					}
+				}
+			}
+		}
+		#Get all the Senate Families
+		ordered_living_character = {
+			limit = {
+				exists = dynasty
+				this.dynasty = { has_dynasty_modifier = roman_senate_family_west }
+				this = this.dynasty.dynast
+				this.dynasty = { any_dynasty_member = { has_trait = senator_west } }
+			}
+			order_by = this.dynasty.dynasty_prestige_level
+			min = 0
+			max = 100
+			check_range_bounds = no
+			title:d_senate = {
+				add_to_variable_list = {
+					name = senate_family_list_west
+					target = prev.dynasty
+				}
+			}
+		}
+		#Get all the Senate Officers
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_west }
+			title:d_senate = {
+				add_to_variable_list = {
+					name = west_consul
+					target = prev
+				}
+			}
+		}
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_nominee_west }
+			title:d_senate = {
+				add_to_variable_list = {
+					name = west_consul_nominee
+					target = prev
+				}
+			}
+		}
+		
+		ordered_living_character = {
+			limit = { has_trait = senator_east }
+			
+			order_by = this.primary_title.tier
+			min = 0
+			max = 500
+			check_range_bounds = no
+			
+			title:d_senate_east = {
+				add_to_variable_list = {
+					name = all_east_senator_list
+					target = prev
+				}
+			}
+			#Get all the Senators in Rome and add them to a list
+			if = {
+				limit = { character_is_in_senate_east_trigger = yes }
+				title:d_senate_east = {
+					add_to_variable_list = {
+						name = senators_in_constantinople_list
+						target = prev
+					}
+				}
+			}
+			else = {
+				title:d_senate_east = {
+					add_to_variable_list = {
+						name = senators_out_of_constantinople_list
+						target = prev
+					}
+				}
+			}
+		}
+		#Get all the Senate Families
+		ordered_living_character = {
+			limit = {
+				exists = dynasty
+				this.dynasty = { has_dynasty_modifier = roman_senate_family_east }
+				this = this.dynasty.dynast
+				this.dynasty = { any_dynasty_member = { has_trait = senator_east } }
+			}
+			order_by = this.dynasty.dynasty_prestige_level
+			min = 0
+			max = 100
+			check_range_bounds = no
+			title:d_senate_east = {
+				add_to_variable_list = {
+					name = senate_family_list_east
+					target = prev.dynasty
+				}
+			}
+		}
+		#Get all the Senate Officers
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_east }
+			title:d_senate_east = {
+				add_to_variable_list = {
+					name = east_consul
+					target = prev
+				}
+			}
+		}
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_nominee_east }
+			title:d_senate_east = {
+				add_to_variable_list = {
+					name = east_consul_nominee
+					target = prev
+				}
+			}
+		}
+	}
+}
+
+#Senate Interactions
+request_western_senate_recognition_gui_effect = {
+	scope = character
+	
+	is_valid = {}
+	
+	effect = {
+		root = {
+			set_variable = already_asked_the_senate
+			trigger_event = BP_roman_senate_events.0011
+		}
+	}
+}
+
+disestablish_western_senate_gui_effect = {
+	scope = character
+	
+	is_valid = {}
+	
+	effect = { #Warn players about disestablishing the Senate
+		root = { trigger_event = BP_roman_senate_events.0001 }
+	}
+}
+
+request_eastern_senate_recognition_gui_effect = {
+	scope = character
+	
+	is_valid = {}
+	
+	effect = {
+		root = {
+			set_variable = already_asked_the_senate
+			trigger_event = BP_roman_senate_events.1011
+		}
+	}
+}
+
+disestablish_eastern_senate_gui_effect = {
+	scope = character
+	
+	is_valid = {}
+	
+	effect = { #Warn players about disestablishing the Senate
+		root = { trigger_event = BP_roman_senate_events.1001 }
+	}
+}

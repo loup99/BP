@@ -326,22 +326,18 @@ minor_migration_cb_title_management_effect = {
 	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_independent
 	resolve_title_and_vassal_change = scope:change_attacker_becomes_independent
 	
+	#### Government bootstrap crap
 	hidden_effect = {
-		##### TODO (Beta): This will spam several cases of Scoped object of type 'character' is not valid,
-		#####    but its not clear why; the if statement should be appropriately checking
 		every_in_list = {
 			list = new_holders
 			save_temporary_scope_as = the_holder
 			
-			scope:the_holder = {
-				if = { #If-block prevents a spam of errors wrt tooltip creation
-					limit = { exists = $ATTACKER$ }
-					bootstrap_prevention_effect = {
-						THE_LANDED_TITLE = scope:the_holder.capital_county
-						THE_PREVIOUS_HOLDER = $ATTACKER$
-					}
-					propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
+			scope:the_holder ?= {
+				bootstrap_prevention_effect = {
+					THE_LANDED_TITLE = scope:the_holder.capital_county
+					THE_PREVIOUS_HOLDER = $ATTACKER$
 				}
+				propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
 			}
 		}
 		#Ensure no gov't trickery here, as things can go sideways fast
@@ -589,14 +585,13 @@ major_migration_cb_title_management_effect = {
 	resolve_title_and_vassal_change = scope:change_transfered_old_attacker_titles
 	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_independent
 	
+	##### Government boostrap crap
 	hidden_effect = {
-		##### TODO (Beta): This will spam several cases of Scoped object of type 'character' is not valid,
-		#####    but its not clear why; the if statement should be appropriately checking
 		every_in_list = {
 			list = new_holders
 			save_temporary_scope_as = the_holder
 			
-			scope:the_holder = {
+			scope:the_holder ?= {
 				bootstrap_prevention_effect = {
 					THE_LANDED_TITLE = scope:the_holder.capital_county
 					THE_PREVIOUS_HOLDER = $ATTACKER$

@@ -1,0 +1,172 @@
+﻿#Eligible Location/Status Triggers
+character_is_in_senate_west_trigger = {
+	character_in_west_senate_region_trigger = yes
+	character_in_senate_eligible_status_trigger = yes
+}
+character_is_in_senate_east_trigger = {
+	character_in_east_senate_region_trigger = yes
+	character_in_senate_eligible_status_trigger = yes
+}
+character_in_senate_eligible_status_trigger {
+	is_imprisoned = no
+	is_incapable = no
+}
+character_in_west_senate_region_trigger = {
+	character_in_senate_region_trigger = {
+		THE_CITY = b_roma
+		THE_REGION = custom_western_senate
+	}
+}
+character_in_east_senate_region_trigger = {
+	character_in_senate_region_trigger = {
+		THE_CITY = b_constantinople
+		THE_REGION = custom_eastern_senate
+	}
+}
+character_in_senate_region_trigger = {
+	trigger_if = {
+		limit = { is_landed = yes }
+		OR = {
+			custom_description = {
+				text = the_city_is_part_of_the_realm
+				this.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			}
+			this.capital_barony.title_province = { geographical_region = $THE_REGION$ }
+		}
+	}
+	trigger_else_if = {
+		limit = { exists = this.employer }
+		OR = {
+			custom_description = {
+				text = the_city_is_part_of_the_employers_realm
+				object = this
+				this.employer.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			}
+			this.employer.capital_barony.title_province = { geographical_region = $THE_REGION$ }
+		}
+	}
+	trigger_else_if = {
+		limit = { exists = this.host }
+		OR = {
+			custom_description = {
+				text = the_city_is_part_of_the_employers_realm
+				object = this
+				this.host.top_liege = { any_sub_realm_barony = { this = title:$THE_CITY$ } }
+			}
+			this.host.capital_barony.title_province = { geographical_region = $THE_REGION$ }
+		}
+	}
+	trigger_else = { always = no }
+}
+
+#Checking that the Senate exists
+no_remaining_senators_after_this_one_in_west_senate_trigger = {
+	no_remaining_senators_after_this_one_in_region_senate_trigger = {
+		REGION = west
+		ACTOR = $ACTOR$
+	}
+}
+no_remaining_senators_after_this_one_in_east_senate_trigger = {
+	no_remaining_senators_after_this_one_in_region_senate_trigger = {
+		REGION = east
+		ACTOR = $ACTOR$
+	}
+}
+no_remaining_senators_after_this_one_in_region_senate_trigger = {
+	any_living_character = {
+		count = 0
+		has_trait = senator_$REGION$
+		character_is_in_senate_$REGION$_trigger = yes
+		NOT = { this = $ACTOR$ }
+	}
+}
+no_remaining_senators_in_west_senate_trigger = {
+	no_remaining_senators_in_region_senate_trigger = { REGION = west }
+}
+no_remaining_senators_in_east_senate_trigger = {
+	no_remaining_senators_in_region_senate_trigger = { REGION = east }
+}
+no_remaining_senators_in_region_senate_trigger = {
+	any_living_character = {
+		count = 0
+		has_trait = senator_$REGION$
+		character_is_in_senate_$REGION$_trigger = yes
+	}
+}
+
+#Eligible Senate Characteristics Triggers
+valid_to_be_senator_trigger_age_trigger = {
+	$CHAR$ = { age >= 25 }
+}
+valid_to_be_senator_trigger_sex_trigger = {
+	$CHAR$ = { is_male = yes }
+}
+valid_to_be_senator_trigger_roman_empires_trigger = {
+	custom_description = {
+		text = has_a_roman_empire_as_a_primary_title
+		OR = { #Emperors could be consuls
+			$CHAR$.primary_title = title:e_wre
+			$CHAR$.primary_title = title:e_byzantium
+			$CHAR$.primary_title = title:e_roman_empire
+		}
+	}
+}
+valid_to_be_senator_trigger = {
+	valid_to_be_senator_trigger_sex_trigger = { CHAR = $RECIPIENT$ }
+	$RECIPIENT$ = { valid_characteristics_to_interact_with_senate_trigger = yes }
+	#Top Liege awarding to _themselves_:  they either 25, are a child Emperor, OR adult king
+	trigger_if = {
+		limit = {
+			$ACTOR$ = $RECIPIENT$
+			$ACTOR$ = title:$THE_CITY$.holder.top_liege
+		}
+		OR = {
+			valid_to_be_senator_trigger_age_trigger = { CHAR = $RECIPIENT$ }
+			valid_to_be_senator_trigger_roman_empires_trigger = { CHAR = $RECIPIENT$ }
+			AND = {
+				$RECIPIENT$ = { age >= 16 }
+				custom_description = {
+					text = is_the_top_liege_of_the_required_city
+					$RECIPIENT$ = title:$THE_CITY$.holder.top_liege
+				}
+				custom_description = {
+					text = primary_title_is_kingdom_or_greater
+					$RECIPIENT$.primary_title.tier >= tier_kingdom
+				}
+			}
+		}
+	}
+	#Otherwise, have to be at least 25 and in a valid location
+	trigger_else = { valid_to_be_senator_trigger_age_trigger = { CHAR = $RECIPIENT$ } }
+}
+valid_location_to_be_senator_trigger = {
+	OR = {
+		trigger_if = {
+			limit = { $RECIPIENT$ = { has_trait = senator_$REGION$ } }
+			$RECIPIENT$ = { character_is_in_senate_$REGION$_trigger = yes }
+		}
+		custom_description = {
+			text = you_are_part_of_the_city_holders_realm
+			subject = $RECIPIENT$
+			OR = {
+				$ACTOR$ = $RECIPIENT$.top_liege
+				$ACTOR$ = $RECIPIENT$.liege_or_court_owner
+				$ACTOR$ = $RECIPIENT$.employer.top_liege
+				$ACTOR$ = $RECIPIENT$.liege_or_court_owner.top_liege
+			}
+		}
+	}
+}
+
+#Other Triggers
+valid_characteristics_to_interact_with_senate_trigger = {
+	trigger_if = {
+		limit = { is_landed = yes }
+		NOR = {
+			has_government = rajamandala_government
+			has_government = eranshar_government
+			has_government = theocracy_government
+			has_government = mercenary_government
+		}
+	}
+}

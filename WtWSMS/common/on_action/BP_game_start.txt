@@ -31,8 +31,12 @@ bp_game_start = {
 		set_ethnic_religion_flags
 		set_autocephalous_church_flags
 		other_religion_effects
+		#Culture Stuff
+		set_additional_parent_cultures
 		#Family Stuff
 		set_dead_dynasty_renown
+		#Other Actions
+		create_other_armies
 	}
 }
 
@@ -238,47 +242,64 @@ setup_realm_laws = {
 # To make it so we can systematically add specific laws, then overwrite for exceptions
 setup_realm_and_title_succession_laws = {
 	effect = {
-		### Cultures
-		every_ruler = { #Cultures/Religions with male_only_law effects
-			limit = {
-				OR = {
-					culture = { has_cultural_parameter = male_only_inheritance }
-					has_religion = religion:islam_religion
+		every_ruler = {### Cultural/Religion impact with strong male bias
+			if = {
+				limit = {
+					OR = {
+						culture = { has_cultural_parameter = male_only_inheritance }
+						has_religion = religion:islam_religion
+						faith = { has_doctrine = doctrine_gender_male_dominated }
+					}
+					NOT = { has_realm_law = male_only_law }
 				}
-				NOT = { has_realm_law = male_only_law }
+				add_realm_law_skip_effects = male_only_law
 			}
-			add_realm_law_skip_effects = male_only_law
-		}
-		every_ruler = { #Cultures/Religions with female_preference_law effects
-			limit = {
-				culture = {
-					has_cultural_parameter = female_only_inheritance
-					has_cultural_parameter = not_male_succession
+			else_if = { #NB: This is the femae only case
+				limit = {
+					OR = {
+						culture = { has_cultural_parameter = female_only_inheritance }
+						culture = {has_cultural_parameter = not_male_succession }
+					}
+					NOT = { has_realm_law = female_only_law }
 				}
-				NOT = { has_realm_law = female_preference_law }
+				add_realm_law_skip_effects = female_only_law
 			}
-			add_realm_law_skip_effects = female_preference_law
-		}
-		every_ruler = { #Equal inheritance
-			limit = {
-				culture = { has_cultural_parameter = gender_equal_inheritance }
-				NOT = { has_realm_law = equal_law }
+			
+			else_if = {
+				limit = {
+					faith = { has_doctrine =  doctrine_gender_female_dominated }
+					NOT = { has_realm_law = female_preference_law }
+				}
+				add_realm_law_skip_effects = female_preference_law
 			}
-			add_realm_law_skip_effects = equal_law
+			else_if = {
+				limit = {
+					OR = {
+						culture = { has_cultural_parameter = gender_equal_inheritance }
+						faith = { has_doctrine = doctrine_gender_equal }
+					}
+					NOT = { has_realm_law = equal_law }
+				}
+				add_realm_law_skip_effects = equal_law
+			}
+			else = { add_realm_law_skip_effects = male_only_law } #Fallback; male-only.
 		}
+		### Other Realm-Succession laws that must be enforced
 		every_ruler = { #High Partition
-			limit = {
-				culture = { has_cultural_parameter = can_enact_high_partition_succession_law }
-				NOT = { has_realm_law = high_partition_succession_law }
+			if = {
+				limit = {
+					culture = { has_cultural_parameter = can_enact_high_partition_succession_law }
+					NOT = { has_realm_law = high_partition_succession_law }
+				}
+				add_realm_law_skip_effects = high_partition_succession_law
 			}
-			add_realm_law_skip_effects = high_partition_succession_law
-		}
-		every_ruler = { #Confederate Partition
-			limit = {
-				culture = { has_cultural_parameter = must_use_confederate_partition }
-				NOT = { has_realm_law = confederate_partition_succession_law }
+			else_if = {
+				limit = {
+					culture = { has_cultural_parameter = must_use_confederate_partition }
+					NOT = { has_realm_law = confederate_partition_succession_law }
+				}
+				add_realm_law_skip_effects = confederate_partition_succession_law
 			}
-			add_realm_law_skip_effects = confederate_partition_succession_law
 		}
 		
 		### Governments
@@ -293,12 +314,27 @@ setup_realm_and_title_succession_laws = {
 				limit = { NOT = { has_realm_law = single_heir_succession_law } }
 				add_realm_law_skip_effects = single_heir_succession_law
 			}
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
+		}
+		every_ruler = { #Sub-Roman Government
+			limit = {
+				has_government = subroman_government
+				NOT = { has_realm_law = male_only_law }
+			}
+			add_realm_law_skip_effects = male_only_law
 		}
 		every_ruler = { #Eranshar
 			limit = { has_government = eranshar_government }
 			if = {
 				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
 				add_realm_law_skip_effects = single_heir_dynasty_house
+			}
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
 			}
 		}
 		
@@ -308,17 +344,6 @@ setup_realm_and_title_succession_laws = {
 			if = {
 				limit = { NOT = { has_realm_law = single_heir_succession_law } }
 				add_realm_law_skip_effects = single_heir_succession_law
-			}
-		}
-		every_ruler = { #The Senate should be male-only republic succession
-			limit = { has_title = title:d_senate }
-			if = {
-				limit = { NOT = { has_realm_law = male_only_law } }
-				add_realm_law_skip_effects = male_only_law
-			}
-			if = {
-				limit = { NOT = { has_realm_law = city_succession_law } }
-				add_realm_law_skip_effects = city_succession_law
 			}
 		}
 		every_ruler = { #Suebia & Burgundians should be partition partion to avoid creating undesirable kingdoms
@@ -575,7 +600,10 @@ setup_realm_and_title_succession_laws = {
 					has_title = title:e_turkestan
 				}
 			}
-			add_realm_law_skip_effects = male_only_law
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
 		}
 		
 		#Equal Succession
@@ -1184,11 +1212,6 @@ setup_vassal_contracts = {
 }
 other_title_effects = {
 	effect = {
-		#Unrevokable titles
-		every_duchy = {
-			limit = { this = title:d_senate }
-			this = { set_variable = unrevokable }
-		}
 		#Capital changes for specific time periods
 		title:k_ostrogoths.holder = {
 			if = { #Odoacer's death/Theodoric's conquest of Italy
@@ -1238,25 +1261,6 @@ other_title_effects = {
 			title:k_mazandaran = { set_de_jure_liege_title = title:e_persia }
 		}
 		#Note specific kingdoms that are cultural titles (and thus should block creation of any de jure while titular)
-		
-		#*goths
-		title:k_visigoths = { set_variable = { name = title_culture value = culture:visigothic } }
-		title:k_ostrogoths = { set_variable = { name = title_culture value = culture:ostrogothic } }
-		#Other Germans
-		title:k_vandalica = { set_variable = { name = title_culture value = culture:vandalic } }
-		title:k_suebia = { set_variable = { name = title_culture value = culture:suebi } }
-		title:k_burgundians = { set_variable = { name = title_culture value = culture:burgundian } }
-		title:k_alamannia = { set_variable = { name = title_culture value = culture:alamannian } }
-		title:k_gepidia = { set_variable = { name = title_culture value = culture:gepid } }
-		title:k_herul = { set_variable = { name = title_culture value = culture:heruli } }
-		title:k_rugiland = { set_variable = { name = title_culture value = culture:rygir } }
-		title:k_thuringia = { set_variable = { name = title_culture value = culture:thuringian } }
-		title:k_geatland = { set_variable = { name = title_culture value = culture:geatish } }
-		title:k_saxony = { set_variable = { name = title_culture value = culture:old_saxon } }
-		#Turco-Mongol-Magyar
-		title:k_chuban = { set_variable = { name = title_culture value = culture:xiongnu } }
-		title:k_tuyuhun = { set_variable = { name = title_culture value = culture:tuyuhun } }
-		title:k_magyar = { set_variable = { name = title_culture value = culture:mogyer } }
 	}
 }
 
@@ -1347,11 +1351,15 @@ convert_christian_chars_to_rites = {
 		}
 		#Ethiopian Orthodox
 		change_ruler_and_court_rite_by_county_faith_effect = {
-			OLD_RITE = miaphysitism
+			OLD_RITE = coptic
 			NEW_RITE = ethiopian_orthodox
 		}
 		#Handle edge cases:
 		character:109769 = { set_character_faith_history = faith:nicene } #Make Erikos the Massalian Nicene
+		if = { #Raetia should be Nicene
+			limit = { exists = title:d_raetia_curiensis.holder }
+			title:d_raetia_curiensis.holder = { set_character_faith_history = faith:nicene }
+		}
 	}
 }
 change_vanilla_religion_doctrines = {
@@ -1365,7 +1373,6 @@ change_vanilla_religion_doctrines = {
 				}
 				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
 				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
-				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = tibetan_sky_burials }
 			}
 			#Individual Faiths
 			faith:bon = {
@@ -1373,19 +1380,11 @@ change_vanilla_religion_doctrines = {
 					OLD_DOCTRINE = tenet_eastern_syncretism
 					NEW_DOCTRINE = tenet_inner_journey
 				}
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = tenet_sky_burials
-					NEW_DOCTRINE = tenet_communal_identity
-				}
 			}
 			faith:old_bon = {
 				swap_doctrine_if_it_has_it_effect = {
 					OLD_DOCTRINE = tenet_esotericism
 					NEW_DOCTRINE = tenet_bhakti
-				}
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = tenet_sky_burials
-					NEW_DOCTRINE = tenet_communal_identity
 				}
 				if = {
 					limit = { has_dlc_feature = the_northern_lords }
@@ -1552,6 +1551,14 @@ other_religion_effects = {
 			limit = { current_date >= 484.1.1 }
 			legalize_caucasian_christianity_global_effect = yes
 		}
+	}
+}
+
+## Culture Stuff
+set_additional_parent_cultures = {
+	effect = {
+		#Additional Child Cultures
+		culture:numidian = { add_to_variable_list = { name = bastard_cultures target = flag:romano_african } }
 	}
 }
 
@@ -1741,7 +1748,7 @@ set_starting_culture_acceptance = {
 					value = 23
 				}
 				set_cultural_acceptance = {
-					target = culture:coptic
+					target = culture:copt
 					value = 15
 				}
 			}
@@ -1749,13 +1756,13 @@ set_starting_culture_acceptance = {
 	}
 }
 
+#Other Events
 trigger_needed_events = {
 	effect = {
 		#Inform all the players
 		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
 	}
 }
-
 set_global_variables = {
 	#Historically unset variables: rome_restored
 	effect = {
@@ -1901,3 +1908,19 @@ fix_custom_character_governments = {
 		}
 	}
 }
+
+create_other_armies = {
+	effect = {
+		#Theodoric gets special troops
+		if = {
+			limit = { current_date = 476.2.2 }
+			character:63 = {
+				create_theodoric_army_effect = { LOCATION = 3643 }
+				create_theodoric_army_effect = { LOCATION = 3643 }
+				create_theodoric_army_effect = { LOCATION = 3643 }
+				create_theodoric_army_effect = { LOCATION = 3643 }
+			}
+		}
+	}
+}
+

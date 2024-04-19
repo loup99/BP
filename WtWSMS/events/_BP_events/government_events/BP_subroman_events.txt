@@ -459,7 +459,7 @@ BP_subroman_events.0040 = {
 ###############################
 scripted_trigger a_clergy_oriented_vassal = {
 	basic_character_requirements_trigger = yes
-	# Strong martial
+	# Strong learning
 	learning >= 12
 	# Weak other stat
 	OR = {
@@ -638,6 +638,13 @@ BP_subroman_events.0060 = {
 	}
 	
 	option = {
+		fallback = yes
+		trigger = {
+			OR = {
+				root.faith = { has_doctrine_parameter = right_to_rule_feudal }
+				root.culture = { has_cultural_parameter = right_to_rule_feudal }
+			}
+		}
 		name = BP_subroman_events.0060.a
 		#Remove all extant variables from the title
 		ROOT.primary_title = {
@@ -669,9 +676,54 @@ BP_subroman_events.0060 = {
 		#Every vassal and below gets a chance to have this fire as well between
 		#1 week and 1 year, to make transition more gradual
 		custom_description = {
-			text = creates_chance_for_vassals_to_convert_to_feudal
+			text = creates_chance_for_vassals_to_convert_government
 			every_vassal = {
 				limit = { basic_character_requirements_trigger =yes }
+				trigger_event = { id = BP_subroman_events.0060 days = { 7 360 } }
+			}
+		}
+	}
+	option = {
+		trigger = {
+			OR = {
+				root.faith = { has_doctrine_parameter = right_to_rule_clan }
+				root.culture = { has_cultural_parameter = right_to_rule_clan }
+			}
+		}
+		name = BP_subroman_events.0060.b
+		#Remove all extant variables from the title
+		ROOT.primary_title = {
+			if = {
+				limit = { has_variable = landed_army }
+				remove_variable = landed_army
+			}
+			if = {
+				limit = { has_variable = changed_military_cultural_values }
+				remove_variable = changed_military_cultural_values
+			}
+			if = {
+				limit = { has_variable = changed_ecclesiastic_cultural_values }
+				remove_variable = changed_ecclesiastic_cultural_values
+			}
+		}
+		convert_realm_to_clan_effect = yes
+		#Every direct baron of your title should convert to feudalism as well
+		custom_description = {
+			text = all_direct_barons_convert_to_clan
+			every_vassal = {
+				limit = {
+					has_government = subroman_government
+					primary_title = { tier = tier_barony }
+				}
+				convert_realm_to_clan_effect = yes
+			}
+		}
+		#Every vassal and below gets a chance to have this fire as well between
+		#1 week and 1 year, to make transition more gradual
+		custom_description = {
+			text = creates_chance_for_vassals_to_convert_government
+			every_vassal = {
+				limit = { basic_character_requirements_trigger = yes }
 				trigger_event = { id = BP_subroman_events.0060 days = { 7 360 } }
 			}
 		}

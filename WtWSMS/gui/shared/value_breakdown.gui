@@ -1,13 +1,17 @@
 types Breakdowns
 {
 	## List of values tooltip
-	type widget_value_breakdown_tooltip = widget {
+	# Note: use "widget_value_breakdown_tooltip" to get a list with a tooltip background and header.
+	# (this type widget should be used when you want only the list)
+	type widget_value_breakdown_list = widget {
 		name = "values_grid"
 		size = { 50 50 }
 		alwaystransparent = no
 
-		background = {
-			using = Background_Area_Border_Solid
+		block "background" {
+			background = {
+				using = Background_Area_Border_Solid
+			}
 		}
 
 		vbox = {
@@ -16,6 +20,8 @@ types Breakdowns
 			set_parent_size_to_minimum = yes
 			margin = { 17 10 }
 			spacing = 3
+
+			block "list" {}
 
 			block "header" {}
 
@@ -29,12 +35,14 @@ types Breakdowns
 						layoutpolicy_horizontal = expanding
 						text = "[ValueBreakdown.GetName]"
 						min_width = 180
-						max_width = 250
+						max_width = 275
 						fonttintcolor = "[TooltipInfo.GetTintColor]"
 						margin_right = 10
 					}
 
 					text_single= {
+						layoutpolicy_horizontal = expanding
+
 						visible = "[And(ValueBreakdown.HasTooltip, ValueBreakdown.ShouldShowValue)]"
 						name = "value_with_tooltip"
 						text = "[ValueBreakdown.GetValue|L]"
@@ -61,6 +69,36 @@ types Breakdowns
 			}
 		}
 	}
+	
+	# Used in a 'top level' aka directly inside a `tooltipwidget = {}`
+	type widget_value_breakdown_tooltip = widget_value_breakdown_list
+	{
+		blockoverride "header"
+		{
+			# We have the header be the name, if it exists
+			block "header" {
+				text_label_left = {
+					layoutpolicy_horizontal = expanding
+					block "header_text" {
+						text = "[ValueBreakdown.GetName]"
+					}
+					default_format = "#T"
+					visible = "[Not( StringIsEmpty( ValueBreakdown.GetName ) )]"
+				}
+			}
+		}
+
+		blockoverride "background"
+		{
+			using = DefaultTooltipBackground
+		}
+
+		blockoverride "list"
+		{
+			# We want more spacing in bottom for this background
+			margin_bottom = 17
+		}
+	}
 
 	## Gold Breakdown Tooltip
 	type widget_gold_breakdown_tooltip = widget {
@@ -72,7 +110,6 @@ types Breakdowns
 
 		vbox = {
 			layoutpolicy_horizontal = expanding
-
 			set_parent_size_to_minimum = yes
 			margin = { 14 8 }
 			margin_bottom = 18
@@ -86,7 +123,6 @@ types Breakdowns
 				block "income" {}
 				block "jankcome_gold" {}
 			}
-
 
 			vbox_gold_breakdown = {
 				name = "expenses"
@@ -170,13 +206,11 @@ types Breakdowns
 
 			vbox = {
 				layoutpolicy_horizontal = expanding
-
 				margin_top = 10
 
 				divider_light = {
 					layoutpolicy_horizontal = expanding
 				}
-
 
 				hbox = {
 					visible = "[DataModelHasItems( ValueBreakdown.GetSubValues )]"
@@ -185,7 +219,6 @@ types Breakdowns
 					text_single = {
 						visible = "[ValueBreakdown.ShouldShowValue]"
 						layoutpolicy_horizontal = expanding
-
 						text = "VALUE_BREAKDOWN_TOTAL"
 					}
 
@@ -247,66 +280,19 @@ types Breakdowns
 					visible = "[NotEqualTo_CFixedPoint(PlayerValueItem.GetBalance, '(CFixedPoint)0')]"
 					using = tooltip_ws
 
+					datacontext = "[PlayerValueItem.GetBalanceGained]"
+					tooltip_visible = "[ValueBreakdown.HasTooltip]"
+
 					tooltipwidget = {
-						widget = {
-							size = { 50 50 }
-							alwaystransparent = no
-
-							widget = {
-								name = "background"
-								using = DefaultTooltipBackground
-								size = { 100% 100% }
-								alwaystransparent = yes
-
-								blockoverride "frame_color" {
-									tintcolor = { 0.7 0.7 0.7 1}
-								}
-							}
-
-							vbox = {
-								set_parent_size_to_minimum = yes
-								margin = { 5 5 }
-								vbox = {
-									datacontext = "[PlayerValueItem.GetBalanceGained]"
-									visible = "[ValueBreakdown.HasTooltip]"
-									layoutpolicy_horizontal = expanding
-
-									background = {
-										using = Background_Area_Border_Solid
-									}
-
-									hbox = {
-										layoutpolicy_horizontal = expanding
-										margin = { 15 0 }
-										margin_bottom = 5
-
-										text_single = {
-											name = "gained_label"
-											layoutpolicy_horizontal = expanding
-											text = "GAINED_BREAKDOWN_LABEL_LINK"
-											fonttintcolor = "[TooltipInfo.GetTintColor]"
-										}
-
-										text_single = {
-											name = "gained_value"
-											visible = "[ValueBreakdown.ShouldShowValue]"
-											text = "[ValueBreakdown.GetValue]"
-											fonttintcolor = "[TooltipInfo.GetTintColor]"
-										}
-									}
-
-									widget_value_breakdown_tooltip = {
-										layoutpolicy_horizontal = expanding
-									}
-								}
-							}
+						widget_value_breakdown_list = {
+							blockoverride "header" {}
 						}
 					}
 				}
 
 				#i hate pdx i hate pdx i hate pdx
 				block "resurces_meme" {
-				}				
+				}
 			}
 
 			vbox = {
@@ -440,7 +426,7 @@ types Breakdowns
 		using = DefaultTooltipBackground
 		vbox = {
 			set_parent_size_to_minimum = yes
-			margin = { 16 8 }
+			margin = { 20 6 }
 			minimumsize = { 300 80 }
 
 			# Header
@@ -478,8 +464,8 @@ types Breakdowns
 							layoutpolicy_horizontal = expanding
 							autoresize = yes
 							name = "title"
+							margin_bottom = 18
 
-							fontsize_min = 14
 							using = Font_Size_Medium
 							fonttintcolor = "[TooltipInfo.GetTintColor]"
 
