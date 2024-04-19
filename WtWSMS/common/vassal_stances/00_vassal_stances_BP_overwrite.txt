@@ -1,0 +1,200 @@
+﻿##### Changed from Vanilla: Greco-Roman Social Traditions won't be minority stances with each other
+minority = {
+	score = 1000
+	heir_score = {
+		value = ai_honor
+		value = ai_compassion
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						NOT = {
+							faith = scope:liege.faith
+						}
+						faith = {
+							faith_hostility_level = {
+								target = scope:liege.faith
+								value > faith_astray_level
+							}
+						}
+						NOR = {
+							AND = {
+								scope:liege.faith.religion = religion:islam_religion
+								faith = {
+									has_doctrine = tenet_islamic_syncretism
+								}
+							}
+							AND = {
+								scope:liege.faith.religion = religion:judaism_religion
+								faith = {
+									has_doctrine = tenet_jewish_syncretism
+								}
+							}
+							AND = {
+								scope:liege.faith.religion = religion:christianity_religion
+								faith = {
+									has_doctrine = tenet_christian_syncretism
+								}
+							}
+							AND = {
+								scope:liege.faith = {
+									has_doctrine_parameter = unreformed
+								}
+								faith = {
+									has_doctrine = tenet_unreformed_syncretism
+								}
+							}
+						}
+					}
+					AND = {
+						NOT = {
+							culture = scope:liege.culture
+						}
+						OR = {
+							culture = {
+								cultural_acceptance = { target = scope:liege.culture value < 30 }
+							}
+							AND = {
+								any_character_struggle = {
+									involvement = involved
+									has_struggle_phase_parameter = struggle_different_culture_more_likely_to_use_minority_stance
+								}
+								culture = {
+									cultural_acceptance = { target = scope:liege.culture value < 70 }
+								}
+							}
+						}
+					}
+				}
+			}
+			add = 1000
+		}
+		if = {
+			limit = {
+				is_male = yes
+				scope:liege = {
+					has_realm_law = female_preference_law
+				}
+			}
+			multiply = 0.01
+		}
+		if = {
+			limit = {
+				is_female = yes
+				scope:liege = {
+					has_realm_law = male_preference_law
+				}
+			}
+			multiply = 0.01
+		}
+		if = {
+			limit = {
+				is_adult = no
+			}
+			multiply = 0.01
+			add = -100
+		}
+		if = {
+			limit = {
+				is_male = yes
+				scope:liege = {
+					has_realm_law = female_only_law
+				}
+			}
+			multiply = 0
+			add = -100
+		}
+		if = {
+			limit = {
+				is_female = yes
+				scope:liege = {
+					has_realm_law = male_only_law
+				}
+			}
+			multiply = 0
+			add = -100
+		}
+	}
+	is_valid = {
+		NAND = {
+			is_clergy = yes
+			faith = scope:liege.faith
+		}
+		NOR = {
+			culture = { has_cultural_tradition = tradition_loyal_soldiers }
+			culture = { has_cultural_tradition = tradition_fp2_malleable_subjects }
+		}
+		OR = {
+			AND = {
+				NOT = {
+					faith = scope:liege.faith
+				}
+				NOT = {
+					faith = scope:liege.faith
+				}
+				faith = {
+					faith_hostility_level = {
+						target = scope:liege.faith
+						value > faith_astray_level
+					}
+				}
+				NOR = {
+					AND = {
+						scope:liege.faith.religion = religion:islam_religion
+						faith = {
+							has_doctrine = tenet_islamic_syncretism
+						}
+					}
+					AND = {
+						scope:liege.faith.religion = religion:judaism_religion
+						faith = {
+							has_doctrine = tenet_jewish_syncretism
+						}
+					}
+					AND = {
+						scope:liege.faith.religion = religion:christianity_religion
+						faith = {
+							has_doctrine = tenet_christian_syncretism
+						}
+					}
+					AND = {
+						scope:liege.faith = {
+							has_doctrine_parameter = unreformed
+						}
+						faith = {
+							has_doctrine = tenet_unreformed_syncretism
+						}
+					}
+				}
+			}
+			AND = {
+				scope:liege = {
+					NOT = { has_trait = crusader_king } #First generation of crusader vassals will not prioritize their cultural rights.
+				}
+				NOT = {
+					culture = scope:liege.culture
+				}
+				OR = {
+					culture = {
+						cultural_acceptance = { target = scope:liege.culture value < 30 }
+					}
+					AND = {
+						any_character_struggle = {
+							involvement = involved
+							has_struggle_phase_parameter = struggle_different_culture_more_likely_to_use_minority_stance
+						}
+						culture = {
+							cultural_acceptance = { target = scope:liege.culture value < 70 }
+						}
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		NAND = {
+			culture = { has_cultural_parameter = greco_roman_social_tradition }
+			scope:liege.culture = { has_cultural_parameter = greco_roman_social_tradition }
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+}

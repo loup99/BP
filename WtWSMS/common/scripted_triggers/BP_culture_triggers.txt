@@ -4,11 +4,7 @@
 
 #Cultures able to request/reform the Roman Empires directly
 has_ability_to_reform_rome_directly_trigger = {
-	OR = {
-		has_cultural_tradition = tradition_roman_succession
-		has_cultural_tradition = tradition_latin_succession
-		has_cultural_tradition = tradition_byzantine_succession
-	}
+	has_cultural_parameter = can_restore_roman_empire
 }
 
 the_culture_or_parent_is_trigger = {
@@ -18,6 +14,20 @@ the_culture_or_parent_is_trigger = {
 		OR = {
 			this = $CULTURE$
 			any_parent_culture = { this = $CULTURE$ }
+		}
+	}
+}
+
+the_culture_or_parent_is_with_heritage_trigger = {
+	custom_description = {
+		text = the_culture_or_parent_is_with_heritage
+		subject = $CULTURE$
+		OR = {
+			this = $CULTURE$
+			AND = {
+				any_parent_culture = { this = $CULTURE$ }
+				has_same_culture_heritage = $CULTURE$
+			}
 		}
 	}
 }
@@ -65,16 +75,40 @@ descended_from_one_of_two_cultures_and_kept_heritage_trigger = {
 #NB: **Must** be used in "can_pick" scopes of traditions
 traditions_body_status_type_is_in_list_trigger = {
 	custom_description = {
-		text = cannot_have_more_than_one_body_status_tradition
-		OR = {
-			culture_tradition:tradition_marauders = { is_in_list = traits }
-			culture_tradition:tradition_marauders_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_unblemished_rulership = { is_in_list = traits }
-			culture_tradition:tradition_merciful_blindings = { is_in_list = traits }
-			culture_tradition:tradition_byzantine_succession = { is_in_list = traits }
-			culture_tradition:tradition_roman_succession = { is_in_list = traits }
-			culture_tradition:tradition_armenian_traditions = { is_in_list = traits }
-			culture_tradition:tradition_armenian_traditions_non_dlc = { is_in_list = traits }
+		text = more_than_one_body_status_tradition
+		NOR = {
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_marauders = $TRADITION$ } }
+				culture_tradition:tradition_marauders = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_marauders_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_marauders_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_unblemished_rulership = $TRADITION$ } }
+				culture_tradition:tradition_unblemished_rulership = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_merciful_blindings = $TRADITION$ } }
+				culture_tradition:tradition_merciful_blindings = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_byzantine_succession = $TRADITION$ } }
+				culture_tradition:tradition_byzantine_succession = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_roman_succession = $TRADITION$ } }
+				culture_tradition:tradition_roman_succession = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_armenian_traditions = $TRADITION$ } }
+				culture_tradition:tradition_armenian_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_armenian_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_armenian_traditions_non_dlc = { is_in_list = traits }
+			}
 		}
 	}
 }
@@ -82,14 +116,32 @@ traditions_body_status_type_is_in_list_trigger = {
 #Cultural Combat-type tradtions are mutually exclusive
 traditions_cultural_combat_type_is_in_list_trigger = {
 	custom_description = {
-		text = cannot_have_more_than_one_cultural_combat_tradition
-		OR = {
-			culture_tradition:tradition_gothic_warfare = { is_in_list = traits }
-			culture_tradition:tradition_vandalic_warfare = { is_in_list = traits }
-			culture_tradition:tradition_marauders = { is_in_list = traits }
-			culture_tradition:tradition_marauders_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_western_roman_legacy = { is_in_list = traits }
-			culture_tradition:tradition_roman_legacy = { is_in_list = traits }
+		text = more_than_one_cultural_combat_tradition
+		NOR = {
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_gothic_warfare = $TRADITION$ } }
+				culture_tradition:tradition_gothic_warfare = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_vandalic_warfare = $TRADITION$ } }
+				culture_tradition:tradition_vandalic_warfare = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_marauders = $TRADITION$ } }
+				culture_tradition:tradition_marauders = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_marauders_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_marauders_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_western_roman_legacy = $TRADITION$ } }
+				culture_tradition:tradition_western_roman_legacy = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_roman_legacy = $TRADITION$ } }
+				culture_tradition:tradition_roman_legacy = { is_in_list = traits }
+			}
 		}
 	}
 }
@@ -98,10 +150,16 @@ traditions_cultural_combat_type_is_in_list_trigger = {
 #NB: **Must** be used in "can_pick" scopes of traditions
 traditions_eunuch_status_type_is_in_list_trigger = {
 	custom_description = {
-		text = cannot_have_more_than_one_eunuch_status_tradition
-		OR = {
-			culture_tradition:tradition_court_eunuchs = { is_in_list = traits }
-			culture_tradition:tradition_byzantine_succession = { is_in_list = traits }
+		text = more_than_one_eunuch_status_tradition
+		NOR = {
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_court_eunuchs = $TRADITION$ } }
+				culture_tradition:tradition_court_eunuchs = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_byzantine_succession = $TRADITION$ } }
+				culture_tradition:tradition_byzantine_succession = { is_in_list = traits }
+			}
 		}
 	}
 }
@@ -109,55 +167,161 @@ traditions_eunuch_status_type_is_in_list_trigger = {
 #Traditions with "limitation_on_divergence_hybridization_culture_head" parameter
 traditions_monolithic_culture_type_is_in_list_trigger = {
 	custom_description = {
-		text = cannot_have_more_than_one_monolithic_culture_tradition
-		OR = {
-			culture_tradition:tradition_persian_traditions = { is_in_list = traits }
-			culture_tradition:tradition_hebrew_traditions = { is_in_list = traits }
-			culture_tradition:tradition_levantine_traditions = { is_in_list = traits }
-			culture_tradition:tradition_egyptian_traditions = { is_in_list = traits }
-			culture_tradition:tradition_hellenizers = { is_in_list = traits }
-			culture_tradition:tradition_colonizers = { is_in_list = traits }
-			culture_tradition:tradition_romance_culture = { is_in_list = traits }
-			culture_tradition:tradition_hellenic_culture = { is_in_list = traits }
-			culture_tradition:tradition_caucasian_mountain_homes = { is_in_list = traits }
+		text = more_than_one_monolithic_culture_tradition
+		#Trigger-if checks to make sure the tradition in question is _not_ included in the test
+		NOR = {
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_persian_traditions = $TRADITION$ } }
+				culture_tradition:tradition_persian_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hebrew_traditions = $TRADITION$ } }
+				culture_tradition:tradition_hebrew_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_levantine_traditions = $TRADITION$ } }
+				culture_tradition:tradition_levantine_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_egyptian_traditions = $TRADITION$ } }
+				culture_tradition:tradition_egyptian_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hellenizers = $TRADITION$ } }
+				culture_tradition:tradition_hellenizers = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_colonizers = $TRADITION$ } }
+				culture_tradition:tradition_colonizers = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_romance_culture = $TRADITION$ } }
+				culture_tradition:tradition_romance_culture = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hellenic_culture = $TRADITION$ } }
+				culture_tradition:tradition_hellenic_culture = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_caucasian_mountain_homes = $TRADITION$ } }
+				culture_tradition:tradition_caucasian_mountain_homes = { is_in_list = traits }
+			}
 			#DLC Variants
-			culture_tradition:tradition_persian_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_hebrew_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_levantine_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_egyptian_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_hellenizers_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_colonizers_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_romance_culture_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_hellenic_culture_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_caucasian_mountain_homes_non_dlc = { is_in_list = traits }
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_persian_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_persian_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hebrew_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_hebrew_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_levantine_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_levantine_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_egyptian_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_egyptian_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hellenizers_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_hellenizers_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_colonizers_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_colonizers_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_romance_culture_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_romance_culture_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hellenic_culture_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_hellenic_culture_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_caucasian_mountain_homes_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_caucasian_mountain_homes_non_dlc = { is_in_list = traits }
+			}
 		}
 	}
 }
 
 #To simplify code for selecting multiple "traditions"-type cultural traditions
 #NB: **Must** be used in "can_pick" scopes of traditions
-traditions_heritage_tradition_is_in_list_trigger = {
+traditions_legal_tradition_is_in_list_trigger = {
 	custom_description = {
-		text = cannot_have_more_than_one_heritage_culture_tradition
-		OR = {
-			culture_tradition:tradition_greek_succession = { is_in_list = traits }
-			culture_tradition:tradition_byzantine_succession = { is_in_list = traits }
-			culture_tradition:tradition_latin_succession = { is_in_list = traits }
-			culture_tradition:tradition_roman_succession = { is_in_list = traits }
-			culture_tradition:tradition_frankish_traditions = { is_in_list = traits }
-			culture_tradition:tradition_persian_traditions = { is_in_list = traits }
-			culture_tradition:tradition_armenian_traditions = { is_in_list = traits }
-			culture_tradition:tradition_hebrew_traditions = { is_in_list = traits }
-			culture_tradition:tradition_levantine_traditions = { is_in_list = traits }
-			culture_tradition:tradition_egyptian_traditions = { is_in_list = traits }
-			culture_tradition:tradition_asturian_hierarchy = { is_in_list = traits }
-			culture_tradition:tradition_caucasian_mountain_homes = { is_in_list = traits }
+		text = more_than_one_legal_tradition
+		NOR = {
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_greek_succession = $TRADITION$ } }
+				culture_tradition:tradition_greek_succession = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_byzantine_succession = $TRADITION$ } }
+				culture_tradition:tradition_byzantine_succession = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_latin_succession = $TRADITION$ } }
+				culture_tradition:tradition_latin_succession = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_roman_succession = $TRADITION$ } }
+				culture_tradition:tradition_roman_succession = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_frankish_traditions = $TRADITION$ } }
+				culture_tradition:tradition_frankish_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_persian_traditions = $TRADITION$ } }
+				culture_tradition:tradition_persian_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_armenian_traditions = $TRADITION$ } }
+				culture_tradition:tradition_armenian_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hebrew_traditions = $TRADITION$ } }
+				culture_tradition:tradition_hebrew_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_levantine_traditions = $TRADITION$ } }
+				culture_tradition:tradition_levantine_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_egyptian_traditions = $TRADITION$ } }
+				culture_tradition:tradition_egyptian_traditions = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_asturian_hierarchy = $TRADITION$ } }
+				culture_tradition:tradition_asturian_hierarchy = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_caucasian_mountain_homes = $TRADITION$ } }
+				culture_tradition:tradition_caucasian_mountain_homes = { is_in_list = traits }
+			}
 			#DLC Variants
-			culture_tradition:tradition_persian_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_hebrew_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_levantine_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_egyptian_traditions_non_dlc = { is_in_list = traits }
-			culture_tradition:tradition_caucasian_mountain_homes_non_dlc = { is_in_list = traits }
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_persian_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_persian_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_hebrew_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_hebrew_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_levantine_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_levantine_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_egyptian_traditions_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_egyptian_traditions_non_dlc = { is_in_list = traits }
+			}
+			trigger_if = {
+				limit = { NOT = { culture_tradition:tradition_caucasian_mountain_homes_non_dlc = $TRADITION$ } }
+				culture_tradition:tradition_caucasian_mountain_homes_non_dlc = { is_in_list = traits }
+			}
 		}
 	}
 }
@@ -287,10 +451,10 @@ starts_with_writing_trigger = {
 		this = { has_cultural_pillar = heritage_vasconic }
 		#Specific Cultures
 		this = culture:afghan
-		this = culture:mazanderani
+		this = culture:ancient_egyptian
 		this = culture:bactrian
 		this = culture:briton
-		this = culture:coptic
+		this = culture:copt
 		this = culture:english
 		this = culture:ethiopian
 		this = culture:gaelic
@@ -301,16 +465,19 @@ starts_with_writing_trigger = {
 		this = culture:hunas
 		this = culture:irish
 		this = culture:khwarezmian
+		this = culture:mazanderani
 		this = culture:minaean
 		this = culture:mzab_wargla
 		this = culture:nafusi
 		this = culture:numidian
 		this = culture:old_nubian
+		this = culture:qatarye
 		this = culture:riffian
 		this = culture:sabaean
 		this = culture:tacawit
 		this = culture:tamazight
 		this = culture:tashellhit
+		this = culture:trojan
 	}
 }
 
@@ -338,4 +505,19 @@ ai_will_not_convert_to_local_culture_trigger = {
 
 has_a_greco_roman_social_traditon_trigger = {
 	has_cultural_parameter = greco_roman_social_tradition
+}
+
+BP_is_valid_to_diverge_conditions_trigger = {
+	custom_description = {
+		text = must_not_be_under_culture_head_tradition
+		NAND = {
+			culture = { has_cultural_parameter = monolithic_culture_feature }
+			$CHAR$ = {
+				OR = {
+					any_liege_or_above = { this = $CHAR$.culture.culture_head }
+					any_liege_or_above = { this = $CHAR$.culture.culture_head.liege }
+				}
+			}
+		}
+	}
 }

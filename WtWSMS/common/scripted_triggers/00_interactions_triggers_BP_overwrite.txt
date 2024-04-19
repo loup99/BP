@@ -1,0 +1,50 @@
+﻿title_revocation_is_tyrannical_trigger = {
+	NOR = {
+		has_revoke_title_reason = scope:recipient
+		has_claim_on = scope:landed_title
+		faith = {
+			scope:recipient = {
+				NOT = { vassal_contract_has_flag = religiously_protected}
+			}
+			OR = {
+				AND = {
+					has_doctrine_parameter = pluralism_righteous_revocation_tyranny_reduced
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value = faith_evil_level
+					}
+				}
+				AND = {
+					has_doctrine_parameter = pluralism_fundamentalist_revocation_tyranny_minimal
+					faith_hostility_level = {
+						target = scope:recipient.faith
+						value >= faith_hostile_level
+					}
+				}
+			}
+		}
+	}
+	trigger_if = { #####
+		limit = {
+			can_revoke_title_freely_trigger = yes
+			scope:recipient = { can_revoke_title_freely_trigger = yes }
+		}
+		trigger_if = { #Titulars should not be revokable...
+			limit = { scope:target = { is_titular = yes } }
+			always = yes
+		}
+		trigger_else_if = {
+			limit = { scope:target.tier = tier_county }
+			scope:recipient.capital_county = scope:target.county
+		}
+		trigger_else_if = {
+			limit = { scope:target.tier = tier_duchy }
+			scope:recipient.capital_county.duchy = scope:target.duchy
+		}
+		trigger_else_if = {
+			limit = { scope:target.tier = tier_kingdom }
+			scope:recipient.capital_county.kingdom = scope:target.kingdom
+		}
+		trigger_else = { always = yes } #Otherwise, always tyrannical
+	}
+}

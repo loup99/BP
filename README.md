@@ -1,5 +1,5 @@
-# BP
-WtWSMS for CK3; built on top of 1.10.0
+# BP/volkeranderung
+WtWSMS for CK3; work around for GitHub issues temporarily
 
 Note: Only push error fixes to master/main. All other features should be on their own branch prior to merge.
 

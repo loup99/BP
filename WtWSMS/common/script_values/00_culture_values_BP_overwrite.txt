@@ -71,3 +71,218 @@ hybridization_threshold_value = {
 	min = 0
 	##### Changed from Vanilla ^^^^^
 }
+
+##### Changed from Vanilla: Added new game rule
+culture_divergence_cooldown = {
+	value = 100
+	# Game Rules
+	if = {
+		limit = {
+			has_game_rule = slower_hybrid_and_divergence_cooldowns
+		}
+		add = 100
+	}
+	else_if = {
+		limit = {
+			has_game_rule = faster_hybrid_and_divergence_cooldowns
+		}
+		add = -50
+	}
+	##### Changed from Vanilla vvvvv
+	else_if = { #All are mutually exclusive, but always good to put addition before multiplication
+		limit = { has_game_rule = bp_default_hybrid_and_divergence_cooldowns }
+		add = 50
+	}
+	##### Changed from Vanilla ^^^^^
+	else_if = {
+		limit = {
+			has_game_rule = no_hybrid_and_divergence_cooldowns
+		}
+		multiply = 0
+	}
+}
+
+##### Changed from Vanilla: Added new game rule
+culture_hybrid_cooldown = {
+	value = 50
+	# Game Rules
+	if = {
+		limit = {
+			has_game_rule = slower_hybrid_and_divergence_cooldowns
+		}
+		add = 50
+	}
+	else_if = {
+		limit = {
+			has_game_rule = faster_hybrid_and_divergence_cooldowns
+		}
+		add = -25
+	}
+	##### Changed from Vanilla vvvvv
+	else_if = { #All are mutually exclusive, but always good to put addition before multiplication
+		limit = { has_game_rule = bp_default_hybrid_and_divergence_cooldowns }
+		add = 50
+	}
+	##### Changed from Vanilla ^^^^^
+	else_if = {
+		limit = {
+			has_game_rule = no_hybrid_and_divergence_cooldowns
+		}
+		multiply = 0
+	}
+}
+
+general_grant_multiplier = 7.5
+
+##### Changed from Vanilla: Muted response to these actions (halved addition and multiplication)
+grant_title_cultural_acceptance_impact = {
+	value = 0
+	#How many counties am I giving away out of the total counties of this culture?
+	add = {
+		every_in_list = {
+			list = target_titles
+			limit = {
+				tier = tier_county
+				NOT = { culture = scope:actor.culture }
+				culture = scope:recipient.culture
+				NOT = {
+					recent_history = {
+						type = granted
+						years = 10
+					}
+				}
+			}
+			add = 0.5
+		}
+		divide = {
+			value = culture_number_of_counties
+			min = 1
+		}
+		multiply = general_grant_multiplier #If you are giving all counties with this culture self rule then you will increase acceptance by 15% - If this is changed also change revoke_title_culture_acceptance_impact
+
+		min = 0.5
+		max = general_grant_multiplier
+	}
+	add = { # Up to an additional 10 acceptance for Duchies or Kingdoms with a capital of this culture
+		every_in_list = { #2 per duchy
+			list = target_titles
+			if = {
+				limit = {
+					tier = tier_duchy
+					title_capital_county = {
+						NOT = { culture = scope:actor.culture }
+						culture = scope:recipient.culture
+					}
+					NOT = {
+						recent_history = {
+							type = granted
+							years = 10
+						}
+					}
+				}
+				add = 1
+			}
+		}
+		every_in_list = { #3 per Kingdom
+			list = target_titles
+			if = {
+				limit = {
+					tier = tier_kingdom
+					title_capital_county = {
+						NOT = { culture = scope:actor.culture }
+						culture = scope:recipient.culture
+					}
+					NOT = {
+						recent_history = {
+							type = granted
+							years = 10
+						}
+					}
+				}
+				add = 1.5
+			}
+		}
+		max = 5
+	}
+}
+
+##### Changed from Vanilla: Muted response to these actions (halved addition and multiplication)
+revoke_title_culture_acceptance_impact = {
+	value = 0
+	if = {
+		limit = {
+			scope:landed_title = {
+				tier = tier_county
+				NOT = { culture = scope:actor.culture }
+				culture = scope:recipient.culture
+				NOT = {
+					recent_history = {
+						type = revoked
+						years = 5
+					}
+				}
+			}
+		}
+		subtract = {
+			value = 1
+			divide = {
+				value = scope:landed_title.culture.culture_number_of_counties
+				min = 1
+			}
+			multiply = general_grant_multiplier #Same as used in grant above
+
+			min = 0.5
+			max = general_grant_multiplier
+		}
+	}
+	else = {
+		scope:landed_title = {
+			subtract = tier
+			add = 0.5 # because tier starts at the barony level and we want to start counting at the county level
+		}
+	}
+}
+
+##### Changed from Vanilla: Muted response to these actions (halved addition and multiplication)
+auto_grant_county_cultural_acceptance_impact = {
+	value = 0
+
+	add = {
+		value = 0.5
+		divide = {
+			value = scope:landed_title.culture.culture_number_of_counties
+			min = 1
+		}
+		multiply = general_grant_multiplier #Same as used in grant above
+
+		min = 0.5
+		max = general_grant_multiplier
+	}
+}
+
+##### Changed from Vanilla: Muted response to these actions (halved addition and multiplication)
+culture_conversion_acceptance_impact = { #The smaller a culture is, the more upset it will be.
+	subtract = {
+		value = 1
+		divide = {
+			value = scope:county.culture.culture_number_of_counties
+			min = 1
+		}
+		multiply = general_grant_multiplier #Same as used in grant above
+
+		# Due to minority system
+		divide = 3
+		min = 0.1
+		max = general_grant_multiplier
+	}
+}
+
+##### Changed from Vanilla: Muted response to these actions (halved resulting value)
+declare_war_culture_acceptance_impact = {
+	value = 0
+	scope:defender.primary_title = {
+		subtract = tier
+		add = 1
+	}
+	multiply = 0.5
+}

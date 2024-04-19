@@ -1,0 +1,1251 @@
+﻿namespace = BP_roman_senate_events
+
+#0001-0999: Western Senate Stuff
+##0001-0010: Disestablishment/Reestablishment of the Senate Effects
+##0011-0050: Senate deliberates on recognizing a new ruler
+##0051-0060: Becoming a Senator (various letter events)
+##0061-0070: Dynasty demands land
+
+#1000-1999: Eastern Senate Stuff
+##1001-1010: Disestablishment of the Senate Effects
+##1011-1050: Senate deliberates on recognizing a new ruler
+##1051-1060: You become a Senator (various letter events)
+##1061-1070: Dynasty demands land
+
+#2001+: General Senate Stuff
+## 2001-2010: Loss of Senatorial Support
+
+scripted_trigger always_dismiss_senate_trigger = {
+	OR = {
+		culture = culture:langobard
+	}
+}
+scripted_trigger has_roman_empire_trigger = {
+	$CHAR$ = {
+		OR = {
+			has_title = title:e_wre
+			has_title = title:e_byzantium
+			has_title = title:e_roman_empire
+		}
+	}
+}
+scripted_trigger has_government_of_different_universality_trigger = {
+	$CHAR$ = {
+		OR = {
+			has_government = eranshar_government
+			has_government = rajamandala_government
+		}
+	}
+}
+
+scripted_effect grant_land_to_family_effect = {
+	$UNLANDED_CHAR$ = {
+		get_title = $TARGET_BARONY$
+		add_opinion = {
+			target = $ACTOR$
+			modifier = granted_land_to_family
+		}
+	}
+	$UNLANDED_CHAR$.dynasty.dynast = {
+		add_opinion = {
+			target = $ACTOR$
+			modifier = granted_land_to_family
+		}
+	}
+	$TARGET_BARONY$.holder = {
+		every_liege_or_above = {
+			limit = {
+				NOT = { this = $ACTOR$ }
+				NOT = { this.dynasty = $UNLANDED_CHAR$.dynasty }
+			}
+			add_opinion = {
+				target = $ACTOR$
+				modifier = took_land_from_under_me
+			}
+			if = {
+				limit = { this = { is_ai = no } }
+				send_interface_toast = {
+					type = event_generic_neutral
+					title = the_top_liege_took_land_from_under_you
+					custom_tooltip = the_top_liege_took_land_from_under_you_tt
+					right_icon = title:d_senate
+				}
+			}
+		}
+	}
+}
+scripted_effect refused_land_effect = {
+	every_living_character = {
+		limit = {
+			has_trait = senator_$REGION$
+			character_is_in_senate_$REGION$_trigger = yes
+		}
+		add_opinion = {
+			target = $ACTOR$
+			modifier = refused_to_grant_land
+		}
+		if = {
+			limit = { this = { is_ai = no } }
+			send_interface_toast = {
+				type = event_generic_neutral
+				title = the_top_liege_refused_to_transfer_land
+				custom_tooltip = the_top_liege_refused_to_transfer_land_tt
+				right_icon = title:d_senate
+			}
+		}
+	}
+}
+scripted_effect sought_approval_effect = {
+	add_prestige = senate_approval_prestige_cost_$REGION$
+	scope:the_consul_$REGION$ = {
+		add_opinion = {
+			target = root
+			modifier = sought_senate_approval
+		}
+		trigger_event = { id = BP_roman_senate_events.$EVENT_ID$ days = 3 }
+	}
+	custom_tooltip = {
+		text = prestige_is_distributed_to_senators_$REGION$
+		every_living_character = {
+			limit = {
+				has_trait = senator_$REGION$
+				character_is_in_senate_$REGION$_trigger = yes
+			}
+			add_prestige = 10
+		}
+	}
+}
+scripted_effect ignored_senate_effect = {
+	add_prestige = senate_refusal_prestige_gain_$REGION$
+	scope:the_consul_$REGION$ = {
+		add_opinion = {
+			target = root
+			modifier = did_not_seek_senate_approval
+		}
+	}
+	
+	add_character_modifier = ignored_the_senate
+	update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_$REGION$ }
+	
+	custom_tooltip = {
+		text = prestige_is_taken_from_senators_$REGION$
+		every_living_character = {
+			limit = {
+				has_trait = senator_$REGION$
+				character_is_in_senate_$REGION$_trigger = yes
+			}
+			add_prestige = -10
+		}
+	}
+}
+#Legitimacy impacts
+scripted_effect senate_action_legitimacy_effect = {
+	$CHAR$ = {
+		if = { #On the off-chance something went horribly wrong and we have Indian or Persian rule of Rome, don't gain anything
+			limit = { has_government_of_different_universality_trigger = { CHAR = $CHAR$ } }
+			add_legitimacy = miniscule_legitimacy_$GAIN_LOSS$
+		}
+		else_if = { #IDC about your culture, if you're the Emperor, this shit matters
+			limit = { has_roman_empire_trigger = { CHAR = $CHAR$ } }
+			add_legitimacy = major_legitimacy_$GAIN_LOSS$
+		}
+		else_if = { #Otherwise, if you're a Roman culture, this still is nice
+			limit = { culture = { has_cultural_parameter = roman_cultural_trait_bonus } }
+			add_legitimacy = medium_legitimacy_$GAIN_LOSS$
+		}
+		else = { #That's nice...
+			add_legitimacy = minor_legitimacy_$GAIN_LOSS$
+		}
+	}
+}
+scripted_effect senate_approval_legitimacy_effect = {
+	senate_action_legitimacy_effect = {
+		CHAR = $CHAR$
+		GAIN_LOSS = gain
+	}
+}
+scripted_effect senate_disapproval_legitimacy_effect = {
+	senate_action_legitimacy_effect = {
+		CHAR = $CHAR$
+		GAIN_LOSS = loss
+	}
+}
+
+#0001-0999: Western Senate Stuff
+
+##0001-0010: Disestablishment/Reestablishment of the Senate Effects
+
+BP_roman_senate_events.0001 = { #Informational Event on Disestablishing the Senate
+	type = character_event
+	theme = realm
+	
+	immediate = {
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_west }
+			save_scope_as = the_consul
+		}
+	}
+	
+	left_portrait = { character = ROOT }
+	right_portrait = { character = scope:the_consul }
+	
+	title = BP_roman_senate_events.0001.t
+	desc = BP_roman_senate_events.0001.desc
+	
+	option = {
+		name = BP_roman_senate_events.0001.do_it
+		disestablished_senate_effect = {
+			REGION = west
+			MAIN_EMPIRE = e_wre
+			OPPOSITE_EMPIRE = e_byzantium
+		}
+		root = { save_scope_as = the_destroyer }
+		every_player = { trigger_event = { id = BP_roman_senate_events.0002 } }
+	}
+	option = { name = BP_roman_senate_events.0001.dont_do_it }
+}
+BP_roman_senate_events.0002 = { #Let everyone know what you did...
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = { character = scope:the_destroyer }
+	
+	title = BP_roman_senate_events.0002.t
+	desc = BP_roman_senate_events.0002.desc
+	
+	option = { name = BP_roman_senate_events.0002.a }
+}
+
+##0011-0050: West Senate deliberates on recognizing a new ruler
+
+BP_roman_senate_events.0011 = { #Ask the Senate for Approval
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = character_event
+	title = BP_roman_senate_events.0011.t
+	desc = BP_roman_senate_events.0011.desc
+	theme = realm
+	
+	immediate = {
+		root = { save_scope_as = the_liege_west }
+		root = { set_variable = { name = asked_the_senate_recently days = 15 } }
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_west }
+			save_scope_as = the_consul_west
+		}
+	}
+	
+	left_portrait = {
+		character = ROOT
+		animation = personality_rational
+	}
+	
+	right_portrait = {
+		character = scope:the_consul_west
+		animation = personality_rational
+	}
+	
+	option = { #Ask to get Senate Approval
+		name = BP_roman_senate_events.0011.seek_approval
+		custom_tooltip = BP_roman_senate_events.0011.seek_approval.tootip
+		
+		sought_approval_effect = {
+			REGION = west
+			EVENT_ID = 0012
+		}
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = yes
+			}
+		}
+	}
+	
+	option = { #Ignore the Senate
+		name = BP_roman_senate_events.0011.dismiss_the_senate
+		custom_tooltip = BP_roman_senate_events.0011.dismiss_the_senate.tooltip
+		
+		ignored_senate_effect = { REGION = west }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = no
+			}
+		}
+	}
+	
+	option = { #Wait, let me think...
+		name = BP_roman_senate_events.0011.wait
+		custom_tooltip = BP_roman_senate_events.0011.wait.tooltip
+		remove_variable = already_asked_the_senate
+		remove_variable = asked_the_senate_recently
+		update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_west }
+	}
+}
+BP_roman_senate_events.0012 = { #The Senate deliberates
+	type = character_event
+	title = BP_roman_senate_events.0012.t
+	desc = BP_roman_senate_events.0012.desc
+	theme = realm
+	
+	option = { #Approve of the emperor
+		name = BP_roman_senate_events.0012.approve
+		scope:the_liege_west = { trigger_event = { id = BP_roman_senate_events.0013 days = 3 } }
+	}
+	
+	option = { #Disapprove of the emperor
+		name = BP_roman_senate_events.0012.disapprove
+		trigger = { is_ai = no } ##### TODO (Beta): Make the Senate actually negotiate for the crown
+		scope:the_liege_west = { trigger_event = { id = BP_roman_senate_events.0014 days = 3 } }
+	}
+}
+BP_roman_senate_events.0013 = { #The Senate Approves!
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0013.opening }
+	desc = BP_roman_senate_events.0013.desc
+	
+	sender = scope:the_consul_west
+	
+	immediate = {}
+	
+	option = { #Approve of the emperor
+		name = BP_roman_senate_events.0013.a
+		scope:the_liege_west = {
+			add_character_modifier = approved_by_the_senate
+			senate_approval_legitimacy_effect = { CHAR = scope:the_liege_west }
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
+			add_opinion = {
+				target = scope:the_consul_west
+				modifier = pacified_opinion
+			}
+		}
+		update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_west }
+	}
+}
+BP_roman_senate_events.0014 = { #The Senate Rejects!
+	type = letter_event
+	opening = { desc =  BP_roman_senate_events.0014.opening }
+	desc = BP_roman_senate_events.0014.desc
+	sender = scope:the_consul_west
+	
+	immediate = {}
+	
+	option = { #Boo!
+		name = BP_roman_senate_events.0014.a
+		scope:the_liege_west = {
+			add_character_modifier = rejected_by_the_senate
+			senate_disapproval_legitimacy_effect = { CHAR = scope:the_liege_west }
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
+			add_opinion = {
+				target = scope:the_consul_west
+				modifier = insulted_opinion
+			}
+		}
+		update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_west }
+	}
+}
+
+#You now rule Rome, so the Senate bugs you about it...
+BP_roman_senate_events.0020 = { #The Consul (or representative) of the Western Senate requests you ask the Senate
+	trigger = {
+		root = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		NOT = { root = { has_variable = asked_the_senate_recently } }
+	}
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0020.opening }
+	desc = BP_roman_senate_events.0020.desc
+	
+	sender = scope:the_consul_west
+	
+	immediate = {
+		root = { save_scope_as = the_liege_west }
+		root = { set_variable = { name = asked_the_senate_recently days = 15 } }
+	}
+	
+	option = { #Seek approval
+		name = BP_roman_senate_events.0020.seek_approval
+		custom_tooltip = BP_roman_senate_events.0020.seek_approval.tootip
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		sought_approval_effect = {
+			REGION = west
+			EVENT_ID = 0012
+		}
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = yes
+			}
+		}
+	}
+	option = { #Reject approval
+		name = BP_roman_senate_events.0020.ignore_the_senate
+		custom_tooltip = BP_roman_senate_events.0020.dismiss_the_senate.tooltip
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ignored_senate_effect = { REGION = west }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = no
+			}
+		}
+	}
+	option = { #Stall the Senate
+		name = BP_roman_senate_events.0020.stall
+		if = { limit = { NOT = { has_character_modifier = stalled_the_senate } } add_character_modifier = stalled_the_senate }
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		add_prestige = -50
+	}
+}
+
+##0051-0060: Becoming a Senator & related (various letter events)
+BP_roman_senate_events.0051 = { #You're 25 and now a (Western) Senator!
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0051.opening }
+	desc = BP_roman_senate_events.0051.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.0051.a
+		add_trait = senator_west
+	}
+}
+BP_roman_senate_events.0052 = { #The consul or Rome holder made you a Senator
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0052.opening }
+	desc = BP_roman_senate_events.0052.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.0052.a
+		made_a_senator_effect = {
+			ACTOR = scope:actor
+			REGION = west
+		}
+	}
+}
+BP_roman_senate_events.0053 = { #The consul or Rome holder elevated your dynasty
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0053.opening }
+	desc = BP_roman_senate_events.0053.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.0053.a
+		elevated_a_dynasty_effect = {
+			ACTOR = scope:the_sender
+			RECIPIENT = root
+			REGION = west
+			THE_CITY = b_roma
+		}
+	}
+}
+BP_roman_senate_events.0054 = { #You've been nominated to become consul
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0054.opening }
+	desc = BP_roman_senate_events.0054.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.0054.a
+		nominated_consul_effect = {
+			ACTOR = scope:actor
+			REGION = west
+		}
+	}
+}
+
+##0061-0070: Dynasty demands land
+BP_roman_senate_events.0061 = { #Top Liege recieves message
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0061.opening }
+	desc = BP_roman_senate_events.0061.desc
+	
+	sender = scope:the_sender
+	
+	immediate = { root = { save_scope_as = rome_holder } }
+	
+	option = {
+		name = BP_roman_senate_events.0061.a
+		scope:the_sender = { trigger_event = { id = BP_roman_senate_events.0062 days = { 1 3 } } }
+		add_prestige = -25
+		
+		show_as_tooltip = {
+			grant_land_to_family_effect = {
+				UNLANDED_CHAR = scope:the_unlanded
+				TARGET_BARONY = scope:target_barony
+				ACTOR = root
+			}
+		}
+		
+		ai_chance = {
+			base = 50
+			modifier = { #Bold characters are likely to try to bend the Senate to their will
+				add = -25
+				OR = {
+					root = { has_trait = ambitious }
+					root = { has_trait = arrogant }
+					root = { has_trait = paranoid }
+					root = { has_trait = stubborn }
+				}
+			}
+			modifier = { #Lazy, content personalities will be less likely to care about the Senate
+				add = 25
+				OR = {
+					root = { has_trait = content }
+					root = { has_trait = lazy }
+					root = { has_trait = shy }
+					root = { has_trait = trusting }
+				}
+			}
+			#Less likely to piss off power vassals; zeros out if sender and vassal loosing land are both direct vassals
+			modifier = {
+				add = 25
+				scope:the_sender = { is_powerful_vassal_of = root }
+			}
+			modifier = {
+				add = -25
+				scope:target_barony.holder = { any_liege_or_above = { is_powerful_vassal_of = root } }
+				NOT = { scope:the_sender = { is_liege_or_above_of = scope:target_barony.holder } }
+				NOT = { scope:the_sender = { is_powerful_vassal_of = root } }
+			}
+		}
+	}
+	option = {
+		name = BP_roman_senate_events.0061.b
+		scope:the_sender = { trigger_event = { id = BP_roman_senate_events.0063 days = { 1 3 } } }
+		add_prestige = 25
+		
+		show_as_tooltip = {
+			custom_tooltip = {
+				text = every_senator_is_annoyed_west
+				refused_land_effect = {
+					ACTOR = root
+					REGION = west
+				}
+			}
+		}
+		
+		ai_chance = {
+			base = 50
+			modifier = { #Bold characters are likely to try to bend the Senate to their will
+				add = 25
+				OR = {
+					root = { has_trait = ambitious }
+					root = { has_trait = arrogant }
+					root = { has_trait = paranoid }
+					root = { has_trait = stubborn }
+				}
+			}
+			modifier = { #Lazy, content personalities will be less likely to care about the Senate
+				add = -25
+				OR = {
+					root = { has_trait = content }
+					root = { has_trait = lazy }
+					root = { has_trait = shy }
+					root = { has_trait = trusting }
+				}
+			}
+			#Less likely to piss off power vassals; zeros out if sender and vassal loosing land are both direct vassals
+			modifier = {
+				add = -25
+				scope:the_sender = { is_powerful_vassal_of = root }
+			}
+			modifier = {
+				add = 25
+				scope:target_barony.holder = { any_liege_or_above = { is_powerful_vassal_of = root } }
+				NOT = { scope:the_sender = { is_liege_or_above_of = scope:target_barony.holder } }
+				NOT = { scope:the_sender = { is_powerful_vassal_of = root } }
+			}
+		}
+	}
+}
+BP_roman_senate_events.0062 = { #Top Liege Says yes
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0062.opening }
+	desc = BP_roman_senate_events.0062.desc
+	
+	sender = scope:rome_holder
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.0062.a
+		
+		grant_land_to_family_effect = {
+			UNLANDED_CHAR = scope:the_unlanded
+			TARGET_BARONY = scope:target_barony
+			ACTOR = scope:rome_holder
+		}
+	}
+}
+BP_roman_senate_events.0063 = { #Top Liege Says No
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0063.opening }
+	desc = BP_roman_senate_events.0063.desc
+	
+	sender = scope:rome_holder
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.0063.a
+		custom_tooltip = {
+			text = every_senator_is_annoyed_west
+			refused_land_effect = {
+				ACTOR = scope:rome_holder
+				REGION = west
+			}
+		}
+	}
+}
+
+#1001-1999: Eastern Senate Stuff
+
+##1001-1010: Disestablishment of the Senate Effects
+
+BP_roman_senate_events.1001 = { #Informational Event on Disestablishing the Senate
+	type = character_event
+	theme = realm
+	
+	immediate = {
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_east }
+			save_scope_as = the_consul
+		}
+	}
+	
+	left_portrait = { character = ROOT }
+	right_portrait = { character = scope:the_consul }
+	
+	title = BP_roman_senate_events.1001.t
+	
+	desc = BP_roman_senate_events.1001.desc
+	
+	option = {
+		name = BP_roman_senate_events.1001.do_it
+		disestablished_senate_effect = {
+			REGION = east
+			MAIN_EMPIRE = e_byzantium
+			OPPOSITE_EMPIRE = e_wre
+		}
+		root = { save_scope_as = the_destroyer }
+		every_player = { trigger_event = { id = BP_roman_senate_events.1002 } }
+	}
+	option = { name = BP_roman_senate_events.1001.dont_do_it }
+}
+BP_roman_senate_events.1002 = { #Let everyone know what you did...
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = { character = scope:the_destroyer }
+	
+	title = BP_roman_senate_events.1002.t
+	desc = BP_roman_senate_events.1002.desc
+	
+	option = { name = BP_roman_senate_events.1002.a }
+}
+
+##1011-1050: East Senate deliberates on recognizing a new ruler
+
+BP_roman_senate_events.1011 = { #Ask the Senate for Approval
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = character_event
+	title = BP_roman_senate_events.1011.t
+	desc = BP_roman_senate_events.1011.desc
+	theme = realm
+	
+	immediate = {
+		root = { save_scope_as = the_liege_east }
+		root = { set_variable = { name = asked_the_senate_recently days = 15 } }
+		every_living_character = {
+			limit = { has_character_modifier = roman_consul_east }
+			save_scope_as = the_consul_east
+		}
+	}
+	
+	left_portrait = {
+		character = ROOT
+		animation = personality_rational
+	}
+	
+	right_portrait = {
+		character = scope:the_consul_east
+		animation = personality_rational
+	}
+	
+	option = { #Ask to get Senate Approval
+		name = BP_roman_senate_events.1011.seek_approval
+		custom_tooltip = BP_roman_senate_events.1011.seek_approval.tootip
+		
+		sought_approval_effect = {
+			REGION = east
+			EVENT_ID = 1012
+		}
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = yes
+			}
+		}
+	}
+	
+	option = { #Ignore the Senate
+		name = BP_roman_senate_events.1011.dismiss_the_senate
+		custom_tooltip = BP_roman_senate_events.1011.dismiss_the_senate.tooltip
+		
+		ignored_senate_effect = { REGION = east }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = no
+			}
+		}
+	}
+	
+	option = { #Wait, let me think...
+		name = BP_roman_senate_events.1011.wait
+		custom_tooltip = BP_roman_senate_events.1011.wait.tooltip
+		remove_variable = already_asked_the_senate
+		remove_variable = asked_the_senate_recently
+		update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_east }
+	}
+}
+BP_roman_senate_events.1012 = { #The Senate deliberates
+	type = character_event
+	title = BP_roman_senate_events.1012.t
+	desc = BP_roman_senate_events.1012.desc
+	theme = realm
+	
+	option = { #Approve of the emperor
+		name = BP_roman_senate_events.0012.approve
+		scope:the_liege_east = { trigger_event = { id = BP_roman_senate_events.1013 days = 3 } }
+	}
+	
+	option = { #Disapprove of the emperor
+		name = BP_roman_senate_events.0012.disapprove
+		trigger = { is_ai = no } ##### TODO (Beta): Make the Senate actually negotiate for the crown
+		scope:the_liege_east = { trigger_event = { id = BP_roman_senate_events.1014 days = 3 } }
+	}
+}
+BP_roman_senate_events.1013 = { #The Senate Approves!
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.0013.opening }
+	desc = BP_roman_senate_events.1013.desc
+	
+	sender = scope:the_consul_east
+	
+	immediate = {}
+	
+	option = { #Approve of the emperor
+		name = BP_roman_senate_events.1013.a
+		scope:the_liege_east = {
+			add_character_modifier = approved_by_the_senate
+			senate_approval_legitimacy_effect = { CHAR = scope:the_liege_east }
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
+			add_opinion = {
+				target = scope:the_consul_east
+				modifier = pacified_opinion
+			}
+			update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_east }
+		}
+	}
+}
+BP_roman_senate_events.1014 = { #The Senate Rejects!
+	type = letter_event
+	opening = { desc =  BP_roman_senate_events.1014.opening }
+	desc = BP_roman_senate_events.1014.desc
+	sender = scope:the_consul_east
+	
+	immediate = {}
+	
+	option = { #Boo!
+		name = BP_roman_senate_events.1014.a
+		scope:the_liege_east = {
+			add_character_modifier = rejected_by_the_senate
+			senate_disapproval_legitimacy_effect = { CHAR = scope:the_liege_east }
+			if = { limit = { has_character_modifier = stalled_the_senate } remove_character_modifier = stalled_the_senate }
+			add_opinion = {
+				target = scope:the_consul_east
+				modifier = insulted_opinion
+			}
+			update_all_senate_opinion_about_character_effect = { ACTOR = scope:the_liege_east }
+		}
+	}
+}
+
+#You now rule Rome, so the Senate bugs you about it...
+BP_roman_senate_events.1020 = { #The Consul (or representative) of the Western Senate requests you ask the Senate
+	trigger = {
+		root = { valid_characteristics_to_interact_with_senate_trigger = yes }
+		NOT = { root = { has_variable = asked_the_senate_recently } }
+	}
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1020.opening }
+	desc = BP_roman_senate_events.1020.desc
+	
+	sender = scope:the_consul_east
+	
+	immediate = {
+		root = { save_scope_as = the_liege_east }
+		root = { set_variable = { name = asked_the_senate_recently days = 15 } }
+	}
+	
+	option = { #Seek approval
+		name = BP_roman_senate_events.1020.seek_approval
+		custom_tooltip = BP_roman_senate_events.1020.seek_approval.tootip
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		sought_approval_effect = {
+			REGION = east
+			EVENT_ID = 1012
+		}
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = yes
+			}
+		}
+	}
+	option = { #Reject approval
+		name = BP_roman_senate_events.1020.ignore_the_senate
+		custom_tooltip = BP_roman_senate_events.1020.dismiss_the_senate.tooltip
+		
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		
+		ignored_senate_effect = { REGION = east }
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				always_dismiss_senate_trigger = no
+			}
+		}
+	}
+	option = { #Stall the Senate
+		name = BP_roman_senate_events.1020.stall
+		if = { limit = { NOT = { has_character_modifier = stalled_the_senate } } add_character_modifier = stalled_the_senate }
+		if = { limit = { has_variable = new_top_liege_of_a_city } remove_variable = new_top_liege_of_a_city }
+		add_prestige = -50
+	}
+}
+
+##1051-1060: You become a Senator (various letter events)
+BP_roman_senate_events.1051 = { #You're 25 and now a(n Eastern) Senator!
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1051.opening }
+	desc = BP_roman_senate_events.1051.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.1051.a
+		add_trait = senator_east
+	}
+}
+BP_roman_senate_events.1052 = { #The consul or Constantinople holder made you a Senator
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1052.opening }
+	desc = BP_roman_senate_events.1052.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.1052.a
+		made_a_senator_effect = {
+			ACTOR = scope:actor
+			REGION = east
+		}
+	}
+}
+BP_roman_senate_events.1053 = { #The consul or Constantinople holder elevated your dynasty
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1053.opening }
+	desc = BP_roman_senate_events.1053.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.1053.a
+		elevated_a_dynasty_effect = {
+			ACTOR = scope:the_sender
+			RECIPIENT = root
+			REGION = east
+			THE_CITY = b_constantinople
+		}
+	}
+}
+BP_roman_senate_events.1054 = { #You've been nominated to become consul
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1054.opening }
+	desc = BP_roman_senate_events.1054.desc
+	
+	sender = scope:the_sender
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.1054.a
+		nominated_consul_effect = {
+			ACTOR = scope:actor
+			REGION = west
+		}
+	}
+}
+
+##1061-1070: Dynasty demands land
+BP_roman_senate_events.1061 = { #Top Liege recieves message
+	trigger = { root = { valid_characteristics_to_interact_with_senate_trigger = yes } }
+	
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1061.opening }
+	desc = BP_roman_senate_events.1061.desc
+	
+	sender = scope:the_sender
+	
+	immediate = { root = { save_scope_as = constantinople_holder } }
+	
+	option = {
+		name = BP_roman_senate_events.1061.a
+		scope:the_sender = { trigger_event = { id = BP_roman_senate_events.1062 days = { 1 3 } } }
+		add_prestige = -25
+		
+		show_as_tooltip = {
+			grant_land_to_family_effect = {
+				UNLANDED_CHAR = scope:the_unlanded
+				TARGET_BARONY = scope:target_barony
+				ACTOR = root
+			}
+		}
+		
+		ai_chance = {
+			base = 50
+			modifier = { #Bold characters are likely to try to bend the Senate to their will
+				add = -25
+				OR = {
+					root = { has_trait = ambitious }
+					root = { has_trait = arrogant }
+					root = { has_trait = paranoid }
+					root = { has_trait = stubborn }
+				}
+			}
+			modifier = { #Lazy, content personalities will be less likely to care about the Senate
+				add = 25
+				OR = {
+					root = { has_trait = content }
+					root = { has_trait = lazy }
+					root = { has_trait = shy }
+					root = { has_trait = trusting }
+				}
+			}
+			#Less likely to piss off power vassals; zeros out if sender and vassal loosing land are both direct vassals
+			modifier = {
+				add = 25
+				scope:the_sender = { is_powerful_vassal_of = root }
+			}
+			modifier = {
+				add = -25
+				scope:target_barony.holder = { any_liege_or_above = { is_powerful_vassal_of = root } }
+				NOT = { scope:the_sender = { is_liege_or_above_of = scope:target_barony.holder } }
+				NOT = { scope:the_sender = { is_powerful_vassal_of = root } }
+			}
+		}
+	}
+	option = {
+		name = BP_roman_senate_events.1061.b
+		scope:the_sender = { trigger_event = { id = BP_roman_senate_events.1063 days = { 1 3 } } }
+		add_prestige = 25
+		
+		show_as_tooltip = {
+			custom_tooltip = {
+				text = every_senator_is_annoyed_east
+				refused_land_effect = {
+					ACTOR = root
+					REGION = east
+				}
+			}
+		}
+		
+		ai_chance = {
+			base = 50
+			modifier = { #Bold characters are likely to try to bend the Senate to their will
+				add = 25
+				OR = {
+					root = { has_trait = ambitious }
+					root = { has_trait = arrogant }
+					root = { has_trait = paranoid }
+					root = { has_trait = stubborn }
+				}
+			}
+			modifier = { #Lazy, content personalities will be less likely to care about the Senate
+				add = -25
+				OR = {
+					root = { has_trait = content }
+					root = { has_trait = lazy }
+					root = { has_trait = shy }
+					root = { has_trait = trusting }
+				}
+			}
+			#Less likely to piss off power vassals; zeros out if sender and vassal loosing land are both direct vassals
+			modifier = {
+				add = -25
+				scope:the_sender = { is_powerful_vassal_of = root }
+			}
+			modifier = {
+				add = 25
+				scope:target_barony.holder = { any_liege_or_above = { is_powerful_vassal_of = root } }
+				NOT = { scope:the_sender = { is_liege_or_above_of = scope:target_barony.holder } }
+				NOT = { scope:the_sender = { is_powerful_vassal_of = root } }
+			}
+		}
+	}
+}
+BP_roman_senate_events.1062 = { #Top Liege Says yes
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1062.opening }
+	desc = BP_roman_senate_events.1062.desc
+	
+	sender = scope:constantinople_holder
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.1062.a
+		
+		grant_land_to_family_effect = {
+			UNLANDED_CHAR = scope:the_unlanded
+			TARGET_BARONY = scope:target_barony
+			ACTOR = scope:constantinople_holder
+		}
+	}
+}
+BP_roman_senate_events.1063 = { #Top Liege Says No
+	type = letter_event
+	opening = { desc = BP_roman_senate_events.1063.opening }
+	desc = BP_roman_senate_events.1063.desc
+	
+	sender = scope:constantinople_holder
+	
+	immediate = {}
+	
+	option = {
+		name = BP_roman_senate_events.1063.a
+		custom_tooltip = {
+			text = every_senator_is_annoyed_west
+			refused_land_effect = {
+				ACTOR = scope:constantinople_holder
+				REGION = east
+			}
+		}
+	}
+}
+
+#2001+: General Senate Stuff
+
+## 2001-2010: Loss of Senatorial Support
+## 2011-2020: Collapse of the Senate
+
+## 2001-2010: Loss of Senatorial Support
+BP_roman_senate_events.2001 = { #You are now a vassal, so the senate no longer supports you
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = { character = root }
+	
+	title = BP_roman_senate_events.2001.t
+	desc = BP_roman_senate_events.2001.desc
+	
+	option = {
+		name = BP_roman_senate_events.2001.a
+		if = {
+			limit = { has_character_modifier = approved_by_the_senate }
+			remove_character_modifier = approved_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = rejected_by_the_senate }
+			remove_character_modifier = rejected_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = ignored_the_senate }
+			remove_character_modifier = ignored_the_senate
+		}
+		update_senator_opinion_about_character_effect = { ACTOR = root }
+	}
+}
+BP_roman_senate_events.2002 = { #You no longer rule Rome or Constantinople
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = { character = root }
+	
+	title = BP_roman_senate_events.2002.t
+	desc = BP_roman_senate_events.2002.desc
+	
+	option = {
+		name = BP_roman_senate_events.2002.a
+		if = {
+			limit = { has_character_modifier = approved_by_the_senate }
+			remove_character_modifier = approved_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = rejected_by_the_senate }
+			remove_character_modifier = rejected_by_the_senate
+		}
+		if = {
+			limit = { has_character_modifier = ignored_the_senate }
+			remove_character_modifier = ignored_the_senate
+		}
+		update_senator_opinion_about_character_effect = { ACTOR = root }
+	}
+}
+
+## 2011-2020: Collapse of the Western Senate
+BP_roman_senate_events.2011 = { #Yearly check that the Senate hasn't collapsed
+	scope = none
+	hidden = yes
+	
+	trigger = { #At least one of the Senates is empty
+		trigger_if = {
+			limit = { exists = scope:dying_senator }
+			OR = {
+				no_remaining_senators_after_this_one_in_west_senate_trigger = { ACTOR = scope:dying_senator }
+				no_remaining_senators_after_this_one_in_east_senate_trigger = { ACTOR = scope:dying_senator }
+			}
+		}
+		trigger_else = {
+			OR = {
+				no_remaining_senators_in_west_senate_trigger = yes
+				no_remaining_senators_in_east_senate_trigger = yes
+			}
+		}
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					no_remaining_senators_in_west_senate_trigger = yes
+					trigger_if = {
+						limit = { exists = scope:dying_senator }
+						no_remaining_senators_after_this_one_in_west_senate_trigger = { ACTOR = scope:dying_senator }
+					}
+				}
+			}
+			destroy_senate_effect = { REGION = west }
+			title:b_roma = { save_scope_as = the_city }
+			every_ruler = { limit = { is_ai = no } trigger_event = { id = BP_roman_senate_events.2012 } }
+		}
+		if = {
+			limit = { no_remaining_senators_in_east_senate_trigger = yes }
+			limit = {
+				OR = {
+					no_remaining_senators_in_east_senate_trigger = yes
+					trigger_if = {
+						limit = { exists = scope:dying_senator }
+						no_remaining_senators_after_this_one_in_east_senate_trigger = { ACTOR = scope:dying_senator }
+					}
+				}
+			}
+			destroy_senate_effect = { REGION = east }
+			title:b_constantinople = { save_scope_as = the_city }
+			every_ruler = { limit = { is_ai = no } trigger_event = { id = BP_roman_senate_events.2013 } }
+		}
+	}
+}
+
+BP_roman_senate_events.2012 = { #Collapse of the Senate, no people
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = {}
+	
+	title = BP_roman_senate_events.2012.t
+	desc = BP_roman_senate_events.2012.desc
+	
+	option = {
+		name = BP_roman_senate_events.2012.a
+	}
+}
+BP_roman_senate_events.2013 = { #Collapse of the Senate, by decision
+	type = character_event
+	theme = realm
+	
+	immediate = {}
+	
+	right_portrait = {}
+	
+	title = BP_roman_senate_events.2013.t
+	desc = BP_roman_senate_events.2013.desc
+	
+	option = {
+		name = BP_roman_senate_events.2013.a
+	}
+}

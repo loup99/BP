@@ -1,0 +1,231 @@
+﻿types fedualization_window
+{
+	type feudalization_box = vbox {
+	name = "feudalization_box"
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+	using = Animation_Tab_Switch
+	size = { 100% 100% }
+	visible = "[GetPlayer.GetGovernment.IsType( 'subroman_government' )]"
+
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			#minimumsize = { 0 350 }
+			
+			text_single = {
+				name = "minority_section_heading"
+				text = "SUBROMAN_FEATURES"
+				max_width = 250
+			}
+			
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				using = Background_Inset
+				
+				vbox = { #Feudalization Track
+					name = "fedualization_track"
+					datamodel = "[MyRealmWindow.GetRealmLaws]"
+					ignoreinvisible = yes
+					
+					item = {
+						vbox = {
+							datacontext = "[GuiLawGroup.GetLawGroup]"
+							visible = "[And( GuiLawGroup.GetLawGroup.HasFlag( 'feudalization_track' ), GuiLawGroup.IsAvailable )]"
+							ignoreinvisible = yes
+							
+							text_label_center = {
+								text = "[LawGroup.GetName]"
+							}
+							
+							spacer = {
+								visible = "[GetPlayer.HasLiege]"
+								size = { 5 8 }
+							}
+							
+							vbox = { #Container for the actual feudal transition stuff
+								datamodel = "[GuiLawGroup.GetLaws]"
+								item = {
+									icon_button_decorative = {
+										datacontext = "[GuiLaw.GetLaw]"
+										size = { 60 60 }
+										enabled = "[Or(GuiLaw.CanEnact, GuiLaw.IsEnacted)]"
+										down = "[GuiLaw.IsEnacted]"
+										alwaystransparent = "[GuiLaw.IsEnacted]"
+										onclick = "[GuiLaw.Enact]"
+										tooltipwidget = { pass_law_tooltip = {} }
+										using = tooltip_below
+
+										icon_button_decorative = {
+											size = { 54 54 }
+											parentanchor = center
+											alwaystransparent = yes
+										}
+
+										button_icon = {
+											visible = "[Not(GuiLaw.IsEnacted)]"
+											texture = "[Law.GetIcon]"
+											parentanchor = center
+											size = { 42 42 }
+											alwaystransparent = yes
+										}
+
+										icon = {
+											visible = "[And( GuiLaw.IsEnacted , Not( GuiLaw.CanEnact ) )]"
+											texture = "[Law.GetIcon]"
+											parentanchor = center
+											size = { 42 42 }
+											alwaystransparent = yes
+
+											using = Master_Button_Modify_Texture
+
+											blockoverride "master_color_frame" {
+												frame = 2
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				vbox = { #Other Features (Taxation Infrastructure)
+					layoutpolicy_vertical = expanding
+					hbox = { #Taxation Policy
+						#layoutpolicy_vertical = expanding
+						datamodel = "[MyRealmWindow.GetRealmLaws]"
+						ignoreinvisible = yes
+						
+						item = {
+							vbox = {
+								datacontext = "[GuiLawGroup.GetLawGroup]"
+								visible = "[And( GuiLawGroup.GetLawGroup.HasFlag( 'subroman_taxation' ), GuiLawGroup.IsAvailable )]"
+								ignoreinvisible = yes
+								
+								text_label_center = {
+									text = "[LawGroup.GetName]"
+								}
+								
+								spacer = {
+									visible = "[GetPlayer.HasLiege]"
+									size = { 5 8 }
+								}
+								
+								hbox = { #Container for the actual taxation stuff
+									datamodel = "[GuiLawGroup.GetLaws]"
+									item = {
+										icon_button_decorative = {
+											datacontext = "[GuiLaw.GetLaw]"
+											size = { 60 60 }
+											enabled = "[Or(GuiLaw.CanEnact, GuiLaw.IsEnacted)]"
+											down = "[GuiLaw.IsEnacted]"
+											alwaystransparent = "[GuiLaw.IsEnacted]"
+											onclick = "[GuiLaw.Enact]"
+											tooltipwidget = { pass_law_tooltip = {} }
+											using = tooltip_below
+
+											icon_button_decorative = {
+												size = { 54 54 }
+												parentanchor = center
+												alwaystransparent = yes
+											}
+
+											button_icon = {
+												visible = "[Not(GuiLaw.IsEnacted)]"
+												texture = "[Law.GetIcon]"
+												parentanchor = center
+												size = { 42 42 }
+												alwaystransparent = yes
+											}
+
+											icon = {
+												visible = "[And( GuiLaw.IsEnacted , Not( GuiLaw.CanEnact ) )]"
+												texture = "[Law.GetIcon]"
+												parentanchor = center
+												size = { 42 42 }
+												alwaystransparent = yes
+
+												using = Master_Button_Modify_Texture
+
+												blockoverride "master_color_frame" {
+													frame = 2
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					spacer = { size = { 15 15 } }
+					hbox = { #Popular Opinion
+						#layoutpolicy_vertical = expanding
+						datamodel = "[MyRealmWindow.GetRealmLaws]"
+						
+						item = {
+							vbox = {
+								datacontext = "[GuiLawGroup.GetLawGroup]"
+								visible = "[And( GuiLawGroup.GetLawGroup.HasFlag( 'subroman_popular_opinion' ), GuiLawGroup.IsAvailable )]"
+								ignoreinvisible = yes
+								
+								text_label_center = {
+									text = "[LawGroup.GetName]"
+								}
+								
+								spacer = {
+									visible = "[GetPlayer.HasLiege]"
+									size = { 5 8 }
+								}
+								
+								hbox = { #Container for the actual taxation stuff
+									datamodel = "[GuiLawGroup.GetLaws]"
+									item = {
+										icon_button_decorative = {
+											datacontext = "[GuiLaw.GetLaw]"
+											size = { 60 60 }
+											enabled = "[Or(GuiLaw.CanEnact, GuiLaw.IsEnacted)]"
+											down = "[GuiLaw.IsEnacted]"
+											alwaystransparent = "[GuiLaw.IsEnacted]"
+											onclick = "[GuiLaw.Enact]"
+											tooltipwidget = { pass_law_tooltip = {} }
+											using = tooltip_below
+
+											icon_button_decorative = {
+												size = { 54 54 }
+												parentanchor = center
+												alwaystransparent = yes
+											}
+
+											button_icon = {
+												visible = "[Not(GuiLaw.IsEnacted)]"
+												texture = "[Law.GetIcon]"
+												parentanchor = center
+												size = { 42 42 }
+												alwaystransparent = yes
+											}
+
+											icon = {
+												visible = "[And( GuiLaw.IsEnacted , Not( GuiLaw.CanEnact ) )]"
+												texture = "[Law.GetIcon]"
+												parentanchor = center
+												size = { 42 42 }
+												alwaystransparent = yes
+
+												using = Master_Button_Modify_Texture
+
+												blockoverride "master_color_frame" {
+													frame = 2
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					expand = {}
+				}
+			}
+		}
+	}
+}

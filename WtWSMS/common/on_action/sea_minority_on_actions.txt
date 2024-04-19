@@ -361,3 +361,61 @@ spawn_small_minority_characters = {
 		}
 	}
 }
+
+# Happens when a culture is created through hybridization or divergence
+# Root = The new culture
+# scope:founder = The founder of the new culture
+on_culture_created = {
+	on_actions = {
+		remove_parent_culture_minorities
+	}
+}
+
+#Clean up parent minorities in newly formed culture counties during hybridization
+remove_parent_culture_minorities = {
+	effect = {
+		every_culture_county = {
+			save_temporary_scope_as = the_county
+			this.culture = {
+				every_parent_culture = {
+					save_temporary_scope_as = the_parent
+					
+					if = {
+						limit = {
+							scope:the_county = { has_variable_list = culture_minorities_small }
+							scope:the_county = {
+								is_target_in_variable_list = {
+									name = culture_minorities_small
+									target = scope:the_parent
+								}
+							}
+						}
+						scope:the_county = {
+							remove_list_variable = {
+								name = culture_minorities_small
+								target = scope:the_parent
+							}
+						}
+					}
+					if = {
+						limit = {
+							scope:the_county = { has_variable_list = culture_minorities_large }
+							scope:the_county = {
+								is_target_in_variable_list = {
+									name = culture_minorities_large
+									target = scope:the_parent
+								}
+							}
+						}
+						scope:the_county = {
+							remove_list_variable = {
+								name = culture_minorities_large
+								target = scope:the_parent
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

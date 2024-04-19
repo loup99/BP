@@ -1,7 +1,24 @@
-﻿##### Changed from Vanilla: Changed First Era Start Year, DEFAULT_MAX_TRADITIONS values
+﻿##### Changed from Vanilla: Changed First Era Start Year, DEFAULT_MAX_TRADITIONS values, tweaked culture acceptance rates
 NCulture = {
 	FIRST_ERA_START_YEAR = -1000 # When did the first era start?
 	DEFAULT_MAX_TRADITIONS = 3 # How many traditions can a culture have by default?
+	#Culture acceptance overhaul
+	
+	# This counts the # of border counties. So if culture A has a county that borders a single county of culture B, that's 2 border counties. If it bordered 2, it'd be 3 border counties, as each individual county can only get counted once
+	YEARLY_ACCEPTANCE_PER_BORDER_COUNTY = 0.02 #(Halved round _down_)
+	MAX_YEARLY_ACCEPTANCE_PER_BORDER_COUNTY = 1
+	MAX_ACCEPTANCE_FROM_SHARED_REALMS = 0.25 # (Halved) If 100% of both cultures are in the same realm, acceptance will increase by this much each year. For each realm with both cultures we take the % of each culture that's present in the realm and multiply them with one another. E.G., if a realm has 50% of all Norwegian counties and 40% of all Swedish cultures, that'll contribute 50% * 40% * MAX_ACCEPTANCE_FROM_SHARED_REALMS to acceptance each year
+	# Acceptance per year per vassal of each tier
+	# This is then divided by the size of the smaller of the two cultures, or by MIN_CULTURE_SIZE_FOR_VASSAL_ACCEPTANCE if that's bigger
+	# So a king vassal gives the same gain for a small culture as two king vassals for one that's twice as big
+	# We don't support baron vassals for this
+	YEARLY_ACCEPTANCE_FROM_TIER = { 0 0 1 2 5 0 } #(Halved round up)
+	MAX_YEARLY_ACCEPTANCE_FROM_VASSALS = 0.25 # (Halved) We don't give more than this from vassalage
+	MIN_CULTURE_SIZE_FOR_VASSAL_ACCEPTANCE = 5 # We pretend neither culture involved is smaller than this
+	ACCEPTANCE_REDUCTION_FROM_NO_INTERACTION = 0.5 # If two cultures gain no acceptance at all from bordering, vassals, or shared realm, their acceptance will go down by this amount each year. Cultures with the same heritage are exempt
+	ACCEPTANCE_REGRESSION_TOWARDS_BASELINE = 1 # At 100% past the baseline it ticks down at this rate per year. Scaled from 0 to 100%, so at 50% it'd be half this value
+	MIN_ACCEPTANCE_REGRESSION_TOWARDS_BASELINE = 0.1 # Regression towards zero can't go below this (except to avoid overshooting the baseline)
+	ACCEPTANCE_DIMINISHING_RETURNS = 0.5 # At 100%, increases are reduced by this much. Scaled from 0 to 100%, ignores baseline
 }
 
 ##### Changed from Vanilla: Changed MAA starting stuff

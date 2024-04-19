@@ -1,0 +1,502 @@
+﻿#NB: Note these decisions have 0 cost, because we want the AI to make these calls and AI is dumb
+#    so let's avoid making it think too hard.
+
+#Your family does not have enough non-capital baronies; demand more!
+demand_land_for_family_west = {
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = demand_land_for_family_west_desc
+	selection_tooltip = demand_land_for_family_west_tooltip
+	
+	is_shown = {
+		root = root.dynasty.dynast
+		root.dynasty = { has_dynasty_modifier = roman_senate_family_west }
+		#Has to be under the Rome holder
+		trigger_if = {
+			limit = { is_landed = yes }
+			root.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
+		}
+		trigger_else = { root.employer.top_liege = { any_sub_realm_barony = { this = title:b_roma } } }
+	}
+	
+	is_valid = {
+		valid_characteristics_to_interact_with_senate_trigger = yes
+		is_incapable = no
+		is_imprisoned = no
+		#Have an unlanded member of your family who is not your child-heir in some capacity...
+		custom_description = {
+			text = your_family_has_an_unlanded_non_descendent_west
+			any_living_character = {
+				this.dynasty = root.dynasty
+				has_trait = senator_west
+				NOT = { is_child_of = root }
+				is_landed = no
+				NOT = { this = root }
+			}
+		}
+		#You are below the number of baronies your family could claim
+		custom_description = {
+			text = your_dynasty_has_fewer_holdings_than_expected
+			root.dynasty = { number_of_holdings_in_family < number_of_expected_holdings_for_family }
+		}
+		#A barony _must_ be available
+		custom_description = {
+			text = there_must_be_an_available_barony_to_give_out
+			subject = title:b_roma.holder.top_liege
+			title:b_roma.holder.top_liege = {
+				any_realm_province = {
+					#If it's AI, only consider the top liege capital county, otherwise, allow capital duchies
+					trigger_if = {
+						limit = { title:b_roma.holder.top_liege = { is_ai = yes } }
+						NOT = { this.county = title:b_roma.holder.capital_province.county }
+					}
+					trigger_else = { NOT = { this.duchy = title:b_roma.holder.capital_province.duchy } }
+					#Valid holding type
+					OR = {
+						trigger_if = { #Include church holdings if both are lay clergy
+							limit = { this = { has_holding_type = church_holding } }
+							AND = {
+								this = { has_holding_type = church_holding }
+								this.barony.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+								root.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+							}
+						}
+						has_holding_type = castle_holding
+						has_holding_type = city_holding
+					}
+					#The holding type is not a capital barony
+					this.barony = { is_capital_barony = no }
+					#The holder isn't already a Senator
+					NOT = { this.barony.holder = { has_trait = senator_west } }
+				}
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		custom_description = {
+			text = recently_requested_land_transfer
+			NOT = { has_variable = requested_land_transfer_recently }
+		}
+	}
+	
+	cost = {
+		prestige = {
+			value = 100
+			if = {
+				limit = { is_ai = yes }
+				multiply = 0.5
+			}
+			if = {
+				limit = { is_landed = no }
+				multiply = 0.5
+			}
+		}
+	}
+	
+	effect = {
+		hidden_effect = {
+			root = {
+				save_scope_as = the_sender
+				set_variable = { name = requested_land_transfer_recently days = 1825 }
+			}
+			prepare_grant_land_targets_effect = {
+				ACTOR = root
+				REGION = west
+				THE_CITY = b_roma
+			}
+			title:b_roma.holder.top_liege = {
+				trigger_event = { id = BP_roman_senate_events.0061 days = { 1 3 } }
+			}
+		}
+		custom_tooltip = { text = a_family_member_recieves_an_available_barony }
+	}
+	
+	ai_potential = { always = yes }
+	
+	#Senators should always want more land; it's their right!
+	ai_will_do = { base = 100 }
+}
+demand_land_for_family_east = {
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = demand_land_for_family_east_desc
+	selection_tooltip = demand_land_for_family_east_tooltip
+	
+	is_shown = {
+		root = root.dynasty.dynast
+		root.dynasty = { has_dynasty_modifier = roman_senate_family_east }
+		#Has to be under the Rome holder
+		trigger_if = {
+			limit = { is_landed = yes }
+			root.top_liege = { any_sub_realm_barony = { this = title:b_constantinople } }
+		}
+		trigger_else = { root.employer.top_liege = { any_sub_realm_barony = { this = title:b_constantinople } } }
+	}
+	
+	is_valid = {
+		is_incapable = no
+		is_imprisoned = no
+		#Have an unlanded member of your family who is not your child-heir in some capacity...
+		custom_description = {
+			text = your_family_has_an_unlanded_non_descendent_east
+			any_living_character = {
+				this.dynasty = root.dynasty
+				has_trait = senator_east
+				NOT = { is_child_of = root }
+				is_landed = no
+				NOT = { this = root }
+			}
+		}
+		#You are below the number of baronies your family could claim
+		custom_description = {
+			text = your_dynasty_has_fewer_holdings_than_expected
+			root.dynasty = { number_of_holdings_in_family < number_of_expected_holdings_for_family }
+		}
+		#A barony _must_ be available
+		custom_description = {
+			text = there_must_be_an_available_barony_to_give_out
+			subject = title:b_constantinople.holder.top_liege
+			title:b_constantinople.holder.top_liege = {
+				any_realm_province = {
+					#If it's AI, only consider the top liege capital county, otherwise, allow capital duchies
+					trigger_if = {
+						limit = { title:b_constantinople.holder.top_liege = { is_ai = yes } }
+						NOT = { this.county = title:b_constantinople.holder.capital_province.county }
+					}
+					trigger_else = { NOT = { this.duchy = title:b_constantinople.holder.capital_province.duchy } }
+					#Valid holding type
+					OR = {
+						trigger_if = { #Include church holdings if both are lay clergy
+							limit = { this = { has_holding_type = church_holding } }
+							AND = {
+								this = { has_holding_type = church_holding }
+								this.barony.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+								root.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+							}
+						}
+						has_holding_type = castle_holding
+						has_holding_type = city_holding
+					}
+					#The holding type is not a capital barony
+					this.barony = { is_capital_barony = no }
+					#The holder isn't already a Senator
+					NOT = { this.barony.holder = { has_trait = senator_east } }
+				}
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		custom_description = {
+			text = recently_requested_land_transfer
+			NOT = { has_variable = requested_land_transfer_recently }
+		}
+	}
+	
+	cost = {
+		prestige = {
+			value = 100
+			if = {
+				limit = { is_ai = yes }
+				multiply = 0.5
+			}
+			if = {
+				limit = { is_landed = no }
+				multiply = 0.5
+			}
+		}
+	}
+	
+	effect = {
+		hidden_effect = {
+			root = {
+				save_scope_as = the_sender
+				set_variable = { name = requested_land_transfer_recently days = 1825 }
+			}
+			prepare_grant_land_targets_effect = {
+				ACTOR = root
+				REGION = east
+				THE_CITY = b_constantinople
+			}
+			title:b_constantinople.holder.top_liege = {
+				trigger_event = { id = BP_roman_senate_events.1061 days = { 1 3 } }
+			}
+		}
+		custom_tooltip = { text = a_family_member_recieves_an_available_barony }
+	}
+	
+	ai_potential = { always = yes }
+	
+	#Senators should always want more land; it's their right!
+	ai_will_do = { base = 100 }
+}
+
+### AI-Only Major Decisions
+disestablish_west_senate = { #AI-only decision; implemented in GUI for players
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = disestablish_west_senate_desc
+	selection_tooltip = disestablish_west_senate_tooltip
+	
+	is_shown = {
+		#Only top-level rulers
+		is_independent_ruler = yes
+		#Have to have control of the Senate
+		this = title:c_roma.holder.top_liege
+		#Can't be a Roman Empire in any way, shape, or form
+		NOR = {
+			has_title = title:e_wre
+			has_title = title:e_byzantium
+			has_title = title:e_roman_empire
+		}
+		has_global_variable = west_senate_is_established
+		is_ai = yes #Players should use the GUI instead
+	}
+	
+	is_valid = {
+		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
+		#Can't be Romanesque or governments or cultures or titles
+		NOR = {
+			has_government = bureaucratic_government
+			has_government = gubernatorial_government
+			has_government = subroman_government
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {}
+	
+	effect = {
+		disestablished_senate_effect = {
+			REGION = west
+			MAIN_EMPIRE = e_wre
+			OPPOSITE_EMPIRE = e_byzantium
+		}
+		root = { save_scope_as = the_destroyer }
+		every_player = { trigger_event = { id = BP_roman_senate_events.0002 } }
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = {
+		#%25 chance every 5 years => 43% in 10, 58% in 15, 68% in 20 years of doing so
+		base = 25
+		
+		modifier = { #AI will always do if they have a different universality than Roman
+			add = 1000
+			OR = {
+				has_government = rajamandala_government
+				has_government = eranshar_government
+			}
+		}
+		modifier = { #AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
+			factor = 0
+			has_government = subroman_government
+		}
+		modifier = { #Romance cultures won't destroy the Senate if they maintain Roman Law
+			factor = 0
+			culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		modifier = { #Even if they are Eranshar, they won't disestablish the Senate if they are nostalgic for Rome
+			factor = 0
+			has_trait = roman_nostalgia
+		}
+	}
+}
+disestablish_east_senate = { #AI-only decision; implemented in GUI for players
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = disestablish_east_senate_desc
+	selection_tooltip = disestablish_east_senate_tooltip
+	
+	is_shown = {
+		#Only top-level rulers
+		is_independent_ruler = yes
+		#Have to have control of the Senate
+		this = title:c_byzantion.holder.top_liege
+		#Can't be a Roman Empire in any way, shape, or form
+		NOR = {
+			has_title = title:e_wre
+			has_title = title:e_byzantium
+			has_title = title:e_roman_empire
+		}
+		has_global_variable = senate_is_established
+		is_ai = yes #Players should use the GUI instead
+	}
+	
+	is_valid = {
+		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
+		#Can't be Romanesque or governments or cultures or titles
+		NOR = {
+			has_government = bureaucratic_government
+			has_government = gubernatorial_government
+			AND = {
+				has_government = subroman_government
+				culture = { has_ability_to_reform_rome_directly_trigger = yes }
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {}
+	
+	effect = {
+		disestablished_senate_effect = {
+			REGION = east
+			MAIN_EMPIRE = e_byzantium
+			OPPOSITE_EMPIRE = e_wre
+		}
+		root = { save_scope_as = the_destroyer }
+		every_player = { trigger_event = { id = BP_roman_senate_events.1002 } }
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = {
+		#%25 chance every 5 years => 43% in 10, 58% in 15, 68% in 20 years of doing so
+		base = 25
+		
+		modifier = { #AI will always do if they have a different universality than Roman
+			add = 1000
+			OR = {
+				has_government = rajamandala_government
+				has_government = eranshar_government
+			}
+		}
+		modifier = { #AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
+			factor = 0
+			has_government = subroman_government
+		}
+		modifier = { #Romance cultures won't destroy the Senate if they maintain Roman Law
+			factor = 0
+			culture = { has_cultural_parameter = can_restore_roman_empire }
+		}
+		modifier = { #Even if they are Eranshar, they won't disestablish the Senate if they are nostalgic for Rome
+			factor = 0
+			has_trait = roman_nostalgia
+		}
+	}
+}
+request_west_senate_recognition = { #AI-only decision; implemented in GUI for players
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = request_west_senate_recognition_desc
+	selection_tooltip = request_west_senate_recognition_tooltip
+	
+	is_shown = {
+		#Only top-level rulers
+		is_independent_ruler = yes
+		#Have to have control of the Senate
+		this = title:c_roma.holder.top_liege
+		#Has to actually be available
+		has_global_variable = west_senate_is_established
+		
+		is_ai = yes #Players should use the GUI instead
+	}
+	
+	is_valid = { #Can't have a different model of universality than the Romans did
+		NOT = { has_variable = already_asked_the_senate } #Can't have already asked
+		NOR = {
+			has_government = eranshar_government
+			has_government = rajamandala_government
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {}
+	
+	effect = {
+		root = {
+			set_variable = already_asked_the_senate
+			trigger_event = BP_roman_senate_events.0011
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = {
+		base = 100 #%100 chance
+		
+		#AI won't do this if they have a different theory of Government than Roman
+		modifier = {
+			factor = 0
+			OR = {
+				has_government = eranshar_government
+				has_government = rajamandala_government
+			}
+		}
+	}
+}
+request_east_senate_recognition = { #AI-only decision; implemented in GUI for players
+	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = request_east_senate_recognition_desc
+	selection_tooltip = request_east_senate_recognition_tooltip
+	
+	is_shown = {
+		#Only top-level rulers
+		is_independent_ruler = yes
+		#Have to have control of the Senate
+		this = title:c_byzantion.holder.top_liege
+		#Has to actually be available
+		has_global_variable = east_senate_is_established
+		
+		is_ai = yes #Players should use the GUI instead
+	}
+	
+	is_valid = {
+		NOT = { has_variable = already_asked_the_senate } #Can't have already asked
+		NOR = { #Can't have a different model of universality than the Romans did
+			has_government = eranshar_government
+			has_government = rajamandala_government
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_adult = yes
+		is_at_war = no
+	}
+	
+	cost = {}
+	
+	effect = {
+		root = {
+			set_variable = already_asked_the_senate
+			trigger_event = BP_roman_senate_events.1011
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = {
+		base = 100 #%100 chance
+		
+		#AI won't do this if they have a different theory of Government than Roman
+		modifier = {
+			factor = 0
+			OR = {
+				has_government = eranshar_government
+				has_government = rajamandala_government
+			}
+		}
+	}
+}

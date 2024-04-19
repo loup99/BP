@@ -206,6 +206,28 @@ temple_01 = {
 		graphical_regions = { graphical_mediterranean }
 	}
 	
+	# FP3 Zoroastrian
+	asset = {
+		type = pdxmesh
+		name = "building_mena_temple_islamic_01_mesh"
+		requires_dlc_flag = legacy_of_persia
+		illustration = @illustration_islamic
+		soundeffect = { soundeffect = "event:/SFX/Ambience/3DMapEmitters/Holdings/Temples/mosque_temple" soundparameter = { "Tier" = 0 } }
+		graphical_faiths = { "islamic_gfx" }
+		graphical_cultures = { iranian_building_gfx }
+		graphical_regions = { graphical_mena }
+	}
+	asset = {
+		type = entity
+		name = "fp3_building_persian_temple_01_a_01_entity"
+		requires_dlc_flag = legacy_of_persia
+		illustration = @illustration_iranian_zoroastrian
+		soundeffect = { soundeffect = "event:/SFX/Ambience/3DMapEmitters/Holdings/Temples/mosque_temple" soundparameter = { "Tier" = 0 } } ##todo_cd_polish fix 
+		graphical_faiths = { "zoroastrian_gfx" }
+		graphical_cultures = { iranian_building_gfx }
+		graphical_regions = { graphical_mena }
+	}
+	
 	can_construct_potential = {
 		barony_cannot_construct_holding = no
 	}
@@ -303,6 +325,41 @@ temple_01 = {
 				}
 			}
 			county.holder = { add_prestige = massive_prestige_gain }
+		}
+		#Holy Legend Seed drop
+		if = {
+			limit = {
+				county.holder = { has_dlc_feature = legends }
+			}
+			random = {
+				chance = {
+					value = 10
+					if = {
+						limit = { county.holder.piety_level >= high_piety_level }
+						add = 15 #25%
+					}
+					if = {
+						limit = { county.holder.piety_level >= max_piety_level }
+						add = 25 #50%
+					}
+				}
+				county.holder = {
+					send_interface_toast = {
+						title = holy_seed_toast
+						left_icon = root.barony
+						create_legend_seed = {
+							type = holy
+							quality = famed
+							chronicle = saintly_building
+							properties = {
+								location = prev
+								religion = this.religion
+								faith = this.faith
+							}
+						}
+					}
+				}
+			}
 		}
 
 		#to give follow-up to the vassal.1001 event
@@ -613,6 +670,29 @@ temple_02 = {
 		graphical_cultures = { iberian_building_gfx }
 		graphical_regions = { graphical_mediterranean }
 	}
+	
+	# FP3 Zoroastrian
+	asset = {
+		type = pdxmesh
+		name = "building_mena_temple_islamic_01_mesh"
+		requires_dlc_flag = legacy_of_persia
+		illustration = @illustration_islamic
+		soundeffect = { soundeffect = "event:/SFX/Ambience/3DMapEmitters/Holdings/Temples/mosque_temple" soundparameter = { "Tier" = 0 } }
+		graphical_faiths = { "islamic_gfx" }
+		graphical_cultures = { iranian_building_gfx }
+		graphical_regions = { graphical_mena }
+	}
+	asset = {
+		type = entity
+		name = "fp3_building_persian_temple_01_a_01_entity"
+		requires_dlc_flag = legacy_of_persia
+		illustration = @illustration_iranian_zoroastrian
+		soundeffect = { soundeffect = "event:/SFX/Ambience/3DMapEmitters/Holdings/Temples/mosque_temple" soundparameter = { "Tier" = 0 } } ##todo_cd_polish fix 
+		graphical_faiths = { "zoroastrian_gfx" }
+		graphical_cultures = { iranian_building_gfx }
+		graphical_regions = { graphical_mena }
+	}
+
 
 	can_construct_potential = {
 		building_requirement_tribal = no
@@ -749,6 +829,266 @@ temple_02 = {
 #
 ####
 
+### Scriptorium
+scriptorium_00 = {
+	construction_time = standard_construction_time
+
+	can_construct_potential = {
+		temple_building_level_00_trigger = yes
+		culture = { has_innovation = innovation_writing }
+		scope:holder = { has_dlc_feature = legends }
+	}
+
+	can_construct_showing_failures_only = {
+		building_requirement_tribal = no
+	}
+
+	cost_gold = normal_building_tier_1_cost
+	
+	county_holder_character_modifier = {
+		owned_legend_spread_mult = 0.02
+		legitimacy_gain_mult = 0.01
+	}
+	
+	character_modifier = {
+		monthly_piety = 0.05
+	}
+	county_modifier = {
+		monthly_county_control_growth_add = 0.05
+	}
+	
+	next_building = scriptorium_01
+
+	type_icon = "icon_building_library.dds"
+	
+	ai_value = {
+		base = 10
+		ai_tier_1_building_modifier = yes
+		modifier = {
+			add = 250
+			scope:holder = {
+				OR = {
+					highest_held_title_tier = tier_barony
+					government_has_flag = government_is_theocracy
+					is_theocratic_lessee = yes
+				}
+			}
+		}
+		modifier = {
+			factor = 2
+			free_building_slots <= 1
+		}
+		modifier = {
+			factor = 0
+			NOT = {
+				has_building_or_higher = monastic_schools_01
+			}
+		}
+		modifier = {
+			factor = 0
+			building_farm_estates_requirement_terrain = yes
+			NOT = {
+				has_building_or_higher = farm_estates_01
+			}
+		}
+		modifier = {
+			factor = 0
+			building_cereal_fields_requirement_terrain = yes
+			NOT = {
+				has_building_or_higher = cereal_fields_01
+			}
+		}
+	}
+}
+
+scriptorium_01 = {
+	construction_time = standard_construction_time
+
+	can_construct_potential = {
+		temple_building_level_01_trigger = yes
+		culture = { has_innovation = innovation_writing }
+		scope:holder = { has_dlc_feature = legends }
+	}
+
+	can_construct_showing_failures_only = {
+		building_requirement_tribal = no
+	}
+
+	cost_gold = normal_building_tier_1_cost
+	
+	county_holder_character_modifier = {
+		owned_legend_spread_mult = 0.05
+		legitimacy_gain_mult = 0.01
+	}
+	
+	character_modifier = {
+		monthly_piety = 0.1
+	}
+	county_modifier = {
+		monthly_county_control_growth_add = 0.1
+	}
+	
+	next_building = scriptorium_02
+
+	type_icon = "icon_building_library.dds"
+	
+	ai_value = {
+		base = 10
+		ai_tier_1_building_modifier = yes
+		modifier = {
+			add = 250
+			scope:holder = {
+				OR = {
+					highest_held_title_tier = tier_barony
+					government_has_flag = government_is_theocracy
+					is_theocratic_lessee = yes
+				}
+			}
+		}
+		modifier = {
+			factor = 2
+			free_building_slots <= 1
+		}
+		modifier = {
+			factor = 0
+			NOT = {
+				has_building_or_higher = monastic_schools_01
+			}
+		}
+		modifier = {
+			factor = 0
+			building_farm_estates_requirement_terrain = yes
+			NOT = {
+				has_building_or_higher = farm_estates_01
+			}
+		}
+		modifier = {
+			factor = 0
+			building_cereal_fields_requirement_terrain = yes
+			NOT = {
+				has_building_or_higher = cereal_fields_01
+			}
+		}
+	}
+}
+
+scriptorium_02 = {
+	construction_time = standard_construction_time
+
+	can_construct_potential = {
+		temple_building_level_02_trigger = yes
+		culture = { has_innovation = innovation_writing }
+		scope:holder = { has_dlc_feature = legends }
+	}
+
+	can_construct_showing_failures_only = {
+		building_requirement_tribal = no
+	}
+
+	cost_gold = normal_building_tier_2_cost
+	
+	county_holder_character_modifier = {
+		owned_legend_spread_mult = 0.1
+		legitimacy_gain_mult = 0.02
+	}
+	
+	character_modifier = {
+		monthly_piety = 0.2
+	}
+	county_modifier = {
+		monthly_county_control_growth_add = 0.2
+	}
+	
+	next_building = scriptorium_03
+	ai_value = {
+		base = 9
+		ai_general_building_modifier = yes
+		ai_economical_building_preference_modifier = yes
+		modifier = { # Fill all building slots before going for upgrades
+			factor = 0
+			free_building_slots > 0
+		}
+	}
+}
+
+scriptorium_03 = {
+	construction_time = standard_construction_time
+
+	can_construct = {
+		temple_building_level_03_trigger = yes
+		culture = { has_innovation = innovation_writing }
+		scope:holder = { has_dlc_feature = legends }
+	}
+
+	can_construct_showing_failures_only = {
+		building_requirement_tribal = no
+	}
+
+	cost_gold = normal_building_tier_3_cost
+	
+	county_holder_character_modifier = {
+		owned_legend_spread_mult = 0.15
+		legitimacy_gain_mult = 0.03
+	}
+	
+	character_modifier = {
+		monthly_piety = 0.3
+	}
+	county_modifier = {
+		monthly_county_control_growth_add = 0.3
+	}
+	
+	next_building = scriptorium_04
+	ai_value = {
+		base = 8
+		ai_general_building_modifier = yes
+		ai_economical_building_preference_modifier = yes
+		modifier = { # Fill all building slots before going for upgrades
+			factor = 0
+			free_building_slots > 0
+		}
+	}
+}
+
+scriptorium_04 = {
+	construction_time = standard_construction_time
+
+	can_construct = {
+		temple_building_level_04_trigger = yes
+		culture = { has_innovation = innovation_writing }
+		scope:holder = { has_dlc_feature = legends }
+	}
+
+	can_construct_showing_failures_only = {
+		building_requirement_tribal = no
+	}
+
+	cost_gold = normal_building_tier_4_cost
+	
+	county_holder_character_modifier = {
+		owned_legend_spread_mult = 0.2
+		legitimacy_gain_mult = 0.04
+	}
+	
+	character_modifier = {
+		monthly_piety = 0.4
+	}
+	county_modifier = {
+		monthly_county_control_growth_add = 0.4
+	}
+
+	next_building = scriptorium_05
+	ai_value = {
+		base = 7
+		ai_general_building_modifier = yes
+		ai_economical_building_preference_modifier = yes
+		modifier = { # Fill all building slots before going for upgrades
+			factor = 0
+			free_building_slots > 0
+		}
+	}
+}
+
 ### Monastic School
 
 monastic_schools_00 = {
@@ -768,7 +1108,7 @@ monastic_schools_00 = {
 		monthly_piety = 0.1
 	}
 	county_modifier = {
-		monthly_county_control_change_add = 0.1
+		monthly_county_control_growth_add = 0.1
 	}
 	province_modifier = {
 		monthly_income = poor_building_tax_tier_0
@@ -815,7 +1155,7 @@ monastic_schools_01 = {
 		monthly_piety = 0.1
 	}
 	county_modifier = {
-		monthly_county_control_change_add = 0.1
+		monthly_county_control_growth_add = 0.1
 	}
 	province_modifier = {
 		monthly_income = poor_building_tax_tier_1
@@ -862,7 +1202,7 @@ monastic_schools_02 = {
 		monthly_piety = 0.2
 	}
 	county_modifier = {
-		monthly_county_control_change_add = 0.2
+		monthly_county_control_growth_add = 0.2
 	}
 	province_modifier = {
 		monthly_income = poor_building_tax_tier_2
@@ -897,7 +1237,7 @@ monastic_schools_03 = {
 		monthly_piety = 0.3
 	}
 	county_modifier = {
-		monthly_county_control_change_add = 0.3
+		monthly_county_control_growth_add = 0.3
 	}
 	province_modifier = {
 		monthly_income = poor_building_tax_tier_3
@@ -932,7 +1272,7 @@ monastic_schools_04 = {
 		monthly_piety = 0.4
 	}
 	county_modifier = {
-		monthly_county_control_change_add = 0.4
+		monthly_county_control_growth_add = 0.4
 	}
 	province_modifier = {
 		monthly_income = poor_building_tax_tier_4

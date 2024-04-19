@@ -1,6 +1,6 @@
 ﻿##### Changed from Vanilla: Overhauled with new faiths
-is_preferred_heresy_trigger = {
-	is_valid_heresy_trigger = {
+is_preferred_heresy = {
+	is_valid_heresy = {
 		ORIGIN_FAITH = $ORIGIN_FAITH$
 		HERETICAL_FAITH = $HERETICAL_FAITH$
 	}
@@ -25,19 +25,28 @@ is_preferred_heresy_trigger = {
 				faiths_are_in_muhakkima_islam_group = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
 			}
 		}
+		#If we're Zoroastrian, we don't want Sogdian faith in Armenia and vice versa 
+		AND = {
+			religion_tag = zoroastrianism_religion
+			OR = {
+				faiths_are_eastern_zoroastrian = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
+				faiths_are_western_zoroastrian = {FAITH_1 = $ORIGIN_FAITH$ FAITH_2 = $HERETICAL_FAITH$}
+			}
+		}
 
 		#Otherwise, we don't have any special preferences.
 		AND = {
 			NOT = {
 				religion_tag = islam_religion
 				religion_tag = christianity_religion
+				religion_tag = zoroastrianism_religion
 			}
 		}
 	}
 }
 
 ##### Changed from Vanilla: Overhauled with new faiths
-is_valid_heresy_trigger = {
+is_valid_heresy = {
 	NOT = { $ORIGIN_FAITH$ = $HERETICAL_FAITH$ }
 	# A heretical faith can't be currently locked off via variable.
 	$HERETICAL_FAITH$ = {
@@ -68,10 +77,20 @@ is_valid_heresy_trigger = {
 				}
 			}
 		}
-		#No special requirements for Muslims, Jews, Yazidis, or Zoroastrians.
+		AND = { #FP3: for Zoroastrianism, Bedhin faiths are never heresies of each other 
+			religion_tag = zoroastrianism_religion
+			NAND = {
+				$ORIGIN_FAITH$ = {
+					has_doctrine = doctrine_major_branch_behdin
+				}
+				$HERETICAL_FAITH$ = {
+					has_doctrine = doctrine_major_branch_behdin
+				}
+			}
+		}
+		#No special requirements for Muslims, Jews, or Yazidis
 		religion_tag = islam_religion
 		religion_tag = judaism_religion
-		religion_tag = zoroastrianism_religion
 		#Eastern Faiths can shift and spread amongst each other.
 		AND = {
 			OR = {
@@ -137,7 +156,7 @@ faiths_are_in_orthodox_christianity_group_trigger = {
 ##### Changed from Vanilla: Overhauled with new faiths
 faiths_are_in_eastern_christianity_group_trigger = {
 	OR = {
-		$FAITH_1$ = faith:miaphysitism
+		$FAITH_1$ = faith:coptic
 		$FAITH_1$ = faith:armenian_apostolic
 		$FAITH_1$ = faith:nestorian
 		$FAITH_1$ = faith:messalian
@@ -148,7 +167,7 @@ faiths_are_in_eastern_christianity_group_trigger = {
 		$FAITH_1$ = faith:syrian_orthodox
 	}
 	OR = {
-		$FAITH_2$ = faith:miaphysitism
+		$FAITH_2$ = faith:coptic
 		$FAITH_2$ = faith:armenian_apostolic
 		$FAITH_2$ = faith:nestorian
 		$FAITH_2$ = faith:messalian
@@ -166,6 +185,12 @@ valid_demand_conversion_conditions_trigger = {
 	scope:recipient = { NOT = { has_strong_hook = scope:actor } }
 	scope:recipient = { NOT = { has_trait = devoted } }
 	scope:recipient = { NOT = { has_trait = order_member } }
+	scope:recipient = {
+		NOT = { is_imprisoned_by = scope:actor }
+	}
+	scope:recipient = {
+		NOT = { is_at_war_with = scope:actor }
+	}
 
 	custom_description = {
 		text = "is_head_of_religion"
@@ -179,47 +204,85 @@ valid_demand_conversion_conditions_trigger = {
 		NAND = { # Vassal Contract forbids meddling by liege
 			exists = scope:recipient.liege
 			scope:recipient.liege = scope:actor
-			scope:recipient = { #Now supports more than feudal government type
+			scope:recipient = {
 				is_ruler = yes
 				vassal_contract_has_flag = religiously_protected
 			}
 		}
 	}
+	
+	trigger_if = {
+		limit = {
+			scope:recipient = {	
+				AND = {
+					has_variable = cannot_be_converted_by_value
+					var:cannot_be_converted_by_value = scope:actor	
+				}
+			}
+		}
+		custom_tooltip = {
+			text = promised_to_not_convert_character
+			scope:recipient = {	
+				NOR = {
+					has_variable = cannot_be_converted_by_value
+					var:cannot_be_converted_by_value = scope:actor
+				}
+			}
+		}
+	}
+
 	custom_tooltip = {
 		text = cannot_take_overt_hostile_actions_against_diarch.tt
 		NOT = { scope:recipient ?= scope:actor.diarch }
 	}
+	##### Changed from Vanilla vvvvv
+	BP_demand_conversion_trigger = yes
+	##### Changed from Vanilla ^^^^^
 }
 
-##### Changed from Vanilla: coptic -> miaphysitism
-not_non_catholic_standard_christian_faith_trigger = {
-	NOR = {
-		this = faith:orthodox
-		this = faith:miaphysitism
-		this = faith:armenian_apostolic
-		trigger_if = {
-			limit = { BP_iconoclasm_trigger = yes }
-			this = faith:iconoclast
-		}
+##### Changed from Vanilla: Removed Gayomarthanism
+faiths_are_eastern_zoroastrian = { #FP3 update - so that Armenian faith (Arewordik) don't appear as a heresy in Sogdia
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_1$ = faith:khurmazta
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
+	}
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_1$ = faith:khurmazta
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
 	}
 }
-##### Changed from Vanilla: coptic -> miaphysitism
-not_non_orthodox_standard_christian_faith_trigger = {
-	NOR = {
-		this = faith:catholic
-		this = faith:miaphysitism
-		this = faith:armenian_apostolic
+##### Changed from Vanilla: Removed Gayomarthanism
+faiths_are_western_zoroastrian = { #FP3 update - so that Sogdian faith (Khurmazta) don't appear as a heresy in Armenia 
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
+		$FAITH_2$ = faith:urartuism
+	}
+	OR = {
+		$FAITH_1$ = faith:mazdayasna
+		$FAITH_2$ = faith:zurvanism
+		$FAITH_2$ = faith:mazdakism
+		$FAITH_2$ = faith:khurramism
+		$FAITH_2$ = faith:urartuism
 	}
 }
-##### Changed from Vanilla: coptic -> miaphysitism
-not_non_armenian_standard_christian_faith_trigger = {
-	NOR = {
-		this = faith:catholic
-		this = faith:orthodox
-		this = faith:miaphysitism
-		trigger_if = {
-			limit = { BP_iconoclasm_trigger = yes }
-			this = faith:iconoclast
-		}
+
+##### Changed from Vanilla: Removed conversos reference
+invalid_for_heresy_events_trigger = {
+	OR = {
+		##### Changed from Vanilla: Removed conversos reference
+		this = faith:insular_celtic
+		this = faith:bosnian_church
+		this = faith:mozarabic_church
+		this = faith:adamites
+		this = faith:kabarism
 	}
 }

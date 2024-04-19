@@ -1,0 +1,147 @@
+﻿namespace = bp_faith_conversion
+
+bp_faith_conversion.0001 = { #Culture head converts from an unreformed to reformed faith, martial practices haven't changed
+	#Only fire if the root is the culture head, controls 51% of counties, 51% of counties follow the
+	#old faith, and there's doctrinal disagreements about marriage
+	trigger = {
+		root = root.culture.culture_head
+		root.culture = { any_culture_county = { percent >= 0.50 this.holder = root } }
+		root.culture = { any_culture_county = { percent >= 0.50 this.faith = scope:old_faith } }
+		scope:old_faith = { has_doctrine_parameter = unreformed }
+		OR = {
+			NAND = {
+				scope:old_faith = { has_doctrine = doctrine_monogamy }
+				root.faith = { has_doctrine = doctrine_monogamy }
+			}
+			NAND = {
+				scope:old_faith = { has_doctrine = doctrine_polygamy }
+				root.faith = { has_doctrine = doctrine_polygamy }
+			}
+			NAND = {
+				scope:old_faith = { has_doctrine = doctrine_concubines }
+				root.faith = { has_doctrine = doctrine_concubines }
+			}
+		}
+	}
+
+	type = character_event
+	title = bp_faith_conversion.0001.t
+	desc = {
+		desc = bp_faith_conversion.0001.opening
+		triggered_desc = {
+			trigger = { root.faith = { has_doctrine = doctrine_monogamy } }
+			desc = bp_faith_conversion.0001.monogamy_view
+		}
+		triggered_desc = {
+			trigger = { root.faith = { has_doctrine = doctrine_polygamy } }
+			desc = bp_faith_conversion.0001.polygamy_view
+		}
+		triggered_desc = {
+			trigger = { root.faith = { has_doctrine = doctrine_concubines } }
+			desc = bp_faith_conversion.0001.concubine_view
+		}
+		desc = bp_faith_conversion.0001.comparison
+		triggered_desc = {
+			trigger = { scope:old_faith = { has_doctrine = doctrine_monogamy } }
+			desc = bp_faith_conversion.0001.monogamy_view
+		}
+		triggered_desc = {
+			trigger = { scope:old_faith = { has_doctrine = doctrine_polygamy } }
+			desc = bp_faith_conversion.0001.polygamy_view
+		}
+		triggered_desc = {
+			trigger = { scope:old_faith = { has_doctrine = doctrine_concubines } }
+			desc = bp_faith_conversion.0001.concubine_view
+		}
+		desc = bp_faith_conversion.0001.ending
+	}
+	theme = learning_theology_focus
+	
+	
+	immediate = {}
+	
+	right_portrait = {
+		character = root
+		animation = personality_rational
+	}
+	
+	option = {
+		name = bp_faith_conversion.0001.a
+		
+		root.culture = {
+			if = {
+				limit = { scope:old_faith = { has_doctrine = doctrine_monogamy } }
+				add_culture_tradition = tradition_monogamous
+			}
+			else_if = {
+				limit = { scope:old_faith = { has_doctrine = doctrine_polygamy } }
+				add_culture_tradition = tradition_polygamous
+			}
+			else_if = {
+				limit = { scope:old_faith = { has_doctrine = doctrine_concubines } }
+				add_culture_tradition = tradition_concubines
+			}
+		}
+		
+		every_player = {
+			limit = {
+				is_ai = no
+				this.culture = root.Culture
+				NOT = { this = root }
+			}
+			trigger_event = { id = bp_faith_conversion.0002 delayed = yes }
+		}
+	}
+}
+
+bp_faith_conversion.0002 = { #All other rulers of the culture learn of the sticking practices...
+	type = character_event
+	title = bp_faith_conversion.0002.t
+	desc = {
+		desc = bp_faith_conversion.0002.opening
+		triggered_desc = {
+			trigger = { root.faith = { has_doctrine = doctrine_monogamy } }
+			desc = bp_faith_conversion.0002.monogamy_view
+		}
+		triggered_desc = {
+			trigger = { root.faith = { has_doctrine = doctrine_polygamy } }
+			desc = bp_faith_conversion.0002.polygamy_view
+		}
+		triggered_desc = {
+			trigger = { root.faith = { has_doctrine = doctrine_concubines } }
+			desc = bp_faith_conversion.0002.concubine_view
+		}
+		desc = bp_faith_conversion.0002.comparison
+		triggered_desc = {
+			trigger = { scope:old_faith = { has_doctrine = doctrine_monogamy } }
+			desc = bp_faith_conversion.0002.monogamy_view
+		}
+		triggered_desc = {
+			trigger = { scope:old_faith = { has_doctrine = doctrine_polygamy } }
+			desc = bp_faith_conversion.0002.polygamy_view
+		}
+		triggered_desc = {
+			trigger = { scope:old_faith = { has_doctrine = doctrine_concubines } }
+			desc = bp_faith_conversion.0002.concubine_view
+		}
+		desc = bp_faith_conversion.0002.ending
+	}
+	theme = learning_theology_focus
+	
+	
+	immediate = {}
+	
+	right_portrait = {
+		character = root.culture.culture_head
+		animation = personality_rational
+	}
+	
+	option = { #We'll see
+		trigger = { NOT = { root.faith = scope:old_faith } }
+		name = bp_faith_conversion.0002.a
+	}
+	option = { #Blasphemers
+		trigger = { root.faith = scope:old_faith }
+		name = bp_faith_conversion.0002.b
+	}
+}

@@ -71,7 +71,7 @@ creation_trigger_italian_kingdoms_trigger = {
 		has_a_roman_empire_trigger = yes
 	}
 	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
-	custom_description = {
+	custom_description = { #These were in CK2
 		text = has_a_blocking_title
 		NOR = {
 			has_title = title:k_italy
@@ -84,7 +84,11 @@ creation_trigger_italian_kingdoms_trigger = {
 creation_trigger_e_finland_kingdoms_trigger = {
 	trigger_if = {
 		limit = { is_ai = yes }
-		culture = { has_cultural_pillar = heritage_balto_finnic }
+		OR = {
+			culture = { has_cultural_pillar = heritage_balto_finnic }
+			culture = { has_cultural_pillar = heritage_north_germanic }
+			culture = { has_cultural_pillar = heritage_east_slavic }
+		}
 	}
 }
 #Gaul
@@ -108,14 +112,14 @@ creation_trigger_kingdoms_in_e_gaul_trigger = {
 	trigger_if = {
 		limit = { is_ai = yes }
 		has_a_roman_empire_trigger = yes
-	}
-	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
-	custom_description = {
-		text = has_a_blocking_title
-		NOR = {
-			has_title = title:k_burgundians
-			has_title = title:k_franks
-			has_title = title:k_alamannia
+		#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+		custom_description = {
+			text = has_a_blocking_title
+			NOR = {
+				has_title = title:k_burgundians
+				has_title = title:k_franks
+				has_title = title:k_alamannia
+			}
 		}
 	}
 }
@@ -123,12 +127,12 @@ creation_trigger_k_septem_provincae_trigger = {
 	trigger_if = {
 		limit = { is_ai = yes }
 		culture = { has_cultural_pillar = heritage_vasconic }
-	}
-	creation_trigger_kingdoms_in_e_gaul_trigger = yes
-	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
-	custom_description = {
-		text = has_a_blocking_title
-		NOT = { has_title = title:k_visigoths }
+		creation_trigger_kingdoms_in_e_gaul_trigger = yes
+		#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+		custom_description = {
+			text = has_a_blocking_title
+			NOT = { has_title = title:k_visigoths }
+		}
 	}
 }
 creation_trigger_k_brittany_trigger = {
@@ -177,11 +181,11 @@ creation_trigger_k_africa_trigger = {
 			has_a_roman_empire_trigger = yes
 			culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:punic } }
 		}
-	}
-	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
-	custom_description = {
-		text = has_a_blocking_title
-		NOT = { has_title = title:k_vandalica }
+		#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+		custom_description = {
+			text = has_a_blocking_title
+			NOT = { has_title = title:k_vandalica }
+		}
 	}
 }
 creation_trigger_k_mauretania_trigger = {
@@ -194,18 +198,21 @@ creation_trigger_k_mauretania_trigger = {
 				culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:numidian } }
 			}
 		}
-	}
-	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
-	custom_description = {
-		text = has_a_blocking_title
-		NOT = { has_title = title:k_vandalica }
+		#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+		custom_description = {
+			text = has_a_blocking_title
+			NOT = { has_title = title:k_vandalica }
+		}
 	}
 }
 creation_trigger_k_tripolitania_trigger = {
-	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
-	custom_description = {
-		text = has_a_blocking_title
-		NOT = { has_title = title:k_vandalica }
+	trigger_if = {
+		limit = { is_ai = yes }
+		#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+		custom_description = {
+			text = has_a_blocking_title
+			NOT = { has_title = title:k_vandalica }
+		}
 	}
 }
 #Persia
@@ -270,13 +277,13 @@ creation_trigger_e_spain_kingdoms_trigger = {
 	trigger_if = {
 		limit = { is_ai = yes }
 		has_a_roman_empire_trigger = yes
-	}
-	#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
-	custom_description = {
-		text = has_a_blocking_title
-		NOR = {
-			has_title = title:k_visigoths
-			has_title = title:k_suebia
+		#Historical blockers (aka the kingdoms that duchies should drift into anyway, instead of allowing creation)
+		custom_description = {
+			text = has_a_blocking_title
+			NOR = {
+				has_title = title:k_visigoths
+				has_title = title:k_suebia
+			}
 		}
 	}
 }
@@ -428,14 +435,14 @@ creation_trigger_e_egypt_trigger = {
 	culture = {
 		descended_from_one_of_two_cultures_and_kept_heritage_trigger = {
 			CULTURE_1 = culture:greek
-			CULTURE_2 = culture:coptic
+			CULTURE_2 = culture:ancient_egyptian
 		}
 	}
 	custom_description = {
 		text = christianity_religion_or_egyptian_pagan
 		OR = {
 			religion = religion:christianity_religion
-			religion = religion:egyptian_religion
+			religion = religion:kushitism_religion
 		}
 	}
 }
@@ -607,19 +614,25 @@ creation_trigger_k_khazaria_trigger = {
 }
 
 #General triggers
-possesses_a_primary_titular_cultural_title_trigger = {
-	custom_description = {
-		text = has_a_valid_culture_title
-		subject = root
-		any_held_title = {
-			is_titular = yes
-			has_variable = title_culture
-			save_temporary_scope_as = the_title
+the_primary_title_is_not_titular_trigger = {
+	trigger_if = {
+		limit = {
 			OR = {
-				root.culture = scope:the_title.var:title_culture
+				has_game_rule = titular_titles_restricted
 				AND = {
-					root.culture = { any_parent_culture = { this = scope:the_title.var:title_culture } }
-					root.culture = { has_same_culture_heritage = scope:the_title.var:title_culture }
+					has_game_rule = ai_only_titular_titles_restricted
+					root = { is_ai = yes }
+				}
+			}
+		}
+		custom_description = {
+			text = none_of_my_primary_titles_can_be_titular
+			trigger_if = { #Only applies if you hold a kingdom
+				limit = { root.primary_title.tier >= tier_kingdom }
+				any_held_title = { #We check all titles of the same level because we could hold multiple kingdoms; see the Vandals in 476
+					percent = 1
+					this.tier = root.primary_title.tier
+					is_titular = no
 				}
 			}
 		}
@@ -627,7 +640,7 @@ possesses_a_primary_titular_cultural_title_trigger = {
 }
 general_kingdom_title_creation_trigger = {
 	standard_claimant_status_trigger = yes
-	possesses_a_primary_titular_cultural_title_trigger = no
+	the_primary_title_is_not_titular_trigger = yes
 	custom_description = {
 		text = general_kingdom_title_creation_text
 		subject = root.culture
@@ -637,21 +650,23 @@ general_kingdom_title_creation_trigger = {
 		}
 	}
 }
+holds_a_non_titular_empire_trigger = {
+	trigger_if = {
+		limit = { root.primary_title.tier = tier_kingdom }
+		any_held_title = { #Could hold more than one kingdom; see Vandals
+			this.tier = prev.primary_title.tier
+			is_titular = no
+		}
+	}
+}
 general_empire_title_creation_trigger = {
 	standard_claimant_status_trigger = yes
+	the_primary_title_is_not_titular_trigger = yes
 	trigger_if = {
 		limit = { has_game_rule = can_not_freely_create_empires }
 		custom_description = { #Can't if I already have an empire
 			text = already_have_an_empire
 			NOT = { any_held_title = { tier = tier_empire } }
-		}
-	}
-	trigger_if = { #Goths Gotta make Gothica if available
-		limit = { culture = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:gothic } } }
-		custom_description = {
-			text = goths_should_try_to_make_e_goths
-			object = title:e_goths
-			exists = title:e_goths.holder
 		}
 	}
 	custom_description = {

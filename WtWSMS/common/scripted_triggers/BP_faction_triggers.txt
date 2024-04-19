@@ -135,9 +135,72 @@ character_can_join_populist_faction_trigger = {
 	}
 }
 
-character_is_valid_nation_fracturing_faction_trigger = {
-	custom_description = {
-		text = nation_fracturing_faction_currently_disabled
-		always = no
+bp_character_is_valid_nation_fracturing_faction_trigger = {
+	#Cannot do against Rome if I have some Roman Government or Roman Legal System
+	trigger_if = {
+		limit = {
+			liege = {
+				primary_title = {
+					OR = {
+						this = title:e_wre
+						this = title:e_byzantium
+						this = title:e_roman_empire
+					}
+				}
+				has_roman_government_type_trigger = yes
+			}
+		}
+		custom_description = { #Can't be Roman Gov't
+			text = roman_governments_cannot_dissolve_rome
+			has_roman_government_type_trigger = no
+		}
+		custom_description = { #Can't be a Roman legal culture
+			text = roman_cultures_cannot_dissolve_rome
+			root.culture = { has_ability_to_reform_rome_directly_trigger = no }
+		}
 	}
+	#Cannot do as a Sub-Roman if:
+	#	1). They are Sub-Roman with a legal Roman Province
+	#	2). They don't have a legal Roman Province but _do_ follow Roman Law
+	trigger_else_if ={
+		limit = {
+			liege = { has_government = subroman_government }
+			root = { has_government = subroman_government }
+		}
+		custom_description = { #Can't be Roman Gov't breaking Roman Provinces
+			text = cannot_shatter_roman_provinces_with_roman_government
+			NOT = { liege.primary_title = { is_a_roman_province_trigger = { TITLE = this } } }
+		}
+		#Can't be Roman Gov't breaking the titles of those Following Roman Law
+		trigger_if = {
+			limit = { root.culture = { has_ability_to_reform_rome_directly_trigger = yes } }
+			custom_description = {
+				text = cannot_shatter_roman_provinces_with_roman_law
+				liege.culture = { has_ability_to_reform_rome_directly_trigger = no }
+			}
+		}
+	}
+	#Cannot do against Persia if I have Persian gov't, Persian culture, or Zoroastrian of _some_ stripe
+	trigger_else_if = {
+		limit = {
+			liege = {
+				any_held_title = { this = title:e_persia }
+				has_government = eranshar_government
+			}
+		}
+		custom_description = { #Can't be a Persian Government
+			text = cannot_have_a_persian_government
+			NOT = { root = { has_government = eranshar_government } }
+		}
+		custom_description = { #Can't be a Persian Culture
+			text = cannot_have_a_persian_culture
+			NOT = { root.culture = { has_cultural_parameter = right_to_rule_sassanid } }
+		}
+		custom_description = { #Can't be Zoroastrian
+			text = cannot_have_a_persian_religion
+			NOT = { root.faith.religion = religion:zoroastrianism_religion }
+		}
+	}
+	#Otherwise, we're golden!
+	trigger_else = { always = yes }
 }

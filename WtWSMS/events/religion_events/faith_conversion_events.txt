@@ -1,4 +1,5 @@
 ﻿##### Changed from Vanilla: faith_conversion.0004 Removed vanilla change gov effect
+##### Changed from Vanilla: faith_conversion.0001 Keep large minority of old faith in county
 
 namespace = faith_conversion
 
@@ -19,6 +20,13 @@ faith_conversion.0001 = {
 			capital_county = {
 				set_county_faith = root.faith
 			}
+			##### Changed from Vanilla vvvvv
+			add_faith_minority_effect = {
+				COUNTY = root.capital_county
+				FAITH = scope:old_faith
+				SIZE = large
+			}
+			##### Changed from Vanilla ^^^^^
 		}
 	}
 }
@@ -60,6 +68,7 @@ faith_conversion.0002 = {
 		}
 		else = { remove_character_modifier = fp2_champion_of_the_old_ways_modifier }
 
+		# Reset patron deities.
 		if = {
 			limit = {
 				faith = {
@@ -88,8 +97,80 @@ faith_conversion.0002 = {
 			remove_character_modifier = bhakti_germanic_danish_tyr
 			remove_character_modifier = bhakti_germanic_generic_thor
 			remove_character_modifier = bhakti_germanic_generic_freyr
+			##### Changed from Vanilla vvvvv
+			remove_character_modifier = bhakti_hinduism_murugan
+			remove_character_modifier = bhakti_hinduism_varuna
+			remove_character_modifier = tibet_deity_sipe_gyalmo
+			remove_character_modifier = tibet_deity_shenlha_okar
+			remove_character_modifier = tibet_deity_tonpa_shenrab
+			remove_character_modifier = tibet_deity_yeshe_walmo
+			remove_character_modifier = tibet_deity_takla_mebar
+			remove_character_modifier = tibet_deity_Zhambala
+			remove_character_modifier = tibet_deity_sherab_chamma
+			remove_character_modifier = tibet_deity_palden_lhamo
+			remove_character_modifier = tibet_deity_tara
+			remove_character_modifier = tibet_deity_avalokitesvara
+			remove_character_modifier = tibet_deity_yamantaka
+			remove_character_modifier = tibet_deity_hevajra
+			remove_character_modifier = tibet_deity_vajrayogini
+			remove_character_modifier = nat_ari_thagyamin
+			remove_character_modifier = nat_ari_mahagiri
+			remove_character_modifier = nat_ari_hnamadawgyi
+			remove_character_modifier = nat_ari_ponmagyi
+			remove_character_modifier = nat_ari_sivali
+			remove_character_modifier = nat_ari_shwe_nabay
+			remove_character_modifier = nat_therevada_thurathadi
+			remove_character_modifier = nat_therevada_lokanat
+			remove_character_modifier = nat_therevada_panhtwar
+			remove_character_modifier = nat_therevada_shin_upagutta
+			remove_character_modifier = nat_therevada_manimekhala
+			remove_character_modifier = kharis_hellenism_zeus
+			remove_character_modifier = kharis_hellenism_hera
+			remove_character_modifier = kharis_hellenism_athena
+			remove_character_modifier = kharis_hellenism_ares
+			remove_character_modifier = kharis_hellenism_demeter
+			remove_character_modifier = kharis_hellenism_posidion
+			remove_character_modifier = kharis_hellenism_dionysos
+			remove_character_modifier = kharis_hellenism_hephestios
+			remove_character_modifier = kharis_hellenism_hermes
+			remove_character_modifier = kharis_hellenism_aphrodite
+			remove_character_modifier = kharis_hellenism_apollon
+			remove_character_modifier = kharis_hellenism_artemis
+			remove_character_modifier = kharis_hellenism_herakles
+			remove_character_modifier = kharis_hellenism_asklepios
+			remove_character_modifier = bhakti_vohu_manah
+			remove_character_modifier = bhakti_khshathra_vairya
+			remove_character_modifier = bhakti_haurvatat
+			remove_character_modifier = bhakti_asha_vahishta
+			remove_character_modifier = bhakti_armaiti
+			remove_character_modifier = bhakti_ameretat
+			remove_character_modifier = patron_god_bon_war_god
+			remove_character_modifier = patron_god_bon_creator_god
+			remove_character_modifier = patron_god_bon_trickster_god
+			remove_character_modifier = patron_god_bon_household_god
+			remove_character_modifier = patron_god_bon_knowledge_god
+			remove_character_modifier = patron_god_bon_health_god
+			##### Changed from Vanilla ^^^^^
 		}
-
+		# No Friday prayer shenanigans unless you're involved in the Sunni caliphal drama.
+		## Friday prayers would absolutely happen for others but these modifiers are currently tied heavily to the struggle.
+		## Remove insubordination if you leave Islam.
+		if = {
+			limit = {
+				NOT = { faith.religion = religion:islam_religion }
+			}
+			remove_character_modifier = fp3_name_read_in_friday_prayer_modifier
+		}
+		## Remove subordination.
+		### Special use-case because you might convert faith within the various ones that consider the caliph to be their HoF, in which case it'd stay.
+		if = {
+			limit = {
+				faith.religious_head_title ?= {
+					NOT = { this = title:d_sunni }
+				}
+			}
+			remove_character_modifier = fp3_displayed_pious_submission_to_caliph_modifier
+		}
 		bastard_to_wild_oat_conversion_effect = yes
 	}
 }
