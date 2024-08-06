@@ -367,8 +367,8 @@ tradition_city_builders = {
 	}
 }
 
-#For the Garamantes
-tradition_foggara_builders = {
+#Berber Traditions
+tradition_foggara_builders = { #Garamantes civilization
 #[1] - Referencing the fact that the Garamantes seem to have been agriculturalists primarily
 	category = realm
 
@@ -489,6 +489,105 @@ tradition_foggara_builders = {
 							}
 						}
 					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+tradition_autochthon_identity = { #General Berber shared identity among what becomes Baranis & Butr
+	category = regional
+	
+	layers = {
+		0 = steward
+		1 = mena
+		4 = mountain.dds
+	}
+	
+	is_shown = { has_cultural_pillar = heritage_berber }
+	
+	can_pick = {
+		custom_tooltip = {
+			text = cannot_have_tradition_tribe_unity
+			NOT = { culture_tradition:tradition_tribe_unity = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_staunch_traditionalists
+			NOT = { culture_tradition:tradition_staunch_traditionalists = { is_in_list = traits } }
+		}
+	}
+	can_pick_for_hybridization = {
+		custom_tooltip = {
+			text = cannot_have_tradition_tribe_unity
+			NOT = { culture_tradition:tradition_tribe_unity = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_staunch_traditionalists
+			NOT = { culture_tradition:tradition_staunch_traditionalists = { is_in_list = traits } }
+		}
+		custom_description = { #Only for Berbers
+			text = hybrid_must_have_berber_heritage_for_tradition_autochthon_identity
+			culture_pillar:heritage_berber = { is_in_list = traits }
+		}
+	}
+	
+	parameters = {
+		autochthon_baseline_acceptance = yes
+		harder_to_convert_county_culture_without_heritage = yes
+		easier_to_convert_county_culture_with_heritage = yes
+		harder_to_hybridize = yes
+		unlocks_berber_confederate_succession_law = yes
+	}
+	character_modifier = {
+		controlled_province_advantage = 5
+		same_culture_opinion = 5
+	}
+	county_modifier = {}
+	province_modifier = {}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = { #Butr & Baranis Ethos
+				limit = {
+					NOR = {
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_stoic_or_spiritual_desc
+				}
+			}
+			if = { #Mostly for the North and East Berbers
+				limit = {
+					NOR = {
+						the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:gaetulian }
+						the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:libyan }
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = not_derived_from_gaetulian_or_libyan_desc2
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = { #Keep AI Tuaregs & Zenaga from adopting this
+		value = 100
+		if = {
+			limit = {
+				NOR = {
+					the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:gaetulian }
+					the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:libyan }
 				}
 			}
 			multiply = 0
