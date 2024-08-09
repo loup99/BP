@@ -33,10 +33,12 @@ bp_game_start = {
 		other_religion_effects
 		#Culture Stuff
 		set_additional_parent_cultures
+		learn_the_language_of_your_capital
 		#Family Stuff
 		set_dead_dynasty_renown
 		#Other Actions
 		create_other_armies
+		update_development_by_terrain_and_circumstances
 	}
 }
 
@@ -247,8 +249,8 @@ setup_realm_and_title_succession_laws = {
 				limit = {
 					OR = {
 						culture = { has_cultural_parameter = male_only_inheritance }
-						has_religion = religion:islam_religion
 						faith = { has_doctrine = doctrine_gender_male_dominated }
+						has_religion = religion:islam_religion
 					}
 					NOT = { has_realm_law = male_only_law }
 				}
@@ -258,7 +260,7 @@ setup_realm_and_title_succession_laws = {
 				limit = {
 					OR = {
 						culture = { has_cultural_parameter = female_only_inheritance }
-						culture = {has_cultural_parameter = not_male_succession }
+						culture = { has_cultural_parameter = not_male_succession }
 					}
 					NOT = { has_realm_law = female_only_law }
 				}
@@ -634,9 +636,6 @@ setup_realm_and_title_succession_laws = {
 					has_title = title:k_persia
 					has_title = title:d_fars
 					has_title = title:d_khorezm
-					#Altaics
-					has_title = title:e_rouran
-					has_title = title:e_turkestan
 					#Berbers
 					has_title = title:k_mauretania
 					#Semites
@@ -1260,7 +1259,19 @@ other_title_effects = {
 			#Persia
 			title:k_mazandaran = { set_de_jure_liege_title = title:e_persia }
 		}
-		#Note specific kingdoms that are cultural titles (and thus should block creation of any de jure while titular)
+		#Remove various claims for people that shouldn't have them
+		if = { #Vache voluntarily abidcated with Persian pressure, so prevent any claims from him
+			limit = { character:159589 = { is_alive = yes } }
+			character:159589 = {
+				save_temporary_scope_as = the_char
+				every_claim = {
+					save_temporary_scope_as = the_claim
+					scope:the_char = {
+						remove_claim = scope:the_claim
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -1559,6 +1570,26 @@ set_additional_parent_cultures = {
 	effect = {
 		#Additional Child Cultures
 		culture:numidian = { add_to_variable_list = { name = bastard_cultures target = flag:romano_african } }
+	}
+}
+
+learn_the_language_of_your_capital = {
+	#Specific cases of needing to know another language, to try and minimize revolts
+	effect = {
+		every_ruler = {
+			if = {
+				limit = {
+					OR = {
+						#Parthians in Albania
+						primary_title = title:d_caucasian_albania
+						primary_title = title:k_caucasian_albania
+						#Sarir
+						primary_title = title:k_sarir
+					}
+				}
+				learn_language_of_culture = this.capital_county.culture
+			}
+		}
 	}
 }
 
@@ -1924,3 +1955,160 @@ create_other_armies = {
 	}
 }
 
+update_development_by_terrain_and_circumstances = {
+	#Terrain Scaling for development at start
+	## plains = no effect
+	## farmlands = 1.2
+	## hills = 0.9
+	## mountains = 0.5
+	## desert = 0.5
+	## desert_mountains = 0.5
+	## oasis = 1.1
+	## jungle = 0.6
+	## forest = no_effect
+	## taiga = 0.95
+	## wetlands = 0.75
+	## steppe = 0.5
+	## floodplains = 1.2
+	## drylands = 0.95
+	effect = {
+		every_county = {
+			#Specific title effeacts
+			if = { #Dacia should only have development in non-tribal counties
+				limit = { this.kingdom = title:k_dacia }
+				if = {
+					limit = { any_county_province = { has_holding_type = tribal_holding } }
+					change_development_level = {
+						value = this.development_level
+						multiply = -1.00
+					}
+				}
+			}
+			if = { #Syr Darya is only for non-tribal counties
+				limit = { this.kingdom = title:k_syr_darya }
+				if = {
+					limit = { any_county_province = { has_holding_type = tribal_holding } }
+					change_development_level = {
+						value = this.development_level
+						multiply = -1.00
+					}
+				}
+			}
+			if = { #Xia should emphasize d_xia
+				limit = { this.duchy = title:d_xia }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.33
+				}
+			}
+			
+			# Impact of Terrain
+			if = {
+				limit = { this.title_province = { terrain = plains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.0
+				}
+			}
+			if = {
+				limit = { this.title_province = { terrain = farmlands } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.2
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = hills } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.1
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = mountains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.5
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = desert } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.5
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = desert_mountains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.5
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = oasis } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.1
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = jungle } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.4
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = forest } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.0
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = taiga } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.05
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = wetlands } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.25
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = floodplains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.2
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = drylands } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.05
+				}
+			}
+			## Effects of Tribal holdings on development
+			if = {
+				limit = { this.title_province = { has_holding_type = tribal_holding } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.75
+				}
+			}
+			else_if = {
+				limit = { any_county_province = { has_holding_type = tribal_holding } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.50
+				}
+			}
+		}
+	}
+}

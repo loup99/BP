@@ -324,6 +324,9 @@ setup_roman_senate_families = {
 		#Imperial Gens
 		dynasty:1022189 = { make_east_senate_family_effect = yes } #Venerius Gens
 		dynasty:1022188 = { make_east_senate_family_effect = yes } #Leonid Gens
+		#### Taken from Eastern Roman Consuls
+		dynasty:1042365 = { make_east_senate_family_effect = yes } #Family of Gennadius Avienus (ca. 450)
+		dynasty:104246209 = { make_east_senate_family_effect = yes } #Family of F. Taurus Celemntinus Armonius Clementinus
 		
 		#Symmachus suggested, no chars/dynasty associated in database:
 		# Theagenes
@@ -337,7 +340,10 @@ setup_roman_senate_families = {
 }
 
 on_game_start_after_lobby = {
-	on_actions = { give_senatorial_families_land }
+	on_actions = {
+		give_senatorial_families_land
+		add_random_roman_senators
+	}
 }
 give_senatorial_families_land = {
 	effect = {
@@ -348,5 +354,51 @@ give_senatorial_families_land = {
 		give_roman_senators_land_in_appropriate_regions_effect = { REGION = west }
 		give_roman_senators_land_in_appropriate_regions_effect = { REGION = east }
 		clear_global_variable_list = families_that_should_not_have_land
+	}
+}
+
+#This just adds a bunch of random, non-dynastic senators to each senate
+add_random_roman_senators = {
+	effect = {
+		#Populate the Western Senate
+		every_living_character = {
+			limit = {
+				valid_location_to_be_senator_trigger = {
+					RECIPIENT = this
+					ACTOR = title:b_roma.holder.top_liege
+					REGION = west
+				}
+				valid_to_be_senator_trigger_age_trigger = { CHAR = this }
+				valid_to_be_senator_trigger_sex_trigger = { CHAR = this }
+				NOT = { has_trait = senator_west }
+				NOT = { has_trait = senator_east }
+				has_dynasty = yes
+				is_landed = no
+			}
+			random = {
+				chance = 5
+				add_trait = senator_west
+			}
+		}
+		#Populate the Western Senate
+		every_living_character = {
+			limit = {
+				valid_location_to_be_senator_trigger = {
+					RECIPIENT = this
+					ACTOR = title:b_constantinople.holder.top_liege
+					REGION = east
+				}
+				valid_to_be_senator_trigger_age_trigger = { CHAR = this }
+				valid_to_be_senator_trigger_sex_trigger = { CHAR = this }
+				NOT = { has_trait = senator_west }
+				NOT = { has_trait = senator_east }
+				has_dynasty = yes
+				is_landed = no
+			}
+			random = {
+				chance = 10
+				add_trait = senator_east
+			}
+		}
 	}
 }
