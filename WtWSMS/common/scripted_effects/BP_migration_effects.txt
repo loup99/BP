@@ -660,25 +660,265 @@ flip_culture_major_migration_effect = {
 							this.title_province = { has_holding_type = tribal_holding }
 						}
 						modifier = { factor = development_level_no_effect_modifier } #How development effects odds
+						major_migration_county_development_damage_effect = {
+							THE_COUNTY = this
+							MAJORITY = no
+							LARGE_MINORITY = no
+							SMALL_MINORITY = no
+							NO_MINORITY = yes
+						}
 					}
 					30 = { # Small Minority
 						modifier = { factor = development_level_small_minority_modifier } 
 						add_small_culture_to_county_effect = { CULTURE = holder.culture }
 						add_small_faith_to_county_effect = { FAITH = holder.faith }
+						major_migration_county_development_damage_effect = {
+							THE_COUNTY = this
+							MAJORITY = no
+							LARGE_MINORITY = no
+							SMALL_MINORITY = yes
+							NO_MINORITY = no
+						}
 					}
 					15 = { # Large Minority
 						modifier = { factor = development_level_large_minority_modifier }
 						add_large_culture_to_county_effect = { CULTURE = holder.culture }
 						add_large_faith_to_county_effect = { FAITH = holder.faith }
+						major_migration_county_development_damage_effect = {
+							THE_COUNTY = this
+							MAJORITY = no
+							LARGE_MINORITY = yes
+							SMALL_MINORITY = no
+							NO_MINORITY = no
+						}
 					}
 					05 = { # Population Flip
 						modifier = { factor = development_level_majority_modifier }
 						displace_majority_culture_effect = { CULTURE = holder.culture }
 						displace_majority_faith_effect = { FAITH = holder.faith }
+						major_migration_county_development_damage_effect = {
+							THE_COUNTY = this
+							MAJORITY = yes
+							LARGE_MINORITY = no
+							SMALL_MINORITY = no
+							NO_MINORITY = no
+						}
 					}
 				}
 			}
 		}
 	}
 }
-
+#Scope is a county
+major_migration_county_development_damage_effect = {
+	random_list = {
+		#Basic Odds (without considering anything else):
+		# Normally distributed, around 30% damage
+		# 05 - 05% - No effect
+		# 10 - 10% - 10% Damage
+		# 20 - 20% - 20% Damage
+		# 30 - 30% - 30% Damage
+		# 20 - 20% - 40% Damage
+		# 10 - 10% - 50% Damage
+		# 05 - 05% - 75% Damage
+		#
+		# Then, we account for disruptions from minorities, which skews things:
+		#
+		# No Minority:
+		# 50 - 30% - No effect
+		# 50 - 30% - 10% Damage
+		# 40 - 24% - 20% Damage
+		# 15 - 09% - 30% Damage
+		# 10 - 06% - 40% Damage
+		# 00 - 00% - 50% Damage
+		# 00 - 00% - 75% Damage
+		#
+		# Small Minority:
+		# 25 - 20% - No effect
+		# 20 - 16% - 10% Damage
+		# 20 - 16% - 20% Damage
+		# 30 - 24% - 30% Damage
+		# 20 - 16% - 40% Damage
+		# 10 - 08% - 50% Damage
+		# 00 - 00% - 75% Damage
+		#
+		# Large Minority:
+		# 00 - 00% - No effect
+		# 10 - 08% - 10% Damage
+		# 20 - 16% - 20% Damage
+		# 30 - 24% - 30% Damage
+		# 20 - 16% - 40% Damage
+		# 20 - 16% - 50% Damage
+		# 25 - 20% - 75% Damage
+		#
+		# Majority:
+		# 00 - 00% - No effect
+		# 00 - 00% - 10% Damage
+		# 10 - 06% - 20% Damage
+		# 15 - 09% - 30% Damage
+		# 40 - 24% - 40% Damage
+		# 50 - 30% - 50% Damage
+		# 50 - 30% - 75% Damage
+		
+		05 = { #No Effect
+			modifier = {
+				factor = 0.0
+				always = $MAJORITY$
+			}
+			modifier = {
+				factor = 0.0
+				always = $LARGE_MINORITY$
+			}
+			modifier = {
+				factor = 5.0
+				always = $SMALL_MINORITY$
+			}
+			modifier = {
+				factor = 10.0
+				always = $NO_MINORITY$
+			}
+		}
+		10 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.9
+			}
+			modifier = {
+				factor = 0.0
+				always = $MAJORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $LARGE_MINORITY$
+			}
+			modifier = {
+				factor = 2.0
+				always = $SMALL_MINORITY$
+			}
+			modifier = {
+				factor = 5.0
+				always = $NO_MINORITY$
+			}
+		}
+		20 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.8
+			}
+			modifier = {
+				factor = 0.5
+				always = $MAJORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $LARGE_MINORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $SMALL_MINORITY$
+			}
+			modifier = {
+				factor = 2.0
+				always = $NO_MINORITY$
+			}
+		}
+		30 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.7
+			}
+			modifier = {
+				factor = 0.5
+				always = $MAJORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $LARGE_MINORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $SMALL_MINORITY$
+			}
+			modifier = {
+				factor = 0.5
+				always = $NO_MINORITY$
+			}
+		}
+		20 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.6
+			}
+			modifier = {
+				factor = 2.0
+				always = $MAJORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $LARGE_MINORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $SMALL_MINORITY$
+			}
+			modifier = {
+				factor = 0.5
+				always = $NO_MINORITY$
+			}
+		}
+		10 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.5
+			}
+			modifier = {
+				factor = 5.0
+				always = $MAJORITY$
+			}
+			modifier = {
+				factor = 2.0
+				always = $LARGE_MINORITY$
+			}
+			modifier = {
+				factor = 1.0
+				always = $SMALL_MINORITY$
+			}
+			modifier = {
+				factor = 0.0
+				always = $NO_MINORITY$
+			}
+		}
+		05 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.25
+			}
+			modifier = {
+				factor = 10.0
+				always = $MAJORITY$
+			}
+			modifier = {
+				factor = 5.0
+				always = $LARGE_MINORITY$
+			}
+			modifier = {
+				factor = 0.0
+				always = $SMALL_MINORITY$
+			}
+			modifier = {
+				factor = 0.0
+				always = $NO_MINORITY$
+			}
+		}
+	}
+}
+reduce_county_development_effect = {
+	$THE_COUNTY$ = {
+		change_development_level = {
+			value = $THE_COUNTY$.development_level
+			multiply = $RELATIVE_DEVELOPMENT_REDUCTION$
+			floor = yes
+		}
+		change_development_progress = { value = -100 }
+	}
+}
