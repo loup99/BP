@@ -72,9 +72,80 @@ BP_maintenance_events.0001 = {
 	option = { name = BP_maintenance_events.0001.a }
 }
 
+#Fix issues with governments of baronies at start (Feudal must die!)
+BP_maintenance_events.0002 = {
+	scope = none
+	hidden = yes
+	
+	immediate = {
+		every_barony = {
+			limit = { this = { is_capital_barony = no } }
+			if = {
+				limit = {
+					OR = {
+						this.title_province = { has_holding_type = castle_holding }
+						AND = {
+							this.title_province = { has_holding_type = city_holding }
+							OR = {
+								this.county.holder = { has_bureaucratic_government_type_trigger = yes }
+								this.county.holder = { has_government = subroman_government }
+							}
+						}
+						AND = {
+							this.title_province = { has_holding_type = church_holding }
+							this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+						}
+					}
+				}
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { convert_realm_to_tribal_effect = yes }
+				}
+				else_if = { #NB: Causes singular "illegal_government" error in 476 start
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { convert_realm_to_republic_effect = yes }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { convert_realm_to_theocracy_effect = yes }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { convert_realm_to_high_tribal_effect = yes }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { convert_realm_to_prefeudal_effect = yes }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { convert_realm_to_nomad_effect = yes }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_government } }
+					this.holder = { convert_realm_to_subroman_direct_effect = yes }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = eranshar_government } }
+					this.holder = { convert_realm_to_eranshar_effect = yes }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = rajamandala_government } }
+					this.holder = { convert_realm_to_gupta_effect = yes }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_bureaucratic_government_type_trigger = yes } }
+					this.holder = { convert_realm_to_gubernatorial_effect = yes }
+				}
+			}
+		}
+	}
+}
 
 #Does things for 476.2.2 game start
-BP_maintenance_events.0002 = {
+BP_maintenance_events.0100 = {
 	scope = none
 	hidden = yes
 	
@@ -91,4 +162,3 @@ BP_maintenance_events.0002 = {
 		character:145226 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:145226 } }
 	}
 }
-

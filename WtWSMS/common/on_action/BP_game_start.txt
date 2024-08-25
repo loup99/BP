@@ -18,7 +18,6 @@ bp_game_start = {
 		BP_set_government_id_effects
 		create_BP_artifacts
 		#Legal Stuff
-		game_start_fix_barony_government
 		setup_realm_laws
 		setup_realm_and_title_succession_laws
 		setup_administrative_languages
@@ -137,8 +136,8 @@ BP_character_events = {
 			character:8 = { designate_diarch = character:109758 }
 			#Ensure Orestes is Regent for Romulus and make it rather entrenched
 			character:96054 = { designate_diarch = character:96055 }
-			#The actual entrenchment must be delayed becuase the diarchy isn't registered yet
-			trigger_event = { id = BP_maintenance_events.0002 days = 1 delayed = yes }
+			#The actual entrenchment must be delayed because the diarchy isn't registered yet
+			trigger_event = { id = BP_maintenance_events.0100 days = 1 delayed = yes }
 		}
 	}
 }
@@ -680,7 +679,7 @@ setup_realm_and_title_succession_laws = {
 }
 setup_administrative_languages = {
 	effect = {
-		#Set some court langauge variables for bureaucrats
+		#Set some court language variables for bureaucrats
 		title:e_wre = {
 			set_variable = {
 				name = court_language
@@ -845,111 +844,6 @@ setup_administrative_languages = {
 			setup_learnt_language_effect = {
 				CHAR = this
 				LANGUAGE = language_israelite
-			}
-		}
-	}
-}
-#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
-#in through the back door
-game_start_fix_barony_government = {
-	effect = {
-		every_barony = {
-			#Which isn't a capital
-			limit = { is_capital_barony = no }
-			#All castle holders should have the government of the county holder
-			if = {
-				limit = { this.title_province = { has_holding_type = castle_holding } }
-				#Vanilla Governments
-				if = {
-					limit = { this.county.holder = { has_government = tribal_government } }
-					this.holder = { convert_realm_to_tribal_effect = yes }
-				}
-				else_if = { #NB: Causes singular "illegal_government" error in 476 start
-					limit = { this.county.holder = { has_government = republic_government } }
-					this.holder = { convert_realm_to_republic_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = theocracy_government } }
-					this.holder = { convert_realm_to_theocracy_effect = yes }
-				}
-				#BP Governments
-				else_if = {
-					limit = { this.county.holder = { has_government = high_tribal_government } }
-					this.holder = { convert_realm_to_high_tribal_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = prefeudal_government } }
-					this.holder = { convert_realm_to_prefeudal_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = nomad_government } }
-					this.holder = { convert_realm_to_nomad_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = subroman_government } }
-					this.holder = { convert_realm_to_subroman_direct_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = eranshar_government } }
-					this.holder = { convert_realm_to_eranshar_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = rajamandala_government } }
-					this.holder = { convert_realm_to_gupta_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_bureaucratic_government_type_trigger = yes } }
-					this.holder = { convert_realm_to_gubernatorial_effect = yes }
-				}
-			}
-			#Handle cases of lay clergy faiths holding temples as well
-			else_if = {
-				limit = {
-					this.title_province = { has_holding_type = church_holding }
-					this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
-				}
-				#Vanilla Governments
-				if = {
-					limit = { this.county.holder = { has_government = tribal_government } }
-					this.holder = { convert_realm_to_tribal_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = republic_government } }
-					this.holder = { convert_realm_to_republic_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = theocracy_government } }
-					this.holder = { convert_realm_to_theocracy_effect = yes }
-				}
-				#BP Governments
-				else_if = {
-					limit = { this.county.holder = { has_government = high_tribal_government } }
-					this.holder = { convert_realm_to_high_tribal_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = prefeudal_government } }
-					this.holder = { convert_realm_to_prefeudal_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = nomad_government } }
-					this.holder = { convert_realm_to_nomad_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = subroman_government } }
-					this.holder = { convert_realm_to_subroman_direct_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = eranshar_government } }
-					this.holder = { convert_realm_to_eranshar_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_government = rajamandala_government } }
-					this.holder = { convert_realm_to_gupta_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_bureaucratic_government_type_trigger = yes } }
-					this.holder = { convert_realm_to_gubernatorial_effect = yes }
-				}
 			}
 		}
 	}
@@ -1790,8 +1684,10 @@ set_starting_culture_acceptance = {
 #Other Events
 trigger_needed_events = {
 	effect = {
-		#Inform all the players
+		#Inform all the players of the mod
 		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
+		#Fix _all_ the barony governments; has to be some ruler for some reason
+		random_ruler = { trigger_event = { id = BP_maintenance_events.0002 } }
 	}
 }
 set_global_variables = {
