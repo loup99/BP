@@ -634,7 +634,7 @@ flip_culture_major_migration_effect = {
 		$ATTACKER$ = {
 			every_realm_county = {
 				this = { save_temporary_scope_as = the_county }
-				random_list = {
+				random_list = { #Apply minorities and damages
 					#Basic Odds:
 					#without considering any other factors:
 					#50% - No Effect
@@ -705,11 +705,212 @@ flip_culture_major_migration_effect = {
 						}
 					}
 				}
+				#Flip holdings if possible...
+				major_migration_flip_holding_to_tribal_effect = {
+					THE_COUNTY = this
+					THE_ATTACKING_CULTURE = $ATTACKER$.culture
+				}
 			}
 		}
 	}
 }
-#Scope is a county
+major_migration_flip_holding_to_tribal_effect = {
+	random = {
+		# Development Level Impacts (without considering anything else)
+		# 00 - 100%
+		# 01 - 100%
+		# 02 - 100%
+		# 03 - 100%
+		# 04 - 100%
+		# 05 - 83.3%
+		# 06 - 66.7%
+		# 07 - 50.0%
+		# 08 - 33.3%
+		# 09 - 16.7%
+		# >=10 impossible
+		#
+		# 1 Effective Innovation
+		# 00 - 100%
+		# 01 - 100%
+		# 02 - 100%
+		# 03 - 100%
+		# 04 - 83.3%
+		# 05 - 66.7%
+		# 06 - 50.0%
+		# 07 - 33.3%
+		# 08 - 16.7%
+		# >=09, impossible
+		#
+		# 2 Effective Inventions
+		# 00 - 100%
+		# 01 - 100%
+		# 02 - 100%
+		# 03 - 83.3%
+		# 04 - 66.7%
+		# 05 - 50.0%
+		# 06 - 33.3%
+		# 07 - 16.7%
+		# >=08, impossible
+		#
+		# 3 Effective Inventions
+		# 00 - 100%
+		# 01 - 100%
+		# 02 - 83.3%
+		# 03 - 66.7%
+		# 04 - 50.0%
+		# 05 - 33.3%
+		# 06 - 16.7%
+		# >=07, impossible
+		#
+		# 4+ Effective Inventions
+		# 00 - 100%
+		# 01 - 83.3%
+		# 02 - 66.7%
+		# 03 - 50.0%
+		# 04 - 33.3%
+		# 05 - 16.7%
+		# >=06, impossible
+		$THE_COUNTY$ = {
+			every_county_province = {
+				limit = { has_holding_type = castle_holding }
+				set_holding_type = tribal_holding
+			}
+		}
+		chance = 100
+		modifier = { #Never for highly developed counties with enough innovations
+			factor = 0
+			OR = {
+				$THE_COUNTY$.development_level >= 10
+				AND = {
+					$THE_COUNTY$.development_level >= 9
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 1
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 8
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 2
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 7
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 3
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 7
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 4
+				}
+			}
+		}
+		modifier = { #83% Chance
+			factor = 0.833
+			OR = {
+				$THE_COUNTY$.development_level >= 5
+				AND = {
+					$THE_COUNTY$.development_level >= 4
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 1
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 3
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 2
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 2
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 3
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 1
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 4
+				}
+			}
+		}
+		modifier = { #67% Chance
+			factor = 0.667
+			OR = {
+				$THE_COUNTY$.development_level >= 6
+				AND = {
+					$THE_COUNTY$.development_level >= 5
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 1
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 4
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 2
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 3
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 3
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 2
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 4
+				}
+			}
+		}
+		modifier = { #50% Chance
+			factor = 0.50
+			OR = {
+				$THE_COUNTY$.development_level >= 7
+				AND = {
+					$THE_COUNTY$.development_level >= 6
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 1
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 5
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 2
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 4
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 3
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 3
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 4
+				}
+			}
+		}
+		modifier = { #33% Chance
+			factor = 0.333
+			OR = {
+				$THE_COUNTY$.development_level >= 8
+				AND = {
+					$THE_COUNTY$.development_level >= 7
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 1
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 6
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 2
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 5
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 3
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 4
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 4
+				}
+			}
+		}
+		modifier = { #17% Chance
+			factor = 0.167
+			OR = {
+				$THE_COUNTY$.development_level >= 9
+				AND = {
+					$THE_COUNTY$.development_level >= 8
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 1
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 7
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 2
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 6
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 3
+				}
+				AND = {
+					$THE_COUNTY$.development_level >= 5
+					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 4
+				}
+			}
+		}
+	}
+}
 major_migration_county_development_damage_effect = {
 	random_list = {
 		#Basic Odds (without considering anything else):
@@ -917,6 +1118,7 @@ reduce_county_development_effect = {
 		change_development_level = {
 			value = $THE_COUNTY$.development_level
 			multiply = $RELATIVE_DEVELOPMENT_REDUCTION$
+			multiply = -1.0
 			floor = yes
 		}
 		change_development_progress = { value = -100 }
