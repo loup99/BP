@@ -512,3 +512,126 @@ tradition_highland_cavalry_non_dlc = { #Effectively replacing "Indomitable Azant
 		}
 	}
 }
+
+tradition_early_slavic_warfare = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = western
+		4 = battle.dds
+	}
+	
+	is_shown = {
+		OR = {
+			this = culture:old_slavic
+			NOT = { the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:old_slavic } }
+		}
+	}
+	can_pick = {
+		traditions_cultural_combat_type_is_in_list_trigger = { TRADITION = culture_tradition:tradition_early_slavic_warfare }
+		culture_not_pacifistic_trigger = yes
+		custom_tooltip = {
+			text = cannot_have_tradition_hit_and_run
+			NOT = { culture_tradition:tradition_hit_and_run = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_adaptive_skirmishing
+			NOT = { culture_tradition:tradition_adaptive_skirmishing = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_forest_fighters
+			NOT = { culture_tradition:tradition_forest_fighters = { is_in_list = traits } }
+		}
+	}
+	can_pick_for_hybridization = {
+		traditions_cultural_combat_type_is_in_list_trigger = { TRADITION = culture_tradition:tradition_early_slavic_warfare }
+		custom_tooltip = {
+			text = cannot_have_tradition_hit_and_run
+			NOT = { culture_tradition:tradition_hit_and_run = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_adaptive_skirmishing
+			NOT = { culture_tradition:tradition_adaptive_skirmishing = { is_in_list = traits } }
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_forest_fighters
+			NOT = { culture_tradition:tradition_forest_fighters = { is_in_list = traits } }
+		}
+		custom_description = {
+			text = hybrid_must_common_slavic_heritage_for_tradition_early_slavic_traditions
+			culture_pillar:heritage_common_slavic = { is_in_list = traits }
+		}
+	}
+	
+	parameters = {
+		can_duel_rivals = yes
+		forest_fighter_trait_more_common = yes
+		forest_trait_bonuses = yes
+		can_recruit_forest_specialist = yes
+		#CB aspects
+		easier_migration_cbs = yes
+		migration_cbs_more_powerful = yes
+		#Other
+		changes_into_other_traditions_after_tribal_era_military = yes
+	}
+	character_modifier = {
+		skirmishers_damage_mult = 0.05
+		skirmishers_screen_mult = 0.1
+		light_cavalry_damage_mult = 0.05
+		light_cavalry_screen_mult = 0.1
+		archers_damage_mult = 0.05
+		archers_screen_mult = 0.1
+		
+		forest_advantage = 5
+		taiga_advantage = 5
+		wetlands_advantage = 5
+	}
+	province_modifier = {
+		forest_levy_size = 0.1
+		taiga_levy_size = 0.1
+		wetlands_levy_size = 0.1
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_bureaucratic = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_bureaucratic_or_stoic_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 100
+		if = {
+			limit = { NOT = { scope:character = { has_government = tribal_government } } }
+			multiply = 0.00
+		}
+		if = {
+			limit = {
+				NOR = {
+					culture_pillar:heritage_common_slavic = { is_in_list = traits }
+					is_divergent_culture = yes
+				}
+			}
+			multiply = 0
+		}
+	}
+}

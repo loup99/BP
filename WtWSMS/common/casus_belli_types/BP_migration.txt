@@ -564,7 +564,11 @@ major_migration_war = {
 	}
 
 	allowed_for_character_display_regardless = {
-		prestige_level >= major_migration_prestige_level
+		trigger_if = {
+			limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+			prestige_level >= major_migration_prestige_level_easier
+		}
+		trigger_else = { prestige_level >= major_migration_prestige_level }
 		custom_description = {
 			text = has_launched_migration_war_recently
 			NOT = { has_character_flag = launched_migration_war_recently }
@@ -614,7 +618,18 @@ major_migration_war = {
 		}
 	}
 
-	cost = { prestige = major_migration_war_prestige_cost }
+	cost = {
+		prestige = {
+			value = 0
+			if = {
+				limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+				add = major_migration_war_prestige_cost_cheaper
+			}
+			else = {
+				add = major_migration_war_prestige_cost
+			}
+		}
+	}
 
 	on_declaration = {
 		every_in_list = {
@@ -772,7 +787,13 @@ major_migration_war = {
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		if = {
+			limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time_easier } }
+		}
+		else = {
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		}
 	}
 	
 	on_defeat_desc = {
@@ -861,7 +882,13 @@ major_migration_war = {
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		if = {
+			limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time_easier } }
+		}
+		else = {
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		}
 	}
 	
 	transfer_behavior = transfer
