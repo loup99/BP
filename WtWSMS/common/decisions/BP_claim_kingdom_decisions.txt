@@ -1,0 +1,140 @@
+﻿##### These are various decisions that cover weird edge cases between the CK3 mechanics
+##### and history, like the throne of Aghwank being empty for a few decades then being reclaimed.
+#####
+##### Basically, should be a cheaper, simpler way of getting certain kingdoms that would exist
+##### exist historically
+reclaim_albania_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = reclaim_albania_decision_desc
+	selection_tooltip = reclaim_albania_decision_tooltip
+	
+	is_shown = {
+		highest_held_title_tier = tier_duchy
+		OR = {
+			has_title = title:d_caucasian_albania
+			has_title = title:d_balasagan
+		}
+		has_claim_on = title:k_caucasian_albania
+		NOT = { has_global_variable = reestablished_albania }
+	}
+	
+	is_valid = {
+		OR = {
+			#Has enough political clout
+			AND = {
+				is_independent_ruler = no
+				OR = {
+					prestige_level >= 3
+					AND = {
+						prestige_level >= 2
+						has_hook = root.top_liege
+					}
+					AND = {
+						prestige_level >= 1
+						has_strong_hook = root.top_liege
+					}
+				}
+			}
+			#Or is independent
+			is_independent_ruler = yes
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_at_peace_adult = yes
+		is_imprisoned = no
+		is_adult = yes
+	}
+	
+	cost = {
+		gold = 150
+		prestige = 200
+	}
+	
+	effect = {
+		#Done as event to prevent RC formation event from firing
+		show_as_tooltip = { reform_caucasian_albania_effect = yes }
+		hidden_effect = {
+			#Can only do it once
+			set_global_variable = {
+				name = reestablished_albania
+				value = yes
+			}
+			
+			root = { save_scope_as = the_albanian_reformer }
+			
+			root = { trigger_event = { id = BP_major_secular_decisions.0001 } }
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 100 }
+}
+#The Aures Kingdom in the mountains of Africa
+claim_k_aures_decision = {
+	picture = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	major = yes
+	ai_check_interval = 60
+	desc = claim_k_aures_decision_desc
+	selection_tooltip = claim_k_aures_decision_tooltip
+	
+	is_shown = {
+		highest_held_title_tier = tier_duchy
+		has_title = title:d_auresia
+		NOT = { has_global_variable = claimed_k_aures }
+	}
+	
+	is_valid = {
+		OR = {
+			#Has enough political clout
+			prestige_level >= 2
+			piety_level >= 2
+		}
+		#Have to be in the Aures Mountains
+		OR = {
+			custom_description = {
+				text = capital_is_bilizma
+				root.capital_county = title:c_bilizma
+			}
+			custom_description = {
+				text = capital_is_biskra
+				root.capital_county = title:c_biskra
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_at_peace_adult = yes
+		is_imprisoned = no
+		is_adult = yes
+	}
+	
+	cost = {
+		gold = 25
+		prestige = 50
+		piety = 50
+	}
+	
+	effect = {
+		#Done as event to prevent RC formation event from firing
+		show_as_tooltip = { form_k_aures_effect = yes }
+		hidden_effect = {
+			#Can only do it once
+			set_global_variable = {
+				name = claimed_k_aures
+				value = yes
+			}
+			
+			root = { save_scope_as = the_k_aures_former }
+			
+			root = { trigger_event = { id = BP_major_secular_decisions.0003 } }
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 100 }
+}
