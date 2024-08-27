@@ -17,9 +17,10 @@ bp_game_start = {
 		BP_character_events
 		create_BP_artifacts
 		#Legal Stuff
-		game_start_fix_barony_government
 		setup_realm_laws
 		setup_realm_and_title_succession_laws
+		game_start_fix_barony_government
+		setup_administrative_languages
 		setup_vassal_contracts
 		#Other Title effects
 		other_title_effects
@@ -802,6 +803,174 @@ game_start_fix_barony_government = {
 					limit = { this.county.holder = { has_government = rajamandala_government } }
 					this.holder = { change_government = rajamandala_government }
 				}
+			}
+setup_administrative_languages = {
+	effect = {
+		#Set some court language variables for bureaucrats
+		title:e_wre = {
+			set_variable = {
+				name = court_language
+				value = culture:roman
+			}
+		}
+		title:e_byzantium = {
+			if = {
+				limit = { current_date < 610.10.5 }
+				set_variable = {
+					name = court_language
+					value = culture:roman
+				}
+			}
+			else = {
+				set_variable = {
+					name = court_language
+					value = culture:greek
+				}
+			}
+		}
+		title:k_italy = {
+			set_variable = {
+				name = court_language
+				value = culture:roman
+			}
+			holder = {
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+		}
+		#Byzantines use Latin before Hearclius' reign
+		#Source: Davis, Leo Donald (1990). The First Seven Ecumenical Councils (325–787): Their History and Theology. Liturgical Press. p. 260. 
+		every_ruler = {
+			limit = { has_title = title:e_byzantium }
+			if = {
+					limit = { current_date < 610.10.5 }
+					setup_the_court_language_effect = {
+						CHAR = this
+						LANGUAGE = language_latin
+					}
+				}
+				else = { #Otherwise, learn Greek
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+						setup_the_court_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+					else = {
+						setup_learnt_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+				}
+			every_vassal_or_below = {
+				limit = { has_government = gubernatorial_government }
+				if = {
+					limit = { current_date < 610.10.5 }
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+							setup_the_court_language_effect = {
+							CHAR = this
+							LANGUAGE = language_latin
+						}
+					}
+					else = {
+						setup_learnt_language_effect = {
+							CHAR = this
+							LANGUAGE = language_latin
+						}
+					}
+				}
+				else = { #Otherwise, learn Greek
+					if = {
+						limit = { primary_title = { tier >= tier_kingdom } }
+						setup_the_court_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+					else = {
+						setup_learnt_language_effect = {
+							CHAR = this
+							LANGUAGE = language_greek
+						}
+					}
+				}
+			}
+		}
+		#Gupta Governments use Sanskrit
+		every_ruler = {
+			limit = { has_government = rajamandala_government }
+			if = {
+				limit = { primary_title = { tier >= tier_kingdom } }
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+			}
+			else = { #Ensure every Gupta ruler knows Sanskrit
+				setup_learnt_language_effect = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+			}
+		}
+		#Sub-Romans (in 476 at least) use Latin
+		every_ruler = {
+			limit = { has_government = subroman_government }
+			if = {
+				limit = { primary_title = { tier >= tier_kingdom } }
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+			else = { #Ensure every Sub-Roman ruler knows Latin
+				setup_learnt_language_effect = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+		}
+		#Standardize use of Persian under e_persia
+		every_ruler = {
+			limit = { has_title = title:e_persia }
+			every_vassal_or_below = {
+				if = {
+					limit = { #Eranshar Zoroastrian Vassals Under Persia (only) should adopt Persian
+						primary_title = { tier >= tier_kingdom }
+						AND = {
+							has_government = eranshar_government
+							has_religion = religion:zoroastrianism_religion
+						}
+					}
+					setup_the_court_language_effect = {
+						CHAR = this
+						LANGUAGE = language_iranian
+					}
+				}
+				else = {
+					setup_learnt_language_effect = {
+						CHAR = this
+						LANGUAGE = language_iranian
+					}
+				}
+			}
+		}
+		#All learned Jewish rulers should know Hebrew
+		every_ruler = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_israelite }
+					religion = religion:judaism_religion
+				}
+			}
+			setup_learnt_language_effect = {
+				CHAR = this
+				LANGUAGE = language_israelite
 			}
 		}
 	}
@@ -1736,8 +1905,10 @@ set_starting_culture_acceptance = {
 #Other Events
 trigger_needed_events = {
 	effect = {
-		#Inform all the players
+		#Inform all the players of the mod
 		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
+		#Fix _all_ the barony governments; has to be some ruler for some reason
+		random_ruler = { trigger_event = { id = BP_maintenance_events.0002 } }
 	}
 }
 set_global_variables = {
