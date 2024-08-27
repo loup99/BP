@@ -11,7 +11,12 @@
 # Naturally, Malleable Invaders overrides the behavior (see Norse et al)
 scripted_trigger conquer_culture_trigger = {
 	culture = { has_cultural_parameter = conqueror_culture_feature }
-	NOT = { culture = { has_cultural_parameter = overrides_conqueror_culture_feature } }
+	NOT = { culture = { has_cultural_parameter = culture_blending_culture_feature } }
+}
+
+scripted_trigger culture_blending_capital_culture_feature_trigger = {
+	NOT = { culture = { has_cultural_parameter = culture_blending_culture_feature } }
+	scope:hybdridization_offer_culture = { has_cultural_parameter = culture_blending_culture_feature }
 }
 
 # Opportunity for your culture to hybridize with your capital culture
@@ -22,7 +27,12 @@ bp_culture_emergence_events.0001 = {
 	title = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { conquer_culture_trigger = yes }
+				trigger = {
+					OR = {
+						conquer_culture_trigger = yes
+						culture_blending_capital_culture_feature_trigger = yes
+					}
+				}
 				desc = bp_culture_emergence_events.0001.t_conqueror
 			}
 			#Default
@@ -32,7 +42,12 @@ bp_culture_emergence_events.0001 = {
 	desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { conquer_culture_trigger = yes }
+				trigger = {
+					OR = {
+						conquer_culture_trigger = yes
+						culture_blending_capital_culture_feature_trigger = yes
+					}
+				}
 				desc = bp_culture_emergence_events.0001.desc_conqueror
 			}
 			#Default
@@ -281,7 +296,10 @@ bp_culture_emergence_events.0001 = {
 
 	##### Changed from Vanilla vvvvv
 	option = {
-		trigger = { conquer_culture_trigger = no }
+		trigger = {
+			conquer_culture_trigger = no
+			culture_blending_capital_culture_feature_trigger = no
+		}
 		name = bp_culture_emergence_events.0001.a
 		
 		flavor = bp_new_hybrid_culture_standard_tt
@@ -308,6 +326,45 @@ bp_culture_emergence_events.0001 = {
 				root = { set_variable = { name = dominant_culture value = root.capital_county.culture } }
 				root.culture = { save_scope_as = ruler_culture }
 				trigger_event = { id = bp_culture_emergence_events.1002 }
+			}
+		}
+
+		ai_chance = {
+			base = 100
+		}
+	}
+	
+	option = {
+		trigger = {
+			conquer_culture_trigger = no
+			culture_blending_capital_culture_feature_trigger = yes
+		}
+		name = bp_culture_emergence_events.0001.a_blending
+		
+		flavor = bp_new_hybrid_culture_conqueror_tt
+		
+		if = { # If a hybrid culture already exist, convert to that one
+			limit = {
+				exists = scope:existing_hybrid_culture
+			}
+			custom_tooltip = bp_culture_emergence_events.0001.existing_hybrid
+			custom_tooltip = bp_culture_emergence_events.0001.vassals
+			hidden_effect = {
+				new_culture_created_vassal_conversion_effect = {
+					CONVERTEE = root
+					CONVERTER = root
+					CULTURE = scope:existing_hybrid_culture
+				}
+			}
+		}
+		else = {
+			custom_tooltip = bp_culture_emergence_events.0001.new_hybrid
+			custom_tooltip = bp_culture_emergence_events.0001.vassals
+			
+			hidden_effect = {
+				root = { set_variable = { name = dominant_culture value = root.culture } }
+				root.culture = { save_scope_as = ruler_culture }
+				trigger_event = { id = bp_culture_emergence_events.1003 }
 			}
 		}
 
@@ -353,8 +410,12 @@ bp_culture_emergence_events.0001 = {
 	}
 	##### Changed from Vanilla ^^^^^
 
+	##### Changed from Vanilla vvvvv
 	option = {
-		trigger = { conquer_culture_trigger = no }
+		trigger = {
+			conquer_culture_trigger = no
+			culture_blending_capital_culture_feature_trigger = no
+		}
 		name = bp_culture_emergence_events.0001.b
 		
 		scope:hybdridization_offer_culture = {
@@ -370,7 +431,26 @@ bp_culture_emergence_events.0001 = {
 		}
 	}
 	
-	##### Changed from Vanilla vvvvv
+	option = {
+		trigger = {
+			conquer_culture_trigger = no
+			culture_blending_capital_culture_feature_trigger = yes
+		}
+		name = bp_culture_emergence_events.0001.b_blending
+		
+		scope:hybdridization_offer_culture = {
+			change_cultural_acceptance = {
+				target = root.culture
+				value = 5
+				desc = cultural_acceptance_gain_event
+			}
+		}
+
+		ai_chance = {
+			base = 0
+		}
+	}
+	
 	option = {
 		trigger = { conquer_culture_trigger = yes }
 		name = bp_culture_emergence_events.0001.b_conqueror
