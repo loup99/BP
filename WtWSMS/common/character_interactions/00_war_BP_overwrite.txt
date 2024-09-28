@@ -86,7 +86,16 @@ end_war_attacker_victory_interaction = {
 			}
 		}
 
-		release_prisoners_of_war_effect = yes
+		if = {
+			limit = {
+				scope:war ?= {
+					using_cb = fp3_free_house_member_cb
+				}
+			}
+		}
+		else = {
+			release_prisoners_of_war_effect = yes
+		}
 
 		# Hostages
 		# Save scopes for clarity
@@ -101,78 +110,73 @@ end_war_attacker_victory_interaction = {
 				}
 			}
 			if = {
-				limit = { exists = scope:secondary_actor }
-				scope:secondary_actor ?= { save_scope_as = hostage_1 }
-			}
-			scope:actor = { save_scope_as = hostage_sender_1 }
-			if = {
-				limit = { exists = scope:secondary_recipient }
-				scope:secondary_recipient ?= { save_scope_as = hostage_2 }
-			}
-			scope:recipient = { save_scope_as = hostage_sender_2 }
-			if = {
 				limit = {
-					exists = scope:hostage_1
-					scope:hostage_sender_2 = { is_landed = yes }
+					exists = scope:secondary_actor
+					scope:recipient = { is_landed_or_landless_administrative = yes }
 				}
 				hostage_depart_effect = {
-					HOSTAGE = scope:hostage_1
-					WARDEN = scope:hostage_sender_2
-					HOME_COURT = scope:hostage_sender_1
+					HOSTAGE = scope:secondary_actor
+					WARDEN = scope:recipient
+					HOME_COURT = scope:actor
 				}
 			}
 			if = {
 				limit = {
-					exists = scope:hostage_2
-					scope:hostage_sender_1 = { is_landed = yes }
+					exists = scope:secondary_recipient
+					scope:actor = { is_landed_or_landless_administrative = yes }
 				}
 				hostage_depart_effect = {
-					HOSTAGE = scope:hostage_2
-					WARDEN = scope:hostage_sender_1
-					HOME_COURT = scope:hostage_sender_2
+					HOSTAGE = scope:secondary_recipient
+					WARDEN = scope:actor
+					HOME_COURT = scope:recipient
 				}
 			}
 		}
 
 		#Send notification to vassals
-		scope:attacker_winner = {
-			if = {
-				limit = {
-					any_vassal = {
-						NOT = { this = scope:defender_loser }
+		hidden_effect = {
+			scope:attacker_winner = {
+				if = {
+					limit = {
+						any_vassal = {
+							NOT = { this = scope:defender_loser }
+						}
 					}
-				}
-				every_vassal = {
-					limit = { NOT = { this = scope:defender_loser } }
-					send_interface_toast = {
-						title = war_event.notification_liege_win.t
-						left_icon = scope:attacker_winner
-						left_icon = scope:defender_loser
-						custom_tooltip = war_event.1901
+					every_vassal = {
+						limit = { NOT = { this = scope:defender_loser } }
+						send_interface_toast = {
+							type = msg_liege_war_ended_attacker_win
+							title = war_event.notification_liege_win.t
+							left_icon = scope:attacker_winner
+							right_icon = scope:defender_loser
+							custom_tooltip = war_event.1901
+						}
 					}
 				}
 			}
-		}
-		scope:defender_loser = {
-			if = {
-				limit = {
-					any_vassal = { NOT = { this = scope:attacker_winner } }
-				}
-				every_vassal = {
+			scope:defender_loser = {
+				if = {
 					limit = {
-						NOT = { this = scope:attacker_winner }
+						any_vassal = { NOT = { this = scope:attacker_winner } }
 					}
-					send_interface_toast = {
-						title = war_event.notification_liege_loss.t
-						left_icon = scope:defender_loser
-						right_icon = scope:attacker_winner
-						custom_tooltip = war_event.1902
+					every_vassal = {
+						limit = {
+							NOT = { this = scope:attacker_winner }
+						}
+						send_interface_toast = {
+							type = msg_liege_war_ended_attacker_win
+							title = war_event.notification_liege_loss.t
+							left_icon = scope:defender_loser
+							right_icon = scope:attacker_winner
+							custom_tooltip = war_event.1902
+						}
 					}
 				}
 			}
 		}
 
-		##### Changed from Vanilla: Removed bookmark_867_northmen_aellas_capture_war_imprisonment_effect
+		#Special bookmark event for Aella of Northumbria
+		##### Changed from Vanilla: Removed "bookmark_867_northmen_aellas_capture_war_imprisonment_effect = yes"
 
 		end_war = attacker
 	}
@@ -195,6 +199,10 @@ end_war_attacker_victory_interaction = {
 						is_ai = yes
 					}
 				}
+				primary_defender = {
+					is_ai = yes
+					ai_has_conqueror_personality = yes
+				}
 			}
 		}
 	}
@@ -214,6 +222,17 @@ end_war_attacker_victory_interaction = {
 						}
 						primary_defender = {
 							is_ai = yes
+						}
+					}
+					AND = {
+						NOR = {
+							using_cb = undirected_great_holy_war
+							using_cb = mongol_invasion_war
+							using_cb = mongol_realm_invasion_war
+						}
+						primary_defender = {
+							is_ai = yes
+							ai_has_conqueror_personality = yes
 						}
 					}
 				}
@@ -272,6 +291,17 @@ end_war_attacker_victory_interaction = {
 			AND = {
 				scope:recipient = { is_ai = yes }
 				primary_attacker = scope:recipient
+			}
+			scope:war.casus_belli = { # Conquerors know when to fold
+				primary_attacker = {
+					is_ai = yes
+					current_military_strength >= scope:recipient.fifty_percent_more_of_current_military_strength
+				}
+				primary_defender = {
+					is_ai = yes
+					ai_has_conqueror_personality = yes
+					this = scope:recipient
+				}
 			}
 		}
 	}

@@ -146,39 +146,6 @@ spawn_armies_from_development_effect = { #Spawn armies based on development
 # TITLE MANAGEMENT
 
 ## GENERAL
-propagate_government_down_tree_effect = { #Scope the top liege
-	every_vassal_or_below = {
-		save_temporary_scope_as = the_vassal
-		if = {
-			limit = {
-				exists = $THE_PREVIOUS_HOLDER$ #Prevents a spam of errors wrt tooltip creation
-				OR = {
-					scope:the_vassal.capital_barony.title_province = { has_holding_type = castle_holding }
-					trigger_if = {
-						limit = { scope:the_vassal.faith = { has_doctrine = doctrine_theocracy_lay_clergy } }
-						scope:the_vassal.capital_barony.title_province = { has_holding_type = church_holding }
-					}
-				}
-			}
-			bootstrap_prevention_effect = {
-				THE_LANDED_TITLE = scope:the_vassal.capital_barony
-				THE_PREVIOUS_HOLDER = $THE_PREVIOUS_HOLDER$
-			}
-		}
-	}
-}
-nomadic_bootstrap_prevention_effect = {
-	if = {
-		limit = {
-			$ATTACKER$ = { has_government = nomad_government }
-			any_in_list = {
-				list = $LIST_OF_TITLES$
-				title_province = { has_holding_type = castle_holding }
-			}
-		}
-		$ATTACKER$ = { convert_realm_to_tribal_effect = yes }
-	}
-}
 
 ## MINOR MIGRATIONS
 minor_migration_cb_title_management_effect = {
@@ -237,12 +204,6 @@ minor_migration_cb_title_management_effect = {
 			}
 			add_to_temporary_list = defender_titles_taken
 		}
-	}
-	
-	#Change Nomadic government if _any_ captured holding is not tribal/church
-	nomadic_bootstrap_prevention_effect = {
-		ATTACKER = $ATTACKER$
-		LIST_OF_TITLES = defender_titles_taken
 	}
 	
 	#Now seize the defender titles
@@ -325,24 +286,6 @@ minor_migration_cb_title_management_effect = {
 	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_liege
 	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_independent
 	resolve_title_and_vassal_change = scope:change_attacker_becomes_independent
-	
-	#### Government bootstrap crap
-	hidden_effect = {
-		every_in_list = {
-			list = new_holders
-			save_temporary_scope_as = the_holder
-			
-			scope:the_holder ?= {
-				bootstrap_prevention_effect = {
-					THE_LANDED_TITLE = scope:the_holder.capital_county
-					THE_PREVIOUS_HOLDER = $ATTACKER$
-				}
-				propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
-			}
-		}
-		#Ensure no gov't trickery here, as things can go sideways fast
-		$ATTACKER$ = { propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ } }
-	}
 	
 	#Apply county effects
 	hidden_effect = { #apply county modifiers to new counties
@@ -522,12 +465,6 @@ major_migration_cb_title_management_effect = {
 		}
 	}
 	
-	#Change Nomadic government if _any_ captured holding is not tribal/church
-	nomadic_bootstrap_prevention_effect = {
-		ATTACKER = $ATTACKER$
-		LIST_OF_TITLES = all_seized_titles
-	}
-	
 	#Now seize the defender titles
 	
 	##Start with de jure counties (because of how the GUI works)
@@ -584,24 +521,6 @@ major_migration_cb_title_management_effect = {
 	resolve_title_and_vassal_change = scope:change_seized_defender_titles
 	resolve_title_and_vassal_change = scope:change_transfered_old_attacker_titles
 	resolve_title_and_vassal_change = scope:change_attacker_vassals_to_independent
-	
-	##### Government boostrap crap
-	hidden_effect = {
-		every_in_list = {
-			list = new_holders
-			save_temporary_scope_as = the_holder
-			
-			scope:the_holder ?= {
-				bootstrap_prevention_effect = {
-					THE_LANDED_TITLE = scope:the_holder.capital_county
-					THE_PREVIOUS_HOLDER = $ATTACKER$
-				}
-				propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ }
-			}
-		}
-		#Ensure no gov't trickery here, as things can go sideways fast
-		$ATTACKER$ = { propagate_government_down_tree_effect = { THE_PREVIOUS_HOLDER = $ATTACKER$ } }
-	}
 	
 	#Apply county effects
 	hidden_effect = { #apply county modifiers to new counties

@@ -15,13 +15,12 @@ bp_game_start = {
 		ccu_startup_debug
 		#Other BP Stuff
 		BP_character_events
-		BP_set_government_id_effects
 		create_BP_artifacts
 		#Legal Stuff
 		game_start_fix_barony_government
 		setup_realm_laws
 		setup_realm_and_title_succession_laws
-		setup_administrative_languages
+		###### setup_administrative_languages
 		setup_vassal_contracts
 		#Other Title effects
 		other_title_effects
@@ -50,7 +49,7 @@ bp_game_start_after_lobby = {
 		trigger_needed_events
 		set_global_variables
 		delay = { days = 1 }
-		fix_custom_character_governments
+		#fix_custom_character_governments
 	}
 }
 
@@ -143,12 +142,6 @@ BP_character_events = {
 	}
 }
 
-BP_set_government_id_effects = {
-	effect = {
-		every_ruler = { set_government_id_effect = { THE_RULER = this } }
-	}
-}
-
 create_BP_artifacts = {
 	effect = {
 		if = {
@@ -213,23 +206,12 @@ setup_realm_laws = {
 			limit = { has_government = subroman_government }
 			add_realm_law_skip_effects = subroman_taxation_3
 		}
-		#Setup Bureaucratic Taxation
-		every_ruler = {
-			limit = { has_government = bureaucratic_government }
-			add_realm_law_skip_effects = bureaucratic_taxation_2
-			apply_taxation_down_tree_effect = { VALUE = 2 }
-		}
 		#Setup e_persia's clerical/shah authority
 		#Initally strong Clerical Influence and weak Secular Authority
 		if = {
 			limit = { current_date >= 476.2.2 }
 			every_ruler = {
 				limit = { has_title = title:e_persia }
-				if = {
-					limit = { NOT = { has_realm_law = eranshar_authority_0 } }
-					add_realm_law = eranshar_authority_0
-					remove_variable = eranshar_authority_cooldown
-				}
 				if = {
 					limit = { NOT = { has_realm_law = clerical_influence_1 } }
 					add_realm_law = clerical_influence_1
@@ -305,50 +287,9 @@ setup_realm_and_title_succession_laws = {
 		}
 		
 		### Governments
-		every_ruler = { #Bureaucratic
-			limit = {
-				OR = {
-					has_government = bureaucratic_government
-					has_government = gubernatorial_government
-				}
-			}
-			if = {
-				limit = { NOT = { has_realm_law = single_heir_succession_law } }
-				add_realm_law_skip_effects = single_heir_succession_law
-			}
-			if = {
-				limit = { NOT = { has_realm_law = male_only_law } }
-				add_realm_law_skip_effects = male_only_law
-			}
-		}
-		every_ruler = { #Sub-Roman Government
-			limit = {
-				has_government = subroman_government
-				NOT = { has_realm_law = male_only_law }
-			}
-			add_realm_law_skip_effects = male_only_law
-		}
-		every_ruler = { #Eranshar
-			limit = { has_government = eranshar_government }
-			if = {
-				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
-				add_realm_law_skip_effects = single_heir_dynasty_house
-			}
-			if = {
-				limit = { NOT = { has_realm_law = male_only_law } }
-				add_realm_law_skip_effects = male_only_law
-			}
-		}
 		
 		### Other Special Cases
-		every_ruler = { #Nepos' realm
-			limit = { has_title = title:k_dalmatia }
-			if = {
-				limit = { NOT = { has_realm_law = single_heir_succession_law } }
-				add_realm_law_skip_effects = single_heir_succession_law
-			}
-		}
-		every_ruler = { #Suebia & Burgundians should be partition partion to avoid creating undesirable kingdoms
+		every_ruler = { #Suebia & Burgundians should be partion to avoid creating undesirable kingdoms
 			limit = {
 				OR = {
 					has_title = title:k_suebia
@@ -678,177 +619,6 @@ setup_realm_and_title_succession_laws = {
 		}
 	}
 }
-setup_administrative_languages = {
-	effect = {
-		#Set some court langauge variables for bureaucrats
-		title:e_wre = {
-			set_variable = {
-				name = court_language
-				value = culture:roman
-			}
-		}
-		title:e_byzantium = {
-			if = {
-				limit = { current_date < 610.10.5 }
-				set_variable = {
-					name = court_language
-					value = culture:roman
-				}
-			}
-			else = {
-				set_variable = {
-					name = court_language
-					value = culture:greek
-				}
-			}
-		}
-		title:k_italy = {
-			set_variable = {
-				name = court_language
-				value = culture:roman
-			}
-			holder = {
-				setup_the_court_language_effect = {
-					CHAR = this
-					LANGUAGE = language_latin
-				}
-			}
-		}
-		#Byzantines use Latin before Hearclius' reign
-		#Source: Davis, Leo Donald (1990). The First Seven Ecumenical Councils (325–787): Their History and Theology. Liturgical Press. p. 260. 
-		every_ruler = {
-			limit = { has_title = title:e_byzantium }
-			if = {
-					limit = { current_date < 610.10.5 }
-					setup_the_court_language_effect = {
-						CHAR = this
-						LANGUAGE = language_latin
-					}
-				}
-				else = { #Otherwise, learn Greek
-					if = {
-						limit = { primary_title = { tier >= tier_kingdom } }
-						setup_the_court_language_effect = {
-							CHAR = this
-							LANGUAGE = language_greek
-						}
-					}
-					else = {
-						setup_learnt_language_effect = {
-							CHAR = this
-							LANGUAGE = language_greek
-						}
-					}
-				}
-			every_vassal_or_below = {
-				limit = { has_government = gubernatorial_government }
-				if = {
-					limit = { current_date < 610.10.5 }
-					if = {
-						limit = { primary_title = { tier >= tier_kingdom } }
-							setup_the_court_language_effect = {
-							CHAR = this
-							LANGUAGE = language_latin
-						}
-					}
-					else = {
-						setup_learnt_language_effect = {
-							CHAR = this
-							LANGUAGE = language_latin
-						}
-					}
-				}
-				else = { #Otherwise, learn Greek
-					if = {
-						limit = { primary_title = { tier >= tier_kingdom } }
-						setup_the_court_language_effect = {
-							CHAR = this
-							LANGUAGE = language_greek
-						}
-					}
-					else = {
-						setup_learnt_language_effect = {
-							CHAR = this
-							LANGUAGE = language_greek
-						}
-					}
-				}
-			}
-		}
-		#Gupta Governments use Sanskrit
-		every_ruler = {
-			limit = { has_government = rajamandala_government }
-			if = {
-				limit = { primary_title = { tier >= tier_kingdom } }
-				setup_the_court_language_effect = {
-					CHAR = this
-					LANGUAGE = language_sanskrit
-				}
-			}
-			else = { #Ensure every Gupta ruler knows Sanskrit
-				setup_learnt_language_effect = {
-					CHAR = this
-					LANGUAGE = language_sanskrit
-				}
-			}
-		}
-		#Sub-Romans (in 476 at least) use Latin
-		every_ruler = {
-			limit = { has_government = subroman_government }
-			if = {
-				limit = { primary_title = { tier >= tier_kingdom } }
-				setup_the_court_language_effect = {
-					CHAR = this
-					LANGUAGE = language_latin
-				}
-			}
-			else = { #Ensure every Sub-Roman ruler knows Latin
-				setup_learnt_language_effect = {
-					CHAR = this
-					LANGUAGE = language_latin
-				}
-			}
-		}
-		#Standardize use of Persian under e_persia
-		every_ruler = {
-			limit = { has_title = title:e_persia }
-			every_vassal_or_below = {
-				if = {
-					limit = { #Eranshar Zoroastrian Vassals Under Persia (only) should adopt Persian
-						primary_title = { tier >= tier_kingdom }
-						AND = {
-							has_government = eranshar_government
-							has_religion = religion:zoroastrianism_religion
-						}
-					}
-					setup_the_court_language_effect = {
-						CHAR = this
-						LANGUAGE = language_iranian
-					}
-				}
-				else = {
-					setup_learnt_language_effect = {
-						CHAR = this
-						LANGUAGE = language_iranian
-					}
-				}
-			}
-		}
-		#All learned Jewish rulers should know Hebrew
-		every_ruler = {
-			limit = {
-				OR = {
-					culture = { has_cultural_pillar = heritage_israelite }
-					religion = religion:judaism_religion
-				}
-			}
-			setup_learnt_language_effect = {
-				CHAR = this
-				LANGUAGE = language_israelite
-			}
-		}
-	}
-}
 #Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
 #in through the back door
 game_start_fix_barony_government = {
@@ -897,10 +667,6 @@ game_start_fix_barony_government = {
 					limit = { this.county.holder = { has_government = rajamandala_government } }
 					this.holder = { convert_realm_to_gupta_effect = yes }
 				}
-				else_if = {
-					limit = { this.county.holder = { has_bureaucratic_government_type_trigger = yes } }
-					this.holder = { convert_realm_to_gubernatorial_effect = yes }
-				}
 			}
 			#Handle cases of lay clergy faiths holding temples as well
 			else_if = {
@@ -945,10 +711,6 @@ game_start_fix_barony_government = {
 				else_if = {
 					limit = { this.county.holder = { has_government = rajamandala_government } }
 					this.holder = { convert_realm_to_gupta_effect = yes }
-				}
-				else_if = {
-					limit = { this.county.holder = { has_bureaucratic_government_type_trigger = yes } }
-					this.holder = { convert_realm_to_gubernatorial_effect = yes }
 				}
 			}
 		}
@@ -1816,126 +1578,6 @@ set_global_variables = {
 		if = { #Justinian Ascends the Throne (enabling reconquests)
 			limit = { current_date >= 527.4.1 }
 			set_global_variable = sole_roman_empire
-		}
-	}
-}
-
-fix_custom_character_governments = {
-	effect = {
-		every_ruler = {
-			limit = { is_from_ruler_designer = yes }
-			this = { save_temporary_scope_as = the_holder }
-			this.primary_title.previous_holder = { save_temporary_scope_as = the_previous_holder }
-			
-			if = {
-				limit = { NOT = { exists = this.primary_title.previous_holder } }
-				debug_log = "ERROR: DID NOT FIND PREVIOUS HOLDER FOR CUSTOM RULER"
-			}
-			
-			#Primitive Governments (can hold tribal_holding)
-			if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_tribal_government
-					}
-				}
-				convert_realm_to_tribal_effect = yes
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_nomad_government
-					}
-				}
-				convert_realm_to_nomad_effect = yes
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_high_tribal_government
-					}
-				}
-				convert_realm_to_high_tribal_effect = yes
-			}
-			#Intermediate Governments (prefeudal/feudal/clan)
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_prefeudal_government
-					}
-				}
-				convert_realm_to_prefeudal_effect = yes
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_feudal_government
-					}
-				}
-				convert_realm_to_feudal_effect = yes
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_clan_government
-					}
-				}
-				convert_realm_to_clan_effect = yes
-			}
-			#Advanced Governments
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_subroman_government
-					}
-				}
-				convert_realm_to_subroman_effect = { THE_PREVIOUS_HOLDER = scope:the_previous_holder }
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_eranshar_government
-					}
-				}
-				convert_realm_to_eranshar_effect = yes
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_rajamandala_government
-					}
-				}
-				convert_realm_to_gupta_effect = yes
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_bureaucratic_government
-					}
-				}
-				convert_realm_to_bureaucratic_just_ruler_effect = yes
-			}
-			else_if = {
-				limit = {
-					scope:the_previous_holder = {
-						has_variable = government_id
-						var:government_id = id_gubernatorial_government
-					}
-				}
-				convert_realm_to_gubernatorial_effect = yes
-			}
-			#OTHERS
-			else = { debug_log = "ERROR: DID NOT FIND government_id VALUE FOR CUSTOM RULER PREVIOUS HOLDER" }
 		}
 	}
 }

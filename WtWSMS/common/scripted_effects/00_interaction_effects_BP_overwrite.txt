@@ -38,12 +38,18 @@ revoke_title_interaction_effect = {
 			scope:landed_title.tier != tier_barony
 		}
 		scope:actor = {
-			revocation_tyranny_effect = yes
-			title_revocation_stress_effect = yes
+			revocation_tyranny_effect = { VASSAL = scope:recipient }
+			title_revocation_stress_effect = { VASSAL = scope:recipient }
 			consume_revoke_title_reason = scope:recipient
 		}
 		scope:recipient = {
-			add_pressed_claim = scope:landed_title
+			if = {
+				limit = {
+					NOT = { exists = scope:administrative_revocation }
+					is_landed_or_landless_administrative = no
+				}
+				add_pressed_claim = scope:landed_title
+			}
 			if = {
 				limit = {
 					is_a_faction_member = yes
@@ -98,7 +104,7 @@ revoke_title_interaction_effect = {
 					add_prestige = major_prestige_loss
 				}
 			}
-			else = { #Empire
+			else_if = { #Empire
 				limit = {
 					scope:landed_title.tier = tier_kingdom
 				}
@@ -133,7 +139,7 @@ revoke_title_interaction_effect = {
 					add_prestige = major_prestige_loss
 				}
 			}
-			else = { #Empire
+			else_if = { #Empire
 				limit = {
 					scope:landed_title.tier = tier_kingdom
 				}
@@ -155,7 +161,7 @@ revoke_title_interaction_effect = {
 					scope:landed_title.tier = tier_county
 				}
 				scope:actor = {
-					add_prestige = medium_piety_loss
+					add_piety = medium_piety_loss
 				}
 			}
 			else_if = {
@@ -163,7 +169,7 @@ revoke_title_interaction_effect = {
 					scope:landed_title.tier = tier_duchy
 				}
 				scope:actor = {
-					add_prestige = major_piety_loss
+					add_piety = major_piety_loss
 				}
 			}
 			else = { #Can't revoke empire titles anyway
@@ -171,7 +177,7 @@ revoke_title_interaction_effect = {
 					scope:landed_title.tier = tier_kingdom
 				}
 				scope:actor = {
-					add_prestige = massive_piety_loss
+					add_piety = massive_piety_loss
 				}
 			}
 		}
@@ -205,7 +211,7 @@ revoke_title_interaction_effect = {
 						value = medium_unity_loss
 					}
 				}
-				else = {
+				else_if = {
 					limit = {
 						scope:landed_title.tier = tier_kingdom
 					}
@@ -222,6 +228,25 @@ revoke_title_interaction_effect = {
 						VALUE = scope:revoke_title_unity_loss
 						DESC = clan_unity_title_revoked.desc
 						REVERSE_NON_HOUSE_TARGET = no
+					}
+				}
+			}
+		}
+		
+		# EP3 - Become Adventurer - Revocation
+		scope:recipient = {
+			if = {
+				limit = {
+					has_ep3_dlc_trigger = yes
+					is_valid_for_laampdom = yes
+				}
+				# Plus for our memory variable.
+				primary_title = { save_scope_as = lost_primary_title }
+				custom_tooltip = {
+					text = laamp_may_become_adventurer_tt
+					trigger_event = {
+						id = ep3_laamps.0041
+						delayed = yes
 					}
 				}
 			}
@@ -265,6 +290,13 @@ revoke_title_interaction_effect = {
 				scope:recipient = { is_alive = yes }
 			}
 			use_hook = scope:recipient
+		}
+		if = {
+			limit = {
+				scope:hook_liege ?= yes
+				scope:intermediary = { is_alive = yes }
+			}
+			use_hook = scope:intermediary
 		}
 	}
 	scope:recipient = {

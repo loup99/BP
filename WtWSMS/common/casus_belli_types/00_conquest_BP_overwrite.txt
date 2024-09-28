@@ -1,5 +1,4 @@
-﻿### TFE EDIT: Added general war dec checks (tributaries), effect of new governments
-
+﻿### TFE EDIT: Added general war dec checks (tributaries)
 county_conquest_cb = {
 	icon = county_conquest_cb
 	group = conquest
@@ -10,6 +9,9 @@ county_conquest_cb = {
 
 	allowed_for_character = {
 		can_use_conquest_cbs_trigger = yes
+		NOT = {
+			government_has_flag = government_is_landless_adventurer
+		}
 	}
 
 	allowed_against_character = {
@@ -20,15 +22,6 @@ county_conquest_cb = {
 			}
 		}
 	}
-	
-
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: War dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
-	
 	target_titles = all
 	target_title_tier = county
 	ignore_effect = change_title_holder
@@ -56,6 +49,20 @@ county_conquest_cb = {
 
 		# AI in struggles act insularly for wars that don't have a familial or legal basis.
 		multiply = struggle_wars_prioritise_struggle_targets_value
+		# Tell the Romans to stop going adventuring into the steppe for no gods-damned reason.
+		multiply = byzantium_conquests_ai_score_value
+		#Declaring war on the frankokratia leader can really ruin the whole thing
+		if = {
+			limit = {
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
+					}
+				}
+			}
+			multiply = 0
+		}
 	}
 
 	valid_to_start = {
@@ -71,8 +78,11 @@ county_conquest_cb = {
 			text = struggle_involvement_cb_check_failure
 			struggle_blocks_invasion_conquest_cb_trigger = yes
 		}
+		##### Changed from Vanilla vvvvv
+		
 		### TFE EDIT: War dec check
 		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -157,6 +167,9 @@ county_conquest_cb = {
 		# Legitimacy
 		add_legitimacy_attacker_victory_effect = yes
 
+		# Influence
+		add_influence_attacker_victory_effect = yes
+
 		#EP2 accolade glory gain for winning against higher ranked enemy
 		scope:attacker = { accolade_attacker_war_end_glory_gain_low_effect = yes }
 
@@ -165,6 +178,9 @@ county_conquest_cb = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
 
 		#As this is just a county conquest, simply grab the designated county.
 		every_in_list = {
@@ -268,6 +284,9 @@ county_conquest_cb = {
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 
+		# Influence
+		add_influence_attacker_defeat_effect = yes
+
 		#EP2 accolade glory gain for winning against higher ranked enemy
 		scope:defender = { accolade_defender_war_end_glory_gain_low_effect = yes }
 
@@ -276,10 +295,7 @@ county_conquest_cb = {
 			pay_short_term_gold_reparations_effect = {
 				GOLD_VALUE = 2
 			}
-			add_prestige = {
-				value = medium_prestige_value
-				multiply = -1.0
-			}
+			add_prestige = medium_prestige_loss
 		}
 
 		# Prestige for Defender
@@ -328,6 +344,7 @@ county_conquest_cb = {
 	max_attacker_score_from_occupation = 150
 }
 
+### TFE EDIT: Added general war dec checks (tributaries)
 duchy_conquest_cb = {
 	icon = duchy_conquest_cb
 	group = conquest
@@ -342,13 +359,37 @@ duchy_conquest_cb = {
 
 	allowed_for_character = {
 		can_use_conquest_cbs_trigger = yes
+		NOT = {
+			government_has_flag = government_is_landless_adventurer
+		}
 	}
 
+	##### Changed from Vanilla vvvvv
 	allowed_for_character_display_regardless = {
 		trigger_if = {
 			limit = {
+				government_has_flag = government_is_clan
+				house ?= {
+					has_house_unity_stage = antagonistic
+				}
 				culture = {
 					has_cultural_parameter = cb_lower_prestige_level_requirement
+				}
+			}
+			prestige_level >= 1
+		}
+		trigger_else_if = {
+			limit = {
+				OR = {
+					AND = {
+						government_has_flag = government_is_clan
+						house ?= {
+							has_house_unity_stage = antagonistic
+						}
+					}
+					culture = {
+						has_cultural_parameter = cb_lower_prestige_level_requirement
+					}
 				}
 			}
 			prestige_level >= 2
@@ -362,12 +403,9 @@ duchy_conquest_cb = {
 			text = struggle_involvement_cb_check_failure
 			struggle_blocks_invasion_conquest_cb_trigger = yes
 		}
-	}
-
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: Trib war dec check
+		##### Changed from Vanilla vvvvv
 		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -403,6 +441,22 @@ duchy_conquest_cb = {
 
 		# AI in struggles act insularly for wars that don't have a familial or legal basis.
 		multiply = struggle_wars_prioritise_struggle_targets_value
+		# Tell the Romans to stop going adventuring into the steppe for no gods-damned reason.
+		multiply = byzantium_conquests_ai_score_value
+		multiply = muslim_invasions_prefer_nonmuslims_ai_score_value
+
+		#Declaring war on the frankokratia leader can really ruin the whole thing
+		if = {
+			limit = {
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
+					}
+				}
+			}
+			multiply = 0
+		}
 	}
 
 	valid_to_start = {
@@ -410,6 +464,26 @@ duchy_conquest_cb = {
 			any_in_de_jure_hierarchy = {
 				tier = tier_county
 				neighboring_county_or_viking_conquest_trigger = { CHARACTER = root }
+			}
+		}
+		scope:target = {
+			trigger_if = {
+				limit = {
+					scope:attacker = {
+						is_ai = yes
+					}
+				}
+				any_in_de_jure_hierarchy = {
+					continue = { tier > tier_county }
+					count >= 2
+					tier = tier_county
+					holder ?= {
+						OR = {
+							this = scope:defender
+							is_vassal_or_below_of = scope:defender
+						}
+					}
+				}
 			}
 		}
 	}
@@ -541,6 +615,9 @@ duchy_conquest_cb = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
 
 		# go through the dejure hierarchy under target titles, transfer eligible vassals and sieze counties from ineligible ones
 		every_in_list = {
@@ -765,6 +842,7 @@ duchy_conquest_cb = {
 	max_attacker_score_from_occupation = 150
 }
 
+### TFE EDIT: Added general war dec checks (tributaries)
 ducal_conquest_cb = {
 	icon = county_conquest_cb
 	group = conquest
@@ -780,6 +858,9 @@ ducal_conquest_cb = {
 	allowed_for_character = {
 		has_perk = ducal_conquest_perk
 		can_use_conquest_cbs_trigger = no
+		NOT = {
+			government_has_flag = government_is_landless_adventurer
+		}
 	}
 
 	allowed_against_character = {
@@ -790,14 +871,6 @@ ducal_conquest_cb = {
 		#	}
 		#}
 	}
-	
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: War dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
-	
 	target_titles = neighbor_land
 	target_title_tier = all
 	target_de_jure_regions_above = yes
@@ -827,8 +900,9 @@ ducal_conquest_cb = {
 			text = struggle_involvement_cb_check_failure
 			struggle_blocks_invasion_conquest_cb_trigger = yes
 		}
-		### TFE EDIT: War dec check
+		##### Changed from Vanilla vvvvv
 		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
+		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -909,6 +983,9 @@ ducal_conquest_cb = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
 
 		# go through the dejure hierarchy under target titles, transfer titles with same or worse tolerance holders (their religion equaly or less tolerated than the defender's),
 		# take the holder as vassal otherwise and don't go deeper
@@ -1134,8 +1211,24 @@ ducal_conquest_cb = {
 	max_attacker_score_from_occupation = 150
 
 	max_ai_diplo_distance_to_title = 1500
+
+	ai_score_mult = {
+		#Declaring war on the frankokratia leader can really ruin the whole thing
+		if = {
+			limit = {
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
 }
 
+### TFE EDIT: Added general war dec checks (tributaries)
 ireland_laudabiliter_conquest_cb = {
 	icon = county_conquest_cb
 	group = conquest
@@ -1163,14 +1256,6 @@ ireland_laudabiliter_conquest_cb = {
 			}
 		}
 	}
-	
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: War dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
-	
 	target_titles = all
 	target_title_tier = all
 	target_de_jure_regions_above = yes
@@ -1187,13 +1272,18 @@ ireland_laudabiliter_conquest_cb = {
 		}
 	}
 
+	##### Changed from Vanilla vvvvv
 	allowed_for_character_display_regardless = {
 		# Struggle constraint
 		custom_tooltip = {
 			text = struggle_involvement_cb_check_failure
 			struggle_blocks_invasion_conquest_cb_trigger = yes
 		}
+		##### Changed from Vanilla vvvvv
+		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
+		##### Changed from Vanilla ^^^^^
 	}
+	##### Changed from Vanilla ^^^^^
 
 	should_invalidate = {
 		NOT = {
@@ -1217,8 +1307,8 @@ ireland_laudabiliter_conquest_cb = {
 
 	cost = {
 		piety = {
-			add = common_cb_impious_piety_cost
 			value = 0
+			add = common_cb_impious_piety_cost
 			if = {
 				limit = {
 					scope:defender.faith = scope:attacker.faith
@@ -1277,6 +1367,10 @@ ireland_laudabiliter_conquest_cb = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
+		
 		# go through the dejure hierarchy under target titles, transfer titles with same or worse tolerance holders (their religion equaly or less tolerated than the defender's),
 		# take the holder as vassal otherwise and don't go deeper
 		every_in_list = {
@@ -1503,4 +1597,19 @@ ireland_laudabiliter_conquest_cb = {
 	max_attacker_score_from_occupation = 150
 
 	max_ai_diplo_distance_to_title = 500
+
+	ai_score_mult = {
+		#Declaring war on the frankokratia leader can really ruin the whole thing
+		if = {
+			limit = {
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
 }

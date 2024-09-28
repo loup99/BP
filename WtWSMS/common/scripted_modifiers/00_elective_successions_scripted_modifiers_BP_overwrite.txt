@@ -239,7 +239,7 @@ elector_voting_pattern_circumstances_feudal_elective_modifier = {
 	}
 	modifier = { #If candidate is elected, he will rule from a capital outside this de jure.
 		desc = tooltip_feudal_elector_vote_political_concerns
-		is_landed = yes
+		is_playable_character = yes
 		exists = capital_county
 		capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } }
 
@@ -258,7 +258,7 @@ elector_voting_pattern_circumstances_feudal_elective_modifier = {
 
 		scope:candidate = {
 			is_ruler = yes
-			is_vassal_of = scope:holder
+			#is_vassal_of = scope:holder
 			exists = capital_county
 			NOT = { capital_county = { scope:title = { is_de_jure_liege_or_above_target = prev } } }
 		}
@@ -274,7 +274,7 @@ elector_voting_pattern_circumstances_feudal_elective_modifier = {
 	}
 	modifier = { #Candidate is a foreign ruler.
 		desc = tooltip_feudal_elector_vote_encroaching_foreigner
-		is_landed = yes
+		is_playable_character = yes
 		exists = capital_county
 		scope:candidate = {
 			is_ruler = yes
@@ -566,7 +566,15 @@ elector_voting_pattern_circumstances_feudal_elective_modifier = {
 		add = 30
 		desc = tooltip_feudal_elector_vote_strong_claimant
 		NOT = { this = scope:candidate }
-		scope:candidate = { has_strong_claim_on = scope:title }
+		scope:candidate = {
+			OR = {
+				has_strong_claim_on = scope:title
+				AND = {
+					NOT = { has_trait = bastard }
+					is_child_of = scope:holder
+				}
+			}
+		}
 	}
 	modifier = {
 		add = 15
