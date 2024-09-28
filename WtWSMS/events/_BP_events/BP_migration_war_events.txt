@@ -149,11 +149,68 @@ scripted_trigger historically_would_not_adopt_roman_practices = {
 	}
 }
 
+scripted_trigger valid_vassal_government_to_change_tribals_trigger = {
+	OR = {
+		this.primary_title.tier >= tier_county
+		AND = {
+			this.primary_title.tier = tier_barony
+			OR = {
+				this.capital_barony.title_province = { has_holding_type = castle_holding }
+				this.capital_barony.title_province = { has_holding_type = tribal_holding }
+			}
+		}
+	}
+}
+
 scripted_effect convert_whole_realm_to_new_government = {
-	convert_realm_to_$GOVT$_effect = yes
-	every_vassal_or_below = {
-		limit = { this.primary_title.tier >= tier_county }
-		convert_realm_to_$GOVT$_effect = yes
+	switch = {
+		trigger = var:new_government
+		
+		#Vanilla Governments
+		flag:tribal_government = {
+			change_government = tribal_government
+			
+			every_vassal_or_below = {
+				limit = { valid_vassal_government_to_change_tribals_trigger = yes }
+				change_government = tribal_government
+			}
+		}
+		#WtWSMS Governments
+		flag:nomad_government = {
+			change_government = nomad_government
+			
+			every_vassal_or_below = {
+				limit = { valid_vassal_government_to_change_tribals_trigger = yes }
+				change_government = nomad_government
+			}
+		}
+		flag:high_tribal_government = {
+			change_government = high_tribal_government
+			
+			every_vassal_or_below = {
+				limit = { valid_vassal_government_to_change_tribals_trigger = yes }
+				change_government = high_tribal_government
+			}
+		}
+		flag:subroman_government = {
+			convert_realm_to_subroman_effect = yes
+			
+			every_vassal_or_below = {
+				limit = {
+					OR = {
+						this.primary_title.tier >= tier_county
+						AND = {
+							this.primary_title.tier = tier_barony
+							OR = {
+								this.capital_barony.title_province = { has_holding_type = castle_holding }
+								this.capital_barony.title_province = { has_holding_type = city_holding }
+							}
+						}
+					}
+				}
+				convert_realm_to_subroman_effect = yes
+			}
+		}
 	}
 }
 
@@ -207,7 +264,11 @@ migration_war.0100 = {
 			nomad_government_conversion_requirements = no
 		}
 		name = migration_war.0100.adopt_tribalism
-		convert_whole_realm_to_new_government = { GOVT = tribal }
+		root = {
+			set_variable = { name = new_government value = flag:tribal_government }
+			convert_whole_realm_to_new_government = yes
+			remove_variable = new_government
+		}
 		ai_chance = {
 			base = 10
 			modifier = {
@@ -223,7 +284,11 @@ migration_war.0100 = {
 			nomad_government_conversion_requirements = yes
 		}
 		name = migration_war.0100.adopt_nomadism
-		convert_whole_realm_to_new_government = { GOVT = nomad }
+		root = {
+			set_variable = { name = new_government value = flag:nomad_government }
+			convert_whole_realm_to_new_government = yes
+			remove_variable = new_government
+		}
 		ai_chance = {
 			base = 10
 			modifier = { #We Ride!
@@ -246,6 +311,11 @@ migration_war.0100 = {
 		}
 		name = migration_war.0100.adopt_high_tribal
 		convert_whole_realm_to_new_government = { GOVT = high_tribal }
+		root = {
+			set_variable = { name = new_government value = flag:high_tribal_government }
+			convert_whole_realm_to_new_government = yes
+			remove_variable = new_government
+		}
 		ai_chance = {
 			base = 20
 			#The more techs we have, the more likely we'll do it
@@ -274,6 +344,11 @@ migration_war.0100 = {
 		show_as_unavailable = { subroman_government_is_unavailable_requirements = yes }
 		name = migration_war.0100.adopt_sub_roman
 		convert_whole_realm_to_new_government = { GOVT = subroman_direct }
+		root = {
+			set_variable = { name = new_government value = flag:subroman_government }
+			convert_whole_realm_to_new_government = yes
+			remove_variable = new_government
+		}
 		
 		ai_chance = {
 			base = 20
