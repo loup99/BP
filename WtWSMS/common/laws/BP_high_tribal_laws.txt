@@ -1,0 +1,186 @@
+﻿@high_tribal_organization_cooldown_years = 10
+
+high_tribal_organization = {
+	default = high_tribal_organization_0
+	cumulative = yes
+	flag = realm_law
+
+	high_tribal_organization_0 = {
+		modifier = {
+			development_growth_factor = -0.40
+			#Opinions
+			barons_and_minor_landholders_opinion = 20
+			glory_hound_opinion = 10
+			parochial_opinion = 10
+			courtly_opinion = 5
+		}
+
+		can_keep = { realm_law_use_high_tribal_organization_trigger = yes }
+	}
+
+	high_tribal_organization_1 = {
+		modifier = { 
+			development_growth_factor = 0.10
+			#Opinions
+			barons_and_minor_landholders_opinion = -30
+			glory_hound_opinion = -15
+			parochial_opinion = -15
+			courtly_opinion = -5
+			minority_opinion = -10
+		}
+		flag = title_revocation_allowed
+
+		can_keep = { realm_law_use_high_tribal_organization_trigger = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = high_tribal_organization_0 }
+				custom_description = {
+					subject = root
+					text = "has_high_tribal_organization_cooldown"
+					NOT = { has_variable = high_tribal_organization_cooldown }
+				}
+			}
+			root.culture = { has_innovation = innovation_leges_barbarorum }
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = high_tribal_organization_2
+							has_realm_law = high_tribal_organization_3
+						}
+					}
+					add = increase_centralization_prestige_cost
+				}
+			}
+		}
+
+		on_pass = {
+			if = {
+				limit = {
+					NOR = {
+						has_realm_law = high_tribal_organization_2
+						has_realm_law = high_tribal_organization_3
+					}
+				}
+			}
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_0 }
+				value = 1
+			}
+		}
+	}
+
+	high_tribal_organization_2 = {
+		modifier = {
+			development_growth_factor = 0.10
+			#Opinions
+			barons_and_minor_landholders_opinion = -10
+			glory_hound_opinion = -10
+			parochial_opinion = -10
+			courtly_opinion = -5
+			zealot_opinion = -10
+			minority_opinion = -10
+		}
+		flag = vassal_retraction_allowed
+
+		can_keep = { realm_law_use_high_tribal_organization_trigger = yes }
+
+		can_pass = {
+			trigger_if = {
+				limit = {
+					NOT = { has_realm_law = high_tribal_organization_3 }
+				}
+				has_realm_law = high_tribal_organization_1
+				custom_description = {
+					subject = root
+					text = "has_high_tribal_organization_cooldown"
+					NOT = { has_variable = high_tribal_organization_cooldown }
+				}
+			}
+			root.culture = { has_innovation = innovation_mundium }
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOT = { has_realm_law = high_tribal_organization_3 }
+					}
+					add = increase_centralization_prestige_cost
+				}
+			}
+		}
+
+		on_pass = {
+			if = {
+				limit = {
+					NOT = { has_realm_law = high_tribal_organization_3 }
+				}
+			}
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_1 }
+				value = 1
+			}
+		}
+	}
+
+	high_tribal_organization_3 = {
+		modifier = {
+			development_growth_factor = 0.10
+			#Opinions
+			barons_and_minor_landholders_opinion = -10
+			glory_hound_opinion = -10
+			parochial_opinion = -10
+			courtly_opinion = -5
+			zealot_opinion = -10
+			minority_opinion = -10
+		}
+		flag = can_change_partition_succession_laws
+
+		can_keep = { realm_law_use_high_tribal_organization_trigger = yes }
+
+		can_pass = {
+			has_realm_law = high_tribal_organization_2
+			custom_description = {
+				subject = root
+				text = "has_high_tribal_organization_cooldown"
+				NOT = { has_variable = high_tribal_organization_cooldown }
+			}
+			root.culture = { has_innovation = innovation_hereditary_rule }
+		}
+
+		pass_cost = { prestige = increase_centralization_prestige_cost }
+
+		on_pass = {
+			set_variable = {
+				name = high_tribal_organization_cooldown
+				years = @high_tribal_organization_cooldown_years
+			}
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = high_tribal_organization_2 }
+				value = 1
+			}
+		}
+	}
+}
