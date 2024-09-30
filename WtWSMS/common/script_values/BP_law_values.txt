@@ -107,45 +107,85 @@ increase_centralization_prestige_cost = {
 	}
 }
 
-### Eranshar Values
-
-#Infidel Counties: Reducing clerical influence reduces cost by 5 for each
-eranshar_infidel_county_scaling = -10
-eranshar_infidel_county_number_modifier = {
+### Clerical Influence Calculation
+righteous_realm_county_cost = {
 	value = 0
 	every_realm_county = {
-		limit = {
-			OR = {
-				NOT = { this.religion = religion:zoroastrianism_religion }
-				NOT = { this.faith = { has_doctrine = doctrine_major_branch_behdin } }
+		save_temporary_scope_as = the_county
+		if = {
+			limit = {
+				this.faith = {
+					faith_hostility_level = {
+						target = scope:the_county.holder.top_liege.faith
+						value = 0
+					}
+				}
 			}
-			#Unreformed religions are ignorable
-			this.faith = { NOT = { has_doctrine = unreformed_faith_doctrine } }
+			add = 1
 		}
-		add = 1
 	}
-	multiply = eranshar_infidel_county_scaling
+	multiply = 50
 }
-
-#How much the faithful counties increase the cost
-eranshar_faithful_county_scaling = 20
-eranshar_faithful_county_number_modifier = {
+astray_realm_county_cost = {
 	value = 0
 	every_realm_county = {
-		limit = {
-			this.religion = religion:zoroastrianism_religion
-			this.faith = { has_doctrine = doctrine_major_branch_behdin }
+		save_temporary_scope_as = the_county
+		if = {
+			limit = {
+				this.faith = {
+					faith_hostility_level = {
+						target = scope:the_county.holder.top_liege.faith
+						value = 1
+					}
+				}
+				NOT = { this.faith = { has_doctrine = unreformed_faith_doctrine } }
+			}
+			add = 1
 		}
-		add = 1
 	}
-	multiply = eranshar_faithful_county_scaling
+	multiply = 25
+}
+hostile_realm_county_cost = {
+	value = 0
+	every_realm_county = {
+		save_temporary_scope_as = the_county
+		if = {
+			limit = {
+				this.faith = {
+					faith_hostility_level = {
+						target = scope:the_county.holder.top_liege.faith
+						value = 2
+					}
+				}
+				NOT = { this.faith = { has_doctrine = unreformed_faith_doctrine } }
+			}
+			add = 1
+		}
+	}
+	multiply = -25
+}
+evil_realm_county_cost = {
+	value = 0
+	every_realm_county = {
+		save_temporary_scope_as = the_county
+		if = {
+			limit = {
+				this.faith = {
+					faith_hostility_level = {
+						target = scope:the_county.holder.top_liege.faith
+						value = 3
+					}
+				}
+				NOT = { this.faith = { has_doctrine = unreformed_faith_doctrine } }
+			}
+			add = 1
+		}
+	}
+	multiply = -50
 }
 
-#How much each piety level increases the cost
-piety_level_multiplier = 1.25
-
-#Modifiers for action direction
 decrease_clerical_influence_piety_base = 100
+piety_level_multiplier = 1.25
 decrease_clerical_influence_piety_cost = {
 	add = {
 		desc = "BASE_VALUE"
@@ -153,18 +193,26 @@ decrease_clerical_influence_piety_cost = {
 		format = "BASE_VALUE_FORMAT"
 	}
 	
-	# Eranshar County makes decreasing clerical influence harder by 10
-	add = {
+	#Impact of Realm alignment with faith
+	add = { # Righteous Counties increase the piety cost by 50
 		desc = "faithful_counties"
 		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
-		value = eranshar_faithful_county_number_modifier
+		value = righteous_realm_county_cost
 	}
-	
-	# Infidel County makes decreasing clerical influence easier by 5
-	add = {
-		desc = "infidel_counties"
+	add = { # Astray Counties increase the piety cost by 25
+		desc = "astray_counties"
 		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
-		value = eranshar_infidel_county_number_modifier
+		value = astray_realm_county_cost
+	}
+	add = { # Hostile Counties decrease the piety cost by -25
+		desc = "hostile_counties"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
+		value = hostile_realm_county_cost
+	}
+	add = { # Evil Counties decrease the piety cost by -50
+		desc = "evil_counties"
+		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
+		value = hostile_realm_county_cost
 	}
 	
 	# Learning Modifier (2% more expensive for each skill point below 8 Learning)
@@ -261,11 +309,12 @@ decrease_clerical_influence_piety_cost = {
 	}
 }
 
-eranshar_county_realm_size_scaling = 5
-eranshar_realm_size_modifier = {
+#Prestige Cost
+iranian_dynastic_county_realm_size_scaling = 5
+iranian_dynastic_realm_size_modifier = {
 	value = 0
 	every_realm_county = { add = 1 }
-	multiply = eranshar_county_realm_size_scaling
+	multiply = iranian_dynastic_county_realm_size_scaling
 }
 
 #Modifiers for action direction
@@ -281,7 +330,7 @@ change_clerical_influence_prestige_cost = {
 	add = {
 		desc = "realm_size"
 		format = "BREAKDOWN_FORMAT_REALM_SIZE_GOLD_COST"
-		value = eranshar_realm_size_modifier
+		value = iranian_dynastic_realm_size_modifier
 	}
 	
 	# Learning Modifier (2% more expensive for each skill point below 8 Learning)

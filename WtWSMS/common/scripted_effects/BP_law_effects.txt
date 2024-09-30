@@ -1,0 +1,51 @@
+﻿clerical_authory_angry_at_reduced_clerical_influence_effect = {
+	#All priests are pissed you lowered their influence
+	every_vassal = {
+		limit = {
+			OR = {
+				has_government = theocracy_government
+				has_vassal_stance = zealot
+			}
+			faith = {
+				this.religion = $TOP_LIEGE$.religion
+				this.religious_head = $TOP_LIEGE$.faith.religious_head
+			}
+		}
+		if = {
+			limit = { this = $TOP_LIEGE$.faith.religious_head }
+			add_opinion = {
+				modifier = hof_vassal_reduced_influence_modifier
+				target = root
+				years = 25
+			}
+		}
+		else_if = {
+			add_opinion = {
+				modifier = clerical_vassal_reduced_influence_modifier
+				target = root
+				years = 25
+			}
+		}
+		else = { #Secular Zealots
+			add_opinion = {
+				modifier = zealot_vassal_reduced_clerical_influence_modifier
+				target = root
+				years = 25
+			}
+		}
+		every_court_position_holder = { #And update the landless realm priest/devoted opinions
+			limit = {
+				OR = {
+					has_council_position = councillor_court_chaplain
+					has_trait = devoted
+				}
+				is_landed = no
+			}
+			add_opinion = {
+				modifier = clerical_vassal_reduced_influence_modifier
+				target = root
+				years = 25
+			}
+		}
+	}
+}
