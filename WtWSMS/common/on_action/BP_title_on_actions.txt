@@ -19,22 +19,79 @@
 # flag:faction_demand
 # flag:swear_fealty
 
+# A title is destroyed
+# root = the holder before destruction
+# scope:landed_title = the title that is being destroyed
+# Does *not* provide scope:transfer_type
+on_title_destroyed = {
+	events = {}
+	on_actions = {
+		BP_handle_independent_roman_duchies
+	}
+}
+
+BP_handle_independent_roman_duchies = {
+	effect = {
+		# If the title of an independent Roman Dynastic ruler is destroyed,
+		# let's make sure we handle any stray Roman Dynastic vassals
+		if = {
+			limit = {
+				government_has_flag = government_only_valid_for_kingdoms_empires
+				government_has_flag = government_uses_roman_dynastic_authority
+				is_independent_ruler = yes
+				NOT = {
+					any_held_title = {
+						tier > tier_duchy
+						NOT = { this = scope:landed_title }
+					}
+				}
+			}
+			root = { change_government = subroman_government }
+			every_vassal_or_below = {
+				limit = { government_has_flag = government_uses_roman_dynastic_authority }
+				change_government = subroman_government
+			}
+		}
+	}
+}
+
 # root = the new holder
 # scope:title = the title that changes hands
 # scope:previous_holder = previous holder. Might be dead
 on_title_gain = {
 	events = {}
 	on_actions = {
-		#Government Handling stuff
-		BP_degrade_roman_government
+		#Handle Centralized Realm stuff
+		BP_handle_centralized_realm_stuff
+		
 		#Other On Actions
 		BP_fall_of_rome
 	}
 }
 
-#If we have an invalid state for Roman governance, degrade it.
-BP_degrade_roman_government = {
-	effect = { degrade_roman_government_effect = yes }
+BP_handle_centralized_realm_stuff = {
+	effect = {
+		# Ensure Emperor keeps old realm capital in admin realms & apply unique domicile
+		# building bonus if appropriate
+		if = {
+			limit = {
+				government_has_flag = government_is_centralized
+				is_independent_ruler = yes
+				highest_held_title_tier >= tier_empire
+			}
+			if = { # Ensure we keep the old realm capital
+				limit = {
+					scope:title = {
+						tier = tier_empire
+						NOT = { title_capital_county = root.capital_county }
+						# Constantinople must have been inherited
+						title_capital_county.holder = root
+					}
+				}
+				set_realm_capital = scope:title.title_capital_county
+			}
+		}
+	}
 }
 
 #Fires when Rome falls
@@ -60,12 +117,27 @@ BP_fall_of_rome = {
 	}
 }
 
-# A title is destroyed
-# root = the holder before destruction
-# scope:landed_title = the title that is being destroyed
-# Does *not* provide scope:transfer_type
-on_title_destroyed = {
+# A vassal changes their liege
+# root = vassal changing their status
+# scope:old_liege = the previous liege of the vassal
+# It is also fired for rulers gaining independence, those can be identified by checking current liege
+on_vassal_change = {
 	on_actions = {
 		BP_degrade_roman_government
+	}
+}
+
+BP_degrade_roman_government = {
+	effect = {
+		### If an admin ruler becomes independent, who are not of a high enough rank, changes government
+		if = {
+			limit = {
+				liege = root # I.e. root is independent
+				government_has_flag = government_only_valid_for_kingdoms_empires
+				government_has_flag = government_uses_roman_dynastic_authority
+				highest_held_title_tier < tier_kingdom
+			}
+			change_government = subroman_government
+		}
 	}
 }
