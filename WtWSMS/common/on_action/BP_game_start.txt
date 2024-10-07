@@ -570,15 +570,23 @@ game_start_fix_barony_government = {
 		every_barony = {
 			#Which isn't a capital
 			limit = { is_capital_barony = no }
-			#All castle holders should have the government of the county holder
-			if = {
+			
+			if = { #Castle Holding
 				limit = { this.title_province = { has_holding_type = castle_holding } }
 				#Vanilla Governments
 				if = {
 					limit = { this.county.holder = { has_government = tribal_government } }
 					this.holder = { change_government = tribal_government }
 				}
-				else_if = { #NB: Causes singular "illegal_government" error in 476 start
+				else_if = {
+					limit = { this.county.holder = { has_government = feudal_government } }
+					this.holder = { change_government = feudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = clan_government } }
+					this.holder = { change_government = clan_government }
+				}
+				else_if = {
 					limit = { this.county.holder = { has_government = republic_government } }
 					this.holder = { change_government = republic_government }
 				}
@@ -597,11 +605,15 @@ game_start_fix_barony_government = {
 				}
 				else_if = {
 					limit = { this.county.holder = { has_government = nomad_government } }
-					this.holder = { change_government = nomad_government }
+					this.holder = { change_government = tribal_government }
 				}
 				else_if = {
 					limit = { this.county.holder = { has_government = subroman_dynastic_government } }
-					this.holder = { convert_realm_to_subroman_effect = yes }
+					this.holder = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = roman_dynastic_government } }
+					this.holder = { change_government = roman_dynastic_government }
 				}
 				else_if = {
 					limit = { this.county.holder = { has_government = iranian_dynastic_government } }
@@ -610,6 +622,59 @@ game_start_fix_barony_government = {
 				else_if = {
 					limit = { this.county.holder = { has_government = rajamandala_government } }
 					this.holder = { change_government = rajamandala_government }
+				}
+			}
+			else_if = { #City Holding
+				limit = { this.title_province = { has_holding_type = city_holding } }
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = feudal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = clan_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = republic_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_dynastic_government } }
+					this.holder = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = roman_dynastic_government } }
+					this.holder = { change_government = roman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = iranian_dynastic_government } }
+					this.holder = { change_government = iranian_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = rajamandala_government } }
+					this.holder = { change_government = republic_government }
 				}
 			}
 			#Handle cases of lay clergy faiths holding temples as well
@@ -624,6 +689,14 @@ game_start_fix_barony_government = {
 					this.holder = { change_government = tribal_government }
 				}
 				else_if = {
+					limit = { this.county.holder = { has_government = feudal_government } }
+					this.holder = { change_government = feudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = clan_government } }
+					this.holder = { change_government = clan_government }
+				}
+				else_if = {
 					limit = { this.county.holder = { has_government = republic_government } }
 					this.holder = { change_government = republic_government }
 				}
@@ -646,7 +719,11 @@ game_start_fix_barony_government = {
 				}
 				else_if = {
 					limit = { this.county.holder = { has_government = subroman_dynastic_government } }
-					this.holder = { convert_realm_to_subroman_effect = yes }
+					this.holder = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = roman_dynastic_government } }
+					this.holder = { change_government = roman_dynastic_government }
 				}
 				else_if = {
 					limit = { this.county.holder = { has_government = iranian_dynastic_government } }
@@ -677,10 +754,10 @@ setup_vassal_contracts = {
 					type = war_declaration_rights
 					level = 1
 				}
-####				vassal_contract_set_obligation_level = {
-####					type = prefeudal_government_obligation
-####					level = 0
-####				}
+				vassal_contract_set_obligation_level = {
+					type = prefeudal_government_obligation
+					level = 0
+				}
 			}
 			if = { #d_sophanene, d_sophene have some nice rights
 				limit = {
@@ -698,23 +775,23 @@ setup_vassal_contracts = {
 					level = 1
 				}
 			}
-####			if = { #Vassals of the Gupta Empire are militarily oriented
-####				limit = {
-####					liege.primary_title = title:e_rajastan
-####					primary_title.tier >= tier_duchy
-####					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
-####					has_government = rajamandala_government
-####				}
-####				debug_log_scopes = no
-####				vassal_contract_set_obligation_level = {
-####					type = rajamandala_government_taxes
-####					level = 1
-####				}
-####				vassal_contract_set_obligation_level = {
-####					type = rajamandala_government_levies
-####					level = 3
-####				}
-####			}
+			if = { #Vassals of the Gupta Empire are militarily oriented
+				limit = {
+					liege.primary_title = title:e_rajastan
+					primary_title.tier >= tier_duchy
+					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
+					has_government = rajamandala_government
+				}
+				debug_log_scopes = no
+				vassal_contract_set_obligation_level = {
+					type = rajamandala_government_taxes
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = rajamandala_government_levies
+					level = 3
+				}
+			}
 			if = { #Non-Tributary Prefeudal Christian Vassals of Persia have religious freedom
 				limit = {
 					has_government = prefeudal_government
