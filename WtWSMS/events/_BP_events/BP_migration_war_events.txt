@@ -53,13 +53,7 @@ migration_war.0002 = {
 	
 	option = {
 		name = migration_war.0002.a
-		trigger = { #Never can migrate if I'm not tribal/high tribal/nomand
-			NAND = {
-				has_government = tribal_government
-				has_government = high_tribal_government
-				has_government = nomad_government
-			}
-		}
+		trigger = { NOT = { government_has_flag = government_is_tribal } }
 		add_character_flag = participating_vassal
 		scope:war = { add_attacker = ROOT }
 		spawn_armies_from_development_effect = { ATTACKER = ROOT }
@@ -69,7 +63,7 @@ migration_war.0002 = {
 	}
 	option = {
 		name = migration_war.0002.b
-		#Make indpendent
+		#Make independent
 		create_title_and_vassal_change = {
 			type = independency
 			save_scope_as = change_migration_declared
@@ -114,7 +108,10 @@ scripted_trigger subroman_dynastic_government_requirements = {
 	scope:target_char.culture = { has_innovation = innovation_writing }
 }
 scripted_trigger subroman_dynastic_government_is_unavailable_requirements = {
-	scope:the_old_ruler = { has_government = roman_dynastic_government }
+	scope:the_old_ruler = {
+		government_has_flag = is_a_roman_government
+		NOT = { government_has_flag = is_a_transitory_roman_government }
+	}
 	#You need the most basic social organization to have a hope of holding on...
 	scope:target_char.culture = { has_innovation = innovation_social_stratification }
 	scope:target_char.culture = { has_innovation = innovation_leges_barbarorum }
@@ -225,7 +222,7 @@ migration_war.0100 = {
 	#Must _actually_ be possible to change your government in some way
 	trigger = {
 		trigger_if = {
-			limit = { has_government = nomad_government }
+			limit = { government_has_flag = government_is_nomadic }
 			nomad_government_conversion_requirements = no
 		}
 		trigger_else = {
@@ -253,14 +250,14 @@ migration_war.0100 = {
 			base = 10
 			modifier = {
 				add = -10
-				scope:target_char = { has_government = nomad_government }
+				scope:target_char = { government_has_flag = government_is_nomadic }
 				nomad_government_conversion_requirements = no
 			}
 		}
 	}
 	option = {
 		trigger = {
-			has_government = nomad_government
+			government_has_flag = government_is_nomadic
 			nomad_government_conversion_requirements = no
 		}
 		name = migration_war.0100.adopt_tribalism
@@ -273,14 +270,15 @@ migration_war.0100 = {
 			base = 10
 			modifier = {
 				add = 1000
-				scope:target_char = { has_government = nomad_government }
+				scope:target_char = { government_has_flag = government_is_nomadic }
 				nomad_government_conversion_requirements = no
 			}
 		}
 	}
 	option = {
 		trigger = {
-			has_government = tribal_government
+			government_has_flag = government_is_tribal
+			NOT = { government_has_flag = government_is_nomadic }
 			nomad_government_conversion_requirements = yes
 		}
 		name = migration_war.0100.adopt_nomadism
@@ -304,7 +302,7 @@ migration_war.0100 = {
 	option = {
 		trigger = {
 			high_tribal_government_conversion_requirements = yes
-			NOT = { has_government = nomad_government }
+			NOT = { government_has_flag = government_is_nomadic }
 		}
 		show_as_unavailable = {
 			high_tribal_government_is_unavailable_requirements = yes
@@ -338,7 +336,7 @@ migration_war.0100 = {
 		#    the option will be shown, but disabled.
 		trigger = {
 			subroman_dynastic_government_requirements = yes
-			NOT = { has_government = nomad_government }
+			NOT = { government_has_flag = government_is_nomadic }
 		}
 		show_as_unavailable = { subroman_dynastic_government_is_unavailable_requirements = yes }
 		name = migration_war.0100.adopt_sub_roman
