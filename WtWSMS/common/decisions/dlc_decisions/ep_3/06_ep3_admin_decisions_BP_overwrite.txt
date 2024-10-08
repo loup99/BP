@@ -1,0 +1,329 @@
+﻿##### Changed from Vanilla: Blocked Centralized Governments from taking this decision
+convert_to_administrative_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+	}
+	decision_group_type = major
+	desc = convert_to_administrative_decision_desc
+
+	ai_check_interval = 36
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		has_ep3_dlc_trigger = yes
+		OR = {
+			government_has_flag = government_is_feudal
+			government_has_flag = government_is_clan
+		}
+		trigger_if = {
+			limit = { is_independent_ruler = no }
+			liege = { government_allows = administrative }
+		}
+		trigger_else = {
+			is_independent_ruler = yes
+		}
+		##### Changed from Vanilla vvvvv
+		NOT = { government_has_flag = government_is_centralized }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid = {
+		has_ep3_dlc_trigger = yes
+		OR = {
+			government_has_flag = government_is_feudal
+			government_has_flag = government_is_clan
+		}
+		trigger_if = {
+			limit = { is_independent_ruler = no }
+			liege = { government_allows = administrative }
+		}
+		trigger_else = {
+			trigger_if = {
+				limit = {
+					culture = { has_cultural_parameter = can_adopt_administrative_government_as_kingdom_tier }
+				}
+				custom_tooltip = {
+					text = king_tier_tt
+					primary_title.tier >= tier_kingdom
+				}
+			}
+			trigger_else = {
+				custom_tooltip = {
+					text = empire_tier_tt
+					primary_title.tier = tier_empire
+				}
+				custom_tooltip = {
+					text = small_realm_size_tt
+					realm_size >= small_empire_size_value
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				is_independent_ruler = yes
+				is_ai = no
+			}
+			prestige_level >= 3
+		}
+		trigger_if = {
+			limit = {
+				is_independent_ruler = yes
+				is_ai = no
+			}
+			custom_tooltip = {
+				text = all_powerful_vassals_required_tt
+				any_powerful_vassal = {
+					count = all
+					opinion = {
+						target = root
+						value >= 50
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = { is_ai = yes }
+			calc_true_if = {
+				amount >= 2
+				culture = { has_cultural_pillar = ethos_bureaucratic }
+				culture = { has_cultural_pillar = ethos_courtly }
+				culture = { has_cultural_pillar = ethos_egalitarian }
+				culture = { has_cultural_tradition = tradition_legalistic }
+				culture = { has_cultural_tradition = tradition_hereditary_hierarchy }
+				has_realm_law = crown_authority_3
+				capital_county = {
+					development_level > medium_development_level
+				}
+				faith = { has_doctrine = tenet_legalism }
+				dynasty = {
+					has_dynasty_perk = erudition_legacy_5
+				}
+				dynasty = {
+					has_dynasty_perk = law_legacy_5
+				}
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_at_war = no
+	}
+
+	cost = {
+		prestige = {
+			value = 1000
+			if = {
+				limit = {
+					is_ai = no
+					primary_title.tier = tier_kingdom
+				}
+				multiply = 1.5
+			}
+			if = { # Much cheaper for vassals wanting to adopt their admin liege's government
+				limit = {
+					is_independent_ruler = no
+				}
+				multiply = 0.1
+			}
+		}
+		gold = {
+			value = 800
+			if = {
+				limit = { is_ai = no }
+				#Realm size
+				if = {
+					limit = { root.realm_size >= 300 }
+					multiply = 3.5
+				}
+				else_if = {
+					limit = { root.realm_size >= 250 }
+					multiply = 3
+				}
+				else_if = {
+					limit = { root.realm_size >= 200 }
+					multiply = 2.5
+				}
+				else_if = {
+					limit = { root.realm_size >= 150 }
+					multiply = 2
+				}
+				else_if = {
+					limit = { root.realm_size >= 100 }
+					multiply = 1.5
+				}
+			}
+			#Era
+			culture = {
+				if = {
+					limit = { has_cultural_era_or_later = culture_era_late_medieval }
+					multiply = 1.75
+				}
+				else_if = {
+					limit = { has_cultural_era_or_later = culture_era_high_medieval }
+					multiply = 1.25
+				}
+				else_if = {
+					limit = { has_cultural_era_or_later = culture_era_early_medieval }
+					multiply = 1
+				}
+				else = {
+					multiply = 0.75
+				}
+			}
+			#Income
+			if = {
+				limit = { root.monthly_character_income >= 100 }
+				multiply = 3
+			}
+			else_if = {
+				limit = { root.monthly_character_income >= 80 }
+				multiply = 2.5
+			}
+			else_if = {
+				limit = { root.monthly_character_income >= 60 }
+				multiply = 2
+			}
+			else_if = {
+				limit = { root.monthly_character_income >= 40 }
+				multiply = 1.5
+			}
+			else_if = {
+				limit = { root.monthly_character_income >= 20 }
+				multiply = 1.1
+			}
+
+			max = 3000
+			
+			if = { # Much cheaper for vassals wanting to adopt their admin liege's government
+				limit = {
+					is_independent_ruler = no
+				}
+				multiply = 0.1
+			}
+		}
+	}
+
+	effect = {
+		save_scope_as = actor
+		convert_to_administrative_from_feudalism_effect = yes
+		trigger_event = ep3_decisions_event.4060 #Also sends information event to human vassals
+		#Letter event for the vassals
+		hidden_effect = {
+			if = {
+				limit = {
+					is_ai = no
+				}
+				add_achievement_global_variable_effect = {
+					VARIABLE = achieved_epic_paperwork_achievement
+					VALUE = yes
+				}
+			}
+			if = {
+				limit = {
+					is_ai = no
+					religion = religion:islam_religion
+					has_title = title:k_rum
+					OR = {
+						has_title = title:c_byzantion
+						any_sub_realm_title = {
+							this = title:c_byzantion
+						}
+					}
+				}
+				add_achievement_global_variable_effect = {
+					VARIABLE = finished_new_management_achievement
+					VALUE = yes
+				}
+			}
+		}
+	}
+
+	ai_potential = {
+		OR = {
+			government_has_flag = government_is_feudal
+			government_has_flag = government_is_clan
+		}
+		is_independent_ruler = yes
+	}
+
+	ai_will_do = {
+		base = 0
+		modifier = {
+			OR = {
+				primary_title = title:e_byzantium
+				primary_title = title:e_roman_empire
+			}
+			add = 100
+		}
+		modifier = {
+			culture = {
+				OR = {
+					has_cultural_pillar = ethos_bureaucratic 
+					has_cultural_pillar = ethos_courtly 
+					has_cultural_pillar = ethos_egalitarian 
+				}
+			}
+			add = 50
+		}
+		modifier = {
+			culture = {
+				OR = {
+					has_cultural_tradition = tradition_legalistic
+					has_cultural_tradition = tradition_hereditary_hierarchy 
+				}
+			}
+			add = 50
+		}
+		modifier = {
+			culture = {
+				OR = {
+					has_cultural_tradition = tradition_fp3_enlightened_magnates 
+					has_cultural_tradition = tradition_loyal_soldiers 
+				}
+			}
+			add = 20
+		}
+		modifier = {
+			culture = {
+				OR = {
+					has_cultural_tradition = tradition_staunch_traditionalists
+					has_cultural_tradition = tradition_ep3_audacious_cadets
+				}
+			}
+			add = -20
+		}
+		modifier = {
+			culture = {
+				OR = {
+					has_cultural_tradition = tradition_ep3_indomitable_azatani
+					has_cultural_tradition = tradition_quarrelsome
+					has_cultural_tradition = tradition_warrior_culture
+					has_cultural_tradition = tradition_fp3_fierce_independence
+				}
+			}
+			add = -50
+		}
+		modifier = {
+			culture = {
+				OR = {
+					has_cultural_pillar = ethos_stoic
+					has_cultural_pillar = ethos_bellicose 
+					has_cultural_pillar = ethos_communal 
+				}
+			}
+			add = -50
+		}
+		modifier = {
+			culture = {
+				any_parent_culture_or_above = {
+					OR = {
+						this = culture:han
+						this = culture:greek
+					}
+				}
+			}
+			add = 100
+		}
+	}
+}
