@@ -141,3 +141,35 @@ BP_degrade_roman_government = {
 		}
 	}
 }
+
+# A character gains a vassal
+# root = character gaining vassal
+# scope:vassal = vassal being gained
+# scope:old_liege = the previous liege of the vassal. Might be the null character (vassal used to be a non-ruler or independent), so make sure to use "exists" checks where relevant
+on_vassal_gained = {
+	on_actions = {
+		BP_subroman_to_roman
+	}
+}
+
+BP_subroman_to_roman = {
+	effect = {
+		#Sub-Romans change government to roman if they get vassalized
+		if = {
+			limit = {
+				root = {
+					government_has_flag = is_a_roman_government
+					NOT = { government_has_flag = is_a_transitory_roman_government }
+					scope:vassal = { government_has_flag = is_a_transitory_roman_government }
+				}
+			}
+			scope:vassal = {
+				change_government = roman_dynastic_government
+				every_vassal_or_below = {
+					limit = { government_has_flag = is_a_transitory_roman_government }
+					change_government = roman_dynastic_government
+				}
+			}
+		}
+	}
+}
