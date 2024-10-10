@@ -1,10 +1,18 @@
 ﻿reform_government_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
+
 	desc = reform_government_decision_desc
 	ai_check_interval = 36
 
 	is_shown = {
+		trigger_if = {
+			limit = { has_ep3_dlc_trigger = yes }
+			NOT = { government_has_flag = government_is_administrative }
+		}
+		NOT = { government_has_flag = government_uses_roman_dynastic_authority } #Rome is special
 		OR = {
 			faith = { has_doctrine_parameter = right_to_rule_feudal }
 			culture = { has_cultural_parameter = right_to_rule_feudal }
@@ -16,25 +24,25 @@
 		}
 		OR = {
 			AND = {
-				has_government = feudal_government
+				government_has_flag = government_is_feudal
 				AND = {
 					faith = { NOT = { has_doctrine_parameter = right_to_rule_feudal } }
 					culture = { NOT = { has_cultural_parameter = right_to_rule_feudal } }
 				}
 			}
 			AND = {
-				has_government = clan_government
+				government_has_flag = government_is_clan
 				AND = {
 					faith = { NOT = { has_doctrine_parameter = right_to_rule_clan } }
 					culture = { NOT = { has_cultural_parameter = right_to_rule_clan } }
 				}
 			}
 			AND = {
-				has_government = rajamandala_government
+				government_has_flag = government_uses_rajamandala_authority
 				faith = { NOT = { has_doctrine_parameter = right_to_rule_mandala } }
 			}
 			AND = {
-				has_government = eranshar_government
+				government_has_flag = government_uses_iranian_dynastic_authority
 				AND = {
 					faith = { NOT = { has_doctrine_parameter = right_to_rule_sassanid } }
 					culture = { NOT = { has_cultural_parameter = right_to_rule_sassanid } }
@@ -81,8 +89,8 @@
 						scope:liege = { has_government = rajamandala_government }
 					}
 					AND = {
-						has_government = eranshar_government
-						scope:liege = { has_government = eranshar_government }
+						has_government = iranian_dynastic_government
+						scope:liege = { has_government = iranian_dynastic_government }
 					}
 				}
 				OR = {
@@ -123,28 +131,28 @@
 			limit = { faith = { has_doctrine_parameter = right_to_rule_feudal } }
 			every_in_list = {
 				list = characters_to_convert
-				convert_realm_to_feudal_effect = yes
+				change_government = feudal_government
 			}
 		}
 		else_if = {
 			limit = { faith = { has_doctrine_parameter = right_to_rule_clan } }
 			every_in_list = {
 				list = characters_to_convert
-				convert_realm_to_clan_effect = yes
+				change_government = clan_government
 			}
 		}
 		else_if = {
 			limit = { faith = { has_doctrine_parameter = right_to_rule_mandala } }
 			every_in_list = {
 				list = characters_to_convert
-				convert_realm_to_gupta_effect = yes
+				change_government = rajamandala_government
 			}
 		}
 		else_if = {
 			limit = { faith = { has_doctrine_parameter = right_to_rule_sassanid } }
 			every_in_list = {
 				list = characters_to_convert
-				convert_realm_to_eranshar_effect = yes
+				change_government = iranian_dynastic_government
 			}
 		}
 	}

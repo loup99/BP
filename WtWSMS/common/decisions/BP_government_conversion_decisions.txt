@@ -1,13 +1,17 @@
 ﻿convert_to_high_tribal_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
 	desc = convert_to_high_tribal_decision_desc
 	
 	ai_check_interval = 36
 	
 	is_shown = {
 		is_independent_ruler = yes
-		has_government = tribal_government
+		government_has_flag = government_is_tribal
+		NOT = { government_has_flag = government_is_nomadic }
+		NOT = { government_has_flag = government_uses_high_tribal_organization }
 	}
 	
 	is_valid = {
@@ -23,7 +27,7 @@
 	effect = {
 		trigger_event = BP_government_conversion.0001
 		save_scope_as = actor
-		show_as_tooltip = { convert_realm_to_high_tribal_effect = yes }
+		show_as_tooltip = { change_government = high_tribal_government }
 	}
 	
 	ai_potential = { always = yes }
@@ -32,21 +36,25 @@
 }
 
 convert_to_high_tribal_as_vassal_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
 	desc = convert_to_high_tribal_as_vassal_decision_desc
 	
 	ai_check_interval = 36
 	
 	is_shown = {
-		has_government = tribal_government
+		government_has_flag = government_is_tribal
+		NOT = { government_has_flag = government_is_nomadic }
+		NOT = { government_has_flag = government_uses_high_tribal_organization }
 		is_independent_ruler = no
 		liege = {
 			OR = {
-				has_advanced_government_trigger = yes
+				government_has_flag = government_is_centralized
 				AND = {
 					has_a_feudal_type_of_government_trigger = yes
-					NOT = { has_government = prefeudal_government }
+					NOT = { government_has_flag = government_uses_prefeudal_authority }
 				}
 			}
 		}
@@ -70,7 +78,7 @@ convert_to_high_tribal_as_vassal_decision = {
 	effect = {
 		trigger_event = BP_government_conversion.0011
 		save_scope_as = actor
-		show_as_tooltip = { convert_realm_to_high_tribal_effect = yes }
+		show_as_tooltip = { change_government = high_tribal_government }
 	}
 	
 	ai_potential = { always = yes }
@@ -78,14 +86,16 @@ convert_to_high_tribal_as_vassal_decision = {
 	ai_will_do = { base = 100 }
 }
 
-convert_to_bureaucratic_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-	major = yes
-	desc = convert_to_bureaucratic_decision_desc
+convert_to_roman_government_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
+	desc = convert_to_roman_government_decision_desc
 	
 	ai_check_interval = 36
 	
-	is_shown = { has_government = subroman_government }
+	is_shown = { government_has_flag = is_a_transitory_roman_government }
 	
 	is_valid = {
 		custom_description = {
@@ -96,7 +106,7 @@ convert_to_bureaucratic_decision = {
 		is_independent_ruler = yes #Must be independent
 		highest_held_title_tier >= tier_kingdom #Must be a kingdom or empire
 		prestige_level >= 4
-		capital_province.county = { development_level >= convert_to_bureaucratic_development_requirement }
+		capital_province.county = { development_level >= convert_to_roman_government_development_requirement }
 		
 		#Tribal Innovations
 		custom_description = {
@@ -123,7 +133,7 @@ convert_to_bureaucratic_decision = {
 	effect = {
 		trigger_event = BP_government_conversion.0021
 		save_scope_as = actor
-		show_as_tooltip = { convert_realm_to_bureaucratic_effect = yes }
+		show_as_tooltip = { change_government = roman_dynastic_government }
 	}
 	
 	ai_potential = { always = yes }
@@ -132,18 +142,20 @@ convert_to_bureaucratic_decision = {
 }
 
 convert_to_feudalism_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
 	desc = convert_to_feudalism_decision_desc
 	
 	ai_check_interval = 36
 	
 	is_shown = {
 		OR = {
-			has_government = prefeudal_government
-			has_government = high_tribal_government
+			government_has_flag = government_uses_prefeudal_authority
+			government_has_flag = government_uses_high_tribal_organization
 		}
-		#TODO: Fix to match the Clan/Bureaucratic/&c. Gov't decisions so we don't get a case where a player has no conversion decision
+		#TODO: Fix to match the other govs Gov't decisions so we don't get a case where a player has no conversion decision
 		#OR = {
 		#	culture = { has_cultural_parameter = right_to_rule_feudal }
 		#	faith = { has_doctrine_parameter = right_to_rule_feudal }
@@ -189,7 +201,7 @@ convert_to_feudalism_decision = {
 		trigger_event = BP_government_conversion.0031
 		save_scope_as = actor
 		show_as_tooltip = {
-			convert_realm_to_feudal_effect = yes
+			change_government = feudal_government
 			custom_tooltip = {
 				text = convert_holdings_text
 				convert_holdings_effect = yes
@@ -203,16 +215,18 @@ convert_to_feudalism_decision = {
 }
 
 convert_to_clan_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
 	desc = convert_to_clan_decision_desc
 	
 	ai_check_interval = 36
 	
 	is_shown = {
 		OR = {
-			has_government = prefeudal_government
-			has_government = high_tribal_government
+			government_has_flag = government_uses_prefeudal_authority
+			government_has_flag = government_uses_high_tribal_organization
 		}
 		OR = {
 			culture = { has_cultural_parameter = right_to_rule_clan }
@@ -259,7 +273,7 @@ convert_to_clan_decision = {
 		trigger_event = BP_government_conversion.0041
 		save_scope_as = actor
 		show_as_tooltip = {
-			convert_realm_to_clan_effect = yes
+			change_government = clan_government
 			custom_tooltip = {
 				text = convert_holdings_text
 				convert_holdings_effect = yes
@@ -273,13 +287,15 @@ convert_to_clan_decision = {
 }
 
 settle_nomads_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
 	desc = settle_nomads_decision_desc
 	
 	ai_check_interval = 36
 	
-	is_shown = { has_government = nomad_government }
+	is_shown = { government_has_flag = government_is_nomadic }
 	
 	is_valid = {
 		OR = {
@@ -305,7 +321,7 @@ settle_nomads_decision = {
 	effect = {
 		trigger_event = BP_government_conversion.0051
 		save_scope_as = actor
-		show_as_tooltip = { convert_realm_to_tribal_effect = yes }
+		show_as_tooltip = { change_government = tribal_government }
 	}
 	
 	ai_potential = {

@@ -1,4 +1,4 @@
-﻿##### Changed from Vanilla: Tied to new innovations, Islam
+﻿##### Made available to Islam, tied to innovation
 minor_religious_war = {
 	icon = minor_religious_war
 	group = religious
@@ -90,13 +90,6 @@ minor_religious_war = {
 		}
 	}
 
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: Trib war dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
-
 	allowed_against_character = {
 		scope:attacker = {
 			faith = {
@@ -126,6 +119,7 @@ minor_religious_war = {
 				scope:defender = {
 					any_character_struggle = {
 						involvement = involved
+						is_struggle_type = iberian_struggle
 					}
 				}
 			}
@@ -220,6 +214,20 @@ minor_religious_war = {
 
 		# AI in struggles act insularly for wars that don't have a familial or legal basis.
 		multiply = struggle_wars_prioritise_struggle_targets_value
+		# Tell the Romans to stop going adventuring into the steppe for no gods-damned reason.
+		multiply = byzantium_conquests_ai_score_value
+		#Declaring war on the frankokratia leader can really ruin the whole thing
+		if = {
+			limit = {
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
+					}
+				}
+			}
+			multiply = 0
+		}
 	}
 
 	cost = {
@@ -287,6 +295,9 @@ minor_religious_war = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
 
 		# go through the dejure hierarchy under target titles, transfer titles with same or worse tolerance holders (their religion equaly or less tolerated than the defender's),
 		# take the holder as vassal otherwise and don't go deeper
@@ -413,7 +424,7 @@ minor_religious_war = {
 
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
-
+		
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 
@@ -511,7 +522,7 @@ minor_religious_war = {
 	max_ai_diplo_distance_to_title = 500
 }
 
-##### Changed from Vanilla: Tied to new innovations, Islam
+##### Made available to Islam, tied to innovation
 religious_war = {
 	icon = minor_religious_war
 	group = religious
@@ -605,13 +616,6 @@ religious_war = {
 		}
 	}
 
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: Trib war dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
-
 	allowed_against_character = {
 		scope:attacker = {
 			faith = {
@@ -635,12 +639,33 @@ religious_war = {
 		scope:target = {
 			tier = tier_duchy
 		}
+		scope:target = {
+			trigger_if = {
+				limit = {
+					scope:attacker = {
+						is_ai = yes
+					}
+				}
+				any_in_de_jure_hierarchy = {
+					continue = { tier > tier_county }
+					count >= 2
+					tier = tier_county
+					holder ?= {
+						OR = {
+							this = scope:defender
+							is_vassal_or_below_of = scope:defender
+						}
+					}
+				}
+			}
+		}
 		# Filter for struggles
 		trigger_if = {
 			limit = {
 				scope:defender = {
 					any_character_struggle = {
 						involvement = involved
+						is_struggle_type = iberian_struggle
 					}
 				}
 			}
@@ -805,7 +830,7 @@ religious_war = {
 
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
-
+		
 		# Legitimacy
 		add_legitimacy_attacker_victory_effect = yes
 
@@ -817,6 +842,9 @@ religious_war = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
 
 		# go through the dejure hierarchy under target titles, transfer titles with same or worse tolerance holders (their religion equaly or less tolerated than the defender's),
 		# take the holder as vassal otherwise and don't go deeper
@@ -947,7 +975,7 @@ religious_war = {
 
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
-
+		
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 
@@ -1068,10 +1096,26 @@ religious_war = {
 
 		# AI in struggles act insularly for wars that don't have a familial or legal basis.
 		multiply = struggle_wars_prioritise_struggle_targets_value
+		# Tell the Romans to stop going adventuring into the steppe for no gods-damned reason.
+		multiply = byzantium_conquests_ai_score_value
+		multiply = muslim_invasions_prefer_nonmuslims_ai_score_value
+
+		#Declaring war on the frankokratia leader can really ruin the whole thing
+		if = {
+			limit = {
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
+					}
+				}
+			}
+			multiply = 0
+		}
 	}
 }
 
-##### Changed from Vanilla: Tied to new innovations, Islam
+##### Made available to Islam, tied to innovation
 major_religious_war = {
 	icon = major_religious_war
 	group = religious
@@ -1083,7 +1127,7 @@ major_religious_war = {
 	mutually_exclusive_titles = { always = yes }
 
 	##### Changed from Vanilla vvvvv
-
+	
 	# Additional requirements to the defines in 00_casus_belli_groups.txt
 	allowed_for_character = {
 		scope:attacker.faith = {
@@ -1128,10 +1172,10 @@ major_religious_war = {
 						}
 					}
 				}
-				piety_level >= 2
+				piety_level >= 1
 			}
 			trigger_else = {
-				piety_level >= 3
+				piety_level >= 2
 			}
 		}
 		trigger_else = {
@@ -1153,10 +1197,10 @@ major_religious_war = {
 						} 
 					}
 				}
-				piety_level >= 3
+				piety_level >= 2
 			}
 			trigger_else = {
-				piety_level >= 4
+				piety_level >= 3
 			}
 		}
 		trigger_if = {
@@ -1176,13 +1220,6 @@ major_religious_war = {
 			}
 		}
 	}
-
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: Trib war dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
 
 	allowed_against_character = {
 		scope:attacker = {
@@ -1213,6 +1250,7 @@ major_religious_war = {
 				scope:defender = {
 					any_character_struggle = {
 						involvement = involved
+						is_struggle_type = iberian_struggle
 					}
 				}
 			}
@@ -1220,6 +1258,26 @@ major_religious_war = {
 		}
 		are_holy_wars_disabled_by_struggle_conciliation_trigger = no # Disabled against other involved faiths in FP2 Conciliation ending
 
+		scope:target = {
+			trigger_if = {
+				limit = {
+					scope:attacker = {
+						is_ai = yes
+					}
+				}
+				any_in_de_jure_hierarchy = {
+					continue = { tier > tier_county }
+					count >= 5
+					tier = tier_county
+					holder ?= {
+						OR = {
+							this = scope:defender
+							is_vassal_or_below_of = scope:defender
+						}
+					}
+				}
+			}
+		}
 	}
 
 	should_invalidate = {
@@ -1365,7 +1423,7 @@ major_religious_war = {
 
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
-
+		
 		# Legitimacy
 		add_legitimacy_attacker_victory_effect = yes
 
@@ -1377,6 +1435,10 @@ major_religious_war = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
+
 		# go through the dejure hierarchy under target titles, transfer titles with same or worse tolerance holders (their religion equaly or less tolerated than the defender's),
 		# take the holder as vassal otherwise and don't go deeper
 		every_in_list = {
@@ -1506,9 +1568,9 @@ major_religious_war = {
 
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
-
+		
 		# Legitimacy
-		add_legitimacy_attacker_victory_effect = yes
+		add_legitimacy_attacker_defeat_effect = yes
 
 		#EP2 accolade glory gain for winning against higher ranked enemy
 		scope:defender = { accolade_defender_war_end_glory_gain_high_effect = yes }
@@ -1627,726 +1689,21 @@ major_religious_war = {
 
 		# AI in struggles act insularly for wars that don't have a familial or legal basis.
 		multiply = struggle_wars_prioritise_struggle_targets_value
-	}
-}
+		# Tell the Romans to stop going adventuring into the steppe for no gods-damned reason.
+		multiply = byzantium_conquests_ai_score_value
+		multiply = muslim_invasions_prefer_nonmuslims_ai_score_value
 
-##### Changed from Vanilla: Fixed up Crown Authority effect
-undirected_great_holy_war = {
-	group = religious_script_only
-	interface_priority = 1000
-	icon = undirected_great_holy_war
-
-	war_name = "GREAT_HOLY_WAR_WAR_NAME"
-
-	target_titles = all
-	target_title_tier = all
-	target_de_jure_regions_above = yes
-	use_de_jure_wargoal_only = yes
-	check_all_defenders_for_ticking_war_score = yes # All defenders land in the Crusade Kingdom should count
-	defender_ticking_warscore = 0.125
-	attacker_ticking_warscore = 0.125
-	max_defender_score_from_occupation = 50
-	max_attacker_score_from_occupation = 150
-	full_occupation_by_defender_gives_victory = no
-	imprisonment_by_attacker_give_war_score = no
-	imprisonment_by_defender_give_war_score = no
-	attacker_capital_gives_war_score = no
-	defender_capital_gives_war_score = no
-	is_great_holy_war = yes
-	landless_attacker_needs_armies = no
-	allow_hostages = no
-	
-	defender_score_from_battles_scale = 125
-	attacker_score_from_battles_scale = 125
-	
-	max_defender_score_from_battles = 150
-
-	occupation_participation_mult = 0.5
-	siege_participation_mult = 1
-	battle_participation_mult = 7.5
-	on_primary_attacker_death = inherit
-	on_primary_defender_death = inherit
-	transfer_behavior = transfer
-
-	white_peace_possible = no
-
-	allowed_for_character = {
-		always = yes
-	}
-
-	valid_to_start = {
-		scope:target = {
-			tier = tier_kingdom
-			any_in_de_jure_hierarchy = { #Any ruler in the dejure of the targeted Kingdom belongs to a Faith that the HoF's Faith is hostile enough to Holy War against.
-				continue = { tier > tier_county }
-				tier = tier_county
-				scope:attacker.faith = {
-					is_hostile_enough_for_holy_war_trigger = { FAITH = prev.holder.top_liege.faith }
-				}
-			}
-		}
-	}
-
-	on_declaration = {
-		scope:attacker.faith.great_holy_war = {
-			if = { #Clear forced participation flag.
-				limit = {
-					any_pledged_attacker = {
-						has_character_flag = variable_ghw_papal_hooked_pledge
-					}
-				}
-				every_pledged_attacker = {
-					limit = {
-						has_character_flag = variable_ghw_papal_hooked_pledge
-					}
-					remove_character_flag = variable_ghw_papal_hooked_pledge
-				}
-			}
-		}
-		scope:attacker.faith.great_holy_war.ghw_target_title = {
-			save_scope_as = target_kingdom
-		}
-		scope:attacker = { #Loc keys for localization fluff.
-			save_scope_as = ghw_sponsor
-		}
-		scope:defender = {
-			save_scope_as = ghw_defender
-		}
-		scope:attacker.faith = {
-			save_scope_as = the_faith
-		}
-		scope:attacker.faith.great_holy_war = {
-			save_scope_as = the_ghw
-		}
-		force_truce_GHW_defenders_effect = yes
-		every_player = { #Fluff for attackers/defenders
-			limit = {
-				scope:attacker.faith.great_holy_war = {
-					OR = {
-						has_pledged_attacker = prev
-						has_pledged_defender = prev
-					}
-				}
-			}
-			trigger_event = great_holy_war.0051
-		}
-		on_declared_war = yes
-		scope:attacker.faith.great_holy_war = {
-			divide_war_chest = {
-				fraction = ghw_war_start_handout_percentage
-			}
-		}
-
-		# First of the Crusader Kings achievement tracking.
+		#Declaring war on the frankokratia leader can really ruin the whole thing
 		if = {
 			limit = {
-				scope:attacker.faith = faith:catholic
-				NOT = { exists = global_var:had_first_catholic_crusade }
-			}
-			# Credit where chredit is due.
-			scope:attacker.faith.great_holy_war = {
-				every_pledged_attacker = {
-					limit = { fp1_achievement_culture_norse_trigger = yes }
-					add_achievement_flag_effect = { FLAG = first_of_the_crusader_kings_achievement_flag }
-				}
-			}
-			# Mark the first crusade as having happened.
-			set_global_variable = {
-				name = had_first_catholic_crusade
-				value = yes
-			}
-		}
-
-		debug_log = undirected_ghw_debug_loc
-	}
-
-	should_invalidate = {
-		scope:attacker.faith = scope:defender.faith # Primary defender has converted
-	}
-
-	on_invalidated_desc = msg_invalidate_war_title
-	
-	on_invalidated = {
-		scope:attacker.faith.great_holy_war.ghw_target_title = {
-			save_scope_as = target_kingdom
-		}
-		scope:attacker = { #Loc keys for localization fluff.
-			save_scope_as = ghw_sponsor
-		}
-		scope:defender = {
-			save_scope_as = ghw_defender
-		}
-		scope:attacker.faith = {
-			save_scope_as = the_faith
-		}
-		scope:attacker.faith.great_holy_war = {
-			save_scope_as = the_ghw
-		}
-		every_player = {
-			limit = { is_within_diplo_range = { CHARACTER = scope:defender } }
-			trigger_event = great_holy_war.0056
-		}
-		hidden_effect = {
-			if = { #Clear pledged gold flag.
-				limit = {
-					any_player = {
-						has_character_flag = ghw_pledged_gold
-					}
-				}
-				every_player = {
-					limit = {
-						has_character_flag = ghw_pledged_gold
-					}
-					remove_character_flag = ghw_pledged_gold
-				}
-			}
-		}
-
-		debug_log = "Undirected Great Holy War invalidated"
-	}
-
-	on_victory_desc = {
-		desc = great_holy_war_victory_desc
-	}
-
-##### Changed from Vanilla vvvvv
-	on_victory = {
-		scope:attacker = { show_pow_release_message_effect = yes }
-
-		# Legitimacy
-		add_legitimacy_attacker_victory_effect = yes
-
-		#EP2 Accolade glory gain to the holy knights of the faith head
-		scope:attacker = { accolade_attacker_war_end_glory_gain_low_effect = yes }
-
-		create_title_and_vassal_change = {
-			type = conquest_holy_war
-			save_scope_as = change
-			add_claim_on_loss = yes
-		}
-		scope:attacker.faith.great_holy_war.ghw_target_title = { #Loc keys for localization fluff.
-			save_scope_as = target_kingdom
-		}
-		scope:attacker = {
-			save_scope_as = ghw_sponsor
-		}
-		scope:defender = {
-			save_scope_as = ghw_defender
-		}
-		scope:attacker.faith = {
-			save_scope_as = the_faith
-		}
-		scope:attacker.faith.great_holy_war = {
-			save_scope_as = the_ghw
-		}
-
-		scope:attacker = {	#Achievement setup.
-			every_character_war = {
-				limit = {
-					is_attacker = scope:attacker
-					is_defender = scope:defender
-				}
-				every_war_attacker = {
-					add_achievement_flag_effect = { FLAG = achievement_for_the_faith_flag }
-				}
-			}
-		}
-
-		scope:defender.faith = {		#needed for hold_court.6150
-			set_variable = {
-				name = 6150_lost_ghw_recently		
-				years = 5
-			}
-		}
-
-		hidden_effect = {
-			if = { #Recipient is going to be the Papal's chosen Recipient or, if the main contributor is overriding the Papal will, his Beneficiary.
-				limit = {
-					exists = scope:attacker.faith.great_holy_war.ghw_title_recipient
-				}
-				scope:attacker.faith.great_holy_war.ghw_title_recipient = {
-					save_scope_as = title_recipient
-				}
-			}
-			else = { #If no Recipient or Beneficiary, check for any random claimants that might have cropped in the meantime.
-				undirected_ghw_recipient_selection_on_victory_effect = yes
-			}
-			if = {
-				limit = {
-					exists = scope:the_ghw
-					NOT = { exists = scope:title_recipient }
-					scope:the_ghw = {
-						has_variable = var_fallback_recipient
-						var:var_fallback_recipient = {
-							is_alive = yes
-						}
-					}
-				}
-				scope:the_ghw = {
-					var:var_fallback_recipient = {
-						save_scope_as = title_recipient
-						set_designated_winner = scope:title_recipient
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
 					}
 				}
 			}
-			if = { #If for some reason there is no title recipient selected yet, create character from scratch.
-				limit = {
-					exists = scope:the_ghw
-					NOT = { exists = scope:title_recipient }
-					NOT = {
-						scope:the_ghw = {
-							has_variable = var_fallback_recipient
-						}
-					}
-				}
-				create_character = {
-					location = scope:ghw_sponsor.capital_province
-					template = new_commander_character
-					faith = scope:the_faith
-					culture = scope:ghw_sponsor
-					save_scope_as = title_recipient
-					gender_female_chance = {
-						if = {
-							limit = { scope:the_faith = { has_doctrine = doctrine_gender_male_dominated } }
-							add = 0
-						}
-						else_if = {
-							limit = { scope:the_faith = { has_doctrine = doctrine_gender_female_dominated } }
-							add = 100
-						}
-						else = {
-							add = 50
-						}
-					}
-				}
-				scope:the_faith.great_holy_war = {
-					set_designated_winner = scope:title_recipient
-				}
-			}
-			if = { #Check if Recipient is landless to give him the Crusader King buff.
-				limit = {
-					exists = scope:title_recipient
-					scope:title_recipient = { is_ruler = no }
-				}
-				scope:title_recipient = {
-					add_character_flag = {
-						flag = ghw_recipient_will_be_crusader_king
-					}
-				}
-			}
+			multiply = 0
 		}
-		every_in_list = {
-			list = target_titles
-			save_scope_as = target
-		}
-
-		if = { #Tooltip explaining who gets the first title when a Recipient exists (otherwise avoid or it will show the fallback character).
-			limit = {
-				exists = scope:attacker.faith.great_holy_war.ghw_title_recipient
-			}
-			show_as_tooltip = {
-				scope:target = {
-					change_title_holder = {
-						holder = scope:attacker.faith.great_holy_war.ghw_title_recipient
-						change = scope:change
-					}
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				exists = scope:the_ghw
-				scope:the_ghw = {
-					has_variable = var_fallback_recipient
-				}
-			}
-			scope:the_ghw = {
-				var:var_fallback_recipient = {
-					save_scope_as = ghw_fallback_recipient
-				}
-			}
-			show_as_tooltip = {
-				scope:target = {
-					change_title_holder = {
-						holder = scope:ghw_fallback_recipient
-						change = scope:change
-					}
-				}
-			}
-		}
-
-		# Create a dynamic title if the kingdom itself can't be created/taken
-		if = {
-			limit = { #In the event that, for ex. k_jerusalem exists and is held by a foreign ruler who is not involved in the war in any way.
-				exists = scope:the_ghw
-				exists = scope:target_kingdom
-				exists = scope:target_kingdom.holder
-				scope:the_ghw = {
-					NOR = {
-						#Do not create a titular title if the target is held by a defender.
-						has_pledged_defender = scope:target_kingdom.holder
-						has_forced_defender = scope:target_kingdom.holder
-						#Or, if the title_recipient is the current holder of the target_kingdom.
-						scope:title_recipient = scope:target_kingdom.holder
-					}
-				}
-			}
-			hidden_effect = {
-				random_list = {
-					50 = {
-						create_dynamic_title = {
-							tier = kingdom
-							name = CRUSADER_STATE_CRUSADER_TITLE_NAME
-						}
-					}
-					50 = {
-						create_dynamic_title = {
-							tier = kingdom
-							name = CRUSADER_STATE_FAITH_TITLE_NAME
-						}
-					}
-				}
-				scope:new_title = {
-					change_title_holder = {
-						holder = scope:title_recipient
-						change = scope:change
-					}
-				}
-			}
-			scope:the_ghw = {
-				do_ghw_title_handout = scope:change
-				divide_war_chest = {}
-			}
-			scope:new_title = { generate_coa = yes }
-		}
-		else_if = { #Otherwise hand out titles normally.
-			limit = {
-				exists = scope:the_ghw
-			}
-			hidden_effect = {
-				if = {
-					limit = {
-						NAND = {
-							exists = scope:target.holder
-							scope:target.holder = scope:title_recipient
-						}
-					}
-					scope:target = {
-						change_title_holder = {
-							holder = scope:title_recipient
-							change = scope:change
-						}
-					}
-				}
-			}
-			scope:the_ghw = {
-				do_ghw_title_handout = scope:change
-				divide_war_chest = {}
-			}
-		}
-
-		##### Changed from Vanilla vvvvv
-		hidden_effect = {
-			every_player = { #Fluff for players
-				limit = {
-					OR = {
-						this = scope:attacker
-						this = scope:defender
-						any_war_enemy = { this = scope:attacker }
-						any_war_enemy = { this = scope:defender }
-						is_within_diplo_range = { CHARACTER = scope:defender }
-					}
-				}
-				trigger_event = great_holy_war.0052 #Differentiate depending on faith (compared to scope:attacker)
-			}
-
-			if = {
-				limit = { exists = scope:title_recipient }
-				scope:title_recipient = {
-					every_realm_county = { # Crusading troops seizing control
-						change_county_control = 50
-					}
-					every_realm_province = {
-						refill_levy = yes
-						refill_garrison = yes
-					}
-				}
-			}
-			if = { #If Recipient was landless give him the Crusader King buff.
-				limit = {
-					exists = scope:title_recipient
-					scope:title_recipient = { has_character_flag = ghw_recipient_will_be_crusader_king }
-				}
-				scope:title_recipient = {
-					add_trait = crusader_king
-					remove_character_flag = ghw_recipient_will_be_crusader_king
-					
-					##### Changed from Vanilla vvvvv
-					apply_given_crown_authority_level_skip_effect = { LEVEL = 1 }
-					##### Changed from Vanilla ^^^^^
-					
-					if = { # Set the appropriate Succession Law
-						limit = {
-							can_have_single_heir_succession_law_trigger = yes
-							NOT = {
-								has_realm_law = single_heir_succession_law
-							}
-						}
-						add_realm_law_skip_effects = single_heir_succession_law
-					}
-					else_if = {
-						limit = {
-							can_have_high_partition_succession_law_trigger = yes
-							NOT = {
-								has_realm_law = high_partition_succession_law
-							}
-						}
-						add_realm_law_skip_effects = high_partition_succession_law
-					}
-					else_if = {
-						limit = {
-							can_have_partition_succession_law_trigger = yes
-							NOT = {
-								has_realm_law = partition_succession_law
-							}
-						}
-						add_realm_law_skip_effects = partition_succession_law
-					}
-					
-					spawn_army = { # Spawn a temporary army so that the Crusader King isn't helpless, symbolizing Crusaders staying behind
-						levies = {
-							value = 100
-							scope:attacker.faith.great_holy_war = {
-								every_pledged_attacker = {
-									add = 100
-								}
-							}
-						}
-						men_at_arms = {
-							type = teutonic_knights
-							stacks = {
-								value = 1
-								scope:attacker.faith.great_holy_war = {
-									every_pledged_attacker = {
-										add = 0.2
-									}
-								}
-							}
-						}
-						inheritable = no
-						uses_supply = no
-						location = capital_province
-						name = house_beneficiary_won_ghw
-					}
-					every_vassal = { # Vassals should not want to revolt too soon after inaguration
-						add_opinion = {
-							modifier = respect_opinion
-							target = scope:title_recipient
-							opinion = 50
-						}
-					}
-					add_gold = 500 # Some extra plunder
-					add_prestige = 500
-					add_piety = 500
-				}
-			}
-			scope:attacker.faith.great_holy_war = { #Give Prestige/Piety modifier to Dynasty/House of the winners' Beneficiaries (only if they gained any land in the GHW).
-				every_pledged_attacker = {
-					limit = { exists = ghw_beneficiary }
-					ghw_beneficiary = { trigger_event = great_holy_war.0061 }
-				}
-				if = { #Chance to switch-play to Crusader King.
-					limit = {
-						exists = scope:title_recipient
-						exists = scope:title_recipient.dynasty
-						scope:title_recipient = {
-							is_ai = yes
-							has_trait = crusader_king
-						}
-						any_pledged_attacker = {
-							is_ai = no
-							dynasty = scope:title_recipient.dynasty
-						}
-					}
-					random_pledged_attacker = {
-						limit = {
-							is_ai = no
-							dynasty = scope:title_recipient.dynasty
-							scope:title_recipient = {
-								is_ai = yes
-								has_trait = crusader_king
-							}
-						}
-						trigger_event = { id = great_holy_war.0070 days = 5 }
-					}
-				}
-			}
-		}
-		##### Changed from Vanilla ^^^^^
-		
-		#Set 30 years cooldown.
-		hidden_effect = {
-			scope:attacker.faith = {
-				set_variable = {
-					name = variable_ghw_cooldown
-					value = yes
-					years = 30
-				}
-			}
-			if = { #Clear pledged gold flag.
-				limit = {
-					any_player = {
-						has_character_flag = ghw_pledged_gold
-					}
-				}
-				every_player = {
-					limit = {
-						has_character_flag = ghw_pledged_gold
-					}
-					remove_character_flag = ghw_pledged_gold
-				}
-			}
-		}
-
-		ordered_in_list = {
-			list = target_titles
-			order_by = tier
-			max = 1
-
-			save_scope_as = war_goal_title
-		}
-
-		scope:attacker.faith = {
-			change_fervor = {
-				value = -25
-				desc = fervor_loss_great_holy_war
-			}
-		}
-		scope:defender.faith = {
-			change_fervor = {
-				value = 30
-				desc = fervor_gain_great_holy_war
-			}
-		}
-
-		#Truce between the chief beneficiary & all defenders
-		add_truce_GHW_attacker_victory_effect = yes
-		debug_log = undirected_ghw_victory_debug_message
-
-		# FP1: note the victory for future memorialisation via stele (if applicable).
-		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
-		
-
-		scope:title_recipient = {
-			custom_tooltip = legend_seed_ghw.tt
-		}
-	}
-##### Changed from Vanilla ^^^^^
-
-	on_white_peace_desc = {
-		desc = WHITE_PEACE_DISABLED
-	}
-
-	on_defeat_desc = {
-		desc = great_holy_war_defeat_desc
-	}
-
-	on_defeat = {
-		scope:attacker = { show_pow_release_message_effect = yes }
-
-		# Legitimacy
-		add_legitimacy_attacker_defeat_effect = yes
-
-		#EP2 Accolade glory gain to the noble native defenders
-		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
-
-		scope:attacker.faith.great_holy_war = {
-			divide_war_chest = {
-				defenders = yes
-				gold = no
-			}
-		}
-
-		scope:attacker.faith.great_holy_war.ghw_target_title = { #Loc keys for localization fluff.
-			save_scope_as = target_kingdom
-		}
-		scope:attacker = {
-			save_scope_as = ghw_sponsor
-		}
-		scope:defender = {
-			save_scope_as = ghw_defender
-		}
-		scope:attacker.faith = {
-			save_scope_as = the_faith
-		}
-		scope:attacker.faith.great_holy_war = {
-			save_scope_as = the_ghw
-		}
-
-		scope:attacker = {
-			faith = {
-				change_fervor = {
-					value = -15
-					desc = fervor_loss_lost_great_holy_war
-				}
-				set_variable = {			#needed for hold_court.6150
-					name = 6150_lost_ghw_recently
-					years = 5
-				}
-			}
-		}
-
-		scope:defender = {	#Achievement setup.
-			every_character_war = {
-				limit = {
-					is_attacker = scope:attacker
-					is_defender = scope:defender
-				}
-				every_war_defender = {
-					add_achievement_flag_effect = { FLAG = achievement_for_the_faith_flag }
-				}
-			}
-		}
-
-		every_player = { #Fluff for players
-			limit = {
-				OR = {
-					this = scope:attacker
-					this = scope:defender
-					any_war_enemy = { this = scope:attacker }
-					any_war_enemy = { this = scope:defender }
-					is_within_diplo_range = { CHARACTER = scope:defender }
-				}
-			}
-			trigger_event = great_holy_war.0053 #Differentiate depending on faith (compared to scope:attacker)
-		}
-
-		# Truce
-		add_truce_attacker_defeat_effect = yes
-
-		#Set 30 years cooldown.
-		hidden_effect = {
-			scope:attacker.faith = {
-				set_variable = {
-					name = variable_ghw_cooldown
-					value = yes
-					years = 30
-				}
-			}
-			if = { #Clear pledged gold flag.
-				limit = {
-					any_player = {
-						has_character_flag = ghw_pledged_gold
-					}
-				}
-				every_player = {
-					limit = {
-						has_character_flag = ghw_pledged_gold
-					}
-					remove_character_flag = ghw_pledged_gold
-				}
-			}
-		}
-		debug_log = undirected_ghw_defeat_debug_message
 	}
 }

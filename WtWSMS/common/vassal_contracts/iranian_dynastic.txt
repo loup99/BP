@@ -1,0 +1,51 @@
+﻿@ai_standard_liege_desire = 2
+@ai_standard_vassal_desire = 1
+
+iranian_dynastic_government_obligations = {
+	obligation_levels = {
+		default = {
+			levies = 0.25
+			tax = 0.25
+		}
+	}
+}
+
+iranian_dynastic_marzban_contract = {
+	display_mode = radiobutton
+	is_shown = {
+		scope:vassal = { government_has_flag = government_uses_iranian_dynastic_authority }
+		scope:liege = { government_has_flag = government_uses_iranian_dynastic_authority }
+		scope:vassal.primary_title.tier >= tier_duchy
+	}
+	obligation_levels = {
+		marzban_contract_none = {
+			position = { 0 1 }
+			default = yes
+			
+			ai_vassal_desire = { value = @ai_standard_vassal_desire }
+			ai_liege_desire = { value = @ai_standard_liege_desire }
+		}
+		marzban_contract_granted = {
+			is_valid = {
+				scope:liege.culture = { has_innovation = innovation_marzban }
+				scope:vassal.primary_title.tier >= tier_duchy
+			}
+			parent = marzban_contract_none
+			position = { 1 0 }
+			
+			tax_factor = -0.5
+			
+			vassal_modifier = {
+				levy_size = 0.2
+				army_maintenance_mult = -0.2
+				garrison_size = 0.2
+				levy_reinforcement_rate = 0.2
+				controlled_province_advantage = 5
+			}
+			
+			flag = has_march_contract
+			
+			ai_liege_desire = @ai_standard_liege_desire
+		}
+	}
+}

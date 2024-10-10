@@ -637,6 +637,7 @@ inspiration_adventure_create_artifact_effect = {
 ####								}
 ####								trigger = {
 ####									current_year >= 1097
+####									character:107590 ?= { is_alive = no } #El Cid is not around
 ####									NOT = {
 ####										any_artifact = {
 ####											has_variable = sword_cid
@@ -1984,6 +1985,31 @@ inspiration_adventure_create_artifact_effect = {
 									HUNTER = scope:inspiration_owner
 								}
 							}
+							10 = { #Constantine statue
+								modifier = {
+									OR = {
+										scope:adventurer.adventure_inspiration_average_skill_value >= high_inspiration_skill
+										AND = {
+											exists = scope:inspiration_owner.var:artifact_quality
+											scope:inspiration_owner.var:artifact_quality > high_adventurer_epic_quality_level #Cumulative event choices
+										}
+									}
+									add = 5
+								}
+								trigger = {
+									any_artifact = {
+										count < 3
+										has_variable = statue_constantine
+									}
+									scope:location ?= {
+										OR = {
+											geographical_region = world_europe_south_italy #Rome
+											geographical_region = world_asia_minor #Constantinople
+										}
+									}
+								}
+								create_artifact_statue_constantine_effect = { OWNER = root }
+							}
 						}
 					}
 				}
@@ -2311,7 +2337,10 @@ inspiration_adventure_create_artifact_effect = {
 				}
 			}
 			if = {
-				limit = { exists = scope:epic }
+				limit = {
+					exists = scope:epic
+					NOT = { exists = scope:task_contract_taker }
+				}
 				scope:epic = {
 					add_artifact_history = {
 						location = root.capital_province
@@ -2322,7 +2351,10 @@ inspiration_adventure_create_artifact_effect = {
 				}
 			}
 			else_if = {
-				limit = { exists = scope:newly_created_artifact }
+				limit = {
+					exists = scope:newly_created_artifact
+					NOT = { exists = scope:task_contract_taker }
+				}
 				scope:newly_created_artifact = {
 					add_artifact_history = {
 						location = root.capital_province

@@ -1,0 +1,481 @@
+﻿@iranian_dynastic_authority_cooldown_years = 10
+@clerical_influence_cooldown_years = 25
+
+#Iranian_Dynastic Government Secular Authority
+iranian_dynastic_authority = {
+	default = iranian_dynastic_authority_1
+	cumulative = no
+	flag = realm_law
+	
+	iranian_dynastic_authority_0 = {
+		modifier = {
+			minority_opinion = -5
+			vassal_tax_contribution_mult = 0.05
+			vassal_levy_contribution_mult = 0.05
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = title_revocation_wuzurgan_massive_tyranny
+		
+		can_keep = {
+			realm_law_use_iranian_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = iranian_dynastic_authority_0 }
+		}
+		
+		can_pass = {
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = iranian_dynastic_authority_0 }
+		}
+		
+		pass_cost = {}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = iranian_dynastic_authority_cooldown
+				years = @iranian_dynastic_authority_cooldown_years
+			}
+		}
+	}
+	iranian_dynastic_authority_1 = {
+		modifier = {
+			direct_vassal_opinion = -5
+			powerful_vassal_opinion = -5
+			glory_hound_opinion = -5
+			parochial_opinion = -5
+			courtly_opinion = -5
+			minority_opinion = -10
+			vassal_tax_contribution_mult = 0.10
+			vassal_levy_contribution_mult = 0.10
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = title_revocation_wuzurgan_major_tyranny
+		
+		can_keep = {
+			realm_law_use_iranian_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = iranian_dynastic_authority_1 }
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = iranian_dynastic_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_iranian_dynastic_authority_cooldown"
+					NOT = { has_variable = crown_authority_cooldown }
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = iranian_dynastic_authority_1 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = iranian_dynastic_authority_2
+							has_realm_law = iranian_dynastic_authority_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = iranian_dynastic_authority_cooldown
+				years = @iranian_dynastic_authority_cooldown_years
+			}
+		}
+	}
+	iranian_dynastic_authority_2 = {
+		modifier = {
+			direct_vassal_opinion = -10
+			powerful_vassal_opinion = -10
+			glory_hound_opinion = -10
+			parochial_opinion = -10
+			courtly_opinion = -10
+			minority_opinion = -10
+			vassal_tax_contribution_mult = 0.15
+			vassal_levy_contribution_mult = 0.15
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = title_revocation_wuzurgan_moderate_tyranny
+		flag = vassal_internal_wars_banned
+		
+		can_keep = {
+			realm_law_use_iranian_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = iranian_dynastic_authority_2 }
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = iranian_dynastic_authority_3 } }
+				has_realm_law = iranian_dynastic_authority_1
+				custom_description = {
+					subject = root
+					text = "has_crown_authority_cooldown"
+					NOT = { has_variable = iranian_dynastic_authority_cooldown }
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = iranian_dynastic_authority_2 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = iranian_dynastic_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = iranian_dynastic_authority_cooldown
+				years = @iranian_dynastic_authority_cooldown_years
+			}
+		}
+	}
+	iranian_dynastic_authority_3 = {
+		modifier = {
+			direct_vassal_opinion = -20
+			powerful_vassal_opinion = -20
+			glory_hound_opinion = -15
+			parochial_opinion = -15
+			courtly_opinion = -15
+			minority_opinion = -15
+			vassal_tax_contribution_mult = 0.25
+			vassal_levy_contribution_mult = 0.25
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = title_revocation_wuzurgan_minimal_tyranny
+		flag = vassal_all_wars_banned
+		
+		can_keep = {
+			realm_law_use_iranian_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = iranian_dynastic_authority_3 }
+		}
+		
+		can_pass = {
+			has_realm_law = iranian_dynastic_authority_2
+			custom_description = {
+				subject = root
+				text = "has_crown_authority_cooldown"
+				NOT = { has_variable = iranian_dynastic_authority_cooldown }
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = iranian_dynastic_authority_3 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = iranian_dynastic_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = iranian_dynastic_authority_cooldown
+				years = @iranian_dynastic_authority_cooldown_years
+			}
+		}
+	}
+}
+
+#Iranian_Dynastic Government Religious Authority
+#Directly influences Zoroastrian doctrines for Asavan faiths
+clerical_influence = {
+	default = clerical_influence_0
+	cumulative = no
+	flag = clerical_influence
+	flag = other_law
+	
+	#Temporal Revocable
+	clerical_influence_0 = {
+		modifier = {
+			clergy_opinion = -10
+			religious_head_opinion = -20
+			theocracy_government_tax_contribution_add = 0.25 #i.e., 25%-80%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.25 #i.e., 25%-75%, depending on devotion
+			different_faith_county_opinion_mult = -0.25 #Like adaptive
+			#Opinions
+			zealot_opinion = -10
+			minority_opinion = 20
+		}
+		flag = clerical_appointment_ruler
+		
+		can_keep = {
+			realm_law_use_clerical_influence_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = clerical_influence_0 }
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = clerical_influence_1 }
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = clerical_influence_0 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = clerical_influence_1 }
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+			piety = {
+				if = {
+					limit = { has_realm_law = clerical_influence_1 }
+					add = decrease_clerical_influence_piety_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = {
+					OR = {
+						has_realm_law = clerical_influence_1
+						has_realm_law = clerical_influence_2
+						has_realm_law = clerical_influence_3
+					}
+				}
+				clerical_authory_angry_at_reduced_clerical_influence_effect = {
+					TOP_LIEGE = root.top_liege
+				}
+			}
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+		}
+	}
+	#Spiritual Revocable
+	clerical_influence_1 = {
+		modifier = {
+			clergy_opinion = 0
+			religious_head_opinion = -10
+			theocracy_government_tax_contribution_add = 0.15 #i.e., 15%-70%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.15 #i.e., 15%-70%, depending on devotion
+			domain_limit = 1
+			#Opinions
+			zealot_opinion = 10
+			minority_opinion = -10
+		}
+		flag = clerical_appointment_ruler
+		flag = clerical_appointment_fixed
+		
+		can_keep = {
+			realm_law_use_clerical_influence_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = clerical_influence_1 }
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = {
+					OR = {
+						has_realm_law = clerical_influence_0
+						has_realm_law = clerical_influence_2
+					}
+				}
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					text = must_change_adjacent
+					always = no
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = clerical_influence_1 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						OR = {
+							has_realm_law = clerical_influence_0
+							has_realm_law = clerical_influence_2
+						}
+					}
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+			piety = {
+				if = {
+					limit = { has_realm_law = clerical_influence_2 }
+					add = decrease_clerical_influence_piety_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = {
+					OR = {
+						has_realm_law = clerical_influence_2
+						has_realm_law = clerical_influence_3
+					}
+				}
+				clerical_authory_angry_at_reduced_clerical_influence_effect = {
+					TOP_LIEGE = root.top_liege
+				}
+			}
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+		}
+	}
+	#Spiritual Revocable
+	clerical_influence_2 = {
+		modifier = {
+			clergy_opinion = 10
+			religious_head_opinion = 5
+			theocracy_government_tax_contribution_add = 0.05 #i.e., 5%-60%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.05 #i.e., 5%-55%, depending on devotion
+			different_faith_county_opinion_mult = 0.25 #Inverse of adaptive
+			domain_limit = 2
+			#Opinions
+			zealot_opinion = 20
+			minority_opinion = -20
+		}
+		flag = clerical_appointment_fixed
+		
+		can_keep = {
+			realm_law_use_clerical_influence_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = clerical_influence_2 }
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = {
+					OR = {
+						has_realm_law = clerical_influence_1
+						has_realm_law = clerical_influence_3
+					}
+				}
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					text = must_change_adjacent
+					always = no
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = clerical_influence_2 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						OR = {
+							has_realm_law = clerical_influence_1
+							has_realm_law = clerical_influence_3
+						}
+					}
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+			piety = {
+				if = {
+					limit = { has_realm_law = clerical_influence_3 }
+					add = decrease_clerical_influence_piety_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { has_realm_law = clerical_influence_3 }
+				clerical_authory_angry_at_reduced_clerical_influence_effect = {
+					TOP_LIEGE = root.top_liege
+				}
+			}
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+		}
+	}
+	#Spiritual for life
+	clerical_influence_3 = {
+		modifier = {
+			clergy_opinion = 20
+			religious_head_opinion = 10
+			theocracy_government_tax_contribution_add = 0.00 #i.e., 00%-55%, depending on devotion
+			theocracy_government_levy_contribution_add = 0.00 #i.e., 00%-50%, depending on devotion
+			different_faith_county_opinion_mult = 0.50 #4x Adaptive
+			domain_limit = 4
+			#Opinions
+			zealot_opinion = 30
+			minority_opinion = -30
+		}
+		
+		can_keep = {
+			realm_law_use_clerical_influence_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = clerical_influence_3 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { has_realm_law = clerical_influence_3 }
+					add = change_clerical_influence_prestige_cost
+				}
+			}
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = clerical_influence_2 }
+				custom_description = {
+					subject = root
+					text = "has_clerical_influence_cooldown"
+					NOT = { has_variable = clerical_influence_cooldown }
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					text = must_change_adjacent
+					always = no
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = clerical_influence_3 }
+		}
+		
+		on_pass = {
+			set_variable = {
+				name = clerical_influence_cooldown
+				years = @clerical_influence_cooldown_years
+			}
+		}
+	}
+}

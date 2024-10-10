@@ -322,6 +322,7 @@ tradition_city_keepers = {
 		city_buildings_more_county_opinion = yes
 		ai_more_likely_to_city = yes
 		architect_trait_prestige = yes
+		watermills_windmills_cities = yes
 	}
 	character_modifier = {
 		city_holding_build_speed = -0.25
@@ -392,7 +393,7 @@ tradition_hereditary_hierarchy = {
 	
 	##### Changed from Vanilla vvvvv
 	can_pick = {
-		scope:character = { has_a_primitive_type_of_government_trigger = no }
+		scope:character = { NOT = { government_has_flag = government_is_tribal } }
 		custom_tooltip = {
 			text = cannot_have_tradition_tribal_hierarchy
 			NOT = { culture_tradition:tradition_tribal_hierarchy = { is_in_list = traits } }
@@ -414,8 +415,8 @@ tradition_hereditary_hierarchy = {
 		feudal_government_tax_contribution_mult = 0.1
 		prefeudal_government_tax_contribution_mult = 0.1
 		rajamandala_government_tax_contribution_mult = 0.1
-		eranshar_government_tax_contribution_mult = 0.1
-		subroman_government_tax_contribution_mult = 0.1
+		iranian_dynastic_government_tax_contribution_mult = 0.1
+		subroman_dynastic_government_tax_contribution_mult = 0.1
 		long_reign_bonus_mult = 0.25
 		tyranny_loss_mult = -0.5
 	}
@@ -450,7 +451,7 @@ tradition_hereditary_hierarchy = {
 							any_vassal = {
 								count >= 10
 								primary_title.tier >= tier_county
-								has_a_primitive_type_of_government_trigger = no
+								NOT = { government_has_flag = government_is_tribal }
 							}
 						}
 					}
@@ -485,117 +486,6 @@ tradition_hereditary_hierarchy = {
 			limit = {
 				NOT = {
 					scope:character.primary_title.tier >= tier_kingdom
-				}
-			}
-			multiply = 0
-		}
-	}
-}
-
-##### Changed from Vanilla: Made available to high tribals, nomads
-tradition_tribe_unity = {
-	category = realm
-
-	layers = {
-		0 = martial
-		1 = mena
-		4 = crown.dds
-	}
-	
-	is_shown = { #Replaced by Strong Kinship
-		NOR = {
-			this = culture:pictish
-			any_parent_culture_or_above = { this = culture:pictish }
-		}
-	}
-	can_pick = {
-		custom_tooltip = {
-			text = requires_clannish_tribalish_government_trigger
-			scope:character = {
-				OR = {
-					has_government = clan_government
-					has_government = tribal_government
-					has_government = nomad_government
-					has_government = high_tribal_government
-				}
-			}
-		}
-	}
-	
-	parameters = {
-		bonuses_from_patriarch_matriarch_trait = yes
-		cultural_house_personal_scheme_success_chance = yes
-		landing_house_members_give_prestige = yes
-		penalty_for_revoking_titles_from_house_members = yes
-		loyal_trait_more_valued = yes
-	}
-	character_modifier = {
-		dynasty_house_opinion = 10
-		opinion_of_liege = -5
-	}
-	
-	cost = {
-		prestige = {
-			add = {
-				value = tradition_base_cost
-				desc = BASE
-				format = "BASE_VALUE_FORMAT"
-			}
-			if = {
-				limit = {
-					NOR = {
-						culture_pillar:ethos_communal = { is_in_list = traits }
-						culture_pillar:ethos_spiritual = { is_in_list = traits }
-						culture_pillar:ethos_stoic = { is_in_list = traits }
-					}
-				}
-				add = {
-					value = tradition_incompatible_ethos_penalty
-					desc = not_communal_spiritual_or_stoic_desc
-				}
-			}
-			if = {
-				limit = {
-					exists = scope:character.house
-					NOT = {
-						scope:character.house = {
-							any_house_member = {
-								count >= 3
-								has_relation_friend = scope:character
-							}
-						}
-					}
-				}
-				add = {
-					value = tradition_unfulfilled_criteria_penalty
-					desc = house_friends_desc
-				}
-			}
-			if = {
-				limit = {
-					has_variable = defensive_traditionalist_discount
-				}
-				add = {
-					value = traditionalist_discount
-					desc = traditionalist_discount_desc
-				}
-			}
-			
-			multiply = tradition_replacement_cost_if_relevant
-		}
-	}
-	
-	ai_will_do = {
-		value = 100
-		if = {
-			limit = {
-				NOT = {
-					scope:character = {
-						OR = {
-							government_has_flag = government_is_clan
-							government_has_flag = government_is_tribal
-						}
-					}
 				}
 			}
 			multiply = 0
@@ -638,7 +528,7 @@ tradition_culture_blending = {
 	}
 	character_modifier = {
 		max_learn_language_schemes_add = 1
-		learn_language_scheme_power_mult = 0.3
+		learn_language_scheme_phase_duration_add = medium_scheme_phase_duration_bonus_value
 	}
 	
 	cost = {
@@ -715,6 +605,8 @@ tradition_ruling_caste = {
 	
 	parameters = {
 		peasant_and_populist_factions_less_common = yes
+		expensive_convert_to_local_culture = yes
+		less_likely_to_promote_culture = yes
 	}
 	culture_modifier = {
 		cultural_acceptance_gain_mult = -0.25

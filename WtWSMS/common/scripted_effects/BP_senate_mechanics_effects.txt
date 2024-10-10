@@ -503,7 +503,7 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 			has_holding_type = city_holding
 			this.barony = { is_capital_barony = no }
 			#So that holdings in (merchant) republics aren't seized
-			NOT = { this.county.holder = { has_government = republic_government } }
+			NOT = { this.county.holder = { government_has_flag = government_is_republic } }
 		}
 		add_to_temporary_list = provinces_with_city_holdings_in_$REGION$
 	}
@@ -537,12 +537,19 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 				get_title = scope:the_province_with_available_city_holdings.barony
 				#Match up governments
 				if = {
-					limit = { this.liege = { has_bureaucratic_government_type_trigger = yes } }
-					this = { convert_realm_to_gubernatorial_effect = yes }
+					limit = {
+						this.liege = {
+							government_has_flag = government_uses_roman_dynastic_authority
+							NOT = { government_has_flag = is_a_transitory_roman_government }
+						}
+					}
+					this = { change_government = roman_dynastic_government }
 				}
 				else_if = {
-					limit = { this.liege = { has_government = subroman_government } }
-					this = { convert_realm_to_subroman_direct_effect = yes }
+					limit = {
+						this.liege = { government_has_flag = is_a_transitory_roman_government }
+					}
+					this = { change_government = subroman_dynastic_government }
 				}
 			}
 		}

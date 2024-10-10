@@ -1,0 +1,184 @@
+﻿@roman_dynastic_authority_cooldown_years = 10
+
+#Iranian Dynastic Government Secular Authority
+roman_dynastic_authority = {
+	default = roman_dynastic_authority_1
+	cumulative = no
+	flag = realm_law
+	
+	roman_dynastic_authority_0 = {
+		modifier = {
+			vassal_tax_contribution_mult = 0.05
+			vassal_levy_contribution_mult = 0.05
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = {
+			realm_law_use_roman_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = roman_dynastic_authority_0 }
+		}
+		
+		can_pass = {
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = roman_dynastic_authority_0 }
+		}
+		
+		pass_cost = {}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = crown_authority_cooldown
+				years = @roman_dynastic_authority_cooldown_years
+			}
+		}
+	}
+	roman_dynastic_authority_1 = {
+		modifier = {
+			glory_hound_opinion = -10
+			parochial_opinion = -10
+			courtly_opinion = -10
+			minority_opinion = -20
+			vassal_tax_contribution_mult = 0.10
+			vassal_levy_contribution_mult = 0.10
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		
+		can_keep = {
+			realm_law_use_roman_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = roman_dynastic_authority_1 }
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { has_realm_law = roman_dynastic_authority_0 }
+				custom_description = {
+					subject = root
+					text = "has_roman_dynastic_authority_cooldown"
+					NOT = { has_variable = crown_authority_cooldown }
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = roman_dynastic_authority_1 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = roman_dynastic_authority_2
+							has_realm_law = roman_dynastic_authority_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = crown_authority_cooldown
+				years = @roman_dynastic_authority_cooldown_years
+			}
+		}
+	}
+	roman_dynastic_authority_2 = {
+		modifier = {
+			glory_hound_opinion = -20
+			parochial_opinion = -20
+			courtly_opinion = -20
+			minority_opinion = -30
+			vassal_tax_contribution_mult = 0.15
+			vassal_levy_contribution_mult = 0.15
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = vassal_internal_wars_banned
+		
+		can_keep = {
+			realm_law_use_roman_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = roman_dynastic_authority_2 }
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { NOT = { has_realm_law = roman_dynastic_authority_3 } }
+				has_realm_law = roman_dynastic_authority_1
+				custom_description = {
+					subject = root
+					text = "has_crown_authority_cooldown"
+					NOT = { has_variable = crown_authority_cooldown }
+				}
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = roman_dynastic_authority_2 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = roman_dynastic_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = crown_authority_cooldown
+				years = @roman_dynastic_authority_cooldown_years
+			}
+		}
+	}
+	roman_dynastic_authority_3 = {
+		modifier = {
+			glory_hound_opinion = -30
+			parochial_opinion = -30
+			courtly_opinion = -30
+			minority_opinion = -40
+			vassal_tax_contribution_mult = 0.25
+			vassal_levy_contribution_mult = 0.25
+		}
+		flag = title_revocation_allowed
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		flag = vassal_all_wars_banned
+		
+		can_keep = {
+			realm_law_use_roman_dynastic_authority_trigger = yes
+			realm_law_match_liege_law_level_trigger = { LAW = roman_dynastic_authority_3 }
+		}
+		
+		can_pass = {
+			has_realm_law = roman_dynastic_authority_2
+			custom_description = {
+				subject = root
+				text = "has_crown_authority_cooldown"
+				NOT = { has_variable = crown_authority_cooldown }
+			}
+			realm_law_vassal_has_liege_law_level_trigger = { LAW = roman_dynastic_authority_3 }
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = { NOT = { has_realm_law = roman_dynastic_authority_3 } }
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			#Remove modifiers
+			remove_law_related_modifiers_effect = yes
+			set_variable = {
+				name = crown_authority_cooldown
+				years = @roman_dynastic_authority_cooldown_years
+			}
+		}
+	}
+}

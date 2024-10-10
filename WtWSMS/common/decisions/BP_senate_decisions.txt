@@ -3,8 +3,11 @@
 
 #Your family does not have enough non-capital baronies; demand more!
 demand_land_for_family_west = {
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	}
+	decision_group_type = major
+
 	ai_check_interval = 60
 	desc = demand_land_for_family_west_desc
 	selection_tooltip = demand_land_for_family_west_tooltip
@@ -119,8 +122,11 @@ demand_land_for_family_west = {
 	ai_will_do = { base = 100 }
 }
 demand_land_for_family_east = {
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	}
+	decision_group_type = major
+
 	ai_check_interval = 60
 	desc = demand_land_for_family_east_desc
 	selection_tooltip = demand_land_for_family_east_tooltip
@@ -236,8 +242,11 @@ demand_land_for_family_east = {
 
 ### AI-Only Major Decisions
 disestablish_west_senate = { #AI-only decision; implemented in GUI for players
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	}
+	decision_group_type = major
+
 	ai_check_interval = 60
 	desc = disestablish_west_senate_desc
 	selection_tooltip = disestablish_west_senate_tooltip
@@ -260,11 +269,7 @@ disestablish_west_senate = { #AI-only decision; implemented in GUI for players
 	is_valid = {
 		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
 		#Can't be Romanesque or governments or cultures or titles
-		NOR = {
-			has_government = bureaucratic_government
-			has_government = gubernatorial_government
-			has_government = subroman_government
-		}
+		NOT = { government_has_flag = is_a_roman_government }
 	}
 	
 	is_valid_showing_failures_only = {
@@ -293,27 +298,30 @@ disestablish_west_senate = { #AI-only decision; implemented in GUI for players
 		modifier = { #AI will always do if they have a different universality than Roman
 			add = 1000
 			OR = {
-				has_government = rajamandala_government
-				has_government = eranshar_government
+				government_has_flag = government_uses_rajamandala_authority
+				government_has_flag = government_uses_iranian_dynastic_authority
 			}
 		}
 		modifier = { #AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
 			factor = 0
-			has_government = subroman_government
+			government_has_flag = is_a_roman_government
 		}
 		modifier = { #Romance cultures won't destroy the Senate if they maintain Roman Law
 			factor = 0
 			culture = { has_cultural_parameter = can_restore_roman_empire }
 		}
-		modifier = { #Even if they are Eranshar, they won't disestablish the Senate if they are nostalgic for Rome
+		modifier = { #Even if they are Iranian_Dynastic, they won't disestablish the Senate if they are nostalgic for Rome
 			factor = 0
 			has_trait = roman_nostalgia
 		}
 	}
 }
 disestablish_east_senate = { #AI-only decision; implemented in GUI for players
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	}
+	decision_group_type = major
+
 	ai_check_interval = 60
 	desc = disestablish_east_senate_desc
 	selection_tooltip = disestablish_east_senate_tooltip
@@ -336,14 +344,8 @@ disestablish_east_senate = { #AI-only decision; implemented in GUI for players
 	is_valid = {
 		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
 		#Can't be Romanesque or governments or cultures or titles
-		NOR = {
-			has_government = bureaucratic_government
-			has_government = gubernatorial_government
-			AND = {
-				has_government = subroman_government
-				culture = { has_ability_to_reform_rome_directly_trigger = yes }
-			}
-		}
+		NOT = { government_has_flag = is_a_roman_government }
+		NOT = { culture = { has_ability_to_reform_rome_directly_trigger = yes } }
 	}
 	
 	is_valid_showing_failures_only = {
@@ -372,27 +374,30 @@ disestablish_east_senate = { #AI-only decision; implemented in GUI for players
 		modifier = { #AI will always do if they have a different universality than Roman
 			add = 1000
 			OR = {
-				has_government = rajamandala_government
-				has_government = eranshar_government
+				government_has_flag = government_uses_rajamandala_authority
+				government_has_flag = government_uses_iranian_dynastic_authority
 			}
 		}
 		modifier = { #AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
 			factor = 0
-			has_government = subroman_government
+			government_has_flag = is_a_roman_government
 		}
 		modifier = { #Romance cultures won't destroy the Senate if they maintain Roman Law
 			factor = 0
 			culture = { has_cultural_parameter = can_restore_roman_empire }
 		}
-		modifier = { #Even if they are Eranshar, they won't disestablish the Senate if they are nostalgic for Rome
+		modifier = { #Even if they are Iranian_Dynastic, they won't disestablish the Senate if they are nostalgic for Rome
 			factor = 0
 			has_trait = roman_nostalgia
 		}
 	}
 }
 request_west_senate_recognition = { #AI-only decision; implemented in GUI for players
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	}
+	decision_group_type = major
+	
 	ai_check_interval = 60
 	desc = request_west_senate_recognition_desc
 	selection_tooltip = request_west_senate_recognition_tooltip
@@ -411,8 +416,8 @@ request_west_senate_recognition = { #AI-only decision; implemented in GUI for pl
 	is_valid = { #Can't have a different model of universality than the Romans did
 		NOT = { has_variable = already_asked_the_senate } #Can't have already asked
 		NOR = {
-			has_government = eranshar_government
-			has_government = rajamandala_government
+			government_has_flag = government_uses_rajamandala_authority
+			government_has_flag = government_uses_iranian_dynastic_authority
 		}
 	}
 	
@@ -439,15 +444,18 @@ request_west_senate_recognition = { #AI-only decision; implemented in GUI for pl
 		modifier = {
 			factor = 0
 			OR = {
-				has_government = eranshar_government
-				has_government = rajamandala_government
+				government_has_flag = government_uses_rajamandala_authority
+				government_has_flag = government_uses_iranian_dynastic_authority
 			}
 		}
 	}
 }
 request_east_senate_recognition = { #AI-only decision; implemented in GUI for players
-	picture = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
-	major = yes
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/roman_emperor_salute.dds"
+	}
+	decision_group_type = major
+	
 	ai_check_interval = 60
 	desc = request_east_senate_recognition_desc
 	selection_tooltip = request_east_senate_recognition_tooltip
@@ -465,9 +473,9 @@ request_east_senate_recognition = { #AI-only decision; implemented in GUI for pl
 	
 	is_valid = {
 		NOT = { has_variable = already_asked_the_senate } #Can't have already asked
-		NOR = { #Can't have a different model of universality than the Romans did
-			has_government = eranshar_government
-			has_government = rajamandala_government
+		NOR = { #Can't have a different universality than Roman
+			government_has_flag = government_uses_rajamandala_authority
+			government_has_flag = government_uses_iranian_dynastic_authority
 		}
 	}
 	
@@ -494,8 +502,8 @@ request_east_senate_recognition = { #AI-only decision; implemented in GUI for pl
 		modifier = {
 			factor = 0
 			OR = {
-				has_government = eranshar_government
-				has_government = rajamandala_government
+				government_has_flag = government_uses_rajamandala_authority
+				government_has_flag = government_uses_iranian_dynastic_authority
 			}
 		}
 	}
