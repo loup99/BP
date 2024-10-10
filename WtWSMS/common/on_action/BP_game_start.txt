@@ -30,7 +30,6 @@ bp_game_start = {
 		set_autocephalous_church_flags
 		other_religion_effects
 		#Culture Stuff
-		set_additional_parent_cultures
 		learn_the_language_of_your_capital
 		#Family Stuff
 		set_historical_dynasty_renown
@@ -256,7 +255,7 @@ setup_realm_and_title_succession_laws = {
 				}
 				add_realm_law_skip_effects = male_only_law
 			}
-			else_if = { #NB: This is the femae only case
+			else_if = { #NB: This is the female only case
 				limit = {
 					OR = {
 						culture = { has_cultural_parameter = female_only_inheritance }
@@ -305,9 +304,31 @@ setup_realm_and_title_succession_laws = {
 		}
 		
 		### Governments
+		every_ruler = { #Roman Governments
+			limit = { government_has_flag = is_a_roman_government }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_succession_law } }
+				add_realm_law_skip_effects = single_heir_succession_law
+			}
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
+		}
+		every_ruler = { #Eranshar
+			limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
+				add_realm_law_skip_effects = single_heir_dynasty_house
+			}
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
+		}
 		
 		### Other Special Cases
-		every_ruler = { #Suebia & Burgundians should be partion to avoid creating undesirable kingdoms
+		every_ruler = { #Suebia & Burgundians should be partition to avoid creating undesirable kingdoms
 			limit = {
 				OR = {
 					has_title = title:k_suebia
@@ -1365,14 +1386,6 @@ other_religion_effects = {
 			limit = { current_date >= 484.1.1 }
 			legalize_caucasian_christianity_global_effect = yes
 		}
-	}
-}
-
-## Culture Stuff
-set_additional_parent_cultures = {
-	effect = {
-		#Additional Child Cultures
-		culture:numidian = { add_to_variable_list = { name = bastard_cultures target = flag:romano_african } }
 	}
 }
 
