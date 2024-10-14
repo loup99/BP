@@ -1,0 +1,289 @@
+﻿##### Changed from Vanilla: added WtWSMS governments
+ep3_become_landed_transfer_effect = {
+	$TITLE_RECEIVER$ = {
+		if = {
+			limit = { character:90028 ?= this }
+			custom_tooltip = ep3_story_cycle_harrying.3053.b.tt
+			add_character_flag = hereward_settled_flag
+		}
+		set_variable = {
+			name = ascended_throne_reason
+			value = $REASON$
+			weeks = 1
+		}
+		save_scope_value_as = {
+			name = ascended_throne_value
+			value = $REASON$
+		}
+	}
+	create_title_and_vassal_change = {
+		type = $TYPE$
+		add_claim_on_loss = yes
+		save_scope_as = title_change
+	}
+	##### Changed from Vanilla vvvvv
+	scope:target.holder ?= {
+		save_scope_as = old_holder
+		switch = {
+			trigger = government_has_flag
+			government_is_administrative = {
+				save_scope_value_as = { name = old_government value = flag:admin }
+			}
+			government_is_clan = {
+				save_scope_value_as = { name = old_government value = flag:clan }
+			}
+			government_is_tribal = {
+				save_scope_value_as = { name = old_government value = flag:tribal } #This is fine!
+			}
+			##### Changed from Vanilla vvvvv
+			government_uses_high_tribal_organization = {
+				save_scope_value_as = { name = old_government value = flag:high_tribal }
+			}
+			government_uses_prefeudal_authority = {
+				save_scope_value_as = { name = old_government value = flag:prefeudal }
+			}
+			government_uses_rajamandala_authority = {
+				save_scope_value_as = { name = old_government value = flag:rajamandala }
+			}
+			government_uses_iranian_dynastic_authority = {
+				save_scope_value_as = { name = old_government value = flag:iranian_dynastic }
+			}
+			is_a_transitory_roman_government = {
+				save_scope_value_as = { name = old_government value = flag:subroman_dynastic }
+			}
+			government_uses_roman_dynastic_authority = {
+				save_scope_value_as = { name = old_government value = flag:roman_dynastic }
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	every_in_list = {
+		list = $TITLE_LIST$
+		limit = {
+			is_leased_out = no
+			is_landless_type_title = no
+			is_head_of_faith = no
+			tier >= tier_county
+		}
+		change_title_holder_include_vassals = {
+			holder = $TITLE_RECEIVER$
+			change = scope:title_change
+			take_baronies = no
+		}
+	}
+	ordered_in_list = {
+		list = $TITLE_LIST$
+		order_by = tier
+		save_scope_as = new_primary_title
+	}
+	if = {
+		limit = {
+			NOT = { exists = scope:new_capital }
+		}
+		ordered_in_list = {
+			list = $TITLE_LIST$
+			limit = { tier = tier_county }
+			order_by = development_level
+			save_scope_as = new_capital
+		}
+	}
+	if = {
+		limit = { has_character_flag = special_laamp_char }
+		resolve_title_and_vassal_change = scope:title_change
+		# Then we resolve vassalage separately, so that we can lock in tiers.
+		create_title_and_vassal_change = {
+			type = $TYPE$
+			add_claim_on_loss = yes
+			save_scope_as = title_change
+		}
+	}
+	if = {
+		limit = { 
+			exists = scope:new_liege 
+			trigger_if = {
+				limit = {
+					exists = scope:ascended_throne_value
+				}
+				NOT = { scope:ascended_throne_value = flag:conquest }
+			}
+		}
+		$TITLE_RECEIVER$ = {
+			change_liege = {
+				liege = scope:new_liege
+				change = scope:title_change
+			}
+		}
+	}
+	else_if = {
+		limit = { is_independent_ruler = no }
+		becomes_independent = { change = scope:title_change }
+	}
+	resolve_title_and_vassal_change = scope:title_change
+	
+	$TITLE_RECEIVER$ = {
+		save_scope_as = the_title_reciever
+		debug_log_scopes = yes
+		
+		# Change our government according to the government of our liege.
+		## Administrative.
+		if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_is_administrative }
+					scope:old_government ?= flag:admin
+				}
+			}
+			change_government = administrative_government
+		}
+		## Clan.
+		else_if = {
+			limit = {
+				ep3_is_clan_inclined_trigger = yes
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_is_clan }
+					scope:old_government ?= flag:clan
+				}
+			}
+			change_government = clan_government
+		}
+		## Tribal.
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_is_tribal }
+					scope:old_government ?= flag:tribal
+				}
+			}
+			change_government = tribal_government
+		}
+		##### Changed from Vanilla vvvvv
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_uses_high_tribal_organization }
+					scope:old_government ?= flag:high_tribal
+				}
+			}
+			change_government = high_tribal_government
+		}
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_uses_prefeudal_authority }
+					scope:old_government ?= flag:prefeudal
+				}
+			}
+			change_government = prefeudal_government
+		}
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_uses_rajamandala_authority }
+					scope:old_government ?= flag:rajamandala
+				}
+			}
+			change_government = rajamandala_government
+		}
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_uses_iranian_dynastic_authority }
+					scope:old_government ?= flag:iranian_dynastic
+				}
+			}
+			change_government = iranian_dynastic_government
+		}
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = is_a_transitory_roman_government }
+					scope:old_government ?= flag:subroman_dynastic
+				}
+			}
+			change_government = subroman_dynastic_government
+		}
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_uses_roman_dynastic_authority }
+					scope:old_government ?= flag:roman_dynastic
+				}
+			}
+			change_government = roman_dynastic_government
+		}
+		##### Changed from Vanilla ^^^^^
+		
+		## Else feudal.
+		else = { change_government = feudal_government }
+		if = {
+			limit = {
+				calc_true_if = {
+					amount = 3
+					prestige_level <= 3
+					scope:new_capital.culture ?= {
+						NOR = {
+							$TITLE_RECEIVER$.culture ?= this
+							$TITLE_RECEIVER$.primary_spouse.culture ?= this
+							$TITLE_RECEIVER$.primary_heir.culture ?= this
+						}
+					}
+					scope:new_capital.faith != faith
+				}
+			}
+			custom_tooltip = ep3_ennobled_adventurer_modifier_reason_3
+			add_character_modifier = {
+				modifier = ep3_ennobled_adventurer_modifier_3
+				years = 30
+			}
+			custom_tooltip = ep3_ennobled_adventurer_modifier_rules
+		}
+		else_if = {
+			limit = {
+				calc_true_if = {
+					amount = 2
+					prestige_level <= 3
+					scope:new_capital.culture ?= {
+						NOR = {
+							$TITLE_RECEIVER$.culture ?= this
+							$TITLE_RECEIVER$.primary_spouse.culture ?= this
+							$TITLE_RECEIVER$.primary_heir.culture ?= this
+						}
+					}
+					scope:new_capital.faith != faith
+				}
+			}
+			custom_tooltip = ep3_ennobled_adventurer_modifier_reason_2
+			add_character_modifier = {
+				modifier = ep3_ennobled_adventurer_modifier_2
+				years = 20
+			}
+			custom_tooltip = ep3_ennobled_adventurer_modifier_rules
+		}
+		else_if = {
+			limit = {
+				calc_true_if = {
+					amount = 1
+					prestige_level <= 3 
+					scope:new_capital.culture ?= {
+						NOR = {
+							$TITLE_RECEIVER$.culture ?= this
+							$TITLE_RECEIVER$.primary_spouse.culture ?= this
+							$TITLE_RECEIVER$.primary_heir.culture ?= this
+						}
+					}
+					scope:new_capital.faith != faith
+				}
+			}
+			custom_tooltip = ep3_ennobled_adventurer_modifier_reason_1
+			add_character_modifier = {
+				modifier = ep3_ennobled_adventurer_modifier_1
+				years = 10
+			}
+			custom_tooltip = ep3_ennobled_adventurer_modifier_rules
+		}
+	}
+	destroy_laamp_effect = { ADVENTURER = $TITLE_RECEIVER$ }
+}
+
+admin_government_reset_effect = {}

@@ -41,6 +41,31 @@ feudal_government = {
 	color = hsv{ 0.67 1.00 0.78 }
 }
 
+republic_government = {
+	primary_holding = city_holding
+	valid_holdings = { castle_holding }
+	required_county_holdings = { city_holding castle_holding church_holding }
+
+	government_rules = {
+		inherit_from_dynastic_government = no
+		use_as_base_on_landed = yes
+	}
+
+	ai = {
+		arrange_marriage = no
+		use_goals = no
+		use_scripted_guis = no
+		perform_religious_reformation = no
+		use_legends = no
+	}
+
+	vassal_contract = { republic_government_obligations }
+
+	# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
+	flag = government_is_republic
+	color = hsv{ 0.00 1.00 0.98 }
+}
+
 ### Brief: clan_government
 # This is referenced in code
 #
@@ -133,4 +158,39 @@ clan_government = {
 	flag = government_is_clan
 	flag = may_appoint_viziers
 	color = hsv{ 0.39 0.93 0.54 }
+}
+
+### Brief: theocracy_government
+# Head of faith will always get this if possible
+#
+# This is referenced in code
+#
+theocracy_government = {
+	government_rules = {
+		religious = yes
+		inherit_from_dynastic_government = no
+		use_as_base_on_landed = yes #Avoiding a bunch of jank code with this
+	}
+
+	primary_holding = church_holding
+	valid_holdings = { castle_holding }
+	required_county_holdings = { church_holding castle_holding city_holding }
+
+	ai = {
+		use_legends = no
+	}
+
+	can_get_government = {
+		NOT = {
+			faith = {
+				has_doctrine = doctrine_theocracy_lay_clergy
+			}
+		}
+	}
+
+	vassal_contract = { theocracy_government_obligations }
+
+	# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
+	flag = government_is_theocracy
+	color = hsv{ 0.00 0.00 0.78 }
 }
