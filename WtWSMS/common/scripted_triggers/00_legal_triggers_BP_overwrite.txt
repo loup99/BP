@@ -1,35 +1,83 @@
-﻿##### Changed from Vanilla: Generalized Triggers
-can_change_succession_law_trigger = {
-	AND = {
-		custom_description = { #This complex trigger overwrites the trigger_if/trigger_else logic in Vanilla CK3
-			text = either_your_government_or_laws_must_allow_succession_change
-			can_change_succession_law_BP_trigger = yes
-		}
+﻿##### Changed from Vanilla: Added Advanced government flag ref
+can_designate_heir_trigger = {
+	OR = {
 		custom_description = {
-			text = "no_powerful_vassal_with_negative_opinion"
-			NOT = {
-				any_vassal = {
-					is_powerful_vassal = yes
-					opposes_succession_law_change_trigger = yes
-				}
-			}
+			text = "has_law_allowing_designate_heir"
+			has_realm_law_flag = can_designate_heirs
+		}
+		custom_tooltip = {
+			text = has_advanced_gov
+			government_has_flag = government_is_centralized
 		}
 	}
 }
 
-##### Changed from Vanilla: Generalized Triggers
-can_change_single_heir_dynasty_house_succession_law_trigger = { ##### TODO (Beta): can_change_single_heir_dynasty_house_succession_law_trigger breaks when the West Slavs will spawn
+##### Changed from Vanilla: Added Advanced government flag ref
+can_change_succession_laws_realm_flag_trigger = {
+	trigger_if = {
+		limit = { realm_law_use_tribal_authority = yes }
+		custom_description = {
+			text = "has_tribal_law_allowing_succession_law_change"
+			has_realm_law_flag = can_change_succession_laws
+		}
+	}
+	trigger_else_if = {
+		limit = { realm_law_use_imperial_bureaucracy = yes }
+		custom_description = {
+			text = has_imperial_bureaucracy_law_allowing_succession_law_change
+			has_realm_law_flag = can_change_succession_laws
+		}
+	}
+	##### Changed from Vanilla vvvvv
+	trigger_else_if = {
+		limit = { government_has_flag = government_is_centralized }
+		custom_tooltip = {
+			text = has_advanced_gov
+			always = yes
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+	trigger_else = {
+		custom_description = {
+			text = "has_crown_law_allowing_succession_law_change"
+			has_realm_law_flag = can_change_succession_laws
+		}
+	}
+}
+
+##### Changed from Vanilla: Added Advanced government flag ref
+can_change_single_heir_dynasty_house_succession_law_trigger = {
 	trigger_if = {
 		limit = {
 			culture = { has_cultural_pillar = heritage_west_slavic }
-			NOT = { has_realm_law_flag = can_change_succession_laws }
+			NOT = {
+				has_realm_law_flag = can_change_succession_laws
+			}
 		}
-		culture = { has_innovation = innovation_table_of_princes }
+		culture = {
+			has_innovation = innovation_table_of_princes
+		}
 	}
+	trigger_else_if = {
+		limit = { realm_law_use_tribal_authority = yes }
+		custom_description = {
+			text = "has_tribal_law_allowing_succession_law_change"
+			has_realm_law_flag = can_change_succession_laws
+		}
+	}
+	##### Changed from Vanilla vvvvv
+	trigger_else_if = {
+		limit = { government_has_flag = government_is_centralized }
+		custom_tooltip = {
+			text = has_advanced_gov
+			always = yes
+		}
+	}
+	##### Changed from Vanilla ^^^^^
 	trigger_else = {
 		custom_description = {
-			text = either_your_government_or_laws_must_allow_succession_change
-			can_change_succession_law_BP_trigger = yes
+			text = "has_crown_law_allowing_succession_law_change"
+			has_realm_law_flag = can_change_succession_laws
 		}
 	}
 	custom_description = {
@@ -43,65 +91,30 @@ can_change_single_heir_dynasty_house_succession_law_trigger = { ##### TODO (Beta
 	}
 }
 
-##### Changed from Vanilla: Generalized Triggers
-can_change_to_equal_succession_law_trigger = {
-	AND = {
-		#Must have access to equal inheritance in some manner
-		OR = {
-			culture = { has_cultural_parameter = gender_equal_inheritance }
-			faith = { has_doctrine = doctrine_gender_equal }
-		}
-		custom_description = {
-			text = "no_powerful_vassal_with_negative_opinion"
-			NOT = {
-				any_vassal = {
-					is_powerful_vassal = yes
-					opposes_succession_law_change_trigger = yes
-				}
-			}
-		}
-	}
-}
-
-##### Changed from Vanilla: Generalized Triggers
+##### Changed from Vanilla: Added Advanced government flag ref
 can_change_partition_succession_law_trigger = {
-	AND = {
-		custom_description = {
-			text = either_your_government_or_laws_must_allow_succession_change
-			OR = {
-				valid_government_can_change_always_succession_trigger = yes
-				OR = {
-					has_realm_law_flag = can_change_partition_succession_laws
-					has_realm_law_flag = can_change_succession_laws
-				}
-			}
+	trigger_if = {
+		limit = { government_has_flag = government_is_centralized }
+		custom_tooltip = {
+			text = has_advanced_gov
+			always = yes
 		}
+	}
+	trigger_else = {
 		custom_description = {
-			text = "no_powerful_vassal_with_negative_opinion"
-			NOT = {
-				any_vassal = {
-					is_powerful_vassal = yes
-					opposes_succession_law_change_trigger = yes
-				}
+			text = "has_law_allowing_partition_succession_law_change"
+			OR = {
+				has_realm_law_flag = can_change_partition_succession_laws
+				has_realm_law_flag = can_change_succession_laws
 			}
 		}
 	}
-}
-
-##### Changed from Vanilla: Generalized Triggers
-can_designate_heir_trigger = {
-	AND = {
-		custom_description = {
-			text = "has_law_allowing_designate_heir"
-			##### Changed from Vanilla vvvvv
-			can_designate_heirs_trigger = yes
-			##### Changed from Vanilla ^^^^^
-		}
-		custom_description = {
-			text = "dynasty_member_leads_election"
-			NAND = {
-				primary_title = { has_title_law_flag = elective_succession_law }
-				dynasty = primary_heir.dynasty
+	custom_description = {
+		text = "no_powerful_vassal_with_negative_opinion"
+		NOT = {
+			any_vassal = {
+				is_powerful_vassal = yes
+				opposes_succession_law_change_trigger = yes
 			}
 		}
 	}

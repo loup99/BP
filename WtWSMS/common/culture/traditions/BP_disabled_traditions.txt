@@ -1,0 +1,98 @@
+﻿##### Changed from Vanilla: Disabled these (rolled into new traditions)
+
+tradition_ep3_indomitable_azatani = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = indomitable_azatani.dds 
+	}
+
+	is_shown = { always = no }
+	can_pick = { always = no }
+	can_pick_for_hybridization = { always = no }
+	
+	parameters = {
+		unlock_maa_ayrudzi = yes
+		house_hostility_more_common = yes
+		vassals_more_likely_to_refuse_demands = yes
+	}
+	character_modifier = {
+		light_cavalry_maintenance_mult = -0.15
+		heavy_cavalry_maintenance_mult = -0.15
+		archer_cavalry_maintenance_mult = -0.15
+		light_cavalry_damage_add = 4
+		heavy_cavalry_damage_add = 20
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						NOR = { # Culture Head need to have a 8 sized regiment of either Light/Heavy/Archer Cavalry
+							number_maa_soldiers_of_base_type = {
+								type = light_cavalry
+								value >= 800
+							}
+							number_maa_soldiers_of_base_type = {
+								type = heavy_cavalry
+								value >= 400
+							}
+							number_maa_soldiers_of_base_type = {
+								type = archer_cavalry
+								value >= 800
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = culture_head_cavalry_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 200
+		if = {
+			limit = { # Reduce chance slightly if the culture has access to other "cavalry" types
+				OR = {
+					has_innovation = innovation_war_camels
+					has_innovation = innovation_elephantry
+				}
+			}
+			multiply = 0.4
+		}
+		else_if = {
+			limit = {
+				scope:character ?= {
+					ai_has_warlike_personality = yes
+				}
+			}
+			multiply = 4
+		}
+	}
+}

@@ -1,0 +1,742 @@
+﻿#Taken from "Successions Expanded" and modified
+
+imperial_elective = {
+	candidates = {
+		add = {
+			type = holder_close_family
+			limit = {
+				imperial_elective_potential_landless_dynastic_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+				#Only dynastic family members
+				this.dynasty = scope:title.holder.dynasty
+			}
+		}
+		add = {
+			type = title_claimants
+			limit = {
+				imperial_elective_potential_landless_claimant_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+			}
+		}
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				imperial_elective_potential_landed_candidate_trigger = yes
+				byzantine_elective_deformed_candidate_trigger = no
+				OR = {
+					is_powerful_vassal = yes
+					is_knight = yes
+				}
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				NOT = { vassal_contract_has_flag = tributary_state_installed_flag }
+			}
+		}
+		add = {
+			type = holder_spouses
+			limit = {
+				byzantine_elective_deformed_candidate_trigger = no
+				OR = {
+					any_liege_or_above = { this = scope:holder }
+					is_ruler = no
+					scope:holder = { is_independent_ruler = yes }
+					scope:holder = {
+						exists = liege
+						NOT = {
+							any_liege_or_above = {
+								has_realm_law_flag = titles_cannot_leave_realm_on_succession
+								NOR = {
+									this = scope:potential_candidate
+									target_is_vassal_or_below = scope:potential_candidate
+								}
+							}
+						}
+					}
+				}
+				NOT = { #Landless characters should not be heirs to Theocracies/Republics.
+					any_heir_title = {
+						exists = holder
+						holder = { has_unelectable_government_trigger = yes }
+					}
+				}
+				OR = { #If the title controls the faith, candidates must be of the same faith.
+					scope:holder = {
+						NAND = {
+							exists = faith.religious_head
+							this = scope:holder.faith.religious_head #TODO_CD:It might need to be changed to check only for the title rather than the holder. (controlled_faith = scope:holder.faith)
+						}
+					}
+					faith = scope:holder.faith
+				}
+				has_unelectable_trait_trigger = no
+				has_unelectable_government_trigger = no
+			}
+		}
+	}
+	electors = {
+		add = holder
+		#All de-facto secular vassals that are Dukes or above, regardless of religion
+		#But don't include tributaries but foederati okay (Barracks Emperors and Gallic Empire say so)
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				NOT = { has_government = theocracy_government }
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				NOT = { vassal_contract_has_flag = tributary_state_installed_flag }
+				OR = {
+					is_powerful_vassal = yes
+					is_knight = yes
+					scope:holder = { any_councillor = { this = root } }
+				}
+			}
+		}
+		#All de-facto religious vassals dukes and above, whose faith is in agreement with ours
+		add = {
+			type = holder_direct_vassals
+			limit = {
+				has_government = theocracy_government
+				NOT = { vassal_contract_has_flag = tributary_installed_flag }
+				faith.religion = scope:holder.religion
+				this.faith = { save_temporary_scope_as = vassal_faith }
+				scope:holder.faith = { considers_astray_trigger = { TARGET_FAITH = scope:vassal_faith } }
+			}
+		}
+		
+		add = holder_spouses
+	}
+	elector_vote_strength = {
+		base = 0
+		modifier = { #The Emperor's word is worth more than anybody else's by far.
+			add = 100
+			desc = tooltip_imperial_vote_strength_emperor_influence
+			scope:holder = root
+		}
+		modifier = { #...Yet it can be reduced in certain circumstances.
+			add = -20
+			desc = tooltip_imperial_vote_strength_emperor_unpurpled
+			scope:holder = root
+			NOT = { has_trait = born_in_the_purple }
+		}
+		modifier = { #The Basileios must have an untarnished body.
+			add = -50
+			desc = tooltip_imperial_vote_strength_emperor_deformed
+			scope:holder = root
+			scope:title = title:e_byzantium
+			is_adult = yes
+			OR = {
+				has_trait = disfigured
+				has_trait = blind
+				has_trait = eunuch
+				has_trait = dwarf
+				has_trait = maimed
+				has_trait = wounded_3
+				has_trait = clubfooted
+				has_trait = lisping
+				has_trait = inbred
+				has_trait = hunchbacked
+				has_trait = giant
+				has_trait = scaly
+				has_trait = albino
+				has_trait = bleeder
+				has_trait = gout_ridden
+			}
+		}
+		modifier = { #Children are not leaders.
+			add = -40
+			desc = tooltip_imperial_vote_strength_emperor_child
+			scope:holder = root
+			scope:title = title:e_byzantium
+			NOT = { is_adult = yes }
+		}
+		modifier = { #Rome is not ruled by children.
+			add = -130
+			desc = tooltip_imperial_vote_strength_emperor_child_roman
+			scope:holder = root
+			scope:title = title:e_roman_empire
+			NOT = { is_adult = yes }
+		}
+		modifier = { #Being a good orator.
+			add = 10
+			desc = tooltip_imperial_vote_strength_emperor_diplomacy
+			scope:holder = root
+			is_adult = yes
+			diplomacy >= 10
+			add = {
+				value = 10
+				if = {
+					limit = {
+						diplomacy >= 15
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy >= 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy >= 25
+					}
+					add = 5
+				}
+			}
+		}
+		#The Electors: General modifiers.
+		modifier = { #Prestigious people hold more sway.
+			desc = tooltip_imperial_vote_strength_elector_prestige
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = {
+				scope:holder = root
+			}
+			prestige_level >= 2
+			add = {
+				value = 5
+				if = {
+					limit = {
+						prestige_level >= 3
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						prestige_level >= 4
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						prestige_level >= 5
+					}
+					add = 5
+				}
+			}
+		}
+
+		modifier = { #People from Prestigious dynasties hold more sway.
+			desc = tooltip_imperial_vote_strength_elector_prestige_dynasty
+			exists = scope:holder
+			exists = root.dynasty
+			is_vassal_of = scope:holder
+			NOT = {
+				scope:holder = root
+			}
+			dynasty = { dynasty_prestige_level >= 4 }
+			add = {
+				value = 5
+				if = {
+					limit = {
+						dynasty = { dynasty_prestige_level >= 5 }
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						dynasty = { dynasty_prestige_level >= 6 }
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						dynasty = { dynasty_prestige_level >= 7 }
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						dynasty = { dynasty_prestige_level >= 8 }
+					}
+					add = 10
+				}
+				if = {
+					limit = {
+						dynasty = { dynasty_prestige_level >= 9 }
+					}
+					add = 10
+				}
+				if = {
+					limit = {
+						dynasty = { dynasty_prestige_level >= 10 }
+					}
+					add = 10
+				}
+			}
+		}
+		modifier = { #Powerful people can pull strings.
+			add = 5
+			desc = tooltip_imperial_vote_strength_elector_tier
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			highest_held_title_tier > 2
+			add = {
+				value = 5
+				if = {
+					limit = {
+						highest_held_title_tier > 3
+					}
+					add = 10
+				}
+			}
+		}
+		#Commanders
+		modifier = { #Martial increases a commander's influence.
+			add = 10
+			desc = tooltip_imperial_vote_strength_commander_martial
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			martial >= 8
+			OR = {
+				is_knight_of = scope:holder
+				has_council_position = councillor_marshal
+			}
+			add = {
+				value = 10
+				if = {
+					limit = {
+						martial >= 10
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						martial > 12
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						martial > 14
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						martial > 16
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						martial > 18
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						martial > 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						martial > 25
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						martial > 30
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						has_council_position = councillor_marshal
+					}
+					multiply = 2
+				}
+			}
+		}
+		modifier = { #Diplomacy increases the Chancellor's influence.
+			add = 10
+			desc = tooltip_imperial_vote_strength_chancellor_diplomacy
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			diplomacy >= 8
+			has_council_position = councillor_chancellor
+			add = {
+				value = 10
+				if = {
+					limit = {
+						diplomacy >= 10
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 12
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 14
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 16
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 18
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 25
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 30
+					}
+					add = 5
+				}
+			}
+		}
+		modifier = { #Stewardship increases the Steward's influence.
+			add = 10
+			desc = tooltip_imperial_vote_strength_steward_stewardship
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			stewardship >= 8
+			has_council_position = councillor_steward
+			add = {
+				value = 10
+				if = {
+					limit = {
+						stewardship >= 10
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						stewardship > 12
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						stewardship > 14
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						stewardship > 16
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						stewardship > 18
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						stewardship > 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						stewardship > 25
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						stewardship > 30
+					}
+					add = 5
+				}
+			}
+		}
+		modifier = { #Intrigue increases the Spymaster's influence.
+			add = 10
+			desc = tooltip_imperial_vote_strength_spymaster_intrigue
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			intrigue >= 8
+			has_council_position = councillor_spymaster
+			add = {
+				value = 10
+				if = {
+					limit = {
+						intrigue >= 10
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 12
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 14
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 16
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 18
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 25
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 30
+					}
+					add = 5
+				}
+			}
+		}
+		modifier = { #Learning increases the Chaplain's influence.
+			add = 10
+			desc = tooltip_imperial_vote_strength_chaplain_learning
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			learning >= 8
+			has_council_position = councillor_court_chaplain
+			add = {
+				value = 10
+				if = {
+					limit = {
+						learning >= 10
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						learning > 12
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						learning > 14
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						learning > 16
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						learning > 18
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						learning > 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						learning > 25
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						learning > 30
+					}
+					add = 5
+				}
+			}
+		}
+		modifier = { #Chaplain is also the head of the ruling religion.
+			add = 15
+			desc = tooltip_imperial_vote_strength_chaplain_patriarch
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			scope:holder.faith = root.faith
+			NOT = { scope:holder = root }
+			faith = { exists = religious_head }
+			scope:holder.faith.religious_head = root.faith.religious_head
+			has_council_position = councillor_court_chaplain
+		}
+		modifier = { #Spouse Bonus
+			add = 30
+			desc = tooltip_imperial_vote_strength_spouse
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			is_spouse_of = scope:holder
+		}
+		modifier = { #Those crafty Byzantines...
+			desc = tooltip_imperial_vote_strength_greek_intrigue
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			culture = { has_cultural_pillar = heritage_byzantine }
+			intrigue >= 8
+			add = {
+				value = 10
+				if = {
+					limit = {
+						intrigue >= 10
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 12
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 14
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 16
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 18
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 25
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						intrigue > 30
+					}
+					add = 5
+				}
+			}
+		}
+		modifier = { #Romans love their orations...
+			desc = tooltip_imperial_vote_strength_roman_diplomacy
+			exists = scope:holder
+			is_vassal_of = scope:holder
+			NOT = { scope:holder = root }
+			culture = { has_cultural_pillar = heritage_latin }
+			diplomacy >= 8
+			add = {
+				value = 10
+				if = {
+					limit = {
+						diplomacy >= 10
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 12
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 14
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 16
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 18
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 20
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 25
+					}
+					add = 5
+				}
+				if = {
+					limit = {
+						diplomacy > 30
+					}
+					add = 5
+				}
+			}
+		}
+	}
+	candidate_score = {
+		base = 0
+		elector_self_voting_pattern_feudal_elective_modifier = yes
+		holder_voting_pattern_feudal_elective_modifier = yes
+		elector_voting_pattern_circumstances_feudal_elective_modifier = yes
+		elector_voting_pattern_prestige_piety_feudal_elective_modifier = yes
+		elector_voting_pattern_traits_feudal_elective_modifier = yes
+		elector_voting_pattern_opinion_feudal_elective_modifier = yes
+		elector_voting_pattern_circumstances_imperial_elective_modifier = yes
+		vote_for_dynasty_modifier = yes
+	}
+}

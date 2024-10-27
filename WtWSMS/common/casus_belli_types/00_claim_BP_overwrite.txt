@@ -1,19 +1,32 @@
-﻿##### Changed from Vanilla: Handle Government bootstrapping, make always available for advanced governments
+﻿##### Changed from Vanilla: Put in mechanics to properly hand off Sub-Roman Transition in victory bloc
+	##### We have to this here, because the chance the older holder will be unlanded during
+	##### the title_on_actions
 claim_cb = {
 	icon = claim_cb
 	group = claim
-	##### Changed from Vanilla vvvvv
 	mutually_exclusive_titles = {
 		NOT = {
-			trigger_if = { scope:attacker = { has_advanced_government_trigger = yes } }
 			# If pushing personal claims, you can press multiple claims with the Divine Right innovation (High Medieval Era).
-			trigger_else_if = {
+			trigger_if = {
 				limit = {
 					scope:attacker = scope:claimant
 				}
 				scope:attacker = {
-					culture = {
-						has_innovation = innovation_chronicle_writing
+					OR = {
+						culture = {
+							has_innovation = innovation_chronicle_writing
+						}
+						AND = {
+							government_has_flag = government_is_landless_adventurer
+							has_realm_law = camp_purpose_legitimists
+							has_variable = legitimist_claimed_title
+							var:legitimist_claimed_title = {
+								OR = {
+									holder = scope:defender
+									de_jure_liege = scope:defender
+								}
+							}
+						}
 					}
 				}
 			}
@@ -27,7 +40,6 @@ claim_cb = {
 			}
 		}
 	}
-	##### Changed from Vanilla ^^^^^
 
 	# This whole section was already commented out, I just commented it out more to prevent console errors
 	#allowed_for_character = {}
@@ -41,6 +53,15 @@ claim_cb = {
 	# scope:attacker is the attacker
 	# scope:defender is the defender
 	is_allowed_claim_title = {
+		trigger_if = {
+			limit = {
+				scope:attacker = {
+					is_ai = yes
+					ai_has_conqueror_personality = yes
+				}
+			}
+			tier >= tier_duchy
+		}
 		custom_description = {
 			text = "claimant_titles_held_by_you_or_vassal"
 			NOR = {
@@ -137,11 +158,11 @@ claim_cb = {
 				custom_description = {
 					text = "byzantine_claimant_is_disfigured"
 					object = scope:claimant
+					is_eunuch_trigger = no
 					NOR = {
 						has_trait = incapable
 						has_trait = blind
 						has_trait = disfigured
-						has_trait = eunuch
 						has_trait = maimed
 						has_trait = one_eyed
 						has_trait = one_legged
@@ -160,10 +181,9 @@ claim_cb = {
 			scope:claimant = {
 				custom_description = {
 					text = "byzantine_claimant_is_celibate"
-					object = scope:claimant
+					object = scope:defender
+					is_eunuch_trigger = no
 					NOR = {
-						has_trait = eunuch
-						has_trait = devoted
 						has_trait = celibate
 					}
 				}
@@ -171,12 +191,19 @@ claim_cb = {
 		}
 	}
 
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: War dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
+	allowed_for_character_display_regardless = {
+		#If you're landless, you need the Legitimist camp purpose
+		trigger_if = {
+			limit = {
+				scope:attacker = {
+					government_has_flag = government_is_landless_adventurer
+				}
+			}
+			scope:attacker = {
+				has_realm_law = camp_purpose_legitimists
+			}
+		}
 	}
-	##### Changed from Vanilla ^^^^^
 
 	cost = {
 		piety = {
@@ -343,29 +370,120 @@ claim_cb = {
 		}
 	}
 
-	##### Changed from Vanilla: Added some government bootstrapping-prevention code for safety at start and end
-	##### Changed from Vanilla vvvvv
 	on_victory = {
-		##### Changed from Vanilla vvvvv
-		save_government_type_effect = {
-			THE_NEW_HOLDER = scope:claimant
-			THE_PREVIOUS_HOLDER = scope:defender
+		scope:attacker = {
+			if = {
+				limit = {
+					is_ai = no
+					has_realm_law = camp_purpose_legitimists
+					any_in_list = {
+						list = target_titles
+						tier >= tier_kingdom
+					}
+				}
+				add_achievement_global_variable_effect = {
+					VARIABLE = finished_birthright_achievement
+					VALUE = yes
+				}
+			}
+			if = {
+				limit = {
+					is_landless_adventurer = yes
+				}
+				hidden_effect = {
+					if = {
+						limit = {
+							NOT = { has_trait = adventurer }
+						}
+						add_trait = adventurer
+					}
+					save_scope_as = the_adventurer
+					every_courtier = {
+						set_variable = {
+							name = former_camp_leader
+							value = scope:the_adventurer
+						}
+						add_trait = adventurer_follower
+					}
+				}
+			}
 		}
-		##### Changed from Vanilla ^^^^^
-
+	
 		scope:attacker = { show_pow_release_message_effect = yes }
-		
+
 		# Legitimacy
 		add_legitimacy_attacker_victory_effect = yes
 
+		# Influence
+		add_influence_attacker_victory_effect = yes
+
 		#EP2 Accolade glory gain from winning against higher ranked enemy
 		scope:attacker = { accolade_attacker_war_end_glory_gain_med_effect = yes }
+
+		scope:defender ?= {
+			if = {
+				limit = {
+					is_independent_ruler = yes
+					government_allows = administrative
+					primary_title = { is_in_list = target_titles }
+				}
+				every_held_title = {
+					limit = {
+						is_noble_family_title = no
+						tier >= tier_county
+					}
+					add_to_list = target_titles
+				}
+			}
+		}
+		###### Changed from Vanilla vvvvv
+		hidden_effect = {
+			if = { #Save the current transition status
+				limit = {
+					scope:defender ?= { government_has_flag = is_a_transitory_roman_government }
+					scope:claimant = { is_landed = no } #Should apply to landless and adventurers
+				}
+				scope:claimant = { set_variable = import_subroman_laws }
+				scope:defender = {
+					switch = {
+						trigger = has_realm_law
+						subroman_taxation_0 = { scope:claimant = { set_variable = subroman_taxation_0 } }
+						subroman_taxation_1 = { scope:claimant = { set_variable = subroman_taxation_1 } }
+						subroman_taxation_2 = { scope:claimant = { set_variable = subroman_taxation_2 } }
+						subroman_taxation_3 = { scope:claimant = { set_variable = subroman_taxation_3 } }
+					}
+					switch = {
+						trigger = has_realm_law
+						subroman_popular_opinion_0 = { scope:claimant = { set_variable = subroman_popular_opinion_0 } }
+						subroman_popular_opinion_1 = { scope:claimant = { set_variable = subroman_popular_opinion_1 } }
+					}
+					switch = {
+						trigger = has_realm_law
+						subroman_feudal_transition_0 = { scope:claimant = { set_variable = subroman_feudal_transition_0 } }
+						subroman_feudal_transition_1 = { scope:claimant = { set_variable = subroman_feudal_transition_1 } }
+						subroman_feudal_transition_2 = { scope:claimant = { set_variable = subroman_feudal_transition_2 } }
+						subroman_feudal_transition_3 = { scope:claimant = { set_variable = subroman_feudal_transition_3 } }
+						subroman_feudal_transition_4 = { scope:claimant = { set_variable = subroman_feudal_transition_4 } }
+						subroman_feudal_transition_5 = { scope:claimant = { set_variable = subroman_feudal_transition_5 } }
+						subroman_feudal_transition_6 = { scope:claimant = { set_variable = subroman_feudal_transition_6 } }
+						subroman_feudal_transition_7 = { scope:claimant = { set_variable = subroman_feudal_transition_7 } }
+						subroman_feudal_transition_8 = { scope:claimant = { set_variable = subroman_feudal_transition_8 } }
+						subroman_feudal_transition_9 = { scope:claimant = { set_variable = subroman_feudal_transition_9 } }
+					}
+				}
+			}
+		}
+		###### Changed from Vanilla ^^^^^
 
 		create_title_and_vassal_change = {
 			type = conquest_claim
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		# EP3 Laamp possibility warning
+		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }
+		
 		# Create a claim CB which is executed to handle title/vassal changes, in addition to being used to calculate Prestige awards for war participants.
 		setup_claim_cb = {
 			titles = target_titles
@@ -436,19 +554,67 @@ claim_cb = {
 		# FP1: note the victory for future memorialisation via stele (if applicable).
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
 		
-		##### Changed from Vanilla vvvvv
-		if = {
-			limit = { scope:claimant = { has_variable = unlanded_character } }
-			convert_government_type_effect = {
-				THE_PREVIOUS_HOLDER = scope:defender
-				THE_NEW_HOLDER = scope:claimant
+		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
+		laamp_as_mercenary_payout_tooltip_effect = yes
+		
+		###### Changed from Vanilla vvvvv
+		hidden_effect = {
+			if = { #Setup the transition effects
+				limit = { scope:claimant ?= { has_variable = import_subroman_laws } }
+				scope:claimant = {
+					#Set the Laws
+					switch = {
+						trigger = has_variable
+						subroman_taxation_0 = { add_law_if_not_having_it_effect = { LAW = subroman_taxation_0 } }
+						subroman_taxation_1 = { add_law_if_not_having_it_effect = { LAW = subroman_taxation_1 } }
+						subroman_taxation_2 = { add_law_if_not_having_it_effect = { LAW = subroman_taxation_2 } }
+						subroman_taxation_3 = { add_law_if_not_having_it_effect = { LAW = subroman_taxation_3 } }
+					}
+					switch = {
+						trigger = has_variable
+						subroman_popular_opinion_0 = { add_law_if_not_having_it_effect = { LAW = subroman_popular_opinion_0 } }
+						subroman_popular_opinion_1 = { add_law_if_not_having_it_effect = { LAW = subroman_popular_opinion_1 } }
+					}
+					switch = {
+						trigger = has_variable
+						
+						subroman_feudal_transition_0 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_0 } }
+						subroman_feudal_transition_1 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_1 } }
+						subroman_feudal_transition_2 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_2 } }
+						subroman_feudal_transition_3 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_3 } }
+						subroman_feudal_transition_4 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_4 } }
+						subroman_feudal_transition_5 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_5 } }
+						subroman_feudal_transition_6 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_6 } }
+						subroman_feudal_transition_7 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_7 } }
+						subroman_feudal_transition_8 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_8 } }
+						subroman_feudal_transition_9 = { add_law_if_not_having_it_effect = { LAW = subroman_feudal_transition_9 } }
+					}
+					#Clean up Variables
+					cleanup_variable_effect = { VAR = subroman_taxation_0 }
+					cleanup_variable_effect = { VAR = subroman_taxation_1 }
+					cleanup_variable_effect = { VAR = subroman_taxation_2 }
+					cleanup_variable_effect = { VAR = subroman_taxation_3 }
+					
+					cleanup_variable_effect = { VAR = subroman_popular_opinion_0 }
+					cleanup_variable_effect = { VAR = subroman_popular_opinion_1 }
+					
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_0 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_1 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_2 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_3 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_4 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_5 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_6 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_7 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_8 }
+					cleanup_variable_effect = { VAR = subroman_feudal_transition_9 }
+					
+					cleanup_variable_effect = { VAR = import_subroman_laws }
+				}
 			}
 		}
-		scope:claimant = { government_transition_garbage_collect_effect = yes }
-		scope:defender = { government_transition_garbage_collect_effect = yes }
-		##### Changed from Vanilla ^^^^^
+		###### Changed from Vanilla ^^^^^
 	}
-	##### Changed from Vanilla ^^^^^
 
 	on_white_peace_desc = {
 		first_valid = {
@@ -534,6 +700,9 @@ claim_cb = {
 
 		# Truce
 		add_truce_white_peace_effect = yes
+
+		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
+		laamp_as_mercenary_payout_tooltip_effect = yes
 	}
 
 	on_defeat_desc = {
@@ -560,6 +729,9 @@ claim_cb = {
 		
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
+
+		# Influence
+		add_influence_attacker_defeat_effect = yes
 
 		#EP2 accolade glory gain for winning against higher ranked enemy
 		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
@@ -623,6 +795,9 @@ claim_cb = {
 			save_temporary_scope_as = loser
 		}
 		on_lost_aggression_war_discontent_loss = yes
+
+		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
+		laamp_as_mercenary_payout_tooltip_effect = yes
 	}
 
 	on_primary_attacker_death = inherit
@@ -647,4 +822,35 @@ claim_cb = {
 	max_attacker_score_from_occupation = 150
 
 	max_ai_diplo_distance_to_title = 1000
+
+	ai_score_mult = {
+		#There is no fighting in the admin room!
+		if = {
+			limit = {
+				scope:attacker = {
+					government_has_flag = government_is_feudal
+					liege ?= {
+						government_has_flag = government_is_administrative
+					}
+				}
+				scope:defender = {
+					government_has_flag = government_is_administrative
+					liege ?= scope:attacker.liege
+				}
+			}
+			multiply = 0.4
+		}
+		#Declaring war on the frankokratia leader can really ruin the whole thing
+		if = {
+			limit = {
+				scope:defender = {
+					any_owned_story = {
+						story_type = frankokratia_story
+						NOT = { has_variable = franko_war_complete }
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
 }

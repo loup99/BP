@@ -9,11 +9,7 @@
 	
 	can_pick = {
 		scope:character = {
-			NOR = {
-				has_government = nomad_government
-				has_government = tribal_government
-				has_government = high_tribal_government
-			}
+			NOT = { government_has_flag = government_is_tribal }
 		}
 		custom_tooltip = {
 			text = cannot_have_tradition_diasporic
@@ -26,11 +22,7 @@
 	}
 	can_pick_for_hybridization = {
 		scope:character = {
-			NOR = {
-				has_government = nomad_government
-				has_government = tribal_government
-				has_government = high_tribal_government
-			}
+			NOT = { government_has_flag = government_is_tribal }
 		}
 		custom_tooltip = {
 			text = cannot_have_tradition_diasporic
@@ -117,7 +109,7 @@ tradition_gothic_warfare = {
 	
 	parameters = {
 		gain_gold_from_battles = yes
-		culture_can_raid_even_if_feudal = yes
+		culture_can_raid_over_land_even_if_feudal = yes
 		not_tribal_raiding_malus = yes
 	}
 	county_modifier = {
@@ -242,6 +234,273 @@ tradition_vandalic_warfare = {
 		if = {
 			limit = { NOT = { culture_pillar:ethos_bellicose = { is_in_list = traits } } }
 			multiply = 0.5
+		}
+	}
+}
+
+tradition_highland_cavalry = { #Effectively replacing "Indomitable Azanti" for Armenians; combines combat features of Indomitable Azatani and Highland Warriors
+	category = combat
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = indomitable_azatani.dds 
+	}
+
+	is_shown = {
+		# DLC check.
+		has_ep3_dlc_trigger = yes
+		the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:armenian }
+		NOT = { has_cultural_tradition = tradition_horse_breeder }
+	}
+	can_pick = {
+		culture_not_pacifistic_trigger = yes
+		trigger_if = {
+			limit = {
+				OR = {
+					NOT = { exists = scope:replacing }
+					NOT = { scope:replacing = culture_tradition:tradition_horse_breeder }
+				}
+			}
+			NOT = { has_cultural_tradition = tradition_horse_breeder } #To prevent stacking after hybridization
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_highland_warriors
+			NOT = { culture_tradition:tradition_highland_warriors = { is_in_list = traits } }
+		}
+	}
+	can_pick_for_hybridization = {
+		culture_not_pacifistic_trigger = yes
+		trigger_if = {
+			limit = {
+				OR = {
+					NOT = { exists = scope:replacing }
+					NOT = { scope:replacing = culture_tradition:tradition_horse_breeder }
+				}
+			}
+			NOT = { has_cultural_tradition = tradition_horse_breeder } #To prevent stacking after hybridization
+		}
+		custom_tooltip = {
+			text = cannot_have_tradition_highland_warriors
+			NOT = { culture_tradition:tradition_highland_warriors = { is_in_list = traits } }
+		}
+		custom_description = {
+			text = hybrid_must_have_caucasian_heritage_for_tradition_highland_cavalry
+			culture_pillar:heritage_caucasian = { is_in_list = traits }
+		}
+	}
+	
+	parameters = {
+		unlock_maa_ayrudzi = yes
+		rough_terrain_expert_trait_more_common = yes
+		hill_trait_bonuses = yes
+		can_recruit_hill_specialist = yes
+	}
+	character_modifier = {
+		light_cavalry_maintenance_mult = -0.15
+		heavy_cavalry_maintenance_mult = -0.15
+		archer_cavalry_maintenance_mult = -0.15
+		light_cavalry_damage_add = 4
+		heavy_cavalry_damage_add = 20
+		hills_travel_danger = hills_low_danger_reduction
+	}
+	province_modifier = {
+		hills_levy_size = 0.1
+		hills_supply_limit_mult = 0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						NOR = { # Culture Head need to have a 8 sized regiment of either Light/Heavy/Archer Cavalry
+							number_maa_soldiers_of_base_type = {
+								type = light_cavalry
+								value >= 800
+							}
+							number_maa_soldiers_of_base_type = {
+								type = heavy_cavalry
+								value >= 400
+							}
+							number_maa_soldiers_of_base_type = {
+								type = archer_cavalry
+								value >= 800
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = culture_head_cavalry_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 200
+		if = {
+			limit = { # Reduce chance slightly if the culture has access to other "cavalry" types
+				OR = {
+					has_innovation = innovation_war_camels
+					has_innovation = innovation_elephantry
+				}
+			}
+			multiply = 0.4
+		}
+		else_if = {
+			limit = { scope:character ?= { ai_has_warlike_personality = yes } }
+			multiply = 4
+		}
+	}
+}
+tradition_highland_cavalry_non_dlc = { #Effectively replacing "Indomitable Azanti" for Armenians; combines combat features of Indomitable Azatani and Highland Warriors
+	category = combat
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = horses.dds 
+	}
+
+	is_shown = {
+		# DLC check.
+		has_ep3_dlc_trigger = no
+		the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:armenian }
+		NOT = { has_cultural_tradition = tradition_horse_breeder }
+	}
+	can_pick = {
+		culture_not_pacifistic_trigger = yes
+		trigger_if = {
+			limit = {
+				OR = {
+					NOT = { exists = scope:replacing }
+					NOT = { scope:replacing = culture_tradition:tradition_horse_breeder }
+				}
+			}
+			NOT = { has_cultural_tradition = tradition_horse_breeder } #To prevent stacking after hybridization
+		}
+	}
+	can_pick_for_hybridization = {
+		culture_not_pacifistic_trigger = yes
+		trigger_if = {
+			limit = {
+				OR = {
+					NOT = { exists = scope:replacing }
+					NOT = { scope:replacing = culture_tradition:tradition_horse_breeder }
+				}
+			}
+			NOT = { has_cultural_tradition = tradition_horse_breeder } #To prevent stacking after hybridization
+		}
+		custom_description = {
+			text = hybrid_must_have_caucasian_heritage_for_tradition_highland_cavalry
+			culture_pillar:heritage_caucasian = { is_in_list = traits }
+		}
+	}
+	
+	parameters = {
+		unlocks_cataphract_innovation = yes
+		rough_terrain_expert_trait_more_common = yes
+		hill_trait_bonuses = yes
+		can_recruit_hill_specialist = yes
+	}
+	character_modifier = {
+		light_cavalry_maintenance_mult = -0.15
+		heavy_cavalry_maintenance_mult = -0.15
+		archer_cavalry_maintenance_mult = -0.15
+		light_cavalry_damage_add = 4
+		heavy_cavalry_damage_add = 20
+		hills_travel_danger = hills_low_danger_reduction
+	}
+	province_modifier = {
+		hills_levy_size = 0.1
+		hills_supply_limit_mult = 0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						NOR = { # Culture Head need to have a 8 sized regiment of either Light/Heavy/Archer Cavalry
+							number_maa_soldiers_of_base_type = {
+								type = light_cavalry
+								value >= 800
+							}
+							number_maa_soldiers_of_base_type = {
+								type = heavy_cavalry
+								value >= 400
+							}
+							number_maa_soldiers_of_base_type = {
+								type = archer_cavalry
+								value >= 800
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = culture_head_cavalry_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 200
+		if = {
+			limit = { # Reduce chance slightly if the culture has access to other "cavalry" types
+				OR = {
+					has_innovation = innovation_war_camels
+					has_innovation = innovation_elephantry
+				}
+			}
+			multiply = 0.4
+		}
+		else_if = {
+			limit = { scope:character ?= { ai_has_warlike_personality = yes } }
+			multiply = 4
 		}
 	}
 }

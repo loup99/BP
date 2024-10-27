@@ -1,0 +1,144 @@
+﻿# Fired when a character's court grandeur level changes
+# root = character observing the change
+# scope:target_character = character changing language
+on_court_language_changed = {
+	on_actions = { bp_court_language_on_actions }
+}
+
+bp_court_language_on_actions = {
+	effect = {
+		scope:target_character = {
+			if = {
+				limit = { government_has_flag = is_a_roman_government }
+				#Update all imperial titles court languages
+				every_held_title = {
+					limit = { tier = tier_empire }
+					if = {
+						limit = { has_variable = court_language }
+						remove_variable = court_language
+						set_variable = {
+							name = court_language
+							value = scope:target_character.culture
+						}
+					}
+					else = { #A new empire
+						set_variable = {
+							name = court_language
+							value = scope:target_character.culture
+						}
+					}
+				}
+				#And all the vassals
+				every_vassal_or_below = {
+					limit = {
+						government_has_flag = is_a_roman_government
+						has_royal_court = yes
+					}
+					if = {
+						limit = { NOT = { has_same_court_language = this.top_liege } }
+						match_court_languages_effect = {
+							TOP_COURT = this.top_liege
+							CURRENT_COURT = this
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	on_actions = {
+		BP_set_court_language
+	}
+}
+
+#Keep Gupta and Bureaucratic Court Languages
+BP_set_court_language = {
+	effect = {
+		if = {
+			limit = {
+				has_royal_court = yes
+				government_has_flag = is_a_roman_government
+				scope:title.tier >= tier_kingdom
+				scope:title = root.primary_title #Fire only once per succession
+			}
+			if = {
+				limit = { primary_title = { has_variable = court_language } }
+				set_court_language_from_effect = {
+					CULTURE = primary_title.var:court_language
+					CHARACTER = root
+				}
+			}
+			else = {
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_latin
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_royal_court = yes
+				scope:title.tier >= tier_kingdom
+				has_government = rajamandala_government
+				scope:title = root.primary_title #Fire only once per succession
+			}
+			set_court_language = language_sanskrit
+		}
+	}
+}
+
+on_game_start = {
+	on_actions = { setup_administrative_languages }
+}
+
+setup_administrative_languages = {
+	effect = {
+		every_ruler = {
+			limit = { primary_title.tier >= tier_kingdom }
+			
+			if = { #Roman Governments use Latin
+				limit = { government_has_flag = is_a_roman_government }
+				set_court_language_from_effect = {
+					CULTURE = culture:roman
+					CHARACTER = this
+				}
+			}
+			if = { #Eranians use Persian
+				limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+				set_court_language_from_effect = {
+					CULTURE = culture:persian
+					CHARACTER = this
+				}
+			}
+			if = { #Rajamandala use Sanskrit
+				limit = { government_has_flag = government_uses_rajamandala_authority }
+				setup_the_court_language_effect = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+				setup_learnt_language_effect = {
+					CHAR = this
+					LANGUAGE = language_sanskrit
+				}
+			}
+		}
+		#All learned Jewish rulers should know Hebrew
+		every_ruler = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_israelite }
+					religion = religion:judaism_religion
+				}
+			}
+			setup_learnt_language_effect = {
+				CHAR = this
+				LANGUAGE = language_israelite
+			}
+		}
+	}
+}

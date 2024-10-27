@@ -1,4 +1,4 @@
-﻿##### Changed from Vanilla: Senators are more willing to join courts that put them in the Senate
+﻿##### Changed from Vanilla: Senators more likely to join courts within correct regions
 invite_to_court_interaction = {
 	category = interaction_category_vassal
 	icon = guest
@@ -20,6 +20,15 @@ invite_to_court_interaction = {
 	}
 
 	is_valid_showing_failures_only = {
+		custom_tooltip = {
+			scope:recipient = {
+				OR = {
+					NOT = { exists = liege }
+					NOT = { has_variable = invite_to_court_cooldown }
+				}
+			}
+			text = INVITE_TO_COURT_COOLDOWN
+		}	
 		can_recruit_character_to_court_trigger = {
 			RECRUITER = scope:actor
 			RECRUITEE = scope:recipient
@@ -30,28 +39,61 @@ invite_to_court_interaction = {
 	send_option = {
 		is_shown = {
 			exists = scope:recipient
-			scope:recipient = {
-				is_pool_guest = no
-				location.province_owner = {
-					OR = {
-						any_liege_or_above = { this = scope:actor }
-						this = scope:actor
-					}
-				}
-				NOR = {
-					has_relation_rival = scope:actor
-					exists = liege
-					is_child_of = scope:actor
-					has_character_modifier = lust_for_adventure
-				}
-			}
 		}
 		flag = cover_travel_expenses
 		localization = COVER_TRAVEL_EXPENSES
 	}
+	send_option = { # EP3 Influence
+		is_shown = { # Actor must have a government that uses influence 
+			scope:actor = {
+				government_has_flag = government_has_influence
+			}
+		}
+		is_valid = {
+			# Actor has enough influence
+			scope:actor = { influence >= medium_influence_value }
+			# Both characters are within the same top realm
+			scope:recipient.top_liege = scope:actor.top_liege
+		}
+		flag = influence_send_option
+		localization = TRADE_INFLUENCE_FOR_BETTER_AI_ACCEPTANCE
+	}
+	send_option = {
+		is_valid = {
+			scope:actor = {
+				has_usable_hook = scope:recipient
+			}
+		}
+		flag = hook
+		localization = SCHEME_HOOK
+	}
+	should_use_extra_icon = {
+		scope:actor = { has_usable_hook = scope:recipient }
+	}
+	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
+
+	send_options_exclusive = no
+
+	cost = {
+		influence = {
+			value = 0
+			if = {
+				limit = { scope:influence_send_option = yes }
+				add = scope:actor.medium_influence_value
+				desc = INFLUENCE_INTERACTION_ACCEPTANCE_SEND_OPTION
+			}
+		}
+	}
 
 	on_accept = {
 		hidden_effect = {
+			scope:recipient = {
+				set_variable = {
+					name = invite_to_court_cooldown
+					years = 5
+				}
+			}		
+		
 			if = {
 				limit = {
 					exists = scope:recipient.liege
@@ -90,12 +132,6 @@ invite_to_court_interaction = {
 					limit = { always = scope:hook }
 					scope:actor = {
 						use_hook = scope:recipient
-					}
-				}
-
-				scope:actor = {
-					stress_impact = {
-						shy = minor_stress_impact_gain
 					}
 				}
 			}
@@ -139,6 +175,14 @@ invite_to_court_interaction = {
  			multiplier = 0.5
  			step = 5
  			max = 25
+ 		}
+		
+		# Stooge modifier
+		modifier = {
+ 			scope:recipient = { has_variable = non_recruitable_var }
+			scope:recipient.var:non_recruitable_var = scope:actor
+ 			add = -200
+ 			desc = AI_STOOGE
  		}
 
  		#Current roles
@@ -191,8 +235,22 @@ invite_to_court_interaction = {
 
  		modifier = {
  			this.house.house_head = scope:actor
- 			add = 30
+ 			add = 60
  			desc = AI_YOU_ARE_THE_HOUSE_HEAD
+ 		}
+		
+		modifier = {
+ 			this.top_liege = scope:actor
+ 			add = 60
+ 			desc = AI_YOU_ARE_THE_SOVEREIGN
+ 		}
+		
+		modifier = {
+ 			NOT = { is_child_of = scope:actor }
+ 			NOT = { is_close_family_of = scope:actor }
+			is_extended_family_of = scope:actor
+ 			add = 30
+ 			desc = AI_YOUR_RELATIVE
  		}
 
  		modifier = {
@@ -226,7 +284,7 @@ invite_to_court_interaction = {
  		modifier = {
  			exists = liege
  			is_child_of = liege
- 			add = -100
+ 			add = -160
  			desc = AI_THEIR_CHILD
  		}
 
@@ -300,6 +358,25 @@ invite_to_court_interaction = {
  			desc = AI_WANDERLUST
 			is_child_of = scope:actor
  			has_character_modifier = lust_for_adventure
+ 		}
+		
+ 		modifier = {
+ 			add = -180
+ 			desc = ELUDING_CASTRATOR
+ 			is_adult = no
+ 			any_memory = {
+				has_memory_type = family_castration_fled_memory
+				memory_participant:castrator ?= {
+					this = scope:actor
+				}
+			}
+ 		}
+
+ 		modifier = {
+ 			liege ?= { is_landed = yes }
+ 			scope:actor = { is_landed = no }
+ 			add = -50
+ 			desc = AI_MY_LIEGE_IS_LANDED
  		}
 		
 		#Wandering characters (who aren't doing anything else)
@@ -397,6 +474,7 @@ invite_to_court_interaction = {
  					limit = {
  						scope:actor = {
 			 				has_royal_court = yes
+							has_dlc_feature = royal_court
 			 				amenity_level = { type = court_lodging_standards value >=  high_amenity_level }
 			 			}
  					}
@@ -422,6 +500,7 @@ invite_to_court_interaction = {
  			desc = AI_COURT_LODGING_STANDARDS_QUALITY
 			scope:actor = {
 			 	has_royal_court = yes
+				has_dlc_feature = royal_court
 				amenity_level = { type = court_lodging_standards value >=  medium_amenity_level }
 			}
  		}
@@ -459,8 +538,56 @@ invite_to_court_interaction = {
 			is_courtier_of = liege
 			liege = {
 				has_royal_court = yes
+				has_dlc_feature = royal_court
 				amenity_level = { type = court_lodging_standards value >=  medium_amenity_level }
 			}
+ 		}
+		
+ 		modifier = {
+ 			add = {
+				value = scope:actor.house.house_unity_value
+				multiply = 0.5
+			}
+ 			desc = AI_HOUSE_UNITY
+			scope:actor = { government_has_flag = government_is_clan }
+			exists = house
+			exists = scope:actor.house
+			house = scope:actor.house
+			house = {
+				OR = {
+					has_house_unity_stage = harmonious
+					has_house_unity_stage = friendly
+				}
+			}
+ 		}
+
+ 		modifier = {
+			add = 25
+			scope:influence_send_option = yes
+			desc = INFLUENCE_INTERACTION_ACCEPTANCE_SEND_OPTION
+		}
+
+ 		modifier = {
+ 			add = -1000
+ 			desc = MALUS_TO_RECRUITMENT_FOR_IMPERIAL_EUNUCHS
+ 			scope:recipient = {
+ 				is_eunuch_trigger = yes
+	 			liege = {
+	 				government_allows = administrative
+	 				primary_title.tier = tier_empire
+	 				culture = { has_cultural_parameter = can_appoint_chief_eunuch }
+	 			}
+	 		}
+ 		}
+		
+		# Event modifiers
+		
+		# El Cid
+		modifier = {
+ 			has_variable = cid_1010_no_invite_var
+			var:cid_1010_no_invite_var = scope:actor
+ 			add = -200
+ 			desc = cid_1010_no_invite_var_desc
  		}
 		
 		##### Changed from Vanilla vvvvv
@@ -512,20 +639,4 @@ invite_to_court_interaction = {
 			scope:hook = yes
 		}
 	}
-
-	send_option = {
-		is_valid = {
-			scope:actor = {
-				has_usable_hook = scope:recipient
-			}
-		}
-		flag = hook
-		localization = SCHEME_HOOK
-	}
-	should_use_extra_icon = {
-		scope:actor = { has_usable_hook = scope:recipient }
-	}
-	extra_icon = "gfx/interface/icons/character_interactions/hook_icon.dds"
-
-	send_options_exclusive = no
 }

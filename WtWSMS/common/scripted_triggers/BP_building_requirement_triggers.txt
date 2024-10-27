@@ -19,21 +19,31 @@ early_urbanization_trigger = { #Culture Scope
 holding_level_01_general_trigger = {
 	OR = {
 		#Special Urbanization Innovations
-		culture = { early_urbanization_trigger = yes }
+		$CHAR$.culture = { early_urbanization_trigger = yes }
 		#Advanced Governments in Classical Antiquity
 		AND = {
-			$CHAR$ = { has_advanced_government_trigger = yes }
-			culture = { has_innovation = $ADVANCED_GOVERNMENT_UNLOCK_INNOVATION$ }
+			$CHAR$ = { government_has_flag = government_is_centralized }
+			culture = { has_innovation = $EARLY_ERA_UNLOCK_INNOVATION$ }
 		}
-		#Else, Late Antiquity
-		culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		#Era unlocks
+		trigger_if = { #Tribal-level unlock
+			limit = { $CHAR$.culture = { has_cultural_parameter = $TRIBAL_LEVEL_UNLOCK$ } }
+			always = yes
+		}
+		trigger_if = { #Late Antiquity
+			limit = { $CHAR$.culture = { has_cultural_parameter = $NEXT_LEVEL_HOLDING_UNLOCK_PARAM$ } }
+			$CHAR$.culture = { has_innovation = $EARLY_ERA_UNLOCK_INNOVATION$ }
+		}
+		trigger_else = { #Late Antiquity
+			$CHAR$.culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		}
 	}
 }
 holding_level_02_general_trigger = {
 	OR = {
 		#Special Urbanization Innovations: Depends on the development & Era
 		#Development Value is 75% of the max
-		culture = {
+		$CHAR$.culture = {
 			early_urbanization_trigger = yes
 			OR = {
 				AND = {
@@ -48,18 +58,30 @@ holding_level_02_general_trigger = {
 		}
 		#Advanced Governments in Late Antiquity
 		AND = {
-			$CHAR$ = { has_advanced_government_trigger = yes }
-			culture = { has_innovation = $ADVANCED_GOVERNMENT_UNLOCK_INNOVATION$ }
+			$CHAR$ = { government_has_flag = government_is_centralized }
+			$CHAR$.culture = { has_innovation = $EARLY_ERA_UNLOCK_INNOVATION$ }
 		}
-		#Else, Early Medevial
-		culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		#Era unlocks
+		trigger_if = { #Late Antiquity
+			limit = { culture = { has_cultural_parameter = $NEXT_LEVEL_HOLDING_UNLOCK_PARAM$ } }
+			$CHAR$.culture = { has_innovation = $EARLY_ERA_UNLOCK_INNOVATION$ }
+		}
+		trigger_else = { #Early Medieval
+			$CHAR$.culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		}
 	}
 }
 #Building triggers
 building_holding_specific_general_trigger = {
 	has_building_or_higher = $HOLDING$_$NUM$
 	OR = {
-		culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		trigger_if = {
+			limit = { culture = { has_cultural_parameter = $NEXT_LEVEL_BUILDING_UNLOCK_PARAM$ } }
+			culture = { has_innovation = $EARLY_UNLOCK_INNOVATION$ }
+		}
+		trigger_else = {
+			culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
+		}
 		culture = { early_urbanization_trigger = yes }
 	}
 }
@@ -67,6 +89,8 @@ building_holding_specific_level_00_trigger = {
 	building_holding_specific_general_trigger = {
 		HOLDING = $HOLDING$
 		NUM = 01
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = $NEXT_LEVEL_BUILDING_UNLOCK_PARAM$
+		EARLY_UNLOCK_INNOVATION = $EARLY_UNLOCK_INNOVATION$
 		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
 	}
 }
@@ -74,6 +98,8 @@ building_holding_specific_level_01_trigger = {
 	building_holding_specific_general_trigger = {
 		HOLDING = $HOLDING$
 		NUM = 01
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = $NEXT_LEVEL_BUILDING_UNLOCK_PARAM$
+		EARLY_UNLOCK_INNOVATION = $EARLY_UNLOCK_INNOVATION$
 		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
 	}
 }
@@ -81,6 +107,8 @@ building_holding_specific_level_02_trigger = {
 	building_holding_specific_general_trigger = {
 		HOLDING = $HOLDING$
 		NUM = 02
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = $NEXT_LEVEL_BUILDING_UNLOCK_PARAM$
+		EARLY_UNLOCK_INNOVATION = $EARLY_UNLOCK_INNOVATION$
 		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
 	}
 }
@@ -88,61 +116,23 @@ building_holding_specific_level_03_trigger = {
 	building_holding_specific_general_trigger = {
 		HOLDING = $HOLDING$
 		NUM = 02
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = $NEXT_LEVEL_BUILDING_UNLOCK_PARAM$
+		EARLY_UNLOCK_INNOVATION = $EARLY_UNLOCK_INNOVATION$
 		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
-	}
-}
-#For cases like guild halls where one unlocks a level early
-building_holding_specific_level_01_with_next_level_param_trigger = {
-	has_building_or_higher = $HOLDING$_01
-	OR = {
-		culture = { early_urbanization_trigger = yes }
-		trigger_if = {
-			limit = { NOT = { culture = { has_cultural_parameter = $NEXT_LEVEL_TYPE$ } } }
-			culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
-		}
-		trigger_else = {
-			culture = { has_innovation = $NEXT_LEVEL_UNLOCK_INNOVATION$ }
-		}
-	}
-}
-building_holding_specific_level_02_with_next_level_param_trigger = {
-	building_holding_specific_level_01_with_next_level_param_trigger = {
-		HOLDING = $HOLDING$
-		NEXT_LEVEL_TYPE = $NEXT_LEVEL_TYPE$
-		GENERAL_UNLOCK_INNOVATION = $GENERAL_UNLOCK_INNOVATION$
-		NEXT_LEVEL_UNLOCK_INNOVATION = $NEXT_LEVEL_UNLOCK_INNOVATION$
-	}
-}
-building_holding_specific_level_03_with_next_level_param_trigger = {
-	trigger_if = {
-		limit = { NOT = { culture = { has_cultural_parameter = $NEXT_LEVEL_TYPE$ } } }
-		OR = {
-			culture = { has_innovation = $NEXT_LEVEL_UNLOCK_INNOVATION$ }
-			culture = { early_urbanization_trigger = yes }
-		}
-		has_building_or_higher = $HOLDING$_02
-	}
-	trigger_else = {
-		culture = { has_cultural_parameter = next_level_guild_halls }
-		OR = {
-			culture = { has_innovation = $GENERAL_UNLOCK_INNOVATION$ }
-			culture = { early_urbanization_trigger = yes }
-		}
-		has_building_or_higher = $HOLDING$_01
 	}
 }
 #Trade Buildings
 general_trade_building_can_construct_potential_trigger = {
-		trigger_if = {
-			limit = { NOT = { culture = { has_cultural_parameter = trade_ports_enabled_for_tribals } } }
+	trigger_if = {
+		limit = { NOT = { culture = { has_cultural_parameter = trade_ports_enabled_for_tribals } } }
+		building_requirement_castle_city_church = { LEVEL = 01 }
+	}
+	trigger_else = {
+		OR = {
+			has_building_or_higher = tribe_01
 			building_requirement_castle_city_church = { LEVEL = 01 }
 		}
-		trigger_else = {
-			OR = {
-				has_building_or_higher = tribe_01
-				building_requirement_castle_city_church = { LEVEL = 01 }
-			}
-		}
+	}
 }
 general_trade_building_trigger = {
 	#If we get early access
@@ -186,45 +176,54 @@ general_military_building_trigger = {
 castle_holding_level_01_trigger = {
 	holding_level_01_general_trigger = {
 		CHAR = $CHAR$
-		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_muri
+		EARLY_ERA_UNLOCK_INNOVATION = innovation_muri
 		GENERAL_UNLOCK_INNOVATION = innovation_motte
+		NEXT_LEVEL_HOLDING_UNLOCK_PARAM = DOES_NOT_EXIST
+		TRIBAL_LEVEL_UNLOCK = DOES_NOT_EXIST
 	}
 }
 castle_holding_level_02_trigger = {
 	holding_level_02_general_trigger = {
 		CHAR = $CHAR$
-		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_motte
+		EARLY_ERA_UNLOCK_INNOVATION = innovation_motte
 		GENERAL_UNLOCK_INNOVATION = innovation_burhs
+		NEXT_LEVEL_HOLDING_UNLOCK_PARAM = DOES_NOT_EXIST
 	}
 }
 ## City Holdings
 city_holding_level_01_trigger = {
 	holding_level_01_general_trigger = {
 		CHAR = $CHAR$
-		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_fora
+		EARLY_ERA_UNLOCK_INNOVATION = innovation_fora
 		GENERAL_UNLOCK_INNOVATION = innovation_city_planning
+		NEXT_LEVEL_HOLDING_UNLOCK_PARAM = next_level_cities
+		TRIBAL_LEVEL_UNLOCK = DOES_NOT_EXIST
 	}
 }
 city_holding_level_02_trigger = {
 	holding_level_02_general_trigger = {
 		CHAR = $CHAR$
-		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_city_planning
+		EARLY_ERA_UNLOCK_INNOVATION = innovation_city_planning
 		GENERAL_UNLOCK_INNOVATION = innovation_manorialism
+		NEXT_LEVEL_HOLDING_UNLOCK_PARAM = next_level_cities
 	}
 }
 ## Temple Holdings
 temple_holding_level_01_trigger = {
 	holding_level_01_general_trigger = {
 		CHAR = $CHAR$
-		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_state_religion
+		EARLY_ERA_UNLOCK_INNOVATION = innovation_state_religion
 		GENERAL_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
+		NEXT_LEVEL_HOLDING_UNLOCK_PARAM = temple_next_level
+		TRIBAL_LEVEL_UNLOCK = tribals_can_into_temples
 	}
 }
 temple_holding_level_02_trigger = {
 	holding_level_02_general_trigger = {
 		CHAR = $CHAR$
-		ADVANCED_GOVERNMENT_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
+		EARLY_ERA_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
 		GENERAL_UNLOCK_INNOVATION = innovation_scriptural_cannon
+		NEXT_LEVEL_HOLDING_UNLOCK_PARAM = temple_next_level
 	}
 }
 
@@ -236,61 +235,100 @@ temple_holding_level_02_trigger = {
 city_building_level_00_trigger = {
 	building_holding_specific_level_00_trigger = {
 		HOLDING = city
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = next_level_guild_halls
+		EARLY_UNLOCK_INNOVATION = innovation_barter
 		GENERAL_UNLOCK_INNOVATION = innovation_barter
 	}
 }
 city_building_level_01_trigger = {
-	building_holding_specific_level_01_with_next_level_param_trigger = {
+	building_holding_specific_level_01_trigger = {
 		HOLDING = city
-		NEXT_LEVEL_TYPE = next_level_guild_halls
-		NEXT_LEVEL_UNLOCK_INNOVATION = innovation_barter
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = next_level_guild_halls
+		EARLY_UNLOCK_INNOVATION = innovation_barter
 		GENERAL_UNLOCK_INNOVATION = innovation_fora
 	}
 }
 city_building_level_02_trigger = {
-	building_holding_specific_level_02_with_next_level_param_trigger = {
+	building_holding_specific_level_02_trigger = {
 		HOLDING = city
-		NEXT_LEVEL_TYPE = next_level_guild_halls
-		NEXT_LEVEL_UNLOCK_INNOVATION = innovation_fora
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = next_level_guild_halls
+		EARLY_UNLOCK_INNOVATION = innovation_fora
 		GENERAL_UNLOCK_INNOVATION = innovation_city_planning
 	}
 }
 city_building_level_03_trigger = {
-	building_holding_specific_level_03_with_next_level_param_trigger = {
+	building_holding_specific_level_02_trigger = {
 		HOLDING = city
-		NEXT_LEVEL_TYPE = next_level_guild_halls
-		NEXT_LEVEL_UNLOCK_INNOVATION = innovation_city_planning
-		GENERAL_UNLOCK_INNOVATION = innovation_manorialism
-	}
-}
-## Temple Buildings
-temple_building_level_00_trigger = {
-	building_holding_specific_level_00_trigger = {
-		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = DOES_NOT_EXIST
+		EARLY_UNLOCK_INNOVATION = innovation_social_stratification
 		GENERAL_UNLOCK_INNOVATION = innovation_social_stratification
 	}
 }
-temple_building_level_01_trigger = {
+## Temple Buildings
+
+### Scriptoria
+scriptorium_level_00_trigger = {
+	building_holding_specific_level_00_trigger = {
+		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = DOES_NOT_EXIST
+		EARLY_UNLOCK_INNOVATION = innovation_social_stratification
+		GENERAL_UNLOCK_INNOVATION = innovation_social_stratification
+	}
+}
+scriptorium_level_01_trigger = {
 	building_holding_specific_level_01_trigger = {
 		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = DOES_NOT_EXIST
+		EARLY_UNLOCK_INNOVATION = innovation_state_religion
 		GENERAL_UNLOCK_INNOVATION = innovation_state_religion
 	}
 }
-temple_building_level_02_trigger = {
+scriptorium_level_02_trigger = {
 	building_holding_specific_level_02_trigger = {
 		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = DOES_NOT_EXIST
+		EARLY_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
 		GENERAL_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
 	}
 }
-temple_building_level_03_trigger = {
-	building_holding_specific_level_02_trigger = {
+scriptorium_level_03_trigger = {
+	building_holding_specific_level_03_trigger = {
 		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = DOES_NOT_EXIST
+		EARLY_UNLOCK_INNOVATION = innovation_scriptural_cannon
 		GENERAL_UNLOCK_INNOVATION = innovation_scriptural_cannon
 	}
 }
-temple_building_level_04_trigger = {
-	building_holding_specific_level_03_trigger = {
+### Monastic Schools
+monastic_schools_level_00_trigger = {
+	building_holding_specific_level_00_trigger = {
 		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = next_level_monasteries
+		EARLY_UNLOCK_INNOVATION = innovation_social_stratification
+		GENERAL_UNLOCK_INNOVATION = innovation_social_stratification
+	}
+}
+monastic_schools_level_01_trigger = {
+	building_holding_specific_level_01_trigger = {
+		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = next_level_monasteries
+		EARLY_UNLOCK_INNOVATION = innovation_social_stratification
+		GENERAL_UNLOCK_INNOVATION = innovation_state_religion
+	}
+}
+monastic_schools_level_02_trigger = {
+	building_holding_specific_level_02_trigger = {
+		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = next_level_monasteries
+		EARLY_UNLOCK_INNOVATION = innovation_state_religion
+		GENERAL_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
+	}
+}
+monastic_schools_level_03_trigger = {
+	building_holding_specific_level_02_trigger = {
+		HOLDING = temple
+		NEXT_LEVEL_BUILDING_UNLOCK_PARAM = next_level_monasteries
+		EARLY_UNLOCK_INNOVATION = innovation_doctrine_and_dogma
 		GENERAL_UNLOCK_INNOVATION = innovation_scriptural_cannon
 	}
 }

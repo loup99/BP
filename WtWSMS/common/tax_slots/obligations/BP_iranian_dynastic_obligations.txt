@@ -1,0 +1,80 @@
+﻿#For when the high nobles are powerful; nerfs taxes being paid and other annoyances in exchange for dissolution protection
+wuzurgan_special_rights_tax_collector = {
+	is_shown = {
+		scope:liege = { can_have_wuzurgan_trigger = yes }
+		#Can only have one of these slots, period
+		can_only_have_num_jurisdictions_of_this_type_trigger = {
+			LIEGE = scope:liege
+			NUMBER = 1
+			TAX_SLOT = scope:tax_slot
+			TAX_SLOT_TYPE = wuzurgan_special_rights_tax_collector
+		}
+	}
+	
+	is_vassal_valid = {
+		scope:vassal = { is_wuzurgan_trigger = yes }
+	}
+
+	tax_factor = -0.25
+	levies_factor = -0.25
+
+	liege_modifier = {
+		monthly_prestige_gain_mult = -0.01
+		tyranny_gain_mult = 0.03
+		legitimacy_gain_mult = 0.03
+		monthly_dynasty_prestige_mult = 0.03
+		vassal_limit = 5
+		domain_limit = 1
+		enemy_hostile_scheme_success_chance_add = -1
+	}
+
+	vassal_modifier = {
+		monthly_prestige_gain_mult = 0.05
+		domain_limit = 1
+		opinion_of_liege = 10
+		owned_hostile_scheme_success_chance_add = 2
+	}
+	
+	flag = title_revocation_increased_tyranny
+	flag = cannot_join_dissolution_faction
+	flag = expects_landed_titles_to_be_granted
+
+	ai_will_do = {
+		value = 1000
+	}
+}
+
+#Deqhan status (different than PDX's; should tie to innovation)
+deqhan_wtwsms_special_rights_tax_collector = {
+	is_shown = {
+		scope:liege = { government_has_flag = government_uses_iranian_dynastic_authority }
+		scope:liege = { can_have_wuzurgan_trigger = yes } #Only for the big empires; you need the decentralization
+	}
+	
+	is_valid = { scope:liege.culture = { has_innovation = innovation_deqhan } }
+	
+	is_vassal_valid = {
+		scope:vassal = { government_has_flag = government_uses_iranian_dynastic_authority }
+		scope:vassal = { is_wuzurgan_trigger = no }
+		scope:vassal = { is_deqhan_trigger = yes }
+		#Can't be in the Imperial Core; Deqhan arose on the periphery
+		scope:vassal = { NOT = { this.primary_title = scope:liege.primary_title } }
+	}
+
+	tax_factor = 0.15
+	levies_factor = -0.15
+
+	liege_modifier = {
+		monthly_prestige = 0.02
+	}
+
+	vassal_modifier = {
+		monthly_prestige_gain_mult = 0.05
+		development_growth_factor = 0.025
+	}
+
+	ai_will_do = {
+		value = tax_obligation_base_ai_will_do
+		add = 1
+	}
+}

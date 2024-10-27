@@ -2086,7 +2086,7 @@ iberia_north_africa.2001 = { # Jewish translator of old books (reward: skill boo
 		}
 
 		send_interface_message = {
-			type = event_generic_good
+			type = event_learning_good
 			title = iberia_north_africa.2001.t
 			right_icon = scope:generated_actor
 		
@@ -2151,7 +2151,7 @@ iberia_north_africa.2001 = { # Jewish translator of old books (reward: skill boo
 		}
 		hidden_effect = {
 			send_interface_message = {
-				type = event_generic_good
+				type = event_learning_good
 				title = iberia_north_africa.2001.t
 				right_icon = scope:generated_actor
 			
@@ -2207,7 +2207,7 @@ iberia_north_africa.2001 = { # Jewish translator of old books (reward: skill boo
 		name = iberia_north_africa.2001.c
 
 		send_interface_message = {
-			type = event_generic_good
+			type = event_learning_good
 			title = fp2_rejection_of_old_thoughts_modifier
 			right_icon = root
 
@@ -3183,5 +3183,130 @@ iberia_north_africa.2014 = { # Getting a high five (and a gift) from your HOF
 		}
 
 		ai_chance = { base = 10 }
+	}
+}
+
+################
+# Restore Old Vasconia
+# by Joe Parkin
+################
+
+#The kingdom revived.
+iberia_north_africa.2100 = {
+	type = character_event
+	title = iberia_north_africa.2100.t
+	desc = iberia_north_africa.2100.desc
+	theme = realm
+	left_portrait = {
+		character = scope:founder
+		animation = personality_bold
+	}
+
+	immediate = {
+		play_music_cue = "mx_cue_positive_effect"
+		restore_old_vasconia_decision_scripted_effect = yes
+		restore_old_vasconia_decision_tooltip_scripted_effect = yes
+		#Notify other players.
+		every_player = {
+			limit = {
+				#NOT = { this = scope:founder }
+				in_diplomatic_range = root
+			}
+			trigger_event = iberia_north_africa.2101
+		}
+	}
+
+	#Well done Nickname
+	option = {
+		name = iberia_north_africa.2100.a
+		give_nickname = nick_the_great
+		add_prestige = minor_prestige_gain
+	}
+
+	#Well done.
+	option = {
+		name = iberia_north_africa.2100.b
+		add_prestige = medium_prestige_gain
+	}
+}
+
+#Inform any players.
+iberia_north_africa.2101 = {
+	type = character_event
+	title = iberia_north_africa.2100.t
+	desc = iberia_north_africa.2101.desc
+	theme = realm
+	theme = diplomacy
+	left_portrait = {
+		character = scope:founder
+		animation = personality_bold
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				culture = {
+					OR = {
+						this = culture:basque
+						AND = {
+							any_parent_culture_or_above = { this = culture:basque }
+							has_cultural_pillar = heritage_iberian
+						}
+					}
+				}
+			}
+			play_music_cue = "mx_cue_positive_effect"
+		}
+		restore_old_vasconia_decision_tooltip_scripted_effect = yes
+	}
+
+	option = {
+		name = { #Basques are happy.
+			trigger = {
+				culture = {
+					OR = {
+						this = culture:basque
+						AND = {
+							any_parent_culture_or_above = { this = culture:basque }
+							has_cultural_pillar = heritage_iberian
+						}
+					}
+				}
+			}
+			text = iberia_north_africa.2100.b
+		}
+		name = { #Iberians and Franks/Occitans are outraged.
+			trigger = {
+				NOT = {
+					culture = {
+						OR = {
+							this = culture:basque
+							AND = {
+								any_parent_culture_or_above = { this = culture:basque }
+								has_cultural_pillar = heritage_iberian
+							}
+						}
+					}
+				}
+				culture = {
+					OR = {
+						has_cultural_pillar = heritage_frankish
+						has_cultural_pillar = heritage_iberian
+					}
+				}
+			}
+			text = iberia_north_africa.2101.b
+		}
+		name = { #Noone else especially cares.
+			trigger = {
+				culture = {
+					NOR = {
+						has_cultural_pillar = heritage_iberian
+						has_cultural_pillar = heritage_frankish
+					}
+				}
+			}
+			text = iberia_north_africa.2101.c
+		}
 	}
 }

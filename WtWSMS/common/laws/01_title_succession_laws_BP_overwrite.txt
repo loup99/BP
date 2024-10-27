@@ -1,21 +1,19 @@
-﻿title_succession_laws = {
-	##### Changed from Vanilla vvvvv
-	
+﻿##### Changed from Vanilla:  Extended election types to centralized governments
+title_succession_laws = {
 	#Default Feudal Elective
 	feudal_elective_succession_law = {
 		can_have = {
-			##### Changed from Vanilla: Removed "feudal_government" flag; captured by trigger now
+			OR = {
+				government_has_flag = government_is_feudal
+				government_has_flag = government_is_centralized
+			}
 			highest_held_title_tier >= tier_duchy
 			NOR = { #Cultures have their special flavor.
 				culture = { has_cultural_parameter = witenagemot_succession_enabled }
 				culture = { has_cultural_parameter = scandinavian_elective_enabled }
 				culture = { has_cultural_parameter = tribal_elective_enabled } #FP3 addition
 			}
-			##### Changed from Vanilla vvvvv
-			can_have_feudal_elective_succession_title_law_trigger = yes
-			##### Changed from Vanilla ^^^^^
 		}
-		##### Changed from Vanilla ^^^^^
 		can_pass = {
 			can_change_title_law_trigger = yes
 		}
@@ -35,20 +33,16 @@
 			prestige = change_title_succession_law_prestige_cost
 		}
 	}
-	##### Changed from Vanilla ^^^^^
-	
-	##### Changed from Vanilla vvvvv
-	
+
 	#HRE Succession
 	princely_elective_succession_law = {
-		##### Changed from Vanilla vvvvv
 		can_have = {
+			OR = {
+				government_has_flag = government_is_feudal
+				government_has_flag = government_is_clan
+			}
 			highest_held_title_tier = tier_empire
-			##### Changed from Vanilla vvvvv
-			has_a_feudal_type_of_government_trigger = yes
-			##### Changed from Vanilla ^^^^^
 		}
-		##### Changed from Vanilla ^^^^^
 		can_pass = {
 			can_change_title_law_trigger = yes
 		}
@@ -73,23 +67,18 @@
 			prestige = change_title_succession_law_prestige_cost
 		}
 	}
-	##### Changed from Vanilla ^^^^^
-	
-	##### Changed from Vanilla vvvvv
-	
+
 	#Witenagemot
 	saxon_elective_succession_law = {
-		##### Changed from Vanilla vvvv
 		can_have = {
-			##### Changed from Vanilla vvvv
 			OR = {
-				has_a_feudal_type_of_government_trigger = yes
-				has_government = tribal_government
+				government_has_flag = government_is_feudal
+				government_has_flag = government_is_clan
+				government_has_flag = government_is_tribal
+				government_has_flag = government_is_centralized
 			}
-			##### Changed from Vanilla ^^^^^
 			highest_held_title_tier >= tier_kingdom
 		}
-		##### Changed from Vanilla ^^^^^
 		can_pass = {
 			can_change_title_law_trigger = yes
 			culture = { has_cultural_parameter = witenagemot_succession_enabled }
@@ -110,23 +99,18 @@
 			prestige = change_title_succession_law_prestige_cost
 		}
 	}
-	##### Changed from Vanilla ^^^^^
-	
-	##### Changed from Vanilla vvvvv
-	
+
 	#Thing
 	scandinavian_elective_succession_law = {
-		##### Changed from Vanilla vvvvv
 		can_have = {
-			##### Changed from Vanilla vvvvv
 			OR = {
-				has_a_feudal_type_of_government_trigger = yes
-				has_government = tribal_government
+				government_has_flag = government_is_feudal
+				government_has_flag = government_is_clan
+				government_has_flag = government_is_tribal
+				government_has_flag = government_is_centralized
 			}
-			##### Changed from Vanilla ^^^^^
 			highest_held_title_tier >= tier_duchy
 		}
-		##### Changed from Vanilla ^^^^^
 		can_pass = {
 			can_change_title_law_trigger = yes
 			culture = { has_cultural_parameter = scandinavian_elective_enabled }
@@ -147,34 +131,28 @@
 			prestige = change_title_succession_law_prestige_cost
 		}
 	}
-	##### Changed from Vanilla ^^^^^
-	
-	##### Changed from Vanilla vvvvv
-	
+
 	#Tanistry
 	gaelic_elective_succession_law = {
-		##### Changed from Vanilla vvvvv
 		can_have = {
-			##### Changed from Vanilla vvvvv
-			can_have_gaelic_elective_succession_title_law_trigger = yes
-			##### Changed from Vanilla ^^^^^
+			OR = {
+				government_has_flag = government_is_feudal
+				government_has_flag = government_is_clan
+				government_has_flag = government_is_tribal
+				government_has_flag = government_is_centralized
+			}
 			highest_held_title_tier >= tier_duchy
 		}
 		can_pass = {
 			can_change_title_law_trigger = yes
 			custom_description = {
-				##### Changed from Vanilla vvvvv
 				OR = {
 					culture = { has_cultural_pillar = heritage_brythonic }
 					culture = { has_cultural_pillar = heritage_goidelic }
-					culture = { has_cultural_pillar = heritage_continental_celtic }
-					culture = { has_cultural_pillar = heritage_celtic }
 				}
-				##### Changed from Vanilla ^^^^^
 				text = succession_laws_must_have_valid_tanistry_culture
 			}
 		}
-		##### Changed from Vanilla ^^^^^
 		can_title_have = {
 			can_title_have_law_general_trigger = yes
 		}
@@ -191,10 +169,9 @@
 			prestige = change_title_succession_law_prestige_cost
 		}
 	}
-	##### Changed from Vanilla ^^^^^
-	
-	#Jirga elective 
-	tribal_elective_succession_law = { #FOR FP3 
+
+	#Jirga elective
+	tribal_elective_succession_law = { #FOR FP3
 		can_have = {
 			OR = {
 				government_has_flag = government_is_feudal
@@ -223,7 +200,7 @@
 			prestige = change_title_succession_law_prestige_cost
 		}
 	}
-	
+
 	#Player Heir
 	temporal_head_of_faith_succession_law = {
 		can_title_have = {
@@ -241,5 +218,22 @@
 		succession = {
 			order_of_succession = player_heir
 		}
+	}
+
+	#Noble Family Succession
+	noble_family_succession_law = {
+		can_title_have = {
+			is_noble_family_title = yes
+		}
+		should_show_for_title = { # Never show this in the UI, just apply it through script
+			always = no
+		}
+		can_remove_from_title = {
+			always = no
+		}
+		succession = {
+			order_of_succession = noble_family
+		}
+		flag = can_designate_heirs
 	}
 }

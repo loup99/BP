@@ -1,85 +1,79 @@
-﻿#Vanilla Governments & sundry
-realm_law_use_high_tribal_organization_trigger = { has_government = high_tribal_government }
-realm_law_use_prefeudal_authority_trigger = { has_government = prefeudal_government }
-realm_law_use_rajamandala_authority_trigger = { has_government = rajamandala_government }
-realm_law_use_eranshar_authority_trigger = { has_government = eranshar_government }
-realm_law_use_clerical_influence_trigger = {
-	this = { save_temporary_scope_as = the_ruler }
-	has_government = eranshar_government
-	#Only the Shahanshah gets to deal with the influence of the priests on the government
-	religion = religion:zoroastrianism_religion
-	exists = this.faith.religious_head
-	this.faith.religious_head = { is_vassal_of = scope:the_ruler }
-}
-
-realm_law_use_subroman_taxation_trigger = { has_government = subroman_government }
-realm_law_use_feudal_transition_trigger = { has_government = subroman_government }
-
-realm_law_use_bureaucratic_taxation_trigger = {
+﻿should_have_same_religion_succession_trigger = {
 	OR = {
-		has_government = bureaucratic_government
-		has_government = gubernatorial_government
-	}
-}
-
-should_have_same_religion_succession_trigger = {
-	OR = {
-		has_government = eranshar_government
+		government_has_flag = government_uses_iranian_dynastic_authority
 		culture = { has_cultural_parameter = same_religion_inheritance_only }
 	}
 }
 
-has_bureaucratic_taxation_trigger = {
-	OR = {
-		has_realm_law = bureaucratic_taxation_0
-		has_realm_law = bureaucratic_taxation_1
-		has_realm_law = bureaucratic_taxation_2
-		has_realm_law = bureaucratic_taxation_3
-		has_realm_law = bureaucratic_taxation_4
+can_have_tribal_elective_succession_title_law_trigger = {}
+
+################## ========================= 
+
+#Macros
+realm_law_match_liege_law_level_trigger = { #can_keep
+	trigger_if = { #See Vanilla Imperial Authority
+		limit = { is_independent_ruler = no }
+		liege = { has_realm_law = $LAW$ }
+	}
+}
+realm_law_vassal_has_liege_law_level_trigger = { #can_pass
+	trigger_if = { #See Vanilla Imperial Authority
+		limit = {
+			is_independent_ruler = no
+			liege = { has_realm_law = $LAW$ }
+		}
+		custom_tooltip = {
+			text = imperial_bureaucracy_pending_law_change
+			always = no
+		}
 	}
 }
 
-#Title Law Triggers
-
-#Only for bureaucratic_government
-can_have_imperial_elective_succession_realm_law_trigger = { has_government = bureaucratic_government }
-
-#Pretty Universal title succession law
-can_have_feudal_elective_succession_title_law_trigger = {
-	OR = {
-		has_government = feudal_government
-		has_government = prefeudal_government
-		has_government = high_tribal_government
-		has_government = subroman_government
-		has_government = eranshar_government
-		has_government = rajamandala_government
-		has_government = bureaucratic_government
+realm_law_match_liege_law_level_subroman_dynastic_trigger = {
+	trigger_if = { #So Sub-Roman Vassals match the top liege's law
+		limit = {
+			is_independent_ruler = no
+			liege = { government_has_flag = is_a_transitory_roman_government }
+		}
+		liege = { has_realm_law = $LAW$ }
 	}
+	trigger_else = {}
 }
-can_have_tribal_elective_succession_title_law_trigger = {
-	OR = {
-		has_government = tribal_government
-		has_government = nomad_government
-		has_government = high_tribal_government
+realm_law_vassal_has_liege_law_level_subroman_dynastic_trigger = { #can_pass
+	trigger_if = { #So transition happens down the tree
+		limit = {
+			is_independent_ruler = no
+			liege = { government_has_flag = is_a_transitory_roman_government }
+		}
+		liege = { has_realm_law = $LAW$ }
 	}
-}
-can_have_gaelic_elective_succession_title_law_trigger = {
-	OR = {
-		has_government = feudal_government
-		has_government = clan_government
-		has_government = tribal_government
-		has_government = subroman_government
-		has_government = high_tribal_government
+	trigger_else = {
+		custom_description = {
+			text = $TYPE$_can_not_be_controlled_manually
+			always = no
+		}
 	}
 }
 
-#### Crown Authority Equivalent levels
-has_crown_authority_equivalent_level_trigger = {
-	OR = {
-		has_realm_law = crown_authority_$LEVEL$
-		has_realm_law = high_tribal_organization_$LEVEL$
-		has_realm_law = prefeudal_authority_$LEVEL$
-		has_realm_law = rajamandala_authority_$LEVEL$
-		has_realm_law = eranshar_authority_$LEVEL$
-	}
+#Else
+realm_law_use_high_tribal_organization_trigger = {
+	government_has_flag = government_uses_high_tribal_organization
+}
+
+realm_law_use_prefeudal_authority_trigger = {
+	government_has_flag = government_uses_prefeudal_authority
+}
+
+realm_law_use_rajamandala_authority_trigger = {
+	government_has_flag = government_uses_rajamandala_authority
+}
+
+realm_law_use_iranian_dynastic_authority_trigger = {
+	government_has_flag = government_uses_iranian_dynastic_authority
+}
+realm_law_use_clerical_influence_trigger = {
+	government_has_flag = government_uses_iranian_dynastic_authority
+}
+realm_law_use_roman_dynastic_authority_trigger = {
+	government_has_flag = government_uses_roman_dynastic_authority
 }

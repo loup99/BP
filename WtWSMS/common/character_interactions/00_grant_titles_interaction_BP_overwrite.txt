@@ -1,4 +1,8 @@
 ﻿##### Changed from Vanilla: Modified is_valid_showing_failures_only, can_be_picked_title
+##### Changed from Vanilla: Applied Wuzurgan opinion modifiers
+##### Changed from Vanilla: Applied Aneran/Eran connotations to title grants
+
+#be aware that the actual granting of the title happens in code!
 grant_titles_interaction = {
 
 	category = interaction_category_vassal
@@ -17,6 +21,11 @@ grant_titles_interaction = {
 
 	is_shown = {
 		NOT = { scope:actor = scope:recipient }
+		scope:actor = {
+			NOT = {
+				government_has_flag = government_is_landless_adventurer
+			}
+		}
 		scope:recipient = {
 			OR = {
 				target_is_liege_or_above = scope:actor
@@ -27,8 +36,14 @@ grant_titles_interaction = {
 				}
 			}
 		}
+		trigger_if = {
+			limit = {
+				scope:actor = { government_allows = administrative }
+			}
+			scope:recipient = { NOT = { government_allows = administrative } }
+		}
 	}
-	
+
 	##### Changed from Vanilla vvvvv
 	is_valid_showing_failures_only = {
 		scope:recipient = {
@@ -37,6 +52,10 @@ grant_titles_interaction = {
 				OR = {
 					can_be_granted_titles_by = { RULER = scope:actor }
 					can_be_granted_theocratic_titles_by = { RULER = scope:actor }
+					AND = {
+						is_diarch_of_target = scope:actor
+						scope:actor = { has_diarchy_active_parameter = diarchy_is_co_rulership }
+					}
 				}
 			}
 			NOT = { is_at_war_with = scope:actor }
@@ -65,6 +84,8 @@ grant_titles_interaction = {
 					}
 				}
 			}
+			# Gallivanters won't accept additional responsibilities.
+			NOT = { has_trait = gallivanter }
 		}
 		custom_description = {
 			text = is_not_theocratic_court_chaplain
@@ -87,43 +108,8 @@ grant_titles_interaction = {
 				count > 1
 			}
 		}
-		
 		##### Changed from Vanilla vvvvv
-		trigger_if = { #Eranshar must give to powerful families if the throne is weak
-			limit = {
-				scope:actor = {
-					primary_title.tier >= tier_kingdom
-					has_government = eranshar_government
-					has_realm_law_flag = must_give_titles_to_powerful_families_or_landed_chars_if_possible
-					#Have to actually have a vassal or courtier that fits the bill
-					OR = {
-						#Any (county+) landed vassal or courtier have
-						any_vassal = {
-							primary_title.tier >= tier_county
-							dynasty = {
-								exists = this
-								dynasty_prestige_level >= low_dynasty_prestige_level
-							}
-						}
-						any_courtier = {
-							dynasty = {
-								exists = this #This is false for lowborn
-								dynasty_prestige_level >= low_dynasty_prestige_level
-							}
-						}
-					}
-				}
-			}
-			scope:recipient = {
-				custom_description = {
-					text = must_already_be_landed_or_from_a_powerful_family
-					AND = {
-						exists = dynasty
-						dynasty = { dynasty_prestige_level >= low_dynasty_prestige_level }
-					}
-				}
-			}
-		}
+		
 		#Rajamandala must give to family memebers if possible
 		trigger_if = {
 			limit = {
@@ -131,7 +117,7 @@ grant_titles_interaction = {
 					is_independent_ruler = no
 					government_has_flag = vassals_must_give_titles_to_dynasty_members
 					#Have to actually have a family member that you can give land to
-					dynasty = {
+					this.dynasty = {
 						any_dynasty_member = {
 							count > 0
 							NOT = { is_heir_of = scope:actor } #Can't be your heir
@@ -145,20 +131,24 @@ grant_titles_interaction = {
 					}
 				}
 			}
-			scope:recipient = {
-				custom_description = {
-					text = must_be_of_my_dynasty
-					AND = {
-						exists = dynasty
-						dynasty = scope:actor.dynasty
+			OR = { #Either give to a family member, or you have baronies to give away
+				scope:recipient = {
+					custom_description = {
+						text = must_be_of_my_dynasty
+						AND = {
+							exists = dynasty
+							this.dynasty = scope:actor.dynasty
+						}
 					}
 				}
+				scope:actor = { any_held_title = { this.tier < tier_county } }
 			}
 		}
 		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
-	
+
+	##### Changed from Vanilla vvvvv
 	can_send = {
 		trigger_if = {
 			limit = {
@@ -177,12 +167,21 @@ grant_titles_interaction = {
 			}
 		}
 	}
-	
+	##### Changed from Vanilla ^^^^^
+
 	##### Changed from Vanilla vvvvv
 	can_be_picked_title = {
+		##### Changed from Vanilla vvvvv
 		scope:target = {
 			is_leased_out = no
 
+			trigger_if = {
+				limit = { is_noble_family_title = yes }
+				custom_tooltip = {
+					text = GRANT_TITLES_ITEM_CANT_GIVE_NOBLE_FAMILY
+					always = no
+				}
+			}
 
 			trigger_if = {
 				limit = {
@@ -212,7 +211,44 @@ grant_titles_interaction = {
 				limit = { scope:target = title:k_fashion }
 				NOT = { scope:target = title:k_fashion }
 			}
+			
+			##### Changed from Vanilla vvvvv
+			
+			#Rajamandala must give to family memebers if possible
+			trigger_if = {
+				limit = {
+					scope:actor = {
+						government_has_flag = vassals_must_give_titles_to_dynasty_members
+						is_independent_ruler = no
+						#Have to actually have a family member that you can give land to
+						this.dynasty = {
+							any_dynasty_member = {
+								count > 0
+								NOT = { is_heir_of = scope:actor } #Can't be your heir
+								NOT = { is_child_of = scope:actor } #Or your direct descendents
+								#Has to be your courtier or vassal already
+								OR = {
+									is_courtier_of = scope:actor
+									is_vassal_of = scope:actor
+								}
+							}
+						}
+					}
+				}
+				custom_description = {
+					text = must_be_of_my_dynasty
+					OR = {
+						AND = {
+							scope:recipient.dynasty = scope:actor.dynasty
+							scope:target.tier >= tier_county
+						}
+						scope:target.tier < tier_county
+					}
+				}
+			}
+			##### Changed from Vanilla ^^^^^
 		}
+		##### Changed from Vanilla ^^^^^
 
 		custom_description = {
 			text = grant_titles_interaction_can_only_give_diarch_de_jure_liege_to_diarch
@@ -249,11 +285,11 @@ grant_titles_interaction = {
 						is_adult = no
 					}
 					scope:target = {
-						tier = tier_county 
+						tier = tier_county
 
-						title_province = { 
+						title_province = {
 							is_county_capital = yes
-							has_building_with_flag = temple 
+							has_building_with_flag = temple
 						}
 					}
 				}
@@ -266,27 +302,17 @@ grant_titles_interaction = {
 				scope:target = { has_variable = wagered_county }
 			}
 		}
-	
-		##### Changed from Vanilla vvvvv
 		
-		#Eranshar can only give "Eran" counties to followers of Ahura Mazda
+		##### Changed from Vanilla vvvvv
 		trigger_if = {
 			limit = {
-				scope:actor = {
-					has_government = eranshar_government
-					religion = religion:zoroastrianism_religion
-				}
-				scope:target = {
-					tier = tier_county
-					religion = religion:zoroastrianism_religion
-				}
+				scope:actor = { government_has_flag = righteous_counties_to_rightous_characters }
+				scope:target.tier = tier_county
+				scope:actor.faith = { faith_hostility_level  = { target = scope:target.faith value <= 1 } }
 			}
-			scope:recipient = {
-				religion = religion:zoroastrianism_religion
-				custom_description = {
-					text = must_be_asavan
-					faith = { considers_astray_trigger = { TARGET_FAITH = scope:actor.faith } }
-				}
+			custom_description = {
+				text = must_consider_the_chars_faith_to_be_righteous_or_astray
+				scope:actor.faith = { faith_hostility_level = { target = scope:recipient.faith value <= 1 } }
 			}
 		}
 		##### Changed from Vanilla ^^^^^
@@ -300,7 +326,7 @@ grant_titles_interaction = {
 			trigger_event = char_interaction.0110
 		}
 	}
-	
+
 	on_accept = {
 		if = {
 			limit = {
@@ -325,11 +351,8 @@ grant_titles_interaction = {
 			}
 			if = {
 				limit = {
-					NAND = {
+					NOT = {
 						has_relation_friend = scope:actor
-						has_relation_lover = scope:actor
-						has_relation_soulmate = scope:actor
-						has_relation_best_friend = scope:actor
 					}
 				}
 				if = {
@@ -904,7 +927,7 @@ grant_titles_interaction = {
 						count >= 1
 					}
 				}
-				
+
 				# Generous characters enjoy giving away titles
 				if = {
 					limit = {
@@ -954,7 +977,7 @@ grant_titles_interaction = {
 									else_if = {
 										limit = { this.tier = tier_empire }
 										add = {
-											value = monumental_stress_loss 
+											value = monumental_stress_loss
 											multiply = 2 # 200 base
 										}
 									}
@@ -983,7 +1006,7 @@ grant_titles_interaction = {
 				# Greedy & ambitious ruler gain stress for giving away titles if they would normally be able to keep them.
 				if = {
 					limit = {
-						# Pre-filter 
+						# Pre-filter
 						OR = {
 							has_trait = greedy
 							has_trait = ambitious
@@ -999,7 +1022,7 @@ grant_titles_interaction = {
 							limit = {
 								has_too_many_held_duchies_trigger = yes
 							}
-							NOT = {				
+							NOT = {
 								# Granting at least 1 duchy
 								any_in_list = {
 									list = target_titles
@@ -1009,7 +1032,7 @@ grant_titles_interaction = {
 									# All counties being granted are De Jure part of the duchy that is being granted
 									any_in_list = {
 										list = target_titles
-										count = all 
+										count = all
 										trigger_if = {
 											limit = { tier = tier_county}
 											de_jure_liege = scope:granted_duchy
@@ -1066,7 +1089,7 @@ grant_titles_interaction = {
 				# Actually removed in religious_decision.0312
 				custom_tooltip = runestone_grant_title_warning
 			}
-			
+
 			if = {
 				limit = {
 					exists = scope:actor.dynasty
@@ -1074,7 +1097,7 @@ grant_titles_interaction = {
 						has_dynasty_perk = ep1_culture_legacy_3
 					}
 					scope:recipient = {
-						is_landed = no
+						is_playable_character = no
 						NOT = {
 							culture = scope:actor.culture
 						}
@@ -1128,11 +1151,12 @@ grant_titles_interaction = {
 						save_temporary_scope_as = loc_title
 					}
 					send_interface_toast = {
+						type = event_toast_effect_neutral
 						title = grant_titles_interaction_notification
-					
-						left_icon = scope:actor					
+
+						left_icon = scope:actor
 						right_icon = scope:recipient
-					
+
 						custom_tooltip = grant_titles_interaction_notification_effect_2
 						if = {
 							limit = {
@@ -1176,11 +1200,12 @@ grant_titles_interaction = {
 						save_temporary_scope_as = loc_title
 					}
 					send_interface_toast = {
+						type = event_toast_effect_neutral
 						title = grant_titles_interaction_notification
-					
-						left_icon = scope:actor					
+
+						left_icon = scope:actor
 						right_icon = scope:recipient
-					
+
 						custom_tooltip = grant_titles_interaction_notification_effect_3
 					}
 				}
@@ -1194,11 +1219,12 @@ grant_titles_interaction = {
 						save_temporary_scope_as = loc_title
 					}
 					send_interface_toast = {
+						type = event_toast_effect_neutral
 						title = grant_titles_interaction_notification
-					
-						left_icon = scope:actor					
+
+						left_icon = scope:actor
 						right_icon = scope:recipient
-					
+
 						custom_tooltip = grant_titles_interaction_notification_effect_6
 					}
 				}
@@ -1213,11 +1239,12 @@ grant_titles_interaction = {
 						}
 					}
 					send_interface_toast = {
+						type = event_toast_effect_neutral
 						title = grant_titles_interaction_notification
-					
-						left_icon = scope:actor					
+
+						left_icon = scope:actor
 						right_icon = scope:recipient
-					
+
 						custom_tooltip = grant_titles_interaction_notification_effect_5
 					}
 				}
@@ -1231,19 +1258,21 @@ grant_titles_interaction = {
 						}
 					}
 					send_interface_toast = {
+						type = event_toast_effect_neutral
 						title = grant_titles_interaction_notification
-					
-						left_icon = scope:actor					
+
+						left_icon = scope:actor
 						right_icon = scope:recipient
-					
+
 						custom_tooltip = grant_titles_interaction_notification_effect_4
 					}
 				}
 				else = {
 					send_interface_toast = {
+						type = event_toast_effect_neutral
 						title = grant_titles_interaction_notification
 
-						left_icon = scope:actor					
+						left_icon = scope:actor
 						right_icon = scope:recipient
 
 						custom_tooltip = grant_titles_interaction_notification_effect
@@ -1304,5 +1333,100 @@ grant_titles_interaction = {
 				}
 			}
 		}
+		##### Changed from Vanilla vvvvv
+		
+		#Wuzurgan expect counties on up in Iranian Feudal Governments
+		if = {
+			limit = {
+				scope:actor = { government_has_flag = government_uses_iranian_dynastic_authority }
+				scope:target.tier >= tier_county #No one cares about baronies
+				#Is not an existing Wuzurgan, a dynasty member of an existing Wuzurgan, royal family, or a great dynasty
+				NOR = {
+					scope:recipient = { vassal_contract_has_flag = expects_landed_titles_to_be_granted } #Existing Wuzurgan
+					scope:recipient.dynasty ?= { #Dynasty Members are Wuzurgan
+						any_dynasty_member = {
+							this.dynasty = scope:recipient.dynasty
+							vassal_contract_has_flag = expects_landed_titles_to_be_granted
+						}
+					}
+					scope:recipient.dynasty = scope:actor.dynasty
+					scope:recipient.dynasty.dynasty_prestige_level >= eligible_to_be_wuzurgan_prestige_level
+				}
+			}
+			scope:actor = {
+				every_vassal = {
+					limit = { vassal_contract_has_flag = expects_landed_titles_to_be_granted }
+					
+					save_temporary_scope_as = the_vassal
+					scope:the_vassal = {
+						add_opinion = {
+							target = scope:actor
+							modifier = granted_the_poors_a_title
+							opinion = granted_titles_to_poor_opinion
+						}
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla ^^^^^
 	}
+}
+
+#This interaction is referenced in code! If it's renamed you have to ping a coder
+grant_title_to_new_random_character_interaction = {
+	hidden = yes
+	auto_accept = yes
+	special_interaction = grant_titles_interaction
+	use_diplomatic_range = no
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			NOT = {
+				this = scope:recipient
+			}
+			any_held_title = {
+				count > 1
+			}
+		}
+		scope:recipient = { is_busy_in_events_localised = yes }
+	}
+	
+	##### Changed from Vanilla vvvvv
+	on_accept = {
+		#Wuzurgan expect counties on up in Iranian Feudal Governments
+		if = {
+			limit = {
+				exists = scope:target
+				scope:actor = { government_has_flag = government_uses_iranian_dynastic_authority }
+				scope:target.tier >= tier_county #No one cares about baronies
+				#Is not an existing Wuzurgan, a dynasty member of an existing Wuzurgan, royal family, or a great dynasty
+				NOR = {
+					scope:recipient = { vassal_contract_has_flag = expects_landed_titles_to_be_granted } #Existing Wuzurgan
+					scope:recipient.dynasty ?= { #Dynasty Members are Wuzurgan
+						any_dynasty_member = {
+							this.dynasty = scope:recipient.dynasty
+							vassal_contract_has_flag = expects_landed_titles_to_be_granted
+						}
+					}
+					scope:recipient.dynasty = scope:actor.dynasty
+					scope:recipient.dynasty_prestige_level >= eligible_to_be_wuzurgan_prestige_level
+				}
+			}
+			scope:actor = {
+				every_vassal = {
+					limit = { vassal_contract_has_flag = expects_landed_titles_to_be_granted }
+					
+					save_temporary_scope_as = the_vassal
+					scope:the_vassal = {
+						add_opinion = {
+							target = scope:actor
+							modifier = granted_the_poors_a_title
+							opinion = granted_titles_to_poor_opinion
+						}
+					}
+				}
+			}
+		}
+	}
+	##### Changed from Vanilla ^^^^^
 }

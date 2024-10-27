@@ -1,12 +1,13 @@
 ﻿##### Changed from Vanilla: AI Romans/Greeks won't convert to local cultures
 convert_to_local_culture_decision = {
-	picture = "gfx/interface/illustrations/decisions/decision_realm.dds"
-
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
 	desc = convert_to_local_culture_decision_desc
 	selection_tooltip = convert_to_local_culture_decision_tooltip
 
 	is_shown = {
-		is_landed = yes
+		is_playable_character = yes
 		primary_title.tier > tier_barony
 		NOT = { culture = capital_province.culture }
 		NAND = {
@@ -112,6 +113,30 @@ convert_to_local_culture_decision = {
 	##### Changed from Vanilla ^^^^^
 
 	effect = {
+		if = {
+			limit = {
+				culture = {
+					has_cultural_parameter = less_likely_to_culture_convert
+				}
+				OR = {
+					has_trait = compassionate
+					has_trait = gregarious
+					has_trait = diligent
+					has_trait = fickle
+					has_trait = humble
+					has_trait = trusting
+				}
+			}
+			add_stress = medium_stress_gain
+		}
+		else_if = {
+			limit = {
+				culture = {
+					has_cultural_parameter = less_likely_to_culture_convert
+				}
+			}
+			add_stress = major_stress_gain
+		}
 		# Struggle Catalysts
 		if = {
 			limit = {
@@ -140,11 +165,11 @@ convert_to_local_culture_decision = {
 	ai_check_interval = 60
 
 	ai_potential = {
-		is_landed = yes
+		is_playable_character = yes
 		NOT = { culture = capital_province.culture }
+		is_landless_adventurer = no
 	}
 
-	##### Changed from Vanilla vvvvv
 	ai_will_do = {
 		base = 3
 		
@@ -195,7 +220,7 @@ convert_to_local_culture_decision = {
 				has_cultural_tradition = tradition_loyal_soldiers
 			}
 		}
-		##### Changed from Vanilla vvvvv
+		
 		modifier = { # You're an independent count that has become landed somewhere, as you can't increase acceptance, it's best to assimilate.
 			add = 200
 			is_independent_ruler = yes
@@ -205,12 +230,11 @@ convert_to_local_culture_decision = {
 				NOR = {
 					has_cultural_parameter = easier_to_hybridize # Not for hybrid-loving cultures
 					has_cultural_parameter = expensive_convert_to_local_culture # Nor staunch traditionalists
-					has_cultural_parameter = traditionalist_culture_feature #Nor traditionalists
 				}
 				cultural_acceptance = { target = root.capital_province.culture value < 50 }
 			}
 		}
-		##### Changed from Vanilla ^^^^^
+		
 		modifier = { # Do convert to hybrids of your own culture
 			add = 200
 			capital_province.culture = {
@@ -347,7 +371,12 @@ convert_to_local_culture_decision = {
 			factor = 0
 			has_culture = culture:turkish
 			capital_province = {
-				culture = { has_cultural_pillar = heritage_byzantine }
+				culture = {
+					OR = {
+						has_cultural_pillar = heritage_byzantine
+						has_cultural_pillar = heritage_caucasian
+					}
+				}
 			}
 			NOT = {
 				capital_province = {
@@ -427,13 +456,15 @@ convert_to_local_culture_decision = {
 			factor = 0
 			has_character_flag = converted_culture_this_lifetime
 		}
-		
-		##### Changed from Vanilla vvvvv
-		modifier = { #Anyone
-			factor = 0
-			ai_will_not_convert_to_local_culture_trigger = yes
+		#Some traditions reeeallly don't like doing this
+		modifier = {
+			factor = 0.1
+			culture = {
+				OR = {
+					has_cultural_parameter = less_likely_to_culture_convert
+					has_cultural_parameter = expensive_convert_to_local_culture
+				}
+			}
 		}
-		##### Changed from Vanilla ^^^^^
 	}
-	##### Changed from Vanilla ^^^^^
 }
