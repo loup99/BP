@@ -17,9 +17,9 @@ bp_game_start = {
 		BP_character_events
 		create_BP_artifacts
 		#Legal Stuff
-		game_start_fix_barony_government
 		setup_realm_laws
 		setup_realm_and_title_succession_laws
+		game_start_fix_barony_government
 		setup_vassal_contracts
 		#Other Title effects
 		other_title_effects
@@ -466,7 +466,32 @@ setup_realm_and_title_succession_laws = {
 						this = title:d_ulster
 					}
 				}
-				add_title_law = gaelic_elective_succession_law #3 instances
+				add_title_law = gaelic_elective_succession_law
+			}
+		}
+		#Tribal Elective Succession
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						#Turkic Succession
+						this = title:k_al_hirah ##### TODO (Beta): Implement succ_turkish_succession law
+						this = title:k_arabia_petraea ##### TODO (Beta): Implement succ_turkish_succession law
+						this = title:k_qaryat_dhat_kahil ##### TODO (Beta): Implement succ_turkish_succession law
+					}
+				}
+				add_title_law = tribal_elective_succession_law
+			}
+		}
+		#Berber Confederate Succession: For large Berber Tribal Confederations
+		every_ruler = {
+			limit = {
+				has_government = tribal_government
+				culture = { has_cultural_pillar = heritage_berber }
+			}
+			every_held_title = {
+				limit = { this.tier >= tier_kingdom }
+				add_title_law = berber_confederation_succession_title_law
 			}
 		}
 		
@@ -1027,6 +1052,22 @@ setup_vassal_contracts = {
 				TRIBUTARY = title:d_orleans_alans.holder
 				SUZERAIN = title:k_soissons.holder
 			}
+			#Vandals
+			make_tributary = {
+				TYPE = tributary_permanent#foederatus_tributary
+				TRIBUTARY = title:d_auresia.holder
+				SUZERAIN = title:k_vandalica.holder
+			}
+			make_tributary = {
+				TYPE = tributary_permanent#foederatus_tributary
+				TRIBUTARY = title:d_sicca_veneria.holder
+				SUZERAIN = title:k_vandalica.holder
+			}
+			make_tributary = {
+				TYPE = tributary_permanent#foederatus_tributary
+				TRIBUTARY = title:d_capsa.holder
+				SUZERAIN = title:k_vandalica.holder
+			}
 			#### Britannia
 			make_tributary = { #Deria dependence on York
 				TYPE = tributary_permanent
@@ -1076,12 +1117,23 @@ other_title_effects = {
 				set_realm_capital = title:c_zetang
 			}
 		}
+		title:k_kidarite.holder = {
+			if = { #Kidarite Rump Kingdom in Gandhara
+				limit = { current_date >= 467.1.1 }
+				set_realm_capital = title:c_udabhanda
+			}
+		}
+		title:d_caucasian_albania.holder = {
+			if = {
+				limit = { current_date < 500.1.1 }
+				set_realm_capital = title:c_shaki
+			}
+		}
 		#Make some titular titles align with specific lieges
 		if = {
 			limit = { current_date = 476.2.2 }
 			#k_armenia
 			title:d_gugark = { set_de_jure_liege_title = title:k_armenia }
-			title:d_gardman = { set_de_jure_liege_title = title:k_armenia }
 			title:d_tayk = { set_de_jure_liege_title = title:k_armenia }
 			#e_peria
 			title:d_gortyene = { set_de_jure_liege_title = title:k_asoristan }
@@ -1370,6 +1422,7 @@ set_autocephalous_church_flags = {
 		faith:armenian_apostolic = { set_variable = { name = church_culture value = culture:armenian } }
 		faith:georgian_orthodox = { set_variable = { name = church_culture value = culture:georgian } }
 		faith:gothic_church = { set_variable = { name = church_culture value = culture:gothic } }
+		faith:cypriot_church = { set_variable = { name = church_culture value = culture:cypriot } }
 	}
 }
 set_ethnic_religion_flags = {
@@ -1379,10 +1432,10 @@ set_ethnic_religion_flags = {
 		faith:bathouism = { set_variable = { name = ethnic_religion_culture value = culture:kachari } }
 		faith:sanamahi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:meitei } }
 		#Dualism
-		faith:mandeaism = { set_variable = { name = ethnic_religion_culture value = culture:aramean } }
+		faith:mandeaism = { set_variable = { name = ethnic_religion_culture value = culture:chaldean } }
 		faith:sabianism = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
 		#Judaism
-		faith:samaritan = { set_variable = { name = ethnic_religion_culture value = culture:hebrew } }
+		faith:samaritan = { set_variable = { name = ethnic_religion_culture value = culture:samaritan_culture } }
 		faith:tzadikite = { set_variable = { name = ethnic_religion_culture value = culture:juhuro } }
 		faith:haymanot = { set_variable = { name = ethnic_religion_culture value = culture:sidamic } }
 		#Munhumism
@@ -1399,6 +1452,9 @@ set_ethnic_religion_flags = {
 		faith:munda_pagan = { set_variable = { name = ethnic_religion_culture value = culture:munda } }
 		faith:gondi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:gond } }
 		faith:khasi_animism = { set_variable = { name = ethnic_religion_culture value = culture:khasi } }
+		#Mesopotamianism
+		faith:assyrian_pagan = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
+		faith:shamsi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
 	}
 }
 other_religion_effects = {
@@ -1407,6 +1463,38 @@ other_religion_effects = {
 			limit = { current_date >= 484.1.1 }
 			legalize_caucasian_christianity_global_effect = yes
 		}
+		#Mazdakism as a strain of mainline Zoroastianism before Sukhra's death, so this is more Zaradushtism
+		#See Crone's "Kavad's Heresy and Mazdak's Revolt" for a thorough treatment
+		if = {
+			limit = { current_date <= 493.1.1 }
+			faith:mazdakism = {
+				#Was less ascetic and more "life is to be enjoyed" (although "Hedonistic" might be too far)
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_asceticism
+					NEW_DOCTRINE = tenet_hedonistic
+				}
+				#Still priestly
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_lay_clergy
+					NEW_DOCTRINE = doctrine_theocracy_temporal
+				}
+				#Male Dominated; more about not hoarding the women
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_gender_equal
+					NEW_DOCTRINE = doctrine_gender_male_dominated
+				}
+				#Still considered acceptable
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_heretic_branch_zandik
+					NEW_DOCTRINE = doctrine_major_branch_dorustdin
+				}
+				set_religious_head_title = title:d_mazdayasna
+			}
+		}
+		#### Other Global Events
+		
+		#Yazidism effects
+		RICE_setup_yazidi_flavor_pack_BP_subselect_effect = yes
 	}
 }
 
@@ -1483,10 +1571,6 @@ set_starting_culture_acceptance = {
 					value = 100
 				}
 				set_cultural_acceptance = {
-					target = culture:indo_parthian
-					value = 90
-				}
-				set_cultural_acceptance = {
 					target = culture:mazanderani
 					value = 83
 				}
@@ -1512,7 +1596,7 @@ set_starting_culture_acceptance = {
 				}
 				set_cultural_acceptance = {
 					target = culture:aramean
-					value = 47
+					value = 20
 				}
 				set_cultural_acceptance = {
 					target = culture:corduenian
@@ -1544,7 +1628,7 @@ set_starting_culture_acceptance = {
 				}
 				set_cultural_acceptance = {
 					target = culture:assyrian
-					value = 17
+					value = 6
 				}
 			}
 			#ERE
@@ -1572,10 +1656,6 @@ set_starting_culture_acceptance = {
 				set_cultural_acceptance = {
 					target = culture:cappadocian
 					value = 80
-				}
-				set_cultural_acceptance = {
-					target = culture:helleno_aramean
-					value = 79
 				}
 				set_cultural_acceptance = {
 					target = culture:armenian
@@ -1642,6 +1722,13 @@ set_starting_culture_acceptance = {
 					value = 15
 				}
 			}
+			#OTHERS
+			culture:parthian = {
+				set_cultural_acceptance = {
+					target = culture:caucasian_albanian
+					value = 16
+				}
+			}
 		}
 	}
 }
@@ -1649,8 +1736,10 @@ set_starting_culture_acceptance = {
 #Other Events
 trigger_needed_events = {
 	effect = {
-		#Inform all the players
+		#Inform all the players of the mod
 		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
+		#Fix _all_ the barony governments; has to be some ruler for some reason
+		random_ruler = { trigger_event = { id = BP_maintenance_events.0002 } }
 	}
 }
 set_global_variables = {

@@ -5,8 +5,122 @@ doctrine_zoroastrian_branches = {
 		religion_tag = zoroastrianism_religion
 	}
 
-
-	doctrine_major_branch_behdin = {
+##### Changed from Vanilla vvvvv
+	doctrine_major_branch_dorustdin = {
+		is_shown = {}
+		can_pick = {
+			custom_description = {
+				text = dorustdin_requires_you_follow_the_magi
+				this.religious_head ?= faith:mazdayasna.religious_head
+			}
+			
+			##### Mostly taken from core_tenet_rite #####
+			
+			# Must have a theocratic HoF.
+			custom_description = {
+				text = doctrine_requires_theocratic_head_of_faith_trigger
+				doctrine:doctrine_spiritual_head = { is_in_list = selected_doctrines }
+			}
+			# !!! SECTION NOTE !!!
+			## We check for tenets rather than doctrine parameters here because doctrine parameters cannot be checked in the selected_doctrines list, so we maintain such throughout the section for consistency.
+			# Some tenet/doctrine configurations are mutually exclusive.
+			
+			## Criminal witches vs. adorcists.
+			custom_description = {
+				text = incompatible_tenet_shared_hof_criminal_witches_vs_adorcists
+				NOR = {
+					# Either you're big on possessions but your HoF hates witchcraft...
+					AND = {
+						doctrine:tenet_adorcism = { is_in_list = selected_doctrines }
+						religious_head.faith = { has_doctrine = doctrine_witchcraft_crime }
+					}
+					# ... or you hate witchcraft but your HoF likes possessions.
+					AND = {
+						doctrine:doctrine_witchcraft_crime = { is_in_list = selected_doctrines }
+						religious_head.faith = { has_doctrine = tenet_adorcism }
+					}
+				}
+			}
+			## Monogamy doesn't like polygamy.
+			custom_description = {
+				text = incompatible_tenet_shared_hof_monogamy_vs_polygamy
+				# Monogamous HoFs do not appreciate polygamy.
+				trigger_if = {
+					limit = {
+						doctrine:doctrine_polygamy = { is_in_list = selected_doctrines }
+					}
+					NOT = {
+						religious_head.faith = { has_doctrine = doctrine_monogamy }
+					}
+				}
+			}
+			## All lesser variations of incest don't like unrestricted incest.
+			custom_description = {
+				text = incompatible_tenet_shared_hof_world_vs_unrestricted_incest
+				# Non-incestual HoFs really take issue with unrestricted incest.
+				trigger_if = {
+					limit = {
+						doctrine:doctrine_consanguinity_unrestricted = { is_in_list = selected_doctrines }
+					}
+					religious_head.faith = { has_doctrine = doctrine_consanguinity_unrestricted }
+				}
+			}
+			
+			##### General Zoroastrianism Blockers
+			
+			## Exaltation of Pain does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_exaltation_of_pain_trigger
+				NOT = { doctrine:tenet_exaltation_of_pain = { is_in_list = selected_doctrines } }
+			}
+			## Human Sacrifice does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_human_sacrifice_trigger
+				NOT = { doctrine:tenet_human_sacrifice = { is_in_list = selected_doctrines } }
+			}
+			## Human Sacrifice does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_gruesome_festivals_trigger
+				NOT = { doctrine:tenet_gruesome_festivals = { is_in_list = selected_doctrines } }
+			}
+			## Cannibalism does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_ritual_cannibalism_trigger
+				NOT = { doctrine:tenet_ritual_cannibalism = { is_in_list = selected_doctrines } }
+			}
+			
+			##### Dorustdin Specific Blockers
+			custom_description = { #No Pantheon anymore (Yaztas, but no Pantheon)
+				text = incompatible_tenet_bhakti_trigger
+				NOT = { doctrine:tenet_bhakti = { is_in_list = selected_doctrines } }
+			}
+			custom_description = { #No Sun worship, only Orzmid
+				text = incompatible_tenet_sun_worship_trigger
+				NOT = { doctrine:tenet_sun_worship = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_false_conversion_sanction_trigger
+				NOT = { doctrine:tenet_false_conversion_sanction = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_sacred_shadows_trigger
+				NOT = { doctrine:tenet_sacred_shadows = { is_in_list = selected_doctrines } }
+			}
+			
+			## Cannot pick a syncretism
+			custom_description = {
+				text = incompatible_tenet_syncretism_dorustdin
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
 		piety_cost = {
 			value = faith_doctrine_cost_high
 			if = {
@@ -15,12 +129,56 @@ doctrine_zoroastrian_branches = {
 			}
 		}
 		parameters = {
-			hostility_override_doctrine_major_branch_behdin = 0
-			##### Changed from Vanilla vvvvv
+			hostility_override_doctrine_major_branch_dorustdin = 0
+			hostility_override_doctrine_major_branch_behdin = 1
 			hostility_override_special_doctrine_legalized_faith_persia = 2
 			shared_hof_converts_counties_to_hof_religion = yes
-			##### Changed from Vanilla ^^^^^
+			maintains_head_of_faith_on_creation = yes
 		}
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	##### Changed from Vanilla vvvvv
+	doctrine_major_branch_behdin = {
+		piety_cost = {
+			value = faith_doctrine_cost_high
+			if = {
+				limit = { has_doctrine = doctrine_heretic_branch_zandik } #Becoming accepted by the mainstream movement is very piety-expensive 
+				multiply = 3
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		can_pick = {
+			##### General Zoroastrianism Blockers
+			
+			## Exaltation of Pain does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_exaltation_of_pain_trigger
+				NOT = { doctrine:tenet_exaltation_of_pain = { is_in_list = selected_doctrines } }
+			}
+			## Human Sacrifice does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_human_sacrifice_trigger
+				NOT = { doctrine:tenet_human_sacrifice = { is_in_list = selected_doctrines } }
+			}
+			## Human Sacrifice does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_gruesome_festivals_trigger
+				NOT = { doctrine:tenet_gruesome_festivals = { is_in_list = selected_doctrines } }
+			}
+			## Cannibalism does not fit with mainstream Zoroastrianism
+			custom_description = {
+				text = incompatible_tenet_ritual_cannibalism_trigger
+				NOT = { doctrine:tenet_ritual_cannibalism = { is_in_list = selected_doctrines } }
+			}
+		}
+		
+		parameters = {
+			hostility_override_doctrine_major_branch_dorustdin = 1
+			hostility_override_doctrine_major_branch_behdin = 1
+			shared_hof_converts_counties_to_hof_religion = yes
+		}
+		##### Changed from Vanilla ^^^^^
 	}
 	
 	doctrine_heretic_branch_zandik = {
