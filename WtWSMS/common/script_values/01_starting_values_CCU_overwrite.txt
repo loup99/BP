@@ -311,8 +311,26 @@ culture_acceptance_baseline = {
 				desc = ACCEPTANCE_BASELINE_CLOSE_PLURALISTS
 			}
 		}
-		#Specific Tradition cases
-		if = {
+		#Specific Tradition cases; shouldn't stack
+		if = { #Berber/Assyrian case; different cultures view themselves as the same
+			limit = {
+				OR = {
+					AND = {
+						root = { has_cultural_parameter = autochthon_baseline_acceptance }
+						scope:culture = { has_cultural_parameter = autochthon_baseline_acceptance }
+					}
+					AND = {
+						root = { has_cultural_parameter = shared_assyro_aramean_traditions }
+						scope:culture = { has_cultural_parameter = shared_assyro_aramean_traditions }
+					}
+				}
+			}
+			add = {
+				value = autochthon_baseline_acceptance_value
+				desc = ACCEPTANCE_BASELINE_AUTOCHTHON_TRADITION
+			}
+		}
+		else_if = { #Greeks and Romans
 			limit = {
 				root = { has_a_greco_roman_social_traditon_trigger = yes }
 				scope:culture = { has_a_greco_roman_social_traditon_trigger = yes }
@@ -322,7 +340,7 @@ culture_acceptance_baseline = {
 				desc = ACCEPTANCE_BASELINE_ROMAN_TRADITIONS
 			}
 		}
-		if = {
+		else_if = { #General Shared Culture Values
 			limit = {
 				has_same_heritage_culture_tradition_trigger = {
 					CULTURE_1 = root
