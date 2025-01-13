@@ -4,7 +4,7 @@
 # $COUNTY$
 add_culture_minority_effect = {
 	$COUNTY$ = {
- 		if = {
+		if = {
 			limit = {
 				NOR = {
 					culture = $CULTURE$
@@ -361,7 +361,13 @@ county_to_county_culture_faith_migration_effect = {
 minority_culture_growth_effect = {
 	scope:source_county = {
 		if = {
-			limit = { holder = { has_realm_law_flag = cultural_minorities_may_grow } }
+			limit = {
+				holder = { has_realm_law_flag = cultural_minorities_may_grow }
+				#Do not displace the ruler's culture
+				NOT = { scope:source_county.culture = scope:source_county.holder.culture }
+				#Do not displace Judean and Samaritan in Palestine
+				jewish_culture_in_palestine_trigger = no
+			}
 			save_scope_as = county
 			promote_culture_minority_effect = { CULTURE = scope:minority_culture }
 		}
@@ -374,6 +380,10 @@ minority_culture_spread_effect = {
 			limit = {
 				holder = { has_realm_law_flag = cultural_minorities_may_migrate }
 				NOT = { culture = scope:minority_culture }
+				#Do not displace the ruler's culture
+				NOT = { this.culture = this.holder.culture }
+				#Do not displace Judean and Samaritan in Palestine
+				jewish_culture_in_palestine_trigger = no
 			}
 			save_scope_as = county
 			promote_culture_minority_effect = { CULTURE = scope:minority_culture }
@@ -387,7 +397,50 @@ minority_culture_spread_effect = {
 minority_faith_growth_effect = {
 	scope:source_county = {
 		if = {
-			limit = { holder = { has_realm_law_flag = religious_minorities_may_grow } }
+			limit = {
+				holder = { has_realm_law_flag = religious_minorities_may_grow }
+				#Do not displace the ruler's faith
+				NOT = { this.faith = scope:source_county.holder.faith }
+				#Do not displace Judaism in Palestine
+				jewish_faith_in_palestine_trigger = no
+				#Ethnic Religions shouldn't migrate unless target county has necessary culture
+				trigger_if = {
+					limit = { scope:minority_faith = { has_doctrine = tenet_ethnic_religion } }
+					OR = {
+						actor_is_faith_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = ethnic_religion_culture
+						}
+						actor_is_faith_child_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = ethnic_religion_culture
+						}
+					}
+				}
+				#Autocephalous shouldn't migrate unless target county has necessary culture/heritage
+				trigger_if = {
+					limit = { scope:minority_faith = { has_doctrine = tenet_autocephaly } }
+					OR = {
+						actor_is_faith_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = church_culture
+						}
+						actor_is_faith_child_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = church_culture
+						}
+						actor_is_different_heritage_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = church_culture
+						}
+					}
+				}
+			}
 			save_scope_as = county
 			promote_faith_minority_effect = { FAITH = scope:minority_faith }
 		}
@@ -400,6 +453,47 @@ minority_faith_spread_effect = {
 			limit = {
 				holder = { has_realm_law_flag = religious_minorities_may_migrate }
 				NOT = { faith = scope:minority_faith }
+				#Do not displace the ruler's faith
+				NOT = { this.faith = this.holder.faith }
+				#Do not displace Judaism in Palestine
+				jewish_faith_in_palestine_trigger = no
+				#Ethnic Religions shouldn't migrate unless target county has necessary culture
+				trigger_if = {
+					limit = { scope:minority_faith = { has_doctrine = tenet_ethnic_religion } }
+					OR = {
+						actor_is_faith_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = ethnic_religion_culture
+						}
+						actor_is_faith_child_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = ethnic_religion_culture
+						}
+					}
+				}
+				#Autocephalous shouldn't migrate unless target county has necessary culture/heritage
+				trigger_if = {
+					limit = { scope:minority_faith = { has_doctrine = tenet_autocephaly } }
+					OR = {
+						actor_is_faith_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = church_culture
+						}
+						actor_is_faith_child_culture_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = church_culture
+						}
+						actor_is_different_heritage_for_cultural_religions_trigger = {
+							ACTOR = this
+							TARGET = scope:minority_faith
+							VARIABLE = church_culture
+						}
+					}
+				}
 			}
 			save_scope_as = county
 			promote_faith_minority_effect = { FAITH = scope:minority_faith }
