@@ -66,12 +66,7 @@ scripted_trigger is_culture_mostly_in_linguistic_region_trigger = {
 }
 
 scripted_trigger a_culture_parent_is_a_germanic_culture_trigger = {
-	OR = {
-		any_parent_culture = { has_cultural_pillar = heritage_central_germanic }
-		any_parent_culture = { has_cultural_pillar = heritage_east_germanic }
-		any_parent_culture = { has_cultural_pillar = heritage_north_germanic }
-		any_parent_culture = { has_cultural_pillar = heritage_west_germanic }
-	}
+	any_parent_culture = { has_cultural_parameter = heritage_group_germanic }
 }
 
 scripted_trigger a_culture_parent_speaks_a_semitic_language_trigger = {
@@ -858,12 +853,113 @@ scripted_effect shift_heritage_latin_to_children_effect = {
 			set_culture_pillar = heritage_italian
 			ccu_culture_created_or_changed_effect = yes
 		}
-		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: HERITAGE (LATIN=>CHILDREN" }
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: HERITAGE (LATIN=>CHILDREN)" }
 	}
 }
 
+scripted_effect germanic_shift_by_local_cultures_effect = {
+	if = {
+		limit = {
+			any_culture_county = {
+				percent > 0.5
+				any_neighboring_county = {
+					OR = {
+						culture = { has_cultural_pillar = heritage_nordwestblock }
+						culture = { has_cultural_pillar = heritage_west_germanic }
+					}
+				}
+			}
+		}
+		set_culture_pillar = heritage_west_germanic
+		ccu_culture_created_or_changed_effect = yes
+	}
+	else_if = {
+		limit = {
+			any_culture_county = {
+				percent > 0.5
+				any_neighboring_county = {
+					OR = {
+						culture = { has_cultural_pillar = heritage_scandzan }
+						culture = { has_cultural_pillar = heritage_north_germanic }
+					}
+				}
+			}
+		}
+		set_culture_pillar = heritage_north_germanic
+		ccu_culture_created_or_changed_effect = yes
+	}
+	else_if = {
+		limit = {
+			any_culture_county = {
+				percent > 0.5
+				any_neighboring_county = {
+					OR = {
+						culture = { has_cultural_pillar = heritage_suebic }
+						culture = { has_cultural_pillar = heritage_central_germanic }
+					}
+				}
+			}
+		}
+		set_culture_pillar = heritage_central_germanic
+		ccu_culture_created_or_changed_effect = yes
+	}
+	else_if = {
+		limit = {
+			any_culture_county = {
+				percent > 0.5
+				any_neighboring_county = {
+					OR = {
+						culture = { has_cultural_pillar = heritage_gothic }
+						culture = { has_cultural_pillar = heritage_przeworsk }
+						culture = { has_cultural_pillar = heritage_east_germanic }
+					}
+				}
+			}
+		}
+		set_culture_pillar = heritage_east_germanic
+		ccu_culture_created_or_changed_effect = yes
+	}
+	else = {
+		set_culture_pillar = $DEFAULT_MEDIEVAL_HERITAGE$
+		ccu_culture_created_or_changed_effect = yes
+	}
+}
+
+scripted_effect shift_germanic_heritage_to_children_effect = {
+	scope:shift_culture = {
+		if = {
+			limit = { has_cultural_pillar = heritage_nordwestblock }
+			germanic_shift_by_local_cultures_effect = { DEFAULT_MEDIEVAL_HERITAGE = heritage_west_germanic }
+		}
+		else_if = {
+			limit = { has_cultural_pillar = heritage_scandzan }
+			germanic_shift_by_local_cultures_effect = { DEFAULT_MEDIEVAL_HERITAGE = heritage_north_germanic }
+		}
+		else_if = {
+			limit = { has_cultural_pillar = heritage_suebic }
+			germanic_shift_by_local_cultures_effect = { DEFAULT_MEDIEVAL_HERITAGE = heritage_central_germanic }
+		}
+		else_if = { #East Germanics...
+			limit = {
+				OR = {
+					has_cultural_pillar = heritage_gothic
+					has_cultural_pillar = heritage_przeworsk
+				}
+			}
+			germanic_shift_by_local_cultures_effect = { DEFAULT_MEDIEVAL_HERITAGE = heritage_east_germanic }
+		}
+		else_if = { #Jutlandics...
+			limit = { has_cultural_pillar = heritage_jutlandic }
+			germanic_shift_by_local_cultures_effect = { DEFAULT_MEDIEVAL_HERITAGE = heritage_central_germanic }
+		}
+		else = { debug_log = "UNHANDLED CULTURE IN bp_heritage_linguistic_drift EVENT SPACE: HERITAGE (GERMANIC=>CHILDREN)" }
+	}
+}
+
+
 scripted_effect shift_heritage_effect = {
 	shift_heritage_latin_to_children_effect = yes
+	shift_germanic_heritage_to_children_effect = yes
 }
 
 bp_heritage_linguistic_drift.0101 = {
