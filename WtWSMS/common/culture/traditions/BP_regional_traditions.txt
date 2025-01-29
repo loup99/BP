@@ -2745,3 +2745,85 @@ tradition_early_slavic_traditions_non_dlc = {
 		}
 	}
 }
+
+#For large kingdom-level migrations that form a new culture via decision
+tradition_migratory_culture = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = western
+		4 = king.dds
+	}
+	
+	is_shown = { always = no }
+	can_pick = { always = no }
+	can_pick_for_hybridization = { always = no }
+	
+	parameters = {
+		traditionalist_culture_feature = yes
+		dislikes_marrying_outside_of_culture = yes
+		courtiers_less_likely_to_leave_same_culture_court = yes
+		peasant_and_populist_factions_less_common = yes
+		less_likely_to_promote_culture = yes
+		is_removed_if_enough_counties = yes #Just for flavor
+	}
+	culture_modifier = {
+		cultural_acceptance_gain_mult = -0.50
+	}
+	character_modifier = {
+		same_culture_opinion = 5
+		revolting_siege_morale_loss_mult = 0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_courtly = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_spiritual_or_courtly_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						any_councillor = {
+							NOR = {
+								culture = scope:character.culture
+								is_spouse_of = scope:character # Might be hard to have the right culture for the Spouse; but we can remove this helper if needed
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_council_desc
+				}
+			}
+			if = {
+				limit = {
+					has_variable = aggressive_traditionalist_discount
+				}
+				add = {
+					value = traditionalist_discount
+					desc = traditionalist_discount_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = { value = 100 }
+}
