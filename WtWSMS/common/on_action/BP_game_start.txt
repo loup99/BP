@@ -32,6 +32,7 @@ bp_game_start = {
 		#Culture Stuff
 		learn_the_language_of_your_capital
 		add_innovations_as_required
+		update_culture_traditions_by_date
 		#Family Stuff
 		set_historical_dynasty_renown
 		#Other Actions
@@ -1527,6 +1528,49 @@ add_innovations_as_required = {
 				}
 			}
 			culture:armenian = { add_innovation = innovation_cataphracts }
+		}
+	}
+}
+
+update_culture_traditions_by_date = {
+	effect = {
+		#The Mogyer's are nomadic
+		culture:mogyer = { set_culture_pillar = heritage_yugrian }
+		
+		if = { #Vandal migration
+			limit = { current_date >= 395.1.1 }
+			if = {
+				limit = { has_dlc_feature = diverge_culture }
+				culture:vandalic = { add_culture_tradition = tradition_migratory_culture }
+			}
+			else = { culture:vandalic = { add_culture_tradition = tradition_migratory_culture } }
+		}
+		if = { #The Great Migration
+			limit = { current_date >= 406.1.1 }
+			if = {
+				limit = { has_dlc_feature = diverge_culture }
+				culture:marcomanni = { add_culture_tradition = tradition_migratory_culture }
+				culture:buri = { add_culture_tradition = tradition_migratory_culture }
+			}
+			else = {
+				culture:marcomanni = { add_culture_tradition = tradition_ruling_caste }
+				culture:buri = { add_culture_tradition = tradition_ruling_caste }
+			}
+		}
+		if = { #Conversion of the Suebi by Ajax
+			limit = { current_date >= 466.1.1 }
+			culture:hispanian_suebi = { add_culture_tradition = tradition_concubines }
+		}
+		if = { #Skirians get booted from Pannonia
+			limit = { current_date >= 469.1.1 }
+			
+			culture:rygir = { add_culture_tradition = tradition_concubines } #Actually, no later than 482, but this works
+			culture:skirian = { add_culture_tradition = tradition_concubines } #Only ruling component left at this point
+			if = {
+				limit = { has_dlc_feature = diverge_culture }
+				culture:skirian = { add_culture_tradition = tradition_migratory_culture }
+			}
+			else = { culture:skirian = { add_culture_tradition = tradition_ruling_caste } }
 		}
 	}
 }

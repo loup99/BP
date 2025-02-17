@@ -392,8 +392,9 @@ tradition_desert_nomads = {
 	}
 }
 
-##### Changed from Vanilla: made available to Ingvaeonic (North Sea Germanic) derived cultures
+##### Changed from Vanilla: made available to Nordwestblock, West Germanic, and Jutlandic cultures
 #More accurate as it grew out of germanic traditions instead of brythonic/goidelic traditions
+##### Changed from Vanilla: made unselectable with tradition_things
 tradition_the_witenagemot = {
 	category = regional
 
@@ -405,35 +406,23 @@ tradition_the_witenagemot = {
 
 	##### Changed from Vanilla vvvvv
 	is_shown = {
-		any_parent_culture_or_above = {
-			OR = {
-				#Central Germanic
-				this = culture:anglo
-				this = culture:old_saxon
-				this = culture:reudignian
-				#West Germanic
-				this = culture:cheruscii
-				this = culture:old_frisian
-				#Jutes get Tings as they are north_germanics
-			}
+		OR = {
+			has_cultural_pillar = heritage_jutlandic
+			has_cultural_pillar = heritage_nordwestblock
+			has_cultural_pillar = heritage_west_germanic
 		}
+		NOT = { culture_tradition:tradition_things = { is_in_list = traits } }
 	}
 	##### Changed from Vanilla ^^^^^
 	
 	##### Changed from Vanilla vvvvv
-	can_pick = {
-		any_parent_culture_or_above = {
-			OR = {
-				#Central Germanic
-				this = culture:anglo
-				this = culture:old_saxon
-				this = culture:reudignian
-				#West Germanic
-				this = culture:cheruscii
-				this = culture:old_frisian
-				#Jutes get Tings as they are north_germanics
-			}
+	can_pick_for_hybridization = {
+		OR = {
+			has_cultural_pillar = heritage_jutlandic
+			has_cultural_pillar = heritage_nordwestblock
+			has_cultural_pillar = heritage_west_germanic
 		}
+		NOT = { culture_tradition:tradition_things = { is_in_list = traits } }
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -494,6 +483,97 @@ tradition_the_witenagemot = {
 			limit = {
 				OR = {
 					culture_tradition:tradition_things = { is_in_list = traits }
+					culture_tradition:tradition_fp3_jirga = { is_in_list = traits }
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
+##### Changed from Vanilla: made available to North Germanic, Scandzan, and Jutlandic cultures
+##### Changed from Vanilla: made unselectable with tradition_the_witenagemot
+tradition_things = {
+	category = regional
+
+	layers = {
+		0 = learning
+		1 = western
+		4 = council.dds
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		OR = {
+			has_cultural_pillar = heritage_jutlandic
+			has_cultural_pillar = heritage_scandzan
+			has_cultural_pillar = heritage_north_germanic
+		}
+		NOT = { culture_tradition:tradition_the_witenagemot = { is_in_list = traits } }
+	}
+	##### Changed from Vanilla ^^^^^
+	
+	##### Changed from Vanilla vvvvv
+	can_pick_for_hybridization = {
+		OR = {
+			has_cultural_pillar = heritage_jutlandic
+			has_cultural_pillar = heritage_scandzan
+			has_cultural_pillar = heritage_north_germanic
+		}
+		NOT = { culture_tradition:tradition_the_witenagemot = { is_in_list = traits } }
+	}
+	##### Changed from Vanilla ^^^^^
+
+	parameters = {
+		scandinavian_elective_enabled = yes
+		trait_county_opinion_modifiers = yes
+	}
+
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_bureaucratic = { is_in_list = traits }
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_or_bureaucratic_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						scope:character = {
+							any_sub_realm_county = {
+								county_opinion < 0
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = counties_with_low_county_opinion_desc
+				}
+			}
+
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+
+	ai_will_do = {
+		value = 200
+		if = {
+			limit = {
+				OR = {
+					culture_tradition:tradition_the_witenagemot = { is_in_list = traits }
 					culture_tradition:tradition_fp3_jirga = { is_in_list = traits }
 				}
 			}
