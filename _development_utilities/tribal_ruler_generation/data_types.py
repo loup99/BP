@@ -3,6 +3,7 @@ from dataclasses import dataclass
 @dataclass
 class Dynasty:
     name: str
+    id_num: str
     culture: str
 
 @dataclass
@@ -18,7 +19,7 @@ class Family:
     religion: str
 
 @dataclass
-class Holder(Family):
+class Character(Family):
     birth: int
     death: int
     name: str
@@ -28,6 +29,6 @@ class Holder(Family):
 @dataclass
 class TitleHolder:
     id_num: str
-    acession_date: int
+    accession_date: int
     abdication_date: int
     government: str = 'tribal_government'
