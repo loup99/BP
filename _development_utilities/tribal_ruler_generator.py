@@ -11,12 +11,19 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 #TODO: Weight name selection by father/grandfather weights (attach to culture data struct)
 
 ##### Main #####
-
+start_year = 395
+end_year = 500
 religion = 'nicene'
 culture = culture_storage.culture_list['test_roman']
+holding_list = ['c_example_1','c_example_2']
 
-characters,dynasty = generate_holders('exampleChars',culture,religion,395,500)
-title_history = generate_title_history(characters)
-print_character_history(characters,religion,'example_characters.txt')
-print_dynasty(dynasty,'example_dynasty.txt')
-print_title_history('d_example',title_history,'example_title_history.txt')
+for holding,list_loc in zip(holding_list,range(len(holding_list))):
+    #Write or append data
+    write_mode = 'w' if list_loc==0 else 'a'
+    #Generate the holding data
+    characters,dynasty = generate_holders('exampleChars',culture,religion,start_year,end_year)
+    title_history = generate_title_history(characters)
+    #print the holding data
+    print_character_history(characters,religion,'example_characters.txt',write_mode)
+    print_dynasty(dynasty,'example_dynasty.txt',write_mode)
+    print_title_history(holding,title_history,'example_title_history.txt',write_mode)
