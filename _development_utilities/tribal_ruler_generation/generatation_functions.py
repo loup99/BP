@@ -26,7 +26,7 @@ def generate_char(birth_year,family,id_num=0):
     death_year = round(rand.normal(loc=birth_year+40,scale=16.0))
     return makeCharacter(family,birth_year,death_year,name,id_num,None)
 
-def generate_holders(base_str,culture,religion,start_year,stop_year,start_id_num=0):
+def generate_characters(base_str,culture,religion,start_year,stop_year,start_id_num=0):
     #Build the family
     dynasty = makeDynasty('dynn_'+base_str,culture)
     family = Family(culture,dynasty,religion)
