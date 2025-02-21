@@ -30,6 +30,9 @@ def generate_holders(base_str,culture,religion,start_year,stop_year,start_id_num
     #Build the family
     dynasty = makeDynasty('dynn_'+base_str,culture)
     family = Family(culture,dynasty,religion)
+    #Renaming odds
+    father_name_interval = [0,culture.father_name_chance]
+    grandfather_name_interval = [culture.father_name_chance,culture.father_name_chance+culture.grandfather_name_chance]
     #Initialize the character list
     character_list = []
     id_num = start_id_num
@@ -46,6 +49,14 @@ def generate_holders(base_str,culture,religion,start_year,stop_year,start_id_num
     for holder,list_loc in zip(character_list,range(len(character_list))):
         holder.id_num = base_str+str(holder.id_num).zfill(3)
         if list_loc>0: character_list[list_loc].father = character_list[list_loc-1].id_num
+        #Odds of being named father/grandfather
+        rename_roll = rand.uniform(0,1)
+        if (father_name_interval[0]<rename_roll) and (rename_roll<father_name_interval[1]):
+            if list_loc>0:
+                character_list[list_loc].name = character_list[list_loc-1].name
+        elif (grandfather_name_interval[0]<rename_roll) and (rename_roll<grandfather_name_interval[1]):
+            if list_loc>1:
+                character_list[list_loc].name = character_list[list_loc-2].name
     return character_list,dynasty
 
 def generate_title_history(character_list,government='tribal_government'):

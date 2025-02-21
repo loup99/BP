@@ -8,8 +8,6 @@ This is code for generating fictional tribal holders in places far removed from 
 It presumes no change in culture or religion and just builds a line of rulers for various titles.
 '''
 
-#TODO: Weight name selection by father/grandfather weights (attach to culture data struct)
-
 ##### Main #####
 start_year = 395
 end_year = 500

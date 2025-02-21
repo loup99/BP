@@ -11,6 +11,8 @@ class Culture:
     name: str
     male_name_list: list
     dynasty_name_list: list
+    father_name_chance: float
+    grandfather_name_chance: float
 
 @dataclass
 class Family:
