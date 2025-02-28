@@ -9,6 +9,7 @@ def print_character_history(character_history,religion,fname,write_mode='w'):
             file.write('\tdynasty = '+character.dynasty+'\n')
             file.write('\treligion = '+religion+'\n')
             file.write('\tculture = '+character.culture+'\n')
+            if character.father: file.write('\tfather = '+character.father+'\n')
             file.write('\t'+str(character.birth)+'.1.1 = { birth = yes }\n')
             file.write('\t'+str(character.death)+'.1.1 = { death = yes }\n')
             file.write('}\n')

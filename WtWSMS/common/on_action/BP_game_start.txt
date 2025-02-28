@@ -21,6 +21,7 @@ bp_game_start = {
 		setup_realm_and_title_succession_laws
 		game_start_fix_barony_government
 		setup_vassal_contracts
+		setup_landless_chars
 		#Other Title effects
 		other_title_effects
 		#Religious Stuff
@@ -152,6 +153,9 @@ BP_character_events = {
 				LIEGE = character:96054
 			}
 			trigger_event = { id = BP_maintenance_events.0002 }
+			#Emnetzur and Ultzindur shouldn't get any claims to Hunnic titles
+			character:HunnicEmnetzur = { every_claim = { prev = { remove_claim = prev } } }
+			character:HunnicUltzindur = { every_claim = { prev = { remove_claim = prev } } }
 		}
 	}
 }
@@ -864,6 +868,7 @@ setup_vassal_contracts = {
 			}
 			if = { #Non-Zoros have religious freedom in Asoristan
 				limit = {
+					this.top_liege.primary_title ?= title:e_persia
 					NOT = { this.religion = this.liege.religion }
 					OR = {
 						this.capital_county.kingdom = title:k_asoristan
@@ -872,7 +877,6 @@ setup_vassal_contracts = {
 						this.primary_title = title:d_tayk
 						this.primary_title = title:d_gardman
 					}
-					this.top_liege.primary_title = title:e_persia
 					can_have_religious_rights_trigger = yes
 				}
 				vassal_contract_set_obligation_level = {
@@ -1041,12 +1045,6 @@ setup_vassal_contracts = {
 				TRIBUTARY = title:k_gaochang.holder
 				SUZERAIN = title:e_rouran.holder
 			}
-			#Huns
-			make_tributary = { #Still tied to the Huns, for better or worse
-				TYPE = tributary_permanent
-				TRIBUTARY = title:d_acatiri.holder
-				SUZERAIN = title:e_hunnic_empire.holder
-			}
 			#Orleans Alans
 			make_tributary = {
 				TYPE = tributary_permanent#foederatus_tributary
@@ -1084,6 +1082,290 @@ setup_vassal_contracts = {
 				TYPE = tributary_permanent
 				TRIBUTARY = title:c_middlesex.holder
 				SUZERAIN = title:d_esseaxena.holder
+			}
+		}
+	}
+}
+setup_landless_chars = {
+	effect = {
+		#Hormidak's camp gets some oomph
+		title:d_laamp_hormidak.holder ?= {
+			add_realm_law_skip_effects = camp_purpose_mercenaries
+			this.domicile = {
+				add_domicile_building = camp_main_02
+				add_domicile_building = camp_main_03
+				add_domicile_building = proving_grounds_01
+				add_domicile_building = proving_grounds_02
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_02
+			}
+			create_maa_regiment = {
+				type = horse_archers
+				check_can_recruit = yes
+				size = 3
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = yes
+				size = 3
+			}
+		}
+		#Severinus is oriented towards monasticism
+		title:d_laamp_severinus_of_noricum.holder ?= {
+			add_realm_law_skip_effects = camp_purpose_scholars
+			add_gold = 50
+			this.domicile = {
+				change_provisions = starting_provisions_value
+				
+				add_domicile_building = barber_tent_01
+				add_domicile_building = mess_tent_01
+				add_domicile_building = mess_tent_bakers
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_shrine
+			}
+			#He's walking the holy path...
+			add_character_flag = zealous_missionary_prep
+			set_variable = {
+				name = holy_site_ascension
+				value = province:2575 #Roma
+			}
+			add_realm_law_skip_effects = bishop_theocratic_succession_law
+			#Boot out family members that end up with him by game code
+			every_courtier = {
+				if = {
+					limit = { is_close_or_extended_family_of = character:1001100 }
+					move_to_pool_at = title:c_roma.title_province
+				}
+				else = { #Make the rest of the camp followers of his faith
+					if = {
+						limit = { NOT = { this.faith = character:1001100.faith } }
+						set_character_faith = character:1001100.faith
+					}
+				}
+			}
+		}
+		#Hormidak's camp gets some oomph
+		title:d_laamp_odoacer.holder ?= {
+			add_gold = 250
+			add_realm_law_skip_effects = camp_purpose_mercenaries
+			this.domicile = {
+				change_provisions = starting_provisions_value
+				
+				add_domicile_building = camp_main_02
+				add_domicile_building = camp_main_03
+				add_domicile_building = camp_main_04
+				#Camp Fires: Num of MAA (+2)
+				add_domicile_building = camp_fire_01
+				add_domicile_building = camp_fire_02
+				add_domicile_building = camp_fire_03
+				add_domicile_building = camp_fire_04
+				add_domicile_building = camp_fire_05
+				add_domicile_building = camp_fire_06
+				#Baggage Train: Size of MAA (+1 to all)
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_02
+				add_domicile_building = baggage_train_03
+				add_domicile_building = baggage_train_04
+				add_domicile_building = baggage_train_05
+				add_domicile_building = baggage_train_06
+				add_domicile_building = baggage_train_ample_steeds
+				add_domicile_building = baggage_train_siege_engineers
+				#Proving Ground: Effectiveness of MAA/Size of MAA (+2)
+				add_domicile_building = proving_grounds_01
+				add_domicile_building = proving_grounds_02
+				add_domicile_building = proving_grounds_03
+				add_domicile_building = proving_grounds_04
+				add_domicile_building = proving_grounds_05
+				add_domicile_building = proving_grounds_06
+				add_domicile_building = proving_grounds_horse_run
+				add_domicile_building = proving_grounds_personal_bouts
+				add_domicile_building = proving_grounds_training_circle
+				add_domicile_building = proving_grounds_the_stump
+				add_domicile_building = proving_grounds_mock_battle_drills
+			}
+			# 7 Total, Size 7
+			# 2x armored_footmen, 2x bowmen, 1x light_footmen
+			# 1x pikemen, 1x light_horsemen
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = { #Extra to bring down castles
+				type = primitive_catapult
+				check_can_recruit = yes
+				size = 7
+			}
+		}
+		title:d_laamp_odoacer_rugii.holder ?= {
+			add_gold = 150
+			add_realm_law_skip_effects = camp_purpose_mercenaries
+			this.domicile = {
+				change_provisions = starting_provisions_value
+				
+				add_domicile_building = camp_main_02
+				#Camp Fires: Num of MAA
+				add_domicile_building = camp_fire_01
+				add_domicile_building = camp_fire_02
+				add_domicile_building = camp_fire_03
+				add_domicile_building = camp_fire_04
+				#Baggage Train: Size of MAA
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_02
+				add_domicile_building = baggage_train_03
+				add_domicile_building = baggage_train_ample_steeds
+				add_domicile_building = baggage_train_siege_engineers
+				#Proving Ground: Effectiveness of MAA/Size of MAA
+				add_domicile_building = proving_grounds_01
+				add_domicile_building = proving_grounds_02
+				add_domicile_building = proving_grounds_03
+				add_domicile_building = proving_grounds_horse_run
+			}
+			# 4 Total, Size: 4
+			# 2x heavy_infantry, 1x bowmen, 1x light_footmen
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+		}
+		title:d_laamp_odoacer_heruli.holder ?= {
+			add_gold = 150
+			add_realm_law_skip_effects = camp_purpose_mercenaries
+			this.domicile = {
+				change_provisions = starting_provisions_value
+				
+				add_domicile_building = camp_main_02
+				#Camp Fires: Num of MAA
+				add_domicile_building = camp_fire_01
+				add_domicile_building = camp_fire_02
+				add_domicile_building = camp_fire_03
+				add_domicile_building = camp_fire_04
+				#Baggage Train: Size of MAA
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_02
+				add_domicile_building = baggage_train_03
+				add_domicile_building = baggage_train_ample_steeds
+				add_domicile_building = baggage_train_siege_engineers
+				#Proving Ground: Effectiveness of MAA/Size of MAA
+				add_domicile_building = proving_grounds_01
+				add_domicile_building = proving_grounds_02
+				add_domicile_building = proving_grounds_03
+				add_domicile_building = proving_grounds_horse_run
+			}
+			# 4 Total, Size: 4
+			# 2x heavy_infantry, 1x bowmen, 1x light_footmen
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+		}
+		title:d_laamp_odoacer_skirian.holder ?= {
+			add_gold = 150
+			add_realm_law_skip_effects = camp_purpose_mercenaries
+			this.domicile = {
+				change_provisions = starting_provisions_value
+				
+				add_domicile_building = camp_main_02
+				#Camp Fires: Num of MAA
+				add_domicile_building = camp_fire_01
+				add_domicile_building = camp_fire_02
+				add_domicile_building = camp_fire_03
+				add_domicile_building = camp_fire_04
+				#Baggage Train: Size of MAA
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_02
+				add_domicile_building = baggage_train_03
+				add_domicile_building = baggage_train_ample_steeds
+				add_domicile_building = baggage_train_siege_engineers
+				#Proving Ground: Effectiveness of MAA/Size of MAA
+				add_domicile_building = proving_grounds_01
+				add_domicile_building = proving_grounds_02
+				add_domicile_building = proving_grounds_03
+				add_domicile_building = proving_grounds_horse_run
+			}
+			# 4 Total, Size: 4
+			# 2x heavy_infantry, 1x bowmen, 1x light_footmen
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = yes
+				size = 4
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = yes
+				size = 4
 			}
 		}
 	}
@@ -1162,6 +1444,9 @@ other_title_effects = {
 				}
 			}
 		}
+		
+		#Ernak should have his capital on the plains
+		character:69 = { set_realm_capital = title:c_odessa }
 		##### Changed from Vanilla vvvvv
 		
 		#Because some downstream triggers freak out if this list is never set...

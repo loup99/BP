@@ -35,14 +35,6 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	
 	on_declaration = {
 		on_declared_war = yes
-		scope:attacker = { #Needs a fat stack of troops
-			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = yes }
-			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = yes }
-			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = yes }
-			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = no }
-			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = no }
-			create_odoacer_army_effect = { KEEP_AFTER_VICTORY = no }
-		}
 	}
 
 	on_victory_desc = {
@@ -67,7 +59,7 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		
 		create_title_and_vassal_change = {
 			type = conquest
-			save_scope_as = change
+			save_scope_as = change_counties
 			add_claim_on_loss = yes
 		}
 		scope:defender = {
@@ -88,6 +80,22 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			}
 		}
 		
+		#Step 1: Transfer Counties
+		scope:attacker = {
+			every_war_ally = { #Award Odoacer's compatriots with roof trees...
+				limit = { is_landless_adventurer = yes }
+				random_in_list = {
+					limit = { NOT = { this.duchy = title:d_flaminia } }
+					list = titles_taken
+					change_title_holder = {
+						holder = prev
+						change = scope:change_counties
+						take_baronies = no
+					}
+				}
+				add_to_list = new_vassals
+			}
+		}
 		#Destroy invalid titles
 		hidden_effect = {
 			every_in_list = {
@@ -95,24 +103,60 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				scope:defender = { destroy_title = prev }
 			}
 		}
-		#Transfer Counties
+		#Odoacer gets everything else
 		every_in_list = {
 			list = titles_taken
 			change_title_holder = {
 				holder = scope:attacker
-				change = scope:change
+				change = scope:change_counties
 				take_baronies = no
 			}
 		}
-		#Transfer vassals
+		resolve_title_and_vassal_change = scope:change_counties
+		
+		#Step 2: Create the titular kingdom of Italy & give to Odoacer
+		create_title_and_vassal_change = {
+			type = created
+			save_scope_as = title_change
+			add_claim_on_loss = no
+		}
+		title:k_italy = {
+			change_title_holder = {
+				holder = scope:attacker
+				change = scope:title_change
+			}
+		}
+		resolve_title_and_vassal_change = scope:title_change
+		
+		create_title_and_vassal_change = {
+			type = conquest
+			save_scope_as = change_vassals
+			add_claim_on_loss = yes
+		}
+		#Step 3: Transfer vassals
 		every_in_list = {
 			list = vassals_taken
 			change_liege = {
 				liege = scope:attacker
-				change = scope:change
+				change = scope:change_vassals
 			}
 		}
-		resolve_title_and_vassal_change = scope:change
+		resolve_title_and_vassal_change = scope:change_vassals
+		
+		#Step 4: Odoacer's compatriots get their due
+		create_title_and_vassal_change = {
+			type = swear_fealty
+			save_scope_as = change_fealty
+			add_claim_on_loss = no
+		}
+		every_in_list = {
+			list = new_vassals
+			change_liege = {
+				liege = scope:attacker
+				change = scope:change_fealty
+			}
+		}
+		resolve_title_and_vassal_change = scope:change_fealty
 		
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
 		modify_all_participants_fame_values = {
@@ -138,6 +182,16 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		}
 		scope:attacker = { set_realm_capital = title:c_ravenna }
 		scope:attacker = { change_government = roman_dynastic_government }
+		scope:attacker = { add_legitimacy = 500 }
+		hidden_effect = { #Fix govenrment flipping issues
+			scope:attacker = {
+				add_realm_law_skip_effects = single_heir_succession_law
+				every_vassal_or_below = {
+					limit = { has_government = subroman_dynastic_government }
+					change_government = roman_dynastic_government
+				}
+			}
+		}
 	}
 
 #Included only for error suppression
@@ -181,6 +235,18 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				TARGET = this
 				IMPRISONER = scope:defender
 			}
+			every_vassal = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
+			every_courtier = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
 			scope:defender = {
 				add_opinion = {
 					target = prev
@@ -189,41 +255,12 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			}
 		}
 		
-		create_title_and_vassal_change = {
-			type = conquest
-			save_scope_as = change
-			add_claim_on_loss = yes
-		}
+		#Destroy invalid titles
 		scope:attacker = {
-			#Parse out what to do with Odoacer's titles
-			every_held_title = {
-				if = {
-					limit = { this.tier > tier_county }
-					this = { add_to_temporary_list = titles_destroyed }
-				}
-				else_if = {
-					limit = { this.tier = tier_county }
-					this = { add_to_temporary_list = titles_taken }
-				}
-			}
+			destroy_title = this.primary_title
+			every_vassal = { destroy_title = this.primary_title }
 		}
 		
-		#Destroy invalid titles
-		every_in_list = {
-			list = titles_destroyed
-			scope:attacker = { destroy_title = prev }
-		}
-		#Transfer Counties
-		every_in_list = {
-			list = titles_taken
-			change_title_holder = {
-				holder = scope:defender
-				change = scope:change
-				take_baronies = yes
-			}
-		}
-		resolve_title_and_vassal_change = scope:change
-
 		# Attacker loses Prestige, all other war participants gain Prestige (Defender gains full prestige, all allies on both sides gain based on war contribution).
 		modify_all_participants_fame_values = {
 			WINNER = scope:defender
@@ -240,6 +277,9 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		
 		scope:attacker = { save_temporary_scope_as = loser }
 		on_lost_aggression_war_discontent_loss = yes
+		
+		#Prevent laampdom
+		scope:attacker = { add_character_flag = declined_become_laamp }
 	}
 	
 	transfer_behavior = transfer
