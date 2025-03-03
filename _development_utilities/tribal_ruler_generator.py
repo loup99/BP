@@ -11,8 +11,8 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 ##### Main #####
 start_year = 395
 end_year = 600
-religion = 'hellenic_pagan'
-culture = culture_storage.culture_list['sardinian']
+religion = 'germanic_pagan'
+culture = culture_storage.culture_list['norse']
 #holding_list = ['c_hohenau']
 
 ## Saami Peoples
@@ -125,8 +125,11 @@ culture = culture_storage.culture_list['sardinian']
 #Random Tiele holders
 #holding_list = ["c_karasu","c_teniz","c_eghiz_kara","c_ulytau","c_kaska","c_astana","c_atbasar","c_shchuchinsk","c_kush-murun"]
 
-#Barbaria of Sardinia
-holding_list = ["c_barbaria"]
+##Barbaria of Sardinia
+#holding_list = ["c_barbaria"]
+
+#Norse of Brondings
+holding_list = ["d_brondings"]
 
 for holding,list_loc in zip(holding_list,range(len(holding_list))):
     #Write or append data

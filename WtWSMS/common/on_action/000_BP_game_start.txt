@@ -1,4 +1,8 @@
-﻿#Some of this taken from "Successions Expanded" and modified
+﻿#This file should be for _global_ game start aspects.
+#Year-dependent game start effects should be in their own folder in the by-year section
+#So by-year effects will apply _after_ this file
+
+#Some of this taken from "Successions Expanded" and modified
 
 on_game_start = {
 	on_actions = { bp_game_start }
@@ -13,47 +17,33 @@ bp_game_start = {
 	on_actions = {
 		#Needs to be done first to avoid some errors
 		ccu_startup_debug
-		#Other BP Stuff
-		BP_character_events
 		create_BP_artifacts
 		#Legal Stuff
-		setup_realm_laws
 		setup_realm_and_title_succession_laws
 		game_start_fix_barony_government
-		setup_vassal_contracts
-		setup_landless_chars
-		#Other Title effects
-		other_title_effects
+		setup_initial_variable_lists
 		#Religious Stuff
 		convert_christian_chars_to_rites
 		change_vanilla_religion_doctrines #Must be before ethnic religion effects
-		set_ethnic_religion_flags
 		set_autocephalous_church_flags
+		set_ethnic_religion_flags
 		other_religion_effects
 		#Culture Stuff
 		learn_the_language_of_your_capital
 		add_innovations_as_required
-		update_culture_traditions_by_date
 		#Family Stuff
 		set_historical_dynasty_renown
 		#Other Actions
-		create_other_armies
 		update_development_by_terrain_and_circumstances
 	}
 }
 
 bp_game_start_after_lobby = {
 	on_actions = {
-		# Culture stuff
-		set_starting_culture_acceptance
 		#Other Events
 		trigger_needed_events
-		set_global_variables
 		delay = { days = 1 }
 		#fix_custom_character_governments
-	}
-	events = {
-		bp_historical_artifacts.0023
 	}
 }
 
@@ -120,46 +110,6 @@ ccu_startup_debug = {
 	}
 }
 
-## Other BP Stuff
-BP_character_events = {
-	effect = {
-		#Persian Emperors start with negative prestige because of Wuzurgan, so flip it
-		character:180624 = {
-			add_prestige = {
-				value = character:180624.prestige
-				multiply = 1.5
-			}
-		}
-		#Fire specific date events for characters
-		if = { #476 Events
-			limit = { current_date = 476.2.2 }
-			character:93 = { #Genseric of the Vandals
-				if = {
-					limit = {
-						is_alive = yes
-						is_landed = yes
-					}
-					save_scope_as = geneseric
-					#Vandals have lots of Roman slaves at start
-					trigger_event = { id = bp_historical_flavor.0001 days = 1 }
-				}
-			}
-			#David of Rheged has Saint Patrick as a Regent; we can't make him a court chaplain anymore, so this is the second-best thing
-			character:8 = { designate_diarch = character:109758 }
-			#Ensure Orestes is Regent for Romulus and make it rather entrenched
-			character:96054 = { designate_diarch = character:96055 }
-			remove_generated_diarch_consequences_effect = {
-				NEW_DIARCH = character:96055
-				LIEGE = character:96054
-			}
-			trigger_event = { id = BP_maintenance_events.0002 }
-			#Emnetzur and Ultzindur shouldn't get any claims to Hunnic titles
-			character:HunnicEmnetzur = { every_claim = { prev = { remove_claim = prev } } }
-			character:HunnicUltzindur = { every_claim = { prev = { remove_claim = prev } } }
-		}
-	}
-}
-
 create_BP_artifacts = {
 	effect = {
 		if = {
@@ -216,34 +166,6 @@ create_BP_artifacts = {
 	}
 }
 
-## Legal Stuff
-setup_realm_laws = {
-	effect = {
-		#Set-up Subroman Taxation
-		every_ruler = {
-			limit = { government_has_flag = is_a_transitory_roman_government }
-			add_realm_law_skip_effects = subroman_taxation_3
-		}
-		#Setup e_persia's clerical/shah authority
-		#Initally strong Clerical Influence and somewhat decent Secular Authority
-		if = {
-			limit = { current_date >= 476.2.2 }
-			every_ruler = {
-				limit = { has_title = title:e_persia }
-				if = {
-					limit = { NOT = { has_realm_law = clerical_influence_1 } }
-					add_realm_law = clerical_influence_1
-					remove_variable = clerical_influence_cooldown
-				}
-				if = {
-					limit = { NOT = { has_realm_law = iranian_dynastic_authority_1 } }
-					add_realm_law = iranian_dynastic_authority_1
-					remove_variable = crown_authority_cooldown
-				}
-			}
-		}
-	}
-}
 #These follow the following pattern:
 # By culture, by government, then by specific titles, finally specific title overwrites after 476.2.2
 # To make it so we can systematically add specific laws, then overwrite for exceptions
@@ -630,11 +552,6 @@ setup_realm_and_title_succession_laws = {
 			}
 			add_realm_law_skip_effects = single_heir_dynasty_house
 		}
-		### Specific History Overwrites
-		if = { #Visigoths adopt elective
-			limit = { current_date >= 531.1.1 }
-			title:k_visigoths = { add_title_law = feudal_elective_succession_law }
-		}
 	}
 }
 #Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
@@ -811,650 +728,13 @@ game_start_fix_barony_government = {
 		}
 	}
 }
-setup_vassal_contracts = {
+setup_initial_variable_lists = {
 	effect = {
-		every_ruler = {
-			if = { #k_mazandaran always has great rights
-				limit = { primary_title = title:k_mazandaran }
-				vassal_contract_set_obligation_level = {
-					type = religious_rights
-					level = 1
-				}
-				vassal_contract_set_obligation_level = {
-					type = title_revocation_rights
-					level = 1
-				}
-				vassal_contract_set_obligation_level = {
-					type = war_declaration_rights
-					level = 1
-				}
-				vassal_contract_set_obligation_level = {
-					type = prefeudal_government_obligation
-					level = 0
-				}
-			}
-			if = { #d_sophanene, d_sophene have some nice rights
-				limit = {
-					OR = {
-						primary_title = title:d_sophene
-						primary_title = title:d_sophanene
-					}
-				}
-				vassal_contract_set_obligation_level = {
-					type = religious_rights
-					level = 1
-				}
-				vassal_contract_set_obligation_level = {
-					type = title_revocation_rights
-					level = 1
-				}
-			}
-			if = { #Vassals of the Gupta Empire are militarily oriented
-				limit = {
-					liege.primary_title = title:e_rajastan
-					primary_title.tier >= tier_duchy
-					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
-					government_has_flag = government_uses_rajamandala_authority
-				}
-				debug_log_scopes = no
-				vassal_contract_set_obligation_level = {
-					type = rajamandala_government_taxes
-					level = 1
-				}
-				vassal_contract_set_obligation_level = {
-					type = rajamandala_government_levies
-					level = 3
-				}
-			}
-			if = { #Non-Zoros have religious freedom in Asoristan
-				limit = {
-					this.top_liege.primary_title ?= title:e_persia
-					NOT = { this.religion = this.liege.religion }
-					OR = {
-						this.capital_county.kingdom = title:k_asoristan
-						this.capital_county.kingdom = title:k_armenia #Armenians are protected
-						this.primary_title = title:d_exilarch #Jews are protected
-						this.primary_title = title:d_tayk
-						this.primary_title = title:d_gardman
-					}
-					can_have_religious_rights_trigger = yes
-				}
-				vassal_contract_set_obligation_level = {
-					type = religious_rights
-					level = 1
-				}
-			}
-			if = {
-				limit = { this.primary_title = title:d_gugark }
-				vassal_contract_set_obligation_level = {
-					type = religious_rights
-					level = 1
-				}
-			}
-			#Byzantines
-			make_tributary = {
-				TYPE = foederatus_tributary
-				TRIBUTARY = title:d_thracian_goths.holder
-				SUZERAIN = title:e_byzantium.holder
-			}
-			make_tributary = {
-				TYPE = foederatus_tributary
-				TRIBUTARY = title:k_arabia_petraea.holder
-				SUZERAIN = title:e_byzantium.holder
-			}
-			make_tributary = {
-				TYPE = foederatus_tributary
-				TRIBUTARY = title:k_salihid.holder
-				SUZERAIN = title:e_byzantium.holder
-			}
-			make_tributary = {
-				TYPE = tributary_permanent
-				TRIBUTARY = title:k_sarir.holder
-				SUZERAIN = title:e_byzantium.holder
-			}
-			make_tributary = {
-				TYPE = tributary_permanent
-				TRIBUTARY = title:k_lazica.holder
-				SUZERAIN = title:e_byzantium.holder
-			}
-			make_tributary = {
-				TYPE = tributary_permanent
-				TRIBUTARY = title:c_zichia.holder
-				SUZERAIN = title:e_byzantium.holder
-			}
-			#Persians
-			if = {
-				limit = { exists = title:k_caucasian_albania.holder }
-				make_tributary = {
-					TYPE = tributary_permanent
-					TRIBUTARY = title:k_caucasian_albania.holder
-					SUZERAIN = title:e_persia.holder
-				}
-			}
-			else = {
-				make_tributary = {
-					TYPE = tributary_permanent
-					TRIBUTARY = title:d_caucasian_albania.holder
-					SUZERAIN = title:e_persia.holder
-				}
-			}
-			make_tributary = {
-				TYPE = tributary_permanent
-				TRIBUTARY = title:k_iberia.holder
-				SUZERAIN = title:e_persia.holder
-			}
-			make_tributary = {
-				TYPE = tributary_permanent
-				TRIBUTARY = title:k_al_hirah.holder
-				SUZERAIN = title:e_persia.holder
-			}
-			#Xiongnu (Hepthalites)
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_khuttal.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_samarkand.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_bukhara.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_khorezm.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_osrushana.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_ferghana.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_chah.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_muyunkum.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_kashgar.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:k_kabulistan.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:k_kucha.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_syr_darya.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_badakhshan.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_munjan.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_wakhan.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_karran.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_shughnan.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:d_suyab.holder
-				SUZERAIN = title:e_xiongnu.holder
-			}
-			#Rouran
-			make_tributary = {
-				TYPE = tributary_non_permanent
-				TRIBUTARY = title:k_gaochang.holder
-				SUZERAIN = title:e_rouran.holder
-			}
-			#Orleans Alans
-			make_tributary = {
-				TYPE = tributary_permanent#foederatus_tributary
-				TRIBUTARY = title:d_orleans_alans.holder
-				SUZERAIN = title:k_soissons.holder
-			}
-			#Vandals
-			make_tributary = {
-				TYPE = tributary_permanent#foederatus_tributary
-				TRIBUTARY = title:d_auresia.holder
-				SUZERAIN = title:k_vandalica.holder
-			}
-			make_tributary = {
-				TYPE = tributary_permanent#foederatus_tributary
-				TRIBUTARY = title:d_sicca_veneria.holder
-				SUZERAIN = title:k_vandalica.holder
-			}
-			make_tributary = {
-				TYPE = tributary_permanent#foederatus_tributary
-				TRIBUTARY = title:d_capsa.holder
-				SUZERAIN = title:k_vandalica.holder
-			}
-			#### Britannia
-			make_tributary = { #Deria dependence on York
-				TYPE = tributary_permanent
-				TRIBUTARY = title:d_deria.holder
-				SUZERAIN = title:d_york.holder
-			}
-			make_tributary = { #Surrey dependence on Kent (fought over by several groups)
-				TYPE = tributary_permanent
-				TRIBUTARY = title:c_surrey.holder
-				SUZERAIN = title:d_canterbury.holder
-			}
-			make_tributary = { #Middlesex dependence on Essex
-				TYPE = tributary_permanent
-				TRIBUTARY = title:c_middlesex.holder
-				SUZERAIN = title:d_esseaxena.holder
-			}
-		}
-	}
-}
-setup_landless_chars = {
-	effect = {
-		#Hormidak's camp gets some oomph
-		title:d_laamp_hormidak.holder ?= {
-			add_realm_law_skip_effects = camp_purpose_mercenaries
-			this.domicile = {
-				add_domicile_building = camp_main_02
-				add_domicile_building = camp_main_03
-				add_domicile_building = proving_grounds_01
-				add_domicile_building = proving_grounds_02
-				add_domicile_building = baggage_train_01
-				add_domicile_building = baggage_train_02
-			}
-			create_maa_regiment = {
-				type = horse_archers
-				check_can_recruit = yes
-				size = 3
-			}
-			create_maa_regiment = {
-				type = light_horsemen
-				check_can_recruit = yes
-				size = 3
-			}
-		}
-		#Severinus is oriented towards monasticism
-		title:d_laamp_severinus_of_noricum.holder ?= {
-			add_realm_law_skip_effects = camp_purpose_scholars
-			add_gold = 50
-			this.domicile = {
-				change_provisions = starting_provisions_value
-				
-				add_domicile_building = barber_tent_01
-				add_domicile_building = mess_tent_01
-				add_domicile_building = mess_tent_bakers
-				add_domicile_building = baggage_train_01
-				add_domicile_building = baggage_train_shrine
-			}
-			#He's walking the holy path...
-			add_character_flag = zealous_missionary_prep
-			set_variable = {
-				name = holy_site_ascension
-				value = province:2575 #Roma
-			}
-			add_realm_law_skip_effects = bishop_theocratic_succession_law
-			#Boot out family members that end up with him by game code
-			every_courtier = {
-				if = {
-					limit = { is_close_or_extended_family_of = character:1001100 }
-					move_to_pool_at = title:c_roma.title_province
-				}
-				else = { #Make the rest of the camp followers of his faith
-					if = {
-						limit = { NOT = { this.faith = character:1001100.faith } }
-						set_character_faith = character:1001100.faith
-					}
-				}
-			}
-		}
-		#Hormidak's camp gets some oomph
-		title:d_laamp_odoacer.holder ?= {
-			add_gold = 250
-			add_realm_law_skip_effects = camp_purpose_mercenaries
-			this.domicile = {
-				change_provisions = starting_provisions_value
-				
-				add_domicile_building = camp_main_02
-				add_domicile_building = camp_main_03
-				add_domicile_building = camp_main_04
-				#Camp Fires: Num of MAA (+2)
-				add_domicile_building = camp_fire_01
-				add_domicile_building = camp_fire_02
-				add_domicile_building = camp_fire_03
-				add_domicile_building = camp_fire_04
-				add_domicile_building = camp_fire_05
-				add_domicile_building = camp_fire_06
-				#Baggage Train: Size of MAA (+1 to all)
-				add_domicile_building = baggage_train_01
-				add_domicile_building = baggage_train_02
-				add_domicile_building = baggage_train_03
-				add_domicile_building = baggage_train_04
-				add_domicile_building = baggage_train_05
-				add_domicile_building = baggage_train_06
-				add_domicile_building = baggage_train_ample_steeds
-				add_domicile_building = baggage_train_siege_engineers
-				#Proving Ground: Effectiveness of MAA/Size of MAA (+2)
-				add_domicile_building = proving_grounds_01
-				add_domicile_building = proving_grounds_02
-				add_domicile_building = proving_grounds_03
-				add_domicile_building = proving_grounds_04
-				add_domicile_building = proving_grounds_05
-				add_domicile_building = proving_grounds_06
-				add_domicile_building = proving_grounds_horse_run
-				add_domicile_building = proving_grounds_personal_bouts
-				add_domicile_building = proving_grounds_training_circle
-				add_domicile_building = proving_grounds_the_stump
-				add_domicile_building = proving_grounds_mock_battle_drills
-			}
-			# 7 Total, Size 7
-			# 2x armored_footmen, 2x bowmen, 1x light_footmen
-			# 1x pikemen, 1x light_horsemen
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 7
-			}
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 7
-			}
-			create_maa_regiment = {
-				type = bowmen
-				check_can_recruit = yes
-				size = 7
-			}
-			create_maa_regiment = {
-				type = bowmen
-				check_can_recruit = yes
-				size = 7
-			}
-			create_maa_regiment = {
-				type = light_footmen
-				check_can_recruit = yes
-				size = 7
-			}
-			create_maa_regiment = {
-				type = pikemen_unit
-				check_can_recruit = yes
-				size = 7
-			}
-			create_maa_regiment = {
-				type = light_horsemen
-				check_can_recruit = yes
-				size = 7
-			}
-			create_maa_regiment = { #Extra to bring down castles
-				type = primitive_catapult
-				check_can_recruit = yes
-				size = 7
-			}
-		}
-		title:d_laamp_odoacer_rugii.holder ?= {
-			add_gold = 150
-			add_realm_law_skip_effects = camp_purpose_mercenaries
-			this.domicile = {
-				change_provisions = starting_provisions_value
-				
-				add_domicile_building = camp_main_02
-				#Camp Fires: Num of MAA
-				add_domicile_building = camp_fire_01
-				add_domicile_building = camp_fire_02
-				add_domicile_building = camp_fire_03
-				add_domicile_building = camp_fire_04
-				#Baggage Train: Size of MAA
-				add_domicile_building = baggage_train_01
-				add_domicile_building = baggage_train_02
-				add_domicile_building = baggage_train_03
-				add_domicile_building = baggage_train_ample_steeds
-				add_domicile_building = baggage_train_siege_engineers
-				#Proving Ground: Effectiveness of MAA/Size of MAA
-				add_domicile_building = proving_grounds_01
-				add_domicile_building = proving_grounds_02
-				add_domicile_building = proving_grounds_03
-				add_domicile_building = proving_grounds_horse_run
-			}
-			# 4 Total, Size: 4
-			# 2x heavy_infantry, 1x bowmen, 1x light_footmen
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = bowmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = light_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-		}
-		title:d_laamp_odoacer_heruli.holder ?= {
-			add_gold = 150
-			add_realm_law_skip_effects = camp_purpose_mercenaries
-			this.domicile = {
-				change_provisions = starting_provisions_value
-				
-				add_domicile_building = camp_main_02
-				#Camp Fires: Num of MAA
-				add_domicile_building = camp_fire_01
-				add_domicile_building = camp_fire_02
-				add_domicile_building = camp_fire_03
-				add_domicile_building = camp_fire_04
-				#Baggage Train: Size of MAA
-				add_domicile_building = baggage_train_01
-				add_domicile_building = baggage_train_02
-				add_domicile_building = baggage_train_03
-				add_domicile_building = baggage_train_ample_steeds
-				add_domicile_building = baggage_train_siege_engineers
-				#Proving Ground: Effectiveness of MAA/Size of MAA
-				add_domicile_building = proving_grounds_01
-				add_domicile_building = proving_grounds_02
-				add_domicile_building = proving_grounds_03
-				add_domicile_building = proving_grounds_horse_run
-			}
-			# 4 Total, Size: 4
-			# 2x heavy_infantry, 1x bowmen, 1x light_footmen
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = bowmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = light_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-		}
-		title:d_laamp_odoacer_skirian.holder ?= {
-			add_gold = 150
-			add_realm_law_skip_effects = camp_purpose_mercenaries
-			this.domicile = {
-				change_provisions = starting_provisions_value
-				
-				add_domicile_building = camp_main_02
-				#Camp Fires: Num of MAA
-				add_domicile_building = camp_fire_01
-				add_domicile_building = camp_fire_02
-				add_domicile_building = camp_fire_03
-				add_domicile_building = camp_fire_04
-				#Baggage Train: Size of MAA
-				add_domicile_building = baggage_train_01
-				add_domicile_building = baggage_train_02
-				add_domicile_building = baggage_train_03
-				add_domicile_building = baggage_train_ample_steeds
-				add_domicile_building = baggage_train_siege_engineers
-				#Proving Ground: Effectiveness of MAA/Size of MAA
-				add_domicile_building = proving_grounds_01
-				add_domicile_building = proving_grounds_02
-				add_domicile_building = proving_grounds_03
-				add_domicile_building = proving_grounds_horse_run
-			}
-			# 4 Total, Size: 4
-			# 2x heavy_infantry, 1x bowmen, 1x light_footmen
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = armored_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = bowmen
-				check_can_recruit = yes
-				size = 4
-			}
-			create_maa_regiment = {
-				type = light_footmen
-				check_can_recruit = yes
-				size = 4
-			}
-		}
-	}
-}
-other_title_effects = {
-	effect = {
-		#Capital changes for specific time periods
-		title:k_ostrogoths.holder = {
-			if = { #Odoacer's death/Theodoric's conquest of Italy
-				limit = { current_date <= 493.2.25 }
-				set_realm_capital = title:c_szerem
-			}
-		}
-		title:k_visigoths.holder = {
-			if = { #Franks force the capital south
-			limit = {
-					AND = {
-						current_date > 507.1.1
-						current_date < 542.1.1
-					}
-				}
-				set_realm_capital = title:c_barcelona
-			}
-			else_if = { #Final move to Toledo
-				limit = { current_date >= 542.1.1 }
-				set_realm_capital = title:c_toledo
-			}
-		}
-		title:k_yarlung.holder = {
-			if = {
-				limit = { current_date < 637.1.1 }
-				set_realm_capital = title:c_zetang
-			}
-		}
-		title:k_kidarite.holder = {
-			if = { #Kidarite Rump Kingdom in Gandhara
-				limit = { current_date >= 467.1.1 }
-				set_realm_capital = title:c_udabhanda
-			}
-		}
-		title:d_caucasian_albania.holder = {
-			if = {
-				limit = { current_date < 500.1.1 }
-				set_realm_capital = title:c_shaki
-			}
-		}
-		#Make some titular titles align with specific lieges
-		if = {
-			limit = { current_date = 476.2.2 }
-			#k_armenia
-			title:d_gugark = { set_de_jure_liege_title = title:k_armenia }
-			title:d_tayk = { set_de_jure_liege_title = title:k_armenia }
-			#e_peria
-			title:d_gortyene = { set_de_jure_liege_title = title:k_asoristan }
-			title:d_kwrtstan = { set_de_jure_liege_title = title:k_persia }
-			title:d_exilarch = { set_de_jure_liege_title = title:k_asoristan }
-		}
-		#Put specific kingdoms within specific empires where it makes sense
-		if = {
-			limit = { current_date = 476.2.2 }
-			#Britannia
-			title:k_rheged = { set_de_jure_liege_title = title:e_britannia }
-			#Persia
-			title:k_mazandaran = { set_de_jure_liege_title = title:e_persia }
-		}
-		#Remove various claims for people that shouldn't have them
-		if = { #Vache voluntarily abidcated with Persian pressure, so prevent any claims from him
-			limit = { character:159589 = { is_alive = yes } }
-			character:159589 = {
-				save_temporary_scope_as = the_char
-				every_claim = {
-					save_temporary_scope_as = the_claim
-					scope:the_char = {
-						remove_claim = scope:the_claim
-					}
-				}
-			}
-		}
-		
-		#Ernak should have his capital on the plains
-		character:69 = { set_realm_capital = title:c_odessa }
-		##### Changed from Vanilla vvvvv
-		
 		#Because some downstream triggers freak out if this list is never set...
 		add_to_global_variable_list = {
 			name = laamps_tally
 			target = title:d_senate
 		}
-		##### Changed from Vanilla ^^^^^
 	}
 }
 
@@ -1549,11 +829,8 @@ convert_christian_chars_to_rites = {
 			NEW_RITE = ethiopian_orthodox
 		}
 		#Handle edge cases:
-		character:109769 = { set_character_faith_history = faith:nicene } #Make Erikos the Massalian Nicene
-		if = { #Raetia should be Nicene
-			limit = { exists = title:d_raetia_curiensis.holder }
-			title:d_raetia_curiensis.holder = { set_character_faith_history = faith:nicene }
-		}
+		character:109769 ?= { set_character_faith_history = faith:nicene } #Make Erikos the Massalian Nicene
+		title:d_raetia_curiensis.holder ?= { set_character_faith_history = faith:nicene }
 	}
 }
 change_vanilla_religion_doctrines = {
@@ -1707,7 +984,6 @@ set_autocephalous_church_flags = {
 	effect = {
 		faith:armenian_apostolic = { set_variable = { name = church_culture value = culture:armenian } }
 		faith:georgian_orthodox = { set_variable = { name = church_culture value = culture:georgian } }
-		faith:gothic_church = { set_variable = { name = church_culture value = culture:gothic } }
 		faith:cypriot_church = { set_variable = { name = church_culture value = culture:cypriot } }
 	}
 }
@@ -1745,40 +1021,6 @@ set_ethnic_religion_flags = {
 }
 other_religion_effects = {
 	effect = {
-		if = { #Treaty of Nvarsak
-			limit = { current_date >= 484.1.1 }
-			legalize_caucasian_christianity_global_effect = yes
-		}
-		#Mazdakism as a strain of mainline Zoroastianism before Sukhra's death, so this is more Zaradushtism
-		#See Crone's "Kavad's Heresy and Mazdak's Revolt" for a thorough treatment
-		if = {
-			limit = { current_date <= 493.1.1 }
-			faith:mazdakism = {
-				#Was less ascetic and more "life is to be enjoyed" (although "Hedonistic" might be too far)
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = tenet_asceticism
-					NEW_DOCTRINE = tenet_hedonistic
-				}
-				#Still priestly
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = doctrine_theocracy_lay_clergy
-					NEW_DOCTRINE = doctrine_theocracy_temporal
-				}
-				#Male Dominated; more about not hoarding the women
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = doctrine_gender_equal
-					NEW_DOCTRINE = doctrine_gender_male_dominated
-				}
-				#Still considered acceptable
-				swap_doctrine_if_it_has_it_effect = {
-					OLD_DOCTRINE = doctrine_heretic_branch_zandik
-					NEW_DOCTRINE = doctrine_major_branch_dorustdin
-				}
-				set_religious_head_title = title:d_mazdayasna
-			}
-		}
-		#### Other Global Events
-		
 		#Yazidism effects
 		RICE_setup_yazidi_flavor_pack_BP_subselect_effect = yes
 	}
@@ -1817,52 +1059,6 @@ add_innovations_as_required = {
 	}
 }
 
-update_culture_traditions_by_date = {
-	effect = {
-		if = { #Vandal migration
-			limit = { current_date >= 395.1.1 }
-			if = {
-				limit = { has_dlc_feature = diverge_culture }
-				culture:vandalic = { add_culture_tradition = tradition_migratory_culture }
-			}
-			else = { culture:vandalic = { add_culture_tradition = tradition_migratory_culture } }
-		}
-		if = { #The Great Migration
-			limit = { current_date >= 406.1.1 }
-			if = {
-				limit = { has_dlc_feature = diverge_culture }
-				culture:marcomanni = { add_culture_tradition = tradition_migratory_culture }
-				culture:buri = { add_culture_tradition = tradition_migratory_culture }
-				culture:western_alan  = { add_culture_tradition = tradition_migratory_culture }
-			}
-			else = {
-				culture:marcomanni = { add_culture_tradition = tradition_ruling_caste }
-				culture:buri = { add_culture_tradition = tradition_ruling_caste }
-				culture:western_alan  = { add_culture_tradition = tradition_ruling_caste }
-			}
-		}
-		if = { #Attaces killed and the largest Western Alans become Arian
-			limit = { current_date >= 418.1.1 }
-			culture:western_alan = { add_culture_tradition = tradition_concubines }
-		}
-		if = { #Conversion of the Suebi by Ajax
-			limit = { current_date >= 466.1.1 }
-			culture:hispanian_suebi = { add_culture_tradition = tradition_concubines }
-		}
-		if = { #Skirians get booted from Pannonia
-			limit = { current_date >= 469.1.1 }
-			
-			culture:rygir = { add_culture_tradition = tradition_concubines } #Actually, no later than 482, but this works
-			culture:skirian = { add_culture_tradition = tradition_concubines } #Only ruling component left at this point
-			if = {
-				limit = { has_dlc_feature = diverge_culture }
-				culture:skirian = { add_culture_tradition = tradition_migratory_culture }
-			}
-			else = { culture:skirian = { add_culture_tradition = tradition_ruling_caste } }
-		}
-	}
-}
-
 ## Family Stuff
 set_historical_dynasty_renown = {
 	effect = {
@@ -1884,187 +1080,6 @@ set_historical_dynasty_renown = {
 	}
 }
 
-## Culture Stuff
-set_starting_culture_acceptance = {
-	effect = {
-		#Will help keep popular revolts suppressed for a while
-		#Target Value: >=+0.00 yearly acceptance change without going below zero
-		
-		if = { #476 Acceptance
-			limit = { current_date <= 476.2.2 }
-			#Persian Empire
-			culture:persian = {
-				set_cultural_acceptance = {
-					target = culture:parthian
-					value = 100
-				}
-				set_cultural_acceptance = {
-					target = culture:bactrian
-					value = 100
-				}
-				set_cultural_acceptance = {
-					target = culture:mazanderani
-					value = 83
-				}
-				set_cultural_acceptance = {
-					target = culture:median
-					value = 72
-				}
-				set_cultural_acceptance = {
-					target = culture:cyrtian
-					value = 60
-				}
-				set_cultural_acceptance = {
-					target = culture:caucasian_albanian
-					value = 60
-				}
-				set_cultural_acceptance = {
-					target = culture:daylamite
-					value = 57
-				}
-				set_cultural_acceptance = {
-					target = culture:adnanite
-					value = 48
-				}
-				set_cultural_acceptance = {
-					target = culture:aramean
-					value = 20
-				}
-				set_cultural_acceptance = {
-					target = culture:corduenian
-					value = 42
-				}
-				set_cultural_acceptance = {
-					target = culture:georgian
-					value = 42
-				}
-				set_cultural_acceptance = {
-					target = culture:armenian
-					value = 35
-				}
-				set_cultural_acceptance = {
-					target = culture:adhari
-					value = 35
-				}
-				set_cultural_acceptance = {
-					target = culture:afghan
-					value = 31
-				}
-				set_cultural_acceptance = {
-					target = culture:khalan
-					value = 29
-				}
-				set_cultural_acceptance = {
-					target = culture:romano_aramean
-					value = 24
-				}
-				set_cultural_acceptance = {
-					target = culture:assyrian
-					value = 6
-				}
-			}
-			#ERE
-			culture:greek = {
-				set_cultural_acceptance = {
-					target = culture:helleno_thracian
-					value = 100
-				}
-				set_cultural_acceptance = {
-					target = culture:phrygian
-					value = 92
-				}
-				set_cultural_acceptance = {
-					target = culture:pontic
-					value = 90
-				}
-				set_cultural_acceptance = {
-					target = culture:illyrian
-					value = 88
-				}
-				set_cultural_acceptance = {
-					target = culture:lazic
-					value = 84
-				}
-				set_cultural_acceptance = {
-					target = culture:cappadocian
-					value = 80
-				}
-				set_cultural_acceptance = {
-					target = culture:armenian
-					value = 77
-				}
-				set_cultural_acceptance = {
-					target = culture:thracian
-					value = 73
-				}
-				set_cultural_acceptance = {
-					target = culture:helleno_coptic
-					value = 72
-				}
-				set_cultural_acceptance = {
-					target = culture:tsakonian
-					value = 71
-				}
-				set_cultural_acceptance = {
-					target = culture:galatian
-					value = 73
-				}
-				set_cultural_acceptance = {
-					target = culture:romano_thracian
-					value = 70
-				}
-				set_cultural_acceptance = {
-					target = culture:helleno_libyan
-					value = 64
-				}
-				set_cultural_acceptance = {
-					target = culture:khalan
-					value = 62
-				}
-				set_cultural_acceptance = {
-					target = culture:nabatean
-					value = 60
-				}
-				set_cultural_acceptance = {
-					target = culture:isaurian
-					value = 40
-				}
-				set_cultural_acceptance = {
-					target = culture:romano_illyrian
-					value = 40
-				}
-				set_cultural_acceptance = {
-					target = culture:adnanite
-					value = 36
-				}
-				set_cultural_acceptance = {
-					target = culture:romano_aramean
-					value = 23
-				}
-				set_cultural_acceptance = {
-					target = culture:aramean
-					value = 23
-				}
-				set_cultural_acceptance = {
-					target = culture:persian
-					value = 23
-				}
-				set_cultural_acceptance = {
-					target = culture:copt
-					value = 15
-				}
-			}
-			#OTHERS
-			culture:parthian = {
-				set_cultural_acceptance = {
-					target = culture:caucasian_albanian
-					value = 16
-				}
-			}
-		}
-	}
-}
-
 #Other Events
 trigger_needed_events = {
 	effect = {
@@ -2072,46 +1087,6 @@ trigger_needed_events = {
 		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
 		#Fix _all_ the barony governments; has to be some ruler for some reason
 		random_ruler = { trigger_event = { id = BP_maintenance_events.0002 } }
-	}
-}
-set_global_variables = {
-	#Historically unset variables: rome_restored
-	effect = {
-		if = { #The Fall of Rome
-			limit = { current_date >= 476.9.4 }
-			set_global_variable = fall_of_rome
-		}
-		if = { #Clovis ascends the throne
-			limit = { current_date >= 482.1.1 }
-			set_global_variable = formed_frankish_kingdom
-		}
-		if = { #Treaty of Nvarsak
-			limit = { current_date >= 484.1.1 }
-			set_global_variable = persia_legalizes_caucasian_christianity
-		}
-		if = { #Vachagan III re-establishes Albania as a kingdom
-			limit = { current_date >= 485.1.1 }
-			set_global_variable = reestablished_albania
-		}
-		if = { #Justinian Ascends the Throne (enabling reconquests)
-			limit = { current_date >= 527.4.1 }
-			set_global_variable = sole_roman_empire
-		}
-	}
-}
-
-create_other_armies = {
-	effect = {
-		#Theodoric gets special troops
-		if = {
-			limit = { current_date = 476.2.2 }
-			character:63 = {
-				create_theodoric_army_effect = { LOCATION = 3643 }
-				create_theodoric_army_effect = { LOCATION = 3643 }
-				create_theodoric_army_effect = { LOCATION = 3643 }
-				create_theodoric_army_effect = { LOCATION = 3643 }
-			}
-		}
 	}
 }
 

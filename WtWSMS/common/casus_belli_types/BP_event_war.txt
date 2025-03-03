@@ -308,6 +308,9 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 	group = claim
 
+	#One of the two must loose
+	white_peace_possible = no
+
 	# Root is the title
 	# scope:claimant is the claimant
 	# scope:attacker is the attacker
@@ -429,14 +432,14 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 	on_declaration = {
 		on_declared_war = yes
 		scope:attacker = {
-			create_zeno_army_effect = { LOCATION = 759 } #c_lycanonia
-			create_zeno_army_effect = { LOCATION = 759 } #c_lycanonia
 			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
 			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
-			create_zeno_army_effect = { LOCATION = 758 } #c_seleucia
-			create_zeno_army_effect = { LOCATION = 758 } #c_seleucia
-			create_zeno_army_effect = { LOCATION = 5637 } #c_pamphylia
-			create_zeno_army_effect = { LOCATION = 5637 } #c_pamphylia
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
+			create_zeno_army_effect = { LOCATION = 5672 } #c_isauria
 		}
 	}
 
@@ -569,16 +572,16 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 				NOT = { scope:claimant = scope:attacker }
 				scope:attacker = {
 					can_add_hook = {
-					  	type = favor_hook
-					  	target = scope:claimant
+						type = favor_hook
+						target = scope:claimant
 					}
 				}
 			}
 			scope:attacker = {
 				add_hook = {
-		  			target = scope:claimant
-		  			type = favor_hook
-		 		}
+					target = scope:claimant
+					type = favor_hook
+				}
 			}
 		}
 
@@ -599,89 +602,24 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 
 		# FP1: note the victory for future memorialisation via stele (if applicable).
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
+		
+		#Imprison Basilicus
+		scope:defender = {
+			hard_imprison_character_effect = {
+				TARGET = this
+				IMPRISONER = scope:attacker
+			}
+		}
 	}
 
 	on_white_peace_desc = {
 		first_valid = {
 			triggered_desc = {
 				trigger = { scope:defender = { is_local_player = yes } }
-				desc = claim_cb_white_peace_desc_defender
+				desc = ""
 			}
-			desc = claim_cb_white_peace_desc
+			desc = ""
 		}
-		
-	}
-
-	on_white_peace = {
-		scope:attacker = {
-			show_pow_release_message_effect = yes
-			stress_impact = {
- 				ambitious = medium_stress_impact_gain
- 				arrogant = medium_stress_impact_gain
- 			}
-		}
-
-		# press claims
-		every_in_list = {
-			list = target_titles
-			if = {
-				limit = { scope:claimant = { has_weak_claim_on = prev } }
-				scope:claimant = {
-					make_claim_strong = prev
-				}
-			}
-		}
-
-		# Create an 'helper' claim CB which we won't execute, but can use to determine how much Prestige should be given to war participants.
-		setup_claim_cb = {
-			titles = target_titles
-			attacker = scope:attacker
-			defender = scope:defender
-			claimant = scope:claimant
-			victory = no
-		}
-		# Prestige loss for the attacker
-		scope:attacker = {
-			add_prestige = {
-				value = scope:cb_prestige_factor # Set by 'setup_claim_cb'
-				multiply = -5.0
-			}
-		}
-		# Allies on both sides get full prestige value for helping in the war, based on their war participation.
-		modify_allies_of_participants_fame_values = {
-			WINNER = scope:attacker
-			FAME_BASE = scope:cb_prestige_factor # Set by 'setup_claim_cb'
-			IS_RELIGIOUS_WAR = no
-			WINNER_ALLY_FAME_SCALE = 10
-			LOSER_ALLY_FAME_SCALE = 10
-		}
-		# Defender neither gains nor loses any prestige.
-		scope:defender = {
-			stress_impact = {
- 				arrogant = medium_stress_impact_gain
- 			}
-		}
-
-		if = {
-			limit = {
-				NOT = { scope:claimant = scope:attacker }
-				scope:attacker = {
-					can_add_hook = {
-					  	type = favor_hook
-					  	target = scope:claimant
-					}
-				}
-			}
-			scope:attacker = {
-				add_hook = {
-		  			target = scope:claimant
-		  			type = favor_hook
-		 		}
-			}
-		}
-
-		# Truce
-		add_truce_white_peace_effect = yes
 	}
 
 	on_defeat_desc = {
@@ -734,10 +672,16 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 			}
 			scope:attacker = {
 				add_hook = {
-		  			target = scope:claimant
-		  			type = favor_hook
-		 		}
+					target = scope:claimant
+					type = favor_hook
+				}
 			}
+		}
+		
+		#Destroy invalid titles
+		scope:attacker = {
+			destroy_title = this.primary_title
+			every_vassal = { destroy_title = this.primary_title }
 		}
 
 		# Attacker pays gold to the defender as reparations.
@@ -775,6 +719,17 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 			save_temporary_scope_as = loser
 		}
 		on_lost_aggression_war_discontent_loss = yes
+		
+		#Imprison Zeno
+		scope:attacker = {
+			hard_imprison_character_effect = {
+				TARGET = this
+				IMPRISONER = scope:defender
+			}
+		}
+		
+		#Prevent laampdom
+		scope:attacker = { add_character_flag = declined_become_laamp }
 	}
 
 	on_primary_attacker_death = inherit

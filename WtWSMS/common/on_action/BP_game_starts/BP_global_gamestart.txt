@@ -1,0 +1,165 @@
+﻿#Everything in this file should eventually by moved into individual bookmarks when we've populated
+#395 to 476
+
+on_game_start = {
+	on_actions = { bp_global_setup }
+}
+
+bp_global_setup = {
+	on_actions = {
+		BP_set_global_variables_by_date
+		BP_update_culture_traditions_by_date
+		BP_setup_realm_and_title_succession_laws_by_date
+		BP_set_religion_effects_by_date
+		BP_realm_capitals_by_date
+	}
+}
+
+BP_set_global_variables_by_date = {
+	#Historically unset variables: rome_restored
+	effect = {
+		if = { #The Fall of Rome
+			limit = { current_date >= 476.9.4 }
+			set_global_variable = fall_of_rome
+		}
+		if = { #Clovis ascends the throne
+			limit = { current_date >= 482.1.1 }
+			set_global_variable = formed_frankish_kingdom
+		}
+		if = { #Treaty of Nvarsak
+			limit = { current_date >= 484.1.1 }
+			set_global_variable = persia_legalizes_caucasian_christianity
+		}
+		if = { #Vachagan III re-establishes Albania as a kingdom
+			limit = { current_date >= 485.1.1 }
+			set_global_variable = reestablished_albania
+		}
+		if = { #Justinian Ascends the Throne (enabling reconquests)
+			limit = { current_date >= 527.4.1 }
+			set_global_variable = sole_roman_empire
+		}
+	}
+}
+BP_update_culture_traditions_by_date = {
+	effect = {
+		if = { #Vandal migration
+			limit = { current_date >= 395.1.1 }
+			if = {
+				limit = { has_dlc_feature = diverge_culture }
+				culture:vandalic = { add_culture_tradition = tradition_migratory_culture }
+			}
+			else = { culture:vandalic = { add_culture_tradition = tradition_migratory_culture } }
+		}
+		if = { #The Great Migration
+			limit = { current_date >= 406.1.1 }
+			if = {
+				limit = { has_dlc_feature = diverge_culture }
+				culture:marcomanni = { add_culture_tradition = tradition_migratory_culture }
+				culture:buri = { add_culture_tradition = tradition_migratory_culture }
+				culture:western_alan  = { add_culture_tradition = tradition_migratory_culture }
+			}
+			else = {
+				culture:marcomanni = { add_culture_tradition = tradition_ruling_caste }
+				culture:buri = { add_culture_tradition = tradition_ruling_caste }
+				culture:western_alan  = { add_culture_tradition = tradition_ruling_caste }
+			}
+		}
+		if = { #Attaces killed and the largest Western Alans become Arian
+			limit = { current_date >= 418.1.1 }
+			culture:western_alan = { add_culture_tradition = tradition_concubines }
+		}
+		if = { #Conversion of the Suebi by Ajax
+			limit = { current_date >= 466.1.1 }
+			culture:suebi = { add_culture_tradition = tradition_concubines }
+		}
+		if = { #Skirians get booted from Pannonia
+			limit = { current_date >= 469.1.1 }
+			
+			culture:rygir = { add_culture_tradition = tradition_concubines } #Actually, no later than 482, but this works
+			culture:skirian = { add_culture_tradition = tradition_concubines } #Only ruling component left at this point
+			if = {
+				limit = { has_dlc_feature = diverge_culture }
+				culture:skirian = { add_culture_tradition = tradition_migratory_culture }
+			}
+			else = { culture:skirian = { add_culture_tradition = tradition_ruling_caste } }
+		}
+	}
+}
+BP_setup_realm_and_title_succession_laws_by_date = {
+	effect = {
+		if = { #Visigoths adopt elective
+			limit = { current_date >= 531.1.1 }
+			title:k_visigoths = { add_title_law = feudal_elective_succession_law }
+		}
+	}
+}
+BP_set_religion_effects_by_date = {
+	effect = {
+		#Mazdakism as a strain of mainline Zoroastianism before Sukhra's death, so this is more Zaradushtism
+		#See Crone's "Kavad's Heresy and Mazdak's Revolt" for a thorough treatment
+		if = {
+			limit = { current_date <= 493.1.1 }
+			faith:mazdakism = {
+				#Was less ascetic and more "life is to be enjoyed" (although "Hedonistic" might be too far)
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_asceticism
+					NEW_DOCTRINE = tenet_hedonistic
+				}
+				#Still priestly
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_lay_clergy
+					NEW_DOCTRINE = doctrine_theocracy_temporal
+				}
+				#Male Dominated; more about not hoarding the women
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_gender_equal
+					NEW_DOCTRINE = doctrine_gender_male_dominated
+				}
+				#Still considered acceptable
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_heretic_branch_zandik
+					NEW_DOCTRINE = doctrine_major_branch_dorustdin
+				}
+				set_religious_head_title = title:d_mazdayasna
+			}
+		}
+	}
+}
+BP_realm_capitals_by_date = {
+	effect = {
+		#Capital changes for specific time periods
+		title:k_visigoths.holder = {
+			if = { #Franks force the capital south
+			limit = {
+					AND = {
+						current_date > 507.1.1
+						current_date < 542.1.1
+					}
+				}
+				set_realm_capital = title:c_barcelona
+			}
+			else_if = { #Final move to Toledo
+				limit = { current_date >= 542.1.1 }
+				set_realm_capital = title:c_toledo
+			}
+		}
+		title:k_yarlung.holder = {
+			if = {
+				limit = { current_date < 637.1.1 }
+				set_realm_capital = title:c_zetang
+			}
+		}
+		title:k_kidarite.holder = {
+			if = { #Kidarite Rump Kingdom in Gandhara
+				limit = { current_date >= 467.1.1 }
+				set_realm_capital = title:c_udabhanda
+			}
+		}
+		title:d_caucasian_albania.holder = {
+			if = {
+				limit = { current_date < 500.1.1 }
+				set_realm_capital = title:c_shaki
+			}
+		}
+	}
+}
