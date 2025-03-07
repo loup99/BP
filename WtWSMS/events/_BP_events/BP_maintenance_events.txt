@@ -80,6 +80,11 @@ BP_maintenance_events.0001 = {
 	option = { name = BP_maintenance_events.0001.a }
 }
 
+scripted_trigger is_landed_alive_ruler = {
+	$CHAR$ = { is_alive = yes }
+	$CHAR$ = { is_ruler = yes }
+	$CHAR$ = { is_landed = yes }
+}
 
 #Does things for 476.2.2 game start
 BP_maintenance_events.0002 = {
@@ -88,12 +93,28 @@ BP_maintenance_events.0002 = {
 	
 	immediate = {
 		#Make Romulus Augustulus' Diarchy entrenched and give him senatorial approval
-		character:96054 = {
-			start_diarchy = regency
-			set_diarchy_swing = 50
+		if = {
+			limit = { is_landed_alive_ruler = { CHAR = character:96054 } }
+			character:96054 = {
+				start_diarchy = regency
+				set_diarchy_swing = 50
+			}
+			character:96054 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:96054 } }
 		}
-		character:96054 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:96054 } }
 		#Give Basilicos Senatorial approval
-		character:145226 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:145226 } }
+		if = {
+			limit = { is_landed_alive_ruler = { CHAR = character:145226 } }
+			character:145226 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:145226 } }
+		}
+		#Give Odoacer Sentatorial Approval
+		if = {
+			limit = { is_landed_alive_ruler = { CHAR = character:55 } }
+			character:55 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:55 } }
+		}
+		#Give Zeno Sentatorial Approval
+		if = {
+			limit = { is_landed_alive_ruler = { CHAR = character:70515 } }
+			character:70515 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:70515 } }
+		}
 	}
 }
