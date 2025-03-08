@@ -9,10 +9,10 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 '''
 
 ##### Main #####
-start_year = 395
-end_year = 600
-religion = 'germanic_pagan'
-culture = culture_storage.culture_list['norse']
+start_year = 473
+end_year = 500
+religion = 'nicene'
+culture = culture_storage.culture_list['romano_pannonian']
 #holding_list = ['c_hohenau']
 
 ## Saami Peoples
@@ -81,7 +81,14 @@ culture = culture_storage.culture_list['norse']
 #holding_list = ["c_baranya","c_vas","c_tolna"]
 
 ##Pannonian Romano-Pannonians (poor-souls)
-#holding_list = ["c_szekesfehervar","c_veszprem"]
+#holding_list = ["c_szekesfehervar","c_veszprem","c_vukovar","c_zagorje","c_zagreb","c_pozega"]
+holding_list = ["c_kolon","c_somogy"]
+
+##Romano-Illyrian Pannonians
+#holding_list = ["c_vrbas",'c_soli']
+
+##Illyrians
+#holding_list = ["c_vodica","c_srebrenik"]
 
 ##Carpodaci: 450 onwards
 #holding_list = ["c_barcasag","c_tabla_butii","c_galati","c_barlad","c_stoenesti","c_iasi","c_dorohoi","c_neamt","c_suceava"]
@@ -128,8 +135,9 @@ culture = culture_storage.culture_list['norse']
 ##Barbaria of Sardinia
 #holding_list = ["c_barbaria"]
 
-#Norse of Brondings
-holding_list = ["d_brondings"]
+##Norse of Brondings
+#holding_list = ["d_brondings"]
+
 
 for holding,list_loc in zip(holding_list,range(len(holding_list))):
     #Write or append data
