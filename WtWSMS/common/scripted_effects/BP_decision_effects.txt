@@ -41,3 +41,76 @@ establish_de_jure_empire_decision_effect = {
 		}
 	}
 }
+create_ostrogothic_culture_effect = {
+	$CREATING_CHAR$ = {
+		if = {
+			limit = { culture:gothic = { has_cultural_tradition = tradition_concubines } }
+			culture:ostrogothic = { add_culture_tradition = tradition_concubines }
+		}
+		#All landed counties become (order matters here)
+		culture:gothic = { every_culture_county = { set_county_culture = culture:thracian_gothic } }
+		#All minorities flip
+		hidden_effect = {
+			every_county = {
+				limit = { county_has_specific_minority_culture_trigger = { CULTURE = culture:gothic } }
+				if = {
+					limit = { county_has_specific_large_minority_culture_trigger = { CULTURE = culture:gothic } }
+					remove_list_variable = {
+						name = culture_minorities_large
+						target = culture:gothic
+					}
+					add_to_variable_list = {
+						name = culture_minorities_large
+						target = culture:thracian_gothic
+					}
+				}
+				else = {
+					remove_list_variable = {
+						name = culture_minorities_small
+						target = culture:gothic
+					}
+					add_to_variable_list = {
+						name = culture_minorities_small
+						target = culture:thracian_gothic
+					}
+				}
+			}
+		}
+		#All courtiers of the former become Ostrogothic
+		custom_description = {
+			text = your_courtiers_and_guests_become_ostrogothic
+			subject = culture:gothic
+			object = culture:ostrogothic
+			every_courtier_or_guest = {
+				limit = { this.culture = culture:gothic }
+				set_culture = culture:ostrogothic
+			}
+		}
+		set_culture = culture:ostrogothic
+		custom_description = {
+			text = other_rulers_and_courtiers_become_thracian_gothic
+			subject = culture:gothic
+			object = culture:thracian_gothic
+			#Every other gothic ruler or char becomes thracian_gothic
+			every_ruler = {
+				limit = { NOT = { this = $CREATING_CHAR$ } }
+				if = {
+					limit = { this.culture = culture:gothic }
+					set_culture = culture:thracian_gothic
+				}
+				every_courtier_or_guest = {
+					limit = { this.culture = culture:gothic }
+					set_culture = culture:thracian_gothic
+				}
+			}
+		}
+		hidden_effect = {
+			culture:ostrogothic = {
+				set_cultural_acceptance = {
+					target = culture:thracian_gothic
+					value = 100
+				}
+			}
+		}
+	}
+}
