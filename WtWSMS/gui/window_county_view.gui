@@ -112,6 +112,8 @@ window = {
 						margin_left = 2
 						margin_bottom = 4
 						using = Font_Size_Small
+						fontsize_min = 10
+						max_width = 420
 					}
 
 					text_single = {
@@ -122,6 +124,8 @@ window = {
 						margin_left = 5
 						margin_bottom = 4
 						using = Font_Size_Small
+						fontsize_min = 10
+						max_width = 420
 					}
 
 					text_single = {
@@ -132,6 +136,8 @@ window = {
 						margin_left = 5
 						margin_bottom = 4
 						using = Font_Size_Small
+						fontsize_min = 10
+						max_width = 420
 					}
 				}
 			}
@@ -2141,6 +2147,7 @@ window = {
 															enabled = "[GUIPotentialBuildingItem.CanConstruct]"
 															tooltip = "[GUIPotentialBuildingItem.GetTooltip]"
 															onclick = "[GUIPotentialBuildingItem.Construct]"
+															onclick = "[HoldingView.CloseSubwindows]"
 															text = "CONSTRUCT"
 															using = tooltip_es
 														}
@@ -2353,8 +2360,32 @@ window = {
 											tooltip_offset = { 40 0 }
 
 											background = {
+												visible = "[Not(GUITrackItem.IsConstructingReplacement)]"
 												texture = "gfx/interface/window_county/building_status_circle.dds"
 												framesize = { 120 120 }
+												using = Master_Button_Modify_Texture
+
+												blockoverride "master_color_frame" {
+													frame = 3
+												}
+											}
+
+											background = {
+												visible = "[GUITrackItem.IsConstructingReplacement]"
+												texture = "gfx/interface/window_county/building_status_circle.dds"
+												framesize = { 120 120 }
+												alpha = 0.5
+												using = Master_Button_Modify_Texture
+
+												blockoverride "master_color_frame" {
+													frame = 3
+												}
+											}
+											background = {
+												visible = "[GUITrackItem.IsConstructingReplacement]"
+												texture = "gfx/interface/window_county/building_status_circle.dds"
+												framesize = { 120 120 }
+												frame = 2
 												using = Master_Button_Modify_Texture
 
 												blockoverride "master_color_frame" {
@@ -2418,7 +2449,7 @@ window = {
 											tooltip_offset = { 40 0 }
 
 											background = {
-												visible = "[GUITrackItem.IsConstructing]"
+												visible = "[And(GUITrackItem.IsConstructing, Not(GUITrackItem.IsConstructingReplacement))]"
 												texture = "gfx/interface/window_county/building_status_circle.dds"
 												framesize = { 120 120 }
 												frame = 2
@@ -2575,6 +2606,15 @@ window = {
 													text = "[GUITrackItem.GetSelectedBuilding.GetDescription]"
 												}
 
+												text_single = {
+													datacontext = "[GUITrackItem.GetSelectedBuilding]"
+													visible = "[InDebugMode]"
+													margin = { 10 5 }
+
+													layoutpolicy_horizontal = expanding
+													text = "BUILDING_DEBUG_FULL"
+												}
+
 												hbox = {
 													visible = "[And( And( Or( GUITrackItem.CanReplace, GUITrackItem.CanCancel ), GUITrackItem.IsCurrentBuildingSelected), Not( GUITrackItem.IsConstructing ) )]"
 													spacing = 10
@@ -2702,23 +2742,22 @@ window = {
 
 										hbox = {
 											spacing = 10
+																						
+											widget = {
+												size = { 20 20 }
+												allow_outside = yes
 
-											hbox = {
-												widget = {
-													size = { 20 20 }
+												button_round  = {
+													name = "abort_button"
+													parentanchor = center
+													visible = "[GUITrackItem.CanShowCancel]"
+													enabled = "[GUITrackItem.CanCancel]"
+													onclick = "[GUITrackItem.Cancel]"
+													tooltip = "[GUITrackItem.GetCancelTooltip]"
 
-													button_round  = {
-														name = "abort_button"
+													button_cancel = {
 														parentanchor = center
-														visible = "[GUITrackItem.CanShowCancel]"
-														enabled = "[GUITrackItem.CanCancel]"
-														onclick = "[GUITrackItem.Cancel]"
-														tooltip = "[GUITrackItem.GetCancelTooltip]"
-
-														button_cancel = {
-															parentanchor = center
-															alwaystransparent = yes
-														}
+														alwaystransparent = yes
 													}
 												}
 											}
@@ -2862,15 +2901,13 @@ window = {
 											}
 
 											button_primary = {
-												#	layoutpolicy_vertical = expanding
-												#	layoutpolicy_horizontal = expanding
-												#	size = { 250 53 }
 												onclick = "[GUITrackItem.OnClick]"
+												onclick = "[HoldingView.CloseSubwindows]"
+
 												tooltip = "[GUITrackItem.GetNextBuildingTooltip]"
 												enabled = "[GUITrackItem.CanConstructNextBuilding]"
 												visible = "[GUITrackItem.HasNextBuilding]"
 												text = "[SelectLocalization(EqualTo_int32(GUITrackItem.GetNextBuilding.GetLevel, '(int32)1'),'CONSTRUCT','UPGRADE')]"
-												#	using = Font_Size_Medium
 											}
 
 										}
