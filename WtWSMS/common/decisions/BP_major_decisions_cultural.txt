@@ -1,0 +1,70 @@
+﻿create_ostrogothic_culture_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_culture.dds"
+	}
+	decision_group_type = major
+	
+	title = create_ostrogothic_culture_decision_title
+	desc = create_ostrogothic_culture_decision_desc
+	selection_tooltip = create_ostrogothic_culture_decision_tooltip
+	sort_order = 5000
+
+
+	is_shown = {
+		root.culture = culture:gothic
+		is_ruler = yes
+		NOT = { has_global_variable = ostrogothic_culture_formed }
+	}
+
+	is_valid = {
+		custom_description = {
+			text = gothic_culture_control_all_counties
+			subject = root
+			object = culture:gothic
+			culture:gothic = {
+				any_culture_county = {
+					OR = {
+					this.holder.top_liege = root
+					this.holder = root
+					}
+					percent = 1.00
+				}
+			}
+		}
+		#You are the culture head (redundent in 1.14.2, but might not be in next version)
+		custom_description = {
+			text = is_the_gothic_culture_head
+			subject = culture:gothic
+			culture:gothic.culture_head = root
+		}
+		#You are of a sufficient rank
+		root.primary_title.tier >= tier_duchy
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_at_peace_adult = yes
+		is_imprisoned = no
+		is_adult = yes
+	}
+
+	cost = {
+		prestige = 150
+	}
+
+	effect = {
+		save_scope_as = culture_former
+		show_as_tooltip = { create_ostrogothic_culture_effect = { CREATING_CHAR = root } }
+		trigger_event = BP_major_culture_decisions.0001
+	}
+
+	ai_check_interval = 120
+
+	#This is mostly to make it rare for the AI to actually attempt
+	ai_potential = {
+		prestige > 150
+	}
+
+	ai_will_do = {
+		base = 100
+	}
+}

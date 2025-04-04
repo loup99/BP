@@ -354,6 +354,7 @@ county_to_county_culture_faith_migration_effect = {
 			}
 		}
 	}
+	set_variable = { name = recent_migration value = yes years = 20 }
 }
 
 # scope:minority_culture
@@ -370,6 +371,7 @@ minority_culture_growth_effect = {
 			}
 			save_scope_as = county
 			promote_culture_minority_effect = { CULTURE = scope:minority_culture }
+			set_variable = { name = recent_culture_growth value = yes years = 20 }
 		}
 	}
 }
@@ -388,6 +390,7 @@ minority_culture_spread_effect = {
 			save_scope_as = county
 			promote_culture_minority_effect = { CULTURE = scope:minority_culture }
 			notify_characters_of_culture_migration_effect = yes
+			set_variable = { name = recent_culture_growth value = yes years = 20 }
 		}
 	}
 }
@@ -443,6 +446,7 @@ minority_faith_growth_effect = {
 			}
 			save_scope_as = county
 			promote_faith_minority_effect = { FAITH = scope:minority_faith }
+			set_variable = { name = recent_faith_growth value = yes years = 20 }
 		}
 	}
 }
@@ -498,6 +502,43 @@ minority_faith_spread_effect = {
 			save_scope_as = county
 			promote_faith_minority_effect = { FAITH = scope:minority_faith }
 			notify_characters_of_faith_migration_effect = yes
+			set_variable = { name = recent_faith_growth value = yes years = 20 }
+		}
+	}
+}
+
+minority_decline_effect = {
+	scope:source_county = {
+		save_scope_as = county
+		demote_culture_effect = { CULTURE = scope:minority_culture }
+		set_variable = { name = recent_culture_decline value = yes years = 20 }
+	}
+}
+demote_culture_effect = {
+	scope:source_county = {
+		if = {
+			limit = {
+				has_variable_list = culture_minorities_large
+				is_target_in_variable_list = { name = culture_minorities_large target = scope:minority_culture }
+			}
+			remove_list_variable = {
+				name = culture_minorities_large
+				target = $CULTURE$
+			}
+			add_to_variable_list = {
+				name = culture_minorities_small
+				target = $CULTURE$
+			}
+		}
+		else_if = {
+			limit = {
+				has_variable_list = culture_minorities_small
+				is_target_in_variable_list = { name = culture_minorities_small target = scope:minority_culture }
+			}
+			remove_list_variable = {
+				name = culture_minorities_small
+				target = $CULTURE$
+			}
 		}
 	}
 }

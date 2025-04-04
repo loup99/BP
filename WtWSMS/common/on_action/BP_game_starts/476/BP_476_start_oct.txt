@@ -1,0 +1,581 @@
+﻿on_game_start = { on_actions = { bp_game_start_476_oct } }
+
+bp_game_start_476_oct = {
+	trigger = { current_date = 476.10.15 }
+	on_actions = {
+		#Characters
+		BP_character_events_476_oct
+		BP_setup_realm_laws_476_oct
+		BP_setup_vassal_contracts_476_oct
+		BP_setup_landless_chars_476_oct
+		BP_set_lieges_476_oct
+		BP_remove_claims_476_oct
+		#culture
+		BP_starting_culture_acceptance_476_oct
+		#Warfare
+	}
+}
+
+BP_character_events_476_oct = {
+	effect = {
+		#Persian Emperors start with negative prestige because of Wuzurgan, so flip it
+		character:180624 = {
+			add_prestige = {
+				value = character:180624.prestige
+				multiply = 1.5
+			}
+		}
+		
+		#Fire specific date events for characters
+		character:93 = { #Genseric of the Vandals
+			save_scope_as = geneseric
+			#Vandals have lots of Roman slaves at start
+			trigger_event = { id = bp_historical_flavor.0001 days = 1 }
+		}
+		
+		#Odoacer gets some peace treaties
+		character:55 = {
+			#Visigoths
+			add_truce_both_ways = { character = character:30 years = 10 name = odoacer_peace_visigoths }
+			add_truce_both_ways = { character = character:190066 years = 10 name = odoacer_peace_visigoths }
+			#Vandals
+			add_truce_both_ways = { character = character:93 years = 10 name = odoacer_peace_vandals }
+			add_truce_both_ways = { character = character:92 years = 10 name = odoacer_peace_vandals }
+		}
+		
+		#Gylericus should be bishop of Salona
+		character:175110 = {
+			if = {
+				limit = { NOT = { is_employer_of = character:74419 } }
+				character:74419 = { set_employer = character:175110 }
+			}
+			assign_councillor_type = {
+				type = councillor_court_chaplain
+				target = character:74419
+				remove_existing_councillor = yes
+			}
+		}
+		
+		#Nepos should have his capital in Splatum
+		character:175110 = { set_realm_capital = title:c_cetina }
+		
+		#Diarchies
+		
+		#David of Rheged has Saint Patrick as a Regent; we can't make him a court chaplain anymore, so this is the second-best thing
+		character:8 = { designate_diarch = character:109758 }
+		
+		#Entrench Diarchies and adjust senate approval
+		trigger_event = { id = BP_maintenance_events.0002 }
+	}
+}
+## Legal Stuff
+BP_setup_realm_laws_476_oct = {
+	effect = {
+		#Set-up Subroman Taxation
+		every_ruler = {
+			limit = { government_has_flag = is_a_transitory_roman_government }
+			add_realm_law_skip_effects = subroman_taxation_3
+		}
+		#Setup e_persia's clerical/shah authority
+		#Initally strong Clerical Influence and somewhat decent Secular Authority
+		title:e_persia.holder = {
+			if = {
+				limit = { NOT = { has_realm_law = clerical_influence_1 } }
+				add_realm_law = clerical_influence_1
+				remove_variable = clerical_influence_cooldown
+			}
+			if = {
+				limit = { NOT = { has_realm_law = iranian_dynastic_authority_1 } }
+				add_realm_law = iranian_dynastic_authority_1
+				remove_variable = crown_authority_cooldown
+			}
+		}
+	}
+}
+BP_setup_vassal_contracts_476_oct = {
+	effect = {
+		every_ruler = {
+			if = { #k_mazandaran always has great rights
+				limit = { primary_title = title:k_mazandaran }
+				vassal_contract_set_obligation_level = {
+					type = religious_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = title_revocation_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = war_declaration_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = prefeudal_government_obligation
+					level = 0
+				}
+			}
+			if = { #d_sophanene, d_sophene have some nice rights
+				limit = {
+					OR = {
+						primary_title = title:d_sophene
+						primary_title = title:d_sophanene
+					}
+				}
+				vassal_contract_set_obligation_level = {
+					type = religious_rights
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = title_revocation_rights
+					level = 1
+				}
+			}
+			if = { #the Arashukni have some nice rights
+				limit = { primary_title = title:c_theodosiopolis }
+				vassal_contract_set_obligation_level = {
+					type = title_revocation_rights
+					level = 1
+				}
+			}
+			if = { #Vassals of the Gupta Empire are militarily oriented
+				limit = {
+					liege.primary_title = title:e_rajastan
+					primary_title.tier >= tier_duchy
+					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
+					government_has_flag = government_uses_rajamandala_authority
+				}
+				debug_log_scopes = no
+				vassal_contract_set_obligation_level = {
+					type = rajamandala_government_taxes
+					level = 1
+				}
+				vassal_contract_set_obligation_level = {
+					type = rajamandala_government_levies
+					level = 3
+				}
+			}
+			if = { #Non-Zoros have religious freedom in Asoristan
+				limit = {
+					this.top_liege.primary_title ?= title:e_persia
+					NOT = { this.religion = this.liege.religion }
+					OR = {
+						this.capital_county.kingdom = title:k_asoristan
+						this.capital_county.kingdom = title:k_armenia #Armenians are protected
+						this.primary_title = title:d_exilarch #Jews are protected
+						this.primary_title = title:d_tayk
+						this.primary_title = title:d_gardman
+					}
+					can_have_religious_rights_trigger = yes
+				}
+				vassal_contract_set_obligation_level = {
+					type = religious_rights
+					level = 1
+				}
+			}
+			if = {
+				limit = { this.primary_title = title:d_gugark }
+				vassal_contract_set_obligation_level = {
+					type = religious_rights
+					level = 1
+				}
+			}
+		}
+	}
+}
+BP_setup_landless_chars_476_oct = {
+	effect = {
+		#Hormidak's camp gets some oomph
+		title:d_laamp_hormidak.holder ?= {
+			add_realm_law_skip_effects = camp_purpose_mercenaries
+			this.domicile = {
+				add_domicile_building = camp_main_02
+				add_domicile_building = camp_main_03
+				add_domicile_building = proving_grounds_01
+				add_domicile_building = proving_grounds_02
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_02
+			}
+			create_maa_regiment = {
+				type = horse_archers
+				check_can_recruit = yes
+				size = 3
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = yes
+				size = 3
+			}
+		}
+		#Vidimirs's camp gets some oomph
+		title:d_laamp_vidimir.holder ?= {
+			add_gold = 300 #Gylericus' gifts; just short of getting a county by default
+			this.domicile = {
+				add_domicile_building = camp_main_02
+				add_domicile_building = camp_main_03
+				add_domicile_building = proving_grounds_01
+				add_domicile_building = proving_grounds_02
+				add_domicile_building = proving_grounds_03
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_02
+				add_domicile_building = baggage_train_03
+			}
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = yes
+				size = 7
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = yes
+				size = 5
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = yes
+				size = 3
+			}
+			#Make it very possible to get a holding from the Visigoths if you want to go that route
+			add_prestige_level = 1
+			add_contact = title:k_visigoths.holder
+		}
+		#Severinus is oriented towards monasticism
+		title:d_laamp_severinus_of_noricum.holder ?= {
+			add_realm_law_skip_effects = camp_purpose_scholars
+			add_gold = 50
+			this.domicile = {
+				change_provisions = starting_provisions_value
+				
+				add_domicile_building = camp_main_02
+				add_domicile_building = barber_tent_01
+				add_domicile_building = mess_tent_01
+				add_domicile_building = mess_tent_bakers
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_shrine
+			}
+			#He's walking the holy path...
+			add_character_flag = zealous_missionary_prep
+			set_variable = {
+				name = holy_site_ascension
+				value = province:2575 #Roma
+			}
+			add_realm_law_skip_effects = bishop_theocratic_succession_law
+			#Boot out family members that end up with him by game code
+			every_courtier = {
+				if = {
+					limit = { is_close_or_extended_family_of = title:d_laamp_severinus_of_noricum.holder }
+					move_to_pool_at = title:c_roma.title_province
+				}
+				else = { #Make the rest of the camp followers of his faith
+					if = {
+						limit = { NOT = { this.faith = title:d_laamp_severinus_of_noricum.holder.faith } }
+						set_character_faith = title:d_laamp_severinus_of_noricum.holder.faith
+					}
+				}
+			}
+		}
+		#Severinus is oriented towards monasticism
+		title:d_laamp_ajax_of_suebia.holder ?= {
+			add_realm_law_skip_effects = camp_purpose_scholars
+			add_gold = 50
+			this.domicile = {
+				change_provisions = starting_provisions_value
+				
+				add_domicile_building = camp_main_02
+				add_domicile_building = barber_tent_01
+				add_domicile_building = mess_tent_01
+				add_domicile_building = mess_tent_bakers
+				add_domicile_building = baggage_train_01
+				add_domicile_building = baggage_train_shrine
+			}
+			#He's walking the holy path...
+			add_character_flag = zealous_missionary_prep
+			set_variable = {
+				name = holy_site_ascension
+				value = province:496 #Constantinople
+			}
+			add_realm_law_skip_effects = bishop_theocratic_succession_law
+			#Boot out family members that end up with him by game code
+			every_courtier = {
+				if = {
+					limit = { is_close_or_extended_family_of = title:d_laamp_ajax_of_suebia.holder }
+					move_to_pool_at = title:c_roma.title_province
+				}
+				else = { #Make the rest of the camp followers of his faith
+					if = {
+						limit = { NOT = { this.faith = title:d_laamp_ajax_of_suebia.holder.faith } }
+						set_character_faith = title:d_laamp_ajax_of_suebia.holder.faith
+					}
+				}
+			}
+		}
+		#The Baguadae
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae.holder }
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae_2.holder }
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae_3.holder }
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae_gaul_1.holder }
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae_gaul_2.holder }
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae_gaul_3.holder }
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae_gaul_4.holder }
+		create_bagudae_holder_game_start_effect = { HOLDER = title:d_laamp_bagaudae_gaul_5.holder }
+	}
+}
+BP_set_lieges_476_oct = {
+	effect = {
+		#k_armenia
+		title:d_gugark = { set_de_jure_liege_title = title:k_armenia }
+		title:d_tayk = { set_de_jure_liege_title = title:k_armenia }
+		#e_persia
+		title:d_gortyene = { set_de_jure_liege_title = title:k_asoristan }
+		title:d_kwrtstan = { set_de_jure_liege_title = title:k_persia }
+		title:d_exilarch = { set_de_jure_liege_title = title:k_asoristan }
+		#Put specific kingdoms within specific empires where it makes sense
+		title:k_rheged = { set_de_jure_liege_title = title:e_britannia }
+		#Persia
+		title:k_mazandaran = { set_de_jure_liege_title = title:e_persia }
+		#Religious titles
+		create_title_and_vassal_change = {
+			type = swear_fealty
+			save_scope_as = change
+			add_claim_on_loss = no
+		}
+		title:d_manichean.holder = {
+			change_liege = {
+				liege = title:e_persia.holder
+				change = scope:change
+			}
+		}
+		resolve_title_and_vassal_change = scope:change
+	}
+}
+BP_remove_claims_476_oct = {
+	effect = {
+		#Vache voluntarily abidcated with Persian pressure, so prevent any claims from him
+		character:159589 = { every_claim = { prev = { remove_claim = prev } } }
+		#Emnetzur and Ultzindur shouldn't get any claims to Hunnic titles
+		character:HunnicEmnetzur = { every_claim = { prev = { remove_claim = prev } } }
+		character:HunnicUltzindur = { every_claim = { prev = { remove_claim = prev } } }
+		#Odoacer only gets a claim to Skiria
+		character:55 = {
+			every_claim = {
+				limit = { NOT = { this = title:k_skiria } }
+				prev = { remove_claim = prev }
+			}
+		}
+		#Hunulf gets no claims
+		character:41720 = { every_claim = { prev = { remove_claim = prev } } }
+		#Armatus gets no claims
+		character:1100013 = { every_claim = { prev = { remove_claim = prev } } }
+	}
+}
+#Warfare
+
+on_game_start_after_lobby = { on_actions = { bp_game_start_after_lobby_476 } }
+
+bp_game_start_after_lobby_476_oct = {
+	on_actions = {
+		# Culture stuff
+		BP_starting_culture_acceptance_476_oct
+		BP_update_specific_title_courtiers_476_oct
+	}
+	events = {
+		bp_historical_artifacts.0023
+	}
+	effect = {
+		trigger_event = { on_action = BP_update_specific_title_courtiers_476_oct delayed = yes }
+	}
+}
+
+BP_starting_culture_acceptance_476_oct = {
+	effect = {
+		#Persian Empire
+		culture:persian = {
+			set_cultural_acceptance = {
+				target = culture:parthian
+				value = 100
+			}
+			set_cultural_acceptance = {
+				target = culture:bactrian
+				value = 100
+			}
+			set_cultural_acceptance = {
+				target = culture:mazanderani
+				value = 83
+			}
+			set_cultural_acceptance = {
+				target = culture:median
+				value = 72
+			}
+			set_cultural_acceptance = {
+				target = culture:cyrtian
+				value = 60
+			}
+			set_cultural_acceptance = {
+				target = culture:caucasian_albanian
+				value = 60
+			}
+			set_cultural_acceptance = {
+				target = culture:daylamite
+				value = 57
+			}
+			set_cultural_acceptance = {
+				target = culture:adnanite
+				value = 48
+			}
+			set_cultural_acceptance = {
+				target = culture:aramean
+				value = 20
+			}
+			set_cultural_acceptance = {
+				target = culture:corduenian
+				value = 42
+			}
+			set_cultural_acceptance = {
+				target = culture:georgian
+				value = 42
+			}
+			set_cultural_acceptance = {
+				target = culture:armenian
+				value = 35
+			}
+			set_cultural_acceptance = {
+				target = culture:adhari
+				value = 35
+			}
+			set_cultural_acceptance = {
+				target = culture:afghan
+				value = 31
+			}
+			set_cultural_acceptance = {
+				target = culture:khalan
+				value = 29
+			}
+			set_cultural_acceptance = {
+				target = culture:romano_aramean
+				value = 24
+			}
+			set_cultural_acceptance = {
+				target = culture:assyrian
+				value = 6
+			}
+		}
+		#ERE
+		culture:greek = {
+			set_cultural_acceptance = {
+				target = culture:helleno_thracian
+				value = 100
+			}
+			set_cultural_acceptance = {
+				target = culture:phrygian
+				value = 92
+			}
+			set_cultural_acceptance = {
+				target = culture:pontic
+				value = 90
+			}
+			set_cultural_acceptance = {
+				target = culture:illyrian
+				value = 88
+			}
+			set_cultural_acceptance = {
+				target = culture:lazic
+				value = 84
+			}
+			set_cultural_acceptance = {
+				target = culture:cappadocian
+				value = 80
+			}
+			set_cultural_acceptance = {
+				target = culture:armenian
+				value = 77
+			}
+			set_cultural_acceptance = {
+				target = culture:thracian
+				value = 73
+			}
+			set_cultural_acceptance = {
+				target = culture:helleno_coptic
+				value = 72
+			}
+			set_cultural_acceptance = {
+				target = culture:tsakonian
+				value = 71
+			}
+			set_cultural_acceptance = {
+				target = culture:galatian
+				value = 73
+			}
+			set_cultural_acceptance = {
+				target = culture:romano_thracian
+				value = 70
+			}
+			set_cultural_acceptance = {
+				target = culture:helleno_libyan
+				value = 64
+			}
+			set_cultural_acceptance = {
+				target = culture:khalan
+				value = 62
+			}
+			set_cultural_acceptance = {
+				target = culture:nabatean
+				value = 60
+			}
+			set_cultural_acceptance = {
+				target = culture:isaurian
+				value = 40
+			}
+			set_cultural_acceptance = {
+				target = culture:romano_illyrian
+				value = 40
+			}
+			set_cultural_acceptance = {
+				target = culture:adnanite
+				value = 36
+			}
+			set_cultural_acceptance = {
+				target = culture:romano_aramean
+				value = 23
+			}
+			set_cultural_acceptance = {
+				target = culture:aramean
+				value = 23
+			}
+			set_cultural_acceptance = {
+				target = culture:persian
+				value = 23
+			}
+			set_cultural_acceptance = {
+				target = culture:copt
+				value = 15
+			}
+		}
+		#OTHERS
+		culture:parthian = {
+			set_cultural_acceptance = {
+				target = culture:caucasian_albanian
+				value = 16
+			}
+		}
+	}
+}
+
+BP_update_specific_title_courtiers_476_oct = {
+	effect = {
+		title:d_laamp_severinus_of_noricum.holder ?= {
+			every_courtier_or_guest = { #Make the rest of the camp followers of his faith
+				if = {
+					limit = { NOT = { this.faith = prev.faith } }
+					set_character_faith = prev.faith
+				}
+			}
+		}
+		title:d_laamp_ajax_of_suebia.holder ?= {
+			every_courtier_or_guest = { #Make the rest of the camp followers of his faith
+				if = {
+					limit = { NOT = { this.faith = prev.faith } }
+					set_character_faith = prev.faith
+				}
+			}
+		}
+	}
+}
