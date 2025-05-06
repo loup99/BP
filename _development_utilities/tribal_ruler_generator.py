@@ -9,10 +9,10 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 '''
 
 ##### Main #####
-start_year = 473
+start_year = 430
 end_year = 500
-religion = 'nicene'
-culture = culture_storage.culture_list['romano_pannonian']
+religion = 'tengri_pagan'
+culture = culture_storage.culture_list['hunnic']
 #holding_list = ['c_hohenau']
 
 ## Saami Peoples
@@ -79,10 +79,11 @@ culture = culture_storage.culture_list['romano_pannonian']
 
 ##Pannonian Huns: Post Nedao
 #holding_list = ["c_baranya","c_vas","c_tolna"]
+holding_list = ["c_kolon"]
 
 ##Pannonian Romano-Pannonians (poor-souls)
 #holding_list = ["c_szekesfehervar","c_veszprem","c_vukovar","c_zagorje","c_zagreb","c_pozega"]
-holding_list = ["c_kolon","c_somogy"]
+#holding_list = ["c_somogy"]
 
 ##Romano-Illyrian Pannonians
 #holding_list = ["c_vrbas",'c_soli']
