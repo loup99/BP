@@ -9,10 +9,10 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 '''
 
 ##### Main #####
-start_year = 430
+start_year = 440
 end_year = 500
-religion = 'tengri_pagan'
-culture = culture_storage.culture_list['hunnic']
+religion = 'slavic_pagan'
+culture = culture_storage.culture_list['old_slavic']
 #holding_list = ['c_hohenau']
 
 ## Saami Peoples
@@ -139,6 +139,8 @@ holding_list = ["c_kolon"]
 ##Norse of Brondings
 #holding_list = ["d_brondings"]
 
+#Slavs under Hunnic domination
+holding_list = ["c_tigheci","c_chilia","c_cetatea_alba","c_lapusna"]
 
 for holding,list_loc in zip(holding_list,range(len(holding_list))):
     #Write or append data
