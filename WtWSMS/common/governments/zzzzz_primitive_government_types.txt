@@ -15,11 +15,7 @@
 	prestige_opinion_override = { -10 0 3 5 10 20 }
 	always_use_patronym = yes
 
-	vassal_contract = {
-		high_tribal_government_obligations
-		religious_rights
-		tribute_contract
-	}
+	vassal_contract_group = high_tribal_vassal
 
 	ai = {
 		use_legends = yes
@@ -73,10 +69,7 @@ tribal_government = {
 	always_use_patronym = yes
 	affected_by_development = no
 
-	vassal_contract = {
-		tribal_government_obligations
-		tribute_contract
-	}
+	vassal_contract_group = tribal_vassal
 
 	ai = {
 		use_legends = yes
@@ -108,97 +101,126 @@ tribal_government = {
 	color = hsv{ 0.02 0.75 0.36 }
 }
 
-#Nomad Government Types
-#LT-Rascek: Duplicate of Tribal with clan intergration; brought in for easy integration
-#if/when Paradox implements a true Nomadic Governance
+### Brief: nomad_government
+# Default nomad government, used for the Steppe Region
+#
+# This is referenced in code
+#
 nomad_government = {
 	government_rules = {
+		create_cadet_branches = yes
 		rulers_should_have_dynasty = yes
-		regiments_prestige_as_gold = yes
+		dynasty_named_realms = no
 		royal_court = yes
+		landless_playable = yes
 		legitimacy = yes
-		use_as_base_on_landed = yes #Avoiding a bunch of jank code with this
+		use_as_base_on_rank_up = yes
+		use_as_base_on_landed = yes
+		conditional_maa_refill = yes
+		uses_county_fertility = yes
+		uses_culture_and_house_head_named_realms = yes
+		sticky_government = yes
+		obedience = yes
+		subject_men_at_arms = yes
+		no_capital_movement_cooldown = yes
 	}
 
-	supply_limit_mult_for_others = -0.5
-	primary_holding = tribal_holding
-	primary_heritages = { heritage_mongolic heritage_turkic }
-	required_county_holdings = { tribal_holding }
+	domicile_type = yurt
 
-	valid_holdings = { tribal_holding }
+	primary_holding = nomad_holding
+	valid_holdings = { nomad_holding castle_holding tribal_holding }
+	required_county_holdings = { nomad_holding }
 
-	always_use_patronym = yes
+	generated_character_template = nomadic_chieftain_character
+	
 	affected_by_development = no
+	max_dread = 150
 
-	vassal_contract = {
-		nomadic_government_obligation
-		tribute_contract
+	vassal_contract_group = nomad_vassal
+	
+	character_modifier = {
+		steppe_travel_danger = steppe_high_danger_reduction
+		plains_travel_danger = steppe_high_danger_reduction
+		drylands_travel_danger = drylands_medium_danger_reduction
+		mountains_travel_danger = mountains_medium_danger_reduction
+		steppe_cancel_negative_supply = yes
+		ignore_negative_opinion_of_culture = yes
+		county_fertility_decline_add = -15
+		movement_speed = 0.1
+		movement_speed_land_raiding = 0.1
+		the_great_steppe_supply_limit_add = 10000
+		game_rule_extra_nomads_arabs_supply_limit_add = 10000
+		game_rule_extra_nomads_horn_supply_limit_add = 10000
+		game_rule_extra_nomads_sahel_supply_limit_add = 10000
+		game_rule_extra_nomads_sami_supply_limit_add = 10000
+		domain_limit = -1
+		ai_war_cooldown = -0.5
+		ai_war_chance = 2
+		men_at_arms_maintenance = -0.5
+		supply_duration = 1
+		county_opinion_add = 25
+		title_creation_cost_mult = -0.5
+	}
+
+	# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
+	flag = government_is_nomadic
+	flag = government_can_raid_rule
+	flag = government_can_use_tributary_men_at_arms
+	flag = can_start_war_with_raised_troops
+	flag = ignores_faith_marriage_penalties
+	flag = no_hostile_attrition_in_steppe # Done in code, here for loc
+	flag = movement_speed_from_government
+	flag = land_raiding_movement_speed_from_government
+	flag = can_raze_holdings
+
+	# These flags only exist for loc and in-game descriptions
+	color = { 255 127 80 }
+}
+
+### Brief: herder_government
+# Default herder government, used for the Steppe Region
+#
+# This is referenced in code
+#
+herder_government = {
+	primary_holding = herder_holding
+	valid_holdings = { herder_holding castle_holding tribal_holding }
+	required_county_holdings = { herder_holding }
+
+	generated_character_template = herder_character
+
+	government_rules = {
+		court_generate_spouses = no
+		council = no
+		create_cadet_branches = no
+		rulers_should_have_dynasty = no
+		uses_county_fertility = yes
+		replenishes_county_fertility = yes
+		deny_powerful_vassal = yes
+		redirects_wars_to_overlord = yes
+	}
+	
+	character_modifier = {
+		knight_limit = -100
+		active_accolades = -100
+		county_opinion_add = 100
+		monthly_income_mult = -10
 	}
 
 	ai = {
-		use_legends = yes
+		use_lifestyle = no
+		arrange_marriage = no
+		use_goals = no
+		use_decisions = no
+		use_scripted_guis = no
+		use_legends = no
+		perform_religious_reformation = no
 	}
 
-	opinion_of_liege = {
-		scope:vassal = {
-			if = {
-				limit = { NOT = { is_allied_to = scope:liege } }
-				if = {
-					limit = { is_powerful_vassal = yes }
-					value = -30
-				}
-				else = { value = -15 }
-			}
-		}
-	}
-	opinion_of_liege_desc = {
-		first_valid = {
-			triggered_desc = {
-				trigger = {
-					scope:vassal = {
-						NOT = { is_allied_to = scope:liege }
-						is_powerful_vassal = yes
-					}
-				}
-				desc = "GOVERNMENT_NOMAD_NOT_ALLIED_POWERFUL"
-			}
-			triggered_desc = {
-				trigger = {
-					scope:vassal = {
-						NOT = { is_allied_to = scope:liege }
-						is_powerful_vassal = no
-					}
-				}
-				desc = "GOVERNMENT_NOMAD_NOT_ALLIED"
-			}
-		}
-	}
+	vassal_contract_group = herder_vassal
 
-	character_modifier = {
-		title_creation_cost_mult = -0.5
-		army_maintenance_mult = -0.5
-
-		tribal_government_vassal_opinion = -10
-		feudal_government_vassal_opinion = -25
-		clan_government_vassal_opinion = -25
-		republic_government_vassal_opinion = -25
-		subroman_dynastic_government_vassal_opinion = -25
-		prefeudal_government_vassal_opinion = -25
-		high_tribal_government_vassal_opinion = -25
-
-		ai_war_chance = 0.25
-		monthly_prestige = 0.2
-	}
-
-	flag = government_can_raid_rule
-	flag = may_elevate_co_monarch
 	# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
-	flag = government_is_tribal
-	flag = government_is_nomadic
-	flag = government_can_migrate
-	flag = cannot_advance_beyond_tribal_era #Just informative
-	
-	flag = nomad_government_character_modifier
-	
-	color ={ 201 179 36 }
+	flag = government_is_herder
+	flag = ignores_faith_marriage_penalties
+	color = { 235 213 52 }
 }
