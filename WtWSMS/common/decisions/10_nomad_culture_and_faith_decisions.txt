@@ -1,0 +1,100 @@
+﻿##### Changed from Vanilla: Blocked AI from proselytizing reformed faiths too early
+proselytize_to_your_people_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/event_scenes/ep2_holysite_tribal.dds"
+	}
+	decision_group_type = nomad_minor
+	desc = proselytize_to_your_people_decision_desc
+	selection_tooltip = proselytize_to_your_people_decision_tooltip
+
+	is_shown = {
+		is_playable_character = yes
+		government_has_flag = government_is_nomadic
+		exists = domicile.domicile_faith
+		NOT = {
+			faith = domicile.domicile_faith
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_physically_able_adult = yes
+		is_at_war = no
+	}
+
+	cost = {
+		piety = {
+			value = {
+				add = major_piety_value
+				if = { # Cost increases if you're trying to revert to unreformed
+					limit = {
+						domicile.domicile_faith = {
+							NOT = { has_doctrine_parameter = unreformed }
+						}
+						faith = {
+							has_doctrine_parameter = unreformed
+						}
+					}
+					multiply = 4
+				}
+			}
+		}
+	}
+
+	effect = {
+		root.domicile.domicile_culture = { save_scope_as = domicile_culture }
+		domicile = {
+			set_domicile_faith = root.faith
+		}
+		stress_impact = {
+			cynical = medium_stress_impact_gain
+		}
+		every_held_title = {
+			limit = {
+				tier = tier_county
+				is_landless_type_title = no
+				culture = scope:domicile_culture
+			}
+			set_county_faith = root.faith
+		}
+		# Spouses convert
+		every_spouse = {
+			limit = {
+				is_courtier_of = root
+				NOT = { faith = root.faith }
+			}
+			add_to_list = spouses_and_family_to_convert
+		}
+		# Family at court also convert
+		every_close_or_extended_family_member = {
+			limit = {
+				is_courtier_of = root
+				NOT = { faith = root.faith }
+			}
+			add_to_list = spouses_and_family_to_convert
+		}
+		every_in_list = {
+			list = spouses_and_family_to_convert
+			set_character_faith = root.faith
+		}
+	}
+	
+	ai_check_interval = 60
+
+	ai_potential = {
+		government_has_flag = government_is_nomadic
+		ai_zeal > 0
+	}
+
+	##### Changed from Vanilla vvvvv
+	ai_will_do = {
+		base = 100
+		modifier = {
+			add = -10000
+			OR = {
+				current_year < 800
+				NOT = { root.faith = { has_doctrine_parameter = unreformed } }
+			}
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+}
