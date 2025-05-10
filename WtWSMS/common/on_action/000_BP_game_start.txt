@@ -1,0 +1,1244 @@
+﻿#This file should be for _global_ game start aspects.
+#Year-dependent game start effects should be in their own folder in the by-year section
+#So by-year effects will apply _after_ this file
+
+#Some of this taken from "Successions Expanded" and modified
+
+on_game_start = {
+	on_actions = { bp_game_start }
+}
+
+on_game_start_after_lobby = {
+	on_actions = { bp_game_start_after_lobby }
+}
+
+bp_game_start = {
+	effect = { every_culture_global = { ccu_initialize_culture_effect = yes } }
+	on_actions = {
+		#Needs to be done first to avoid some errors
+		ccu_startup_debug
+		create_BP_artifacts
+		#Legal Stuff
+		setup_realm_and_title_succession_laws
+		game_start_fix_barony_government
+		setup_initial_variable_lists
+		#Religious Stuff
+		convert_christian_chars_to_rites
+		change_vanilla_religion_doctrines #Must be before ethnic religion effects
+		set_autocephalous_church_flags
+		set_ethnic_religion_flags
+		other_religion_effects
+		#Culture Stuff
+		learn_the_language_of_your_capital
+		add_innovations_as_required
+		#Family Stuff
+		set_historical_dynasty_renown
+		#Other Actions
+		update_development_by_terrain_and_circumstances
+	}
+}
+
+bp_game_start_after_lobby = {
+	on_actions = {
+		#Other Events
+		trigger_needed_events
+		delay = { days = 1 }
+		#fix_custom_character_governments
+	}
+}
+
+## CCU Stuff
+ccu_startup_debug = {
+	effect = {
+		every_culture_global = {
+			if = {
+				limit = { NOT = { has_variable = heritage_group } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_heritage_group
+						desc = ccu_debug_culture_heritage_group_desc
+					}
+				}
+			}
+			else_if = {
+				limit = { NOT = { has_variable = heritage_family } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_heritage_family
+						desc = ccu_debug_culture_heritage_family_desc
+					}
+				}
+			}
+			if = {
+				limit = { NOT = { has_variable = language_group } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_group
+						desc = ccu_debug_culture_language_group_desc
+					}
+				}
+			}
+			else_if = {
+				limit = { NOT = { has_variable = language_family } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_family
+						desc = ccu_debug_culture_language_family_desc
+					}
+				}
+			}
+			else_if = {
+				limit = { NOT = { has_variable = language_union } }
+				save_scope_as = problem_culture
+				every_player = {
+					send_interface_message = {
+						type = event_steward_task_bad
+						title = ccu_debug_culture_language_union
+						desc = ccu_debug_culture_language_union_desc
+					}
+				}
+			}
+		}
+	}
+}
+
+create_BP_artifacts = {
+	effect = {
+		if = {
+			limit = { has_dlc_feature = royal_court }
+			#Tooth of the Buddha
+			title:k_lanka.holder = {
+				save_scope_as = the_holder
+				create_artifact = {
+					name = tooth_of_the_buddha
+					description = tooth_of_the_buddha_desc
+					history = { type = created_before_history }
+					type = pedestal
+					template = buddhism_artifact_template
+					quality = 999
+					decaying = no
+					modifier = tooth_of_the_buddha_modifier
+					visuals = bone
+					save_scope_as = tooth_of_the_buddha_scope
+				}
+				scope:tooth_of_the_buddha_scope = {
+					set_variable = { # required to track usability for template
+						name = saint_bone_faith
+						value = scope:the_holder.faith
+					}
+				}
+			}
+			title:e_byzantium.holder = {
+				create_artifact = {
+					name = nail_of_the_true_cross
+					description = nail_of_the_true_cross_desc
+					history = { type = created_before_history }
+					type = pedestal
+					template = christian_relic_template
+					quality = 999
+					decaying = no
+					modifier = nail_of_the_true_cross_modifier
+					visuals = reliquary
+				}
+			}
+			title:e_persia.holder = {
+				create_artifact = {
+					name = branch_of_the_keshmar_cypress
+					description = branch_of_the_keshmar_cypress_desc
+					history = { type = created_before_history }
+					type = pedestal
+					template = zoroastrian_relic_template
+					quality = 999
+					decaying = no
+					modifier = branch_of_the_keshmar_cypress_modifier
+					visuals = flowers
+				}
+			}
+		}
+	}
+}
+
+#These follow the following pattern:
+# By culture, by government, then by specific titles, finally specific title overwrites after 476.2.2
+# To make it so we can systematically add specific laws, then overwrite for exceptions
+setup_realm_and_title_succession_laws = {
+	effect = {
+		every_ruler = {### Cultural/Religion impact with strong male bias
+			if = {
+				limit = {
+					OR = {
+						culture = { has_cultural_parameter = male_only_inheritance }
+						faith = { has_doctrine = doctrine_gender_male_dominated }
+						has_religion = religion:islam_religion
+					}
+					NOT = { has_realm_law = male_only_law }
+				}
+				add_realm_law_skip_effects = male_only_law
+			}
+			else_if = { #NB: This is the female only case
+				limit = {
+					OR = {
+						culture = { has_cultural_parameter = female_only_inheritance }
+						culture = { has_cultural_parameter = not_male_succession }
+					}
+					NOT = { has_realm_law = female_only_law }
+				}
+				add_realm_law_skip_effects = female_only_law
+			}
+			
+			else_if = {
+				limit = {
+					faith = { has_doctrine =  doctrine_gender_female_dominated }
+					NOT = { has_realm_law = female_preference_law }
+				}
+				add_realm_law_skip_effects = female_preference_law
+			}
+			else_if = {
+				limit = {
+					OR = {
+						culture = { has_cultural_parameter = gender_equal_inheritance }
+						faith = { has_doctrine = doctrine_gender_equal }
+					}
+					NOT = { has_realm_law = equal_law }
+				}
+				add_realm_law_skip_effects = equal_law
+			}
+			else = { add_realm_law_skip_effects = male_only_law } #Fallback; male-only.
+		}
+		### Other Realm-Succession laws that must be enforced
+		every_ruler = { #High Partition
+			if = {
+				limit = {
+					culture = { has_cultural_parameter = can_enact_high_partition_succession_law }
+					NOT = { has_realm_law = high_partition_succession_law }
+				}
+				add_realm_law_skip_effects = high_partition_succession_law
+			}
+			else_if = {
+				limit = {
+					culture = { has_cultural_parameter = must_use_confederate_partition }
+					NOT = { has_realm_law = confederate_partition_succession_law }
+				}
+				add_realm_law_skip_effects = confederate_partition_succession_law
+			}
+		}
+		
+		### Governments
+		every_ruler = { #Roman Governments
+			limit = { government_has_flag = is_a_roman_government }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_succession_law } }
+				add_realm_law_skip_effects = single_heir_succession_law
+			}
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
+		}
+		every_ruler = { #Eranshar
+			limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
+				add_realm_law_skip_effects = single_heir_dynasty_house
+			}
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
+		}
+		
+		### Other Special Cases
+		every_ruler = { #Suebia & Burgundians should be partition to avoid creating undesirable kingdoms
+			limit = {
+				OR = {
+					has_title = title:k_suebia
+					has_title = title:k_burgundians
+				}
+			}
+			if = {
+				limit = { NOT = { has_realm_law = partition_succession_law } }
+				add_realm_law_skip_effects = partition_succession_law
+			}
+		}
+		every_ruler = { #Helleno-Roman Sub-Romans should use primogeniture
+			limit = { has_title = title:k_taurica }
+			if = {
+				limit = { NOT = { has_realm_law = single_heir_succession_law } }
+				add_realm_law_skip_effects = single_heir_succession_law
+			}
+		}
+		every_ruler = { #Vandals should use Seniority
+			limit = { has_title = title:k_vandalica }
+			every_vassal_or_below = {
+				limit = {
+					primary_title.tier >= tier_county
+					culture = title:k_vandalica.holder.culture
+				}
+				if = {
+					limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
+					add_realm_law_skip_effects = single_heir_dynasty_house
+				}
+			}
+		}
+		
+		### Specific Title Overwrites
+		
+		##### TODO (Beta): Remove those that are meaningless based on the above
+		
+		#Title Succession Laws
+		
+		#General Title Succession Laws (not tied to a specific title
+		
+		#Scandinavian Elective
+		every_independent_ruler = {
+			limit = {
+				culture = { has_cultural_parameter = scandinavian_elective_enabled }
+				highest_held_title_tier >= tier_duchy
+				OR = {
+					has_a_feudal_type_of_government_trigger = yes
+					government_has_flag = government_is_tribal
+				}
+			}
+			this.primary_title = { add_title_law = scandinavian_elective_succession_law }
+		}
+		#Witangamot
+		every_independent_ruler = {
+			limit = {
+				culture = { has_cultural_parameter = witenagemot_succession_enabled }
+				highest_held_title_tier >= tier_kingdom
+				OR = {
+					has_a_feudal_type_of_government_trigger = yes
+					government_has_flag = government_is_tribal
+				}
+			}
+			this.primary_title = { add_title_law = saxon_elective_succession_law }
+		}
+		
+		#Title Elective Laws Tied to Specific Titles
+		
+		#Mahestan Elective
+		every_ruler = {
+			every_held_title = {
+				limit = { this = title:e_persia }
+				add_title_law = mahestan_elective_succession_law
+			}
+		}
+		#Imperial Elective
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						this = title:e_byzantium
+						this = title:e_wre
+						this = title:e_roman_empire
+					}
+				}
+				add_title_law = imperial_elective_succession_law
+			}
+		}
+		#Feudal Elective
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						this = title:k_gallaecia
+						this = title:k_lombardia
+						this = title:k_suebia
+						#Tarim Basin/Central Asia
+						this = title:k_kucha
+						this = title:d_bukhara
+						this = title:d_chah
+						this = title:d_ferghana
+						this = title:d_khotan
+						this = title:d_khuttal
+						this = title:d_merv
+						this = title:d_osrushana
+						this = title:d_samarkand
+					}
+				}
+				add_title_law = feudal_elective_succession_law #1 instance
+			}
+		}
+		#Gaelic Elective Succession
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						this = title:k_brittany
+						this = title:k_dal_riata
+						this = title:d_aileach
+						this = title:d_astures
+						this = title:d_brittany
+						this = title:d_broerec
+						this = title:d_cait
+						this = title:d_ce
+						this = title:d_connacht
+						this = title:d_western_isles #Creones
+						this = title:d_deasmhumhain
+						this = title:d_domnonia
+						this = title:d_fortriu
+						this = title:d_fotla
+						this = title:d_kernev
+						this = title:d_leinster
+						this = title:d_meath
+						this = title:d_munster
+						this = title:d_ulster
+					}
+				}
+				add_title_law = gaelic_elective_succession_law
+			}
+		}
+		#Tribal Elective Succession
+		every_ruler = {
+			every_held_title = {
+				limit = {
+					OR = {
+						#Turkic Succession
+						this = title:k_al_hirah ##### TODO (Beta): Implement succ_turkish_succession law
+						this = title:k_arabia_petraea ##### TODO (Beta): Implement succ_turkish_succession law
+						this = title:k_qaryat_dhat_kahil ##### TODO (Beta): Implement succ_turkish_succession law
+					}
+				}
+				add_title_law = tribal_elective_succession_law
+			}
+		}
+		
+		#Realm Succession Laws: Sex
+		
+		#Male Only
+		every_ruler = {
+			limit = {
+				OR = {
+					has_title = title:e_axum
+					has_title = title:k_england
+					has_title = title:k_gallaecia
+					#Persians
+					has_title = title:e_persia
+					has_title = title:k_persia
+					has_title = title:d_fars
+					#Romans/Byzantines
+					has_title = title:e_byzantium
+					has_title = title:e_wre
+					has_title = title:k_dalmatia
+					has_title = title:k_italia
+					has_title = title:k_soissons
+					has_title = title:d_constantinopolitan_prefect
+					has_title = title:d_gaul_prefect
+					has_title = title:d_isauria
+					has_title = title:d_roman_prefect
+					has_title = title:d_tangiers
+					has_title = title:d_triveria
+					#Germans
+					has_title = title:k_alamannia
+					has_title = title:k_geatland
+					has_title = title:k_italy
+					has_title = title:k_lombardia
+					has_title = title:k_ostrogoths
+					has_title = title:k_suebia
+					has_title = title:k_thuringia
+					has_title = title:k_vandalica
+					has_title = title:d_germanii
+					has_title = title:d_thracian_goths
+					#Franks
+					has_title = title:k_franks
+					#Celts
+					has_title = title:d_aileach
+					has_title = title:d_connacht
+					has_title = title:d_deasmhumhain
+					has_title = title:d_leinster
+					has_title = title:d_meath
+					has_title = title:d_munster
+					has_title = title:d_ulster
+					#Semites
+					has_title = title:k_al_hirah
+					has_title = title:k_arabia_petraea
+					has_title = title:k_qaryat_dhat_kahil
+					has_title = title:k_yemen
+					#Berbers
+					has_title = title:k_gaetulia
+					has_title = title:k_garamantes
+					has_title = title:k_mauretania
+					#Altaics
+					has_title = title:e_rouran
+					has_title = title:e_turkestan
+				}
+			}
+			if = {
+				limit = { NOT = { has_realm_law = male_only_law } }
+				add_realm_law_skip_effects = male_only_law
+			}
+		}
+		
+		#Equal Succession
+		every_ruler = {
+			limit = {
+				OR = {
+					has_title = title:k_angloland
+					has_title = title:k_frisia
+				}
+			}
+			add_realm_law_skip_effects = equal_law
+		}
+		
+		#Realm Succession Laws: Order
+		
+		#Primogeniture Succession
+		every_ruler = {
+			limit = {
+				OR = {
+					#Romans/Byzantines
+					has_title = title:k_soissons
+					has_title = title:d_isauria
+					has_title = title:d_tangiers
+					has_title = title:d_thracian_goths
+					has_title = title:d_triveria
+					#Persians
+					has_title = title:e_persia
+					has_title = title:k_persia
+					has_title = title:d_fars
+					has_title = title:d_khorezm
+					#Berbers
+					has_title = title:k_mauretania
+					#Semites
+					has_title = title:k_yemen
+					#Germans
+					has_title = title:k_italy
+					has_title = title:k_ostrogoths
+				}
+				NOT = { has_realm_law = single_heir_succession_law }
+			}
+			add_realm_law_skip_effects = single_heir_succession_law
+		}
+		#Seniority Succession
+		every_ruler = {
+			limit = {
+				OR = {
+					#East Africans
+					has_title = title:e_axum
+					#Romans/Byzantines
+					has_title = title:k_england
+					#Persians
+					has_title = title:d_exilarch
+					#Berbers
+					has_title = title:k_gaetulia
+					has_title = title:k_garamantes
+					#Germans
+					has_title = title:k_vandalica
+					has_title = title:k_geatland
+					#Armenians
+					has_title = title:d_syunik
+				}
+				NOT = { has_realm_law = single_heir_dynasty_house }
+			}
+			add_realm_law_skip_effects = single_heir_dynasty_house
+		}
+	}
+}
+#Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
+#in through the back door
+game_start_fix_barony_government = {
+	effect = {
+		every_barony = {
+			#Which isn't a capital
+			limit = { is_capital_barony = no }
+			
+			if = { #Castle Holding
+				limit = { this.title_province = { has_holding_type = castle_holding } }
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = feudal_government } }
+					this.holder = { change_government = feudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = clan_government } }
+					this.holder = { change_government = clan_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = theocracy_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = high_tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = prefeudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_dynastic_government } }
+					this.holder = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = roman_dynastic_government } }
+					this.holder = { change_government = roman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = iranian_dynastic_government } }
+					this.holder = { change_government = iranian_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = rajamandala_government } }
+					this.holder = { change_government = rajamandala_government }
+				}
+			}
+			else_if = { #City Holding
+				limit = { this.title_province = { has_holding_type = city_holding } }
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = feudal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = clan_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = republic_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_dynastic_government } }
+					this.holder = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = roman_dynastic_government } }
+					this.holder = { change_government = roman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = iranian_dynastic_government } }
+					this.holder = { change_government = iranian_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = rajamandala_government } }
+					this.holder = { change_government = republic_government }
+				}
+			}
+			#Handle cases of lay clergy faiths holding temples as well
+			else_if = {
+				limit = {
+					this.title_province = { has_holding_type = church_holding }
+					this.holder.faith = { has_doctrine = doctrine_theocracy_lay_clergy }
+				}
+				#Vanilla Governments
+				if = {
+					limit = { this.county.holder = { has_government = tribal_government } }
+					this.holder = { change_government = tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = feudal_government } }
+					this.holder = { change_government = feudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = clan_government } }
+					this.holder = { change_government = clan_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = republic_government } }
+					this.holder = { change_government = republic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = theocracy_government } }
+					this.holder = { change_government = theocracy_government }
+				}
+				#BP Governments
+				else_if = {
+					limit = { this.county.holder = { has_government = high_tribal_government } }
+					this.holder = { change_government = high_tribal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = prefeudal_government } }
+					this.holder = { change_government = prefeudal_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = nomad_government } }
+					this.holder = { change_government = nomad_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = subroman_dynastic_government } }
+					this.holder = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = roman_dynastic_government } }
+					this.holder = { change_government = roman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = iranian_dynastic_government } }
+					this.holder = { change_government = iranian_dynastic_government }
+				}
+				else_if = {
+					limit = { this.county.holder = { has_government = rajamandala_government } }
+					this.holder = { change_government = rajamandala_government }
+				}
+			}
+		}
+	}
+}
+setup_initial_variable_lists = {
+	effect = {
+		#Because some downstream triggers freak out if this list is never set...
+		add_to_global_variable_list = {
+			name = laamps_tally
+			target = title:d_senate
+		}
+	}
+}
+
+## Religion Stuff
+
+#Flips Nicene Chars to adopt the appropriate rites
+convert_christian_chars_to_rites = {
+	effect = {
+		#Hispanic Rite
+		change_ruler_and_court_rite_by_county_faith_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = mozarabic_church
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = mozarabic_church
+			KINGDOM = k_lusitania
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = mozarabic_church
+			KINGDOM = k_baetica
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = mozarabic_church
+			KINGDOM = k_gallaecia
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = mozarabic_church
+			KINGDOM = k_tarraconensis
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = mozarabic_church
+			KINGDOM = k_cartaginensis
+		}
+		#African Rite
+		change_ruler_and_court_rite_by_county_faith_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = african_church
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = african_church
+			KINGDOM = k_mauretania
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = african_church
+			KINGDOM = k_africa
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = african_church
+			KINGDOM = k_tripolitania
+		}
+		#Gallican Rite
+		change_ruler_and_court_rite_by_county_faith_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = gallican_church
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = gallican_church
+			KINGDOM = k_septem_provincae
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = gallican_church
+			KINGDOM = k_lugdunensis
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = gallican_church
+			KINGDOM = k_brittany
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = gallican_church
+			KINGDOM = k_maxima_sequanorum
+		}
+		change_ruler_and_court_rite_by_kingdom_effect = {
+			OLD_RITE = nicene
+			NEW_RITE = gallican_church
+			KINGDOM = k_belgica
+		}
+		#Ethiopian Orthodox
+		change_ruler_and_court_rite_by_county_faith_effect = {
+			OLD_RITE = coptic
+			NEW_RITE = ethiopian_orthodox
+		}
+		#Handle edge cases:
+		character:109769 ?= { set_character_faith_history = faith:nicene } #Make Erikos the Massalian Nicene
+		title:d_raetia_curiensis.holder ?= { set_character_faith_history = faith:nicene }
+	}
+}
+change_vanilla_religion_doctrines = {
+	effect = {
+		#Eastern Pagans
+		religion:bon_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+			}
+			#Individual Faiths
+			faith:bon = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_eastern_syncretism
+					NEW_DOCTRINE = tenet_inner_journey
+				}
+			}
+			faith:old_bon = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_esotericism
+					NEW_DOCTRINE = tenet_bhakti
+				}
+				if = {
+					limit = { has_dlc_feature = the_northern_lords }
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_human_sacrifice
+						NEW_DOCTRINE = tenet_gruesome_festivals
+					}
+				}
+			}
+		}
+		religion:mundhum_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+				#Tenets: This is true for both of them, actually
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_eastern_syncretism
+					NEW_DOCTRINE = tenet_ethnic_religion
+				}
+			}
+		}
+		religion:qiangic_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+			}
+		}
+		#Other Pagans
+		religion:zunism_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_eastern_pagan_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+				#Tenets: Make hybrid between Zoroastianism and Eastern Paganism
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = tenet_eastern_syncretism
+					NEW_DOCTRINE = tenet_zoroastrian_syncretism
+				}
+			}
+		}
+		#Organized Religions
+		religion:jainism_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_pluralism_righteous
+					NEW_DOCTRINE = doctrine_pluralism_pluralistic
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_polygamy
+					NEW_DOCTRINE = doctrine_concubines
+				}
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_is_jainism_faith }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_required }
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_right_to_rule_rajadharma }
+				#Individual Faiths
+				faith:svetambara = {
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_monasticism
+						NEW_DOCTRINE = tenet_adaptive
+					}
+					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = nudity_doctrine_no_naked_priests }
+				}
+				faith:yapaniya = {
+					swap_doctrine_if_it_has_it_effect = {
+						OLD_DOCTRINE = tenet_asceticism
+						NEW_DOCTRINE = tenet_consolamentum
+					}
+					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = nudity_doctrine_naked_priests }
+				}
+				faith:digambara = { if_does_not_have_doctrine_add_it_effect = { DOCTRINE = nudity_doctrine_naked_priests } }
+			}
+		}
+		#### Global Religion Effects ####
+		every_religion_global = { #If a faith is missing a ritual doctrine, give them the defaults
+			every_faith = {
+				if = {
+					limit = {
+						NOR = {
+							has_doctrine = doctrine_ritual_vegetarianism_required
+							has_doctrine = doctrine_ritual_vegetarianism_clerics
+							has_doctrine = doctrine_ritual_vegetarianism_partial
+							has_doctrine = doctrine_ritual_vegetarianism_no_statement
+						}
+					}
+					if_does_not_have_doctrine_add_it_effect = { DOCTRINE = doctrine_ritual_vegetarianism_no_statement }
+				}
+			}
+		}
+		every_religion_global = { #Most faiths should be lay clergy, not theocracy
+			limit = {
+				OR = {
+					this = religion:akom_religion
+					this = religion:baltic_religion
+					this = religion:finno_ugric_religion
+					this = religion:paganism_religion
+					this = religion:siberian_religion
+					this = religion:west_african_bori_religion
+					this = religion:west_african_roog_religion
+				}
+			}
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_theocracy_temporal
+					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+			}
+		}
+	}
+}
+set_autocephalous_church_flags = {
+	effect = {
+		faith:armenian_apostolic = { set_variable = { name = church_culture value = culture:armenian } }
+		faith:georgian_orthodox = { set_variable = { name = church_culture value = culture:georgian } }
+		faith:cypriot_church = { set_variable = { name = church_culture value = culture:cypriot } }
+	}
+}
+set_ethnic_religion_flags = {
+	effect = {
+		#Donyipoloism
+		faith:sedism = { set_variable = { name = ethnic_religion_culture value = culture:kachari } }
+		faith:bathouism = { set_variable = { name = ethnic_religion_culture value = culture:kachari } }
+		faith:sanamahi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:meitei } }
+		#Dualism
+		faith:mandeaism = { set_variable = { name = ethnic_religion_culture value = culture:chaldean } }
+		faith:sabianism = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
+		#Judaism
+		faith:samaritan = { set_variable = { name = ethnic_religion_culture value = culture:samaritan_culture } }
+		faith:tzadikite = { set_variable = { name = ethnic_religion_culture value = culture:juhuro } }
+		faith:haymanot = { set_variable = { name = ethnic_religion_culture value = culture:sidamic } }
+		#Munhumism
+		faith:kiratism = { set_variable = { name = ethnic_religion_culture value = culture:kirati } }
+		faith:yumaism = { set_variable = { name = ethnic_religion_culture value = culture:kirati } }
+		#Tengrism
+		faith:magyar_pagan  = { set_variable = { name = ethnic_religion_culture value = culture:mogyer } }
+		#Hepthalitism
+		faith:hepthalitism  = { set_variable = { name = ethnic_religion_culture value = culture:hunas } }
+		#Paleo-Balkan
+		faith:illyrian_pagan = { set_variable = { name = ethnic_religion_culture value = culture:illyrian } }
+		faith:thracian_pagan = { set_variable = { name = ethnic_religion_culture value = culture:thracian } }
+		#Indian Tribal
+		faith:munda_pagan = { set_variable = { name = ethnic_religion_culture value = culture:munda } }
+		faith:gondi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:gond } }
+		faith:khasi_animism = { set_variable = { name = ethnic_religion_culture value = culture:khasi } }
+		#Mesopotamianism
+		faith:assyrian_pagan = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
+		faith:shamsi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
+	}
+}
+other_religion_effects = {
+	effect = {
+		#Yazidism effects
+		RICE_setup_yazidi_flavor_pack_BP_subselect_effect = yes
+	}
+}
+
+learn_the_language_of_your_capital = {
+	#Specific cases of needing to know another language, to try and minimize revolts
+	effect = {
+		every_ruler = {
+			if = {
+				limit = {
+					OR = {
+						#Parthians in Albania
+						primary_title = title:d_caucasian_albania
+						primary_title = title:k_caucasian_albania
+						#Sarir
+						primary_title = title:k_sarir
+					}
+				}
+				learn_language_of_culture = this.capital_county.culture
+			}
+		}
+	}
+}
+add_innovations_as_required = {
+	effect = {
+		if = { #Armenians should have Cataphracts if you don't have the DLC for their Vanilla MAA
+			limit = {
+				NOR = {
+					has_ep3_dlc_trigger = yes
+					has_dlc_feature = hybridize_culture
+				}
+			}
+			culture:armenian = { add_innovation = innovation_cataphracts }
+		}
+	}
+}
+
+## Family Stuff
+set_historical_dynasty_renown = {
+	effect = {
+		#Iranian Houses
+		dynasty:10424228 = { add_dynasty_prestige_level = 2 } #Ispahbudhan of Tabaristan and Gurgan
+		dynasty:10424226 = { add_dynasty_prestige_level = 2 } #Waraz of East Khoristan
+			#house_karen_pahlav #Karen (fine as is)
+		dynasty:1029027 = { add_dynasty_prestige_level = 2 } #Mihran of Ray
+		dynasty:10424229 = { add_dynasty_prestige_level = 2 } #Spandiyadh of Ray
+		dynasty:10424230 = { add_dynasty_prestige_level = 2 } #Zik of Adurbadagan
+		dynasty:1042143 = { add_dynasty_prestige_level = 2 } #Suren of Sakastan
+		dynasty:1029100 = { add_dynasty_prestige_level = 1 } #Sassanids
+		#Dead Dynasties; Re-evaluate all of these as dynasty tree is filled out for increased accuracy
+		dynasty:israelite_dynn_herodian = { add_dynasty_prestige_level = 1 }
+		dynasty:iranian_dynn_achaemenid = { add_dynasty_prestige_level = 4 }
+		dynasty:bactrian_dynn_orontid = { add_dynasty_prestige_level = 4 }
+		dynasty:104246212 = { add_dynasty_prestige_level = 3 } #Seleucid
+		dynasty:macedonian_dynn_Argead = { add_dynasty_prestige_level = 10 } #Alexander the Great
+	}
+}
+
+#Other Events
+trigger_needed_events = {
+	effect = {
+		#Inform all the players of the mod
+		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
+		#Fix _all_ the barony governments; has to be some ruler for some reason
+		random_ruler = { trigger_event = { id = BP_maintenance_events.0002 } }
+	}
+}
+
+update_development_by_terrain_and_circumstances = {
+	#Terrain Scaling for development at start
+	## plains = no effect
+	## farmlands = 1.2
+	## hills = 0.9
+	## mountains = 0.5
+	## desert = 0.5
+	## desert_mountains = 0.5
+	## oasis = 1.1
+	## jungle = 0.6
+	## forest = no_effect
+	## taiga = 0.95
+	## wetlands = 0.75
+	## steppe = 0.5
+	## floodplains = 1.2
+	## drylands = 0.95
+	effect = {
+		every_county = {
+			#Specific title effeacts
+			if = { #Dacia should only have development in non-tribal counties
+				limit = { this.kingdom = title:k_dacia }
+				if = {
+					limit = { any_county_province = { has_holding_type = tribal_holding } }
+					change_development_level = {
+						value = this.development_level
+						multiply = -1.00
+					}
+				}
+			}
+			if = { #Syr Darya is only for non-tribal counties
+				limit = { this.kingdom = title:k_syr_darya }
+				if = {
+					limit = { any_county_province = { has_holding_type = tribal_holding } }
+					change_development_level = {
+						value = this.development_level
+						multiply = -1.00
+					}
+				}
+			}
+			if = { #Xia should emphasize d_xia
+				limit = { this.duchy = title:d_xia }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.33
+				}
+			}
+			
+			# Impact of Terrain
+			if = {
+				limit = { this.title_province = { terrain = plains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.0
+				}
+			}
+			if = {
+				limit = { this.title_province = { terrain = farmlands } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.2
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = hills } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.1
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = mountains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.5
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = desert } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.5
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = desert_mountains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.5
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = oasis } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.1
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = jungle } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.4
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = forest } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.0
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = taiga } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.05
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = wetlands } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.25
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = steppe } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.50
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = floodplains } }
+				change_development_level = {
+					value = this.development_level
+					multiply = 0.2
+				}
+			}
+			else_if = {
+				limit = { this.title_province = { terrain = drylands } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.05
+				}
+			}
+			## Effects of Tribal holdings on development
+			if = {
+				limit = { this.title_province = { has_holding_type = tribal_holding } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.75
+				}
+			}
+			else_if = {
+				limit = { any_county_province = { has_holding_type = tribal_holding } }
+				change_development_level = {
+					value = this.development_level
+					multiply = -0.50
+				}
+			}
+		}
+	}
+}

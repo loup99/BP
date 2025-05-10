@@ -1,0 +1,67 @@
+﻿namespace = BP_major_culture_decisions
+
+#0001-0099: Special one-offs
+
+#Establishment of Ostrogothic culture
+BP_major_culture_decisions.0001 = {
+	type = character_event
+	title = BP_major_culture_decisions.0001.t
+	theme = culture_change
+	
+	desc = {
+		triggered_desc = {
+			trigger = { NOT = { root = scope:culture_former } }
+			desc = BP_major_culture_decisions.0001.others.desc
+		}
+		triggered_desc = {
+			trigger = {
+				NOT = { root = scope:culture_former }
+				root.culture = culture:gothic
+			}
+			desc = BP_major_culture_decisions.0001.other_goths.desc
+		}
+		triggered_desc = {
+			trigger = { root = scope:culture_former }
+			desc = BP_major_culture_decisions.0001.culture_former.desc
+		}
+	}
+	
+	right_portrait = {
+		character = scope:culture_former
+		animation = personality_bold
+	}
+	
+	immediate = {
+		#We show as tooltip so that it appears as "has happened" to others.
+		if = {
+			limit = { NOT = { root = scope:culture_former } }
+			show_as_tooltip = { create_ostrogothic_culture_effect = { CREATING_CHAR = scope:culture_former } }
+		}
+	}
+	
+	option = { #The Emperor himself
+		trigger = { this = scope:culture_former }
+		name = BP_major_culture_decisions.0001.the_former
+		
+		create_ostrogothic_culture_effect = { CREATING_CHAR = scope:culture_former }
+		
+		#Every other gothic ruler get informed
+		
+		#Every relatively close ruler gets informed
+		every_ruler = {
+			limit = {
+				OR = {
+					is_ai = no
+					this.culture = culture:gothic
+				}
+				NOT = { this = scope:culture_former }
+			}
+			trigger_event = { id = BP_major_culture_decisions.0001 }
+		}
+	}
+	option = { #The fallback option
+		fallback = yes
+		trigger = { NOT = { this = scope:culture_former } }
+		name = BP_major_culture_decisions.0001.neutral
+	}
+}

@@ -1,34 +1,4 @@
 ﻿### Army Spawns
-create_odoacer_army_effect = {
-	spawn_army = { #Odoacer's East Germans army
-		name = event_troop_default_name
-		levies = 1000
-		men_at_arms = {
-			type = light_footmen
-			stacks = 3
-		}
-		men_at_arms = {
-			type = armored_footmen
-			stacks = 3
-		}
-		men_at_arms = {
-			type = bowmen
-			stacks = 3
-		}
-		men_at_arms = {
-			type = light_horsemen
-			stacks = 1
-		}
-		men_at_arms = {
-			type = onager
-			stacks = 1
-		}
-		location = province:2497 #Mantua
-		war = scope:war
-		war_keep_on_attacker_victory = $KEEP_AFTER_VICTORY$ #Otherwise Italy is toast in like 5 years
-		inheritable = no #But his son doesn't get to keep them
-	}
-}
 create_zeno_army_effect = {
 	spawn_army = {
 		name = event_troop_default_name
@@ -206,6 +176,148 @@ major_war_county_development_damage_effect = {
 			reduce_county_development_effect = {
 				THE_COUNTY = $THE_COUNTY$
 				RELATIVE_DEVELOPMENT_REDUCTION = 0.60
+			}
+		}
+	}
+}
+tradition_county_development_damage_effect = {
+	random_list = {
+		#Basic Odds (without considering anything else):
+		# Normally distributed, around 30% damage
+		# 30 - 30% - No effect
+		# 10 - 10% - 5% Damage
+		# 15 - 15% - 10% Damage
+		# 25 - 25% - 15% Damage
+		# 15 - 15% - 20% Damage
+		# 05 - 05% - 25% Damage
+		#
+		# i.e., 30% No damage, 70% of damage
+		#
+		# Being under 10 development increases odds of damage by 1.5
+		#     22% of no damage, 78% of damage
+		# Being under 05 development increases odds of damage by 1.5 (so factor of 2 if under 5 development)
+		#    Cumulative, 12.5% of no damage, 87.5% of damage
+		# Only having tribes in the county increases odds of damage by 2 by also increases odds of no effect
+		# by 50% (so 22.5% of no damage, 77.5% of damage)
+		
+		30 = {
+			modifier = {
+				NOR = {
+					scope:county = { any_county_province = { has_holding_type = castle_holding } }
+					scope:county = { any_county_province = { has_holding_type = city_holding } }
+					scope:county = { any_county_province = { has_holding_type = church_holding } }
+				}
+				factor = 1.5
+			}
+		} #No Effect
+		10 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.95
+			}
+			modifier = {
+				scope:barony.county.development_level < 10
+				factor = 1.5
+			}
+			modifier = {
+				scope:barony.county.development_level < 05
+				factor = 1.5
+			}
+			modifier = {
+				NOR = {
+					scope:county = { any_county_province = { has_holding_type = castle_holding } }
+					scope:county = { any_county_province = { has_holding_type = city_holding } }
+					scope:county = { any_county_province = { has_holding_type = church_holding } }
+				}
+				factor = 2
+			}
+		}
+		15 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.90
+			}
+			modifier = {
+				scope:barony.county.development_level < 10
+				factor = 1.5
+			}
+			modifier = {
+				scope:barony.county.development_level < 05
+				factor = 1.5
+			}
+			modifier = {
+				NOR = {
+					scope:county = { any_county_province = { has_holding_type = castle_holding } }
+					scope:county = { any_county_province = { has_holding_type = city_holding } }
+					scope:county = { any_county_province = { has_holding_type = church_holding } }
+				}
+				factor = 2
+			}
+		}
+		25 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.85
+			}
+			modifier = {
+				scope:barony.county.development_level < 10
+				factor = 1.5
+			}
+			modifier = {
+				scope:barony.county.development_level < 05
+				factor = 1.5
+			}
+			modifier = {
+				NOR = {
+					scope:county = { any_county_province = { has_holding_type = castle_holding } }
+					scope:county = { any_county_province = { has_holding_type = city_holding } }
+					scope:county = { any_county_province = { has_holding_type = church_holding } }
+				}
+				factor = 2
+			}
+		}
+		15 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.80
+			}
+			modifier = {
+				scope:barony.county.development_level < 10
+				factor = 1.5
+			}
+			modifier = {
+				scope:barony.county.development_level < 05
+				factor = 1.5
+			}
+			modifier = {
+				NOR = {
+					scope:county = { any_county_province = { has_holding_type = castle_holding } }
+					scope:county = { any_county_province = { has_holding_type = city_holding } }
+					scope:county = { any_county_province = { has_holding_type = church_holding } }
+				}
+				factor = 2
+			}
+		}
+		05 = {
+			reduce_county_development_effect = {
+				THE_COUNTY = $THE_COUNTY$
+				RELATIVE_DEVELOPMENT_REDUCTION = 0.75
+			}
+			modifier = {
+				scope:barony.county.development_level < 10
+				factor = 1.5
+			}
+			modifier = {
+				scope:barony.county.development_level < 05
+				factor = 1.5
+			}
+			modifier = {
+				NOR = {
+					scope:county = { any_county_province = { has_holding_type = castle_holding } }
+					scope:county = { any_county_province = { has_holding_type = city_holding } }
+					scope:county = { any_county_province = { has_holding_type = church_holding } }
+				}
+				factor = 2
 			}
 		}
 	}

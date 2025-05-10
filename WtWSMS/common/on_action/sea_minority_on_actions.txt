@@ -23,6 +23,7 @@ on_yearly_sea_minority_maintainance = {
 	effect = {
 		# Normal culture/faith spread
 		every_county = {
+			limit = { NOT = { has_variable = recent_migration } }
 			save_scope_as = source_county
 			random = {
 				chance = 0.75 #0.75% per annum translates to a MTTH of about 100 years (47.5% of not occurring)
@@ -35,7 +36,10 @@ on_yearly_sea_minority_maintainance = {
 
 		# Minority culture spread/growth
 		every_county = {
-			limit = { county_has_minority_culture_trigger = yes }
+			limit = {
+				county_has_minority_culture_trigger = yes
+				NOT = { has_variable = recent_culture_growth }
+			}
 
 			save_scope_as = source_county
 			random = {
@@ -49,7 +53,10 @@ on_yearly_sea_minority_maintainance = {
 
 		# Minority faith spread/growth
 		every_county = {
-			limit = { county_has_minority_faith_trigger = yes }
+			limit = {
+				county_has_minority_faith_trigger = yes
+				NOT = { has_variable = recent_faith_growth }
+			}
 
 			save_scope_as = source_county
 			random = {
@@ -57,6 +64,22 @@ on_yearly_sea_minority_maintainance = {
 				trigger_event = {
 					days = { 1 360 }
 					on_action = do_minority_faith_growth
+				}
+			}
+		}
+
+		#Migratory Minority decline
+		every_county = {
+			limit = {
+				county_has_migratory_minority_culture_trigger = yes
+				NOT = { has_variable = recent_culture_decline }
+			}
+			save_scope_as = source_county
+			random = {
+				chance = 1.25 #1.25% per annum translates to MTTH of about 55 years (50.06% of not occurring)
+				trigger_event = {
+					days = { 1 360 }
+					on_action = do_migratory_minority_decline
 				}
 			}
 		}
@@ -131,6 +154,43 @@ do_minority_faith_growth = {
 					50 = { minority_faith_growth_effect = yes }
 					50 = { minority_faith_spread_effect = yes }
 				}
+			}
+		}
+	}
+}
+
+do_migratory_minority_decline = {
+	effect = {
+		scope:source_county = {
+			every_in_list = {
+				limit = {
+					this = { has_cultural_tradition = tradition_migratory_culture }
+					NOT = { this.culture = scope:source_county.holder.culture }
+				}
+				variable = culture_minorities_large
+				add_to_temporary_list = potential_cultures
+			}
+			every_in_list = {
+				limit = {
+					this = { has_cultural_tradition = tradition_migratory_culture }
+					NOT = { this.culture = scope:source_county.holder.culture }
+				}
+				variable = culture_minorities_large
+				add_to_temporary_list = potential_cultures
+			}
+			every_in_list = {
+				limit = {
+					this = { has_cultural_tradition = tradition_migratory_culture }
+					NOT = { this.culture = scope:source_county.holder.culture }
+				}
+				variable = culture_minorities_small
+				add_to_temporary_list = potential_cultures
+			}
+			
+			random_in_list = {
+				list = potential_cultures
+				save_scope_as = minority_culture
+				minority_decline_effect = yes
 			}
 		}
 	}

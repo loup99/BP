@@ -45,9 +45,7 @@ uses_eucharistic_rite_trigger = {
 		text = has_a_eucharistic_rite
 		OR = {
 			has_doctrine = doctrine_christian_communion_transubstantiation
-			has_doctrine = doctrine_christian_communion_consubstantiation
 			has_doctrine = doctrine_christian_communion_memorialism
-			has_doctrine = doctrine_christian_communion_unstated
 		}
 		NOT = { has_doctrine = doctrine_christian_communion_repudiation }
 	}
@@ -488,10 +486,6 @@ kept_christian_doctrines_trigger = {
 			religious_head.faith = { has_doctrine = doctrine_christian_communion_transubstantiation }
 		}
 		trigger_if = {
-			limit = { doctrine:doctrine_christian_communion_consubstantiation = { is_in_list = selected_doctrines } }
-			religious_head.faith = { has_doctrine = doctrine_christian_communion_consubstantiation }
-		}
-		trigger_if = {
 			limit = { doctrine:doctrine_christian_communion_memorialism = { is_in_list = selected_doctrines } }
 			religious_head.faith = { has_doctrine = doctrine_christian_communion_memorialism }
 		}
@@ -589,16 +583,18 @@ actor_is_different_heritage_for_cultural_religions_trigger = {
 	}
 }
 actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+	exists = $ACTOR$.faith.var:$VARIABLE$
 	OR = {
-		$ACTOR$.culture = $TARGET$.faith.var:$VARIABLE$
+		$ACTOR$.faith.var:$VARIABLE$ = $TARGET$.culture
 		AND = {
-			$ACTOR$.culture = { any_parent_culture_or_above = { this = $TARGET$.faith.var:$VARIABLE$ } }
-			$ACTOR$.culture = { has_same_culture_heritage = $TARGET$.faith.var:$VARIABLE$ }
+			$ACTOR$.faith.var:$VARIABLE$ = { any_parent_culture_or_above = { this = $TARGET$.culture } }
+			$ACTOR$.faith.var:$VARIABLE$ = { has_same_culture_heritage = $TARGET$.culture }
 		}
 	}
 }
 #Copy of the above, but for context where we access faith directly
 actor_is_faith_culture_or_child_culture_for_cultural_religions_DIRECT_trigger = {
+	exists = $TARGET_FAITH$.var:$VARIABLE$
 	OR = {
 		$ACTOR$.culture = $TARGET_FAITH$.var:$VARIABLE$
 		AND = {

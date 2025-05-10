@@ -36,13 +36,6 @@ minor_migration_war = { #Cribbed from Vanilla Invasions
 		}
 	}
 	
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: Trib war dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
-	
 	target_titles = neighbor_land_or_water
 	target_title_tier = duchy
 	target_de_jure_regions_above = yes
@@ -308,13 +301,6 @@ minor_migration_war_kingdom = { #Cribbed from Vanilla Invasions
 		}
 	}
 	
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: Trib war dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
-	
 	target_titles = neighbor_land_or_water
 	target_title_tier = kingdom
 	target_de_jure_regions_above = yes
@@ -564,7 +550,11 @@ major_migration_war = {
 	}
 
 	allowed_for_character_display_regardless = {
-		prestige_level >= major_migration_prestige_level
+		trigger_if = {
+			limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+			prestige_level >= major_migration_prestige_level_easier
+		}
+		trigger_else = { prestige_level >= major_migration_prestige_level }
 		custom_description = {
 			text = has_launched_migration_war_recently
 			NOT = { has_character_flag = launched_migration_war_recently }
@@ -579,13 +569,6 @@ major_migration_war = {
 			}
 		}
 	}
-	
-	##### Changed from Vanilla vvvvv
-	allowed_against_character_display_regardless = {
-		### TFE EDIT: Trib war dec check
-		casus_belli_block = { SCOPEATK = scope:attacker SCOPEDEF = root }
-	}
-	##### Changed from Vanilla ^^^^^
 	
 	target_titles = all
 	target_title_tier = kingdom
@@ -614,7 +597,18 @@ major_migration_war = {
 		}
 	}
 
-	cost = { prestige = major_migration_war_prestige_cost }
+	cost = {
+		prestige = {
+			value = 0
+			if = {
+				limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+				add = major_migration_war_prestige_cost_cheaper
+			}
+			else = {
+				add = major_migration_war_prestige_cost
+			}
+		}
+	}
 
 	on_declaration = {
 		every_in_list = {
@@ -772,7 +766,13 @@ major_migration_war = {
 		scope:defender = { stress_impact = { arrogant = medium_stress_impact_gain } }
 		
 		#Add migratory invasion flag
-		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		if = {
+			limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time_easier } }
+		}
+		else = {
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		}
 	}
 	
 	on_defeat_desc = {
@@ -861,7 +861,13 @@ major_migration_war = {
 		on_lost_aggression_war_discontent_loss = yes
 		
 		#Add migratory invasion flag
-		scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		if = {
+			limit = { scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs } }
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time_easier } }
+		}
+		else = {
+			scope:attacker = { add_character_flag = { flag = launched_migration_war_recently years = major_migration_wait_time } }
+		}
 	}
 	
 	transfer_behavior = transfer

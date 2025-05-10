@@ -215,13 +215,15 @@ court_chaplain_conversion_contextual_bonuses = {
 	### Ethnic Religions
 	if = { #Ethnic Religions are **very** hard to convert
 		limit = {
-			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_conversion_resistance_active }
 			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_conversion_resistance_active }
 			#Make sure culture and faith align
-			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:county
-				VARIABLE = ethnic_religion_culture
+			NOT = {
+				actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
+					ACTOR = scope:councillor_liege
+					TARGET = scope:county
+					VARIABLE = ethnic_religion_culture
+				}
 			}
 		}
 		add = {
@@ -282,6 +284,17 @@ court_chaplain_conversion_contextual_bonuses = {
 		add = {
 			value = scope:councillor.conversion_ecumenical_resistance
 			desc = COURT_CHAPLAIN_CONVERSION_ECUMENICAL_MODIFIER
+		}
+	}
+	if = { #Early Slavs
+		limit = {
+			scope:councillor_liege.culture = { has_cultural_parameter = faster_convert_county_task_both_unreformed }
+			scope:councillor_liege.faith = { has_doctrine_parameter = unreformed }
+			scope:county.faith ?= { has_doctrine_parameter = unreformed }
+		}
+		add = {
+			value = scope:councillor.convert_faith_early_slav_bonus
+			desc = COURT_CHAPLAIN_CONVERSION_TRADITION_EARLY_SLAVS
 		}
 	}
 	##### Changed from Vanilla ^^^^^
@@ -983,6 +996,30 @@ court_chaplain_conversion_contextual_bonuses = {
 		add = {
 			value = scope:councillor.court_chaplain_conversion_monthly_increase_perk_bonus
 			desc = CONVERSION_REFORMER_BONUS_VALUE
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county = {
+				has_county_modifier = internal_affairs_county_religious_tensions_modifier
+			}
+		}
+		add = {
+			value = -0.2
+			desc = RELIGIOUS_TENSIONS_DESC
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county = {
+				has_county_modifier = internal_affairs_county_religious_tolerance_modifier
+			}
+		}
+		add = {
+			value = -0.1
+			desc = RELIGIOUS_TOLERANCE_DESC
 		}
 	}
 }
