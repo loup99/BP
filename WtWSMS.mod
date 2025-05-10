@@ -1,4 +1,14 @@
 name = "When the World Stopped Making Sense"
+tags={
+	"Bookmarks"
+	"Culture"
+	"Events"
+	"Gameplay"
+	"Historical"
+	"Map"
+	"Religion"
+	"Total Conversion"
+}
 version = "0.1.7"
 supported_version="1.16.*"
 path = "mod/WtWSMS"
