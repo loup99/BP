@@ -66,50 +66,101 @@ change_ruler_and_court_rite_by_kingdom_effect = {
 	}
 }
 
+#Establishes a specific type of tributary & it's obligations based on character flags
+BP_break_subject_contract_and_establish_tributary_effect = {
+	#Break Vassalage if it exists
+	if = {
+		limit = { liege != this }
+		create_title_and_vassal_change = {
+			type = independency
+			save_scope_as = change
+			add_claim_on_loss = no
+		}
+		becomes_independent = { change = scope:change }
+		resolve_title_and_vassal_change = scope:change
+	}
+
+	switch = {
+		trigger = has_character_flag
+		
+		default_federate = {
+			$TRIBUTARY$ = {
+				start_tributary = {
+					contract_group = BP_federate_tributary
+					suzerain = $SUZERAIN$
+				}
+				#You're required to protect them
+				tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
+				tributary_contract_set_obligation_level = { type = federate_subsidies level = 2 } #Moderate Subsidies
+				tributary_contract_set_obligation_level = { type = federate_levies level = 1 } #Moderate Subsidies
+				tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 1 } #The point of federates!
+			}
+			remove_character_flag = default_federate
+		}
+	}
+}
+
 #Specific Tributary Date Effects
 BP_476_tributary_setup_effect = {
 	#Orleans Alans
 	title:k_soissons.holder = {
 		save_scope_as = suzerain
 		title:d_orleans_alans.holder = {
-			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
+			add_character_flag = default_federate
+			BP_break_subject_contract_and_establish_tributary_effect = {
+				TRIBUTARY = this
+				SUZERAIN = scope:suzerain
+			}
 		}
 	}
 	#Byzanties
 	title:e_byzantium.holder = {
 		save_scope_as = suzerain
+		#Basic Tributaries
 		title:k_lazica.holder = {
 			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
-		}
-		title:k_salihid.holder = {
-			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
-			#tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 1 }
-			tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 0 }
-			tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 0 }
-		}
-		title:k_arabia_petraea.holder = {
-			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
-			#tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 1 }
-			tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 0 }
-			tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 0 }
-		}
-		title:d_thracian_goths.holder = {
-			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
-			#tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 1 }
-			tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 0 }
-			tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 0 }
-		}
-		title:k_ostrogoths.holder = {
-			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
-			#tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 1 }
-			tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 0 }
-			tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 0 }
 		}
 		title:k_sarir.holder = {
 			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
 		}
 		title:c_zichia.holder = {
 			break_subject_contract_and_establish_tributary_effect = { SUZERAIN = scope:suzerain TRIBUTARY = this }
+		}
+		#Federates
+		title:k_salihid.holder = {
+			add_character_flag = default_federate
+			BP_break_subject_contract_and_establish_tributary_effect = {
+				TRIBUTARY = this
+				SUZERAIN = scope:suzerain
+			}
+		}
+		title:k_arabia_petraea.holder = {
+			add_character_flag = default_federate
+			BP_break_subject_contract_and_establish_tributary_effect = {
+				TRIBUTARY = this
+				SUZERAIN = scope:suzerain
+			}
+		}
+		title:d_thracian_goths.holder = {
+			add_character_flag = default_federate
+			BP_break_subject_contract_and_establish_tributary_effect = {
+				TRIBUTARY = this
+				SUZERAIN = scope:suzerain
+			}
+		}
+		title:k_ostrogoths.holder = {
+			add_character_flag = default_federate
+			BP_break_subject_contract_and_establish_tributary_effect = {
+				TRIBUTARY = this
+				SUZERAIN = scope:suzerain
+			}
+		}
+		title:k_salihid.holder = {
+			add_character_flag = default_federate
+			BP_break_subject_contract_and_establish_tributary_effect = {
+				TRIBUTARY = this
+				SUZERAIN = scope:suzerain
+			}
 		}
 	}
 	#Persians
