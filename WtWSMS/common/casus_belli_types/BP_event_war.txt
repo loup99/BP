@@ -540,7 +540,51 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 			change = scope:change
 		}
 
+		#Record Permanent Tributaries
+		if = {
+			limit = {
+				any_in_list = {
+					list = target_titles
+					scope:defender.primary_title = this
+				}
+			}
+			scope:defender = {
+				every_tributary = {
+					limit = { is_a_permanent_contract_trigger = yes }
+					
+					if = {
+						limit = { has_subject_contract_group = BP_federate_tributary }
+						this = { add_character_flag = default_federate }
+					}
+					else_if = {
+						limit = { has_subject_contract_group = BP_fixed_tributary }
+						this = { add_character_flag = default_fixed_tributary }
+					}
+					else_if = {
+						limit = { has_subject_contract_group = BP_tribal_fixed_tributary }
+						this = { add_character_flag = default_fixed_tribal_tributary }
+					}
+					else = { this = { add_character_flag = default_fixed_tributary } }
+					
+					add_to_list = permanent_tributaries
+				}
+			}
+		}
+
 		resolve_title_and_vassal_change = scope:change
+
+		#Transfer Permanent Tributaries
+		if = {
+			limit = { list_size:permanent_tributaries > 0 }
+			every_in_list = {
+				list = permanent_tributaries
+				
+				BP_break_subject_contract_and_establish_tributary_effect = {
+					TRIBUTARY = this
+					SUZERAIN = scope:attacker
+				}
+			}
+		}
 
 		if = {
 			limit = {
