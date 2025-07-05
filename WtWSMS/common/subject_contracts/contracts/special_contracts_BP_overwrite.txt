@@ -1,0 +1,61 @@
+﻿@ai_standard_liege_desire = 2
+@ai_standard_vassal_desire = 1
+
+# Do not add any more levels to this, code checks only for non-default to determine behavior
+tributary_war_participation_obligation = {
+	display_mode = checkbox
+	obligation_levels = {
+		tributary_war_participation_obligation_none = {
+			default = yes
+			position = { 0 0 }
+
+			ai_liege_desire = 0
+			ai_subject_desire = @ai_standard_vassal_desire
+			score = 1
+		}
+		tributary_war_participation_obligation_forced = {
+			parent = tributary_war_participation_obligation_none
+			position = { 1 0 }
+
+			is_valid = {
+				##### Changed from Vanilla vvvvv
+				trigger_if = { #BP permanent tributaries should have this available always
+					limit = { scope:subject = { vassal_contract_obligation_level:federate_subsidies >= 0 } }
+					always = yes
+				}
+				trigger_else_if = {
+				##### Changed from Vanilla ^^^^^
+					limit = { scope:subject = { has_government = herder_government } }
+					custom_tooltip = {
+						text = herder_cannot_war_tt
+						always = no
+					}
+				}
+				trigger_else_if = {
+					limit = { NOT = { scope:subject = { has_relation_blood_brother = overlord } } }
+					custom_tooltip = {
+						text = war_support_obligation_conditions_unmet_tt
+						scope:subject = {
+							OR = {
+								is_ai = no # human players cannot be obedient, so this is always valid for them
+								is_obedient = yes
+							}
+							vassal_contract_obligation_level:suzerain_war_participation_guarantee > 0
+						}
+					}
+				}
+				trigger_else = {
+					scope:subject = { has_relation_blood_brother = overlord }
+				}
+			}
+
+			subject_opinion = -25
+
+			flag = tributary_contract_tributary_forced_war_override
+
+			ai_liege_desire = @ai_standard_liege_desire
+			ai_subject_desire = 0
+			score = -3
+		}
+	}
+}

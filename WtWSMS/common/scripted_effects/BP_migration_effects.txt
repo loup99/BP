@@ -553,6 +553,11 @@ flip_culture_major_migration_effect = {
 		$ATTACKER$ = {
 			every_realm_county = {
 				this = { save_temporary_scope_as = the_county }
+				#Flip holdings if possible... (Do this *before* additional migration damage)
+				major_migration_flip_holding_to_tribal_effect = {
+					THE_COUNTY = this
+					THE_ATTACKING_CULTURE = $ATTACKER$.culture
+				}
 				random_list = { #Apply minorities and damages
 					#Basic Odds:
 					#without considering any other factors:
@@ -624,11 +629,6 @@ flip_culture_major_migration_effect = {
 						}
 					}
 				}
-				#Flip holdings if possible...
-				major_migration_flip_holding_to_tribal_effect = {
-					THE_COUNTY = this
-					THE_ATTACKING_CULTURE = $ATTACKER$.culture
-				}
 			}
 		}
 	}
@@ -689,12 +689,6 @@ major_migration_flip_holding_to_tribal_effect = {
 		# 04 - 33.3%
 		# 05 - 16.7%
 		# >=06, impossible
-		$THE_COUNTY$ = {
-			every_county_province = {
-				limit = { has_holding_type = castle_holding }
-				set_holding_type = tribal_holding
-			}
-		}
 		chance = 100
 		modifier = { #Never for highly developed counties with enough innovations
 			factor = 0
@@ -826,6 +820,15 @@ major_migration_flip_holding_to_tribal_effect = {
 					$THE_COUNTY$.development_level >= 5
 					$THE_ATTACKING_CULTURE$.migration_impacting_innovations >= 4
 				}
+			}
+		}
+		$THE_COUNTY$ = {
+			every_county_province = {
+				if = {
+					limit = { is_county_capital = yes }
+					set_holding_type = tribal_holding
+				}
+				else = { remove_holding = yes }
 			}
 		}
 	}

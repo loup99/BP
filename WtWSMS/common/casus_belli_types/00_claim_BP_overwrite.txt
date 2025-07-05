@@ -474,6 +474,38 @@ claim_cb = {
 				}
 			}
 		}
+		
+		#Record Permanent Tributaries
+		if = {
+			limit = {
+				any_in_list = {
+					list = target_titles
+					scope:defender.primary_title = this
+				}
+			}
+			scope:defender = {
+				every_tributary = {
+					limit = { is_a_permanent_contract_trigger = yes }
+					
+					if = {
+						limit = { has_subject_contract_group = BP_federate_tributary }
+						this = { add_character_flag = default_federate }
+					}
+					else_if = {
+						limit = { has_subject_contract_group = BP_fixed_tributary }
+						this = { add_character_flag = default_fixed_tributary }
+					}
+					else_if = {
+						limit = { has_subject_contract_group = BP_tribal_fixed_tributary }
+						this = { add_character_flag = default_fixed_tribal_tributary }
+					}
+					else = { this = { add_character_flag = default_fixed_tributary } }
+					
+					add_to_list = permanent_tributaries
+				}
+			}
+		}
+		
 		###### Changed from Vanilla ^^^^^
 
 		create_title_and_vassal_change = {
@@ -481,6 +513,22 @@ claim_cb = {
 			save_scope_as = change
 			add_claim_on_loss = yes
 		}
+
+		###### Changed from Vanilla vvvvv
+
+		#Transfer Permanent Tributaries
+		if = {
+			limit = { list_size:permanent_tributaries > 0 }
+			every_in_list = {
+				list = permanent_tributaries
+				
+				BP_break_subject_contract_and_establish_tributary_effect = {
+					TRIBUTARY = this
+					SUZERAIN = scope:attacker
+				}
+			}
+		}
+		###### Changed from Vanilla ^^^^^
 
 		# EP3 Laamp possibility warning
 		scope:defender = { ep3_war_loss_adventurer_tt_effect = yes }

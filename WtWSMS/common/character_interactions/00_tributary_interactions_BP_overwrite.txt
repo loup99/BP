@@ -1,0 +1,284 @@
+﻿### Cease Paying Tribute - unilateral
+### Name referenced in code! Don't change it without an adult present!
+# actor = tributary
+# recipient = suzerain
+
+cease_paying_tribute_interaction = {
+	category = interaction_category_diplomacy
+	common_interaction = yes
+	use_diplomatic_range = no
+	icon = cease_paying_tributary_interaction
+
+	desc = cease_paying_tribute_interaction_desc
+
+	is_shown = {
+		scope:actor = {
+			this != scope:recipient
+			suzerain = scope:recipient
+			subject_can_break_tributary = yes
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			is_physically_able = yes
+			is_travelling = no
+			NOT = { exists = involved_activity }
+			trigger_if = {
+				limit = {
+					OR = {
+						any_land_neighboring_realm_with_tributaries_owner = {
+							this = scope:recipient
+						}
+						scope:recipient = {
+							is_landed = no
+						}
+					}
+				}
+				NOT = { has_truce = scope:recipient }
+			}
+		}
+	}
+
+	cost = {
+		prestige = {
+			value = 0
+			if = {
+				limit = {
+					scope:actor = {
+						OR = {
+							any_land_neighboring_realm_with_tributaries_owner = {
+								this = scope:recipient
+							}
+							scope:recipient = {
+								is_landed = no
+							}
+						}
+					}
+				}
+				add = minor_prestige_value
+			}
+		}
+	}
+
+	auto_accept = yes
+	on_accept = {
+		scope:actor = {
+			end_tributary = yes
+		}
+		scope:recipient = {
+			if = {
+				limit = { is_ai = yes }
+				trigger_event = {
+					id = char_interaction.0370
+					days = 14 # we delay the response from the AI for 2 weeks to make it feel more like a "diplomacy response"
+				}
+			}
+			else = {
+				trigger_event = char_interaction.0370
+			}
+			add_opinion = {
+				modifier = tributary_ceased_payments_opinion
+				target = scope:actor
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		update_federate_modifiers_effect = {
+			TRIBUTARY = scope:actor
+			SUZERAIN = scope:recipient
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+
+	ai_potential = {
+		is_at_war = no
+		is_migrating = no
+		suzerain ?= {
+			is_migrating = no
+
+			OR = {
+				is_landed = no
+				NOT = { # disconnected tributaries can always do this, even herders
+					any_land_neighboring_realm_with_tributaries_owner = {
+						this = root
+					}
+				}
+				AND = {
+					NOT = { root = { government_has_flag = government_is_herder } }
+					trigger_if = { # Obedience is a hard blocker, but only if suzerain is landed
+						limit = { 
+							is_landed = yes
+						}
+						root = { is_obedient = no }
+					}
+				}
+			}
+		}
+	}
+
+	ai_targets = {
+		ai_recipients = suzerain
+	}
+
+	ai_frequency = 12 # this must be 12 (1 year) in order to ensure the integrity of the UI-visualized chance the tributary will break the contract
+
+	# visualized in the UI as the annual chance the tributary will break the contract, based on a percentage chance per year
+	ai_will_do = { 
+		base = -25
+
+		modifier = {
+			add = {
+				add = obedience_value
+				subtract = obedience_threshold
+				multiply = -1
+				max = obedience_threshold
+				min = {
+					value = obedience_threshold
+					multiply = -1
+				}
+			}
+			desc = obedience_value_reason
+		}
+
+		modifier = {
+			scope:recipient = {
+				has_variable = temp_tributary_protection
+			}
+			add = -150
+			desc = temp_tributary_protection_reason
+		}
+
+		modifier = {
+			dominance_value > suzerain.dominance_value
+			add = 30
+			desc = cease_tribute_higher_dominance_reason
+		}
+
+		modifier = {
+			suzerain = { 
+				any_memory = { 
+					has_memory_type = nomad_showed_weakness_in_war
+					memory_age_years < 5
+				}
+			}
+			add = 30
+			desc = cease_tribute_showed_weakness_in_war_reason
+		}
+
+		modifier = {
+			any_memory = { 
+				has_memory_type = suzerain_defended_me_in_war
+				has_memory_participant = root.suzerain
+				memory_age_years < 10
+			}
+			add = -100
+			desc = cease_tribute_defended_me_in_war_reason
+		}
+
+		modifier = {
+			suzerain = { 
+				any_memory = { 
+					has_memory_type = had_chaotic_kurultai_succession
+					memory_age_years < 5
+				}
+			}
+			add = 30
+			desc = cease_tribute_had_chaotic_kurultai_succession_reason
+		}
+
+		# if the actor is sufficiently scared of the recipient they're way less likely to do this
+		ai_military_threat_modifier = {  
+			SENDER = scope:actor
+			RECEIVER = scope:recipient
+			MULTIPLIER = -2.5
+		}
+
+		modifier = {
+			scope:actor = {
+				is_migrating = no
+			}
+			scope:recipient = {
+				NOT = { 
+					any_land_neighboring_realm_with_tributaries_owner = {
+						this = scope:actor
+					}
+				}
+			}
+			add = 1000
+			desc = cease_tribute_disconnected_suzerain
+		}
+
+		modifier = {
+			scope:recipient = {
+				is_landed = no
+				is_migrating = no
+				is_at_war = no
+			}
+			add = 10000
+			desc = cease_tribute_landless_suzerain
+		}
+	}
+}
+
+### Release Tributary - unilateral
+# actor = suzerain
+# recipient = tributary
+
+release_tributary_interaction = {
+	category = interaction_category_diplomacy
+	common_interaction = no
+	icon = release_tributary_interaction
+
+	desc = release_tributary_interaction_desc
+
+	is_shown = {
+		scope:recipient = {
+			this != scope:actor
+			suzerain = scope:actor
+			OR = { # AI should only ever consider releasing unruly subjects
+				scope:actor = { is_ai = no }
+				NOT = { is_obedient_to = scope:actor }
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {}
+
+	cost = {
+		prestige = minor_prestige_value
+	}
+
+	auto_accept = yes
+	on_accept = {
+		add_truce_one_way = {
+			character = scope:recipient
+			years = 5
+			name = TRUCE_TRIBUTARY_RELEASED
+		}
+		scope:recipient = {
+			end_tributary = yes
+			save_scope_as = tributary_loc
+			scope:actor = { save_scope_as = suzerain_loc }
+			add_truce_both_ways = {
+				character = scope:actor
+				years = 5
+				name = TRUCE_TRIBUTARY_STOPPED
+			}
+			add_opinion = {
+				target = scope:actor
+				modifier = tributary_released_opinion
+				opinion = 25
+			}
+			trigger_event = char_interaction.0380
+		}
+		scope:actor = {
+			#TODO_CD_MPO some sort of message here
+		}
+		##### Changed from Vanilla vvvvv
+		update_federate_modifiers_effect = {
+			TRIBUTARY = scope:recipient
+			SUZERAIN = scope:actor
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+}

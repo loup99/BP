@@ -118,3 +118,50 @@ BP_maintenance_events.0002 = {
 		}
 	}
 }
+
+scripted_effect update_federate_modifiers_specific_effect = {
+	#Tributary
+	if = {
+		limit = { has_character_modifier = federate_federate_subsidy_modifier }
+		remove_character_modifier = federate_federate_subsidy_modifier
+	}
+	if = {
+		limit = { has_character_modifier = federate_federate_military_modifier }
+		remove_character_modifier = federate_federate_military_modifier
+	}
+	if = {
+		limit = {
+			is_tributary = yes
+			has_subject_contract_group = BP_federate_tributary
+		}
+		add_character_modifier = federate_federate_subsidy_modifier
+		add_character_modifier = federate_federate_military_modifier
+	}
+	
+	#Suzerain removal
+	if = {
+		limit = { has_character_modifier = suzerain_federate_subsidy_modifier }
+		remove_character_modifier = suzerain_federate_subsidy_modifier
+	}
+	if = {
+		limit = { has_character_modifier = suzerain_federate_military_multiplier }
+		remove_character_modifier = suzerain_federate_military_multiplier
+	}
+	if = {
+		limit = {
+			any_tributary = {
+				count >= 1
+				has_subject_contract_group = BP_federate_tributary
+			}
+		}
+		add_character_modifier = suzerain_federate_subsidy_modifier
+		add_character_modifier = suzerain_federate_military_multiplier
+	}
+}
+
+#Applies the tributary modifers
+BP_maintenance_events.1000 = {
+	hidden = yes
+	
+	immediate = { update_federate_modifiers_specific_effect = yes }
+}
