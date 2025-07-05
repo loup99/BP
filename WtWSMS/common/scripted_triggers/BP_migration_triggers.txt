@@ -1,0 +1,59 @@
+﻿#Valid migration counties (aka source counties)
+major_migration_valid_source_counties_trigger = {
+	AND = {
+		this.culture = $ATTACKER$.culture
+		this.faith = $ATTACKER$.faith
+	}
+}
+#Migration War AI constraints
+general_migration_constraints_trigger = {
+	#Pass on targets who have less total development than what we currently have
+	this.total_target_development <= scope:defender.total_realm_development
+	#Pass on targets smaller than our current realm size
+	this.target_size <= scope:attacker.realm_size
+}
+minor_migration_constraints_trigger = {
+	OR = {
+		AND = { #Pass on minor migrations to even partly tribal duchies
+			tier = tier_duchy
+			any_county = {
+				scope:defender = { completely_controls = prev }
+				any_county_province = { has_holding_type = tribal_holding }
+			}
+		}
+		AND = { #We need there to be enough non-tribals to make a kingdom worthwhile
+			tier = tier_kingdom
+			minor_migration_number_of_tribal_holdings > minor_migration_number_of_nontribals
+		}
+		general_migration_constraints_trigger = yes
+	}
+}
+target_title_not_in_great_steppe_trigger = {
+	NOT = {
+		situation:the_great_steppe = {
+			any_situation_county = {
+				count >= 1
+				this.$TIER$ = $TARGET_TITLE$
+			}
+		}
+	}
+}
+migration_war_fame_level_trigger = {
+	trigger_if = {
+		limit = {
+			scope:attacker.culture = { has_cultural_parameter = cb_lower_prestige_level_requirement }
+			scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs }
+		}
+		prestige_level >= $EASIEST_LEVEL$
+	}
+	trigger_else_if = {
+		limit = {
+			OR = {
+				scope:attacker.culture = { has_cultural_parameter = cb_lower_prestige_level_requirement }
+				scope:attacker.culture = { has_cultural_parameter = easier_migration_cbs }
+			}
+		}
+		prestige_level >= $EASIER_LEVEL$
+	}
+	trigger_else = { prestige_level >= $BASE_LEVEL$ }
+}
