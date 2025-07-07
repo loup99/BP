@@ -6,6 +6,7 @@ on_death = {
 		bp_shatter_tribal_peoples_without_leges_barbarorum
 		bp_return_roman_dynastic_duchies_and_kingdoms_to_liege
 		bp_destroy_specific_landless_titles
+		bp_flag_roman_title_for_destruction
 	}
 }
 
@@ -71,8 +72,79 @@ bp_return_roman_dynastic_duchies_and_kingdoms_to_liege = {
 }
 
 bp_destroy_specific_landless_titles = {
-	trigger = { this.primary_title = title:d_laamp_severinus_of_noricum }
+	trigger = {
+		OR = {
+			this.primary_title = title:d_laamp_severinus_of_noricum
+			this.primary_title = title:d_laamp_ajax_of_suebia
+		}
+	}
 	effect = {
-		destroy_title = title:d_laamp_severinus_of_noricum
+		if = {
+			limit = { this.primary_title = title:d_laamp_severinus_of_noricum }
+			destroy_title = title:d_laamp_severinus_of_noricum
+		}
+		else_if = {
+			limit = { this.primary_title = title:d_laamp_ajax_of_suebia }
+			destroy_title = title:d_laamp_severinus_of_noricum
+		}
+	}
+}
+
+#We set a variable because then the title will be passed to a new char and we can check it then
+#Otherwise, it would trigger directly when Nepos gets it, which would not be good.
+bp_flag_roman_title_for_destruction = {
+	trigger = {
+		OR = {
+			AND = {
+				title:e_wre = { is_titular = yes }
+				exists = title:e_wre.holder
+			}
+			AND = {
+				title:e_byzantium = { is_titular = yes }
+				exists = title:e_byzantium.holder
+			}
+			AND = {
+				title:e_roman_empire = { is_titular = yes }
+				exists = title:e_roman_empire.holder
+			}
+		}
+	}
+	effect = {
+		if = {
+			limit = {
+				title:e_wre = { is_titular = yes }
+				NOR = {
+					any_realm_county = { this = title:c_roma }
+					any_realm_county = { this = title:c_lombardia }
+					any_realm_county = { this = title:c_ravenna }
+					any_realm_county = { this = title:c_trier }
+				}
+			}
+			title:e_wre = { set_variable = destroy_me }
+		}
+		else_if = {
+			limit = {
+				title:e_byzantium = { is_titular = yes }
+				NOR = {
+					any_realm_county = { this = title:c_byzantion }
+					any_realm_county = { this = title:c_bithynia }
+				}
+			}
+			title:e_byzantium = { set_variable = destroy_me }
+		}
+		else_if = {
+			limit = {
+				title:e_roman_empire = { is_titular = yes }
+				NOR = {
+					any_realm_county = { this = title:c_roma }
+					any_realm_county = { this = title:c_lombardia }
+					any_realm_county = { this = title:c_ravenna }
+					any_realm_county = { this = title:c_trier }
+					any_realm_county = { this = title:c_byzantion }
+					any_realm_county = { this = title:c_bithynia }
+				}
+			}
+			title:e_roman_empire = { set_variable = destroy_me }
+		}
 	}
 }
