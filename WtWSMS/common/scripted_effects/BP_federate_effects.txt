@@ -3,6 +3,7 @@
 	$SUZERAIN$ = { trigger_event = { id = BP_maintenance_events.1000 delayed = yes } }
 }
 set_default_federate_effect = { #Scope is trib in question
+	save_temporary_scope_as = tributary
 	start_tributary = {
 		contract_group = BP_federate_tributary
 		suzerain = $SUZERAIN$
@@ -13,7 +14,86 @@ set_default_federate_effect = { #Scope is trib in question
 	tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 1 } #The point of federates!
 	
 	update_federate_modifiers_effect = {
-		TRIBUTARY = prev
+		TRIBUTARY = scope:tributary
 		SUZERAIN = $SUZERAIN$
 	}
+}
+
+update_federate_modifiers_single_effect = { #Scope is char
+	trigger_event = { id = BP_maintenance_events.1000 delayed = yes }
+}
+
+########## Tributary Border Raid Effects ##########
+
+save_current_subsidy_level_effect = { #Scope is char
+	#Garbage collect, just in case
+	if = {
+		limit = { has_variable = subsidy_level }
+		remove_variable = subsidy_level
+	}
+	#Save old subsidies value
+	if = {
+		limit = { vassal_contract_obligation_level:federate_subsidies = 0 }
+		set_variable = { name = subsidy_level value = 0 }
+	}
+	else_if = {
+		limit = { vassal_contract_obligation_level:federate_subsidies = 1 }
+		set_variable = { name = subsidy_level value = 1 }
+	}
+	else_if = {
+		limit = { vassal_contract_obligation_level:federate_subsidies = 2 }
+		set_variable = { name = subsidy_level value = 2 }
+	}
+	else_if = {
+		limit = { vassal_contract_obligation_level:federate_subsidies = 3 }
+		set_variable = { name = subsidy_level value = 3 }
+	}
+	else = { set_variable = { name = subsidy_level value = 3 } }
+}
+
+reestablish_federate_and_set_federate_subsidies_effect = { #Scope is tribute char
+	save_temporary_scope_as = tributary
+	
+	start_tributary = {
+		contract_group = BP_federate_tributary
+		suzerain = $SUZERAIN$
+	}
+	
+	if = {
+		limit = { is_tributary = yes }
+		tributary_contract_set_obligation_level = { type = federate_levies level = 1 } #Moderate Levies
+		tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
+		tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 1 } #The point of federates!
+		
+		if = {
+			limit = { has_variable = subsidy_level }
+			
+			if = {
+				limit = { scope:tributary.var:subsidy_level <= 0 }
+				tributary_contract_set_obligation_level = { type = federate_subsidies level = 0 }
+			}
+			else_if = {
+				limit = { scope:tributary.var:subsidy_level = 1 }
+				tributary_contract_set_obligation_level = { type = federate_subsidies level = 1 }
+			}
+			else_if = {
+				limit = { scope:tributary.var:subsidy_level = 2 }
+				tributary_contract_set_obligation_level = { type = federate_subsidies level = 2 }
+			}
+			else_if = {
+				limit = { scope:tributary.var:subsidy_level >= 3 }
+				tributary_contract_set_obligation_level = { type = federate_subsidies level = 3 }
+			}
+			#Otherwise keep default
+		}
+	}
+	#Otherwise, keep default
+	
+	#Update actual values
+	update_federate_modifiers_effect = {
+		TRIBUTARY = scope:tributary
+		SUZERAIN = $SUZERAIN$
+	}
+	
+	remove_variable = subsidy_level
 }
