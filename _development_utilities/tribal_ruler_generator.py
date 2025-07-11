@@ -9,11 +9,10 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 '''
 
 ##### Main #####
-start_year = 440
-end_year = 500
-religion = 'slavic_pagan'
-culture = culture_storage.culture_list['old_slavic']
-#holding_list = ['c_hohenau']
+start_year = 400
+end_year = 550
+religion = 'germanic_pagan'
+culture = culture_storage.culture_list['denziner']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -79,7 +78,7 @@ culture = culture_storage.culture_list['old_slavic']
 
 ##Pannonian Huns: Post Nedao
 #holding_list = ["c_baranya","c_vas","c_tolna"]
-holding_list = ["c_kolon"]
+#holding_list = ["c_kolon"]
 
 ##Pannonian Romano-Pannonians (poor-souls)
 #holding_list = ["c_szekesfehervar","c_veszprem","c_vukovar","c_zagorje","c_zagreb","c_pozega"]
@@ -114,6 +113,10 @@ holding_list = ["c_kolon"]
 
 ##Vidivarii
 #holding_list = ["d_vidivarii"]
+#holding_list = ["c_slupsk","c_danzig","c_berent","c_malbork"]
+
+#Denziner
+holding_list = ["c_stettin","c_soldin","c_kolobrzeg","c_cammin",""]
 
 ##Rump Langobard
 #holding_list = ["c_brzeg","c_breslau","c_nysa"]
@@ -139,8 +142,8 @@ holding_list = ["c_kolon"]
 ##Norse of Brondings
 #holding_list = ["d_brondings"]
 
-#Slavs under Hunnic domination
-holding_list = ["c_tigheci","c_chilia","c_cetatea_alba","c_lapusna"]
+##Slavs under Hunnic domination
+#holding_list = ["c_tigheci","c_chilia","c_cetatea_alba","c_lapusna"]
 
 for holding,list_loc in zip(holding_list,range(len(holding_list))):
     #Write or append data
