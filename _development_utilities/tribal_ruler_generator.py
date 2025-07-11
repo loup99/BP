@@ -116,7 +116,7 @@ culture = culture_storage.culture_list['denziner']
 #holding_list = ["c_slupsk","c_danzig","c_berent","c_malbork"]
 
 #Denziner
-holding_list = ["c_stettin","c_soldin","c_kolobrzeg","c_cammin",""]
+holding_list = ["c_stettin","c_soldin","c_kolobrzeg","c_cammin","c_landsberg","c_pila","c_miastko","c_krajna"]
 
 ##Rump Langobard
 #holding_list = ["c_brzeg","c_breslau","c_nysa"]
