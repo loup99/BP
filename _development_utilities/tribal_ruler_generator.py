@@ -12,7 +12,7 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 start_year = 400
 end_year = 550
 religion = 'germanic_pagan'
-culture = culture_storage.culture_list['denziner']
+culture = culture_storage.culture_list['warnic']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -115,8 +115,14 @@ culture = culture_storage.culture_list['denziner']
 #holding_list = ["d_vidivarii"]
 #holding_list = ["c_slupsk","c_danzig","c_berent","c_malbork"]
 
-#Denziner
-holding_list = ["c_stettin","c_soldin","c_kolobrzeg","c_cammin","c_landsberg","c_pila","c_miastko","c_krajna"]
+##Denziner
+#holding_list = ["c_stettin","c_soldin","c_kolobrzeg","c_cammin","c_landsberg","c_pila","c_miastko","c_krajna"]
+
+##Gustow
+#holding_list = ["c_rugen","c_wolgast"]
+
+#Warnic
+holding_list = ["c_hamburg","c_mecklenburg","c_rostock","c_havelberg","c_ruppin","c_prenzlau","c_brandenburg","c_werle"]
 
 ##Rump Langobard
 #holding_list = ["c_brzeg","c_breslau","c_nysa"]
