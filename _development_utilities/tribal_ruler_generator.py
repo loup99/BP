@@ -12,7 +12,7 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 start_year = 400
 end_year = 550
 religion = 'germanic_pagan'
-culture = culture_storage.culture_list['dane']
+culture = culture_storage.culture_list['old_saxon']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -132,9 +132,11 @@ culture = culture_storage.culture_list['dane']
 
 ##Old Saxon
 #holding_list = ["d_nordalbingia"]
+#holding_list = [ "d_westfalen","d_ostfalen","d_teutoburgiensis"]
+holding_list = ["d_albis"]
 
-#Danes
-holding_list = ["c_halland","c_blekinge"]
+##Danes
+#holding_list = ["c_halland","c_blekinge"]
 
 ##Rump Langobard
 #holding_list = ["c_brzeg","c_breslau","c_nysa"]
