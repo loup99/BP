@@ -44,7 +44,7 @@ bp_game_start_after_lobby = {
 		#Other Events
 		trigger_needed_events
 		delay = { days = 1 }
-		#fix_custom_character_governments
+		cull_maa_from_single_county_tribals
 	}
 }
 
@@ -1247,3 +1247,33 @@ update_development_by_terrain_and_circumstances = {
 		}
 	}
 }
+
+#Mostly for denuding specific cultures on the map of armies, making some confederations weaker
+cull_maa_from_single_county_tribals = {
+	effect = {
+		every_ruler = {
+			limit = {
+				is_ai = yes
+				highest_held_title_tier = tier_county
+				domain_size = 1
+				has_government = tribal_government
+				#Only for specified cultures
+				OR = {
+					this.culture = culture:denziner
+					this.culture = culture:vidivarii
+					this.culture = culture:wielbark
+					this.culture = culture:przeworsk
+					this.culture = culture:lebus
+					this.culture = culture:gustow
+				}
+				this.capital_county = {
+					OR = {
+						any_county_province = { has_holding_type = tribal_holding }
+						any_county_province = { has_holding = no }
+					}
+				}
+			}
+			every_maa_regiment = { destroy_maa_regiment = yes }
+		}
+	}
+ }

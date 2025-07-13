@@ -9,10 +9,10 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 '''
 
 ##### Main #####
-start_year = 400
+start_year = 390
 end_year = 550
-religion = 'germanic_pagan'
-culture = culture_storage.culture_list['old_saxon']
+religion = 'baltic_pagan'
+culture = culture_storage.culture_list['vistula_veneti']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -98,6 +98,8 @@ culture = culture_storage.culture_list['old_saxon']
 
 ##Vistula Veneti
 #holding_list = ["d_vistula_veneti"]
+#holding_list = ["c_peresopnytsia","c_volodymyr","c_dubrovytsia","c_turov"]# Upto around 475
+holding_list = ["c_dorohychyn","c_berestye","c_pinsk","c_slutsk","c_novogrudok","c_kletsk","c_grodno","c_minsk"]# Upto around 550
 
 ##East Galindians
 #holding_list = ["d_east_galindian"]
@@ -133,7 +135,7 @@ culture = culture_storage.culture_list['old_saxon']
 ##Old Saxon
 #holding_list = ["d_nordalbingia"]
 #holding_list = [ "d_westfalen","d_ostfalen","d_teutoburgiensis"]
-holding_list = ["d_albis"]
+#holding_list = ["d_albis"]
 
 ##Danes
 #holding_list = ["c_halland","c_blekinge"]
