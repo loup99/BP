@@ -641,6 +641,17 @@ vistula_veneti = Culture('vistula_veneti',
                grandfather_name_chance = 0.0,
               )
 east_galindian = copy.deepcopy(vistula_veneti); east_galindian.name = 'east_galindian'
+galindian = Culture('galindian',
+               ["Alvydas","Arelis","Auctune","Bajoras","Beidras","Budo","Dagonis","Ekkelis","Galindas",
+                "Gauronas","Gerdautas","Glande","Golding","Jauguttis","Karatas","Klukis","Kugis",
+                "Milzas","Nomedas","Prusas","Sergonis","Ulinniks","Ulitis"],
+               ["dynn_Liudas","dynn_Ringaudas","dynn_Antavas","dynn_Azuolas","dynn_Daugvilas",
+                "dynn_Gedivilas","dynn_Lutuveras","dynn_Mantvydas","dynn_Pukuveras","dynn_Vidmantas"],
+               father_name_chance = 0.0,
+               grandfather_name_chance = 0.0,
+              )
+prussian = copy.deepcopy(galindian); prussian.name = 'prussian'
+sudovian = copy.deepcopy(galindian); sudovian.name = 'sudovian'
 
 old_slavic = Culture('old_slavic',
                ["Boris","Boz","Bryachislav","Vladimir","Vladislav","Volodar","Vsevolod","Vseslav","Vysheslav",
@@ -870,6 +881,9 @@ culture_list = {'test_roman':test_roman,
                 'illyrian':illyrian,
                 'vistula_veneti':vistula_veneti,
                 'east_galindian':east_galindian,
+                'galindian':galindian,
+                'sudovian':sudovian,
+                'prussian':prussian,
                 'old_slavic':old_slavic,
                 'przeworsk':przeworsk,
                 'denziner':denziner,

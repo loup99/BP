@@ -99,10 +99,21 @@ culture = culture_storage.culture_list['vistula_veneti']
 ##Vistula Veneti
 #holding_list = ["d_vistula_veneti"]
 #holding_list = ["c_peresopnytsia","c_volodymyr","c_dubrovytsia","c_turov"]# Upto around 475
-holding_list = ["c_dorohychyn","c_berestye","c_pinsk","c_slutsk","c_novogrudok","c_kletsk","c_grodno","c_minsk"]# Upto around 550
+#holding_list = ["c_dorohychyn","c_berestye","c_pinsk","c_slutsk","c_novogrudok","c_kletsk","c_grodno","c_minsk"]# Upto around 550
+holding_list = ["c_cherven"]
 
 ##East Galindians
 #holding_list = ["d_east_galindian"]
+#holding_list = ["c_orsha","c_smolensk","c_gnezdovo","c_toropets","c_mozhaysk","c_kozelsk"]
+
+##Galindians
+#holding_list = ["c_osterode","c_allenstein"]
+
+##Prussian
+#holding_list = ["c_wormditt","c_natangia","c_koingsberg","c_sclaovia","c_bartenstein"]
+
+##Sudovians
+#holding_list = ["c_lomzynska","c_volkovysk","c_angerburg","c_yatvyagi","c_trakai"]
 
 ##Various Slavs:
 #holding_list = ["d_kolochins"]
