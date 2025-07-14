@@ -12,7 +12,7 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 start_year = 390
 end_year = 550
 religion = 'baltic_pagan'
-culture = culture_storage.culture_list['vistula_veneti']
+culture = culture_storage.culture_list['aesti']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -100,7 +100,7 @@ culture = culture_storage.culture_list['vistula_veneti']
 #holding_list = ["d_vistula_veneti"]
 #holding_list = ["c_peresopnytsia","c_volodymyr","c_dubrovytsia","c_turov"]# Upto around 475
 #holding_list = ["c_dorohychyn","c_berestye","c_pinsk","c_slutsk","c_novogrudok","c_kletsk","c_grodno","c_minsk"]# Upto around 550
-holding_list = ["c_cherven"]
+#holding_list = ["c_cherven"]
 
 ##East Galindians
 #holding_list = ["d_east_galindian"]
@@ -114,6 +114,9 @@ holding_list = ["c_cherven"]
 
 ##Sudovians
 #holding_list = ["c_lomzynska","c_volkovysk","c_angerburg","c_yatvyagi","c_trakai"]
+
+##Aesti
+holding_list = ["c_memel","c_palanga","c_grobin","c_vanemane","c_zemigalians","c_selpils","c_siauliai","c_raseiniai","c_kernave","c_braslau","c_lukoml","c_polotsk","c_vitebsk","c_talava","c_kokenois","c_jersika"]
 
 ##Various Slavs:
 #holding_list = ["d_kolochins"]
