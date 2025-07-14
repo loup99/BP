@@ -66,6 +66,7 @@ on_title_gain = {
 		BP_update_tributary_modifiers
 		#Specific other on-actions
 		BP_fall_of_rome
+		BP_destroy_roman_empires_without_capitals
 	}
 }
 
@@ -134,6 +135,47 @@ BP_fall_of_rome = {
 				limit = { primary_title.tier >= tier_county }
 				trigger_event = { id = bp_narrative_events.0001 }
 			}
+		}
+	}
+}
+
+BP_destroy_roman_empires_without_capitals = {
+	trigger = {
+		OR = {
+			AND = {
+				scope:title = title:e_wre
+				title:e_wre = { has_variable = destroy_me }
+			}
+			AND = {
+				scope:title = title:e_byzantium
+				title:e_byzantium = { has_variable = destroy_me }
+			}
+			AND = {
+				scope:title = title:e_roman_empire
+				title:e_roman_empire = { has_variable = destroy_me }
+			}
+		}
+	}
+	effect = {
+		if = {
+			limit = { scope:title = title:e_wre }
+			title:e_wre = { remove_variable = destroy_me }
+			title:e_wre = { save_scope_as = destroyed_roman_empire }
+			scope:previous_holder = { save_scope_as = last_roman_emperor }
+			trigger_event = { id = bp_narrative_events.0010 }
+		}
+		else_if = {
+			limit = { scope:title = title:e_byzantium }
+			title:e_byzantium = { remove_variable = destroy_me }
+			title:e_byzantium = { save_scope_as = destroyed_roman_empire }
+			scope:previous_holder = { save_scope_as = last_roman_emperor }
+			trigger_event = { id = bp_narrative_events.0010 }
+		}
+		else = {
+			title:e_roman_empire = { remove_variable = destroy_me }
+			title:e_roman_empire = { save_scope_as = destroyed_roman_empire }
+			scope:previous_holder = { save_scope_as = last_roman_emperor }
+			trigger_event = { id = bp_narrative_events.0010 }
 		}
 	}
 }
