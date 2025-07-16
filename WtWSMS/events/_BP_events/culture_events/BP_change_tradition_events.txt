@@ -50,3 +50,34 @@ bp_change_tradition_events.0002 = {
 		add_culture_tradition = tradition_hereditary_hierarchy
 	}
 }
+
+#Zealous Pagans Tradition Removal
+bp_change_tradition_events.0003 = {
+	scope = culture
+	hidden = yes
+	
+	trigger = {
+		OR = {
+			root = { has_cultural_tradition = tradition_zealous_pagans }
+			root = { has_cultural_tradition = tradition_zealous_pagans_non_dlc }
+		}
+		trigger_if = {
+			limit = { exists = this.culture_head }
+			NOT = { this.culture_head.faith = { has_doctrine_parameter = unreformed } }
+		}
+		trigger_else = {
+			any_culture_county = {
+				percent >= 0.50
+				NOT = { this.faith = { has_doctrine_parameter = unreformed } }
+			}
+		}
+	}
+	
+	immediate = {
+		if = {
+			limit = { has_cultural_tradition = tradition_zealous_pagans }
+			remove_culture_tradition = tradition_zealous_pagans
+		}
+		else = { remove_culture_tradition = tradition_zealous_pagans_non_dlc }
+	}
+}
