@@ -845,6 +845,17 @@ gothic = Culture('gothic',
                grandfather_name_chance = 0.5,
               )
 wielbark = copy.deepcopy(gothic); wielbark.name = 'wielbark'
+alamannian = Culture('alamannian',
+               ["Agenarich","Butilin","Chnodomar","Chrodobert","Croc","Gibuld","Gotfrid","Gundomad",
+                "Gunzo","Haming","Hariobaud","Hortar","Knodomar","Lantachar","Lantfrid","Leutfred",
+                "Leuthar","Magnachar","Makrian","Mederich","Priar","Rando","Suomar","Theodefrid",
+                "Theudebald","Uncilin","Ur","Ursicin","Vadomar","Vaefar","Vangio","Vann","Verrit",
+                "Vestralp","Vincomal","Vithicab","Willehar","Wisimar"],
+               ["dynn_Chrocus","dynn_Etichonid","dynn_Butilining","dynn_Chrodoberting","dynn_Gundomading",
+                "dynn_Lantacharing"],
+               father_name_chance = 0.1,
+               grandfather_name_chance = 0.1,
+              )
 
 alan = Culture('alan',
                ["E_lbeg","E_mbalan","Aghsartan","Alatey","Akhsar","Anbal","Anbazuk","Aravat","Arsen","Askhkadar",
@@ -912,6 +923,7 @@ culture_list = {'test_roman':test_roman,
                 'dane':dane,
                 'gothic':gothic,
                 'wielbark':wielbark,
+                'alamannian':alamannian,
                 'alan':alan,
                 'western_alan':western_alan,
                 'norse':norse}

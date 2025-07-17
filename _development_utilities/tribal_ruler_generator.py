@@ -9,10 +9,10 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 '''
 
 ##### Main #####
-start_year = 390
+start_year = 350
 end_year = 550
-religion = 'baltic_pagan'
-culture = culture_storage.culture_list['aesti']
+religion = 'germanic_pagan'
+culture = culture_storage.culture_list['alamannian']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -116,7 +116,7 @@ culture = culture_storage.culture_list['aesti']
 #holding_list = ["c_lomzynska","c_volkovysk","c_angerburg","c_yatvyagi","c_trakai"]
 
 ##Aesti
-holding_list = ["c_memel","c_palanga","c_grobin","c_vanemane","c_zemigalians","c_selpils","c_siauliai","c_raseiniai","c_kernave","c_braslau","c_lukoml","c_polotsk","c_vitebsk","c_talava","c_kokenois","c_jersika"]
+#holding_list = ["c_memel","c_palanga","c_grobin","c_vanemane","c_zemigalians","c_selpils","c_siauliai","c_raseiniai","c_kernave","c_braslau","c_lukoml","c_polotsk","c_vitebsk","c_talava","c_kokenois","c_jersika"]
 
 ##Various Slavs:
 #holding_list = ["d_kolochins"]
@@ -150,6 +150,13 @@ holding_list = ["c_memel","c_palanga","c_grobin","c_vanemane","c_zemigalians","c
 #holding_list = ["d_nordalbingia"]
 #holding_list = [ "d_westfalen","d_ostfalen","d_teutoburgiensis"]
 #holding_list = ["d_albis"]
+
+##Alemanni
+#d_lentienses: Priarius (???-378)
+#d_brisgavi: Vadomarius (???-368)
+#Raetovari, Necker - Quasi-Fictional
+#holding_list = ["d_lentienses","d_brisgavi","d_raetovari"]
+holding_list = ["d_neckersuebi"]
 
 ##Danes
 #holding_list = ["c_halland","c_blekinge"]
