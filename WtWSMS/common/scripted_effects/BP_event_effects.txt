@@ -43,15 +43,30 @@ form_frankish_kingdom_effect = {
 			change = scope:change
 		}
 	}
+	#Shift the capital Duchy, always
+	this.capital_county.duchy = { set_de_jure_liege_title = title:k_franks }
 	#Shift every duchy that's completely controlled
 	every_realm_county = { this.duchy = { add_to_list = possible_duchies } }
-	every_in_list = {
+	every_in_list = { #If it's completely controlled and neighboring the capital, shift its de jure liege
 		list = possible_duchies
-		limit = { root = { completely_controls = prev.duchy } }
+		limit = {
+			root = { completely_controls = prev.duchy }
+			any_county = {
+				this.duchy = prev
+				any_neighboring_county = { this.duchy = root.capital_county.duchy }
+			}
+		}
 		set_de_jure_liege_title = title:k_franks
 	}
 	resolve_title_and_vassal_change = scope:change
 	
+	#Give the special Soissons subjugation CB
+	custom_description = {
+		text = unlocks_one_subj_cb_against_roman_state
+		add_character_flag = available_realm_conquest_cb_against_centralized_state
+	}
+	
+	#Add claims to Gaul
 	add_pressed_claim = title:e_gaul
 	if = {
 		limit = { culture = { has_cultural_parameter = male_only_inheritance } }
@@ -67,9 +82,7 @@ form_frankish_kingdom_effect = {
 			add_pressed_claim = title:e_gaul
 		}
 	}
-	else = {
-		every_heir = { add_pressed_claim = title:e_gaul }
-	}
+	else = { every_heir = { add_pressed_claim = title:e_gaul } }
 }
 
 ### Formation of the Aures Kingdom
