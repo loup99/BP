@@ -60,6 +60,31 @@ form_frankish_kingdom_effect = {
 	}
 	resolve_title_and_vassal_change = scope:change
 	
+	#Move capital to Aachen if its not held by a human player
+	if = {
+		limit = {
+			any_realm_county = { this = title:c_aachen }
+			title:c_aachen.holder = { is_ai = yes }
+		}
+		create_title_and_vassal_change = {
+			type = returned
+			save_scope_as = change
+			add_claim_on_loss = no
+		}
+		title:c_aachen = {
+			change_title_holder = {
+				holder = root
+				change = scope:change
+			}
+		}
+		resolve_title_and_vassal_change = scope:change
+		set_realm_capital = title:c_aachen
+	}
+	else_if = {
+		limit = { title:c_aachen.holder = root }
+		set_realm_capital = title:c_aachen
+	}
+	
 	#Give the special Soissons subjugation CB
 	custom_description = {
 		text = unlocks_one_subj_cb_against_roman_state
