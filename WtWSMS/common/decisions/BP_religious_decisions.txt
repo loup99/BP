@@ -93,6 +93,151 @@ peregrinition_decision = {
 	}
 }
 
+raise_circumcellions_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+	}
+	decision_group_type = major
+
+	desc = raise_circumcellions_decision_desc
+	selection_tooltip = raise_circumcellions_decision_tooltip
+	
+	is_shown = {
+		root.faith = { has_doctrine_parameter = raise_circumcellions_decision }
+		is_ruler = yes
+		NOT = { government_has_flag = government_is_nomadic }
+		trigger_if = { #Available for high tribals, but not tribals
+			limit = { government_has_flag = government_is_tribal }
+			government_has_flag = government_is_settled
+		}
+	}
+	
+	is_valid = {
+		custom_description = {
+			text = recently_called_circumcellions
+			NOT = { has_character_flag = recently_called_circumcellions }
+		}
+		piety_level >= 1
+		is_at_war = yes
+		#Must be at war with an infidel as the primary
+		custom_description = { #Change to faith hostility level must be Evil
+			text = must_be_fighting_infidel_as_primary_opponent
+			any_character_war = {
+				is_war_leader = root
+				save_temporary_scope_as = the_war_in_question
+				root = {
+					any_war_enemy = {
+						scope:the_war_in_question = { is_war_leader = root }
+						save_temporary_scope_as = the_other_leader
+						root.faith = { faith_hostility_level = { target = scope:the_other_leader.faith value > faith_astray_level } }
+					}
+				}
+			}
+		}
+		NOT = { has_trait = excommunicated } #Definitely not allowed in this case; can't fight the Bishop of Carthage deposing you
+	}
+	
+	is_valid_showing_failures_only = {
+		completely_controls = root.capital_county
+		piety >= 0
+		is_imprisoned = no
+		is_available_adult = yes
+	}
+	
+	cost = { piety = root.circumellion_piety_cost }
+	
+	effect = {
+		root = {
+			save_temporary_scope_as = the_ruler
+			ordered_character_war = {
+				order_by = given_war_other_side_max_military_strength
+				position = 0
+				save_scope_as = chosen_war
+			}
+		}
+		every_realm_county = {
+			limit = {
+				this.holder = root
+				this.faith = root.faith
+			}
+			root = {
+				spawn_army = {
+					levies = 300
+					men_at_arms = {
+						type = light_footmen
+						stacks = 2
+					}
+					location = scope:the_ruler.capital_province
+					uses_supply = no
+					war = scope:chosen_war
+					inheritable = no
+					name = circumcellions_army_name
+				}
+			}
+			#The peasants are ~~revolting~~ fighting for us, sir.
+			change_county_control = -25
+			#And the impact sticks around for years
+			add_county_modifier = { modifier = county_raised_circumcellions years = 5 }
+		}
+		hidden_effect = {
+			root = { add_character_flag = { flag = recently_called_circumcellions years = 5 } }
+			root = { save_temporary_scope_as = circumellions_raiser }
+			every_character_war = {
+				every_war_participant = {
+					#limit = { NOT = { this = root } }
+					send_interface_message = {
+						type = event_generic_neutral
+						title = circumellions_raised_title
+						desc = circumellions_raised_desc
+						tooltip = circumellions_raised_tt
+						left_icon = root
+					}
+				}
+			}
+		}
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = { is_at_war = yes }
+	
+	ai_will_do = {
+		base = 50 # 50% Chance in general (we want it to be likely to happen if conditions are right)
+		#Zealous and Ambitious required, also needs enough piety
+		
+		#Won't do if they can't pay
+		modifier = {
+			factor = 0
+			NOT = { piety >= root.circumellion_piety_cost }
+		}
+		#Won't do if cynical
+		modifier = {
+			factor = 0
+			has_trait = cynical
+		}
+		#Won't do if they aren't significantly outgunned
+		modifier = {
+			factor = 0
+			root.my_side_max_military_strength > root.three_fourths_other_sides_max_military_strength
+		}
+		#Arrogant halves the chance (Having the peasants help us?!)
+		modifier = {
+			factor = 0.5
+			has_trait = arrogant
+		}
+		#Likely to do if Zealous/Ambitious (it'll keep them in the Empire and all that)
+		#Will do if both zealous and ambitious, even if arrogant
+		modifier = {
+			factor = 1.59 #sqrt(2.5) rounded up
+			has_trait = zealous
+		}
+		modifier = {
+			factor = 1.59 #sqrt(2.5) rounded up
+			has_trait = ambitious
+		}
+	}
+}
+
 #Converting a Rite to an independent Church
 establish_autocephalous_church_decision = {
 	picture = {
