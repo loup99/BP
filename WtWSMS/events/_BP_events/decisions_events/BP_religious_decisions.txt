@@ -4,6 +4,7 @@
 
 #### 0001-0100: Christian Events
 #### 0101-0200: Zoroastrian Events
+#### 0201-0300: Blot Conversion Events
 
 #################### Christian Events ####################
 
@@ -264,4 +265,97 @@ BP_religious_decisions.0101 = {
 	}
 }
 
+#################### Blot Conversion Events ####################
+BP_religious_decisions.0201 = {
+	type = character_event
+	theme = faith
+	
+	immediate = {
+		play_music_cue = "mx_cue_epic_sacral_moment"
+		if = {
+			limit = { root = scope:blot_reformer }
+			create_the_blot_effect = yes
+		}
+		save_scope_as = the_char
+	}
+	
+	title = BP_religious_decisions.0201.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { root = scope:blot_reformer }
+				desc = BP_religious_decisions.0201.desc.me
+			}
+			triggered_desc = {
+				trigger = { root.faith = scope:blot_reformer.faith }
+				desc = BP_religious_decisions.0201.desc.we
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { root.faith = scope:blot_reformer.faith }
+					OR = {
+						root.faith = { has_doctrine = tenet_human_sacrifice }
+						root.faith = { has_doctrine = tenet_gruesome_festivals }
+					}
+				}
+				desc = BP_religious_decisions.0201.desc.they_positive
+			}
+			desc = BP_religious_decisions.0201.desc.they_negative
+		}
+	}
+	
+	right_portrait = {
+		character = scope:blot_reformer
+		animation = personality_zealous
+	}
+	
+	option = { #Me
+		trigger = { this = scope:blot_reformer }
+		name = BP_religious_decisions.0201.reformer
+		
+		every_ruler = {
+			limit = {
+				is_ai = no
+				NOT = { this = scope:blot_reformer }
+			}
+			trigger_event = { id = BP_religious_decisions.0201 delayed = yes }
+		}
+	}
+	
+	option = { #Our Co-Religionists
+		trigger = {
+			NOT = { this = scope:blot_reformer }
+			this.faith = scope:blot_reformer.faith
+		}
+		name = BP_religious_decisions.0201.co_religionist
+		show_as_tooltip = { create_the_blot_effect = yes }
+	}
+	
+	option = { #Other human sacrifice peoples, in favor
+		trigger = {
+			NOT = { this = scope:blot_reformer }
+			NOT = { this.faith = scope:blot_reformer.faith }
+			OR = {
+				this.faith = { has_doctrine = tenet_human_sacrifice }
+				this.faith = { has_doctrine = tenet_gruesome_festivals }
+			}
+		}
+		name = BP_religious_decisions.0201.we_do_it_too
+		show_as_tooltip = { create_the_blot_effect = yes }
+	}
+	
+	option = { #Other peoples
+		trigger = {
+			NOT = { this = scope:blot_reformer }
+			NOT = { this.faith = scope:blot_reformer.faith }
+			NOR = {
+				this.faith = { has_doctrine = tenet_human_sacrifice }
+				this.faith = { has_doctrine = tenet_gruesome_festivals }
+			}
+		}
+		name = BP_religious_decisions.0201.what_are_they_doing
+		show_as_tooltip = { create_the_blot_effect = yes }
+		fallback = yes
+	}
+}
 
