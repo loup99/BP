@@ -4,7 +4,7 @@
 
 #### 0001-0100: Christian Events
 #### 0101-0200: Zoroastrian Events
-#### 0201-0300: Blot Conversion Events
+#### 0201-0300: Blot & Human Sacrifice Conversion Events
 
 #################### Christian Events ####################
 
@@ -265,8 +265,8 @@ BP_religious_decisions.0101 = {
 	}
 }
 
-#################### Blot Conversion Events ####################
-BP_religious_decisions.0201 = {
+#################### Blot & Human Sacrifice Conversion Events ####################
+BP_religious_decisions.0201 = { #Create the Blot
 	type = character_event
 	theme = faith
 	
@@ -359,3 +359,86 @@ BP_religious_decisions.0201 = {
 	}
 }
 
+BP_religious_decisions.0202 = { #Create human sacrifice
+	type = character_event
+	theme = faith
+	
+	immediate = {
+		play_music_cue = "mx_cue_epic_sacral_moment"
+		if = {
+			limit = { root = scope:human_sacrifice_reformer }
+			establish_human_sacrifice_effect = yes
+		}
+		save_scope_as = the_char
+	}
+	
+	title = BP_religious_decisions.0202.t
+	desc = {
+		desc = BP_religious_decisions.0202.desc.opening
+		first_valid = {
+			triggered_desc = {
+				trigger = { root = scope:human_sacrifice_reformer }
+				desc = BP_religious_decisions.0202.desc.me
+			}
+			triggered_desc = {
+				trigger = { root.faith = scope:human_sacrifice_reformer.faith }
+				desc = BP_religious_decisions.0202.desc.we
+			}
+			desc = BP_religious_decisions.0202.desc.other
+		}
+	}
+	
+	right_portrait = {
+		character = scope:human_sacrifice_reformer
+		animation = personality_zealous
+	}
+	
+	option = { #Me
+		trigger = { this = scope:human_sacrifice_reformer }
+		name = BP_religious_decisions.0202.reformer
+		
+		every_ruler = {
+			limit = {
+				is_ai = no
+				NOT = { this = scope:human_sacrifice_reformer }
+			}
+			trigger_event = { id = BP_religious_decisions.0202 delayed = yes }
+		}
+	}
+	
+	option = { #Our Co-Religionists
+		trigger = {
+			NOT = { this = scope:human_sacrifice_reformer }
+			this.faith = scope:human_sacrifice_reformer.faith
+		}
+		name = BP_religious_decisions.0202.co_religionist
+		show_as_tooltip = { establish_human_sacrifice_effect = yes }
+	}
+	
+	option = { #Other human sacrifice peoples, in favor
+		trigger = {
+			NOT = { this = scope:human_sacrifice_reformer }
+			NOT = { this.faith = scope:human_sacrifice_reformer.faith }
+			OR = {
+				this.faith = { has_doctrine = tenet_human_sacrifice }
+				this.faith = { has_doctrine = tenet_gruesome_festivals }
+			}
+		}
+		name = BP_religious_decisions.0202.we_do_it_too
+		show_as_tooltip = { establish_human_sacrifice_effect = yes }
+	}
+	
+	option = { #Other peoples
+		trigger = {
+			NOT = { this = scope:human_sacrifice_reformer }
+			NOT = { this.faith = scope:human_sacrifice_reformer.faith }
+			NOR = {
+				this.faith = { has_doctrine = tenet_human_sacrifice }
+				this.faith = { has_doctrine = tenet_gruesome_festivals }
+			}
+		}
+		name = BP_religious_decisions.0202.what_are_they_doing
+		show_as_tooltip = { establish_human_sacrifice_effect = yes }
+		fallback = yes
+	}
+}

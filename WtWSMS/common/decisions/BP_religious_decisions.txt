@@ -496,6 +496,76 @@ automutiliation_decision = {
 	}
 }
 
+adopt_human_sacrifice_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
+	}
+	decision_group_type = major
+
+	desc = adopt_human_sacrifice_decision_desc
+	selection_tooltip = adopt_human_sacrifice_decision_tooltip
+
+	is_shown = {
+		is_ai = no
+		is_independent_ruler = yes
+		is_landed = yes
+		this.religion = religion:germanic_religion
+		this.faith = { has_doctrine_parameter = unreformed }
+		NOR = {
+			this.faith = { has_doctrine = tenet_human_sacrifice }
+			this.faith = { has_doctrine = tenet_gruesome_festivals }
+		}
+	}
+
+	is_valid = {
+		#Have a holy site in your realm
+		custom_description = { #1 Holy Sites, but you have some strong pull on him
+			text = controls_one_holy_site
+			root = { any_sub_realm_county = { count >= 1 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+		}
+		
+		#Have at two of your holy sites controlled by your faith
+		custom_description = {
+			text = at_least_two_holy_sites_controlled_by_your_faith
+			this.faith = {
+				any_holy_site = {
+					count >= 2
+					this.holder.top_liege.faith = root.faith
+				}
+			}
+		}
+		
+		#Be noticeably pious
+		piety_level >= 3
+	}
+	
+	cost = {
+		piety = 250
+		prestige = 250
+	}
+
+	is_valid_showing_failures_only = {
+		is_at_war = no
+		is_available_adult = yes
+	}
+
+	effect = {
+		#Replaces human sacrifice with Blot and raises piety level if possible
+		root = { save_scope_as = human_sacrifice_reformer }
+		show_as_tooltip = { establish_human_sacrifice_effect = yes }
+		hidden_effect = { trigger_event = { id = BP_religious_decisions.0202 } }
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = { always = no }
+
+	#AI has to be at least somewhat bold/vengeful/zealous to try
+	ai_will_do = {
+		base = 0
+	}
+}
+
 adopt_the_blot_decision = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
@@ -514,6 +584,14 @@ adopt_the_blot_decision = {
 	}
 
 	is_valid = {
+		trigger_if = { #Triggered for localization reasons
+			limit = { root.faith = { has_variable = human_sacrifice_added } }
+			custom_description = {
+				text = have_not_recently_adopted_human_sacrifice
+				NOT = { root.faith = { has_variable = human_sacrifice_added } }
+			}
+		}
+		
 		#Culture must be somewhat centralized
 		OR = {
 			culture = { has_innovation = innovation_leges_barbarorum }
