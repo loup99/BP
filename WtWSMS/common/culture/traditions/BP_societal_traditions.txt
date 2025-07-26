@@ -917,3 +917,201 @@ tradition_zealous_pagans_non_dlc = {
 		}
 	}
 }
+
+#Just models low-level, decentralized cultures 
+tradition_decentralized = {
+	category = societal
+
+	layers = {
+		0 = steward
+		1 = western
+		4 = fierce_independence.dds
+	}
+	
+	#TODO: Make selectable
+	#Should block Collective Lands, Staunch Traditionalists, Culture Blending
+	is_shown = { always = no }
+	
+	can_pick = { always = no }
+	
+	can_pick_for_hybridization = { always = no }
+	
+	parameters = {
+		stubborn_trait_more_common = yes
+		harder_to_hybridize = yes
+		culture_blending_culture_feature = yes #This is intentional
+		easier_to_promote_county_culture = yes
+		grants_to_lowborns_bonuses = yes
+		peasant_leader_is_inherited = yes
+	}
+
+	character_modifier = {
+		title_creation_cost_mult = 1.0
+		domain_tax_mult = 0.25
+		vassal_tax_mult = -0.25
+		controlled_province_advantage = 5
+		opinion_of_liege = -10
+		vassal_limit = -10
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_spiritual_or_stoic_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						any_sub_realm_county = { NOT = { culture = scope:character.culture } }
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_realm_desc
+				}
+			}
+
+			if = {
+				limit = {
+					culture_tradition_reduction_trigger = { TRADITION = tradition_decentralized }
+				}
+				multiply = {
+					value = 0.5
+					desc = inspired_by_culture_desc
+				}
+			}
+			
+			if = {
+				limit = {
+					scope:character.culture = { has_cultural_era_or_later = culture_era_classical_antiquity }
+				}
+				multiply = {
+					value = 0.5
+					desc = no_longer_in_tribal_era_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 1000
+		if = { #This is only for tribal cultures that already have it
+			limit = { scope:character.culture = { has_cultural_era_or_later = culture_era_classical_antiquity } }
+			multiply = -1
+		}
+	}
+}
+tradition_decentralized_non_dlc = {
+	category = societal
+
+	layers = {
+		0 = steward
+		1 = western
+		4 = fierce_independence.dds
+	}
+	
+	#TODO: Make selectable
+	#Should block Collective Lands, Staunch Traditionalists, Culture Blending
+	is_shown = { always = no }
+	
+	can_pick = { always = no }
+	
+	can_pick_for_hybridization = { always = no }
+	
+	parameters = {
+		stubborn_trait_more_common = yes
+		easier_to_promote_county_culture = yes
+		grants_to_lowborns_bonuses = yes
+		peasant_leader_is_inherited = yes
+	}
+
+	character_modifier = {
+		title_creation_cost_mult = 1.0
+		domain_tax_mult = 0.25
+		vassal_tax_mult = -0.25
+		controlled_province_advantage = 5
+		opinion_of_liege = -10
+		vassal_limit = -10
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_communal_spiritual_or_stoic_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						any_sub_realm_county = { NOT = { culture = scope:character.culture } }
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_realm_desc
+				}
+			}
+
+			if = {
+				limit = {
+					culture_tradition_reduction_trigger = { TRADITION = tradition_decentralized }
+				}
+				multiply = {
+					value = 0.5
+					desc = inspired_by_culture_desc
+				}
+			}
+			
+			if = {
+				limit = {
+					scope:character.culture = { has_cultural_era_or_later = culture_era_classical_antiquity }
+				}
+				multiply = {
+					value = 0.5
+					desc = no_longer_in_tribal_era_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 1000
+		if = { #This is only for tribal cultures that already have it
+			limit = { scope:character.culture = { has_cultural_era_or_later = culture_era_classical_antiquity } }
+			multiply = -1
+		}
+	}
+}
