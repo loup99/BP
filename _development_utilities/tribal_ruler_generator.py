@@ -12,7 +12,7 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 start_year = 350
 end_year = 550
 religion = 'germanic_pagan'
-culture = culture_storage.culture_list['alamannian']
+culture = culture_storage.culture_list['geatish']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -156,7 +156,7 @@ culture = culture_storage.culture_list['alamannian']
 #d_brisgavi: Vadomarius (???-368)
 #Raetovari, Necker - Quasi-Fictional
 #holding_list = ["d_lentienses","d_brisgavi","d_raetovari"]
-holding_list = ["d_neckersuebi"]
+#holding_list = ["d_neckersuebi"]
 
 ##Danes
 #holding_list = ["c_halland","c_blekinge"]
@@ -187,6 +187,10 @@ holding_list = ["d_neckersuebi"]
 
 ##Slavs under Hunnic domination
 #holding_list = ["c_tigheci","c_chilia","c_cetatea_alba","c_lapusna"]
+
+#Geatish
+#Smaland
+holding_list = ["c_more","c_sevede","c_varend","c_njudung","c_finnveden"]
 
 for holding,list_loc in zip(holding_list,range(len(holding_list))):
     #Write or append data
