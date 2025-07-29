@@ -7,7 +7,7 @@ establish_autocephalous_church_decision = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/cathedral_soa_day.dds"
 	}
-	decision_group_type = bp_religion_change_tenet_doctrines
+	decision_group_type = BP_religious_decisions_major
 
 	desc = establish_autocephalous_church_decision_desc
 	selection_tooltip = establish_autocephalous_church_decision_tooltip
@@ -155,7 +155,7 @@ establish_autocephalous_church_decision = {
 		root.faith = { save_scope_as = reformed_faith }
 		root.faith.religious_head = { save_scope_as = reformed_hof }
 		#Inform players of a new Christian Church
-		every_ruler = { trigger_event = { id = BP_religious_decisions.0001 } }
+		every_ruler = { trigger_event = { id = BP_religious_decisions_major.0001 } }
 	}
 	
 	ai_check_interval = 60
@@ -174,7 +174,6 @@ establish_autocephalous_church_decision = {
 	}
 }
 
-
 ########## ZOROASTRIAN DECISIONS ##########
 
 #Legalize Caucasian Christianity
@@ -182,7 +181,7 @@ legalize_caucasian_christianity = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/the_return_to_the_homeland.dds"
 	}
-	decision_group_type = bp_religion_change_tenet_doctrines
+	decision_group_type = BP_religious_decisions_major
 
 	desc = legalize_caucasian_christianity_desc
 	selection_tooltip = legalize_caucasian_christianity_tooltip
@@ -223,7 +222,7 @@ legalize_caucasian_christianity = {
 		show_as_tooltip = { caucasian_christian_legalization_local_effect = yes }
 		hidden_effect = {
 			root = { save_scope_as = legalizing_emperor }
-			trigger_event = { id = BP_religious_decisions.0101 }
+			trigger_event = { id = BP_religious_decisions_major.0101 }
 		}
 	}
 	
@@ -267,12 +266,11 @@ legalize_caucasian_christianity = {
 }
 
 ########## GERMANIC DECISIONS ##########
-
 adopt_human_sacrifice_decision = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
 	}
-	decision_group_type = bp_religion_change_tenet_doctrines
+	decision_group_type = BP_religious_decisions_major
 
 	desc = adopt_human_sacrifice_decision_desc
 	selection_tooltip = adopt_human_sacrifice_decision_tooltip
@@ -312,8 +310,8 @@ adopt_human_sacrifice_decision = {
 	}
 	
 	cost = {
-		piety = 250
-		prestige = 250
+		piety = 1000
+		prestige = 500
 	}
 
 	is_valid_showing_failures_only = {
@@ -325,7 +323,7 @@ adopt_human_sacrifice_decision = {
 		#Replaces human sacrifice with Blot and raises piety level if possible
 		root = { save_scope_as = human_sacrifice_reformer }
 		show_as_tooltip = { establish_human_sacrifice_effect = yes }
-		hidden_effect = { trigger_event = { id = BP_religious_decisions.0202 } }
+		hidden_effect = { trigger_event = { id = BP_religious_decisions_major.0202 } }
 	}
 	
 	ai_check_interval = 60
@@ -342,7 +340,7 @@ adopt_the_blot_decision = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
 	}
-	decision_group_type = bp_religion_change_tenet_doctrines
+	decision_group_type = BP_religious_decisions_major
 
 	desc = adopt_the_blot_decision_desc
 	selection_tooltip = adopt_the_blot_decision_tooltip
@@ -416,7 +414,7 @@ adopt_the_blot_decision = {
 		#Replaces human sacrifice with Blot and raises piety level if possible
 		root = { save_scope_as = blot_reformer }
 		show_as_tooltip = { create_the_blot_effect = yes }
-		hidden_effect = { trigger_event = { id = BP_religious_decisions.0201 } }
+		hidden_effect = { trigger_event = { id = BP_religious_decisions_major.0201 } }
 	}
 	
 	ai_check_interval = 60
@@ -484,5 +482,72 @@ adopt_the_blot_decision = {
 				has_trait = compassionate
 			}
 		}
+	}
+}
+
+adopt_warmongering_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
+	}
+	decision_group_type = BP_religious_decisions_major
+
+	desc = adopt_warmongering_decision_desc
+	selection_tooltip = adopt_warmongering_decision_tooltip
+
+	is_shown = {
+		is_ai = no
+		is_independent_ruler = yes
+		is_landed = yes
+		this.religion = religion:germanic_religion
+		this.faith = { has_doctrine_parameter = unreformed }
+		NOT = { this.faith = { has_doctrine = tenet_warmonger } }
+	}
+
+	is_valid = {
+		#Have a holy site in your realm
+		custom_description = { #1 Holy Sites, but you have some strong pull on him
+			text = controls_one_holy_site
+			root = { any_sub_realm_county = { count >= 1 any_county_province = { barony = { is_holy_site_of = root.faith } } } }
+		}
+		
+		#Have at two of your holy sites controlled by your faith
+		custom_description = {
+			text = at_least_two_holy_sites_controlled_by_your_faith
+			this.faith = {
+				any_holy_site = {
+					count >= 2
+					this.holder.top_liege.faith = root.faith
+				}
+			}
+		}
+		
+		#Be noticeably pious
+		piety_level >= 3
+	}
+	
+	cost = {
+		piety = 500
+		prestige = 500
+	}
+
+	is_valid_showing_failures_only = {
+		is_at_war = no
+		is_available_adult = yes
+	}
+
+	effect = {
+		#Replaces human sacrifice with Blot and raises piety level if possible
+		root = { save_scope_as = warmonger_reformer }
+		show_as_tooltip = { establish_warmonger_effect = yes }
+		hidden_effect = { trigger_event = { id = BP_religious_decisions_major.0202 } }
+	}
+	
+	ai_check_interval = 60
+	
+	ai_potential = { always = no }
+
+	#AI has to be at least somewhat bold/vengeful/zealous to try
+	ai_will_do = {
+		base = 0
 	}
 }
