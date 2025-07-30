@@ -9,7 +9,7 @@ tags={
 	"Religion"
 	"Total Conversion"
 }
-version = "0.1.7.5"
+version = "0.1.8"
 supported_version="1.16.*"
 path = "mod/WtWSMS"
 replace_path="history/characters"
