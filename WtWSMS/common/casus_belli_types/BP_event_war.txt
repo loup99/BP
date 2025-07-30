@@ -136,9 +136,12 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		#Step 3: Transfer vassals
 		every_in_list = {
 			list = vassals_taken
-			change_liege = {
-				liege = scope:attacker
-				change = scope:change_vassals
+			if = {
+				limit = { NOT = { this = scope:attacker } } #For some reason, Odoacer gets scooped up here
+				change_liege = {
+					liege = scope:attacker
+					change = scope:change_vassals
+				}
 			}
 		}
 		resolve_title_and_vassal_change = scope:change_vassals
@@ -157,6 +160,12 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			}
 		}
 		resolve_title_and_vassal_change = scope:change_fealty
+		
+		#Step 5: Clean up extraneous claims of unlanded defenders
+		if = {
+			limit = { scope:defender = { is_landed = no } }
+			scope:defender = { every_claim = { prev = { remove_claim = prev } } }
+		}
 		
 		# Attacker gets Prestige Experience, Defender loses Prestige, all other participants gain Prestige based on their war contribution.
 		modify_all_participants_fame_values = {
