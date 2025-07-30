@@ -120,3 +120,98 @@ number_of_owned_gothic_counties_percent = {
 	value = number_of_owned_gothic_counties
 	divide = number_of_gothic_counties
 }
+
+## Raise Circumcellions
+circumellion_piety_cost = {
+	value = 0
+	#Piety cost is dependent on number of units you're raising
+	every_realm_county = {
+		limit = {
+			this.holder = root
+			root = { completely_controls = prev }
+			this.faith = root.faith
+		}
+		if = {
+			limit = { this.culture = { has_cultural_tradition = tradition_zealous_people } }
+			add = 50
+		}
+		else = { add = 100 }
+	}
+	#Then weight by culture, sins, and traits
+	if = { #Strong believers cuts down on cost
+		limit = { root.culture = { has_cultural_tradition = tradition_zealous_people } }
+		multiply = 0.5
+	}
+	#Every sin raises the price by 25% and every virtue lowers it by 20%
+	every_trait = {
+		limit = {
+			root.faith = { trait_is_sin = prev }
+			root = { has_trait = prev }
+		}
+		if = {
+			limit = { root.faith = { trait_is_sin = prev } }
+			multiply = 1.5
+		}
+		if = {
+			limit = { root.faith = { trait_is_virtue = prev } }
+			multiply = 0.8
+		}
+	}
+	#Zealous vs. Cynical weighting
+	if = {
+		limit = { has_trait = cynical }
+		multiply = 1.5
+	}
+	else_if = {
+		limit = { has_trait = zealous }
+		multiply = 0.5
+	}
+	#Fighting an excommunicated character is *cheap*
+	if = {
+		limit = {
+			any_character_war = {
+				any_war_participant = {
+					prev = { is_war_leader = prev }
+					has_trait = excommunicated
+				}
+			}
+		}
+		multiply = 0.5
+	}
+	min = 100 #Base cost
+}
+my_side_max_military_strength = {
+	value = 0
+	add = root.max_military_strength
+	every_character_war = { every_war_ally = { add = this.max_military_strength } }
+}
+other_sides_max_military_strength = {
+	value = 0
+	every_character_war = { every_war_enemy = { add = this.max_military_strength } }
+}
+three_fourths_other_sides_max_military_strength = {
+	value = root.other_sides_max_military_strength
+	multiply = 0.75
+}
+given_war_other_side_max_military_strength = {
+	value = 0
+	every_war_enemy = { add = this.max_military_strength }
+}
+num_raised_circumcellions = {
+	value = 0
+	every_realm_county = {
+		limit = {
+			this.holder = root
+			this.faith = root.faith
+		}
+		add = 1
+	}
+}
+num_raised_circumcellions_levies = {
+	value = num_raised_circumcellions
+	multiply = 300
+}
+num_raised_circumcellions_infantry = {
+	value = num_raised_circumcellions
+	multiply = 200
+}

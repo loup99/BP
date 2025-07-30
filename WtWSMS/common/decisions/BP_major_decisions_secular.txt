@@ -15,21 +15,38 @@
 	
 	is_valid = {
 		is_independent_ruler = yes
-		completely_controls = title:c_hainaut
-		completely_controls = title:c_bar
-		#Must control 75% of your culture's counties
+		#Control at least two capitals
+		any_realm_county = {
+			count >= 2
+			custom_description = {
+				text = list_frank_capitals
+				OR = {
+					this = title:c_hainaut
+					this = title:c_cambray
+					this = title:c_cologne
+					this = title:c_frankfurt
+				}
+			}
+		}
+		#Must control 66% of your culture's counties
 		AND = {
 			custom_description = {
-				text = controls_least_three_fourths_of_counties_with_culture
+				text = controls_least_two_thirds_of_counties_with_culture
 				subject = root
 				check_if_control_percentage_of_all_counties_with_condition_trigger = {
 					FEATURE = culture
 					CHARACTER = root
-					PERCENTAGE = 0.75
+					PERCENTAGE = 0.66
 				}
 			}
 		}
-		prestige_level >= 3
+		OR = {
+			AND = {
+				prestige_level >= 3
+				legitimacy_level >= 3
+			}
+			has_trait = legendary_leader
+		}
 	}
 	
 	is_valid_showing_failures_only = {

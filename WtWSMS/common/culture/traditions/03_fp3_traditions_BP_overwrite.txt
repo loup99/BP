@@ -1,0 +1,101 @@
+﻿##### Changed from Vanilla: Added parameter reducing number of subjugation CBs in a lifetime
+tradition_fp3_fierce_independence = {
+	category = regional
+
+	layers = {
+		0 = martial
+		1 = mena
+		4 = fierce_independence.dds
+	}
+	
+	is_shown = {
+		has_fp3_dlc_trigger = yes
+		has_cultural_pillar = heritage_iranian
+	}
+
+	can_pick = {
+		NOT = {
+			has_cultural_tradition = tradition_staunch_traditionalists
+		}
+	}
+	
+	parameters = {
+		unlock_maa_tawashi = yes
+		harder_to_hybridize = yes
+		harder_to_convert_county_culture = yes
+		##### Changed from Vanilla vvvvv
+		decreased_subjugation_limit = yes
+		##### Changed from Vanilla ^^^^^
+	}
+
+	character_modifier = {
+		controlled_province_advantage = 5
+		same_culture_opinion = 5
+		opinion_of_liege = -10
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						any_sub_realm_county = {
+							NOT = {
+								culture = scope:character.culture
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = has_other_cultures_in_realm_desc
+				}
+			}
+
+			if = {
+				limit = {
+					culture_tradition_reduction_trigger = { TRADITION = tradition_fp3_fierce_independence }
+				}
+				multiply = {
+					value = 0.5
+					desc = inspired_by_culture_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 400
+		if = {
+			limit = {
+				NOR = {
+					culture_pillar:ethos_stoic = { is_in_list = traits }
+					culture_pillar:ethos_communal = { is_in_list = traits }
+				}
+			}
+			multiply = 0.5
+		}
+	}
+}
+
+##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
