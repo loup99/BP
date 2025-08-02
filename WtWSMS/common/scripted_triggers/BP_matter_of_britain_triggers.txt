@@ -1,14 +1,38 @@
 ﻿mob_involved_trigger = {
 	highest_held_title_tier >= tier_county
 	scope:situation = {
-		any_situation_county = { percent >= mob_involved_percentage this.culture = root.culture }
-		any_situation_county = { percent >= mob_involved_percentage this.faith = root.faith }
+		#Must have a minimal involvement
+		any_situation_county = {
+			count >= mob_involved_minimum_counties
+			this.culture = root.culture
+		}
+		any_situation_county = {
+			count >= mob_involved_minimum_counties
+			this.faith = { faith_hostility_level = { target = root.faith value <= faith_astray_level } }
+		}
+		
+		#And sufficiently involved globally
+		any_situation_county = {
+			percent >= mob_involved_percentage
+			this.culture = { has_same_heritage_group_as_trigger = { TARGET = root.culture } }
+		}
+		any_situation_county = {
+			percent >= mob_involved_percentage
+			this.faith = { faith_hostility_level = { target = root.faith value <= faith_astray_level } }
+		}
 	}
 }
 mob_interloper_trigger = {
 	highest_held_title_tier >= tier_county
+	#Not involved (handled externally), but at least one county of your faith and culture
 	scope:situation = {
-		any_situation_county = { percent < mob_involved_percentage this.culture = root.culture }
-		any_situation_county = { percent < mob_involved_percentage this.faith = root.faith }
+		any_situation_county = {
+			count >= mob_interloper_minimum_counties
+			this.culture = root.culture
+		}
+		any_situation_county = {
+			count >= mob_interloper_minimum_counties
+			this.faith = { faith_hostility_level = { target = root.faith value <= faith_astray_level } }
+		}
 	}
 }
