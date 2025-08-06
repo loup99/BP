@@ -127,6 +127,7 @@ purchase_land_interaction = {
 		current_description = purchase_land_interaction_offer_obligations_desc
 	}
 
+	##### NB: We keep the prestige_level 3 for duchies because of how valuable duchies are
 	can_be_picked_title = {
 		custom_tooltip = {
 			text = purchase_land_tier_tt
@@ -162,9 +163,34 @@ purchase_land_interaction = {
 
 	is_valid_showing_failures_only = {
 		scope:actor = { is_independent_ruler = yes }
-		scope:actor = {
-			prestige_level >= 2
+		##### Changed from Vanilla vvvvv
+		trigger_if = {
+			limit = {
+				#In a situation with the parameter
+				scope:actor = {
+					character_is_in_situation_region_with_parameter_trigger = {
+						CHAR = scope:actor
+						PARAMETER = easier_to_purchase_land_in_same_heritage_group_outside_situation
+					}
+				}
+				#Recipient not in the same situation
+				bp_do_not_share_situation_trigger = {
+					CHAR_1 = scope:actor
+					CHAR_2 = scope:recipient
+				}
+				#Same heritage group
+				scope:actor.culture = {
+					has_same_heritage_group_as_trigger = { TARGET = scope:recipient.culture }
+				}
+			}
+			scope:actor = { prestige_level >= 1 }
 		}
+		trigger_else = {
+			scope:actor = {
+				prestige_level >= 2
+			}
+		}
+		##### Changed from Vanilla ^^^^^
 		scope:actor = {
 			NOT = {
 				has_trait = gallowsbait
@@ -241,10 +267,18 @@ purchase_land_interaction = {
 		trigger_if = {
 			limit = {
 				#In a situation with the parameter
-				scope:actor = {
-					character_is_in_situation_region_with_parameter_trigger = {
-						CHAR = scope:actor
-						PARAMETER = cheaper_to_purchase_land_in_same_heritage_group_outside_situation
+				OR = {
+					scope:actor = {
+						character_is_in_situation_region_with_parameter_trigger = {
+							CHAR = scope:actor
+							PARAMETER = cheaper_to_purchase_land_in_same_heritage_group_outside_situation
+						}
+					}
+					scope:actor = {
+						character_is_in_situation_region_with_parameter_trigger = {
+							CHAR = scope:actor
+							PARAMETER = easier_to_purchase_land_in_same_heritage_group_outside_situation
+						}
 					}
 				}
 				#Recipient not in the same situation
@@ -810,7 +844,7 @@ purchase_land_interaction = {
 				PARAMETER = cheaper_to_purchase_land_in_same_heritage_group_outside_situation
 			}
 			scope:actor.culture = {
-				has_same_heritage_group_as_trigger = { scope:recipient.culture }
+				has_same_heritage_group_as_trigger = { TARGET = scope:recipient.culture }
 			}
 		}
 		##### Changed from Vanilla ^^^^^
@@ -824,10 +858,10 @@ purchase_land_interaction = {
 			ai_energy = -0.5
 			ai_greed = 0.5
 		}
-		#modifier = { #This seems janked
-		#	gold < 1000
-		#	factor = 0
-		#}
+		modifier = { #This seems janked
+			gold < 1000
+			factor = 0
+		}
 		modifier = {
 			gold > 2000
 			add = 50
