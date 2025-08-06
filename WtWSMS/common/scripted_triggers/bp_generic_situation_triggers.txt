@@ -1,8 +1,20 @@
-﻿bp_share_situation_trigger = {
-	$CHAR_1$ ?= {
-		any_character_situation = {
-			save_temporary_scope_as = the_situation
-			$CHAR_2$ ?= { any_character_situation = { this = scope:the_situation } }
+﻿bp_do_not_share_situation_trigger = {
+	NOT = {
+		bp_share_situation_trigger = {
+			CHAR_1 = $CHAR_1$
+			CHAR_2 = $CHAR_2$
+		}
+	}
+}
+bp_share_situation_trigger = {
+	custom_description = {
+		text = do_share_situations
+		object = $CHAR_2$
+		$CHAR_1$ ?= {
+			any_character_situation = {
+				save_temporary_scope_as = the_situation
+				$CHAR_2$ ?= { any_character_situation = { this = scope:the_situation } }
+			}
 		}
 	}
 }
@@ -33,11 +45,35 @@ bp_have_same_situation_and_parameter_trigger = { #TODO: May need to also scope t
 
 #Scope is char in question
 character_is_in_situation_region_with_parameter_trigger = {
-	any_character_situation = {
-		any_situation_sub_region = {
-			has_sub_region_phase_parameter = $PARAMETER$
-			any_situation_sub_region_county = { this = $CHAR$.capital_county }
-			any_situation_sub_region_participant = { this = $CHAR$ }
+	$CHAR$ = {
+		any_character_situation = {
+			any_situation_sub_region = {
+				has_sub_region_phase_parameter = $PARAMETER$
+				any_situation_sub_region_participant = { this = $CHAR$ }
+			}
 		}
+		#Where are you situated?
+		trigger_if = {
+			limit = { is_landed = yes }
+			any_character_situation = {
+				any_situation_sub_region = {
+					has_sub_region_phase_parameter = $PARAMETER$
+					any_situation_sub_region_county = { this = $CHAR$.capital_county }
+				}
+			}
+		}
+		trigger_else_if = {
+			limit = {
+				is_landless_ruler = yes
+				has_domicile = yes
+			}
+			any_character_situation = {
+				any_situation_sub_region = {
+					has_sub_region_phase_parameter = $PARAMETER$
+					any_situation_sub_region_county = { this = $CHAR$.domicile.domicile_location.county }
+				}
+			}
+		}
+		trigger_else = { always = no }
 	}
 }

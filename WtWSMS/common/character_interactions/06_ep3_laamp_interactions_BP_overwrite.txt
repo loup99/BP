@@ -1,0 +1,836 @@
+﻿##### Changed from Vanilla: Applied cheaper_easier_to_purchase_land_in_same_heritage_group_outside_situation effects
+purchase_land_interaction = {
+	category = interaction_category_laamp
+	interface_priority = 30
+	icon = purchase_land_interaction
+
+	desc = purchase_land_interaction_desc
+	target_type = title
+	target_filter = recipient_de_jure_titles
+
+	cooldown_against_recipient = { years = 10 }
+
+	notification_text = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:recipient = { is_independent_ruler = no }
+					scope:target = {
+						trigger_if = {
+							limit = { tier = tier_duchy }
+							scope:recipient.highest_held_title_tier = tier_duchy
+						}
+						trigger_else = { scope:recipient.highest_held_title_tier = tier_county }
+					}
+				}
+				desc = PURCHASE_LAND_PROPOSAL_FELLOW_VASSAL
+			}
+			triggered_desc = {
+				trigger = {
+					scope:target = {
+						trigger_if = {
+							limit = { tier = tier_duchy }
+							scope:recipient.highest_held_title_tier >= tier_kingdom
+						}
+						trigger_else = { scope:recipient.highest_held_title_tier >= tier_duchy }
+					}
+				}
+				desc = PURCHASE_LAND_PROPOSAL_LIEGE
+			}
+			desc = PURCHASE_LAND_PROPOSAL
+		}
+	}
+
+	popup_on_receive = yes
+	pause_on_receive = yes
+
+	interface_priority = 60
+	ai_min_reply_days = 4
+	ai_max_reply_days = 9
+
+	send_options_exclusive = no
+
+	is_shown = {
+		has_ep3_dlc_trigger = yes
+		scope:actor = {
+			government_has_flag = government_is_landless_adventurer
+		}
+		scope:recipient = {
+			is_landed = yes
+			# Need to own the land/cannot directly buy a governorship (procure estate first)
+			NOR = { 
+				government_has_flag = government_is_administrative
+				government_has_flag = government_is_nomadic
+			} 
+		}
+		NOT = { scope:recipient = scope:actor }
+	}
+
+	has_valid_target = {
+		custom_tooltip = { #prevent unwanted trigger tooltip
+			text = blank_line
+			scope:target = {
+				is_title_created = yes
+				holder = {
+					is_ai = yes
+					this = scope:recipient
+				}
+				OR = { #flatten the selection
+					tier = tier_duchy
+					tier = tier_county
+				}
+				NOR = {
+					this = scope:recipient.capital_county
+					this = scope:recipient.capital_county.duchy
+				}
+			}
+		}
+	}
+
+	send_option = {
+		flag = offer_gold
+		localization = purchase_land_interaction_offer_gold
+		current_description = purchase_land_interaction_offer_gold_desc
+	}
+
+	send_option = {
+		flag = hook
+		is_valid = {
+			scope:actor = {
+				has_usable_hook = scope:recipient
+			}
+		}
+		localization = GENERIC_SPEND_A_HOOK
+	}
+
+	send_option = {
+		flag = offer_hook
+		is_valid = {
+			NOT = {
+				scope:recipient = {
+					has_usable_hook = scope:actor
+				}
+			}
+		}
+		localization = purchase_land_interaction_offer_hook
+		current_description = purchase_land_interaction_offer_hook_desc
+	}
+
+	send_option = {
+		flag = vassal_obligation
+		is_shown = {
+			scope:recipient = {
+				government_has_flag = government_is_feudal
+			}
+		}
+		localization = purchase_land_interaction_offer_obligations
+		current_description = purchase_land_interaction_offer_obligations_desc
+	}
+
+	can_be_picked_title = {
+		custom_tooltip = {
+			text = purchase_land_tier_tt
+			scope:target = {
+				tier >= tier_county
+				tier <= tier_duchy
+			}
+		}
+		custom_tooltip = {
+			text = purchase_land_capital_tt
+			NOT = { scope:target = scope:recipient.capital_county }
+		}
+		custom_tooltip = {
+			text = purchase_land_primary_tt
+			NOT = { scope:target = scope:recipient.primary_title }
+		}
+		custom_tooltip = {
+			text = purchase_land_duchy_tt
+			scope:target = {
+				trigger_if = {
+					limit = { tier = tier_duchy }
+					scope:actor = {
+						prestige_level >= 3
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = { exists = scope:target.holder }
+			scope:target.holder = scope:recipient
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = { is_independent_ruler = yes }
+		scope:actor = {
+			prestige_level >= 2
+		}
+		scope:actor = {
+			NOT = {
+				has_trait = gallowsbait
+			}
+		}
+		scope:actor = {
+			NOT = {
+				has_trait = gallivanter
+			}
+		}
+		scope:recipient = { is_at_war = no }
+		trigger_if = { # Can't purchase Baronies
+			limit = {
+				scope:target ?= { tier = tier_barony }
+			}
+			custom_description = {
+				text = purchase_land_barony_tt
+				always = no
+			}
+		}
+		trigger_if = { # Can't purchase Kingdoms or Empires
+			limit = {
+				scope:target ?= { tier >= tier_kingdom }
+			}
+			custom_description = {
+				text = purchase_land_kingdom_tt
+				always = no
+			}
+		}
+		trigger_if = { # Can't purchase HoF titles
+			limit = {
+				scope:target ?= { is_head_of_faith = yes }
+			}
+			custom_description = {
+				text = purchase_land_religious_tt
+				always = no
+			}
+		}
+		trigger_if = { # Can't purchase nf titles
+			limit = {
+				scope:target ?= { is_noble_family_title = yes }
+			}
+			custom_description = {
+				text = purchase_land_noble_family_tt
+				always = no
+			}
+		}
+		trigger_if = { # Can't purchase laamp titles
+			limit = {
+				scope:target ?= { has_variable = adventurer_creation_reason }
+			}
+			custom_description = {
+				text = purchase_land_landless_adventurer_tt
+				always = no
+			}
+		}
+		trigger_if = {
+			limit = {
+				scope:recipient = {
+					any_held_county = { count < 2 }
+				}
+			}
+			custom_description = {
+				text = purchase_land_minimum_county_tt
+				object = scope:recipient
+				always = no
+			}
+		}
+		scope:recipient = {
+			is_busy_in_events_localised = yes
+			NOT = { has_strong_hook = scope:actor }
+		}
+		##### Changed from Vanilla vvvvv
+		trigger_if = {
+			limit = {
+				#In a situation with the parameter
+				scope:actor = {
+					character_is_in_situation_region_with_parameter_trigger = {
+						CHAR = scope:actor
+						PARAMETER = cheaper_to_purchase_land_in_same_heritage_group_outside_situation
+					}
+				}
+				#Recipient not in the same situation
+				bp_do_not_share_situation_trigger = {
+					CHAR_1 = scope:actor
+					CHAR_2 = scope:recipient
+				}
+				#Same heritage group
+				scope:actor.culture = {
+					has_same_heritage_group_as_trigger = { TARGET = scope:recipient.culture }
+				}
+			}
+			scope:actor = { in_diplomatic_range = scope:recipient }
+		}
+		#Has to be used instead of diplo range checks in laamp to landed interactions
+		trigger_else = {
+			ep3_laamp_diplo_range_trigger = {
+				TARGET = scope:recipient
+				LAAMP = scope:actor
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		
+		# Adventurers can't join wars in places they're exiled from.
+		custom_tooltip = {
+			text = the_wake_1
+			NOT = {
+				is_laamp_exiled_from_province_trigger = {
+					PROVINCE = scope:recipient.capital_province
+					LAAMP = scope:actor
+				}
+			}
+		}
+	}
+
+	##### Changed from Vanilla vvvvv
+	cost = {
+		gold = {
+			if = {
+				limit = { scope:target.tier = tier_county }
+				add = purchase_land_county_cost_value
+			}
+			else = {
+				add = purchase_land_duchy_cost_value
+				scope:target = {
+					every_de_jure_county = {
+						limit = { ep3_purchase_land_valid_county_trigger = yes }
+						add = purchase_land_county_cost_value
+					}
+				}
+			}
+			if = {
+				limit = { scope:offer_gold = yes }
+				multiply = 2
+			}
+			##### Changed from Vanilla vvvvv
+			if = {
+				limit = {
+					always = yes
+					#character_is_in_situation_region_with_parameter_trigger = {
+					#	CHAR = scope:actor
+					#	PARAMETER = cheaper_to_purchase_land_in_same_heritage_group_outside_situation
+					#}
+					#scope:actor.culture = {
+					#	has_same_heritage_group_as_trigger = { TARGET = scope:recipient.culture }
+					#}
+					##*NOT* in the same situation
+					#bp_do_not_share_situation_trigger = {
+					#	CHAR_1 = scope:actor
+					#	CHAR_2 = scope:recipient
+					#}
+				}
+				multiply = 0.25
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+
+	on_accept = {
+		scope:actor = { save_scope_as = adventurer }
+		scope:target = {
+			add_to_list = purchased_titles
+			if = {
+				limit = { tier = tier_duchy }
+				every_de_jure_county = {
+					limit = { ep3_purchase_land_valid_county_trigger = yes }
+					add_to_list = purchased_titles
+				}
+			}
+		}
+		ordered_in_list = {
+			list = purchased_titles
+			save_scope_as = new_primary_title
+		}
+		save_scope_value_as = {
+			name = purchase_land_cost
+			value = {
+				every_in_list = {
+					list = purchased_titles
+					if = {
+						limit = { tier = tier_county }
+						add = purchase_land_county_cost_value
+					}
+					else_if = {
+						limit = { tier = tier_duchy }
+						add = purchase_land_duchy_cost_value
+					}
+				}
+				if = {
+					limit = {
+						scope:actor = { has_variable = ep3_grace_to_the_family_var }
+					}
+					multiply = 0.5
+				}
+				if = {
+					limit = {
+						scope:offer_gold = yes
+					}
+					multiply = 2
+				}
+			}
+		}
+		save_scope_value_as = {
+			name = purchase_land_legitimacy_cost
+			value = {
+				value = 0
+				if = {
+					limit = {
+						NOT = {
+							scope:target.holder = scope:recipient
+						}
+					}
+					every_in_list = {
+						list = purchased_titles
+						if = {
+							limit = { tier = tier_county }
+							add = minor_legitimacy_loss
+						}
+						else = { add = medium_legitimacy_loss }
+					}
+				}	
+			}
+		}
+		show_as_tooltip = { purchase_land_interaction_shortened_effect = yes }
+		if = {
+			limit = { always = scope:hook }
+			scope:actor = { use_hook = scope:recipient }
+		}
+		scope:actor = { trigger_event = ep3_laamps.0100 }
+	}
+
+	on_decline = {
+		scope:actor = {
+			save_scope_as = adventurer
+			trigger_event = ep3_laamps.0102
+		}
+	}
+
+	##### Changed from Vanilla vvvvv
+	ai_targets = {
+		ai_recipients = neighboring_rulers
+		ai_recipients = contacts
+	}
+	ai_frequency = 120
+
+	ai_accept = {
+		base = 0 # Try to make it 0 for most interactions
+
+		opinion_modifier = { # Opinion Factor
+			who = scope:recipient
+			opinion_target = scope:actor
+			multiplier = 1
+			desc = AI_OPINION_REASON
+		}
+		modifier = { # Num of counties/duchy
+			add = {
+				value = 0
+				scope:target = {
+					if = {
+						limit = { tier = tier_county }
+						add = -30
+					}
+					else = {
+						add = -60
+						every_de_jure_county = {
+							limit = { ep3_purchase_land_valid_county_trigger = yes }
+							add = -30
+						}
+					}
+				}
+			}
+			desc = PURCHASE_LAND_NUM_TITLES_REASON
+		}
+		modifier = { # Too close to capital
+			add = -50
+			desc = PURCHASE_LAND_DE_JURE_DUCHY_REASON
+			scope:target.duchy = scope:recipient.capital_county.duchy
+		}
+		modifier = { # Province value
+			add = {
+				value = 0
+				if = {
+					limit = { scope:target.tier = tier_county }
+					add = scope:target.development_level
+					scope:target = {
+						every_county_province = { add = num_buildings }
+					}
+				}
+				else = {
+					scope:target = {
+						every_de_jure_county = {
+							limit = { ep3_purchase_land_valid_county_trigger = yes }
+							add = development_level
+							every_county_province = { add = num_buildings }
+						}
+					}
+				}
+				multiply = -2
+			}
+			#add = 1
+			desc = PURCHASE_LAND_VALUE_REASON
+		}
+		modifier = { # Land is foreign
+			add = 10
+			desc = PURCHASE_LAND_FOREIGN_COUNTY_CULTURE_REASON
+			add = {
+				value = 0
+				if = {
+					limit = { scope:target.tier = tier_county }
+					add = 10
+				}
+				else = {
+					scope:target = {
+						every_de_jure_county = {
+							limit = {
+								ep3_purchase_land_valid_county_trigger = yes
+								culture != scope:recipient.culture
+							}
+							add = 10
+						}
+					}
+				}
+				max = 30
+			}
+			desc = PURCHASE_LAND_FOREIGN_CULTURE_REASON
+			trigger_if = {
+				limit = { scope:target.tier = tier_county }
+				scope:target.culture != scope:recipient.culture
+			}
+			trigger_else = {
+				scope:target = {
+					any_de_jure_county = {
+						ep3_purchase_land_valid_county_trigger = yes
+						culture != scope:recipient.culture
+					}
+				}
+			}
+		}
+		modifier = { # Different faith
+			add = {
+				value = 0
+				if = {
+					limit = { scope:target.tier = tier_county }
+					add = 10
+				}
+				else = {
+					scope:target = {
+						every_de_jure_county = {
+							limit = {
+								ep3_purchase_land_valid_county_trigger = yes
+								faith != scope:recipient.faith
+							}
+							add = 10
+						}
+					}
+				}
+				max = 30
+			}
+			desc = PURCHASE_LAND_DIFFERENT_FAITH_REASON
+			trigger_if = {
+				limit = { scope:target.tier = tier_county }
+				scope:target.faith != scope:recipient.faith
+			}
+			trigger_else = {
+				scope:target = {
+					any_de_jure_county = {
+						ep3_purchase_land_valid_county_trigger = yes
+						faith != scope:recipient.faith
+					}
+				}
+			}
+		}
+		modifier = { # My culture's lands
+			add = {
+				value = 0
+				if = {
+					limit = { scope:target.tier = tier_county }
+					add = -40
+				}
+				else = {
+					scope:target = {
+						every_de_jure_county = {
+							limit = {
+								ep3_purchase_land_valid_county_trigger = yes
+								culture != scope:recipient.culture
+							}
+							add = -40
+						}
+					}
+				}
+				if = {
+					limit = { scope:acceptance != 0 }
+					divide = scope:acceptance
+				}
+				multiply = 2
+				min = -200
+			}
+			desc = PURCHASE_LAND_MY_CULTURE_REASON
+			scope:actor.culture != scope:recipient.culture
+			trigger_if = {
+				limit = {
+					scope:target.tier = tier_county
+				}
+				scope:target.culture = scope:recipient.culture
+			}
+			trigger_else = {
+				scope:target = {
+					any_de_jure_county = {
+						ep3_purchase_land_valid_county_trigger = yes
+						culture = scope:recipient.culture
+					}
+				}
+			}
+			scope:recipient.culture = {
+				save_temporary_scope_value_as = {
+					name = acceptance
+					value = {
+						value = "cultural_acceptance(scope:actor.culture)"
+						divide = 25
+						ceiling = yes
+					}
+				}
+			}
+		}
+		modifier = { # My faith's lands
+			add = {
+				value = 0
+				if = {
+					limit = { scope:target.tier = tier_county }
+					add = -40
+				}
+				else = {
+					scope:target = {
+						every_de_jure_county = {
+							limit = {
+								ep3_purchase_land_valid_county_trigger = yes
+								faith != scope:recipient.faith
+							}
+							add = -40
+						}
+					}
+				}
+				if = {
+					limit = { scope:hostility != 0 }
+					multiply = scope:hostility
+				}
+				multiply = 2
+				min = -200
+			}
+			desc = PURCHASE_LAND_MY_FAITH_REASON
+			scope:actor.faith != scope:recipient.faith	
+			trigger_if = {
+				limit = { scope:target.tier = tier_county }
+				scope:target.faith = scope:recipient.faith
+			}
+			trigger_else = {
+				scope:target = {
+					any_de_jure_county = {
+						ep3_purchase_land_valid_county_trigger = yes
+						faith = scope:recipient.faith
+					}
+				}
+			}
+			scope:recipient.faith = {
+				save_temporary_scope_value_as = {
+					name = hostility
+					value = "faith_hostility_level(scope:actor.faith)"
+				}
+			}
+		}
+		modifier = { # Too close
+			add = {
+				value = 0
+				add = scope:distance
+				divide = scope:recipient.highest_held_title_tier
+				if = {
+					limit = { scope:distance <= squared_distance_medium }
+					multiply = -0.01
+				}
+				else = { multiply = 0.0005 }
+				min = -25
+				max = 50
+			}
+			desc = PURCHASE_LAND_DISTANCE_REASON
+			trigger_if = {
+				limit = { scope:target.tier = tier_county }
+				scope:target = { save_temporary_scope_as = distance_target }
+			}
+			trigger_else = {
+				scope:target.title_capital_county = { save_temporary_scope_as = distance_target }
+			}
+			scope:recipient.capital_county = {
+				save_temporary_scope_value_as = {
+					name = distance
+					value = "squared_distance(scope:distance_target)"
+				}
+			}
+		}
+		opinion_modifier = { # Opinion Factor of title holder
+			trigger = {
+				NOT = {
+					scope:target.holder ?= scope:recipient
+				}
+			}
+			who = scope:recipient
+			opinion_target = scope:target.holder
+			multiplier = -1
+			desc = AI_OPINION_REASON
+		}
+		modifier = {
+			add = {
+				value = scope:actor.prestige_level
+				multiply = 20
+			}
+			scope:actor.prestige_level >= 4
+			desc = PURCHASE_LAND_PRESTIGE_LEVEL_REASON
+		}
+		modifier = {
+			add = 40
+			trigger = {
+				scope:actor.culture != scope:recipient.culture
+				OR = {
+					AND = {
+						scope:target.tier = tier_county
+						scope:target.culture = scope:recipient.culture
+					}		
+					scope:target = {
+						any_de_jure_county = {
+							ep3_purchase_land_valid_county_trigger = yes
+							culture = scope:recipient.culture
+						}
+					}
+				}
+			}
+			scope:actor.primary_spouse ?= {
+				culture = scope:recipient.culture
+				dynasty ?= {
+					dynasty_prestige_level >= 2
+				}
+			}
+			desc = PURCHASE_LAND_MARRIED_TO_CULTURE_NOBLE_REASON
+		}
+		modifier = {
+			add = 40
+			trigger = {
+				scope:actor.faith != scope:recipient.faith
+			}
+			scope:actor.primary_spouse ?= {
+				faith = scope:recipient.faith
+				dynasty ?= {
+					dynasty_prestige_level >= 2
+				}
+			}
+			desc = PURCHASE_LAND_MARRIED_TO_FAITH_NOBLE_REASON
+		}
+		modifier = {
+			add = 80
+			scope:actor.primary_spouse ?= {
+				house ?= scope:recipient.house
+			}
+			desc = PURCHASE_LAND_MARRIED_TO_HOUSE_REASON
+		}
+		modifier = {
+			add = 20
+			trigger = {
+				OR = {
+					AND = {
+						scope:target.tier = tier_county
+						scope:target.culture = scope:recipient.culture
+					}		
+					scope:target = {
+						any_de_jure_county = {
+							ep3_purchase_land_valid_county_trigger = yes
+							culture = scope:recipient.culture
+						}
+					}
+				}
+			}
+			scope:actor = {
+				knows_language_of_culture = scope:recipient.culture
+				NOT = {
+					culture = scope:recipient.culture
+				}
+			}
+			desc = PURCHASE_LAND_SPEAKS_LANGUAGE_REASON
+		}
+		modifier = {
+			add = -40
+			scope:actor = {
+				NOT = {
+					knows_language_of_culture = scope:recipient.culture
+					culture = scope:recipient.culture
+				}
+			}
+			desc = PURCHASE_LAND_DOES_NOT_SPEAK_LANGUAGE_REASON
+		}
+		modifier = {
+			add = {
+				value = 40
+				multiply = scope:recipient.debt_level
+			}
+			trigger = {
+				scope:recipient = {
+					debt_level > 0
+				}
+			}
+			desc = PURCHASE_LAND_IS_IN_DEBT_REASON
+		}
+		modifier = {
+			add = 60
+			scope:actor = {
+				has_any_moderate_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+			}
+			desc = PURCHASE_LAND_RELATIONSHIP_REASON
+		}
+		modifier = {
+			add = 80
+			scope:offer_gold = yes
+			desc = PURCHASE_LAND_DOUBLE_GOLD_REASON
+		}
+		modifier = {
+			add = 160
+			scope:hook = yes
+			desc = YOU_HAVE_HOOK_REASON
+		}
+		modifier = {
+			add = 60
+			scope:offer_hook = yes
+			desc = PURCHASE_LAND_OFFER_HOOK_REASON
+		}
+		modifier = {
+			add = 80
+			scope:vassal_obligation = yes
+			desc = PURCHASE_LAND_OBLIGATIONS_REASON
+		}
+		##### Changed from Vanilla vvvvv
+		modifier = {
+			add = 100
+			desc = OUR_KIN_FLEEING_PERSECUTION
+			character_is_in_situation_region_with_parameter_trigger = {
+				CHAR = scope:actor
+				PARAMETER = cheaper_to_purchase_land_in_same_heritage_group_outside_situation
+			}
+			scope:actor.culture = {
+				has_same_heritage_group_as_trigger = { scope:recipient.culture }
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	ai_will_do = {
+		base = -25
+		ai_value_modifier = {
+			ai_boldness = -0.5
+			ai_energy = -0.5
+			ai_greed = 0.5
+		}
+		#modifier = { #This seems janked
+		#	gold < 1000
+		#	factor = 0
+		#}
+		modifier = {
+			gold > 2000
+			add = 50
+		}
+	}
+}
