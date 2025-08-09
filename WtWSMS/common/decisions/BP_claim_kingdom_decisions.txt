@@ -67,7 +67,7 @@ reclaim_albania_decision = {
 			
 			root = { save_scope_as = the_albanian_reformer }
 			
-			root = { trigger_event = { id = BP_major_secular_decisions.0001 } }
+			root = { trigger_event = { id = BP_claim_kingdom_decisions.0001 } }
 		}
 	}
 	
@@ -135,7 +135,88 @@ claim_k_aures_decision = {
 			
 			root = { save_scope_as = the_k_aures_former }
 			
-			root = { trigger_event = { id = BP_major_secular_decisions.0020 } }
+			root = { trigger_event = { id = BP_claim_kingdom_decisions.0020 } }
+		}
+	}
+	
+	ai_potential = { always = yes }
+	
+	ai_will_do = { base = 100 }
+}
+#The Frankish Kingdom
+form_frankish_kingdom_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/pharamond_on_a_shield.dds"
+	}
+	decision_group_type = major
+	ai_check_interval = 60
+	desc = form_frankish_kingdom_decision_desc
+	selection_tooltip = form_frankish_kingdom_decision_tooltip
+	
+	is_shown = {
+		culture = culture:old_frankish
+		NOT = { exists = title:k_franks.holder }
+		NOT = { has_global_variable = formed_frankish_kingdom }
+	}
+	
+	is_valid = {
+		is_independent_ruler = yes
+		#Control at least two capitals
+		any_realm_county = {
+			count >= 2
+			custom_description = {
+				text = list_frank_capitals
+				OR = {
+					this = title:c_hainaut
+					this = title:c_cambray
+					this = title:c_cologne
+					this = title:c_frankfurt
+				}
+			}
+		}
+		#Must control 66% of your culture's counties
+		AND = {
+			custom_description = {
+				text = controls_least_two_thirds_of_counties_with_culture
+				subject = root
+				check_if_control_percentage_of_all_counties_with_condition_trigger = {
+					FEATURE = culture
+					CHARACTER = root
+					PERCENTAGE = 0.66
+				}
+			}
+		}
+		OR = {
+			AND = {
+				prestige_level >= 3
+				legitimacy_level >= 3
+			}
+			has_trait = legendary_leader
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		is_available_at_peace_adult = yes
+		is_imprisoned = no
+		is_adult = yes
+	}
+	
+	cost = {
+		prestige = 500
+	}
+	
+	effect = {
+		#Done as event to prevent RC formation event from firing
+		show_as_tooltip = { form_frankish_kingdom_effect = yes }
+		hidden_effect = {
+			set_global_variable = {
+				name = formed_frankish_kingdom
+				value = yes
+			}
+			
+			root = { save_scope_as = the_frankish_former }
+			
+			root = { trigger_event = { id = BP_claim_kingdom_decisions.0010 } }
 		}
 	}
 	
