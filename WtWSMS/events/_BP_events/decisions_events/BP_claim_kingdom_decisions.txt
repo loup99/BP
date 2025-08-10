@@ -1,0 +1,224 @@
+﻿namespace = BP_claim_kingdom_decisions
+
+#0001-0099: Special one-offs
+#	0001-0009: Albania
+#	0010-0019: Francia
+#	0020-0029: Aures
+
+#Reformation of Albania information decision
+BP_claim_kingdom_decisions.0001 = {
+	type = character_event
+	window = fullscreen_event
+	title = BP_claim_kingdom_decisions.0001.t
+	desc = BP_claim_kingdom_decisions.0001.desc
+	theme = realm
+	override_background = { reference = caucasian_albania_elevation }
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:the_albanian_reformer
+		animation = personality_bold
+	}
+	
+	option = {
+		trigger = { this = scope:the_albanian_reformer }
+		name = BP_claim_kingdom_decisions.0001.the_king
+		reform_caucasian_albania_effect = yes
+		
+		#Inform the Perisan Emperor if he's around
+		if = {
+			limit = { exists = title:e_persia.holder }
+			title:e_persia.holder = { trigger_event = { id = BP_claim_kingdom_decisions.0002 } }
+		}
+		#Every relatively close ruler gets informed
+		every_ruler = {
+			limit = {
+				realm_to_title_distance_squared = { title = root.primary_title value <= squared_distance_medium }
+				NOT = { this = title:e_persia.holder }
+				NOT = { this = scope:the_albanian_reformer }
+			}
+			trigger_event = { id = BP_claim_kingdom_decisions.0002 }
+		}
+	}
+}
+BP_claim_kingdom_decisions.0002 = {
+	type = character_event
+	title = BP_claim_kingdom_decisions.0002.t
+	desc = BP_claim_kingdom_decisions.0002.desc
+	theme = realm
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:the_albanian_reformer
+		animation = personality_bold
+	}
+	
+	option = {
+		trigger = {
+			NOT = { this = scope:the_albanian_reformer }
+			this = { opinion = { target = scope:the_albanian_reformer value >= 30 } }
+		}
+		name = BP_claim_kingdom_decisions.0002.good
+	}
+	option = {
+		trigger = {
+			NOT = { this = scope:the_albanian_reformer }
+			this = {
+				AND = {
+					opinion = { target = scope:the_albanian_reformer value < 30 }
+					opinion = { target = scope:the_albanian_reformer value > -30 }
+				}
+			}
+		}
+		name = BP_claim_kingdom_decisions.0002.neutral
+	}
+	option = {
+		trigger = {
+			NOT = { this = scope:the_albanian_reformer }
+			this = { opinion = { target = scope:the_albanian_reformer value <= -30 } }
+		}
+		name = BP_claim_kingdom_decisions.0002.bad
+	}
+}
+
+#Formation of the Frankish Kingdom information decision (0010 & 0011)
+BP_claim_kingdom_decisions.0010 = {
+	type = character_event
+	window = fullscreen_event
+	title = BP_claim_kingdom_decisions.0010.t
+	desc = BP_claim_kingdom_decisions.0010.desc
+	theme = realm
+	override_background = { reference = frankish_kingdom_elevation }
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:the_frankish_former
+		animation = personality_bold
+	}
+	
+	option = {
+		trigger = { this = scope:the_frankish_former }
+		name = BP_claim_kingdom_decisions.0010.the_king
+		form_frankish_kingdom_effect = yes
+		
+		every_ruler = {
+			limit = {
+				#is_ai = no
+				#NOT = { this = root }
+			}
+			trigger_event = { id = BP_claim_kingdom_decisions.0011 } #Inform the rest
+		}
+	}
+}
+BP_claim_kingdom_decisions.0011 = {
+	type = character_event
+	title = BP_claim_kingdom_decisions.0011.t
+	desc = BP_claim_kingdom_decisions.0011.desc
+	theme = realm
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:the_frankish_former
+		animation = personality_bold
+	}
+	
+	option = {
+		trigger = {
+			NOT = { this = scope:the_frankish_former }
+			this = { opinion = { target = scope:the_frankish_former value >= 30 } }
+		}
+		name = BP_claim_kingdom_decisions.0011.good
+	}
+	option = {
+		fallback = yes
+		trigger = {
+			NOT = { this = scope:the_frankish_former }
+			this = {
+				AND = {
+					opinion = { target = scope:the_frankish_former value < 30 }
+					opinion = { target = scope:the_frankish_former value > -30 }
+				}
+			}
+		}
+		name = BP_claim_kingdom_decisions.0011.neutral
+	}
+	option = {
+		trigger = {
+			NOT = { this = scope:the_frankish_former }
+			this = { opinion = { target = scope:the_frankish_former value <= -30 } }
+		}
+		name = BP_claim_kingdom_decisions.0011.bad
+	}
+}
+
+#Formation of Aures Kingdom information decision
+BP_claim_kingdom_decisions.0020 = {
+	type = character_event
+	window = fullscreen_event
+	title = BP_claim_kingdom_decisions.0020.t
+	desc = BP_claim_kingdom_decisions.0020.desc
+	theme = realm
+	override_background = { reference = aures_kingdom_elevation }
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:the_k_aures_former
+		animation = personality_bold
+	}
+	
+	option = {
+		fallback = yes
+		trigger = { this = scope:the_k_aures_former }
+		name = BP_claim_kingdom_decisions.0020.the_king
+		form_k_aures_effect = yes
+		
+		#Every relatively close ruler gets informed
+		every_ruler = {
+			limit = {
+				realm_to_title_distance_squared = { title = root.primary_title value <= squared_distance_medium }
+				NOT = { this = scope:the_k_aures_former }
+			}
+			trigger_event = { id = BP_claim_kingdom_decisions.0021 }
+		}
+	}
+}
+BP_claim_kingdom_decisions.0021 = {
+	type = character_event
+	title = BP_claim_kingdom_decisions.0021.t
+	desc = BP_claim_kingdom_decisions.0021.desc
+	theme = realm
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:the_k_aures_former
+		animation = personality_bold
+	}
+	
+	option = {
+		trigger = {
+			NOT = { this = scope:the_k_aures_former }
+			this = { opinion = { target = scope:the_k_aures_former value >= 30 } }
+		}
+		name = BP_claim_kingdom_decisions.0021.good
+	}
+	option = {
+		fallback = yes
+		trigger = {
+			NOT = { this = scope:the_k_aures_former }
+			this = {
+				AND = {
+					opinion = { target = scope:the_k_aures_former value < 30 }
+					opinion = { target = scope:the_k_aures_former value > -30 }
+				}
+			}
+		}
+		name = BP_claim_kingdom_decisions.0021.neutral
+	}
+	option = {
+		trigger = {
+			NOT = { this = scope:the_k_aures_former }
+			this = { opinion = { target = scope:the_k_aures_former value <= -30 } }
+		}
+		name = BP_claim_kingdom_decisions.0021.bad
+	}
+}
