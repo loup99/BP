@@ -44,7 +44,7 @@ bp_game_start_after_lobby = {
 		#Other Events
 		trigger_needed_events
 		delay = { days = 1 }
-		#fix_custom_character_governments
+		cull_maa_from_single_county_tribals
 	}
 }
 
@@ -439,14 +439,12 @@ setup_realm_and_title_succession_laws = {
 					has_title = title:d_triveria
 					#Germans
 					has_title = title:k_alamannia
-					has_title = title:k_geatland
 					has_title = title:k_italy
 					has_title = title:k_lombardia
 					has_title = title:k_ostrogoths
 					has_title = title:k_suebia
 					has_title = title:k_thuringia
 					has_title = title:k_vandalica
-					has_title = title:d_germanii
 					has_title = title:d_thracian_goths
 					#Franks
 					has_title = title:k_franks
@@ -482,7 +480,6 @@ setup_realm_and_title_succession_laws = {
 		every_ruler = {
 			limit = {
 				OR = {
-					has_title = title:k_angloland
 					has_title = title:k_frisia
 				}
 			}
@@ -533,7 +530,6 @@ setup_realm_and_title_succession_laws = {
 					has_title = title:k_garamantes
 					#Germans
 					has_title = title:k_vandalica
-					has_title = title:k_geatland
 					#Armenians
 					has_title = title:d_syunik
 				}
@@ -896,6 +892,20 @@ change_vanilla_religion_doctrines = {
 				}
 			}
 		}
+		religion:baltic_religion = {
+			every_faith = { #Baltic is part of Przeworsk
+				if_does_not_have_doctrine_add_it_effect = { DOCTRINE = special_doctrine_przeworsk_complex }
+			}
+		}
+		#Strong affinity for Shamanism/Witchcraft in Ugro-Finnic faiths freak the Norse out
+		religion:finno_ugric_religion = {
+			every_faith = {
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_witchcraft_accepted
+					NEW_DOCTRINE = doctrine_witchcraft_virtuous
+				}
+			}
+		}
 		#Organized Religions
 		religion:jainism_religion = {
 			every_faith = {
@@ -955,15 +965,22 @@ change_vanilla_religion_doctrines = {
 					this = religion:baltic_religion
 					this = religion:finno_ugric_religion
 					this = religion:paganism_religion
+					this = religion:paganism_religion
+					this = religion:qiangic_religion
 					this = religion:siberian_religion
 					this = religion:west_african_bori_religion
 					this = religion:west_african_roog_religion
+					this = religion:zunism_religion
 				}
 			}
 			every_faith = {
 				swap_doctrine_if_it_has_it_effect = {
 					OLD_DOCTRINE = doctrine_theocracy_temporal
 					NEW_DOCTRINE = doctrine_theocracy_lay_clergy
+				}
+				swap_doctrine_if_it_has_it_effect = {
+					OLD_DOCTRINE = doctrine_pluralism_righteous
+					NEW_DOCTRINE = doctrine_pluralism_pluralistic
 				}
 			}
 		}
@@ -1066,6 +1083,7 @@ set_historical_dynasty_renown = {
 		dynasty:bactrian_dynn_orontid = { add_dynasty_prestige_level = 4 }
 		dynasty:104246212 = { add_dynasty_prestige_level = 3 } #Seleucid
 		dynasty:macedonian_dynn_Argead = { add_dynasty_prestige_level = 10 } #Alexander the Great
+		dynasty:macedonian_dynasty_ptolemaid = { add_dynasty_prestige_level = 10 } #Ptolemids
 	}
 }
 
@@ -1249,3 +1267,33 @@ update_development_by_terrain_and_circumstances = {
 		}
 	}
 }
+
+#Mostly for denuding specific cultures on the map of armies, making some confederations weaker
+cull_maa_from_single_county_tribals = {
+	effect = {
+		every_ruler = {
+			limit = {
+				is_ai = yes
+				highest_held_title_tier = tier_county
+				domain_size = 1
+				has_government = tribal_government
+				#Only for specified cultures
+				OR = {
+					this.culture = culture:denziner
+					this.culture = culture:vidivarii
+					this.culture = culture:wielbark
+					this.culture = culture:przeworsk
+					this.culture = culture:lebus
+					this.culture = culture:gustow
+				}
+				this.capital_county = {
+					OR = {
+						any_county_province = { has_holding_type = tribal_holding }
+						any_county_province = { has_holding = no }
+					}
+				}
+			}
+			every_maa_regiment = { destroy_maa_regiment = yes }
+		}
+	}
+ }

@@ -9,11 +9,10 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 '''
 
 ##### Main #####
-start_year = 440
-end_year = 500
-religion = 'slavic_pagan'
-culture = culture_storage.culture_list['old_slavic']
-#holding_list = ['c_hohenau']
+start_year = 350
+end_year = 550
+religion = 'germanic_pagan'
+culture = culture_storage.culture_list['geatish']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -79,7 +78,7 @@ culture = culture_storage.culture_list['old_slavic']
 
 ##Pannonian Huns: Post Nedao
 #holding_list = ["c_baranya","c_vas","c_tolna"]
-holding_list = ["c_kolon"]
+#holding_list = ["c_kolon"]
 
 ##Pannonian Romano-Pannonians (poor-souls)
 #holding_list = ["c_szekesfehervar","c_veszprem","c_vukovar","c_zagorje","c_zagreb","c_pozega"]
@@ -99,9 +98,25 @@ holding_list = ["c_kolon"]
 
 ##Vistula Veneti
 #holding_list = ["d_vistula_veneti"]
+#holding_list = ["c_peresopnytsia","c_volodymyr","c_dubrovytsia","c_turov"]# Upto around 475
+#holding_list = ["c_dorohychyn","c_berestye","c_pinsk","c_slutsk","c_novogrudok","c_kletsk","c_grodno","c_minsk"]# Upto around 550
+#holding_list = ["c_cherven"]
 
 ##East Galindians
 #holding_list = ["d_east_galindian"]
+#holding_list = ["c_orsha","c_smolensk","c_gnezdovo","c_toropets","c_mozhaysk","c_kozelsk"]
+
+##Galindians
+#holding_list = ["c_osterode","c_allenstein"]
+
+##Prussian
+#holding_list = ["c_wormditt","c_natangia","c_koingsberg","c_sclaovia","c_bartenstein"]
+
+##Sudovians
+#holding_list = ["c_lomzynska","c_volkovysk","c_angerburg","c_yatvyagi","c_trakai"]
+
+##Aesti
+#holding_list = ["c_memel","c_palanga","c_grobin","c_vanemane","c_zemigalians","c_selpils","c_siauliai","c_raseiniai","c_kernave","c_braslau","c_lukoml","c_polotsk","c_vitebsk","c_talava","c_kokenois","c_jersika"]
 
 ##Various Slavs:
 #holding_list = ["d_kolochins"]
@@ -114,6 +129,37 @@ holding_list = ["c_kolon"]
 
 ##Vidivarii
 #holding_list = ["d_vidivarii"]
+#holding_list = ["c_slupsk","c_danzig","c_berent","c_malbork"]
+
+##Denziner
+#holding_list = ["c_stettin","c_soldin","c_kolobrzeg","c_cammin","c_landsberg","c_pila","c_miastko","c_krajna"]
+
+##Gustow
+#holding_list = ["c_rugen","c_wolgast"]
+
+###Warnic
+#holding_list = ["c_ruppin","c_prenzlau","c_brandenburg","c_werle"]
+#holding_list = ["d_warini"]
+#holding_list = ["c_werle"]
+
+#Lebus
+#holding_list = ["c_berlin","c_juterbog","c_wittenberg","c_brene","c_spreewald","c_grunberg","c_meissen","c_dresden","c_cottbus","c_naumberg","c_sprottau","c_gorlitz","c_przemkow"]
+#holding_list = ["c_lubusz"]
+
+##Old Saxon
+#holding_list = ["d_nordalbingia"]
+#holding_list = [ "d_westfalen","d_ostfalen","d_teutoburgiensis"]
+#holding_list = ["d_albis"]
+
+##Alemanni
+#d_lentienses: Priarius (???-378)
+#d_brisgavi: Vadomarius (???-368)
+#Raetovari, Necker - Quasi-Fictional
+#holding_list = ["d_lentienses","d_brisgavi","d_raetovari"]
+#holding_list = ["d_neckersuebi"]
+
+##Danes
+#holding_list = ["c_halland","c_blekinge"]
 
 ##Rump Langobard
 #holding_list = ["c_brzeg","c_breslau","c_nysa"]
@@ -139,8 +185,12 @@ holding_list = ["c_kolon"]
 ##Norse of Brondings
 #holding_list = ["d_brondings"]
 
-#Slavs under Hunnic domination
-holding_list = ["c_tigheci","c_chilia","c_cetatea_alba","c_lapusna"]
+##Slavs under Hunnic domination
+#holding_list = ["c_tigheci","c_chilia","c_cetatea_alba","c_lapusna"]
+
+#Geatish
+#Smaland
+holding_list = ["c_more","c_sevede","c_varend","c_njudung","c_finnveden"]
 
 for holding,list_loc in zip(holding_list,range(len(holding_list))):
     #Write or append data

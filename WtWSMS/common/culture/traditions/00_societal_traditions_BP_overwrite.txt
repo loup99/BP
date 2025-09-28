@@ -248,6 +248,123 @@ tradition_vegetarianism = {
 	}
 }
 
+##### Changed from Vanilla: Added parameter reducing number of subjugation CBs in a lifetime
+tradition_pacifism = {
+	category = societal
+
+	layers = {
+		0 = learning
+		1 = indian
+		4 = diplomacy.dds
+	}
+	
+	can_pick = {
+		custom_description = {
+			text = culture_not_bellicose
+			NOT = {
+				culture_pillar:ethos_bellicose = { is_in_list = traits }
+			}
+		}
+		culture_not_warlike_trigger = yes
+	}
+	
+	##### Changed from Vanilla vvvvv
+	parameters = {
+		reduced_cost_for_conversion_to_pacifist_faith = yes
+		##### Changed from Vanilla vvvvv
+		decreased_subjugation_limit = yes
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	county_modifier = {
+		development_growth_factor = 0.15
+		county_opinion_add = 10
+	}
+	character_modifier = {
+		martial = -1
+		monthly_martial_lifestyle_xp_gain_mult = -0.2
+		
+		ai_war_chance = -0.75
+		ai_war_cooldown = 10
+		ai_boldness = -25
+		ai_compassion = 25
+	}
+	province_modifier = {
+		travel_danger = -5
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_egalitarian = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_spiritual_or_egalitarian_desc
+				}
+			}
+			if = {
+				limit = {
+					scope:character = {
+						is_at_war = yes
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = is_at_war_desc
+				}
+			}
+
+			if = {
+				limit = {
+					scope:character = {
+						has_variable = tradition_pacifism_travel_discount
+					}
+					
+				}
+
+				add = {
+					value = tradition_travel_discount
+					desc = tradition_travel_discount_desc
+				}
+			}
+
+			if = {
+				limit = {
+					culture_tradition_reduction_trigger = { TRADITION = tradition_pacifism }
+				}
+				multiply = {
+					value = 0.5
+					desc = inspired_by_culture_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 0
+		if = {
+			limit = {
+				scope:character = { religion = { is_in_family = rf_eastern } }
+				is_divergent_culture = yes
+			}
+			add = 100
+		}
+	}
+}
+
 ##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
 
 ##### Changed from Vanilla: Made transitively unselectable with new traditions
