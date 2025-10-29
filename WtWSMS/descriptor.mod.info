@@ -1,4 +1,4 @@
-name = "When the World Stopped Making Sense"
+name = "(DEV) When the World Stopped Making Sense (DEV)"
 tags={
 	"Bookmarks"
 	"Culture"
@@ -9,12 +9,6 @@ tags={
 	"Religion"
 	"Total Conversion"
 }
-version = "0.1.8"
-supported_version="1.16.*"
+version = "0.1.8.1"
+supported_version="1.18.*"
 path = "mod/WtWSMS"
-replace_path="history/characters"
-replace_path="history/cultures"
-replace_path="history/provinces"
-replace_path="history/titles"
-picture="thumbnail.png"
-remote_file_id="2858562094"
