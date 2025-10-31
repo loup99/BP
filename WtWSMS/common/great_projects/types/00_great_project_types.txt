@@ -1,0 +1,3353 @@
+@msg_completion_effect_generic = "event:/DLC/EP4/SFX/Stingers/China/tgp_mx_sting_finishing_great_project_generic"
+@msg_completion_effect_military = "event:/DLC/EP4/SFX/Stingers/China/tgp_mx_sting_finishing_great_project_military"
+
+@great_project_mandala_icon = "gfx/interface/icons/great_projects/mandala_capital.dds"
+@great_project_china_icon = "gfx/interface/icons/great_projects/city_china.dds"
+@great_project_great_canals_icon = "gfx/interface/icons/great_projects/grand_canals.dds"
+@icon_great_project_great_wall = "gfx/interface/icons/great_projects/great_wall.dds"
+
+@default_illustration = "gfx/interface/illustrations/great_projects/asia_great_project_default.dds"
+@mandala_capital_illustration = "gfx/interface/illustrations/decisions/tgp_projects_mandala_capital.dds"
+@castle_china_illustration = "gfx/interface/illustrations/holding_types/tgp_castle_china.dds"
+@great_wall_illustration = "gfx/interface/illustrations/decisions/tgp_great_wall.dds"
+@grand_canals_illustration = "gfx/interface/illustrations/event_scenes/tgp_chinese_city.dds"
+@courtyard_asia_illustration = "gfx/interface/illustrations/event_scenes/tgp_courtyard_asia.dds"
+
+#The Mandala Capital Great Project!
+mandala_capital_01 = {
+	icon = {
+		reference = @great_project_mandala_icon
+	}
+	illustration = {
+		reference = @mandala_capital_illustration
+	}
+
+	is_important = yes
+	is_shown = {
+		government_has_flag = government_is_mandala
+		capital_province = { 
+			NOT = { has_building_with_flag = mandala_capital_building }
+		}
+		NOT = { is_planning_great_project = mandala_capital_01 }
+	}
+
+	can_start_planning = {
+		capital_province = { has_great_building = no }
+		government_has_flag = government_is_mandala
+		NOT = { is_planning_great_project = mandala_capital_01 }
+		piety_level >= medium_piety_level
+		number_of_tributaries >= 1
+		legitimacy_level >= 1
+		is_independent_ruler = yes
+		trigger_if = {
+			limit = {
+				is_tributary = yes
+			}
+			suzerain = {
+				NOT = { has_government = mandala_government }
+			}
+		}
+		custom_tooltip = {
+			text = great_project_mandala_capital_pick_aspect_tt
+			has_mandala_aspect_trigger = yes
+		}
+		#There can only be 2 active (i.e. non-Ruined) Mandala Capitals per De Jure Kingdom
+		custom_tooltip = {
+			text = not_already_full_on_mandala_capitals
+			less_than_max_amount_of_mandala_capitals_trigger = yes
+		}
+	}
+
+	cost = {
+		piety = major_piety_value
+	}
+	owner = province_owner
+
+	construction_time = great_project_mandala_construction_time
+
+	contributor_cooldown = standard_contributor_cooldown_value
+
+	on_plan_build = {
+		scope:owner = {
+			#Memory
+			create_character_memory = {
+				type = started_planning_mandala_capital_memory
+				participants = { founder = scope:owner }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_planned_location
+					value = scope:province
+				}
+				if = {
+					limit = { exists = var:mandala_capital_planned_location }
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		scope:owner = {
+			scope:province = {
+				if = {
+					limit = { 
+						NOT = { has_holding_type = temple_citadel_holding }
+					}
+					set_holding_type = temple_citadel_holding
+				}
+				set_great_building = mandala_capital_01
+				add_to_global_variable_list = { # Add to list so it can be found by the PoI
+					name = mandala_poi_list
+					target = this
+				}
+			}
+			#Owner rewards
+			show_as_tooltip = { mandala_owner_reward_01_effect = yes }
+			#Memory
+			create_character_memory = {
+				type = completed_first_mandala_capital_memory
+				participants = { founder = scope:founder }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_location
+					value = scope:province
+				}
+				if = {
+					limit = { exists = var:mandala_capital_location }
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+		#Tally the rewards
+		scope:great_project ?= {
+			#Rite of Worthiness
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = rite_of_worthiness }
+			#Slabs of Sandstone
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = slabs_of_sandstone }
+			#Laterite Blocks
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = laterite_blocks }
+			#Timber
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = timber }
+			#Work Force
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = work_force }
+			#Woodcarvings
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = woodcarvings }
+			#Sanctified Domes
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = sanctified_domes }
+			#Ornate Reliefs
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = ornate_reliefs }
+			#Family Shrine
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = family_shrine }
+		}
+		#Dole out some rewards!
+		gather_contributors_in_list_effect = yes
+		every_in_list = {
+			list = contributors_to_reward
+			if = {
+				limit = { this = scope:owner }
+				trigger_event = tgp_east_asia_mandala_capital_events.1000
+			}
+			else = {
+				if = {
+					limit = { 
+						scope:owner = { is_ai = yes }
+					}
+					show_as_tooltip = { 
+						mandala_contributor_opinion_reward_effect = { OVERLORD = scope:owner }
+					}
+				}
+				trigger_event = tgp_east_asia_mandala_capital_events.1010
+			}
+		}
+	}
+
+	on_cancel = {
+		scope:owner = {
+			add_prestige = minor_prestige_loss
+		}
+		every_contribution = {
+			limit = {
+				contribution_is_funded = yes
+			}
+			contributor = {
+				if = {
+					limit = {
+						this != scope:owner
+						this != scope:founder
+					}
+					add_to_list = contributors_to_disappoint	
+				}
+			}
+		}
+		every_in_list = {
+			list = contributors_to_disappoint
+			add_opinion = {
+				modifier = wasted_our_efforts
+				target = scope:owner
+				opinion = -30
+			}
+		}
+	}
+
+	on_start_build = { 
+		scope:owner = {
+			add_legitimacy_effect = { LEGITIMACY = minor_legitimacy_gain }
+		}
+		scope:great_project = {
+			every_contribution = {
+				limit = {
+					contribution_is_funded = yes
+				}
+				contributor = {
+					add_prestige = minor_prestige_value 
+				}	
+			}
+		}
+	}
+
+	invite_interaction = request_great_project_contribution_interaction
+
+	allowed_contributor_filter = {
+		tributaries = yes
+		vassals = yes
+	}
+
+	project_contributions = {
+		rite_of_worthiness = {
+			contributor_is_valid = { 
+				root = scope:owner
+				#Only 2 Capital Temple Complexes per De Jure Kingdom
+				trigger_if = {
+					limit = {
+						capital_county.kingdom = {
+							any_in_de_jure_hierarchy = {
+								count >= mandala_capitals_per_dejure_kingdom
+								tier = tier_barony
+								title_province = {
+									NOT = { scope:great_project.great_project_location.county = root.capital_county } #We don't count our own great project since it needs to be upgradeable.
+									OR = {
+										AND = {
+											has_building_with_flag = mandala_capital_building
+											has_ruined_great_building = no
+										}
+										any_great_project_in_province = {
+											OR = {
+												great_project_type = mandala_capital_01
+												great_project_type = mandala_capital_02
+												great_project_type = mandala_capital_03
+												great_project_type = mandala_capital_04
+												great_project_type = mandala_capital_05
+											}
+											OR = {
+												great_project_construction_phase_is = in_progress
+												great_project_construction_phase_is = completed
+											}	
+										}
+									}
+								}
+							}
+						}
+					}
+					custom_tooltip = {
+						text = not_already_full_on_mandala_capitals
+						always = no
+					}	
+				}
+				trigger_else = {
+					#Aspect of Creation
+					trigger_if = {
+						limit = {
+							scope:owner.house = { has_house_power_parameter = aspect_of_creation }
+						}
+						creation_first_tier_trigger = yes
+					}
+					#Aspect of Serenity
+					trigger_else_if = {
+						limit = {
+							scope:owner.house = { has_house_power_parameter = aspect_of_serenity }
+						}
+						serenity_first_tier_trigger = { MANDALA = scope:owner }
+					}
+					#Aspect of Destruction
+					trigger_else_if = {
+						limit = {
+							scope:owner.house = { has_house_power_parameter = aspect_of_destruction }
+						}
+						destruction_first_tier_trigger = yes
+					}
+					#Aspect of Trickery
+					trigger_else_if = {
+						limit = {
+							scope:owner.house = { has_house_power_parameter = aspect_of_trickery }
+						}
+						trickery_first_tier_trigger = yes
+					}
+					#No Aspect, no dice
+					trigger_else = {
+						custom_tooltip = {
+							text = rite_of_worthiness_per_aspect
+							always = no
+						}
+					}
+				}
+			}
+
+			cost = {}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_minor_rite_reward_effect = yes }
+			}
+
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 3
+				duchy = 3
+				kingdom = 3
+				empire = 3
+				hegemony = 3
+			}
+
+			ai_will_do = {
+				value = 1000
+			}
+		}
+
+		slabs_of_sandstone = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { 
+						value = {
+							add = mandala_contribution_mid_gold_cost
+							divide = 2
+						}
+					}
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_slabs_of_sandstone_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		laterite_blocks = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				gold = mandala_contribution_low_gold_cost
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_laterite_blocks_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		timber = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				gold = mandala_contribution_low_gold_cost
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_low_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_timber_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		work_force = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_high_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_work_force_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		woodcarvings = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_woodcarvings_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		sanctified_domes = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { 
+						value = {
+							add = mandala_contribution_mid_gold_cost
+							divide = 2
+						}
+					}
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_sanctified_domes_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		ornate_reliefs = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { value = mandala_contribution_mid_gold_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_ornate_reliefs_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		family_shrine = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					exists = scope:owner.primary_heir
+					scope:owner.dynasty ?= { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				custom_tooltip = {
+					text = tgp_sea_legacy_3_name
+					dynasty = { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { value = mandala_contribution_mid_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_family_shrine_reward_effect = yes }
+			}
+
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+			}
+		}
+	}
+
+	ai_target_quick_trigger = {
+		adult = yes
+		government_type = { mandala_government }
+		rank = county
+	}
+	ai_check_interval_by_tier = {							
+		barony = 0
+		county = 1
+		duchy = 1
+		kingdom = 1
+		empire = 1
+		hegemony = 1
+	}
+	ai_will_do = {
+		value = 1000
+	}
+
+	completion_sound_effect = @msg_completion_effect_generic
+}
+
+mandala_capital_02 = {
+	icon = {
+		reference = @great_project_mandala_icon
+	}
+	illustration = {
+		reference = @mandala_capital_illustration
+	}
+	owner = province_owner
+
+	is_important = yes
+	is_shown = {
+		government_has_flag = government_is_mandala
+		capital_province = { 
+			has_building_with_flag = first_tier_mandala_capital_building
+			NOT = { has_building_with_flag = second_tier_mandala_capital_building }
+		}
+		NOT = { is_planning_great_project = mandala_capital_02 }
+	}
+
+	can_start_planning = {
+		capital_province = { has_ruined_great_building = no }
+		government_has_flag = government_is_mandala
+		NOR = {
+			is_planning_great_project = mandala_capital_02
+			piety_level < high_piety_level
+		}
+		custom_tooltip = {
+			text = mandala_capital_tier_2_amount_of_subjects
+			num_mandala_subject_value >= mandala_capital_tier_2_subject_threshold_value
+		}
+		legitimacy_level >= 2
+		is_independent_ruler = yes
+		trigger_if = {
+			limit = { is_tributary = yes }
+			suzerain = {
+				NOT = { has_government = mandala_government }
+			}
+		}
+		#There can only be 2 active (i.e. non-Ruined) Mandala Capitals per De Jure Kingdom
+		custom_tooltip = {
+			text = not_already_full_on_mandala_capitals
+			less_than_max_amount_of_mandala_capitals_trigger = yes
+		}
+	}
+
+	cost = {
+		piety = massive_piety_value
+	}
+
+	construction_time = great_project_mandala_construction_time
+
+	contributor_cooldown = standard_contributor_cooldown_value
+
+	on_plan_build = {
+		scope:owner = {
+			#Memory
+			create_character_memory = {
+				type = started_planning_mandala_capital_memory
+				participants = { founder = scope:owner }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_planned_location
+					value = scope:province
+				}
+				set_variable = {
+					name = second_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_planned_location
+						exists = var:second_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		scope:owner = {
+			scope:province = {
+				hidden_effect = { remove_building = mandala_capital_01 }
+				set_great_building = mandala_capital_02
+			}
+			#Owner rewards
+			show_as_tooltip = { mandala_owner_reward_01_effect = yes }
+			#Memory
+			create_character_memory = {
+				type = upgraded_mandala_capital_memory
+				participants = { founder = scope:founder }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_location
+					value = scope:province
+				}
+				set_variable = {
+					name = second_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_location
+						exists = var:second_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+		#Tally the rewards
+		scope:great_project ?= {
+			#Rite of Worthiness
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = rite_of_worthiness }
+			#Brick
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = brick }
+			#Tiles
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = tiles }
+			#Shallow Pools
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = shallow_pools }
+			#Work Force
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = work_force }
+			#Decorative Tiles
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = decorative_tiles }
+			#Decorated Domes
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = decorated_domes }
+			#Family Statues
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = family_statues }
+		}
+		#Dole out some rewards!
+		gather_contributors_in_list_effect = yes
+		every_in_list = {
+			list = contributors_to_reward
+			if = {
+				limit = { this = scope:owner }
+				trigger_event = tgp_east_asia_mandala_capital_events.1000
+			}
+			else = {
+				if = {
+					limit = { 
+						scope:owner = { is_ai = yes }
+					}
+					show_as_tooltip = { 
+						mandala_contributor_opinion_reward_effect = { OVERLORD = scope:owner }
+					}
+				}
+				trigger_event = tgp_east_asia_mandala_capital_events.1010
+			}
+		}
+	}
+
+	on_cancel = {
+		scope:owner = {
+			add_prestige = minor_prestige_loss
+		}
+		every_contribution = {
+			limit = {
+				contribution_is_funded = yes
+			}
+			contributor = {
+				if = {
+					limit = {
+						this != scope:owner
+						this != scope:founder
+					}
+					add_to_list = contributors_to_disappoint	
+				}
+			}
+		}
+		every_in_list = {
+			list = contributors_to_disappoint
+			add_opinion = {
+				modifier = wasted_our_efforts
+				target = scope:owner
+				opinion = -30
+			}
+		}
+	}
+
+	on_start_build = {
+		scope:owner = {
+			add_legitimacy_effect = { LEGITIMACY = minor_legitimacy_gain }
+		}
+		scope:great_project = {
+			every_contribution = {
+				limit = {
+					contribution_is_funded = yes
+				}
+				contributor = {
+					add_prestige = minor_prestige_value 
+				}	
+			}
+		}
+	}
+
+	allowed_contributor_filter = {
+		tributaries = yes
+		vassals = yes
+	}
+
+
+	project_contributions = {
+		rite_of_worthiness = {
+			contributor_is_valid = { 
+				root = scope:owner
+				#Aspect of Creation
+				trigger_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_creation }
+					}
+					creation_second_tier_trigger = yes
+				}
+				#Aspect of Serenity
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_serenity }
+					}
+					serenity_second_tier_trigger = { MANDALA = scope:owner }
+				}
+				#Aspect of Destruction
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_destruction }
+					}
+					destruction_second_tier_trigger = yes
+				}
+				#Aspect of Trickery
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_trickery }
+					}
+					trickery_second_tier_trigger = yes
+				}
+				#No Aspect, no dice
+				trigger_else = {
+					custom_tooltip = {
+						text = rite_of_worthiness_per_aspect
+						always = no
+					}
+				}
+			}
+
+			cost = { }
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_minor_rite_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 3
+				duchy = 3
+				kingdom = 3
+				empire = 3
+				hegemony = 3
+			}
+			ai_will_do = {
+				value = 1000
+			}
+		}
+
+		brick = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { value = mandala_contribution_mid_gold_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_brick_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		tiles = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { value = mandala_contribution_mid_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_piety_cost
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_tiles_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		shallow_pools = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { value = mandala_contribution_mid_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_piety_cost
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_shallow_pools_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		work_force = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_high_piety_cost }
+				} 
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_work_force_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		decorative_tiles = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else = { value = mandala_contribution_mid_gold_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_decorative_tiles_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		decorated_domes = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_gold_cost
+					}
+					else_if = {
+						limit = {
+							this = scope:owner
+							dynasty = { has_dynasty_modifier = mandala_sanctified_domes_dynasty_modifier }
+						}
+						value = {
+							add = mandala_contribution_mid_gold_cost
+							divide = 2
+						}
+					}
+					else = { value = mandala_contribution_mid_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else_if = {
+						limit = {
+							this = scope:owner
+							dynasty = { has_dynasty_modifier = mandala_sanctified_domes_dynasty_modifier }
+						}
+						value = {
+							add = mandala_contribution_high_piety_cost
+							subtract = mandala_contribution_mid_piety_cost
+						}
+					}
+					else = { value = mandala_contribution_high_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_decorated_domes_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		family_statues = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					exists = scope:owner.primary_heir
+					scope:owner.dynasty ?= { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				custom_tooltip = {
+					text = tgp_sea_legacy_3_name
+					dynasty = { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_high_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_family_statues_reward_effect = yes }
+			}
+
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+			}
+		}
+	}
+
+	ai_target_quick_trigger = {
+		adult = yes
+		government_type = { mandala_government }
+		rank = county
+	}
+	ai_check_interval_by_tier = {							
+		barony = 0
+		county = 1
+		duchy = 1
+		kingdom = 1
+		empire = 1
+		hegemony = 1
+	}
+	ai_will_do = {
+		value = 1000
+	}
+
+	completion_sound_effect = @msg_completion_effect_generic
+}
+
+mandala_capital_03 = {
+	icon = {
+		reference = @great_project_mandala_icon
+	}
+	illustration = {
+		reference = @mandala_capital_illustration
+	}
+	owner = province_owner
+
+	is_important = yes
+	is_shown = {
+		government_has_flag = government_is_mandala
+		capital_province = { 
+			has_building_with_flag = second_tier_mandala_capital_building
+			NOT = { has_building_with_flag = third_tier_mandala_capital_building }
+		}
+		NOT = { is_planning_great_project = mandala_capital_03 }
+	}
+
+	can_start_planning = {
+		capital_province = { has_ruined_great_building = no }
+		government_has_flag = government_is_mandala
+		NOR = {
+			is_planning_great_project = mandala_capital_03
+			piety_level < high_piety_level
+		}
+		custom_tooltip = {
+			text = mandala_capital_tier_3_amount_of_subjects
+			num_mandala_subject_value >= mandala_capital_tier_3_subject_threshold_value
+		}
+		legitimacy_level >= 4
+		is_independent_ruler = yes
+		trigger_if = {
+			limit = {
+				is_tributary = yes
+			}
+			suzerain = {
+				NOT = { has_government = mandala_government }
+			}
+		}
+		#There can only be 2 active (i.e. non-Ruined) Mandala Capitals per De Jure Kingdom
+		custom_tooltip = {
+			text = not_already_full_on_mandala_capitals
+			less_than_max_amount_of_mandala_capitals_trigger = yes
+		}
+	}
+
+	cost = {
+		piety = {
+			value = massive_piety_value
+			multiply = 1.5
+		}
+	}
+
+	construction_time = great_project_mandala_increased_construction_time
+
+	contributor_cooldown = standard_contributor_cooldown_value
+
+	on_plan_build = {
+		scope:owner = {
+			#Memory
+			create_character_memory = {
+				type = started_planning_mandala_capital_memory
+				participants = { founder = scope:owner }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_planned_location
+					value = scope:province
+				}
+				set_variable = {
+					name = third_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_planned_location
+						exists = var:third_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		scope:owner = {
+			scope:province = {
+				hidden_effect = { remove_building = mandala_capital_02 }
+				set_great_building = mandala_capital_03
+			}
+			#Owner rewards
+			show_as_tooltip = { mandala_owner_reward_01_effect = yes }
+			#Memory
+			create_character_memory = {
+				type = upgraded_mandala_capital_memory
+				participants = { founder = scope:founder }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_location
+					value = scope:province
+				}
+				set_variable = {
+					name = third_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_location
+						exists = var:third_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+		#Tally the rewards
+		scope:great_project ?= {
+			#Rite of Worthiness
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = rite_of_worthiness }
+			#Volcanic Stone
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = volcanic_stone }
+			#Corbel Gateways
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = corbel_gateways }
+			#Divine Statues
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = divine_statues }
+			#Work Force
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = work_force }
+			#Creation Aspect
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = creation_aspect }
+			#Serenity Aspect
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = serenity_aspect }
+			#Destruction Aspect
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = destruction_aspect }
+			#Trickery Aspect
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = trickery_aspect }
+			#Gilded Domes
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = gilded_domes }
+			#Family Temple Compound
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = family_temple_compound }
+		}
+		#Dole out some rewards!
+		gather_contributors_in_list_effect = yes
+		every_in_list = {
+			list = contributors_to_reward
+			if = {
+				limit = { this = scope:owner }
+				trigger_event = tgp_east_asia_mandala_capital_events.1000
+			}
+			else = {
+				if = {
+					limit = { 
+						scope:owner = { is_ai = yes }
+					}
+					show_as_tooltip = { 
+						mandala_contributor_opinion_reward_effect = { OVERLORD = scope:owner }
+					}
+				}
+				trigger_event = tgp_east_asia_mandala_capital_events.1010
+			}
+		}
+	}
+
+	on_cancel = {
+		scope:owner = {
+			add_prestige = minor_prestige_loss
+		}
+		every_contribution = {
+			limit = {
+				contribution_is_funded = yes
+			}
+			contributor = {
+				if = {
+					limit = {
+						this != scope:owner
+						this != scope:founder
+					}
+					add_to_list = contributors_to_disappoint	
+				}
+			}
+		}
+		every_in_list = {
+			list = contributors_to_disappoint
+			add_opinion = {
+				modifier = wasted_our_efforts
+				target = scope:owner
+				opinion = -30
+			}
+		}
+	}
+
+	on_start_build = {
+		scope:owner = {
+			add_legitimacy_effect = { LEGITIMACY = minor_legitimacy_gain }
+		}
+		scope:great_project = {
+			every_contribution = {
+				limit = {
+					contribution_is_funded = yes
+				}
+				contributor = {
+					add_prestige = minor_prestige_value 
+				}	
+			}
+		}
+	}
+
+	allowed_contributor_filter = {
+		tributaries = yes
+		vassals = yes
+	}
+
+	invite_interaction = request_great_project_contribution_interaction
+
+	project_contributions = {
+		rite_of_worthiness = {
+			contributor_is_valid = { 
+				root = scope:owner
+				#Aspect of Creation
+				trigger_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_creation }
+					}
+					creation_third_tier_trigger = yes
+				}
+				#Aspect of Serenity
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_serenity }
+					}
+					serenity_third_tier_trigger = { MANDALA = scope:owner }
+				}
+				#Aspect of Destruction
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_destruction }
+					}
+					destruction_third_tier_trigger = yes
+				}
+				#Aspect of Trickery
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_trickery }
+					}
+					trickery_third_tier_trigger = yes
+				}
+				#No Aspect, no dice
+				trigger_else = {
+					custom_tooltip = {
+						text = rite_of_worthiness_per_aspect
+						always = no
+					}
+				}
+			}
+
+			cost = { }
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_medium_rite_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 3
+				duchy = 3
+				kingdom = 3
+				empire = 3
+				hegemony = 3
+			}
+			ai_will_do = {
+				value = 1000
+			}
+		}
+
+		volcanic_stone = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_volcanic_stone_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		corbel_gateways = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_high_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_corbel_gateways_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		divine_statues = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_high_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_divine_statues_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		work_force = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = {
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				} 
+			}
+			
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_work_force_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		creation_aspect = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					scope:owner.house ?= { has_house_power_parameter = aspect_of_creation }
+				}
+			}
+
+			contributor_is_valid = { 
+				this = scope:owner
+				piety_level >= max_piety_level
+				custom_tooltip = {
+					text = great_project_mandala_capital_has_creation_aspect_tt
+					house = { has_house_power_parameter = aspect_of_creation }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_creation_aspect_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		serenity_aspect = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					scope:owner.house ?= { has_house_power_parameter = aspect_of_serenity }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				piety_level >= max_piety_level
+				custom_tooltip = {
+					text = great_project_mandala_capital_has_serenity_aspect_tt
+					house = { has_house_power_parameter = aspect_of_serenity }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_serenity_aspect_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		destruction_aspect = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					scope:owner.house ?= { has_house_power_parameter = aspect_of_destruction }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				piety_level >= max_piety_level
+				custom_tooltip = {
+					text = great_project_mandala_capital_has_destruction_aspect_tt
+					house = { has_house_power_parameter = aspect_of_destruction }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_destruction_aspect_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		trickery_aspect = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					scope:owner.house ?= { has_house_power_parameter = aspect_of_trickery }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				piety_level >= max_piety_level
+				custom_tooltip = {
+					text = great_project_mandala_capital_has_trickery_aspect_tt
+					house = { has_house_power_parameter = aspect_of_trickery }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_trickery_aspect_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		gilded_domes = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_gilded_domes_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		family_temple_compound = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					exists = scope:owner.primary_heir
+					scope:owner.dynasty ?= { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				custom_tooltip = {
+					text = tgp_sea_legacy_3_name
+					dynasty = { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_family_statues_reward_effect = yes }
+			}
+
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+			}
+		}
+
+	}
+
+	ai_target_quick_trigger = {
+		adult = yes
+		government_type = { mandala_government }
+		rank = county
+	}
+	ai_check_interval_by_tier = {							
+		barony = 0
+		county = 1
+		duchy = 1
+		kingdom = 1
+		empire = 1
+		hegemony = 1
+	}
+	ai_will_do = {
+		value = 1000
+	}
+
+	completion_sound_effect = @msg_completion_effect_generic
+}
+
+mandala_capital_04 = {
+	icon = {
+		reference = @great_project_mandala_icon
+	}
+	illustration = {
+		reference = @mandala_capital_illustration
+	}
+	owner = province_owner
+
+	is_important = yes
+	is_shown = {
+		government_has_flag = government_is_mandala
+		capital_province = { 
+			has_building_with_flag = third_tier_mandala_capital_building
+			NOT = { has_building_with_flag = fourth_tier_mandala_capital_building }
+		}
+		NOT = { is_planning_great_project = mandala_capital_04 }
+	}
+
+	can_start_planning = {
+		capital_province = { has_ruined_great_building = no }
+		government_has_flag = government_is_mandala
+		NOR = {
+			is_planning_great_project = mandala_capital_04
+			piety_level < very_high_piety_level
+		}
+		custom_tooltip = {
+			text = mandala_capital_tier_4_amount_of_subjects
+			num_mandala_subject_value >= mandala_capital_tier_4_subject_threshold_value
+		}
+		legitimacy_level >= 5
+		is_independent_ruler = yes
+		trigger_if = {
+			limit = {
+				is_tributary = yes
+			}
+			suzerain = {
+				NOT = { has_government = mandala_government }
+			}
+		}
+		#There can only be 2 active (i.e. non-Ruined) Mandala Capitals per De Jure Kingdom
+		custom_tooltip = {
+			text = not_already_full_on_mandala_capitals
+			less_than_max_amount_of_mandala_capitals_trigger = yes
+		}
+	}
+
+	cost = {
+		piety = {
+			value = massive_piety_value
+			multiply = 2
+		}
+	}
+
+	construction_time = great_project_mandala_increased_construction_time
+
+	contributor_cooldown = standard_contributor_cooldown_value
+
+	on_plan_build = {
+		scope:owner = {
+			#Memory
+			create_character_memory = {
+				type = started_planning_mandala_capital_memory
+				participants = { founder = scope:owner }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_planned_location
+					value = scope:province
+				}
+				set_variable = {
+					name = fourth_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_planned_location
+						exists = var:fourth_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+	}
+
+	on_complete = { 
+		scope:owner = {
+			scope:province = {
+				hidden_effect = { remove_building = mandala_capital_03 }
+				set_great_building = mandala_capital_04
+			} 
+			#Owner rewards
+			show_as_tooltip = { mandala_owner_reward_01_effect = yes }
+			#Memory
+			create_character_memory = {
+				type = upgraded_mandala_capital_memory
+				participants = { founder = scope:founder }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_location
+					value = scope:province
+				}
+				set_variable = {
+					name = fourth_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_location
+						exists = var:fourth_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+		#Tally the rewards
+		scope:great_project ?= {
+			#Rite of Worthiness
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = rite_of_worthiness }
+			#Slabs of Granite
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = slabs_of_granite }
+			#Zaungdans
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = zaungdans }
+			#Gilded Shrines
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = gilded_shrines }
+			#Work Force
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = work_force }
+			#Bell Stupas
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = bell_stupas }
+			#Bejeweled Domes
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = bejeweled_domes }
+			#Family Temple Complex
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = family_temple_complex }
+		}
+		#Dole out some rewards!
+		gather_contributors_in_list_effect = yes
+		every_in_list = {
+			list = contributors_to_reward
+			if = {
+				limit = { this = scope:owner }
+				trigger_event = tgp_east_asia_mandala_capital_events.1000
+			}
+			else = {
+				if = {
+					limit = { 
+						scope:owner = { is_ai = yes }
+					}
+					show_as_tooltip = { 
+						mandala_contributor_opinion_reward_effect = { OVERLORD = scope:owner }
+					}
+				}
+				trigger_event = tgp_east_asia_mandala_capital_events.1010
+			}
+		}
+	}
+
+	on_cancel = {
+		scope:owner = {
+			add_prestige = minor_prestige_loss
+		}
+		every_contribution = {
+			limit = {
+				contribution_is_funded = yes
+			}
+			contributor = {
+				if = {
+					limit = {
+						this != scope:owner
+						this != scope:founder
+					}
+					add_to_list = contributors_to_disappoint	
+				}
+			}
+		}
+		every_in_list = {
+			list = contributors_to_disappoint
+			add_opinion = {
+				modifier = wasted_our_efforts
+				target = scope:owner
+				opinion = -30
+			}
+		}
+	}
+
+	on_start_build = {
+		scope:owner = {
+			add_legitimacy_effect = { LEGITIMACY = minor_legitimacy_gain }
+		}
+		scope:great_project = {
+			every_contribution = {
+				limit = {
+					contribution_is_funded = yes
+				}
+				contributor = {
+					add_prestige = minor_prestige_value 
+				}	
+			}
+		}
+	}
+
+	allowed_contributor_filter = {
+		tributaries = yes
+		vassals = yes
+	}
+
+	project_contributions = {
+		rite_of_worthiness = {
+			contributor_is_valid = { 
+				root = scope:owner
+				#Aspect of Creation
+				trigger_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_creation }
+					}
+					creation_fourth_tier_trigger = yes
+				}
+				#Aspect of Serenity
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_serenity }
+					}
+					serenity_fourth_tier_trigger = { MANDALA = scope:owner }
+				}
+				#Aspect of Destruction
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_destruction }
+					}
+					destruction_fourth_tier_trigger = yes
+				}
+				#Aspect of Trickery
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_trickery }
+					}
+					trickery_fourth_tier_trigger = yes
+				}
+				#No Aspect, no dice
+				trigger_else = {
+					custom_tooltip = {
+						text = rite_of_worthiness_per_aspect
+						always = no
+					}
+				}
+			}
+
+			cost = { }
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { contributed_rites_of_worthiness_02_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 3
+				duchy = 3
+				kingdom = 3
+				empire = 3
+				hegemony = 3
+			}
+			ai_will_do = {
+				value = 1000
+			}
+		}
+
+		slabs_of_granite = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_huge_gold_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+			
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_slabs_of_granite_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		zaungdans = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_huge_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+			
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_zaungdans_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		gilded_shrines = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_huge_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_piety_cost
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+			
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_gilded_shrines_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		work_force = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_work_force_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		bell_stupas = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					scope:founder.faith = { religion_tag = buddhism_religion }
+				}
+			}
+
+			contributor_is_valid = {
+				root.faith = { religion_tag = buddhism_religion }
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_huge_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_huge_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_bell_stupas_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		bejeweled_domes = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = mandala_contribution_mega_gold_cost
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_bejeweled_domes_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		family_temple_complex = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					exists = scope:owner.primary_heir
+					scope:owner.dynasty ?= { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				custom_tooltip = {
+					text = tgp_sea_legacy_3_name
+					dynasty = { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_mid_gold_cost
+					}
+					else = { value = mandala_contribution_high_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = 0
+					}
+					else = { value = mandala_contribution_high_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_family_temple_complex_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+			}
+		}
+	}
+
+	ai_target_quick_trigger = {
+		adult = yes
+		government_type = { mandala_government }
+		rank = county
+	}
+	ai_check_interval_by_tier = {							
+		barony = 0
+		county = 1
+		duchy = 1
+		kingdom = 1
+		empire = 1
+		hegemony = 1
+	}
+	ai_will_do = {
+		value = 1000
+	}
+
+	completion_sound_effect = @msg_completion_effect_generic
+}
+
+mandala_capital_05 = {
+	icon = {
+		reference = @great_project_mandala_icon
+	}
+	illustration = {
+		reference = @mandala_capital_illustration
+	}
+	owner = province_owner
+
+	is_important = yes
+	is_shown = {
+		government_has_flag = government_is_mandala
+		capital_province = { 
+			has_building_with_flag = fourth_tier_mandala_capital_building
+			NOT = { has_building_with_flag = final_tier_mandala_capital_building }
+		}
+		NOT = { is_planning_great_project = mandala_capital_05 }
+	}
+
+	can_start_planning = {
+		capital_province = { has_ruined_great_building = no }
+		government_has_flag = government_is_mandala
+		NOR = {
+			is_planning_great_project = mandala_capital_05
+			piety_level < very_high_piety_level
+		}
+		custom_tooltip = {
+			text = mandala_capital_tier_5_amount_of_subjects
+			num_mandala_subject_value >= mandala_capital_tier_5_subject_threshold_value
+		}
+		legitimacy_level >= 7
+		is_independent_ruler = yes
+		trigger_if = {
+			limit = {
+				is_tributary = yes
+			}
+			suzerain = {
+				NOT = { has_government = mandala_government }
+			}
+		}
+		#There can only be 2 active (i.e. non-Ruined) Mandala Capitals per De Jure Kingdom
+		custom_tooltip = {
+			text = not_already_full_on_mandala_capitals
+			less_than_max_amount_of_mandala_capitals_trigger = yes
+		}
+	}
+
+	cost = {
+		piety = {
+			value = massive_piety_value
+			multiply = 3
+		}
+	}
+
+	construction_time = great_project_mandala_massive_construction_time
+
+	contributor_cooldown = standard_contributor_cooldown_value 
+
+	on_plan_build = {
+		scope:owner = {
+			create_artifact = {
+				name = mandala_capital_05_unconfirmed_talisman
+				description = mandala_capital_05_unconfirmed_talisman_desc
+				type = miscellaneous
+				visuals = small_box
+				decaying = no
+				modifier = artifact_monthly_piety_gain_mult_1_modifier
+				save_scope_as = newly_created_talisman
+			}
+			hidden_effect_new_object = {
+				scope:newly_created_talisman = {
+					set_variable = {
+						name = mandala_capital_05_unconfirmed_talisman
+						value = yes
+					}
+					set_variable = {
+						name = mandala_temple_location
+						value = scope:owner.capital_province
+					}
+					if = {
+						limit = { has_variable = mandala_temple_location }
+						#To prevent 'unused except in loc' errors :catto:
+					}
+					set_artifact_name = mandala_capital_05_unconfirmed_talisman
+					set_artifact_description = mandala_capital_05_unconfirmed_talisman_desc
+				}
+			}
+			#Memory
+			create_character_memory = {
+				type = started_planning_mandala_capital_memory
+				participants = { founder = scope:owner }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_planned_location
+					value = scope:province
+				}
+				set_variable = {
+					name = final_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_planned_location
+						exists = var:final_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+	}
+
+	on_complete = { 
+		scope:owner = {
+			capital_province = {
+				hidden_effect = { remove_building = mandala_capital_04 }
+				set_great_building = mandala_capital_05
+			} 
+			#Owner rewards
+			show_as_tooltip = { mandala_owner_reward_01_effect = yes }
+			#Memory
+			create_character_memory = {
+				type = upgraded_mandala_capital_memory
+				participants = { founder = scope:founder }
+			}
+			scope:new_memory ?= {
+				set_variable = {
+					name = mandala_capital_location
+					value = scope:province
+				}
+				set_variable = {
+					name = final_tier_mandala_capital
+					value = flag:yes
+				}
+				if = {
+					limit = { 
+						exists = var:mandala_capital_location
+						exists = var:final_tier_mandala_capital
+					}
+					#To prevent 'unused except in loc' errors :catto:
+				}
+			}
+		}
+		#Tally the rewards
+		scope:great_project ?= {
+			#Rite of Worthiness
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = rite_of_worthiness }
+			#Marble Foundation
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = marble_foundation }
+			#Divine Barays
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = divine_barays }
+			#Work Force
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = work_force }
+			#Bejeweled Reliefs
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = bejeweled_reliefs }
+			#Bunga Mas Forest
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = bunga_mas_forest }
+			#Dynastic Temple Complex
+			determine_if_contributed_and_save_scope_effect = { CONTRIBUTION = dynastic_temple_complex }
+		}
+		#Dole out some rewards!
+		gather_contributors_in_list_effect = yes
+		every_in_list = {
+			list = contributors_to_reward
+			if = {
+				limit = { this = scope:owner }
+				trigger_event = tgp_east_asia_mandala_capital_events.1000
+			}
+			else = {
+				if = {
+					limit = { 
+						scope:owner = { is_ai = yes }
+					}
+					show_as_tooltip = { 
+						mandala_contributor_opinion_reward_effect = { OVERLORD = scope:owner }
+					}
+				}
+				trigger_event = tgp_east_asia_mandala_capital_events.1010
+			}
+		}
+	}
+
+	on_cancel = {
+		scope:owner = {
+			add_prestige = minor_prestige_loss
+			if = {
+				limit = {
+					any_character_artifact = { has_variable = mandala_capital_05_unconfirmed_talisman }
+				}
+				random_character_artifact = {
+					limit = { has_variable = mandala_capital_05_unconfirmed_talisman }
+					destroy_artifact = this
+				}
+			}
+		}
+		every_contribution = {
+			limit = {
+				contribution_is_funded = yes
+			}
+			contributor = {
+				if = {
+					limit = {
+						this != scope:owner
+						this != scope:founder
+					}
+					add_to_list = contributors_to_disappoint	
+				}
+			}
+		}
+		every_in_list = {
+			list = contributors_to_disappoint
+			add_opinion = {
+				modifier = wasted_our_efforts
+				target = scope:owner
+				opinion = -30
+			}
+		}
+	}
+
+	on_start_build = { 
+		scope:owner = {
+			add_legitimacy_effect = { LEGITIMACY = minor_legitimacy_gain }
+		}
+		scope:great_project = {
+			every_contribution = {
+				limit = {
+					contribution_is_funded = yes
+				}
+				contributor = {
+					add_prestige = minor_prestige_value 
+				}	
+			}
+		}
+	}
+
+	allowed_contributor_filter = {
+		tributaries = yes
+		vassals = yes
+	}
+
+	project_contributions = {
+		rite_of_worthiness = {
+			contributor_is_valid = { 
+				root = scope:owner
+				#Aspect of Creation
+				trigger_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_creation }
+					}
+					creation_fifth_tier_trigger = yes
+				}
+				#Aspect of Serenity
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_serenity }
+					}
+					serenity_fifth_tier_trigger = { MANDALA = scope:owner }
+				}
+				#Aspect of Destruction
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_destruction }
+					}
+					destruction_fifth_tier_trigger = yes
+				}
+				#Aspect of Trickery
+				trigger_else_if = {
+					limit = {
+						scope:owner.house = { has_house_power_parameter = aspect_of_trickery }
+					}
+					trickery_fifth_tier_trigger = yes
+				}
+				#No Aspect, no dice
+				trigger_else = {
+					custom_tooltip = {
+						text = rite_of_worthiness_per_aspect
+						always = no
+					}
+				}
+			}
+
+			cost = { }
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_medium_rite_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 3
+				duchy = 3
+				kingdom = 3
+				empire = 3
+				hegemony = 3
+			}
+			ai_will_do = {
+				value = 1000
+			}
+		}
+
+		marble_foundation = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_gold_cost
+					}
+					else = { value = mandala_contribution_mega_gold_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_marble_foundation_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		divine_barays = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_gold_cost
+					}
+					else = { value = mandala_contribution_mega_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_piety_cost
+					}
+					else = { value = mandala_contribution_mega_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_divine_barays_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		work_force = {
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_piety_cost
+					}
+					else = { value = mandala_contribution_mega_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_work_force_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 100
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		bejeweled_reliefs = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_gold_cost
+					}
+					else = { value = mandala_contribution_mega_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_low_piety_cost
+					}
+					else = { value = mandala_contribution_mid_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_bejeweled_reliefs_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		bunga_mas_forest = {
+			is_required = no
+
+			contributor_is_valid = { highest_held_title_tier > tier_barony }
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_gold_cost
+					}
+					else = { 
+						value = mandala_contribution_mega_gold_cost
+						multiply = 1.5
+						#Rounds up to the closest number divisible by 5
+						divide = 5
+						ceiling = yes
+						multiply = 5
+					}
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_piety_cost
+					}
+					else = { value = mandala_contribution_mega_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_bunga_mas_forest_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+				if = {
+					limit = {
+						is_tributary = yes
+						overlord = { has_realm_law_flag = tributaries_more_likely_to_contribute_to_GPs }
+					}
+					multiply = 2
+				}
+			}
+		}
+
+		dynastic_temple_complex = {
+			is_required = no
+
+			is_shown = {
+				trigger_if = {
+					limit = {
+						NOT = { exists = scope:owner }
+					}
+					always = yes
+				}
+				trigger_else = {
+					exists = scope:owner.primary_heir
+					scope:owner.dynasty ?= { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			contributor_is_valid = {
+				this = scope:owner
+				custom_tooltip = {
+					text = tgp_sea_legacy_3_name
+					dynasty = { has_dynasty_perk = tgp_sea_legacy_3 }
+				}
+			}
+
+			cost = { 
+				gold = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_gold_cost
+					}
+					else = { value = mandala_contribution_mega_gold_cost }
+				}
+				piety = {
+					if = {
+						limit = { is_ai = yes }
+						value = mandala_contribution_high_piety_cost
+					}
+					else = { value = mandala_contribution_mega_piety_cost }
+				}
+			}
+
+			contributor_cooldown = individual_contribution_cooldown_value
+
+			on_complete = {
+				show_as_tooltip = { mandala_contributor_family_temple_complex_reward_effect = yes }
+			}
+			ai_check_interval_by_tier = {							
+				barony = 0
+				county = 12
+				duchy = 12
+				kingdom = 6
+				empire = 6
+				hegemony = 6
+			}
+			ai_will_do = {
+				value = 50
+			}
+		}
+	}
+
+	ai_target_quick_trigger = {
+		adult = yes
+		government_type = { mandala_government }
+		rank = county
+	}
+	ai_check_interval_by_tier = {							
+		barony = 0
+		county = 1
+		duchy = 1
+		kingdom = 1
+		empire = 1
+		hegemony = 1
+	}
+	ai_will_do = {
+		value = 1000
+	}
+
+	completion_sound_effect = @msg_completion_effect_generic
+}
+
+##### Changed from Vanilla: Removed Chinese Great Projects
