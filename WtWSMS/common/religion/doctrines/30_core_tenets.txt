@@ -90,8 +90,6 @@
 			}
 		}
 
-
-
 		is_shown = {
 			OR = {
 				religion_tag = christianity_religion
@@ -411,7 +409,7 @@
 					trigger = {
 						religion_tag = zoroastrianism_religion
 					}
-					desc = tenet_divine_marriage_xwedodah
+					desc = tenet_divine_marriage_xwedodah 
 				}
 				desc = tenet_divine_marriage_name
 			}
@@ -453,7 +451,10 @@
 		}
 
 		traits = {
-			virtues = { pure_blooded = 2 }
+			virtues = {
+				pure_blooded = 2
+				incestuous
+			}
 		}
 	}
 
@@ -1025,9 +1026,9 @@
 					}
 					# ... or cannibal-HoF thinks you need to chill the hell out whilst they eat this dude.
 					AND = {
-						doctrine:tenet_ritual_cannibalism = { is_in_list = selected_doctrines }
+						religious_head.faith = { has_doctrine = tenet_ritual_cannibalism }						
 						NOT = {
-							religious_head.faith = { has_doctrine = tenet_ritual_cannibalism }
+							doctrine:tenet_ritual_cannibalism = { is_in_list = selected_doctrines }
 						}
 					}
 				}
@@ -1071,9 +1072,7 @@
 					limit = {
 						doctrine:doctrine_consanguinity_unrestricted = { is_in_list = selected_doctrines }
 					}
-					NOT = {
-						religious_head.faith = { has_doctrine = doctrine_consanguinity_unrestricted }
-					}
+					religious_head.faith = { has_doctrine = doctrine_consanguinity_unrestricted }
 				}
 			}
 			#### Christian Doctrine incompatabilities
@@ -1169,9 +1168,8 @@
 		piety_cost = {
 			if = {
 				limit = {
-					OR = {
-						religion_tag = christianity_religion
-					}
+					religion_tag = christianity_religion
+
 				}
 				value = faith_tenet_cost_high
 			}
@@ -1295,6 +1293,7 @@
 			}
 		}
 
+
 		traits = {
 			virtues = { just = 2 }
 			sins = { arbitrary = 2 }
@@ -1346,6 +1345,10 @@
 				scholar
 			}
 		}
+		
+		character_modifier = {
+			monthly_merit_mult = 0.1
+		}
 
 		parameters = {
 			literalist_debate_enabled = yes
@@ -1358,9 +1361,8 @@
 		piety_cost = {
 			if = {
 				limit = {
-					OR = {
-						religion_tag = islam_religion
-					}
+					religion_tag = islam_religion
+
 				}
 				value = faith_tenet_cost_high
 			}
@@ -1393,7 +1395,7 @@
 				religion_tag = jainism_religion
 			}
 		}
-		
+
 		can_pick = {
 			trigger_if = {
 				limit = { religion_tag = christianity_religion }
@@ -1582,9 +1584,8 @@
 			}
 			else_if = {
 				limit = {
-					OR = {
-						religion_tag = zoroastrianism_religion
-					}
+					religion_tag = zoroastrianism_religion
+
 				}
 				value = faith_tenet_cost_low
 			}
@@ -1750,7 +1751,7 @@
 		}
 	}
 
-	##### Changed from Vanilla: Made available to Zoroastrians
+	##### Changed from Vanilla: Made available to Zoroastrians, requires polytheist to pick
 	tenet_bhakti = {
 		name = {
 			first_valid = {
@@ -1765,7 +1766,6 @@
 				desc = tenet_bhakti_patron_god_name
 			}
 		}
-		
 		desc = {
 			first_valid = {
 				triggered_desc = {
@@ -1790,6 +1790,13 @@
 					religion_tag = germanic_religion
 					has_fp1_dlc_trigger = yes
 				}
+			}
+		}
+
+		can_pick = {
+			custom_description = {
+				text = doctrine_requires_polytheism
+				doctrine:doctrine_polytheist = { is_in_list = selected_doctrines }
 			}
 		}
 
@@ -1849,6 +1856,7 @@
 			holy_wars_forbidden = yes
 			pacifist_opinion_active = yes
 			opinion_of_pacifist_opinion_active = 10
+			hostility_same_religion = 1
 			decreased_subjugation_limit = yes
 		}
 
@@ -1973,6 +1981,10 @@
 			OR = {
 				religion_tag = west_african_bori_religion
 				religion_tag = akom_religion
+				religion_tag = muism_religion
+				religion_tag = dab_qhuas_religion
+				religion_tag = shamanism_religion
+				has_doctrine = tenet_sun_worship #If you already have it
 			}
 		}
 
@@ -2110,9 +2122,8 @@
 			}
 			else_if = {
 				limit = {
-					OR = {
-						religion_tag = hinduism_religion
-					}
+					religion_tag = hinduism_religion
+
 				}
 				value = faith_tenet_cost_low
 			}
@@ -2254,10 +2265,10 @@
 
 		traits = {
 			virtues = { 
-				lifestyle_mystic = {
-					scale = 5
-					weight = 2
-				}
+				lifestyle_mystic = { 
+					scale = 5 
+					weight = 2 
+				} 
 			}
 		}
 	}
@@ -2344,17 +2355,15 @@
 		piety_cost = {
 			if = {
 				limit = {
-					OR = {
-						religion_tag = hinduism_religion
-					}
+					religion_tag = hinduism_religion
+
 				}
 				value = faith_tenet_cost_high
 			}
 			else_if = {
 				limit = {
-					OR = {
-						has_doctrine = pagan_hostility_doctrine
-					}
+					has_doctrine = pagan_hostility_doctrine
+
 				}
 				value = faith_tenet_cost_low
 			}
@@ -2381,12 +2390,16 @@
 
 		character_modifier = {
 			forest_advantage = 5
-			forest_attrition_mult = -0.25
+			forest_development_growth_factor = 0.1
+			forest_levy_size = 0.2
 			taiga_advantage = 5
-			taiga_attrition_mult = -0.25
+			taiga_development_growth_factor = 0.15
+			taiga_levy_size = 0.2
 			jungle_advantage = 5
-			jungle_attrition_mult = -0.25
-			build_gold_cost = 0.1
+			jungle_development_growth_factor = 0.3
+			jungle_levy_size = 0.2
+			holding_build_gold_cost = 0.25
+			holding_build_speed = 0.25
 			county_opinion_add = 5
 		}
 	}
@@ -2405,7 +2418,10 @@
 		}
 
 		is_shown = {
-			religion_tag = zunism_religion
+			OR = {
+				religion_tag = zunism_religion
+				has_doctrine = tenet_sun_worship #If you already have it
+			}
 		}
 
 		parameters = {
@@ -2610,6 +2626,7 @@
 			if = {
 				limit = {
 					OR = {
+						this = faith:bosnian_church
 						this = faith:armenian_apostolic
 						this = faith:lamaism
 						this = faith:vajrayana
@@ -2654,6 +2671,581 @@
 		}
 	}
 
+	tenet_household_gods = {
+		icon = core_tenet_household_gods
+
+		name = tenet_household_gods_name
+
+		desc = tenet_household_gods_desc
+
+		piety_cost = faith_tenet_cost_mid
+
+		is_shown = {
+			religion_tag = hellenism_religion
+		}
+
+		can_pick = {
+			custom_description = {
+				text = rome_must_be_faithfully_restored_trigger
+				has_global_variable = household_gods_tenet_unlocked
+			}
+		}
+
+		parameters = {
+			same_culture_conversion_bonus_active = yes
+			same_faith_promote_culture_bonus_active = yes
+		}
+
+		character_modifier = {
+			monthly_influence = 0.5
+			ignore_opinion_of_different_faith = yes
+			different_faith_county_opinion_mult = -0.1
+			levy_reinforcement_rate_same_faith = 0.25
+			faith_conversion_piety_cost_mult = -0.15
+		}
+
+		traits = {
+			virtues = { augustus born_in_the_purple }
+		}
+	}
+
+	#############################
+	# Syncretic Faith Tenets	#
+	#############################
+
+	##### Changed from Vanilla: All Syncretics are mutually unselectable
+
+	tenet_eastern_syncretism = {
+		icon = core_tenet_eastern_syncretism
+		piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = dualism_religion
+						has_doctrine = pagan_hostility_doctrine
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					religion_tag = islam_religion
+				}
+				value = faith_tenet_cost_high
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_eastern_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			OR = {
+				has_doctrine = abrahamic_hostility_doctrine
+				has_doctrine = pagan_hostility_doctrine
+				NOT = { has_doctrine = special_doctrine_is_gnostic_faith }
+			}
+		}
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_gnosticism_trigger
+				NOT = { doctrine:tenet_gnosticism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		parameters = {
+			hostility_override_eastern_hostility_doctrine = 2
+			#For loc:
+			is_eastern_faith_bilateral_loc_override = 1
+			eastern_syncretic_actor_opinion_active = yes
+			opinion_of_eastern_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+		traits = {
+			virtues = { honest }
+			sins = { wrathful }
+		}
+	}
+
+	tenet_unreformed_syncretism = {
+		icon = core_tenet_unreformed_syncretism
+		piety_cost = {
+			if = {
+				limit = { doctrine:doctrine_pluralism_pluralistic = {is_in_list = selected_doctrines} }
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = { doctrine:doctrine_pluralism_fundamentalist = {is_in_list = selected_doctrines} }
+				value = faith_tenet_cost_high
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_unreformed_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+
+		is_shown = {
+			NOT = { has_doctrine = pagan_hostility_doctrine }
+		}
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		parameters = {
+			hostility_override_unreformed_faith_doctrine = 2
+			hostility_override_west_african_unreformed_faith_doctrine = 2
+			unreformed_syncretic_actor_opinion_active = yes
+			opinion_of_unreformed_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+			unreformed_syncretic_conversion_malus_active = yes
+		}
+		traits = {
+			virtues = { humble }
+			sins = { arrogant }
+		}
+	}
+
+	tenet_christian_syncretism = {
+		icon = core_tenet_christian_syncretism
+
+		piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = islam_religion
+						religion_tag = dualism_religion
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_christian_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			NOT = { religion_tag = christianity_religion }
+		}
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+
+		parameters = {
+			hostility_override_special_doctrine_is_christian_faith = 2
+			#For loc:
+			is_christian_faith_bilateral_loc_override = 2
+			# This parameter is empty; the syncretic religious trigger checks against the doctrine, as that's much clearer in tooltips and allows us to use a unified syncretic trigger per-religion rather than having bitty situational triggers.
+			can_use_christian_artefacts = yes
+			christian_syncretic_actor_opinion_active = yes
+			opinion_of_christian_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+
+		traits = {
+			virtues = { compassionate }
+			sins = { callous sadistic }
+		}
+	}
+
+	tenet_islamic_syncretism = {
+		icon = core_tenet_islamic_syncretism
+
+		piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = christianity_religion
+						religion_tag = dualism_religion
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_islamic_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			NOT = { religion_tag = islam_religion }
+			BP_rise_of_islam_trigger = yes
+		}
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+
+		parameters = {
+			hostility_override_special_doctrine_is_islamic_faith = 2
+			# This parameter is empty; the syncretic religious trigger checks against the doctrine, as that's much clearer in tooltips and allows us to use a unified syncretic trigger per-religion rather than having bitty situational triggers.
+			can_use_islamic_artefacts = yes
+			islamic_syncretic_actor_opinion_active = yes
+			opinion_of_islamic_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+
+		traits = {
+			virtues = { generous }
+			sins = { greedy arbitrary }
+		}
+	}
+
+	##### Changed from Vanilla: Not available to Christians (new doctrines apply)
+	tenet_jewish_syncretism = {
+		icon = core_tenet_jewish_syncretism
+
+		piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = judaism_religion
+						religion_tag = christianity_religion
+						religion_tag = dualism_religion
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_jewish_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			NOR = {
+				religion_tag = judaism_religion
+				religion_tag = christianity_religion #Replaced by judaizers
+			}
+		}
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+
+		parameters = {
+			hostility_override_special_doctrine_is_jewish_faith = 2
+			jewish_syncretic_actor_opinion_active = yes
+			# This parameter is empty; the syncretic religious trigger checks against the doctrine, as that's much clearer in tooltips and allows us to use a unified syncretic trigger per-religion rather than having bitty situational triggers.
+			can_use_jewish_artefacts = yes
+			opinion_of_jewish_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+
+		traits = {
+			virtues = { patient }
+			sins = { cynical greedy }
+		}
+	}
+	
+	tenet_hellenic_syncretism = {
+		icon = core_tenet_hellenic_syncretism
+
+		piety_cost = {
+			if = {
+				limit = { religion_tag = north_african_religion } 
+				value = faith_tenet_cost_low
+			}
+			else = { value = faith_tenet_cost_mid }
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_hellenic_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			OR = {
+				NOT = { religion = religion:hellenism_religion }
+				OR = {
+					has_doctrine = pagan_hostility_doctrine
+					has_doctrine = mazdan_hostility_doctrine
+				}
+			}
+		}
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+
+		parameters = {
+			hostility_override_special_doctrine_is_hellenic_faith = 1
+			hellenism_syncretic_actor_opinion_active = yes
+			opinion_of_hellenism_syncretic_recipient_opinion_active = 10 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+
+		traits = {
+			virtues = { athletic }
+			sins = { arbitrary greedy }
+		}
+	}
+	
+	tenet_zoroastrian_syncretism = {
+		icon = core_tenet_zoroastrian_syncretism
+		is_shown = {
+			NOR = {
+				religion_tag = zoroastrianism_religion
+				religion_tag = hepthal_religion
+				religion_tag = dualism_religion
+			}
+		}
+		
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		
+		piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = dualism_religion
+						has_doctrine = pagan_hostility_doctrine
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else = { value = faith_tenet_cost_mid }
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_zoroastrian_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		
+		parameters = {
+			hostility_override_special_doctrine_is_zoroastrian_faith = 2
+			zoroastrian_syncretic_actor_opinion_active = yes
+			opinion_of_zoroastrian_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+		traits = {
+			virtues = { honest }
+			sins = { deceitful }
+		}
+	}
+	
+	tenet_egyptian_syncretism = {
+		icon = eye_of_horus
+		is_shown = {
+			has_doctrine = pagan_hostility_doctrine
+			NOT = { religion = religion:kushitism_religion }
+		}
+		
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_sinitic_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		
+		piety_cost = {
+			if = {
+				limit = { has_doctrine = pagan_hostility_doctrine }
+				value = faith_tenet_cost_low
+			}
+			else = { value = faith_tenet_cost_mid }
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_egyptian_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		
+		parameters = {
+			hostility_override_special_doctrine_is_egyptian_faith = 1
+			egyptian_syncretic_actor_opinion_active = yes
+			opinion_of_egyptian_syncretic_recipient_opinion_active = 10 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+		traits = {
+			virtues = { honest temperate }
+			sins = { deceitful greedy }
+		}
+	}
+
+	tenet_sinitic_syncretism = {
+		icon = core_tenet_harmonious_society
+		piety_cost = {
+			if = {
+				limit = {
+					OR = {
+						religion_tag = buddhism_religion
+						has_doctrine = pagan_hostility_doctrine
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					religion_tag = islam_religion
+				}
+				value = faith_tenet_cost_high
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_sinitic_syncretism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			OR = {
+				has_doctrine = abrahamic_hostility_doctrine
+				has_doctrine = pagan_hostility_doctrine
+				has_doctrine = eastern_hostility_doctrine
+			}
+		}
+		
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_gnosticism_trigger
+				NOT = {
+					doctrine:tenet_gnosticism = { is_in_list = selected_doctrines }
+				}
+			}
+			custom_description = {
+				text = incompatible_tenet_other_syncretism_trigger
+				NOR = {
+					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		
+		parameters = {
+			hostility_override_sinitic_hostility_doctrine = 1
+			#For loc:
+			is_eastern_faith_bilateral_loc_override = 1
+			eastern_syncretic_actor_opinion_active = yes
+			opinion_of_eastern_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+		}
+		traits = {
+			virtues = { honest }
+			sins = { wrathful }
+		}
+	}
+
 	#############################
 	# Custom Faith Tenets		#
 	#############################
@@ -2661,9 +3253,7 @@
 	tenet_exaltation_of_pain = {
 		icon = core_tenet_human_sacrifice
 
-		is_shown = {
-			always = no
-		}
+		is_shown = {}
 
 		piety_cost = {
 			if = {
@@ -2677,9 +3267,8 @@
 			}
 			else_if = {
 				limit = {
-					OR = {
-						religion_tag = hinduism_religion
-					}
+					religion_tag = hinduism_religion
+
 				}
 				value = faith_tenet_cost_high
 			}
@@ -2788,9 +3377,8 @@
 			}
 			else_if = {
 				limit = {
-					OR = {
-						religion_tag = judaism_religion
-					}
+					religion_tag = judaism_religion
+
 				}
 				value = faith_tenet_cost_high
 			}
@@ -2882,9 +3470,8 @@
 		piety_cost = {
 			if = {
 				limit = {
-					OR = {
-						has_doctrine = pagan_hostility_doctrine
-					}
+					has_doctrine = pagan_hostility_doctrine
+
 				}
 				value = faith_tenet_cost_mid
 			}
@@ -2907,7 +3494,7 @@
 				multiply = faith_unchanged_doctrine_cost_mult
 			}
 		}
-
+		
 		can_pick = {
 			custom_description = {
 				text = incompatible_tenet_communion_trigger
@@ -2929,10 +3516,10 @@
 		}
 	}
 
-	#Changed from Vanilla: Added new custom localization/description
+	##### Changed from Vanilla: Added new custom localization/description
 	tenet_polyamory = {
 		icon = core_tenet_polyamory
-		
+
 		name = {
 			first_valid = {
 				triggered_desc = {
@@ -2942,7 +3529,7 @@
 				desc = tenet_polyamory_name
 			}
 		}
-		
+
 		desc = {
 			first_valid = {
 				triggered_desc = {
@@ -2952,7 +3539,7 @@
 				desc = tenet_polyamory_desc
 			}
 		}
-		
+
 		piety_cost = {
 			if = {
 				limit = {
@@ -3128,7 +3715,7 @@
 			hills_advantage = 5
 		}
 	}
-	
+
 	#############################
 	# FP3 Tenets 		#        
 	#############################
@@ -3222,9 +3809,7 @@
 
 	tenet_communal_possessions = {
 		icon = core_tenet_communism
-		is_shown = {
-			always = no
-		}
+		is_shown = {}
 		can_pick = {
 			always = yes
 		}
@@ -3269,501 +3854,596 @@
 		}
 	}
 
-	tenet_household_gods = {
-		icon = core_tenet_household_gods
+	############################
+	# TGP Tenets				#
+	############################
 
-		name = tenet_household_gods_name
+	tenet_pure_land = {
+		icon = core_tenet_pure_land
+		piety_cost = {
+			if = {
+				limit = {
+					religion_tag = buddhism_religion
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					has_doctrine = pagan_hostility_doctrine
+				}
+				value = faith_tenet_cost_high
+			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
 
-		desc = tenet_household_gods_desc
-
-		piety_cost = faith_tenet_cost_mid
-
-		is_shown = {
-			religion_tag = hellenism_religion
-		}
-
-		can_pick = {
-			custom_description = {
-				text = rome_must_be_faithfully_restored_trigger
-				has_global_variable = household_gods_tenet_unlocked
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_pure_land }
+				multiply = faith_unchanged_doctrine_cost_mult
 			}
 		}
 
+		name = tenet_pure_land_name
+		
+		is_shown = {
+		}
+
 		parameters = {
-			same_culture_conversion_bonus_active = yes
-			same_faith_promote_culture_bonus_active = yes
+			sanctioned_false_conversion = yes
+			peasant_and_populist_factions_more_common = yes
 		}
 
 		character_modifier = {
-			monthly_influence = 0.5
-			ignore_opinion_of_different_faith = yes
-			different_faith_county_opinion_mult = -0.1
-			levy_reinforcement_rate_same_faith = 0.25
-			faith_conversion_piety_cost_mult = -0.15
-			# TODO_CD_EP3: Uncomment when this no longer causes startup errors (TIT-53560)
-			# christianity_religion_opinion = -20
+			different_faith_opinion = -10
+			stress_loss_per_prestige_level = -0.1
+			stress_loss_mult = 0.35
 		}
 
 		traits = {
-			virtues = { augustus born_in_the_purple }
+			sins = {
+				greedy
+			}
 		}
 	}
 
-
-	#############################
-	# Syncretic Faith Tenets	#
-	#############################
-
-	##### Changed from Vanilla: All Syncretics are mutually unselectable
-
-	tenet_eastern_syncretism = {
-		icon = core_tenet_eastern_syncretism
+	tenet_no_mind = { # Zen
+		icon = core_tenet_no_mind
 		piety_cost = {
 			if = {
 				limit = {
 					OR = {
-						religion_tag = dualism_religion
-						has_doctrine = pagan_hostility_doctrine
+						religion_tag = buddhism_religion
+						religion_tag = taoism_religion
 					}
 				}
 				value = faith_tenet_cost_low
 			}
 			else_if = {
 				limit = {
-					religion_tag = islam_religion
-				}
-				value = faith_tenet_cost_high
-			}
-			else = {
-				value = faith_tenet_cost_mid
-			}
-
-			# Multiplier for keeping same tenet
-			if = {
-				limit = { has_doctrine = tenet_eastern_syncretism }
-				multiply = faith_unchanged_doctrine_cost_mult
-			}
-		}
-
-		is_shown = {
-			OR = {
-				has_doctrine = abrahamic_hostility_doctrine
-				has_doctrine = pagan_hostility_doctrine
-				NOT = { has_doctrine = special_doctrine_is_gnostic_faith }
-			}
-		}
-		can_pick = {
-			custom_description = {
-				text = incompatible_tenet_gnosticism_trigger
-				NOT = { doctrine:tenet_gnosticism = { is_in_list = selected_doctrines } }
-			}
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
-				}
-			}
-		}
-		parameters = {
-			hostility_override_eastern_hostility_doctrine = 2
-			#For loc:
-			is_eastern_faith_bilateral_loc_override = 1
-			eastern_syncretic_actor_opinion_active = yes
-			opinion_of_eastern_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
-		}
-		traits = {
-			virtues = { honest }
-			sins = { wrathful }
-		}
-	}
-
-	tenet_unreformed_syncretism = {
-		icon = core_tenet_unreformed_syncretism
-		piety_cost = {
-			if = {
-				limit = { doctrine:doctrine_pluralism_pluralistic = {is_in_list = selected_doctrines} }
-				value = faith_tenet_cost_low
-			}
-			else_if = {
-				limit = { doctrine:doctrine_pluralism_fundamentalist = {is_in_list = selected_doctrines} }
-				value = faith_tenet_cost_high
-			}
-			else = {
-				value = faith_tenet_cost_mid
-			}
-
-			# Multiplier for keeping same tenet
-			if = {
-				limit = { has_doctrine = tenet_unreformed_syncretism }
-				multiply = faith_unchanged_doctrine_cost_mult
-			}
-		}
-
-
-		is_shown = {
-			NOT = { has_doctrine = pagan_hostility_doctrine }
-		}
-		can_pick = {
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
-				}
-			}
-		}
-		parameters = {
-			hostility_override_unreformed_faith_doctrine = 2
-			hostility_override_west_african_unreformed_faith_doctrine = 2
-			unreformed_syncretic_actor_opinion_active = yes
-			opinion_of_unreformed_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
-			unreformed_syncretic_conversion_malus_active = yes
-		}
-		traits = {
-			virtues = { humble }
-			sins = { arrogant }
-		}
-	}
-
-	tenet_christian_syncretism = {
-		icon = core_tenet_christian_syncretism
-
-		piety_cost = {
-			if = {
-				limit = {
-					OR = {
-						religion_tag = islam_religion
-						religion_tag = dualism_religion
-					}
-				}
-				value = faith_tenet_cost_low
-			}
-			else = {
-				value = faith_tenet_cost_mid
-			}
-
-			# Multiplier for keeping same tenet
-			if = {
-				limit = { has_doctrine = tenet_christian_syncretism }
-				multiply = faith_unchanged_doctrine_cost_mult
-			}
-		}
-
-		is_shown = {
-			NOT = { religion_tag = christianity_religion }
-		}
-		can_pick = {
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
-				}
-			}
-		}
-
-		parameters = {
-			hostility_override_special_doctrine_is_christian_faith = 2
-			#For loc:
-			is_christian_faith_bilateral_loc_override = 2
-			# This parameter is empty; the syncretic religious trigger checks against the doctrine, as that's much clearer in tooltips and allows us to use a unified syncretic trigger per-religion rather than having bitty situational triggers.
-			can_use_christian_artefacts = yes
-			christian_syncretic_actor_opinion_active = yes
-			opinion_of_christian_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
-		}
-
-		traits = {
-			virtues = { compassionate }
-			sins = { callous sadistic }
-		}
-	}
-
-	tenet_islamic_syncretism = {
-		icon = core_tenet_islamic_syncretism
-
-		piety_cost = {
-			if = {
-				limit = {
-					OR = {
-						religion_tag = christianity_religion
-						religion_tag = dualism_religion
-					}
-				}
-				value = faith_tenet_cost_low
-			}
-			else = {
-				value = faith_tenet_cost_mid
-			}
-
-			# Multiplier for keeping same tenet
-			if = {
-				limit = { has_doctrine = tenet_islamic_syncretism }
-				multiply = faith_unchanged_doctrine_cost_mult
-			}
-		}
-
-		is_shown = {
-			NOT = { religion_tag = islam_religion }
-			BP_rise_of_islam_trigger = yes
-		}
-		can_pick = {
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
-				}
-			}
-		}
-
-		parameters = {
-			hostility_override_special_doctrine_is_islamic_faith = 2
-			# This parameter is empty; the syncretic religious trigger checks against the doctrine, as that's much clearer in tooltips and allows us to use a unified syncretic trigger per-religion rather than having bitty situational triggers.
-			can_use_islamic_artefacts = yes
-			islamic_syncretic_actor_opinion_active = yes
-			opinion_of_islamic_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
-		}
-
-		traits = {
-			virtues = { generous }
-			sins = { greedy arbitrary }
-		}
-	}
-
-	##### Changed from Vanilla: Not available to Christians (new doctrines apply)
-	tenet_jewish_syncretism = {
-		icon = core_tenet_jewish_syncretism
-
-		piety_cost = {
-			if = {
-				limit = {
-					OR = {
-						religion_tag = judaism_religion
-						religion_tag = christianity_religion
-						religion_tag = dualism_religion
-					}
-				}
-				value = faith_tenet_cost_low
-			}
-			else = {
-				value = faith_tenet_cost_mid
-			}
-
-			# Multiplier for keeping same tenet
-			if = {
-				limit = { has_doctrine = tenet_jewish_syncretism }
-				multiply = faith_unchanged_doctrine_cost_mult
-			}
-		}
-
-		is_shown = {
-			NOR = {
-				religion_tag = judaism_religion
-				religion_tag = christianity_religion #Replaced by judaizers
-			}
-		}
-		can_pick = {
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
-				}
-			}
-		}
-
-		parameters = {
-			hostility_override_special_doctrine_is_jewish_faith = 2
-			jewish_syncretic_actor_opinion_active = yes
-			# This parameter is empty; the syncretic religious trigger checks against the doctrine, as that's much clearer in tooltips and allows us to use a unified syncretic trigger per-religion rather than having bitty situational triggers.
-			can_use_jewish_artefacts = yes
-			opinion_of_jewish_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
-		}
-
-		traits = {
-			virtues = { patient }
-			sins = { cynical greedy }
-		}
-	}
-	
-	tenet_hellenic_syncretism = {
-		icon = core_tenet_hellenic_syncretism
-
-		piety_cost = {
-			if = {
-				limit = { religion_tag = north_african_religion } 
-				value = faith_tenet_cost_low
-			}
-			else = { value = faith_tenet_cost_mid }
-
-			# Multiplier for keeping same tenet
-			if = {
-				limit = { has_doctrine = tenet_hellenic_syncretism }
-				multiply = faith_unchanged_doctrine_cost_mult
-			}
-		}
-
-		is_shown = {
-			OR = {
-				NOT = { religion = religion:hellenism_religion }
-				OR = {
 					has_doctrine = pagan_hostility_doctrine
-					has_doctrine = mazdan_hostility_doctrine
 				}
+				value = faith_tenet_cost_high
 			}
+			else = {
+				value = faith_tenet_cost_mid
+			}
+		}
+
+		name = tenet_no_mind_name
+		
+		is_shown = {
+		}
+
+		parameters = {
+			better_artifacts = yes
+			less_likely_to_become_infirm = yes
+		}
+
+		character_modifier = {
+			negate_prowess_penalty_add = 5
+			stress_gain_mult = -0.1
+		}
+	}
+
+	tenet_mountain_worship = {
+		icon = core_tenet_mountain_worship
+		piety_cost = {
+			if = {
+				limit = {
+					religion_tag = shintoism_religion
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					has_doctrine = pagan_hostility_doctrine
+				}
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_high
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_mountain_worship }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		
+		is_shown = {
+		}
+
+		parameters = {
+			mountain_trait_bonuses = yes
+			piety_from_hills_and_mountains_pilgrimages = yes
+		}
+
+		character_modifier = {
+			mountains_holding_construction_gold_cost = -0.35
+			desert_mountains_holding_construction_gold_cost = -0.35
+		}
+	}
+	tenet_extinction_of_dharma = {
+		icon = core_tenet_extinction_of_dharma
+
+		is_shown = {
+			religion_tag = buddhism_religion
+			has_tgp_dlc_trigger = yes
 		}
 		can_pick = {
 			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
+				text = incompatible_tenet_pacifism_trigger
+				NOT = { doctrine:tenet_pacifism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_dharmic_pacifism_trigger
+				NOT = { doctrine:tenet_dharmic_pacifism = { is_in_list = selected_doctrines } }
+			}
+		}
+
+		piety_cost = {
+			if = {
+				limit = {
+					always = no
 				}
+				value = faith_tenet_cost_low
+			}
+			else = {
+				value = faith_tenet_cost_massive
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_extinction_of_dharma }
+				multiply = faith_unchanged_doctrine_cost_mult
 			}
 		}
 
 		parameters = {
-			hostility_override_special_doctrine_is_hellenic_faith = 1
-			hellenism_syncretic_actor_opinion_active = yes
-			opinion_of_hellenism_syncretic_recipient_opinion_active = 10 #Sync this to syncretic_mutual_opinion_bonus_value
+			hostility_same_religion = 3
+			destroying_artifacts_is_pious = yes
+			awaiting_the_maitreya_savior = yes
+			killing_buddhists_is_pious = yes
 		}
 
-		traits = {
-			virtues = { athletic }
-			sins = { arbitrary greedy }
+		character_modifier = {
+			monthly_piety_gain_mult = -1
 		}
 	}
-	
-	tenet_zoroastrian_syncretism = {
-		icon = core_tenet_zoroastrian_syncretism
+	tenet_cranial_trophies = {
+		icon = core_tenet_cranial_trophies
+
 		is_shown = {
-			NOR = {
-				religion_tag = zoroastrianism_religion
-				religion_tag = hepthal_religion
-				religion_tag = dualism_religion
-			}
+			has_tgp_dlc_trigger = yes
 		}
-		
-		can_pick = {
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_egyptian_syncretism = { is_in_list = selected_doctrines }
-				}
-			}
-		}
-		
+
 		piety_cost = {
 			if = {
 				limit = {
-					OR = {
-						religion_tag = dualism_religion
-						has_doctrine = pagan_hostility_doctrine
+					always = no
+				}
+				value = faith_tenet_cost_low
+			}
+			else = {
+				value = faith_tenet_cost_massive
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_cranial_trophies }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		parameters = {
+			killing_bestows_heads = yes
+			decapitation_steals_prestige_as_piety = yes
+		}
+
+		character_modifier = {
+			jungle_advantage = 5
+			jungle_attrition_mult = -0.25
+			jungle_min_combat_roll = 1
+			monthly_piety_gain_per_dread_add = 0.01
+			prowess = 3
+		}
+	}
+ 	tenet_pursuit_of_knowledge = {
+		icon = core_tenet_pursuit_of_knowledge
+
+		is_shown = {
+			has_tgp_dlc_trigger = yes
+		}
+		can_pick = {
+			religion = {
+				OR = {
+					this = religion:buddhism_religion
+					is_in_family = rf_sinitic
+				}
+			}
+		}
+
+		piety_cost = {
+			if = {
+				limit = {
+					religion = religion:confucianism_religion
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					religion = {
+						is_in_family = rf_sinitic
+					}
+				}
+				value = faith_tenet_cost_mid
+			}
+			else_if = {
+				limit = {
+					religion = religion:buddhism_religion
+				}
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_high
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_pursuit_of_knowledge }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		traits = {
+			virtues = {
+				education_learning_3
+				education_learning_4
+				education_learning_5
+				scholar
+				confucian_education
+			}
+		}
+
+		parameters = {
+			better_study_scheme = yes
+		}
+
+		character_modifier = {
+			monthly_learning_lifestyle_xp_gain_mult = 0.2
+		}
+	}
+ 	tenet_benevolent_governance = {
+		icon = core_tenet_benevolent_governance
+
+		is_shown = {
+			has_tgp_dlc_trigger = yes
+		}
+		can_pick = {
+			religion = {
+				OR = {
+					this = religion:buddhism_religion
+					is_in_family = rf_sinitic
+				}
+			}
+		}
+
+		piety_cost = {
+			if = {
+				limit = {
+					religion = religion:confucianism_religion
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					religion = {
+						is_in_family = rf_sinitic
 					}
 				}
 				value = faith_tenet_cost_low
 			}
-			else = { value = faith_tenet_cost_mid }
+			else_if = {
+				limit = {
+					religion = religion:buddhism_religion
+				}
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_high
+			}
 
 			# Multiplier for keeping same tenet
 			if = {
-				limit = { has_doctrine = tenet_zoroastrian_syncretism }
+				limit = { has_doctrine = tenet_benevolent_governance }
 				multiply = faith_unchanged_doctrine_cost_mult
 			}
 		}
-		
+
 		parameters = {
-			hostility_override_special_doctrine_is_zoroastrian_faith = 2
-			zoroastrian_syncretic_actor_opinion_active = yes
-			opinion_of_zoroastrian_syncretic_recipient_opinion_active = 30 #Sync this to syncretic_mutual_opinion_bonus_value
+			inspections_unlocked_and_costs_piety = yes
+			inspection_gives_devotion = yes
 		}
+
+		character_modifier = {
+			dread_gain_mult = -0.75
+		}
+
 		traits = {
-			virtues = { honest }
-			sins = { deceitful }
+			virtues = { loyal }
+			sins = { disloyal }
 		}
 	}
-	
-	tenet_egyptian_syncretism = {
-		icon = eye_of_horus
+	tenet_filial_piety = {
+		icon = core_tenet_filial_piety 
+
 		is_shown = {
-			has_doctrine = pagan_hostility_doctrine
-			NOT = { religion = religion:kushitism_religion }
-		}
-		
-		can_pick = {
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_unreformed_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
+			has_tgp_dlc_trigger = yes
+			religion = {
+				OR = {
+					this = religion:buddhism_religion
+					is_in_family = rf_sinitic
 				}
 			}
 		}
-		
+		can_pick = {
+			always = yes
+		}
+
 		piety_cost = {
 			if = {
-				limit = { has_doctrine = pagan_hostility_doctrine }
+				limit = {
+					religion = religion:confucianism_religion
+				}
 				value = faith_tenet_cost_low
 			}
-			else = { value = faith_tenet_cost_mid }
+			else_if = {
+				limit = {
+					religion = {
+						is_in_family = rf_sinitic
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					religion = religion:buddhism_religion
+				}
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_high
+			}
 
 			# Multiplier for keeping same tenet
 			if = {
-				limit = { has_doctrine = tenet_egyptian_syncretism }
+				limit = { has_doctrine = tenet_filial_piety }
 				multiply = faith_unchanged_doctrine_cost_mult
 			}
 		}
+
+		parameters = {
+			parents_get_hooks_on_children = yes
+			children_less_likely_to_be_burdened = yes
+		}
+
+		character_modifier = {
+			opinion_of_parents = 20
+		}
+	}
+	tenet_harmonious_society = {
+		icon = core_tenet_harmonious_society
+		is_shown = {
+			has_tgp_dlc_trigger = yes
+			religion = {
+				OR = {
+					this = religion:buddhism_religion
+					is_in_family = rf_sinitic
+				}
+			}
+		}
+		can_pick = {
+			always = yes
+		}
+
+		piety_cost = {
+			if = {
+				limit = {
+					religion = religion:confucianism_religion
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					religion = {
+						is_in_family = rf_sinitic
+					}
+				}
+				value = faith_tenet_cost_low
+			}
+			else_if = {
+				limit = {
+					religion = religion:buddhism_religion
+				}
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_massive
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_harmonious_society }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		parameters = {
+			sway_scheme_better = yes
+			sway_scheme_piety = yes
+			more_often_zealots = yes
+		}
+		
+		traits = {
+			virtues = { temperate }
+			sins = { gluttonous }
+		}
+	}
+
+	tenet_sacred_destruction = {
+		icon = core_tenet_sacred_destruction
+
+		piety_cost = {
+			if = {
+				limit = { has_doctrine = tenet_warmonger }
+				value = faith_tenet_cost_mid
+			}
+			else = {
+				value = faith_tenet_cost_high
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_sacred_destruction }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			religion_tag = hinduism_religion
+		}
+
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_pacifism_trigger
+				NOT = { doctrine:tenet_pacifism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_dharmic_pacifism_trigger
+				NOT = { doctrine:tenet_dharmic_pacifism = { is_in_list = selected_doctrines } }
+			}
+			custom_description = {
+				text = incompatible_tenet_tenet_preservation_trigger
+				NOT = { doctrine:tenet_preservation = { is_in_list = selected_doctrines } }
+			}
+		}
+
+		character_modifier = {
+			prowess_per_piety_level = 1
+			maa_damage_mult = 0.1
+		}
 		
 		parameters = {
-			hostility_override_special_doctrine_is_egyptian_faith = 1
-			egyptian_syncretic_actor_opinion_active = yes
-			opinion_of_egyptian_syncretic_recipient_opinion_active = 10 #Sync this to syncretic_mutual_opinion_bonus_value
+			successful_sieges_give_piety = yes
 		}
+		
 		traits = {
-			virtues = { honest temperate }
-			sins = { deceitful greedy }
+			virtues = { wrathful }
+		}
+	}
+	
+	tenet_preservation = {
+		icon = core_tenet_preservation
+
+		piety_cost = {
+			if = {
+				limit = { has_doctrine = tenet_sanctity_of_nature }
+				value = faith_tenet_cost_massive
+			}
+			else = {
+				value = faith_tenet_cost_high
+			}
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_preservation }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		is_shown = {
+			religion_tag = hinduism_religion
+		}
+
+		can_pick = {
+			custom_description = {
+				text = incompatible_tenet_tenet_sacred_destruction_trigger
+				NOT = { doctrine:tenet_sacred_destruction = { is_in_list = selected_doctrines } }
+			}
+		}
+
+		character_modifier = {
+			church_holding_build_gold_cost = -0.15
+			church_holding_holding_build_speed = -0.15
+			temple_citadel_holding_holding_build_gold_cost = -0.15
+			temple_citadel_holding_holding_build_speed = -0.15
+		}
+		
+		parameters = {
+			building_temples_gives_development = yes
+			monastic_schools_allowed_in_every_holding_type = yes
+		}
+		
+		traits = {
+			virtues = { architect }
+		}
+	}
+	
+	tenet_takamin = {
+		icon = core_tenet_bear
+
+		is_shown = {
+			has_tgp_dlc_trigger = yes
+			has_doctrine = pagan_hostility_doctrine
+		}
+		can_pick = {
+		}
+
+		piety_cost = {
+			value = faith_tenet_cost_high
+
+			# Multiplier for keeping same tenet
+			if = {
+				limit = { has_doctrine = tenet_takamin }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+
+		character_modifier = {
+			taiga_travel_danger = taiga_high_danger_reduction
+		}
+		
+		parameters = {
+			frequent_bear_sightings = yes
+			efficient_hunt_cornering = yes
+			allows_bear_sacrifice = yes
+			chance_to_gain_prowess_during_bear_hunts = yes
+		}
+		
+		traits = {
+			virtues = { lifestyle_hunter }
 		}
 	}
 
@@ -4522,6 +5202,7 @@
 			same_faith_opinion = 20
 		}
 	}
+
 }
 
 	#############################
