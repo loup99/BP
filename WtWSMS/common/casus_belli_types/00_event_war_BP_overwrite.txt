@@ -12,6 +12,7 @@ hungarian_migration_cb = {
 	##### Changed from Vanilla vvvvv
 	allowed_for_character = { always = no }
 	##### Changed from Vanilla ^^^^^
+
 	allowed_against_character = {
 		#Realm must have at least some land in Hungary.
 		scope:defender = {
@@ -93,33 +94,31 @@ hungarian_migration_cb = {
 		scope:attacker = {
 			remove_character_flag = undertaking_hungarian_migration
 			#One army to conquer.
-			spawn_army = {
-				name = event_troop_default_name
-				levies = 2000
-				men_at_arms = {
-					type = horse_archers
-					stacks = 10
-				}
-				location = scope:attacker.capital_province
-				uses_supply = no
-				war = scope:war
-				inheritable = no
-			}
-			#And one army to hold.
-			spawn_army = {
-				name = event_troop_default_name
-				levies = 1000
-				men_at_arms = {
-					type = horse_archers
-					stacks = 10
-				}
-				location = scope:attacker.capital_province
-				uses_supply = no
-				inheritable = no
-			}
-			#If we're a few decades in, beef the Mogyers a bit with another temporary army.
 			if = {
-				limit = { current_date >= 890.1.1 }
+				limit = {
+					has_mpo_dlc_trigger = yes
+				}
+				spawn_army = {
+					name = event_troop_default_name
+					men_at_arms = {
+						type = nomadic_riders
+						stacks = 20
+					}
+					men_at_arms = {
+						type = heavy_horse_archers
+						stacks = 5
+					}
+					men_at_arms = {
+						type = steppe_raiders
+						stacks = 5
+					}
+					location = scope:attacker.capital_province
+					uses_supply = no
+					war = scope:war
+					inheritable = no
+				}
+			}
+			else = {
 				spawn_army = {
 					name = event_troop_default_name
 					levies = 2000
@@ -133,9 +132,27 @@ hungarian_migration_cb = {
 					inheritable = no
 				}
 			}
-			#And if we're almost out of the valid time-frame, add another holding army.
+			#And one army to hold.
 			if = {
-				limit = { current_date >= 905.1.1 }
+				limit = {
+					has_mpo_dlc_trigger = yes
+				}
+				spawn_army = {
+					name = event_troop_default_name
+					men_at_arms = {
+						type = nomadic_riders
+						stacks = 10
+					}
+					men_at_arms = {
+						type = horse_archers
+						stacks = 10
+					}
+					location = scope:attacker.capital_province
+					uses_supply = no
+					inheritable = no
+				}
+			}
+			else = {
 				spawn_army = {
 					name = event_troop_default_name
 					levies = 1000
@@ -146,6 +163,85 @@ hungarian_migration_cb = {
 					location = scope:attacker.capital_province
 					uses_supply = no
 					inheritable = no
+				}
+			}
+			
+			#If we're a few decades in, beef the Mogyers a bit with another temporary army.
+			if = {
+				limit = { current_date >= 890.1.1 }
+				if = {
+					limit = {
+						has_mpo_dlc_trigger = yes
+					}
+					spawn_army = {
+						name = event_troop_default_name
+						men_at_arms = {
+							type = nomadic_riders
+							stacks = 20
+						}
+						men_at_arms = {
+							type = heavy_horse_archers
+							stacks = 5
+						}
+						men_at_arms = {
+							type = steppe_raiders
+							stacks = 5
+						}
+						location = scope:attacker.capital_province
+						uses_supply = no
+						war = scope:war
+						inheritable = no
+					}
+				}
+				else = {
+					spawn_army = {
+						name = event_troop_default_name
+						levies = 2000
+						men_at_arms = {
+							type = horse_archers
+							stacks = 10
+						}
+						location = scope:attacker.capital_province
+						uses_supply = no
+						war = scope:war
+						inheritable = no
+					}
+				}
+			}
+			#And if we're almost out of the valid time-frame, add another holding army.
+			if = {
+				limit = { current_date >= 905.1.1 }
+				if = {
+					limit = {
+						has_mpo_dlc_trigger = yes
+					}
+					spawn_army = {
+						name = event_troop_default_name
+						men_at_arms = {
+							type = nomadic_riders
+							stacks = 10
+						}
+						men_at_arms = {
+							type = horse_archers
+							stacks = 10
+						}
+						location = scope:attacker.capital_province
+						uses_supply = no
+						inheritable = no
+					}
+				}
+				else = {
+					spawn_army = {
+						name = event_troop_default_name
+						levies = 1000
+						men_at_arms = {
+							type = horse_archers
+							stacks = 10
+						}
+						location = scope:attacker.capital_province
+						uses_supply = no
+						inheritable = no
+					}
 				}
 			}
 		}
@@ -181,7 +277,7 @@ hungarian_migration_cb = {
 		#If the Mogyers aren't independent, make them so.
 		if = {
 			limit = {
-				scope:attacker = { is_independent_ruler = no }
+				scope:attacker = { top_liege != this }
 			}
 			create_title_and_vassal_change = {
 				type = independency
@@ -223,14 +319,12 @@ hungarian_migration_cb = {
 					}
 					if = {
 						limit = {
-							exists = holder
-							holder = {
-								exists = top_liege
-								top_liege = scope:defender
+							holder ?= {
+								top_liege ?= scope:defender
 
 								# Vassal players in Hungary get to keep their holdings, so they can play as vassals of the new king instead of game-overing.
 								NAND = {
-									NOT = { this = top_liege }
+									this != top_liege
 									is_ai = no
 								}
 							}
@@ -240,8 +334,7 @@ hungarian_migration_cb = {
 							every_in_de_jure_hierarchy = {
 								limit = {
 									tier = tier_county
-									exists = holder
-									holder = scope:defender
+									holder ?= scope:defender
 								}
 								add_to_temporary_list = county_titles_under_transfer
 							}
@@ -263,13 +356,12 @@ hungarian_migration_cb = {
 				every_in_de_jure_hierarchy = {
 					limit = {
 						tier = tier_county
-						exists = holder
-						holder = {
+						holder ?= {
 							top_liege = scope:defender
 
 							# Vassal players in Hungary get to keep their holdings, so they can play as vassals of the new king instead of game-overing.
 							NAND = {
-								NOT = { this = top_liege }
+								this != top_liege
 								is_ai = no
 							}
 						}
@@ -312,6 +404,12 @@ hungarian_migration_cb = {
 
 		# FP1: note the victory for future memorialisation via stele (if applicable).
 		scope:attacker = { fp1_remember_recent_conquest_victory_effect = yes }
+
+		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
+		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_white_peace_desc = {
@@ -348,6 +446,9 @@ hungarian_migration_cb = {
 		scope:attacker = {
 			add_prestige = mongol_invasion_cb_prestige_white_peace
 		}
+
+		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
+		laamp_as_mercenary_payout_tooltip_effect = yes
 	}
 
 	on_defeat_desc = {
@@ -366,8 +467,11 @@ hungarian_migration_cb = {
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 
-		#EP2 accolade glory gain for winning against higher ranked enemy
-		scope:defender = { accolade_defender_war_end_glory_gain_high_effect = yes }
+		scope:defender = { 
+			mandala_peacemaker_perk_serenity_effect = yes
+			#EP2 accolade glory gain for winning against higher ranked enemy
+			accolade_defender_war_end_glory_gain_high_effect = yes
+		}
 
 		# Prestige loss for the attacker
 		scope:attacker = {
@@ -406,6 +510,12 @@ hungarian_migration_cb = {
 			save_temporary_scope_as = loser
 		}
 		on_lost_aggression_war_discontent_loss = yes
+
+		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
+		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	transfer_behavior = transfer

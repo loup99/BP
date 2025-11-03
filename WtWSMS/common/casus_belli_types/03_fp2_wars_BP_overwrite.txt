@@ -1,6 +1,6 @@
-﻿##### Changed from Vanilla: Made 
+﻿##### Changed from Vanilla: Made more broadly available
 fp2_border_raid = {
-	group = struggle_bp
+	group = struggle
 	icon = struggle
 
 	combine_into_one = yes
@@ -38,7 +38,7 @@ fp2_border_raid = {
 	##### Changed from Vanilla ^^^^^
 
 	##### Changed from Vanilla vvvvv
-	allowed_against_character = {
+	allowed_for_character_display_regardless = {
 		trigger_if = {
 			limit = {
 				has_dlc_feature = the_fate_of_iberia
@@ -96,8 +96,25 @@ fp2_border_raid = {
 				}
 			}
 		}
+		tgp_japan_offensive_wars_ban_trigger = yes
 	}
 	##### Changed from Vanilla ^^^^^
+
+	allowed_against_character = {
+		# Defender must be Involved in Struggle during correct phase
+		any_character_struggle = {
+			involvement = involved
+			has_struggle_phase_parameter = unlocks_border_raid_casus_belli
+		}
+		# Defender must be bordering your realm.
+		OR = {
+			character_is_land_realm_neighbor = scope:attacker
+			AND = {
+				exists = scope:attacker.liege
+				character_is_land_realm_neighbor = scope:attacker.liege
+			}
+		}
+	}
 
 	target_titles = neighbor_land # border
 	target_title_tier = county # county
@@ -106,18 +123,7 @@ fp2_border_raid = {
 
 	ai_score_mult = {
 		value = fp2_border_raid_ai_targeting_value
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 
 	valid_to_start = {
@@ -159,7 +165,7 @@ fp2_border_raid = {
 			value = minor_prestige_value
 			if = {
 				limit = {
-					NOT = { scope:defender.faith = scope:attacker.faith }
+					scope:defender.faith != scope:attacker.faith
 				}
 				add = {
 					value = minor_prestige_value
@@ -314,6 +320,9 @@ fp2_border_raid = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_white_peace_desc = {
@@ -391,8 +400,15 @@ fp2_border_raid = {
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 		
-		#EP2 accolade glory gain for winning against higher ranked enemy
-		scope:defender = { accolade_defender_war_end_glory_gain_low_effect = yes }
+		scope:defender = { 
+			mandala_peacemaker_perk_serenity_effect = yes
+			#EP2 accolade glory gain for winning against higher ranked enemy
+			accolade_defender_war_end_glory_gain_high_effect = yes
+			# Prestige for Defender
+			add_prestige_war_defender_effect = {
+				PRESTIGE_VALUE = medium_prestige_value
+			}
+		}
 
 		# Prestige loss for the attacker
 		scope:attacker = {
@@ -402,13 +418,6 @@ fp2_border_raid = {
 			add_prestige = {
 				value = medium_prestige_value
 				multiply = -1.0
-			}
-		}
-
-		# Prestige for Defender
-		scope:defender = {
-			add_prestige_war_defender_effect = {
-				PRESTIGE_VALUE = medium_prestige_value
 			}
 		}
 
@@ -438,6 +447,9 @@ fp2_border_raid = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 
 	transfer_behavior = transfer

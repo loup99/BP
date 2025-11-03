@@ -23,8 +23,9 @@ tribal_subjugation_cb = {
 				has_variable = subjugations_expanded
 			}
 		}
-		NOT = {
+		NOR = {
 			government_has_flag = government_is_landless_adventurer
+			government_allows = administrative
 		}
 	}
 	
@@ -32,6 +33,7 @@ tribal_subjugation_cb = {
 	# scope:attacker is the attacker
 	# scope:defender is the defender
 	allowed_against_character_display_regardless = {
+		tgp_japan_offensive_wars_ban_trigger = yes
 		scope:attacker = {
 			trigger_if = {
 				limit = {
@@ -78,8 +80,7 @@ tribal_subjugation_cb = {
 								}
 								# Iberian Struggle Hostility Reward
 								AND = {
-									exists = house
-									house = {
+									house ?= {
 										OR = {
 											has_house_modifier = fp2_struggle_hostility_house_faith_modifier
 											has_house_modifier = fp2_struggle_hostility_house_combined_modifier
@@ -131,10 +132,12 @@ tribal_subjugation_cb = {
 				custom_description = {
 					text = has_used_lifetime_subjugation
 					subject = scope:attacker
+					##### Changed from Vanilla vvvvv
 					trigger_if = {
 						limit = { has_variable = used_lifetime_subjugation }
 						scope:attacker.var:used_lifetime_subjugation < scope:attacker.total_available_subjugations
 					}
+					##### Changed from Vanilla ^^^^^
 				}
 				##### Changed from Vanilla ^^^^^
 			}
@@ -178,7 +181,7 @@ tribal_subjugation_cb = {
 		}
 		
 		scope:defender = {
-			is_independent_ruler = yes
+			top_liege = this
 			trigger_if = {
 				limit = { scope:attacker = { is_ai = no } } # Already pre-filtered by the AI due to ai_only_against_neighbors = yes. any_neighboring_top_liege_realm_owner is expensive
 				scope:attacker = {
@@ -236,7 +239,7 @@ tribal_subjugation_cb = {
 	
 	should_invalidate = {
 		scope:defender = {
-			is_independent_ruler = no
+			top_liege != this
 		}
 	}
 	
@@ -271,6 +274,7 @@ tribal_subjugation_cb = {
 		}
 	}
 
+	##### Changed from Vanilla vvvvv
 	on_victory_desc = {
 		first_valid = {
 			triggered_desc = {
@@ -303,6 +307,7 @@ tribal_subjugation_cb = {
 				}
 			}
 		}
+		##### Changed from Vanilla vvvvv
 		triggered_desc = {
 			trigger = {
 				scope:attacker = { is_local_player = yes }
@@ -331,7 +336,9 @@ tribal_subjugation_cb = {
 			}
 			desc = subjugation_war_warning_4_desc
 		}
+		##### Changed from Vanilla ^^^^^
 	}
+	##### Changed from Vanilla ^^^^^
 	
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
@@ -379,15 +386,6 @@ tribal_subjugation_cb = {
 						}
 						##### Changed from Vanilla ^^^^^
 					}
-					else_if = {
-						limit = {
-							OR = {
-								NOT = { exists = scope:secondary_title }
-								tier > scope:secondary_title.tier
-							}
-						}
-						save_temporary_scope_as = secondary_title
-					}
 				}
 			}
 			
@@ -428,6 +426,7 @@ tribal_subjugation_cb = {
 		
 		resolve_title_and_vassal_change = scope:change
 		
+		
 		# Prestige level progress for the attacker
 		scope:attacker = {
 			add_prestige_experience = {
@@ -460,6 +459,9 @@ tribal_subjugation_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_white_peace_desc = {
@@ -537,8 +539,15 @@ tribal_subjugation_cb = {
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 
-		#EP2 accolade glory gain for winning against higher ranked enemy
-		scope:defender = { accolade_defender_war_end_glory_gain_high_effect = yes }
+		scope:defender = { 
+			mandala_peacemaker_perk_serenity_effect = yes
+			#EP2 accolade glory gain for winning against higher ranked enemy
+			accolade_defender_war_end_glory_gain_high_effect = yes
+			# Prestige for Defender
+			add_prestige_war_defender_effect = {
+				PRESTIGE_VALUE = medium_prestige_value
+			}
+		}
 		
 		# Prestige loss for the attacker
 		scope:attacker = {
@@ -548,13 +557,6 @@ tribal_subjugation_cb = {
 			add_prestige = {
 				value = major_prestige_value
 				multiply = -1.0
-			}
-		}
-
-		# Prestige for the defender
-		scope:defender = {
-			add_prestige_war_defender_effect = {
-				PRESTIGE_VALUE = major_prestige_value
 			}
 		}
 
@@ -578,6 +580,9 @@ tribal_subjugation_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	on_primary_attacker_death = inherit
@@ -601,17 +606,6 @@ tribal_subjugation_cb = {
 
 	ai_score_mult = {
 		value = 1
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 }
