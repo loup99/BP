@@ -6,6 +6,13 @@ nation_fracturing_faction = {
 
 	sort_order = 0
 
+	is_shown = {
+		NAND = {
+			tgp_is_ceremonial_liege_trigger = yes
+			tgp_is_ceremonial_regent_trigger = no
+		}
+	}
+
 	discontent_progress = {
 		base = 0
 
@@ -60,7 +67,7 @@ nation_fracturing_faction = {
 		every_faction_member = {
 			limit = {
 				is_ai = no
-				NOT = { this = scope:faction.faction_leader }
+				this != scope:faction.faction_leader
 			}
 			trigger_event = faction_demand.1005
 		}
@@ -74,15 +81,18 @@ nation_fracturing_faction = {
 		}
 	}
 
+	##### Changed from Vanilla vvvvv
 	can_character_create_ui = {
 		base_faction_trigger = { FACTION_TYPE = nation_fracturing_faction }
 
 		common_can_character_create_trigger = {
 			FACTION_TARGET = scope:target
 		}
+		# Bloc Cohesion requirement
+		japan_faction_cohesion_trigger = yes
 
 		liege = {
-			is_independent_ruler = yes
+			top_liege = this
 			NOT = { government_has_flag = government_is_theocracy }
 			custom_tooltip = {
 				text = nation_fracturing_faction.can_character_create_ui.blocked_by_struggle
@@ -126,6 +136,17 @@ nation_fracturing_faction = {
 				NOT = { scope:target = { government_allows = administrative } }
 			}
 		}
+		
+		# Muslims vassals cannot create or join against Dar al-Islam
+		trigger_if = {
+			limit = {
+				scope:target = { has_title = title:h_dar_al_islam }
+			}
+			custom_tooltip = {
+				text = dar_al_islam_faction_block_desc
+				NOT = { faith.religion = religion:islam_religion }
+			}
+		}
 		##### Changed from Vanilla vvvvv
 		NAND = {
 			scope:faction.faction_target = { government_has_flag = is_a_roman_government }
@@ -140,9 +161,11 @@ nation_fracturing_faction = {
 		common_can_character_create_trigger = {
 			FACTION_TARGET = scope:target
 		}
+		# Bloc Cohesion requirement
+		japan_faction_cohesion_trigger = yes
 		
 		liege = {
-			is_independent_ruler = yes
+			top_liege = this
 			NOT = { government_has_flag = government_is_theocracy }
 			custom_tooltip = {
 				text = nation_fracturing_faction.can_character_create_ui.blocked_by_struggle
@@ -183,6 +206,17 @@ nation_fracturing_faction = {
 			custom_tooltip = {
 				text = has_admin_gov
 				NOT = { scope:target = { government_allows = administrative } }
+			}
+		}
+		
+		# Muslims vassals cannot create or join against Dar al-Islam
+		trigger_if = {
+			limit = {
+				scope:target = { has_title = title:h_dar_al_islam }
+			}
+			custom_tooltip = {
+				text = dar_al_islam_faction_block_desc
+				NOT = { faith.religion = religion:islam_religion }
 			}
 		}
 		##### Changed from Vanilla vvvvv
@@ -227,7 +261,7 @@ nation_fracturing_faction = {
 			desc = "FACTION_REASON_HOUSE_HOSTILITY"
 
 			scope:target.house ?= {
-				NOT = { this = root.house }
+				this != root.house
 			}
 			culture = { has_cultural_parameter = house_hostility_more_common }
 
@@ -267,6 +301,17 @@ nation_fracturing_faction = {
 				NOT = { scope:faction.faction_target = { government_allows = administrative } }
 			}
 		}
+		
+		# Muslims vassals cannot create or join against Dar al-Islam
+		trigger_if = {
+			limit = {
+				scope:faction.faction_target = { has_title = title:h_dar_al_islam }
+			}
+			custom_tooltip = {
+				text = dar_al_islam_faction_block_desc
+				NOT = { faith.religion = religion:islam_religion }
+			}
+		}
 		##### Changed from Vanilla vvvvv
 		NAND = {
 			scope:faction.faction_target = { government_has_flag = is_a_roman_government }
@@ -275,6 +320,10 @@ nation_fracturing_faction = {
 		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
+
+	can_character_become_leader = {
+		can_become_leader_of_faction_trigger = yes
+	}
 
 	ai_join_score = {
 		base = -150 # Base reluctance value we must overcome to join an Independence Faction.
@@ -315,7 +364,7 @@ nation_fracturing_faction = {
 			desc = "FACTION_REASON_HOUSE_HOSTILITY"
 
 			scope:target.house ?= {
-				NOT = { this = root.house }
+				this != root.house
 			}
 			culture = { has_cultural_parameter = house_hostility_more_common }
 
@@ -355,7 +404,7 @@ nation_fracturing_faction = {
 				is_at_war = yes # Independence Factions are opportunistic bastards!
 			}
 		}
-		
+
 		modifier = {
 			add = -1000
 			faction_target = {
@@ -380,8 +429,8 @@ nation_fracturing_faction = {
 	is_county_valid = {
 		holder = scope:faction.faction_target
 		OR = {
-			NOT = { culture = scope:faction.faction_target.culture } 
-			NOT = { faith = scope:faction.faction_target.faith } 
+			culture != scope:faction.faction_target.culture 
+			faith != scope:faction.faction_target.faith 
 		}
 	}
 
@@ -390,7 +439,7 @@ nation_fracturing_faction = {
 		if = {
 			limit = {
 				any_player = {
-					is_landless_adventurer = yes
+					has_government = landless_adventurer_government
 					is_within_diplo_range = { CHARACTER = scope:faction.faction_target }
 					NOT = { has_contact = scope:faction.faction_target }
 					OR = {
@@ -398,7 +447,7 @@ nation_fracturing_faction = {
 						culture = scope:faction.faction_target.culture
 					}
 					any_character_task_contract = {
-						has_task_contract_type = laamp_join_faction_contract
+						task_contract_type = laamp_join_faction_contract
 						count <= 3
 					}
 					can_create_task_contract = {
