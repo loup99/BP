@@ -6,7 +6,7 @@ revoke_title_interaction_effect = {
 				faith = scope:actor.faith
 				government_has_flag = government_is_theocracy
 			}
-			NOT = { scope:actor = scope:actor.faith.religious_head } #No loss if actor is head of faith themselves
+			scope:actor != scope:actor.faith.religious_head #No loss if actor is head of faith themselves
 		}
 		scope:actor = {
 			add_piety = major_piety_loss
@@ -36,6 +36,9 @@ revoke_title_interaction_effect = {
 	if = {
 		limit = {
 			scope:landed_title.tier != tier_barony
+			scope:recipient = {
+				NOT = { government_has_flag = government_is_herder }
+			}
 		}
 		scope:actor = {
 			revocation_tyranny_effect = { VASSAL = scope:recipient }
@@ -65,14 +68,14 @@ revoke_title_interaction_effect = {
 					value = -30
 					if = {
 						limit = {
-							NOT = { scope:recipient.culture = scope:actor.culture }
+							scope:recipient.culture != scope:actor.culture
 							scope:recipient.culture = this.culture
 						}
 						multiply = 1.5
 					}
 					if = {
 						limit = {
-							NOT = { scope:recipient.faith = scope:actor.faith }
+							scope:recipient.faith != scope:actor.faith
 							scope:recipient.faith = this.faith
 						}
 						multiply = 1.5
@@ -181,7 +184,7 @@ revoke_title_interaction_effect = {
 				}
 			}
 		}
-		
+
 		# If we're a clan this interaction affects unity
 		if = {
 			limit = {
@@ -232,7 +235,7 @@ revoke_title_interaction_effect = {
 				}
 			}
 		}
-		
+
 		# EP3 - Become Adventurer - Revocation
 		scope:recipient = {
 			if = {
@@ -262,15 +265,13 @@ revoke_title_interaction_effect = {
 				if = {
 					limit = {
 						any_vassal = {
-							has_vassal_stance = barons_and_minor_landholders
+							vassal_stance = barons_and_minor_landholders
 						}
 					}
 					custom_tooltip = barons_and_minor_landholders_disapproves_baron_revocations
 					hidden_effect = {
 						every_vassal = {
-							limit = {
-								has_vassal_stance = barons_and_minor_landholders
-							}
+							vassal_stance = barons_and_minor_landholders
 							add_opinion = {
 								target = scope:actor
 								modifier = barons_and_minor_landholders_disapproves_baron_revocations_opinion
@@ -299,43 +300,71 @@ revoke_title_interaction_effect = {
 			use_hook = scope:intermediary
 		}
 	}
-	scope:recipient = {
-		add_opinion = {
-			target = scope:actor
-			modifier = revoked_title
+	if = {
+		limit = {
+			scope:recipient = { government_has_flag = government_is_herder }
 		}
-		if = { #If they recently imprisoned you, or asked for your excommunication, they become your rival
-			limit = {
-				OR = {
-					has_opinion_modifier = {
-						target = scope:actor
-						modifier = released_from_prison
-					}
-					AND = {
-						exists = var:requested_my_excommunication
-						var:requested_my_excommunication = scope:actor
-					}
-				}
-				NOT = {
-					has_relation_rival = scope:actor
-				}
-			}
-			if = {
-				limit = {
-					has_relation_potential_rival = scope:actor
-				}
-				remove_relation_potential_rival = scope:actor
-			}
-			set_relation_rival = {
+		scope:recipient = {
+			add_opinion = {
 				target = scope:actor
-				reason = rival_revoked_title_reversed
+				opinion = -10 # Herders don't care much
+				modifier = revoked_title
 			}
 		}
-		else = {
-			progress_towards_rival_effect = {
-				CHARACTER = scope:actor
-				REASON = rival_revoked_title_progress
-				OPINION = 0
+	}
+	else = {
+		scope:recipient = {
+			add_opinion = {
+				target = scope:actor
+				modifier = revoked_title
+			}
+			if = { #If they recently imprisoned you, or asked for your excommunication, they become your rival
+				limit = {
+					OR = {
+						has_opinion_modifier = {
+							target = scope:actor
+							modifier = released_from_prison
+						}
+						AND = {
+							exists = var:requested_my_excommunication
+							var:requested_my_excommunication = scope:actor
+						}
+					}
+					NOT = {
+						has_relation_rival = scope:actor
+					}
+				}
+				if = {
+					limit = {
+						has_relation_potential_rival = scope:actor
+					}
+					remove_relation_potential_rival = scope:actor
+				}
+				set_relation_rival = {
+					target = scope:actor
+					reason = rival_revoked_title_reversed
+				}
+			}
+			else = {
+				progress_towards_rival_effect = {
+					CHARACTER = scope:actor
+					REASON = rival_revoked_title_progress
+					OPINION = 0
+				}
+			}
+			# HOUSE RELATION
+			house ?= {
+				if = {
+					limit = { NOT = { this = scope:actor.house } }
+					change_house_relation_effect = {
+						HOUSE = scope:actor.house
+						VALUE = house_relation_damage_medium_value
+						REASON = title_revocation
+						CHAR = scope:actor
+						TARGET_CHAR = scope:recipient
+						TITLE = scope:landed_title
+					}
+				}
 			}
 		}
 	}
@@ -347,7 +376,7 @@ revoke_title_interaction_effect = {
 				has_character_flag = is_party_baron
 				NOT = {
 					any_held_title = {
-						NOT = { this = scope:landed_title }
+						this != scope:landed_title
 					}
 				}
 			}
@@ -358,9 +387,7 @@ revoke_title_interaction_effect = {
 				years = 10
 			}
 			random_owned_story = {
-				limit = {
-					story_type = story_party_baron
-				}
+				type = story_party_baron
 				end_story = yes
 			}
 		}
@@ -571,11 +598,13 @@ start_tributary_interaction_effect = {
 		}
 	}
 }
-
 # Effect to start a tributary relationship, can be called directly without a war or from start_tributary_from_war_effect
 # $TRIBUTARY$ = the new tributary
 # $SUZERAIN$ = their suzerain
 start_tributary_interaction_vanilla_effect = {
+	# Setup truces depending on how the tributary relationship was created
+	$TRIBUTARY$ = { save_scope_as = tributary_loc }
+	$SUZERAIN$ = { save_scope_as = suzerain_loc }
 
 	#Mandala Tributaries
 	if = {
@@ -1242,8 +1271,8 @@ start_tributary_interaction_permanent_tributaries_effect = {
 					tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 0 }
 				}
 			}
-			custom_tooltip = low_tribute_taxes
-			custom_tooltip = none_tribute_prestige
+			custom_tooltip = low_subjugated_tribute_taxes
+			custom_tooltip = none_subjugated_tribute_prestige
 		}
 		else = {
 			if = {
@@ -1259,8 +1288,8 @@ start_tributary_interaction_permanent_tributaries_effect = {
 					tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 1 }
 				}
 			}
-			custom_tooltip = high_tribute_taxes
-			custom_tooltip = normal_tribute_prestige
+			custom_tooltip = high_subjugated_tribute_taxes
+			custom_tooltip = normal_subjugated_tribute_prestige
 		}
 		if = {
 			limit = { is_tributary = yes } # suppress error logging

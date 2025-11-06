@@ -7,7 +7,7 @@ set_war_memory_casus_belli_effect = {
 		casus_belli = {
 			if = {
 				limit = {
-					any_target_title = { count >= 1 }
+					any_target_title = { }
 				}
 				ordered_target_title = {
 					order_by = tier
@@ -53,6 +53,9 @@ set_war_memory_casus_belli_effect = {
 					using_cb = nomadic_conquest_duchy_cb
 					using_cb = domination_cb
 					using_cb = de_jure_cb_nomadic
+					using_cb = japan_install_bloc_member_cb
+					using_cb = japan_soryo_conquest_county_landless_cb
+					using_cb = japan_soryo_conquest_county_cb
 				}
 			}
 			scope:memory = {
@@ -79,6 +82,7 @@ set_war_memory_casus_belli_effect = {
 					using_cb = de_jure_cb
 					using_cb = individual_county_de_jure_cb
 					using_cb = individual_duchy_de_jure_cb
+					using_cb = japan_imperial_reconquest_cb
 				}
 			}
 			scope:memory = {
@@ -109,6 +113,7 @@ set_war_memory_casus_belli_effect = {
 					using_cb = ep3_laamp_adventurer_kingdom_invasion
 					using_cb = ep3_laamp_adventurer_empire_invasion
 					using_cb = mpo_gok_onslaught_cb
+					using_cb = japan_imperial_expansion_cb
 				}
 			}
 			scope:memory = {
@@ -133,13 +138,14 @@ set_war_memory_casus_belli_effect = {
 				OR = {
 					using_cb = independence_war
 					using_cb = independence_faction_war
+					using_cb = tributary_independence_war
 				}
 			}
 			scope:memory = {
 				set_variable = { name = war_cb value = flag:war_memory_cb_independence }
 			}
 		}
-		else_if = {
+		else_if = { # artifact
 			limit = {
 				OR = {
 					using_cb = artifact_war
@@ -150,7 +156,7 @@ set_war_memory_casus_belli_effect = {
 				set_variable = { name = war_cb value = flag:war_memory_cb_artifact }
 			}
 		}
-		else_if = {
+		else_if = { # populist
 			limit = { using_cb = populist_war }
 			scope:memory = {
 				set_variable = { name = war_cb value = flag:war_memory_cb_populist }
@@ -158,7 +164,7 @@ set_war_memory_casus_belli_effect = {
 				set_variable = { name = war_culture value = scope:war.primary_defender.culture }
 			}
 		}
-		else_if = {
+		else_if = { # subjugation
 			limit = {
 				OR = {
 					using_cb = tribal_subjugation_cb
@@ -170,7 +176,7 @@ set_war_memory_casus_belli_effect = {
 				set_variable = { name = war_cb value = flag:war_memory_cb_subjugation }
 			}
 		}
-		else_if = {
+		else_if = { # border
 			limit = {
 				OR = {
 					using_cb = fp2_border_raid
@@ -179,6 +185,31 @@ set_war_memory_casus_belli_effect = {
 			}
 			scope:memory = {
 				set_variable = { name = war_cb value = flag:war_memory_cb_border }
+			}
+		}
+		else_if = { # government
+			limit = {
+				OR = {
+					using_cb = japan_demand_administrative_cb
+					using_cb = japan_refused_ritsuryo_cb
+					using_cb = japan_establish_soryo_administration_cb
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_government }
+				set_variable = { name = war_gov value = scope:war.primary_attacker.government_type }
+			}
+		}
+		else_if = { # bloc
+			limit = {
+				OR = {
+					using_cb = japan_bloc_war_cb
+					using_cb = japan_install_bloc_member_cb
+				}
+			}
+			scope:memory = {
+				set_variable = { name = war_cb value = flag:war_memory_cb_bloc }
+				set_variable = { name = war_bloc value = scope:war.primary_attacker.house.house_confederation }
 			}
 		}
 		else = {
@@ -226,7 +257,7 @@ set_war_memory_casus_belli_effect = {
 					scope:memory = {
 						set_variable = { name = war_cb value = flag:war_memory_cb_vassalization }
 					}
-				}
+				}				
 				fp1_varangian_adventurer_conquest = {
 					scope:memory = {
 						set_variable = { name = war_cb value = flag:war_memory_cb_varangian }
@@ -259,6 +290,11 @@ set_war_memory_casus_belli_effect = {
 				peasant_war = {
 					scope:memory = {
 						set_variable = { name = war_cb value = flag:war_memory_cb_peasant }
+					}
+				}
+				replace_ceremonial_regent_faction_war = {
+					scope:memory = {
+						set_variable = { name = war_cb value = flag:war_memory_cb_depose }
 					}
 				}
 				fallback = {
@@ -298,6 +334,8 @@ set_war_memory_casus_belli_effect = {
 				scope:memory.var:war_cb = flag:war_memory_cb_expel
 				scope:memory.var:war_cb = flag:war_memory_cb_regent
 				scope:memory.var:war_cb = flag:war_memory_cb_tyranny
+				scope:memory.var:war_cb = flag:war_memory_cb_government
+				scope:memory.var:war_cb = flag:war_memory_cb_bloc
 			}
 		}
 	}
