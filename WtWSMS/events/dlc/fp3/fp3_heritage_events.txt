@@ -66,7 +66,7 @@ fp3_yearly.8019 = {
 	}
 
 	trigger = { 
-		
+		is_ai = no
 		#standard sanity checks
 		has_fp3_dlc_trigger = yes
 		is_ruler = yes
@@ -97,7 +97,7 @@ fp3_yearly.8019 = {
 			fp3_hateful_ruler_trigger = yes	
 		}
 
-		any_held_county = { count >= 1 }
+		any_held_county = { }
 	}
 
 	cooldown = { years = 100 }
@@ -314,7 +314,7 @@ fp3_yearly.8019 = {
    		}
 
    		ai_chance = { #zealous-cruel AI goes for this option
-         base = 10
+			base = 10
         	ai_value_modifier = {
             	ai_zeal = 0.8 
             	ai_vengefulness = 0.8
@@ -364,7 +364,7 @@ scripted_trigger fp3_zealous_caliph_trigger = {
 
 scripted_trigger fp3_bibi_shahrbanu_devotee_trigger = {
 	is_female = yes
-	is_independent_ruler = no
+	top_liege != this
 	is_available_ai_adult = yes
 	has_religion = ROOT.religion
 	NOT = {
@@ -383,12 +383,11 @@ scripted_trigger fp3_assertive_female_believer_trigger = {
 	}
 }
 
-##### Changed from Vanilla: removed gayomarthianism reference
 scripted_trigger fp3_zoroastrian_holy_sites_province_trigger = {
 	OR = {
 		is_holy_site_of = faith:mazdayasna
 		is_holy_site_of = faith:zurvanism 
-		##### Changed from Vanilla: removed gayomarthianism reference
+		#is_holy_site_of = faith:gayomarthianism 
 		is_holy_site_of = faith:khurmazta 
 		is_holy_site_of = faith:khurramism
 		is_holy_site_of = faith:mazdakism
@@ -448,7 +447,7 @@ fp3_yearly.8020 = {
 		}
 
 		#checking that we have a HoF with the appropriate interests 
-		NOT = { faith.religious_head = root }
+		faith.religious_head != root
 
 		exists = root.faith.religious_head
 
@@ -726,7 +725,7 @@ fp3_yearly.8020 = {
 					limit = {
 						fp3_bibi_shahrbanu_devotee_trigger = yes
 						fp3_assertive_female_believer_trigger = yes  
-						NOT = { this = scope:pious_woman }
+						this != scope:pious_woman
 					}
 					add_character_modifier = {
 						modifier = fp3_womens_faith_galvanized_modifier
@@ -1223,7 +1222,7 @@ fp3_yearly.8022 = {
 		name = fp3_yearly.8022.b
 		flavor = fp3_yearly.8022.b.flavor
 
-		remove_short_term_gold = major_gold_value 
+		remove_treasury_or_gold = major_treasury_or_gold_value 
 
 		if = {
 			limit = {
@@ -1836,7 +1835,7 @@ fp3_yearly.8027 = {
 	}
 
 	right_portrait = {
-		character = scope:snubbed_lifestyle_poet
+		character = scope:snubbed_poet
 		animation = chancellor
 	}
 
@@ -1855,13 +1854,13 @@ fp3_yearly.8027 = {
 		#Must know Persian for this event to make sense 
 		knows_language_of_culture = culture:persian
 
-		#Must have lots of gold to pay the lifestyle_poet
+		#Must have lots of gold to pay the poet
 		gold >= major_gold_value 
 
 		has_ep1_dlc_trigger = yes
 		has_royal_court = yes
 
-		is_ai = no #since this event potentially spawns both artifacts and courtiers, let's keep it player-only in order to avoid spamming the game world with books and lifestyle_poets 
+		is_ai = no #since this event potentially spawns both artifacts and courtiers, let's keep it player-only in order to avoid spamming the game world with books and poets 
 
 		any_neighboring_top_liege_realm_owner = { fp3_rich_foreign_ruler_trigger = yes }
 	}
@@ -1897,7 +1896,7 @@ fp3_yearly.8027 = {
 		 	create_character = { 
 				location = root.capital_province
 				template = fp3_ferdowsi_template
-				save_scope_as = snubbed_lifestyle_poet 	#this saves him as a scope so we can get nice effects to bounce off him! 
+				save_scope_as = snubbed_poet 	#this saves him as a scope so we can get nice effects to bounce off him! 
 			}
 			set_global_variable = ferdowsi_created 
 		}
@@ -1910,7 +1909,7 @@ fp3_yearly.8027 = {
 				culture = culture:persian
 				trait = lifestyle_poet 
 				trait = shrewd 
-				save_scope_as = snubbed_lifestyle_poet 	
+				save_scope_as = snubbed_poet 	
 			}
 		}
 	}
@@ -1920,13 +1919,13 @@ fp3_yearly.8027 = {
 		
 		custom_tooltip = fp3_promise_to_pay_for_book.tt
 
-		add_courtier = scope:snubbed_lifestyle_poet 
+		add_courtier = scope:snubbed_poet 
 
 		scope:former_employer = {
 			add_opinion = { 
 				target = root
 				opinion = -30
-				modifier = fp3_stole_my_court_lifestyle_poet_opinion
+				modifier = fp3_stole_my_court_poet_opinion
 			}
 		}
 
@@ -1986,7 +1985,7 @@ fp3_yearly.8027 = {
 					}
 				}
 				custom_tooltip = fp3_mediation_succeeds.tt
-				custom_tooltip = fp3_lifestyle_poet_leaves.tt
+				custom_tooltip = fp3_poet_leaves.tt
 				hidden_effect = { 
 					trigger_event = fp3_yearly.8031 
 					
@@ -2019,12 +2018,12 @@ fp3_yearly.8027 = {
 				show_as_tooltip = {
 					if = {
 						limit = { exists = global_var:ferdowsi_created }
-						scope:snubbed_lifestyle_poet = { #Let's keep the historical characters around, if they were created
+						scope:snubbed_poet = { #Let's keep the historical characters around, if they were created
 							move_to_pool = yes 
 						}
 					}
 					else = {
-						scope:snubbed_lifestyle_poet = { #otherwise, let's just have him disappear 
+						scope:snubbed_poet = { #otherwise, let's just have him disappear 
 							move_to_pool = yes
 							silent_disappearance_effect = yes
 						}
@@ -2050,12 +2049,12 @@ fp3_yearly.8027 = {
 
 		if = {
 			limit = { exists = global_var:ferdowsi_created }
-			scope:snubbed_lifestyle_poet = { #Let's keep the historical characters around, if they were created
+			scope:snubbed_poet = { #Let's keep the historical characters around, if they were created
 				move_to_pool = yes 
 			}
 		}
 		else = {
-			scope:snubbed_lifestyle_poet = { #otherwise, let's just have him disappear 
+			scope:snubbed_poet = { #otherwise, let's just have him disappear 
 				move_to_pool = yes
 				silent_disappearance_effect = yes
 			}
@@ -2081,7 +2080,7 @@ fp3_yearly.8028 = {
 	}
 
 	right_portrait = {
-		character = scope:snubbed_lifestyle_poet
+		character = scope:snubbed_poet
 		animation = chancellor
 	}
 
@@ -2091,7 +2090,7 @@ fp3_yearly.8028 = {
 	}
 
 	trigger = { 
-		scope:snubbed_lifestyle_poet = {
+		scope:snubbed_poet = {
 			is_available_healthy_ai_adult = yes
 		}
 	}
@@ -2103,7 +2102,7 @@ fp3_yearly.8028 = {
 
 		create_artifact = {	
 			name = shahnameh_name 
-			creator = scope:snubbed_lifestyle_poet
+			creator = scope:snubbed_poet
 			description = shahnameh_desc 
 			visuals = book
 			type = book
@@ -2119,7 +2118,7 @@ fp3_yearly.8028 = {
 
 		pay_short_term_gold = {
   			gold = 495
-  	 		target = scope:snubbed_lifestyle_poet
+  	 		target = scope:snubbed_poet
   	 	}
 	}
 
@@ -2128,10 +2127,10 @@ fp3_yearly.8028 = {
 
 		pay_short_term_gold = {
   			gold = 495
-  	 		target = scope:snubbed_lifestyle_poet
+  	 		target = scope:snubbed_poet
   	 	}
 
-		scope:snubbed_lifestyle_poet = { 
+		scope:snubbed_poet = { 
 			move_to_pool = yes
 		}	
 	}
@@ -2144,7 +2143,7 @@ fp3_yearly.8028 = {
 			years = 10
 		}
 
-		scope:snubbed_lifestyle_poet = {
+		scope:snubbed_poet = {
 			add_opinion = {
 				target = root
 				modifier = contempt_opinion
@@ -2152,7 +2151,7 @@ fp3_yearly.8028 = {
 			}	
 		}
 
-		scope:snubbed_lifestyle_poet = { 
+		scope:snubbed_poet = { 
 			move_to_pool = yes
 		}	
 	}
@@ -2170,7 +2169,7 @@ fp3_yearly.8029 = {
 	}
 
 	right_portrait = {
-		character = scope:snubbed_lifestyle_poet
+		character = scope:snubbed_poet
 		animation = chancellor
 	}
 
@@ -2186,7 +2185,7 @@ fp3_yearly.8029 = {
 
 		create_artifact = {	
 			name = persian_epic_name 
-			creator = scope:snubbed_lifestyle_poet
+			creator = scope:snubbed_poet
 			description = persian_epic_desc 
 			visuals = book
 			type = book
@@ -2202,7 +2201,7 @@ fp3_yearly.8029 = {
 
 		pay_short_term_gold = {
   			gold = 495
-  	 		target = scope:snubbed_lifestyle_poet
+  	 		target = scope:snubbed_poet
   	 	}
 	}
 
@@ -2211,10 +2210,10 @@ fp3_yearly.8029 = {
 
 		pay_short_term_gold = {
   			gold = 495
-  	 		target = scope:snubbed_lifestyle_poet
+  	 		target = scope:snubbed_poet
   	 	}
 
-		scope:snubbed_lifestyle_poet = { 
+		scope:snubbed_poet = { 
 			move_to_pool = yes
 			silent_disappearance_effect = yes
 		}	
@@ -2228,7 +2227,7 @@ fp3_yearly.8029 = {
 			years = 10
 		}
 
-		scope:snubbed_lifestyle_poet = { 
+		scope:snubbed_poet = { 
 			move_to_pool = yes
 			silent_disappearance_effect = yes
 		}	
@@ -2271,9 +2270,9 @@ fp3_yearly.8031 = {
 				modifier = respect_opinion
 				opinion = 20 
 			}
-			add_courtier = scope:snubbed_lifestyle_poet
+			add_courtier = scope:snubbed_poet
 		}
-		scope:snubbed_lifestyle_poet = {
+		scope:snubbed_poet = {
 			add_opinion = {
 				target = root
 				modifier = grateful_opinion
@@ -2722,7 +2721,7 @@ fp3_yearly.8033 = {
 	option = {
 		name = fp3_yearly.8033.c
 
-		remove_short_term_gold = medium_gold_value 
+		remove_treasury_or_gold = medium_treasury_or_gold_value 
 
 		scope:yakhchal_county = {
 			remove_county_modifier = fp3_broken_icehouses_county_modifier

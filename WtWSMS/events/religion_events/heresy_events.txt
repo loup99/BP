@@ -36,9 +36,9 @@ heresy.0001 = {
 			#Prefer Dukes with only 1 or 2 Duchies.
 			limit = {
 				is_valid_heresiarch = yes
-				highest_held_title_tier = tier_duchy
+				highest_held_title_title_tier = duchy
 				any_held_title = {
-					tier = tier_duchy
+					title_tier = duchy
 					count < 3 #Limit the influence of Mega-Dukes
 					is_landless_type_title = no
 					is_noble_family_title = no
@@ -47,7 +47,7 @@ heresy.0001 = {
 			#Then accept any valid Duke.
 			alternative_limit = {
 				is_valid_heresiarch = yes
-				highest_held_title_tier = tier_duchy
+				highest_held_title_title_tier = duchy
 			}
 			#If no Dukes exist, accept a Count.
 			alternative_limit = {
@@ -63,7 +63,7 @@ heresy.0001 = {
 				}
 				modifier = {
 					add = 75
-					is_independent_ruler = yes
+					top_liege = this
 				}
 				modifier = {
 					add = 50
@@ -459,7 +459,7 @@ heresy.0001 = {
 				# Changes to another religion have reduced heresy power
 				if = {
 					limit = {
-						NOT = { scope:origin_faith.religion = scope:heretic_faith.religion }
+						scope:origin_faith.religion != scope:heretic_faith.religion
 					}
 					change_variable = {
 						name = heresy_power
@@ -507,9 +507,9 @@ heresy.0005 = {
 			#Prefer Dukes with only 1 or 2 Duchies.
 			limit = {
 				faith = root
-				highest_held_title_tier = tier_duchy
+				highest_held_title_title_tier = duchy
 				any_held_title = {
-					tier = tier_duchy
+					title_tier = duchy
 					count < 3 #Limit the influence of Mega-Dukes
 				}
 				is_capable_adult_ai = yes
@@ -521,7 +521,7 @@ heresy.0005 = {
 			#Then accept any valid Duke.
 			alternative_limit = {
 				faith = root
-				highest_held_title_tier = tier_duchy
+				highest_held_title_title_tier = duchy
 				is_capable_adult_ai = yes
 				is_landed = yes
 				exists = capital_county
@@ -548,7 +548,7 @@ heresy.0005 = {
 				}
 				modifier = {
 					add = 75
-					is_independent_ruler = yes
+					top_liege = this
 				}
 				modifier = {
 					add = 50
@@ -961,10 +961,7 @@ heresy.0010 = {
 				}
 				OR = {
 					#Everyone in the same Realm is notified.
-					AND = {
-						exists = top_liege
-						top_liege = scope:heretic_ruler.top_liege
-					}
+					top_liege ?= scope:heretic_ruler.top_liege
 					#If we're physically close to the character, we also get notified.
 					capital_county = {
 						squared_distance = {
@@ -1050,7 +1047,7 @@ heresy.0010 = {
 		name = heresy.0010.b
 		trigger = {
 			is_ai = no
-			NOT = { this.faith = scope:heretic_faith }
+			this.faith != scope:heretic_faith
 		}
 		custom_tooltip = heresy.0010.tt.custom
 
@@ -1074,7 +1071,7 @@ scripted_trigger no_heretical_hof_faith_0011_trigger = { #Head of Faith shouldn'
 		}
 		AND = {
 			exists = scope:origin_faith.religious_head
-			NOT = { this = scope:origin_faith.religious_head }
+			this != scope:origin_faith.religious_head
 		}
 	}
 }
@@ -1213,10 +1210,7 @@ heresy.0011 = {
 				limit = {
 					OR = {
 						#Everyone in the same Realm is notified.
-						AND = {
-							exists = top_liege
-							top_liege = scope:convert_ruler.top_liege
-						}
+						top_liege ?= scope:convert_ruler.top_liege
 						AND = {
 							#If convert is Duke or above, all same-faith charatcers (on both sides) are notified.
 							OR = {
@@ -1229,7 +1223,6 @@ heresy.0011 = {
 						}
 						#If we're physically close to the character, we also get notified.
 						AND = {
-							exists = capital_county
 							capital_county = {
 								squared_distance = {
 									target = scope:convert_capital
