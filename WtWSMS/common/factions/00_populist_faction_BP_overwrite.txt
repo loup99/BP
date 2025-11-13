@@ -1,4 +1,5 @@
-﻿populist_faction = {
+﻿##### Changed from Vanilla: Blocked Romance cultures from revolting against Roman Government
+populist_faction = {
 	casus_belli = populist_war
 
 	leaders_allowed_to_leave = no
@@ -25,7 +26,7 @@
 
 		common_discontent_progress_modifier = yes
 		modifier = {
-			faction_target.primary_title = { are_vassal_wars_redirected_to_holder = no }
+			faction_target = { can_vassals_be_attacked = yes }
 			add = 2
 			desc = border_war_increased_peasant_discontent
 		}
@@ -82,7 +83,7 @@
 		has_valid_faction_members_trigger = yes
 		# Only AIs are allowed to be in popular factions.
 		is_ai = yes
-		
+
 		# Landed rulers can only be in the faction...
 		trigger_if = {
 			limit = {
@@ -90,10 +91,10 @@
 				exists = liege
 				this != liege
 			}
-			
+
 			# ... If they are a direct vassal of the faction target.
 			liege = scope:faction.faction_target
-			
+
 			# ... If they are at least a count. (Barons are not allowed.)
 			highest_held_title_tier >= tier_county
 		}
@@ -224,7 +225,7 @@
 				root.faith != scope:faction.faction_target.primary_title.state_faith
 			}
 		}
-		
+
 		title_province = {
 			NOR = {
 				has_holding_type = nomad_holding
@@ -259,7 +260,7 @@
 			}
 			culture != scope:target.culture
 		}
-		
+
 		trigger_if = { # Must have a different faith than state faith in Admin
 			limit = {
 				exists = scope:faction.faction_target.primary_title.state_faith
@@ -276,7 +277,7 @@
 			subject = scope:target
 			NOT = { scope:target = { immune_to_factions_trigger = yes } }
 		}
-		
+
 		title_province = {
 			NOR = {
 				has_holding_type = nomad_holding
@@ -312,6 +313,16 @@
 					any_faction_county_member = {
 						this.title_province.faith = root.title_province.faith
 					}
+				}
+			}
+		}
+		# If a suitable Escalated Faction exists, prefer to join it instead.
+		modifier = {
+			desc = "FACTION_REASON_PREFER_ESCALATED_FACTION"
+			add = -100
+			scope:target = {
+				any_targeting_faction = {
+					faction_type = escalated_peasant_faction
 				}
 			}
 		}
@@ -379,6 +390,7 @@
 		# Defiant Ambushers
 		modifier = {
 			add = 25
+			county_opinion < 0
 			culture != scope:target.culture
 			culture = { has_cultural_parameter = county_peasant_and_populist_factions_more_common }
 		}
@@ -434,7 +446,7 @@
 				is_ai = yes
 			}
 		}
-		
+
 		# Conquerors
 		modifier = {
 			add = -100
@@ -467,6 +479,16 @@
 				title_province.faith = scope:faction.faction_target.faith
 				# And we do NOT share a Culture Group with the faction leader.
 				NOT = { this.title_province.culture = { has_same_culture_heritage = scope:faction.var:faction_culture } }
+			}
+		}
+		# If a suitable Escalated Faction exists, prefer to join it instead.
+		modifier = {
+			desc = "FACTION_REASON_PREFER_ESCALATED_FACTION"
+			add = -100
+			scope:faction.faction_target = {
+				any_targeting_faction = {
+					faction_type = escalated_peasant_faction
+				}
 			}
 		}
 
@@ -556,6 +578,7 @@
 		# Defiant Ambushers
 		modifier = {
 			add = 25
+			county_opinion < 0
 			culture != scope:faction.faction_target.culture
 			culture = { has_cultural_parameter = county_peasant_and_populist_factions_more_common }
 		}
@@ -600,7 +623,7 @@
 				is_ai = yes
 			}
 		}
-		
+
 		# Conquerors
 		modifier = {
 			add = -100
@@ -847,7 +870,7 @@
 			    			}
 						}
 		    			add = 0.25
-		    		}		
+		    		}
 		    	}
 	    	}
 	    }
@@ -972,7 +995,7 @@
 		special_title = {
 			save_scope_as = target_title
 		}
-		
+
 		# Check for relevant vassals that owns any land targeted by the faction.
 		save_temporary_scope_as = county_faction
 		every_faction_county_member = {
@@ -1015,7 +1038,7 @@
 				}
 			}
 		}
-		
+
 		# Check if there is a player affected by the faction. AI rulers are blocked from accepting the faction demand if so.
 		if = {
 			limit = {
@@ -1031,7 +1054,7 @@
 				}
 			}
 		}
-		
+
 		# Fire the demand event. A follow up event will be sent to affected vassals.
 		scope:faction.faction_target = {
 			trigger_event = faction_demand.1001
@@ -1087,7 +1110,7 @@
 			root.faction_leader = {
 				spawn_popular_revolt_troops = yes
 			}
-			
+
 			# Give the populist leader a commander for each stack of troops.
 			create_character = {
 				template = new_commander_character
@@ -1154,4 +1177,3 @@
 
 	multiple_targeting = yes
 }
-

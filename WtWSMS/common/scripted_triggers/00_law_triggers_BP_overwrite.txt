@@ -35,6 +35,8 @@ can_have_partition_succession_law_trigger = {
 				text = succession_laws_must_have_organised_government_tooltip
 				OR = {
 					government_has_flag = government_is_feudal
+					government_has_flag = government_is_clan
+					government_has_flag = government_is_japan_feudal
 					has_realm_law_flag = can_change_partition_succession_laws
 				}
 			}
@@ -59,6 +61,8 @@ can_have_high_partition_succession_law_trigger = {
 				text = succession_laws_must_have_organised_government_tooltip
 				OR = {
 					government_has_flag = government_is_feudal
+					government_has_flag = government_is_clan
+					government_has_flag = government_is_japan_feudal
 					has_realm_law_flag = can_change_partition_succession_laws
 				}
 			}
@@ -70,19 +74,33 @@ can_have_high_partition_succession_law_trigger = {
 ##### Changed from Vanilla: Made available to WtWSMS governments
 can_have_single_heir_succession_law_trigger = {
 	OR = {
-		culture = {
-			has_innovation = innovation_primogeniture
-		}
-		AND = { # Meritocratic/Celestial/Soryo
-			is_independent_ruler = yes
-			OR = {
-				government_allows = merit
-				government_has_flag = government_is_japan_feudal
+		trigger_if = { # Celestial/Meritocratic/Soryo
+			limit = {
+				OR = {
+					government_allows = merit
+					government_has_flag = government_is_japan_feudal
+				}
+			}
+			custom_tooltip = { # You are independent, have the innovation or are Ceremonial Monarch
+				text = can_have_single_heir_succession_law_trigger_merit_or_japan_tt
+				OR = {
+					is_independent_ruler = yes
+					culture = {
+						has_innovation = innovation_primogeniture
+					}
+					tgp_has_ceremonial_liege_title_trigger = yes
+				}
 			}
 		}
-		# Ceremonial
-		tgp_has_ceremonial_liege_title_trigger = yes
-		
+		trigger_else_if = {
+			limit = { tgp_has_ceremonial_liege_title_trigger = yes }
+			always = yes
+		}
+		trigger_else = {
+			culture = {
+				has_innovation = innovation_primogeniture
+			}
+		}
 		government_has_flag = government_is_centralized
 	}
 	OR = {
@@ -97,6 +115,7 @@ can_have_single_heir_succession_law_trigger = {
 					government_has_flag = government_is_feudal
 					government_has_flag = government_is_clan
 					government_allows = administrative
+					government_has_flag = government_is_japan_feudal
 				}
 			}
 		}
@@ -140,6 +159,7 @@ can_have_single_heir_youngest_succession_law_trigger = {
 						government_has_flag = government_is_feudal
 						government_has_flag = government_is_clan
 						government_allows = administrative
+						government_has_flag = government_is_japan_feudal
 					}
 				}
 			}
@@ -149,6 +169,8 @@ can_have_single_heir_youngest_succession_law_trigger = {
 					OR = {
 						government_has_flag = government_is_feudal
 						government_has_flag = government_is_clan
+						government_has_flag = government_is_japan_feudal
+						tgp_has_ceremonial_liege_title_trigger = yes
 					}
 				}
 			}
@@ -168,7 +190,14 @@ can_have_single_heir_dynasty_house_trigger = {
 		limit = {
 			culture = {
 				OR = {
-					has_cultural_pillar = heritage_west_slavic
+					this = culture:czech
+					this = culture:slovien
+					any_parent_culture_or_above = {
+						this = culture:czech
+					}
+					any_parent_culture_or_above = {
+						this = culture:slovien
+					}
 					NOT = {	has_innovation = innovation_heraldry }
 				}
 			}
@@ -187,6 +216,7 @@ can_have_single_heir_dynasty_house_trigger = {
 		OR = {
 			government_has_flag = government_is_feudal
 			government_has_flag = government_is_clan
+			government_has_flag = government_is_japan_feudal
 		}
 	}
 	NOT = { government_allows = administrative }

@@ -4538,8 +4538,8 @@ on_game_start_after_lobby = {
 						limit = {
 							highest_held_title_tier >= tier_kingdom
 							NOR = {
-								government_has_flag = government_is_administrative
-								government_has_flag = government_is_landless_adventurer
+								government_allows = administrative
+								is_landed = no
 							}
 						}
 						convert_to_administrative_from_feudalism_game_start_effect = yes
@@ -4551,8 +4551,8 @@ on_game_start_after_lobby = {
 						limit = {
 							highest_held_title_tier >= tier_kingdom
 							NOR = {
-								government_has_flag = government_is_administrative
-								government_has_flag = government_is_landless_adventurer
+								government_allows = administrative
+								is_landed = no
 							}
 							has_trait = august
 						}
@@ -6319,8 +6319,8 @@ on_game_start_after_lobby = {
 ####					add_realm_law_skip_effects = camp_purpose_mercenaries
 ####				}
 ####			}
-####			## Liang Zhu Quanzhong
-####			character:liang_zhu_1 ?= {
+####			## Zhu Quanzhong
+####			character:zhu_quanzhong_1 ?= {
 ####				if = {
 ####					limit = {
 ####						is_alive = yes
@@ -6339,8 +6339,8 @@ on_game_start_after_lobby = {
 ####					add_realm_law_skip_effects = camp_purpose_scholars
 ####				}
 ####			}
-####			## Yang-kil
-####			character:yang_kil_1 ?= {
+####			## Ki Hwon
+####			character:ki_hwon_1 ?= {
 ####				if = {
 ####					limit = {
 ####						is_alive = yes
@@ -7643,6 +7643,84 @@ on_game_start_after_lobby = {
 			}
 			# Treasury setup for any government using treasury
 			tgp_treasury_setup_effect = yes
+		}
+
+		# TGP China education track switch
+
+		if = {
+			limit = {
+				exists = title:h_china.holder
+			}
+			title:h_china.holder = {
+				add_to_list = realm_potential_education_flip_list
+			}
+		}
+		if = {
+			limit = {
+				exists = title:e_goryeo.holder
+			}
+			title:e_goryeo.holder = {
+				add_to_list = realm_potential_education_flip_list
+			}
+		}
+		if = {
+			limit = {
+				exists = title:k_dali.holder
+			}
+			title:k_dali.holder = {
+				add_to_list = realm_potential_education_flip_list
+			}
+		}
+		if = {
+			limit = {
+				exists = title:k_viet.holder
+			}
+			title:k_viet.holder = {
+				add_to_list = realm_potential_education_flip_list
+			}
+		}
+		if = {
+			limit = {
+				exists = title:k_xia.holder
+			}
+			title:k_xia.holder = {
+				add_to_list = realm_potential_education_flip_list
+			}
+		}
+		if = {
+			limit = {
+				exists = title:e_andong.holder
+			}
+			title:e_andong.holder = {
+				add_to_list = realm_potential_education_flip_list
+			}
+		}
+
+		every_in_list = {
+			list = realm_potential_education_flip_list
+			every_vassal_or_below = {
+				limit = {
+					is_ai = yes
+					OR = {
+						AND = {
+							OR = {
+								vassal_contract_has_flag = celestial_province_military
+								vassal_contract_has_flag = celestial_province_protectorate
+							}
+							has_trait_with_flag = civilian_province
+						}
+						AND = {
+							OR = {
+								vassal_contract_has_flag = celestial_province_standard
+								vassal_contract_has_flag = celestial_province_industrial
+								vassal_contract_has_flag = celestial_province_metropolitan
+							}
+							has_trait_with_flag = military_province
+						}
+					}
+				}
+				tgp_flip_education_track_on_game_start = yes
+			}
 		}
 	}
 

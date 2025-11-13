@@ -463,6 +463,7 @@ temple = {
 						religion = religion:tengrism_religion
 						faith = faith:magyar_pagan ##### Changed from Vanilla
 						religion = religion:siberian_religion
+						religion = religion:kamuyism_religion
 					}
 				}
 			}
@@ -472,6 +473,7 @@ temple = {
 					religion = religion:tengrism_religion
 					faith = faith:magyar_pagan ##### Changed from Vanilla
 					religion = religion:siberian_religion
+					religion = religion:kamuyism_religion
 				}
 			}
 		}
@@ -489,6 +491,7 @@ temple = {
 						religion = religion:tengrism_religion
 						faith = faith:magyar_pagan ##### Changed from Vanilla
 						religion = religion:siberian_religion
+						religion = religion:kamuyism_religion
 						AND = {
 							religion = religion:buddhism_religion
 							location ?= {
@@ -522,6 +525,7 @@ temple = {
 					religion = religion:tengrism_religion
 					faith = faith:magyar_pagan ##### Changed from Vanilla
 					religion = religion:siberian_religion
+					religion = religion:kamuyism_religion
 					AND = {
 						religion = religion:buddhism_religion
 						location ?= {
@@ -694,18 +698,32 @@ temple = {
 		trigger = {
 			trigger_if = {
 				limit = { exists = scope:bg_override_char }
-				scope:bg_override_char.location.faith.religion = {
+				scope:bg_override_char.location = {
 					OR = {
-						is_in_family = rf_eastern
-						is_in_family = rf_sinitic
+						faith.religion ?= { is_in_family = rf_eastern }
+						faith.religion ?= { is_in_family = rf_sinitic }
+						AND = {
+							NOT = { faith ?= { has_doctrine_parameter = unreformed } }
+							OR = {
+								culture ?= { has_graphical_india_culture_group_trigger = yes }
+								steppe_building_gfx_use_indian_trigger = yes
+							}
+						}
 					}
 				}
 			}
 			trigger_else = {
-				location.faith.religion ?= {
+				location = {
 					OR = {
-						is_in_family = rf_eastern
-						is_in_family = rf_sinitic
+						faith.religion ?= { is_in_family = rf_eastern }
+						faith.religion ?= { is_in_family = rf_sinitic }
+						AND = {
+							NOT = { faith ?= { has_doctrine_parameter = unreformed } }
+							OR = {
+								culture ?= { has_graphical_india_culture_group_trigger = yes }
+								steppe_building_gfx_use_indian_trigger = yes
+							}
+						}
 					}
 				}
 			}
@@ -754,6 +772,7 @@ temple_scope = {
 					religion = religion:tengrism_religion
 					faith = faith:magyar_pagan ##### Changed from Vanilla
 					religion = religion:siberian_religion
+					religion = religion:kamuyism_religion
 					AND = {
 						religion = religion:buddhism_religion
 						location ?= {
@@ -861,8 +880,16 @@ temple_scope = {
 	background = { #Dharmic (Outdoors)
 		trigger = {
 			scope:background_temple_scope = {
-				faith.religion = {
-					is_in_family = rf_eastern #Dharmic if not East Asian
+				OR = {
+					faith.religion ?= { is_in_family = rf_eastern }
+					faith.religion ?= { is_in_family = rf_sinitic }
+					AND = {
+						NOT = { faith ?= { has_doctrine_parameter = unreformed } }
+						OR = {
+							culture ?= { has_graphical_india_culture_group_trigger = yes }
+							steppe_building_gfx_use_indian_trigger = yes
+						}
+					}
 				}
 			}
 		}
@@ -8697,14 +8724,14 @@ throne_room = {
 				limit = { exists = scope:bg_override_char }
 				scope:bg_override_char = {
 					OR = {
-						location.culture ?= { has_building_gfx = indian_building_gfx }
+						location.culture ?= { has_graphical_india_culture_group_trigger = yes }
 						location ?= { steppe_building_gfx_use_indian_trigger = yes }
 					}
 				}
 			}
 			trigger_else = {
 				OR = {
-					location.culture ?= { has_building_gfx = indian_building_gfx }
+					location.culture ?= { has_graphical_india_culture_group_trigger = yes }
 					location ?= { steppe_building_gfx_use_indian_trigger = yes }
 				}
 			}
@@ -8712,22 +8739,6 @@ throne_room = {
 		reference = "gfx/interface/illustrations/event_scenes/throneroom_india.dds"
 		environment = "environment_frontend_india_main"
 		ambience = "event:/SFX/Events/Backgrounds/throneroom_middleeastern_african"
-	}
-	background = {	# Mandala
-		trigger = {
-			trigger_if = {
-				limit = { exists = scope:bg_override_char }
-				scope:bg_override_char = {
-					location.culture ?= { has_building_gfx = southeast_asian_building_gfx }
-				}
-			}
-			trigger_else = {
-				location.culture ?= { has_building_gfx = southeast_asian_building_gfx }
-			}
-		}
-		reference = "gfx/interface/illustrations/event_scenes/tgp_asia_throne_room.dds"
-		environment = "environment_frontend_india_main"
-		ambience = "event:/DLC/EP4/SFX/Events/Event_Backgrounds/tgp_study_asia"
 	}
 	background = {	# Mediterranean
 		trigger = {
@@ -10884,7 +10895,7 @@ holy_site_generic = {
 							religion = {
 								OR = {
 									this = religion:tengrism_religion
-									##### this = religion:magyar_religion
+									this = faith:magyar_pagan ##### Changed from Vanilla
 									this = religion:siberian_religion
 								}
 							}
@@ -10921,7 +10932,7 @@ holy_site_generic = {
 						religion = {
 							OR = {
 								this = religion:tengrism_religion
-								##### this = religion:magyar_religion
+								this = faith:magyar_pagan ##### Changed from Vanilla
 								this = religion:siberian_religion
 							}
 						}
@@ -11335,7 +11346,7 @@ holy_site_generic_scope = {
 							religion = {
 								OR = {
 									this = religion:tengrism_religion
-									##### this = religion:magyar_religion
+									this = faith:magyar_pagan ##### Changed from Vanilla
 									this = religion:siberian_religion
 								}
 							}
@@ -11370,7 +11381,7 @@ holy_site_generic_scope = {
 						religion = {
 							OR = {
 								this = religion:tengrism_religion
-								##### this = religion:magyar_religion
+								this = faith:magyar_pagan ##### Changed from Vanilla
 								this = religion:siberian_religion
 							}
 						}
@@ -11701,7 +11712,7 @@ holy_site_unique = {
 							religion = {
 								OR = {
 									this = religion:tengrism_religion
-									##### this = religion:magyar_religion
+									this = faith:magyar_pagan ##### Changed from Vanilla
 									this = religion:siberian_religion
 								}
 							}
@@ -11738,7 +11749,7 @@ holy_site_unique = {
 						religion = {
 							OR = {
 								this = religion:tengrism_religion
-								##### this = religion:magyar_religion
+								this = faith:magyar_pagan ##### Changed from Vanilla
 								this = religion:siberian_religion
 							}
 						}
@@ -12157,7 +12168,7 @@ holy_site_scope = {
 					religion = {
 						OR = {
 							this = religion:tengrism_religion
-							##### this = religion:magyar_religion
+							this = faith:magyar_pagan ##### Changed from Vanilla
 							this = religion:siberian_religion
 						}
 					}
@@ -13069,7 +13080,7 @@ ep2_involved_activity = {
 						religion = {
 							OR = {
 								this = religion:tengrism_religion
-								##### this = religion:magyar_religion
+								this = faith:magyar_pagan ##### Changed from Vanilla
 								this = religion:siberian_religion
 							}
 						}
@@ -13109,7 +13120,7 @@ ep2_involved_activity = {
 					religion = {
 						OR = {
 							this = religion:tengrism_religion
-							##### this = religion:magyar_religion
+							this = faith:magyar_pagan ##### Changed from Vanilla
 							this = religion:siberian_religion
 						}
 					}
@@ -13576,6 +13587,31 @@ ep2_involved_activity = {
 }
 
 ep2_activity = {
+	### EXAMINATIONS
+	background = {
+		trigger = {
+			scope:activity ?= {
+				OR = {
+					has_activity_type = activity_imperial_examination
+					has_activity_type = activity_local_examination
+				}
+			}
+		}
+		reference = "gfx/interface/illustrations/event_scenes/tgp_examination_room.dds"
+		environment = "environment_tgp_examination_room"
+		ambience = "event:/DLC/EP4/SFX/Events/Event_Backgrounds/tgp_examination_room"
+	}
+	### DEBATE
+	background = {
+		trigger = {
+			scope:activity ?= {
+				has_activity_type = activity_debate
+			}
+		}
+		reference = "gfx/interface/illustrations/event_scenes/tgp_study_asia.dds"
+		environment = "environment_tgp_study_asia"
+		ambience = "event:/DLC/EP4/SFX/Events/Event_Backgrounds/tgp_study_asia"
+	}
 	### TOURNAMENT
 	background = {
 		trigger = {
@@ -13760,7 +13796,7 @@ ep2_activity = {
 				religion = {
 					OR = {
 						this = religion:tengrism_religion
-						##### this = religion:magyar_religion
+						this = faith:magyar_pagan ##### Changed from Vanilla
 						this = religion:siberian_religion
 					}
 				}
@@ -17044,6 +17080,7 @@ coronation_activity_background = {
 					religion = religion:tengrism_religion
 					faith = faith:magyar_pagan ##### Changed from Vanilla
 					religion = religion:siberian_religion
+					religion = religion:kamuyism_religion
 				}
 			}
 		}
