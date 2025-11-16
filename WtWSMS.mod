@@ -1,4 +1,4 @@
-name = "(DEV) When the World Stopped Making Sense (DEV)"
+name = "When the World Stopped Making Sense"
 tags={
 	"Bookmarks"
 	"Culture"
