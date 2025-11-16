@@ -1,26 +1,73 @@
 ﻿##### Changed from Vanilla: Blocked Centralized Governments from taking this decision
 convert_to_administrative_decision = {
 	picture = {
+		trigger = {
+			culture_has_asian_heritage_pillar_trigger = yes
+		}
+		reference = "gfx/interface/illustrations/decisions/tgp_kowtow.dds"
+	}
+	picture = {
 		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
 	}
 	decision_group_type = major
+	title = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_tgp_dlc_trigger = yes
+				}
+				desc = convert_to_administrative_decision_title_multiple
+			}
+			desc = convert_to_administrative_decision
+		}
+	}
 	desc = convert_to_administrative_decision_desc
+	selection_tooltip = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_tgp_dlc_trigger = yes
+				}
+				desc = convert_to_administrative_decision_tooltip_multiple
+			}
+			desc = convert_to_administrative_decision_tooltip
+		}
+	}
+	confirm_text = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_tgp_dlc_trigger = yes
+				}
+				desc = convert_to_administrative_decision_confirm_multiple
+			}
+			desc = convert_to_administrative_decision_confirm
+		}
+	}
 
-	ai_check_interval = 36
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 36
+		duchy = 36
+		kingdom = 36
+		empire = 36
+		hegemony = 0
+	}
 
 	##### Changed from Vanilla vvvvv
 	is_shown = {
-		has_ep3_dlc_trigger = yes
+		OR = {
+			has_ep3_dlc_trigger = yes
+			has_tgp_dlc_trigger = yes
+		}
 		OR = {
 			government_has_flag = government_is_feudal
 			government_has_flag = government_is_clan
+			government_has_flag = government_is_japan_feudal
 		}
 		trigger_if = {
-			limit = { is_independent_ruler = no }
+			limit = { top_liege != this }
 			liege = { government_allows = administrative }
-		}
-		trigger_else = {
-			is_independent_ruler = yes
 		}
 		##### Changed from Vanilla vvvvv
 		NOT = { government_has_flag = government_is_centralized }
@@ -28,47 +75,61 @@ convert_to_administrative_decision = {
 	}
 	##### Changed from Vanilla ^^^^^
 
+	##### Changed from Vanilla vvvvv
 	is_valid = {
-		has_ep3_dlc_trigger = yes
 		OR = {
 			government_has_flag = government_is_feudal
 			government_has_flag = government_is_clan
 		}
 		trigger_if = {
-			limit = { is_independent_ruler = no }
+			limit = { top_liege != this }
 			liege = { government_allows = administrative }
 		}
 		trigger_else = {
-			trigger_if = {
-				limit = {
-					culture = { has_cultural_parameter = can_adopt_administrative_government_as_kingdom_tier }
-				}
+			OR = {
 				custom_tooltip = {
-					text = king_tier_tt
-					primary_title.tier >= tier_kingdom
+					text = HAS_SEAL_OF_INVESTITURE
+					any_character_artifact = {
+						OR = {
+							artifact_type = seal_of_investiture
+							artifact_type = seal_of_investiture_court
+						}
+					}
 				}
-			}
-			trigger_else = {
-				custom_tooltip = {
-					text = empire_tier_tt
-					primary_title.tier = tier_empire
+				trigger_if = {
+					limit = {
+						culture = { has_cultural_parameter = can_adopt_administrative_government_as_kingdom_tier }
+					}
+					custom_tooltip = {
+						text = king_tier_tt
+						primary_title.tier >= tier_kingdom
+					}
 				}
-				custom_tooltip = {
-					text = small_realm_size_tt
-					realm_size >= small_empire_size_value
+				trigger_else = {
+					AND = { # To force the correct tooltip in loc
+						custom_tooltip = {
+							text = empire_tier_tt
+							primary_title.tier >= tier_empire
+						}
+						root = { save_temporary_scope_as = root_scope }
+						custom_tooltip = {
+							text = small_realm_size_tt
+							realm_size >= small_empire_size_value
+						}
+					}
 				}
 			}
 		}
 		trigger_if = {
 			limit = {
-				is_independent_ruler = yes
+				top_liege = this
 				is_ai = no
 			}
 			prestige_level >= 3
 		}
 		trigger_if = {
 			limit = {
-				is_independent_ruler = yes
+				top_liege = this
 				is_ai = no
 			}
 			custom_tooltip = {
@@ -92,21 +153,20 @@ convert_to_administrative_decision = {
 				culture = { has_cultural_tradition = tradition_legalistic }
 				culture = { has_cultural_tradition = tradition_hereditary_hierarchy }
 				has_realm_law = crown_authority_3
-				capital_county = {
-					development_level > medium_development_level
-				}
+				capital_county = { development_level > medium_development_level }
 				faith = { has_doctrine = tenet_legalism }
-				dynasty = {
-					has_dynasty_perk = erudition_legacy_5
-				}
-				dynasty = {
-					has_dynasty_perk = law_legacy_5
-				}
+				dynasty = { has_dynasty_perk = erudition_legacy_5 }
+				dynasty = { has_dynasty_perk = law_legacy_5 }
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 	
 	is_valid_showing_failures_only = {
+		OR = {
+			has_ep3_dlc_trigger = yes
+			tgp_should_become_meritocratic_trigger = yes
+		}
 		is_at_war = no
 	}
 
@@ -121,92 +181,305 @@ convert_to_administrative_decision = {
 				multiply = 1.5
 			}
 			if = { # Much cheaper for vassals wanting to adopt their admin liege's government
-				limit = {
-					is_independent_ruler = no
-				}
+				limit = { top_liege != this }
 				multiply = 0.1
 			}
 		}
 		gold = {
-			value = 800
+			value = 0
 			if = {
-				limit = { is_ai = no }
-				#Realm size
-				if = {
-					limit = { root.realm_size >= 300 }
-					multiply = 3.5
+				limit = {
+					has_treasury = no
 				}
-				else_if = {
-					limit = { root.realm_size >= 250 }
+				add = 800
+				if = {
+					limit = { is_ai = no }
+					#Realm size
+					if = {
+						limit = { root.realm_size >= 300 }
+						multiply = 3.5
+					}
+					else_if = {
+						limit = { root.realm_size >= 250 }
+						multiply = 3
+					}
+					else_if = {
+						limit = { root.realm_size >= 200 }
+						multiply = 2.5
+					}
+					else_if = {
+						limit = { root.realm_size >= 150 }
+						multiply = 2
+					}
+					else_if = {
+						limit = { root.realm_size >= 100 }
+						multiply = 1.5
+					}
+				}
+				#Era
+				culture = {
+					if = {
+						limit = { has_cultural_era_or_later = culture_era_late_medieval }
+						multiply = 1.75
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_high_medieval }
+						multiply = 1.25
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_early_medieval }
+						multiply = 1
+					}
+					else = {
+						multiply = 0.75
+					}
+				}
+				#Income
+				if = {
+					limit = { root.monthly_character_income >= 100 }
 					multiply = 3
 				}
 				else_if = {
-					limit = { root.realm_size >= 200 }
+					limit = { root.monthly_character_income >= 80 }
 					multiply = 2.5
 				}
 				else_if = {
-					limit = { root.realm_size >= 150 }
+					limit = { root.monthly_character_income >= 60 }
 					multiply = 2
 				}
 				else_if = {
-					limit = { root.realm_size >= 100 }
+					limit = { root.monthly_character_income >= 40 }
 					multiply = 1.5
 				}
-			}
-			#Era
-			culture = {
-				if = {
-					limit = { has_cultural_era_or_later = culture_era_late_medieval }
-					multiply = 1.75
-				}
 				else_if = {
-					limit = { has_cultural_era_or_later = culture_era_high_medieval }
-					multiply = 1.25
+					limit = { root.monthly_character_income >= 20 }
+					multiply = 1.1
 				}
-				else_if = {
-					limit = { has_cultural_era_or_later = culture_era_early_medieval }
-					multiply = 1
-				}
-				else = {
-					multiply = 0.75
-				}
-			}
-			#Income
-			if = {
-				limit = { root.monthly_character_income >= 100 }
-				multiply = 3
-			}
-			else_if = {
-				limit = { root.monthly_character_income >= 80 }
-				multiply = 2.5
-			}
-			else_if = {
-				limit = { root.monthly_character_income >= 60 }
-				multiply = 2
-			}
-			else_if = {
-				limit = { root.monthly_character_income >= 40 }
-				multiply = 1.5
-			}
-			else_if = {
-				limit = { root.monthly_character_income >= 20 }
-				multiply = 1.1
-			}
 
-			max = 3000
-			
-			if = { # Much cheaper for vassals wanting to adopt their admin liege's government
-				limit = {
-					is_independent_ruler = no
+				max = 3000
+				
+				if = { # Much cheaper for vassals wanting to adopt their admin liege's government
+					limit = {
+						is_independent_ruler = no
+					}
+					multiply = 0.1
 				}
-				multiply = 0.1
+			}
+		}
+		treasury = {
+			value = 0
+			if = {
+				limit = {
+					has_treasury = yes
+				}
+				add = 800
+				if = {
+					limit = { is_ai = no }
+					#Realm size
+					if = {
+						limit = { root.realm_size >= 300 }
+						multiply = 3.5
+					}
+					else_if = {
+						limit = { root.realm_size >= 250 }
+						multiply = 3
+					}
+					else_if = {
+						limit = { root.realm_size >= 200 }
+						multiply = 2.5
+					}
+					else_if = {
+						limit = { root.realm_size >= 150 }
+						multiply = 2
+					}
+					else_if = {
+						limit = { root.realm_size >= 100 }
+						multiply = 1.5
+					}
+				}
+				#Era
+				culture = {
+					if = {
+						limit = { has_cultural_era_or_later = culture_era_late_medieval }
+						multiply = 1.75
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_high_medieval }
+						multiply = 1.25
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_early_medieval }
+						multiply = 1
+					}
+					else = {
+						multiply = 0.75
+					}
+				}
+				#Income
+				if = {
+					limit = { root.monthly_character_income >= 100 }
+					multiply = 3
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 80 }
+					multiply = 2.5
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 60 }
+					multiply = 2
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 40 }
+					multiply = 1.5
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 20 }
+					multiply = 1.1
+				}
+
+				max = 3000
+				
+				if = { # Much cheaper for vassals wanting to adopt their admin liege's government
+					limit = {
+						top_liege != this
+					}
+					multiply = 0.1
+				}
+			}
+		}
+	}
+	
+	widget = {
+		gui = "decision_view_widget_generic_multichoice_with_effects"
+		controller = decision_option_list_controller
+		decision_to_second_step_button = "SELECT_ACTION"
+		show_from_start = no
+
+		item = { # Administrative
+			value = go_administrative_government
+			is_shown = {
+				has_ep3_dlc_trigger = yes
+			}
+			is_valid = {
+				top_liege = {
+					NOR = {
+						has_government = celestial_government
+						has_government = meritocratic_government
+						has_government = japan_administrative_government
+					}
+				}
+			}
+			current_description = go_administrative_government_desc
+			localization = go_administrative_government_name
+			icon = "gfx/interface/icons/government_types/administrative_government.dds"
+			ai_chance = {
+				value = 10
+			}
+		}
+		item = { # Celestial
+			value = go_celestial_government
+			is_shown = {
+				has_tgp_dlc_trigger = yes
+			}
+			is_valid = {
+				top_liege = {
+					NOR = {
+						has_government = administrative_government
+						has_government = meritocratic_government
+						has_government = japan_administrative_government
+					}
+				}
+				custom_tooltip = {
+					text = convert_to_administrative_celestial_desc
+					tgp_can_become_celestial_trigger = yes
+				}
+			}
+			current_description = go_celestial_government_desc
+			localization = go_celestial_government_name
+			icon = "gfx/interface/icons/government_types/celestial_government.dds"
+			ai_chance = {
+				value = 100
+			}
+		}
+		item = { # Meritocratic
+			value = go_meritocratic_government
+			is_shown = {
+				has_tgp_dlc_trigger = yes
+			}
+			is_valid = {
+				top_liege = {
+					NOR = {
+						has_government = administrative_government
+						has_government = celestial_government
+						has_government = japan_administrative_government
+					}
+				}
+				custom_tooltip = {
+					text = convert_to_administrative_meritocratic_desc
+					tgp_should_become_meritocratic_trigger = yes
+				}
+			}
+			current_description = go_meritocratic_government_desc
+			localization = go_meritocratic_government_name
+			icon = "gfx/interface/icons/government_types/meritocratic_government.dds"
+			ai_chance = {
+				value = 50
+			}
+		}
+		item = { # Ritsuryo / AKA Japan Administrative
+			value = go_japan_administrative_government
+			is_shown = {
+				has_tgp_dlc_trigger = yes
+			}
+			is_valid = {
+				top_liege = {
+					NOR = {
+						has_government = administrative_government
+						has_government = celestial_government
+						has_government = meritocratic_government
+					}
+				}
+				custom_tooltip = {
+					text = convert_to_administrative_japanese_desc
+					tgp_can_become_japan_administrative_trigger = yes
+				}
+			}
+			current_description = go_japan_administrative_government_desc
+			localization = go_japan_administrative_government_name
+			icon = "gfx/interface/icons/government_types/japan_administrative_government.dds"
+			ai_chance = {
+				value = 100
 			}
 		}
 	}
 
 	effect = {
+		# Change to your selected government
+		if = {
+			limit = {
+				scope:go_administrative_government = yes
+			}
+			convert_to_administrative_from_feudalism_effect = { GOVERNMENT_TO_ADOPT = flag:administrative }
+		}
+		else_if = {
+			limit = { scope:go_celestial_government = yes }
+			convert_to_administrative_from_feudalism_effect = { GOVERNMENT_TO_ADOPT = flag:celestial }
+		}
+		else_if = {
+			limit = { scope:go_meritocratic_government = yes }
+			convert_to_administrative_from_feudalism_effect = { GOVERNMENT_TO_ADOPT = flag:meritocratic }
+		}
+		else_if = {
+			limit = { scope:go_japan_administrative_government = yes }
+			convert_to_administrative_from_feudalism_effect = { GOVERNMENT_TO_ADOPT = flag:japan_administrative }
+		}
 		save_scope_as = actor
-		convert_to_administrative_from_feudalism_effect = yes
+		if = {
+			limit = {
+				is_independent_ruler = yes
+			}
+			add_legitimacy_effect = { LEGITIMACY = admin_convert_legitimacy_value } #One Time Legitimacy Boost
+		}
 		trigger_event = ep3_decisions_event.4060 #Also sends information event to human vassals
 		#Letter event for the vassals
 		hidden_effect = {
@@ -244,15 +517,14 @@ convert_to_administrative_decision = {
 			government_has_flag = government_is_feudal
 			government_has_flag = government_is_clan
 		}
-		is_independent_ruler = yes
+		top_liege = this
 	}
 
 	ai_will_do = {
 		base = 0
 		modifier = {
 			OR = {
-				primary_title = title:e_byzantium
-				primary_title = title:e_roman_empire
+				is_roman_emperor_primary_title_trigger = yes
 			}
 			add = 100
 		}
@@ -268,10 +540,7 @@ convert_to_administrative_decision = {
 		}
 		modifier = {
 			culture = {
-				OR = {
-					has_cultural_tradition = tradition_legalistic
-					has_cultural_tradition = tradition_hereditary_hierarchy 
-				}
+				has_cultural_tradition = tradition_legalistic
 			}
 			add = 50
 		}
@@ -290,6 +559,12 @@ convert_to_administrative_decision = {
 					has_cultural_tradition = tradition_staunch_traditionalists
 					has_cultural_tradition = tradition_ep3_audacious_cadets
 				}
+			}
+			add = -20
+		}
+		modifier = {
+			culture = {
+				has_cultural_tradition = tradition_hereditary_hierarchy
 			}
 			add = -20
 		}

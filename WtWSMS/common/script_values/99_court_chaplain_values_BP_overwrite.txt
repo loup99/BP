@@ -202,7 +202,7 @@ court_chaplain_conversion_contextual_bonuses = {
 		limit = {
 			scope:councillor.liege.faith = { has_doctrine = tenet_communal_identity }
 			exists = scope:county
-			NOT = { scope:county.culture = scope:councillor.liege.culture }
+			scope:county.culture != scope:councillor.liege.culture
 		}
 		add = {
 			value = scope:councillor.conversion_communal_identity_resistance
@@ -487,18 +487,16 @@ court_chaplain_conversion_contextual_bonuses = {
 			desc = COURT_CHAPLAIN_CONVERSION_GHW_TENET_NO_HOF_MODIFIER
 		}
 	}
-	### Cthonic Redoubts
+	### Chthonic Redoubts
 	if = {
 		limit = {
 			exists = scope:county
 			scope:councillor.faith = { has_doctrine_parameter = easier_to_convert_faith_in_mountains }
 			scope:county = {
 				# We check any province and not just title province, to be generous.
-				any_county_province = {
-					OR = {
-						terrain = mountains
-						terrain = desert_mountains
-					}
+				county_has_province_with_terrain = {
+					terrain = mountains
+					terrain = desert_mountains
 				}
 			}
 		}
@@ -508,18 +506,16 @@ court_chaplain_conversion_contextual_bonuses = {
 		}
 	}
 	## Maluses
-	### Cthonic Redoubts
+	### Chthonic Redoubts
 	if = {
 		limit = {
 			exists = scope:county
 			scope:county = {
 				faith = { has_doctrine_parameter = harder_to_convert_faith_away_in_mountains }
 				# We check any province and not just title province, to be generous.
-				any_county_province = {
-					OR = {
-						terrain = mountains
-						terrain = desert_mountains
-					}
+				county_has_province_with_terrain = {
+					terrain = mountains
+					terrain = desert_mountains
 				}
 			}
 		}
@@ -534,7 +530,7 @@ court_chaplain_conversion_contextual_bonuses = {
 		limit = {
 			exists = scope:county
 			scope:councillor.faith = { has_doctrine_parameter = unreformed_syncretic_actor_opinion_active }
-			scope:county.faith = { has_doctrine_parameter = unreformed }
+			scope:county.faith = { has_doctrine_parameter = unreformed}
 		}
 		add = {
 			value = scope:councillor.conversion_syncretic_with_religion_malus
@@ -678,7 +674,7 @@ court_chaplain_conversion_contextual_bonuses = {
 	}	
 	if = {
 		limit = {
-			scope:county ?= { has_county_modifier = petition_liege_county_control_modifier }
+			scope:county ?= { has_county_modifier = petition_liege_county_convert_modifier }
 		}
 		add = {
 			value = scope:councillor.petition_liege_county_convert_modifier_value

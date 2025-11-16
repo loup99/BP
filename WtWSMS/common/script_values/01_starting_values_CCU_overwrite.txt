@@ -9,17 +9,9 @@ culture_acceptance_baseline = {
 	if = {
 		limit = { # To stop errors in observe mode
 			exists = root
-			exists = scope:culture
 
 			# Set up some scopes we'll need
-			trigger_if = {
-				limit = {
-					culture_number_of_counties > 0
-				}
-				calc_culture_dominant_religion = { save_temporary_scope_as = our_religion }
-				calc_culture_dominant_faith = { save_temporary_scope_as = our_faith }
-			}
-			scope:culture = {
+			scope:culture ?= {
 				trigger_if = {
 					limit = {
 						culture_number_of_counties > 0
@@ -27,6 +19,13 @@ culture_acceptance_baseline = {
 					calc_culture_dominant_religion = { save_temporary_scope_as = their_religion }
 					calc_culture_dominant_faith = { save_temporary_scope_as = their_faith }
 				}
+			}
+			trigger_if = {
+				limit = {
+					culture_number_of_counties > 0
+				}
+				calc_culture_dominant_religion = { save_temporary_scope_as = our_religion }
+				calc_culture_dominant_faith = { save_temporary_scope_as = our_faith }
 			}
 		}
 		# Increase base acceptance for sharing the same heritage
@@ -61,13 +60,14 @@ culture_acceptance_baseline = {
 			}
 		}
 		
+		
 		# Increase base acceptance for sharing same language
 		if = {
 			limit = {
 				has_same_culture_language = scope:culture
 			}
 			add = {
-				value = same_language_cultural_acceptance # please update CULTURE_PILLAR_TOOLTIP_LANGUAGE_EFFECT if this number changes
+				value = 10 # please update CULTURE_PILLAR_TOOLTIP_LANGUAGE_EFFECT if this number changes
 				desc = ACCEPTANCE_BASELINE_LANGUAGE
 			}
 		}
@@ -122,7 +122,6 @@ culture_acceptance_baseline = {
 				desc = ACCEPTANCE_BASELINE_MARTIAL_TRADITION
 			}
 		}
-		
 		# Increase base acceptance for sharing the same ethos if cultures are present within the same geographical area
 		if = {
 			limit = {
@@ -145,9 +144,8 @@ culture_acceptance_baseline = {
 		# General Faith acceptance modifiers
 		if = { # Same Religion
 			limit = {
-				exists = scope:our_religion
 				exists = scope:their_religion
-				scope:our_religion = scope:their_religion
+				scope:our_religion ?= scope:their_religion
 				root = {
 					any_culture_county = {
 						percent >= 0.5
@@ -168,9 +166,8 @@ culture_acceptance_baseline = {
 		}
 		if = { # Same exact Faith
 			limit = {
-				exists = scope:our_faith
 				exists = scope:their_faith
-				scope:our_faith = scope:their_faith
+				scope:our_faith ?= scope:their_faith
 				root = {
 					any_culture_county = {
 						percent >= 0.5
@@ -189,58 +186,12 @@ culture_acceptance_baseline = {
 				desc = ACCEPTANCE_BASELINE_FAITH
 			}
 		}
-		else_if = {
-			limit = { 
-				AND = {
-					exists = scope:our_faith
-					exists = scope:their_faith
-					scope:our_faith = { faith_hostility_level = { target = scope:their_faith value = 0 } } 
-					scope:their_faith = { faith_hostility_level = { target = scope:our_faith value = 0 } }
-				}
-			}
-			add = {
-				value = 5
-				desc = ACCEPTANCE_BASELINE_FAITH_RIGHTEOUS
-			}
-		}
-		else_if = {
-			limit = { 
-				exists = scope:our_faith
-				exists = scope:their_faith
-				OR = {
-					scope:our_faith = { faith_hostility_level = { target = scope:their_faith value = 3 } } 
-					scope:their_faith = { faith_hostility_level = { target = scope:our_faith value = 3 } }
-				}
-			}
-			add = {
-				value = -20
-				desc = ACCEPTANCE_BASELINE_FAITH_EVIL
-			}
-		}
-		else_if = {
-			limit = { 
-				exists = scope:our_faith
-				exists = scope:their_faith
-				OR = {
-					scope:our_faith = { faith_hostility_level = { target = scope:their_faith value = 2 } } 
-					scope:their_faith = { faith_hostility_level = { target = scope:our_faith value = 2 } }
-				}
-			}
-			add = {
-				value = -10
-				desc = ACCEPTANCE_BASELINE_FAITH_HOSTILE
-			}
-		}
-		
-		
 		if = { # Eastern faiths
 			limit = {
-				exists = scope:our_religion
-				exists = scope:their_religion
-				scope:our_religion = {
+				scope:our_religion ?= {
 					is_in_family = rf_eastern
 				}
-				scope:their_religion = {
+				scope:their_religion ?= {
 					is_in_family = rf_eastern
 				}
 
@@ -270,12 +221,10 @@ culture_acceptance_baseline = {
 		}
 		if = { # Pluralistic close faiths
 			limit = {
-				exists = scope:our_faith
-				exists = scope:their_faith
-				scope:our_faith = {
+				scope:our_faith ?= {
 					has_doctrine = doctrine_pluralism_pluralistic
 				}
-				scope:their_faith = {
+				scope:their_faith ?= {
 					has_doctrine = doctrine_pluralism_pluralistic
 				}
 				any_culture_county = {

@@ -30,7 +30,7 @@ tradition_chivalry = {
 		romance_scheme_bonuses = yes
 		romance_scheme_penalty = yes
 		ai_romance_scheme_increase = yes
-		poet_trait_romance_bonuses = yes
+		lifestyle_poet_trait_romance_bonuses = yes
 		can_host_joust_contests = yes
 		knight_errant_trait_bonuses = yes
 	}
@@ -482,7 +482,7 @@ tradition_xenophilic = {
 			text = culture_acceptance_trigger_desc
 			any_culture_global = {
 				count >= xenophilic_nr_of_cultures_value
-				NOT = { this = prev }
+				this != prev
 				cultural_acceptance = { target = prev value >= xenophilic_acceptance_value }
 			}
 		}
@@ -526,7 +526,7 @@ tradition_xenophilic = {
 					NOT = {
 						any_culture_global = {
 							count >= xenophilic_nr_of_cultures_cost_value
-							NOT = { this = prev }
+							this != prev
 							cultural_acceptance = { target = prev value >= xenophilic_acceptance_cost_value }
 						}
 					}
@@ -600,9 +600,14 @@ tradition_music_theory = {
 	##### Changed from Vanilla vvvvv
 	can_pick = {
 		custom_tooltip = {
+			text = cannot_have_tradition_fp1_northern_stories
+			NOT = { culture_tradition:tradition_fp1_northern_stories = { is_in_list = traits } }
+		}
+		custom_tooltip = {
 			text = cannot_have_tradition_tamil_thai
 			NOT = { culture_tradition:tradition_tamil_thai = { is_in_list = traits } }
 		}
+		NOT = { culture_tradition:tradition_tgp_ephemeral_grace = { is_in_list = traits } }
 	}
 	##### Changed from Vanilla ^^^^^
 	
@@ -645,7 +650,7 @@ tradition_music_theory = {
 								count >= 3
 								culture = prev
 								primary_title.tier >= tier_county
-								has_trait = poet
+								has_trait = lifestyle_poet
 							}
 						}
 					}
@@ -655,7 +660,7 @@ tradition_music_theory = {
 				}
 				add = {
 					value = tradition_unfulfilled_criteria_penalty
-					desc = rulers_with_poet_desc
+					desc = rulers_with_lifestyle_poet_desc
 				}
 			}
 
@@ -691,7 +696,10 @@ tradition_music_theory = {
 		value = 50
 		if = {
 			limit = { # AI should avoid stacking traditions for court positions
-				culture_tradition:tradition_poetry = { is_in_list = traits }
+				OR = {
+					culture_tradition:tradition_poetry = { is_in_list = traits }
+					culture_tradition:tradition_tgp_ephemeral_grace = { is_in_list = traits }
+				}
 			}
 			multiply = 0.25
 		}
@@ -775,7 +783,7 @@ tradition_poetry = {
 								count >= 3
 								culture = prev
 								primary_title.tier >= tier_county
-								has_trait = poet
+								has_trait = lifestyle_poet
 							}
 						}
 					}
@@ -785,7 +793,7 @@ tradition_poetry = {
 				}
 				add = {
 					value = tradition_unfulfilled_criteria_penalty
-					desc = rulers_with_poet_desc
+					desc = rulers_with_lifestyle_poet_desc
 				}
 			}
 
