@@ -1,16 +1,36 @@
 ﻿##### Changed from Vanilla: Removed in cases where culture kingdoms can be founded
 found_kingdom_decision = {
 	picture = {
+		trigger = {
+			culture = { has_graphical_east_asia_culture_group_trigger = yes }
+		}
+		reference = "gfx/interface/illustrations/activity_splash_screens/tour_arrival_asia_welcome.dds"
+	}
+	picture = {
+		trigger = {
+			culture = { has_graphical_india_culture_group_trigger = yes }
+		}
+		reference = "gfx/interface/illustrations/event_scenes/ep2_feast_indian.dds"
+	}
+	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_found_kingdom.dds"
 	}
 	decision_group_type = major
-	ai_check_interval = 60
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 60
+		kingdom = 0
+		empire = 0
+		hegemony = 0
+	}
 	desc = found_kingdom_decision_desc
 
 	##### Changed from Vanilla vvvvv
 	is_shown = {
 		highest_held_title_tier = tier_duchy
 		NOT = { has_game_rule = off_custom_kingdoms }
+		is_landed_or_landless_administrative = yes
 		is_confederation_member = no
 		##### Changed from Vanilla vvvvv
 		trigger_if = {
@@ -26,13 +46,13 @@ found_kingdom_decision = {
 
 	is_valid = {
 		prestige_level >= 3
-		is_independent_ruler = yes
+		top_liege = this
 		OR = {
 			custom_description = {
 				text = found_kingdom_decision_three_duchies_held
 				any_held_title = {
 					count > 2
-					tier = tier_duchy
+					title_tier = duchy
 				}
 			}
 			sub_realm_size >= 30
@@ -59,7 +79,19 @@ found_kingdom_decision = {
 			value = 300
 			if = {
 				limit = {
-					government_has_flag = government_is_nomadic
+					OR = {
+						government_has_flag = government_is_nomadic
+						has_treasury = yes
+					}
+				}
+				multiply = 0
+			}
+		}
+		treasury = {
+			value = 300
+			if = {
+				limit = {
+					has_treasury = no
 				}
 				multiply = 0
 			}
@@ -107,23 +139,45 @@ found_kingdom_decision = {
 ##### Changed from Vanilla: Blocked when primary titles are titular to make players convert them to de jure
 found_empire_decision = {
 	picture = {
+		trigger = {
+			government_is_japanese_trigger = yes
+		}
+		reference = "gfx/interface/illustrations/event_story/tgp_japanese_shogunate.dds"
+	}
+	picture = {
+		trigger = { culture = { has_graphical_east_asia_culture_group_trigger = yes } }
+		reference = "gfx/interface/illustrations/event_story/tgp_dynastic_cycle_stability.dds"
+	}
+	picture = {
+		trigger = { culture = { has_graphical_india_culture_group_trigger = yes } }
+		reference = "gfx/interface/illustrations/decisions/tgp_decision_mandala.dds"
+	}
+	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
 	}
 	decision_group_type = major
-	ai_check_interval = 60
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 0
+		kingdom = 60
+		empire = 0
+		hegemony = 0
+	}
 	desc = found_empire_decision_desc
 
 	##### Changed from Vanilla vvvvv
 	is_shown = {
 		highest_held_title_tier = tier_kingdom
 		OR = {
-			is_independent_ruler = yes
+			top_liege = this
 			any_held_title = {
 				count >= 3
-				tier = tier_kingdom
+				title_tier = kingdom
 			}
 		}
 		NOT = { has_game_rule = off_custom_kingdoms }
+		is_landed_or_landless_administrative = yes
 		is_confederation_member = no
 		##### Changed from Vanilla vvvvv
 		trigger_if = {
@@ -154,7 +208,7 @@ found_empire_decision = {
 						text = found_empire_decision_three_kingdoms_held
 						any_held_title = {
 							count >= 2
-							tier = tier_kingdom
+							title_tier = kingdom
 						}
 					}
 					sub_realm_size >= 40
@@ -169,14 +223,14 @@ found_empire_decision = {
 						text = found_empire_decision_three_kingdoms_held
 						any_held_title = {
 							count >= 3
-							tier = tier_kingdom
+							title_tier = kingdom
 						}
 					}
 					sub_realm_size >= 80
 				}
 			}
 		}
-		
+
 		trigger_if = {
 			limit = {
 				government_has_flag = government_is_nomadic
@@ -223,7 +277,7 @@ found_empire_decision = {
 	##### Changed from Vanilla ^^^^^
 
 	is_valid_showing_failures_only = {
-		is_independent_ruler = yes
+		top_liege = this
 		is_available_adult = yes
 		is_at_war = no
 	}
@@ -233,7 +287,19 @@ found_empire_decision = {
 			value = 1200
 			if = {
 				limit = {
-					government_has_flag = government_is_nomadic
+					OR = {
+						government_has_flag = government_is_nomadic
+						has_treasury = yes
+					}
+				}
+				multiply = 0
+			}
+		}
+		treasury = {
+			value = 1200
+			if = {
+				limit = {
+					has_treasury = no
 				}
 				multiply = 0
 			}
@@ -301,10 +367,21 @@ expand_duchy_decision = {
 		reference = "gfx/interface/illustrations/decisions/fp3/fp3_decision_sunder.dds"
 	}
 	picture = {
+		trigger = { culture = { has_building_gfx = southeast_asian_building_gfx } }
+		reference = "gfx/interface/illustrations/decisions/tgp_projects_mandala_capital.dds"
+	}
+	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_destiny_goal.dds"
 	}
 	decision_group_type = realm
-	ai_check_interval = 240
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 240
+		kingdom = 240
+		empire = 240
+		hegemony = 240
+	}
 
 	cooldown = { years = 10 }
 
@@ -316,8 +393,8 @@ expand_duchy_decision = {
 					limit = {
 						highest_held_title_tier = tier_duchy
 					}
-					primary_title = { 
-						save_temporary_scope_as = duchy_title 
+					primary_title = {
+						save_temporary_scope_as = duchy_title
 					}
 				}
 				trigger_else = {
@@ -351,6 +428,7 @@ expand_duchy_decision = {
 		}
 	}
 
+	##### Changed from Vanilla vvvvv
 	is_shown = {
 		save_temporary_scope_as = root_scope_temporary
 		highest_held_title_tier >= tier_duchy
@@ -366,8 +444,13 @@ expand_duchy_decision = {
 			limit = {
 				highest_held_title_tier = tier_duchy
 			}
-			primary_title = { 
-				save_temporary_scope_as = duchy_title 
+			any_held_title = {
+				tier = tier_duchy
+				NOR = {
+					is_landless_type_title = yes
+					is_noble_family_title = yes
+				}
+				save_temporary_scope_as = duchy_title
 			}
 		}
 		trigger_else = {
@@ -375,23 +458,26 @@ expand_duchy_decision = {
 				save_temporary_scope_as = duchy_title
 			}
 		}
+		##### Changed from Vanilla vvvvv
 		scope:duchy_title = {
 			is_titular = no
 			any_de_jure_county = {
 				count < expand_duchy_max_size_value
 			}
 		}
+		##### Changed from Vanilla ^^^^^
 	}
+	##### Changed from Vanilla ^^^^^
 
 	is_valid = {
 		save_temporary_scope_as = root_scope_temporary
-		is_independent_ruler = yes
+		top_liege = this
 		trigger_if = {
 			limit = {
 				highest_held_title_tier = tier_duchy
 			}
-			primary_title = { 
-				save_temporary_scope_as = duchy_title 
+			primary_title = {
+				save_temporary_scope_as = duchy_title
 			}
 		}
 		trigger_else = {
@@ -402,15 +488,19 @@ expand_duchy_decision = {
 		trigger_if = {
 			limit = {
 				OR = {
-					has_legitimacy = yes 
+					has_legitimacy = yes
 					exists = scope:barony
 				}
 			}
 			OR = {
-				prestige_level >= 3
+				trigger_if = {
+					limit = { government_has_flag = government_is_mandala }
+					piety_level >= 3
+				}
+				trigger_else = { prestige_level >= 3 }
 				trigger_if = {
 					limit = {
-						has_legitimacy = yes 
+						has_legitimacy = yes
 					}
 					legitimacy_level >= 4
 				}
@@ -445,6 +535,7 @@ expand_duchy_decision = {
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	is_valid_showing_failures_only = {
 		is_available_adult = yes
@@ -459,8 +550,8 @@ expand_duchy_decision = {
 						limit = {
 							highest_held_title_tier = tier_duchy
 						}
-						primary_title = { 
-							save_temporary_scope_as = duchy_title 
+						primary_title = {
+							save_temporary_scope_as = duchy_title
 						}
 					}
 					trigger_else = {
@@ -483,7 +574,7 @@ expand_duchy_decision = {
 			limit = {
 				highest_held_title_tier = tier_duchy
 			}
-			primary_title = { 
+			primary_title = {
 				save_temporary_scope_as = duchy_title_scope
 			}
 		}
@@ -534,10 +625,41 @@ set_de_jure_capital_decision = {
 		reference = "gfx/interface/illustrations/event_scenes/mpo_city_steppe.dds"
 	}
 	picture = {
+		trigger = {
+			OR = {
+				government_has_flag = government_is_celestial
+				government_has_flag = government_is_meritocratic
+			}
+		}
+		reference = "gfx/interface/illustrations/holding_types/tgp_city_china.dds"
+	}
+	picture = {
+		trigger = {
+			government_is_japanese_trigger = yes 
+		}
+		reference = "gfx/interface/illustrations/holding_types/tgp_city_japan.dds"
+	}
+	picture = {
+		trigger = {
+			OR = {
+				government_has_flag = government_is_mandala
+				culture = { has_graphical_india_culture_group_trigger = yes }
+			}
+		}
+		reference = "gfx/interface/illustrations/holding_types/city_india.dds"
+	}
+	picture = {
 		reference = "gfx/interface/illustrations/decisions/ep3_decision_city.dds"
 	}
 	decision_group_type = realm
-	ai_check_interval = 240
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 240
+		kingdom = 240
+		empire = 240
+		hegemony = 0
+	}
 
 	cooldown = { years = 10 }
 
@@ -550,7 +672,7 @@ set_de_jure_capital_decision = {
 		item = { # Duchy
 			value = set_duchy_capital
 			is_valid = {
-				
+
 			}
 			current_description = hire_physician_decision_desc
 			localization = set_de_jure_capital_duchy
@@ -585,9 +707,20 @@ set_de_jure_capital_decision = {
 		}
 	}
 
+	##### Changed from Vanilla vvvvv
 	is_shown = {
-		highest_held_title_tier >= tier_duchy
+		##### Changed from Vanilla vvvvv
 		this.primary_title = { is_titular = no }
+		##### Changed from Vanilla ^^^^^
+		highest_held_title_tier >= tier_duchy
+		highest_held_title_tier < tier_hegemony
+		any_held_title = {
+			tier >= tier_duchy
+			NOR = {
+				is_landless_type_title = yes
+				is_noble_family_title = yes
+			}
+		}
 		OR = {
 			AND = {
 				highest_held_title_tier >= tier_duchy
@@ -603,6 +736,7 @@ set_de_jure_capital_decision = {
 			}
 		}
 	}
+	##### Changed from Vanilla ^^^^^
 
 	is_valid = {
 		root.capital_county = {
@@ -635,11 +769,11 @@ set_de_jure_capital_decision = {
 				scope:set_duchy_capital = {
 					root.capital_county.duchy = { save_temporary_scope_as = current_de_jure }
 				}
-				scope:set_kingdom_capital = { 
-					root.capital_county.kingdom = { save_temporary_scope_as = current_de_jure } 
+				scope:set_kingdom_capital = {
+					root.capital_county.kingdom = { save_temporary_scope_as = current_de_jure }
 				}
-				scope:set_empire_capital = { 
-					root.capital_county.empire = { save_temporary_scope_as = current_de_jure } 
+				scope:set_empire_capital = {
+					root.capital_county.empire = { save_temporary_scope_as = current_de_jure }
 				}
 			}
 		}
@@ -721,21 +855,21 @@ set_de_jure_capital_decision = {
 			switch = {
 				trigger = yes
 				scope:set_duchy_capital = {
-					root.capital_county.duchy = { 
+					root.capital_county.duchy = {
 						title_capital_county = { save_scope_as = old_capital }
-						save_scope_as = current_de_jure_scope 
+						save_scope_as = current_de_jure_scope
 					}
 				}
-				scope:set_kingdom_capital = { 
-					root.capital_county.kingdom = { 
+				scope:set_kingdom_capital = {
+					root.capital_county.kingdom = {
 						title_capital_county = { save_scope_as = old_capital }
-						save_scope_as = current_de_jure_scope 
-					} 
+						save_scope_as = current_de_jure_scope
+					}
 				}
-				scope:set_empire_capital = { 
-					root.capital_county.empire = { 
+				scope:set_empire_capital = {
+					root.capital_county.empire = {
 						title_capital_county = { save_scope_as = old_capital }
-						save_scope_as = current_de_jure_scope 
+						save_scope_as = current_de_jure_scope
 					}
 				}
 			}

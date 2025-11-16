@@ -11,8 +11,8 @@ It presumes no change in culture or religion and just builds a line of rulers fo
 ##### Main #####
 start_year = 350
 end_year = 550
-religion = 'germanic_pagan'
-culture = culture_storage.culture_list['geatish']
+religion = 'finnish_pagan'
+culture = culture_storage.culture_list['mari']
 
 ## Saami Peoples
 #holding_list = ["c_kakisalmi","c_sortavala","c_salinis","c_onega","c_kontupohja","c_viena","c_viipuri","c_nyland",
@@ -50,13 +50,16 @@ culture = culture_storage.culture_list['geatish']
 
 #Mari
 #holding_list = ["c_nizhny_novgorod","c_yoshkar-ola","c_martyuba","c_cykma","c_kazan"]
+holding_list = ["c_mamadych","c_mari-turek"]
 
 ##Mordvins
 #holding_list = ["c_cheboksary","c_kozlov","c_lachyk-uba","c_saran","c_voronezh","c_karatayak","c_penza","c_petrovsk","c_tuluchezeva","c_tambov","c_durovka",
 #                "c_ashli"]
+#holding_list = ["c_rakcha","c_serdosk","c_khursa","c_matya"]
 
 ##Gorkhovo
 #holding_list = ["c_uraltau","c_karabash","c_uiska","c_yekaterinburg","c_chelabinsk","c_chadrinsk","c_jitikul","c_atamansku","c_kurgan","c_sabakyul"]
+#holding_list = ["c_duvan"]
 
 ##Sargat
 #holding_list = ["c_vargashi","c_petropavl","c_teke","c_kainsk","c_omsk","c_petropavolsk","c_tara","c_ishim","c_dolgujar","c_kazanskoye"]
@@ -190,7 +193,7 @@ culture = culture_storage.culture_list['geatish']
 
 #Geatish
 #Smaland
-holding_list = ["c_more","c_sevede","c_varend","c_njudung","c_finnveden"]
+#holding_list = ["c_more","c_sevede","c_varend","c_njudung","c_finnveden"]
 
 for holding,list_loc in zip(holding_list,range(len(holding_list))):
     #Write or append data

@@ -1,6 +1,18 @@
 ﻿##### Changed from Vanilla: Blocked prior to early medieval era
 create_holy_order_decision = {
 	picture = {
+		trigger = {
+			culture = { has_graphical_east_asia_culture_group_trigger = yes }
+		}
+		reference = "gfx/interface/illustrations/holding_types/tgp_chinese_pagoda.dds"
+	}
+	picture = {
+		trigger = {
+			culture = { has_graphical_india_culture_group_trigger = yes }
+		}
+		reference = "gfx/interface/illustrations/holding_types/tgp_castle_se_asia.dds"
+	}
+	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
 	}
 	decision_group_type = major
@@ -10,7 +22,10 @@ create_holy_order_decision = {
 	##### Changed from Vanilla vvvvv
 	is_shown = {
 		is_landed = yes
-		NOT = {
+		NOR = {
+			faith = {
+				has_doctrine = special_doctrine_immaterial_harmony
+			}
 			faith = {
 				any_faith_holy_order = {
 					holy_order_patron = root
@@ -109,7 +124,7 @@ create_holy_order_decision = {
 		trigger_if = {
 			limit = {
 				exists = faith.religious_head
-				NOT = { root = root.faith.religious_head }
+				root != root.faith.religious_head
 			}
 			faith.religious_head = {
 				opinion = {
@@ -137,7 +152,22 @@ create_holy_order_decision = {
 	}
 	cost = {
 		gold = {
-			value = holy_order_gold_cost
+			value = 0
+			if = {
+				limit = {
+					has_treasury = no
+				}
+				add = holy_order_gold_cost
+			}
+		}
+		treasury = {
+			value = 0
+			if = {
+				limit = {
+					has_treasury = yes
+				}
+				add = holy_order_gold_cost
+			}
 		}
 		piety = {
 			value = holy_order_piety_cost
@@ -153,7 +183,7 @@ create_holy_order_decision = {
 			}
 			hidden_effect = {
 				if = {
-					limit = { NOT = { scope:barony.holder = root } }
+					limit = { scope:barony.holder != root }
 					create_title_and_vassal_change = {
 						type = leased_out
 						save_scope_as = change
@@ -190,7 +220,7 @@ create_holy_order_decision = {
 		is_playable_character = yes
 		OR = {
 			any_held_title = {
-				tier = tier_barony
+				title_tier = barony
 				barony_is_valid_for_holy_order_lease_trigger = { CHARACTER = root }
 			}
 			any_vassal = {
@@ -214,6 +244,9 @@ create_holy_order_decision = {
 				}
 			}
 		}
-
+		modifier = {
+			government_has_flag = government_is_mandala
+			add = -150
+		}
 	}
 }

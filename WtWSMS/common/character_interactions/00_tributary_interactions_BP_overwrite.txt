@@ -4,7 +4,7 @@
 # recipient = suzerain
 
 cease_paying_tribute_interaction = {
-	category = interaction_category_diplomacy
+	category = interaction_category_vassal
 	common_interaction = yes
 	use_diplomatic_range = no
 	icon = cease_paying_tributary_interaction
@@ -15,7 +15,7 @@ cease_paying_tribute_interaction = {
 		scope:actor = {
 			this != scope:recipient
 			suzerain = scope:recipient
-			subject_can_break_tributary = yes
+			is_tributary = yes
 		}
 	}
 
@@ -36,6 +36,10 @@ cease_paying_tribute_interaction = {
 					}
 				}
 				NOT = { has_truce = scope:recipient }
+			}
+			trigger_else = {
+				NOT = { has_truce = scope:recipient }
+				subject_can_break_tributary = yes
 			}
 		}
 		##### Changed from Vanilla vvvvv
@@ -76,8 +80,48 @@ cease_paying_tribute_interaction = {
 	on_accept = {
 		scope:actor = {
 			end_tributary = yes
+			if = {
+				limit = { 
+					scope:recipient = { government_has_flag = government_is_mandala }
+				}
+				add_opinion = {
+					modifier = tributary_ceased_payments_opinion
+					target = scope:recipient
+					opinion = -100
+				}
+			}
+			
 		}
 		scope:recipient = {
+			# Losing legitimacy if you are the Chinese Hegemon in the Dynastic Cycle Instability phase
+			if = {
+				limit = {
+					top_participant_group:dynastic_cycle ?= {
+						has_participant_group_parameter = dynastic_cycle_external_tributaries_vassals_increased_independence_desire
+					}
+				}
+				add_legitimacy_effect = { LEGITIMACY = minor_legitimacy_loss }
+			}
+
+			#Some cooldown for Mandala rulers
+			if = {
+				limit = { government_has_flag = government_is_mandala }
+				if = {
+					limit = { is_ai = yes }
+					set_variable = {
+						name = tributary_recently_ceased
+						years = 1
+					}
+				}
+				else = {
+					set_variable = {
+						name = tributary_recently_ceased
+						months = 6
+					}
+				}
+				
+			}
+
 			if = {
 				limit = { is_ai = yes }
 				trigger_event = {
@@ -88,6 +132,7 @@ cease_paying_tribute_interaction = {
 			else = {
 				trigger_event = char_interaction.0370
 			}
+
 			add_opinion = {
 				modifier = tributary_ceased_payments_opinion
 				target = scope:actor
@@ -104,7 +149,15 @@ cease_paying_tribute_interaction = {
 	ai_potential = {
 		is_at_war = no
 		is_migrating = no
-		suzerain ?= {
+		trigger_if = {
+			limit = {
+				suzerain = {
+					highest_held_title_tier >= tier_hegemony
+				}
+			}
+			subject_standing < 20
+		}
+		suzerain = {
 			is_migrating = no
 
 			OR = {
@@ -124,6 +177,23 @@ cease_paying_tribute_interaction = {
 					}
 				}
 			}
+			trigger_if = {
+				limit = {
+					any_character_situation = {
+						situation_type = dynastic_cycle
+					}
+				}
+				OR = {
+					root.subject_standing <= 0
+					any_character_situation = {
+						situation_type = dynastic_cycle
+						OR = {
+							situation_current_phase = situation_dynastic_cycle_phase_instability
+							situation_current_phase = situation_dynastic_cycle_phase_instability_conquest
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -131,103 +201,367 @@ cease_paying_tribute_interaction = {
 		ai_recipients = suzerain
 	}
 
-	ai_frequency = 12 # this must be 12 (1 year) in order to ensure the integrity of the UI-visualized chance the tributary will break the contract
+	# this must be 12 (1 year) in order to ensure the integrity of the UI-visualized chance the tributary will break the contract
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 12
+		duchy = 12
+		kingdom = 12
+		empire = 12
+		hegemony = 12
+	}
 
 	# visualized in the UI as the annual chance the tributary will break the contract, based on a percentage chance per year
-	ai_will_do = { 
-		base = -25
-
+	ai_will_do = {
+		base = 0
+		#Base
 		modifier = {
-			add = {
-				add = obedience_value
-				subtract = obedience_threshold
-				multiply = -1
-				max = obedience_threshold
-				min = {
-					value = obedience_threshold
-					multiply = -1
-				}
+			NOT = {
+				suzerain = { government_has_flag = government_is_mandala }
 			}
-			desc = obedience_value_reason
-		}
-
-		modifier = {
-			scope:recipient = {
-				has_variable = temp_tributary_protection
-			}
-			add = -150
-			desc = temp_tributary_protection_reason
-		}
-
-		modifier = {
-			dominance_value > suzerain.dominance_value
-			add = 30
-			desc = cease_tribute_higher_dominance_reason
-		}
-
-		modifier = {
-			suzerain = { 
-				any_memory = { 
-					has_memory_type = nomad_showed_weakness_in_war
-					memory_age_years < 5
-				}
-			}
-			add = 30
-			desc = cease_tribute_showed_weakness_in_war_reason
-		}
-
-		modifier = {
-			any_memory = { 
-				has_memory_type = suzerain_defended_me_in_war
-				has_memory_participant = root.suzerain
-				memory_age_years < 10
-			}
-			add = -100
-			desc = cease_tribute_defended_me_in_war_reason
-		}
-
-		modifier = {
-			suzerain = { 
-				any_memory = { 
-					has_memory_type = had_chaotic_kurultai_succession
-					memory_age_years < 5
-				}
-			}
-			add = 30
-			desc = cease_tribute_had_chaotic_kurultai_succession_reason
+			add = -25
+			desc = base_with_value
 		}
 
 		# if the actor is sufficiently scared of the recipient they're way less likely to do this
-		ai_military_threat_modifier = {  
+		ai_military_threat_modifier = {
 			SENDER = scope:actor
 			RECEIVER = scope:recipient
-			MULTIPLIER = -2.5
+			MULTIPLIER = -2
 		}
 
-		modifier = {
-			scope:actor = {
-				is_migrating = no
+		### Nomad
+			modifier = {
+				scope:recipient = { exists = obedience_target }
+				add = {
+					add = obedience_value
+					subtract = obedience_threshold
+					multiply = -1
+					max = obedience_threshold
+					min = {
+						value = obedience_threshold
+						multiply = -1
+					}
+				}
+				desc = obedience_value_reason
 			}
-			scope:recipient = {
-				NOT = { 
-					any_land_neighboring_realm_with_tributaries_owner = {
-						this = scope:actor
+	
+			modifier = {
+				scope:recipient = {
+					has_variable = temp_tributary_protection
+				}
+				add = -150
+				desc = temp_tributary_protection_reason
+			}
+	
+			modifier = {
+				dominance_value > suzerain.dominance_value
+				add = 30
+				desc = cease_tribute_higher_dominance_reason
+			}
+	
+			modifier = {
+				suzerain = { 
+					any_memory = { 
+						has_memory_type = nomad_showed_weakness_in_war
+						memory_age_years < 5
+					}
+				}
+				add = 30
+				desc = cease_tribute_showed_weakness_in_war_reason
+			}
+	
+			modifier = {
+				any_memory = { 
+					has_memory_type = suzerain_defended_me_in_war
+					has_memory_participant = root.suzerain
+					memory_age_years < 10
+				}
+				add = -100
+				desc = cease_tribute_defended_me_in_war_reason
+			}
+	
+			modifier = {
+				suzerain = { 
+					any_memory = { 
+						has_memory_type = had_chaotic_kurultai_succession
+						memory_age_years < 5
+					}
+				}
+				add = 30
+				desc = cease_tribute_had_chaotic_kurultai_succession_reason
+			}
+		#General Modifiers
+			#Is the Tributary Connected?
+			modifier = { 
+				scope:recipient = {
+					trigger_if = { #Mandalas, China, Wanua, and Meritocratic realms can keep overseas tributaries, if they are coastal.
+						limit = {
+							scope:actor = {
+								OR = {
+									government_has_flag = government_is_mandala
+									government_has_flag = government_is_celestial
+									government_has_flag = government_is_wanua
+									government_has_flag = government_is_meritocratic
+								}
+							}
+						}
+						NOR = {
+							scope:recipient.capital_county = { is_coastal_county = yes }
+							any_sub_realm_county = { is_coastal_county = yes }
+							any_tributary = {
+								any_sub_realm_county = { is_coastal_county = yes }
+							}
+						}
+					}
+					NOT = {
+						any_land_neighboring_realm_with_tributaries_owner = {
+							this = scope:actor
+						}
+					}
+				}
+				add = 1000
+				desc = cease_tribute_disconnected_suzerain
+			}
+			#Is the suzerain landless?
+			modifier = { 
+				scope:recipient = {
+					is_landed = no
+					is_migrating = no
+					is_at_war = no
+				}
+				add = 10000
+				desc = cease_tribute_landless_suzerain
+			}
+			#Subject Standing
+			modifier = {
+				subject_standing >= 0 # applied only if the subject contract uses Subject Standing
+				add = { # every point of subject standing reduces the chance by 5
+					add = subject_standing
+					multiply = -5
+				}
+				desc = ai_will_do_debug
+			}
+			# TGP Dynastic Cycle in Instability phase
+			modifier = {
+				desc = "FACTION_REASON_DYNASTIC_CYCLE_INSTABILITY"
+				add = 25
+				scope:recipient = {
+					top_participant_group:dynastic_cycle ?= {
+						has_participant_group_parameter = dynastic_cycle_external_tributaries_vassals_increased_independence_desire
 					}
 				}
 			}
-			add = 1000
-			desc = cease_tribute_disconnected_suzerain
-		}
 
-		modifier = {
-			scope:recipient = {
-				is_landed = no
-				is_migrating = no
-				is_at_war = no
+		#Legitimacy
+			modifier = {
+				desc = "RECIPIENT_LOW_LEGITIMACY_REASON"
+				add = 75
+				scope:recipient = {
+					has_legitimacy_flag = massively_reduced_tributarization_acceptance
+				}
 			}
-			add = 10000
-			desc = cease_tribute_landless_suzerain
+			modifier = {
+				desc = "RECIPIENT_LOW_LEGITIMACY_REASON"
+				add = 50
+				scope:recipient = {
+					has_legitimacy_flag = very_reduced_tributarization_acceptance
+				}
+			}
+			modifier = {
+				desc = "RECIPIENT_LOW_LEGITIMACY_REASON"
+				add = 25
+				scope:recipient = {
+					has_legitimacy_flag = reduced_tributarization_acceptance
+				}
+			}
+			modifier = {
+				desc = "RECIPIENT_LOW_LEGITIMACY_REASON"
+				add = 15
+				scope:recipient = {
+					has_legitimacy_flag = slightly_reduced_tributarization_acceptance
+				}
+			}
+		# HIGH LEGITIMACY
+			modifier = {
+				desc = "RECIPIENT_HIGH_LEGITIMACY_REASON"
+				add = -25
+				scope:recipient = {
+					has_legitimacy_flag = increased_tributarization_acceptance
+				}
+			}
+			modifier = {
+				desc = "RECIPIENT_HIGH_LEGITIMACY_REASON"
+				add = -50
+				scope:recipient = {
+					has_legitimacy_flag = very_increased_tributarization_acceptance
+				}
+			}
+			modifier = {
+				desc = "RECIPIENT_HIGH_LEGITIMACY_REASON"
+				add = -75
+				scope:recipient = {
+					has_legitimacy_flag = extra_increased_tributarization_acceptance
+				}
+			}
+		### MANDALA ###
+			#I am a Tribal!
+			modifier = {
+				scope:recipient = { government_has_flag = government_is_mandala }
+				scope:actor = { government_has_flag = government_is_tribal }
+				add = -20
+				desc = actor_is_a_tribal_government
+			}
+			#Your Radiance
+			#Radiance Value x2
+			modifier = {
+				scope:recipient = {
+					government_has_flag = government_is_mandala
+					has_unruined_mandala_capital_trigger = yes
+				}
+				add = {
+					value = {
+						value = scope:recipient.mandala_radiance_value
+						multiply = 2
+					}
+					multiply = -1
+				}
+				desc = recipient_negative_mandala_radiance
+			}
+			#You're Prosperity
+			modifier = {
+				desc = is_prosperity_mandala_tributary
+				scope:recipient = { has_realm_law_flag = tributaries_less_likely_to_break_free }
+				add = -15
+			}
+			#Mandala Piety Level - This is only checked if you are not a Devaraja/haven't got a capital temple complex - Otherwise we use Radiance
+			mandala_devaraja_piety_level_remove_weight_modifier = { DEVARAJA = scope:recipient }
+			#Tributary Realm Size
+			subject_realm_size_add_weight_modifier = {
+				DEVARAJA = scope:recipient
+				SUBJECT = scope:actor
+			}
+
+			##Radience of other potential Suzerains is not calculated here since they can directly ask the tributary to switch over to them.
+
+			#Pacing for Mandala Suzerains
+			modifier = {
+				scope:recipient = { 
+					government_has_flag = government_is_mandala
+					has_variable = tributary_recently_ceased 
+				}
+				factor = 0.1
+			}
+			#You're Disbelieved, son
+			modifier = {
+				suzerain = { has_character_modifier = disbelieved_mandala_modifier }
+				add = 40
+				desc = is_disbelieved_mandala
+			}
+			#SEA Legacy
+			modifier = {
+				desc = tgp_sea_legacy_2_modifier_desc
+				scope:recipient = {
+					dynasty ?= {
+						has_dynasty_perk = tgp_sea_legacy_2
+					}
+				}
+				add = {
+					value = {
+						value = tgp_sea_legacy_tributary_acceptance_value
+						multiply = -1
+					}
+				}
+			}
+			# I am higher rank than you
+			modifier = {
+				desc = tributary_interaction_aibehavior_actor_tier_tt
+				scope:actor = { highest_held_title_tier > scope:recipient.highest_held_title_tier }
+				add = {
+					value = scope:actor.highest_held_title_tier
+					subtract = scope:recipient.highest_held_title_tier 
+					multiply = 50
+				}
+			}
+			# I have a Capital Temple Complex of my own (I am also a God King)
+			modifier = { 
+				desc = tributary_interaction_aibehavior_actor_capital_complex
+				scope:recipient = { government_has_flag = government_is_mandala }
+				scope:actor = {
+					government_has_flag = government_is_mandala
+					capital_province = {
+						has_building_with_flag = mandala_capital_building
+						has_ruined_great_building = no
+					}
+				}
+				add = 50
+			}
+			#AI Godkings should NOT want to be subjects
+			modifier = {
+				has_variable = mandala_godking
+				add = 100
+				desc = mandala_ai_godking_modifier
+			}
+			# Same Faith and Recipient is a God King
+			modifier = { 
+				desc = tributary_interaction_aibehavior_recipient_same_faith
+				scope:recipient = {
+					government_has_flag = government_is_mandala
+					faith = scope:actor.faith
+					capital_province = {
+						has_building_with_flag = mandala_capital_building
+						has_ruined_great_building = no
+					}
+				}
+				add = -10
+			}
+			# Different religion Family - We prefer god kings to be vaguely within our own world view
+			modifier = { 
+				desc = tributary_interaction_aibehavior_recipient_other_religion_family
+				scope:actor = { 	
+					NOT = { government_has_flag = government_is_wanua }
+				}
+				scope:recipient.faith.religion = {
+					switch = {
+						trigger = is_in_family
+						rf_pagan = {
+							scope:actor.faith.religion = { NOT = { is_in_family = rf_pagan } }
+						}
+						rf_sinitic = {
+							scope:actor.faith.religion = { NOT = { is_in_family = rf_sinitic } }
+						}
+						rf_eastern = {
+							scope:actor.faith.religion = { NOT = { is_in_family = rf_eastern } }
+						}
+						rf_abrahamic = {
+							scope:actor.faith.religion = { NOT = { is_in_family = rf_abrahamic } }
+						}
+					}
+				}
+				add = 25
+			}
+		###	
+		# Rivalry modifier.
+		modifier = {
+			desc = embrace_tributarization_interaction_aibehavior_rival_tt
+			scope:recipient = {
+				has_relation_rival = scope:actor
+				NOT = { has_relation_nemesis = scope:actor }
+			}
+			add = 30
 		}
+		# Nemesis modifier.
+		modifier = { 
+			desc = embrace_tributarization_interaction_aibehavior_nemesis_tt
+			scope:recipient = { has_relation_nemesis = scope:actor }
+			add = 50
+		}
+		# OPINION INFLUENCE
+		opinion_modifier = { # Compare Opinion modifier.
+			who = scope:actor
+			opinion_target = scope:recipient
+			multiplier = -1
+		}	
 	}
 }
 
@@ -236,7 +570,7 @@ cease_paying_tribute_interaction = {
 # recipient = tributary
 
 release_tributary_interaction = {
-	category = interaction_category_diplomacy
+	category = interaction_category_vassal
 	common_interaction = no
 	icon = release_tributary_interaction
 
@@ -253,19 +587,40 @@ release_tributary_interaction = {
 		}
 	}
 
-	is_valid_showing_failures_only = {}
+	is_valid_showing_failures_only = {
+		scope:recipient = {
+			trigger_if = {
+				limit = { subject_standing >= 0	}
+				subject_standing = 0
+			}
+		}
+	}
 
 	cost = {
-		prestige = minor_prestige_value
+		prestige = {
+			value = minor_prestige_value
+			if = {
+				limit = { 
+					scope:actor = { government_has_flag = government_is_mandala }
+				}
+				multiply = 0
+			}
+		}
+		piety = {
+			value = medium_piety_value
+			if = {
+				limit = {
+					scope:actor = { 
+						NOT = { government_has_flag = government_is_mandala }
+					}
+				}
+				multiply = 0
+			}
+		}
 	}
 
 	auto_accept = yes
 	on_accept = {
-		add_truce_one_way = {
-			character = scope:recipient
-			years = 5
-			name = TRUCE_TRIBUTARY_RELEASED
-		}
 		scope:recipient = {
 			end_tributary = yes
 			save_scope_as = tributary_loc
@@ -276,14 +631,21 @@ release_tributary_interaction = {
 				name = TRUCE_TRIBUTARY_STOPPED
 			}
 			add_opinion = {
-				target = scope:actor
-				modifier = tributary_released_opinion
-				opinion = 25
-			}
+                target = scope:actor
+                modifier = tributary_released_opinion
+                opinion = 25
+            }
+            if = {
+            	limit = { 
+            		scope:actor = { government_has_flag = government_is_mandala }
+            	}
+            	set_variable = {
+            		name = recent_mandala_suzerain
+            		value = scope:actor
+            		years = 5
+            	}
+            }
 			trigger_event = char_interaction.0380
-		}
-		scope:actor = {
-			#TODO_CD_MPO some sort of message here
 		}
 		##### Changed from Vanilla vvvvv
 		update_federate_modifiers_effect = {

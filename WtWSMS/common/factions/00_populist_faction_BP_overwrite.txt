@@ -1,4 +1,5 @@
-﻿populist_faction = {
+﻿##### Changed from Vanilla: Blocked Romance cultures from revolting against Roman Government
+populist_faction = {
 	casus_belli = populist_war
 
 	leaders_allowed_to_leave = no
@@ -24,6 +25,20 @@
 		base = 0
 
 		common_discontent_progress_modifier = yes
+		modifier = {
+			faction_target = { can_vassals_be_attacked = yes }
+			add = 2
+			desc = border_war_increased_peasant_discontent
+		}
+		modifier = {
+			faction_target = {
+				top_participant_group:dynastic_cycle ?= {
+					has_participant_group_parameter = dynastic_cycle_more_peasant_factions
+				}
+			}
+			add = 2
+			desc = instability_increased_peasant_discontent
+		}
 	}
 
 	power_threshold = {
@@ -68,18 +83,18 @@
 		has_valid_faction_members_trigger = yes
 		# Only AIs are allowed to be in popular factions.
 		is_ai = yes
-		
+
 		# Landed rulers can only be in the faction...
 		trigger_if = {
 			limit = {
 				is_playable_character = yes
 				exists = liege
-				NOT = { this = liege }
+				this != liege
 			}
-			
+
 			# ... If they are a direct vassal of the faction target.
 			liege = scope:faction.faction_target
-			
+
 			# ... If they are at least a count. (Barons are not allowed.)
 			highest_held_title_tier >= tier_county
 		}
@@ -88,8 +103,8 @@
 		custom_tooltip = {
 			text = populist_faction_same_culture_faith_as_liege
 			OR = {
-				NOT = { faith = scope:faction.faction_target.faith }
-				NOT = { culture = scope:faction.faction_target.culture }
+				faith != scope:faction.faction_target.faith
+				culture != scope:faction.faction_target.culture
 			}
 		}
 
@@ -97,7 +112,7 @@
 			limit = {
 				exists = scope:faction.faction_target.primary_title.state_faith
 			}
-			NOT = { faith = scope:faction.faction_target.primary_title.state_faith }
+			faith != scope:faction.faction_target.primary_title.state_faith
 		}
 
 		# Not forbidden from being in factions.
@@ -121,15 +136,15 @@
 
 		# Counties must have a different faith or culture than the faction target.
 		OR = {
-			NOT = { faith = scope:faction.faction_target.faith }
-			NOT = { culture = scope:faction.faction_target.culture }
+			faith != scope:faction.faction_target.faith
+			culture != scope:faction.faction_target.culture
 		}
 
 		trigger_if = { # Must have a different faith than state faith in Admin
 			limit = {
 				exists = scope:faction.faction_target.primary_title.state_faith
 			}
-			NOT = { faith = scope:faction.faction_target.primary_title.state_faith }
+			faith != scope:faction.faction_target.primary_title.state_faith
 		}
 
 		# Counties must have the same faith as the faction
@@ -153,7 +168,7 @@
 					is_ai = no
 				}
 			}
-			NOT = { this = holder.capital_county }
+			this != holder.capital_county
 		}
 		title_province = {
 			NOR = {
@@ -207,10 +222,10 @@
 				limit = {
 					exists = scope:faction.faction_target.primary_title.state_faith
 				}
-				NOT = { root.faith = scope:faction.faction_target.primary_title.state_faith }
+				root.faith != scope:faction.faction_target.primary_title.state_faith
 			}
 		}
-		
+
 		title_province = {
 			NOR = {
 				has_holding_type = nomad_holding
@@ -236,15 +251,21 @@
 
 		# Must have a culture or faith different from the target's.
 		OR = {
-			NOT = { faith = scope:target.faith }
-			NOT = { culture = scope:target.culture }
+			#make sure you do not accept their faith
+			faith ?= {
+				faith_hostility_level = {
+					target = scope:target.faith
+					value > faith_fully_accepted_level
+				}
+			}
+			culture != scope:target.culture
 		}
 
 		trigger_if = { # Must have a different faith than state faith in Admin
 			limit = {
 				exists = scope:faction.faction_target.primary_title.state_faith
 			}
-			NOT = { faith = scope:faction.faction_target.primary_title.state_faith }
+			faith != scope:faction.faction_target.primary_title.state_faith
 		}
 
 		####
@@ -256,7 +277,7 @@
 			subject = scope:target
 			NOT = { scope:target = { immune_to_factions_trigger = yes } }
 		}
-		
+
 		title_province = {
 			NOR = {
 				has_holding_type = nomad_holding
@@ -288,10 +309,20 @@
 			add = -1000
 			scope:target = {
 				any_targeting_faction = {
-					faction_is_type = populist_faction
+					faction_type = populist_faction
 					any_faction_county_member = {
 						this.title_province.faith = root.title_province.faith
 					}
+				}
+			}
+		}
+		# If a suitable Escalated Faction exists, prefer to join it instead.
+		modifier = {
+			desc = "FACTION_REASON_PREFER_ESCALATED_FACTION"
+			add = -100
+			scope:target = {
+				any_targeting_faction = {
+					faction_type = escalated_peasant_faction
 				}
 			}
 		}
@@ -303,7 +334,7 @@
 		#	Different Culture OR Astray Faith: Never Creates
 		compare_modifier = {
 			trigger = {
-				NOT = { this.title_province.culture = scope:target.culture }
+				this.title_province.culture != scope:target.culture
 				this.title_province.culture = { has_same_culture_heritage = scope:target.culture }
 			}
 			value = county_opinion
@@ -350,12 +381,18 @@
 		# Ruling Caste
 		modifier = {
 			add = -25
-			NOT = {
-				culture = scope:target.culture
-			}
+			culture != scope:target.culture
 			scope:target.culture = {
 				has_cultural_parameter = peasant_and_populist_factions_less_common
 			}
+		}
+
+		# Defiant Ambushers
+		modifier = {
+			add = 25
+			county_opinion < 0
+			culture != scope:target.culture
+			culture = { has_cultural_parameter = county_peasant_and_populist_factions_more_common }
 		}
 
 		# 10-year 'grace period' from populist factions forming after game start
@@ -409,7 +446,7 @@
 				is_ai = yes
 			}
 		}
-		
+
 		# Conquerors
 		modifier = {
 			add = -100
@@ -418,6 +455,16 @@
 		modifier = {
 			add = -200
 			scope:target = { ai_should_get_extreme_conqueror_bonuses = yes }
+		}
+		# TGP Dynastic Cycle in Instability phase
+		modifier = {
+			desc = "FACTION_REASON_DYNASTIC_CYCLE_INSTABILITY"
+			add = 25
+			scope:target = {
+				top_participant_group:dynastic_cycle ?= {
+					has_participant_group_parameter = dynastic_cycle_more_peasant_factions
+				}
+			}
 		}
 	}
 
@@ -432,6 +479,16 @@
 				title_province.faith = scope:faction.faction_target.faith
 				# And we do NOT share a Culture Group with the faction leader.
 				NOT = { this.title_province.culture = { has_same_culture_heritage = scope:faction.var:faction_culture } }
+			}
+		}
+		# If a suitable Escalated Faction exists, prefer to join it instead.
+		modifier = {
+			desc = "FACTION_REASON_PREFER_ESCALATED_FACTION"
+			add = -100
+			scope:faction.faction_target = {
+				any_targeting_faction = {
+					faction_type = escalated_peasant_faction
+				}
 			}
 		}
 
@@ -512,12 +569,18 @@
 		modifier = {
 			desc = "FACTION_REASON_RULING_CASTE"
 			add = -25
-			NOT = {
-				culture = scope:faction.faction_target.culture
-			}
+			culture != scope:faction.faction_target.culture
 			scope:faction.faction_target.culture = {
 				has_cultural_parameter = peasant_and_populist_factions_less_common
 			}
+		}
+
+		# Defiant Ambushers
+		modifier = {
+			add = 25
+			county_opinion < 0
+			culture != scope:faction.faction_target.culture
+			culture = { has_cultural_parameter = county_peasant_and_populist_factions_more_common }
 		}
 
 		# Realm Stability Settings
@@ -560,7 +623,7 @@
 				is_ai = yes
 			}
 		}
-		
+
 		# Conquerors
 		modifier = {
 			add = -100
@@ -575,16 +638,26 @@
 		modifier = {
 			desc = "FACTION_REASON_REGENT_CULTURAL_REASONS"
 			add = -100
-			NOT = { scope:faction.faction_target.culture = culture }
+			scope:faction.faction_target.culture != culture
 			scope:faction.faction_target = { has_active_diarchy = yes }
 			scope:faction.faction_target.diarch.culture ?= culture
 		}
 		modifier = {
 			desc = "FACTION_REASON_REGENT_FAITH_REASONS"
 			add = -100
-			NOT = { scope:faction.faction_target.faith = faith }
+			scope:faction.faction_target.faith != faith
 			scope:faction.faction_target = { has_active_diarchy = yes }
 			scope:faction.faction_target.diarch.faith ?= faith
+		}
+		# TGP Dynastic Cycle in Instability phase
+		modifier = {
+			desc = "FACTION_REASON_DYNASTIC_CYCLE_INSTABILITY"
+			add = 25
+			scope:faction.faction_target = {
+				top_participant_group:dynastic_cycle ?= {
+					has_participant_group_parameter = dynastic_cycle_more_peasant_factions
+				}
+			}
 		}
 	}
 
@@ -602,7 +675,7 @@
 					limit = {
 						exists = joined_faction
 					}
-					NOT = { joined_faction = scope:faction }
+					joined_faction != scope:faction
 				}
 			}
 		}
@@ -671,7 +744,7 @@
 				value = 50
 				if = {
 					limit = {
-						NOT = { culture = scope:faction.faction_target.culture }
+						culture != scope:faction.faction_target.culture
 						culture = scope:faction.var:faction_culture
 					}
 					add = 50
@@ -733,9 +806,7 @@
 		modifier = {
 			desc = "FACTION_REASON_RULING_CASTE"
 			add = -20
-			NOT = {
-				culture = scope:faction.faction_target.culture
-			}
+			culture != scope:faction.faction_target.culture
 			scope:faction.faction_target.culture = {
 				has_cultural_parameter = peasant_and_populist_factions_less_common
 			}
@@ -799,12 +870,12 @@
 			    			}
 						}
 		    			add = 0.25
-		    		}		
+		    		}
 		    	}
 	    	}
 	    }
 
-	     modifier = {
+	    modifier = {
 			desc = "FACTION_REASON_POWERFUL_VASSAL"
 	    	factor = 2
 			is_powerful_vassal_of = scope:faction.faction_target
@@ -816,6 +887,16 @@
 			scope:faction = {
 				any_faction_member = {
 					has_character_flag = low_legitimacy_admin_factions_flag
+				}
+			}
+		}
+		# TGP Dynastic Cycle in Instability phase
+		modifier = {
+			desc = "FACTION_REASON_DYNASTIC_CYCLE_INSTABILITY"
+			add = 25
+			scope:faction.faction_target = {
+				top_participant_group:dynastic_cycle ?= {
+					has_participant_group_parameter = dynastic_cycle_more_peasant_factions
 				}
 			}
 		}
@@ -914,16 +995,15 @@
 		special_title = {
 			save_scope_as = target_title
 		}
-		
+
 		# Check for relevant vassals that owns any land targeted by the faction.
 		save_temporary_scope_as = county_faction
 		every_faction_county_member = {
 			limit = {
 				holder = {
-					NOT = { this = scope:faction.faction_target }
-					NAND = {
-						exists = joined_faction
-						joined_faction = {
+					this != scope:faction.faction_target
+					NOT = {
+						joined_faction ?= {
 							this = scope:county_faction
 						}
 					}
@@ -942,10 +1022,9 @@
 			holder = {
 				every_liege_or_above = {
 					limit = {
-						NOT = { this = scope:faction.faction_target }
-						NAND = {
-							exists = joined_faction
-							joined_faction = {
+						this != scope:faction.faction_target
+						NOT = {
+							joined_faction ?= {
 								this = scope:county_faction
 							}
 						}
@@ -959,7 +1038,7 @@
 				}
 			}
 		}
-		
+
 		# Check if there is a player affected by the faction. AI rulers are blocked from accepting the faction demand if so.
 		if = {
 			limit = {
@@ -975,7 +1054,7 @@
 				}
 			}
 		}
-		
+
 		# Fire the demand event. A follow up event will be sent to affected vassals.
 		scope:faction.faction_target = {
 			trigger_event = faction_demand.1001
@@ -984,7 +1063,7 @@
 
 	ai_demand_chance = {
 		base = 100
-		
+
 		modifier = {
 			add = -1000
 			faction_target = {
@@ -1031,7 +1110,7 @@
 			root.faction_leader = {
 				spawn_popular_revolt_troops = yes
 			}
-			
+
 			# Give the populist leader a commander for each stack of troops.
 			create_character = {
 				template = new_commander_character
@@ -1098,4 +1177,3 @@
 
 	multiple_targeting = yes
 }
-
