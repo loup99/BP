@@ -9,6 +9,6 @@ tags={
 	"Religion"
 	"Total Conversion"
 }
-version = "0.1.8.1"
+version = "0.1.8.2"
 supported_version="1.18.*"
 path = "mod/WtWSMS"
