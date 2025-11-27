@@ -1,0 +1,448 @@
+﻿bp_matter_of_britain_situation = {
+	
+	is_unique = yes # It can only exist once in the world
+
+	gui_window_name = "window_situation"
+	gui_participation_window_name = "window_situation_participation"
+
+	##################################################
+	# Regions
+	##################################################
+	sub_regions = {
+		britain_main = {
+			icon = "gfx/interface/icons/situations/debug_situation/steppe_west.dds"
+			geographical_regions = { matter_of_britain_region_britannia }
+		}
+	}
+	
+	##################################################
+	# On Actions
+	##################################################
+	on_start = {}
+	on_end = {}
+	on_monthly = {}
+	on_yearly = {}
+	on_leave = {}
+
+	##################################################
+	# Groups
+	##################################################
+	participant_groups = {
+		involved = {
+			icon = "gfx/interface/icons/struggle_types/struggle_iberia_phase_conciliation.dds"
+			
+			is_character_valid = {
+				mob_playable_governments_trigger = yes
+				mob_involved_trigger = yes
+				#mob_interloper_trigger = no #Do not include this, for it'll conflict with mob_involved_trigger
+			}
+			require_capital_in_sub_region = yes
+			require_domain_in_sub_region = yes
+			on_join = {}
+			on_leave = {}
+			map_color = { 0.000 0.000 0.750 }
+		}
+		interloper = {
+			icon = "gfx/interface/icons/struggle_types/struggle_iberia_phase_hostility.dds"
+			
+			is_character_valid = {
+				mob_playable_governments_trigger = yes
+				mob_involved_trigger = no
+				mob_interloper_trigger = yes
+			}
+			require_capital_in_sub_region = yes
+			require_domain_in_sub_region = yes
+			on_join = {}
+			on_leave = {}
+			map_color = { 0.000 0.750 0.000 }
+		}
+		intruder = {
+			icon = "gfx/interface/icons/struggle_types/struggle_iberia_phase_opportunity.dds"
+			
+			is_character_valid = {
+				mob_playable_governments_trigger = yes
+				mob_involved_trigger = no
+				mob_interloper_trigger = no
+			}
+			require_capital_in_sub_region = no
+			require_domain_in_sub_region = no
+			require_realm_in_sub_region = yes
+			on_join = {}
+			on_leave = {}
+			map_color = { 0.750 0.000 0.000 }
+		}
+	}
+	
+	##################################################
+	# Phases
+	##################################################
+	start_phase = mob_migration
+
+	phases = {
+		mob_migration = {
+			icon = "gfx/interface/icons/faith/custom_faith_8.dds"
+			on_start = {}
+			on_end = {}
+			
+			max_duration = { years = 100 }
+			max_duration_next_phase = highest_points
+			
+			future_phases = {
+				#MOB migration
+				mob_strife = {
+					takeover_type = points
+					takeover_points = 1000
+					catalysts = {
+						catalyst_win_any_war_within_the_region = 25
+					}
+				}
+				mob_acculturation = {
+					takeover_type = points
+					takeover_points = 1000
+					catalysts = {
+						catalyst_win_any_war_within_the_region = 5
+					}
+				}
+			}
+			
+			modifier_sets = {
+				#TODO: Common Parameters aren't parsable in the `all` block?
+				situation_mob_migration_warfare_effects = {
+					icon = "gfx/interface/icons/struggle_effects/war.dds"
+					involved = {
+						character_modifier = {
+							defender_holding_advantage = 2
+						}
+						county_modifier = {}
+						parameters = {
+							claims_in_region_cost_prestige_not_gold_for_involved_parties = yes
+							truces_by_involved_or_interlopers_within_region_shorter = yes
+							unlocks_border_raid_casus_belli = yes
+						}
+					}
+					interloper = {
+						character_modifier = {
+							attacker_advantage = 2
+							men_at_arms_maintenance = -0.25
+							men_at_arms_recruitment_cost = -0.25
+						}
+						county_modifier = {}
+						parameters = {
+							claims_in_region_cost_prestige_not_gold_for_involved_parties = yes
+							truces_by_involved_or_interlopers_within_region_shorter = yes
+							unlocks_border_raid_casus_belli = yes
+							cb_lower_prestige_level_requirement = yes
+						}
+					}
+					intruder = {
+						character_modifier = {
+							attacker_advantage = 5
+							men_at_arms_maintenance = -0.50
+							men_at_arms_recruitment_cost = -0.50
+						}
+						county_modifier = {}
+						parameters = {
+							claims_in_region_cost_prestige_not_gold_for_involved_parties = yes
+							truces_by_involved_or_interlopers_within_region_shorter = yes
+							unlocks_border_raid_casus_belli = yes
+							cb_lower_prestige_level_requirement = yes
+						}
+					}
+				}
+				situation_mob_migration_culture_effects = {
+					icon = "gfx/interface/icons/struggle_effects/culture.dds"
+					involved = {
+						character_modifier = {
+							cultural_head_acceptance_gain_mult = -0.5
+						}
+						county_modifier = {}
+						parameters = {
+							culture_hybridization_is_blocked = yes
+							slower_promote_culture_speed = yes
+						}
+					}
+					interloper = {
+						character_modifier = {
+							cultural_head_acceptance_gain_mult = -0.5
+						}
+						county_modifier = {}
+						parameters = {
+							culture_hybridization_is_blocked = yes
+							culture_divergence_is_shorter = yes
+							can_diverge_if_culture_head = yes
+							faster_promote_culture_speed = yes
+						}
+					}
+					intruder = {
+						character_modifier = {
+							cultural_head_acceptance_gain_mult = -0.5
+						}
+						county_modifier = {}
+						parameters = {
+							culture_hybridization_is_blocked = yes
+						}
+					}
+				}
+				situation_mob_migration_faith_effects = {
+					icon = "gfx/interface/icons/struggle_effects/faith.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {
+							slower_convert_speed = yes
+						}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {
+							faster_convert_speed = yes
+						}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+				situation_mob_migration_other_effects = {
+					icon = "gfx/interface/icons/struggle_effects/other.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {
+							development_growth_factor = -0.5
+						}
+						parameters = {
+							cannot_elevate_confederations = yes
+							cheaper_to_purchase_land_in_same_heritage_group_outside_situation = yes
+							easier_to_purchase_land_in_same_heritage_group_outside_situation = yes
+							unlock_voluntary_laampdom = yes
+						}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {
+							development_growth_factor = -0.5
+						}
+						parameters = {
+							cannot_elevate_confederations = yes
+						}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {
+							development_growth_factor = -0.5
+						}
+						parameters = {
+							cannot_elevate_confederations = yes
+						}
+					}
+				}
+			}
+		}
+		mob_strife = {
+			icon = "gfx/interface/icons/situations/debug_situation/plentiful_harvest.dds"
+			on_start = {}
+			on_end = {}
+			
+			max_duration = { years = 100 }
+			max_duration_next_phase = highest_points
+			
+			future_phases = {
+				mob_migration = {
+					takeover_type = points
+					takeover_points = 1000
+					catalysts = {
+						#Too many interlopers/intruders
+					}
+				}
+				#Strife
+				mob_acculturation = {
+					takeover_type = points
+					takeover_points = 1000
+					catalysts = {
+						#Almost all involved
+					}
+				}
+			}
+			
+			modifier_sets = {
+				#TODO: Common Parameters aren't parsable in the `all` block?
+				situation_mob_migration_warfare_effects = {
+					icon = "gfx/interface/icons/struggle_effects/war.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+				situation_mob_migration_culture_effects = {
+					icon = "gfx/interface/icons/struggle_effects/culture.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+				situation_mob_migration_faith_effects = {
+					icon = "gfx/interface/icons/struggle_effects/faith.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+				situation_mob_migration_other_effects = {
+					icon = "gfx/interface/icons/struggle_effects/other.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+			}
+		}
+		mob_acculturation = {
+			icon = "gfx/interface/icons/situations/debug_situation/plentiful_harvest.dds"
+			on_start = {}
+			on_end = {}
+			
+			max_duration = { years = 100 }
+			max_duration_next_phase = highest_points
+			
+			future_phases = {
+				mob_migration = {
+					takeover_type = points
+					takeover_points = 1000
+					catalysts = {
+						#Too many interlopers/intruders
+					}
+				}
+				mob_strife = {
+					takeover_type = points
+					takeover_points = 1000
+					catalysts = {
+						#Too many interlopers/intruders
+					}
+				}
+				#Acculturation
+			}
+			
+			modifier_sets = {
+				#TODO: Common Parameters aren't parsable in the `all` block?
+				situation_mob_migration_warfare_effects = {
+					icon = "gfx/interface/icons/struggle_effects/war.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+				situation_mob_migration_culture_effects = {
+					icon = "gfx/interface/icons/struggle_effects/culture.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+				situation_mob_migration_faith_effects = {
+					icon = "gfx/interface/icons/struggle_effects/faith.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+				situation_mob_migration_other_effects = {
+					icon = "gfx/interface/icons/struggle_effects/other.dds"
+					involved = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					interloper = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+					intruder = {
+						character_modifier = {}
+						county_modifier = {}
+						parameters = {}
+					}
+				}
+			}
+		}
+	}
+}

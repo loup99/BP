@@ -1,4 +1,403 @@
-﻿##### Changed from Vanilla: Blocked before innovation_leges_barbarorum & 
+﻿##### Changed from Vanilla: Extended to High Tribal Authority, legendary_leader
+call_for_confederation_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/mpo_decision_confederation.dds"
+	}
+	decision_group_type = major
+	ai_check_interval = 8
+
+	desc = call_for_confederation_decision_desc
+	selection_tooltip = call_for_confederation_decision_tooltip
+
+	is_shown = {
+		highest_held_title_tier <= tier_duchy
+		OR = {
+			government_has_flag = government_is_tribal
+			government_has_flag = government_is_nomadic
+		}
+		is_playable_character = yes
+		is_independent_ruler = yes
+		NOR = {
+			has_character_flag = forming_confederation
+			is_confederation_member = yes
+		}
+	}
+
+	is_valid = {
+		is_independent_ruler = yes
+		highest_held_title_tier <= tier_duchy
+		is_tributary = no
+		custom_tooltip = {
+			OR = {
+				government_has_flag = government_is_tribal
+				government_has_flag = government_is_nomadic
+			}
+			text = is_nomadic_or_tribal_tt
+		}
+		trigger_if = {
+			limit = {
+				government_has_flag = government_is_nomadic
+			}
+			OR = {
+				has_realm_law = nomadic_authority_1
+				has_realm_law = nomadic_authority_2
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		trigger_if = {
+			limit = { government_has_flag = government_uses_high_tribal_organization }
+			OR = {
+				has_realm_law = high_tribal_organization_0
+				has_realm_law = high_tribal_organization_1
+				has_realm_law = high_tribal_organization_2
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		trigger_else = {
+			OR = {
+				has_realm_law = tribal_authority_0
+				has_realm_law = tribal_authority_1
+				has_realm_law = tribal_authority_2
+			}
+		}
+		NOR = {
+			has_trait = conqueror
+			has_trait = greatest_of_khans
+			##### Changed from Vanilla vvvvv
+			has_trait = legendary_leader
+			##### Changed from Vanilla ^^^^^
+		}
+		OR = {
+			has_trait = diplomat
+			has_trait = family_first
+			confederation_foe_trigger = { CHARACTER = root }
+		}
+		#This is just meant to stop player exploits
+		trigger_if = {
+			limit = {
+				is_ai = no
+			}
+			custom_tooltip = {
+				text = recently_took_leave_confederation_decision_tt
+				NOT = { has_variable = left_confederation }
+			}
+		}
+	}
+	cooldown = { years = 5 }
+
+	is_valid_showing_failures_only = {
+		age >= 6
+		trigger_if = {
+			limit = {
+				is_ai = no
+			}
+			NOT = { exists = involved_activity }
+			NOT = { has_trait = infirm }
+			is_physically_able = yes
+			is_travelling = no
+		}
+		trigger_else = {
+			is_imprisoned = no
+			is_incapable = no
+			is_alive = yes
+			is_migrating = no
+			NOT = { has_trait = infirm }
+		}
+	}
+
+	cost = {
+		prestige = {
+			value = {
+				add = 100
+				if = {
+					limit = {
+						highest_held_title_tier = tier_duchy
+					}
+					add = 200
+				}
+				if = {
+					limit = {
+						max_military_strength > 0
+						any_neighboring_top_liege_realm_owner = {
+							NOT = { is_allied_to = root }
+							max_military_strength > 0
+							confederation_worthy_foe_strength_ratio_value_root <= 0.5
+						}
+					}
+					add = -50
+				}
+				if = {
+					limit = {
+						max_military_strength > 0
+						any_neighboring_top_liege_realm_owner = {
+							NOT = { is_allied_to = root }
+							max_military_strength > 0
+							confederation_worthy_foe_strength_ratio_value_root <= 0.25
+						}
+					}
+					add = -50
+				}
+			}
+		}
+		piety = {
+			value = {
+				add = 250
+			}
+		}
+	}
+
+	effect = {
+		custom_tooltip = enables_offer_confederation_tt
+		custom_tooltip = offer_confederation_members_tt
+		custom_tooltip = confederation_join_defensive_wars_tt
+		custom_tooltip = confederation_raiding_attacking_tt
+		if = {
+			limit = {
+				government_has_flag = government_is_nomadic
+			}
+			custom_tooltip = confederation_modifier_tt
+		}
+		custom_tooltip = offer_confederation_5_year_warning_tt
+		if = {
+			limit = {
+				government_has_flag = government_is_nomadic
+			}
+			custom_tooltip = confederation_restrictions_warning_tt
+		}
+		else = {
+			custom_tooltip = confederation_restrictions_tribe_warning_tt
+		}
+		if = {
+			limit = {
+				government_has_flag = government_is_nomadic
+			}
+			custom_tooltip = confederation_migrating_leaving_warning_tt
+		}
+		else = {
+			custom_tooltip = confederation_leaving_warning_tt
+		}
+		trigger_event = mpo_decisions_events.0001
+	}
+
+	ai_potential = {
+		OR = {
+			government_has_flag = government_is_tribal
+			government_has_flag = government_is_nomadic
+		}
+		is_independent_ruler = yes
+		highest_held_title_tier <= tier_duchy
+		is_tributary = no
+		is_playable_character = yes
+		is_confederation_member = no
+		is_alive = yes
+		#Culture friends
+		any_land_neighboring_realm_with_tributaries_owner = {
+			count >= 2
+			culture = root.culture
+			OR = {
+				faith = root.faith
+				AND = {
+					faith = {
+						has_doctrine_parameter = unreformed
+					}
+					root.faith = {
+						has_doctrine_parameter = unreformed
+					}
+				}
+				faith = {
+					faith_hostility_level = {
+						target = root.faith
+						value < faith_hostile_level
+					}
+				}
+			}
+			valid_confederation_member_trigger = { CHARACTER = root }
+			NOT = {
+				has_any_bad_relationship_with_character_trigger = { CHARACTER = root }
+			}
+		}
+	}
+
+	ai_will_do = {
+		base = 0
+		modifier = {
+			ai_compassion >= low_positive_ai_value
+			add = 5
+		}
+		modifier = {
+			ai_honor >= low_positive_ai_value
+			add = 5
+		}
+		modifier = {
+			ai_boldness <= low_negative_ai_value
+			add = 5
+		}
+		modifier = {
+			ai_sociability >= low_positive_ai_value
+			add = 5
+		}
+		modifier = {
+			ai_greed <= low_negative_ai_value
+			add = 5
+		}
+		modifier = {
+			ai_energy <= low_negative_ai_value
+			add = 5
+		}
+		modifier = {
+			ai_rationality >= low_positive_ai_value
+			add = 5
+		}
+		modifier = {
+			ai_compassion <= low_negative_ai_value
+			add = -5
+		}
+		modifier = {
+			ai_honor <= low_negative_ai_value
+			add = -5
+		}
+		modifier = {
+			ai_boldness >= low_positive_ai_value
+			add = -5
+		}
+		modifier = {
+			ai_sociability <= low_negative_ai_value
+			add = -5
+		}
+		modifier = {
+			ai_greed >= low_positive_ai_value
+			add = -5
+		}
+		modifier = {
+			ai_energy >= low_positive_ai_value
+			add = -5
+		}
+		modifier = {
+			ai_rationality <= low_negative_ai_value
+			add = -5
+		}
+		modifier = {
+			OR = {
+				any_land_neighboring_realm_with_tributaries_owner = {
+					is_confederation_member = no
+					confederation_worthy_foe_strength_ratio_value_root <= 0.25
+				}
+				any_land_neighboring_realm_with_tributaries_owner = {
+					is_confederation_member = no
+					is_tributary = yes
+					top_suzerain = {
+						confederation_worthy_foe_strength_ratio_value_root <= 0.25
+					}
+				}
+				any_land_neighboring_realm_with_tributaries_owner = {
+					is_confederation_member = no
+					is_tributary = yes
+					suzerain ?= {
+						confederation_worthy_foe_strength_ratio_value_root <= 0.25
+					}
+				}
+			}
+			add = 25
+		}
+		modifier = {
+			confederation_neighboring_foe_trigger = { CHARACTER = root }
+			add = 30
+		}
+		modifier = {
+			OR = {
+				any_land_neighboring_realm_with_tributaries_owner = {
+					OR = {
+						has_trait = greatest_of_khans
+						has_trait = conqueror
+						any_owned_story = {
+							OR = {
+								story_type = story_greatest_of_khans
+								story_type = story_mongol_invasion
+							}
+						}
+					}
+				}
+				any_land_neighboring_realm_with_tributaries_owner = {
+					is_tributary = yes
+					top_suzerain = {
+						OR = {
+							has_trait = greatest_of_khans
+							has_trait = conqueror
+							any_owned_story = {
+								OR = {
+									story_type = story_greatest_of_khans
+									story_type = story_mongol_invasion
+								}
+							}
+						}
+					}
+				}
+				any_land_neighboring_realm_with_tributaries_owner = {
+					is_tributary = yes
+					suzerain ?= {
+						OR = {
+							has_trait = greatest_of_khans
+							has_trait = conqueror
+							any_owned_story = {
+								OR = {
+									story_type = story_greatest_of_khans
+									story_type = story_mongol_invasion
+								}
+							}
+						}
+					}
+				}
+			}
+			add = 50
+		}
+		modifier = {
+			add = 10
+			culture = {
+				OR = {
+					has_cultural_pillar = ethos_stoic
+					has_cultural_pillar = ethos_communal
+					has_cultural_pillar = ethos_egalitarian
+				}
+			}
+		}
+		modifier = {
+			add = -20
+			culture = {
+				OR = {
+					has_cultural_pillar = ethos_bellicose
+					has_cultural_pillar = ethos_courtly
+					has_cultural_pillar = ethos_bureaucratic
+				}
+			}
+		}
+		modifier = {
+			add = -100
+			prestige <= medium_prestige_value # You cannot afford this
+		}
+		#Another confederation of your culture already exists
+		modifier = {
+			any_in_global_list = {
+				variable = confederations
+				has_variable = confederation_culture
+				var:confederation_culture = root.culture
+			}
+			factor = 0.05
+		}
+		#There's already another confederation nearby
+		modifier = {
+			any_in_global_list = {
+				variable = confederations
+				any_confederation_member = {
+					in_diplomatic_range = root
+				}
+			}
+			factor = 0.1
+		}
+	}
+}
+
+##### Changed from Vanilla: Blocked before innovation_leges_barbarorum & innovation_social_stratification
+##### Changed from Vanilla: Blocked for situations that block confederate elevation
 confederation_kingdom_decision = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/mpo_decision_confederation.dds"
@@ -62,6 +461,13 @@ confederation_kingdom_decision = {
 		##### Changed from Vanilla vvvvv
 		culture = { has_innovation = innovation_leges_barbarorum }
 		culture = { has_innovation = innovation_social_stratification }
+		trigger_if = {
+			limit = { any_character_situation = { count > 0 } }
+			any_character_situation = {
+				count >= 1
+				has_situation_top_phase_parameter = cannot_elevate_confederations
+			}
+		}
 		##### Changed from Vanilla ^^^^^
 	}
 

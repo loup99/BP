@@ -96,7 +96,20 @@ faith_conversion = {
 # Is this character allowed to diverge their culture?
 # root: Character
 can_diverge_culture = {
-	culture = { culture_age >= culture_divergence_cooldown }
+	##### Changed from Vanilla vvvvv
+	trigger_if = { #We do this here because culture_divergence_cooldown has no scope attached
+		limit = {
+			character_is_in_situation_region_with_parameter_trigger = {
+				CHAR = root
+				PARAMETER = culture_divergence_is_shorter
+			}
+		}
+		culture = { culture_age >= culture_divergence_cooldown_halved }
+	}
+	trigger_else = {
+		culture = { culture_age >= culture_divergence_cooldown }
+	}
+	##### Changed from Vanilla ^^^^^
 	custom_description = {
 		text = culture_present_in_realm_for_divergence
 		any_sub_realm_county = {
@@ -109,6 +122,12 @@ can_diverge_culture = {
 		limit = {
 			NOT = { root.culture = { has_cultural_parameter = can_diverge_if_culture_head } }
 			NOT = { root.culture = { has_cultural_parameter = easier_cheaper_divergence_early_slavs } } #Early Slavs get to ignore this rule
+			NOT = {
+				character_is_in_situation_region_with_parameter_trigger = {
+					CHAR = root
+					PARAMETER = can_diverge_if_culture_head
+				}
+			}
 		}
 		custom_description = {
 			text = head_of_culture_cannot_diverge
@@ -118,7 +137,7 @@ can_diverge_culture = {
 	##### Changed from Vanilla ^^^^^
 }
 
-##### Changed from Vanilla: Tied in with limitation_on_divergence_hybridization_culture_head
+##### Changed from Vanilla: Tied in with limitation_on_divergence_hybridization_culture_head, add hybridization block via situation
 
 # Is this character allowed to hybridize their culture with the target culture?
 # root: Character
@@ -138,6 +157,15 @@ can_hybridize_culture = {
 					any_liege_or_above = { this = root.culture.culture_head }
 					any_liege_or_above = { this = root.culture.culture_head.liege }
 				}
+			}
+		}
+	}
+	custom_description = {
+		text = current_situation_phase_blocks_hybridization
+		NOT = {
+			character_is_in_situation_region_with_parameter_trigger = {
+				CHAR = root
+				PARAMETER = culture_hybridization_is_blocked
 			}
 		}
 	}

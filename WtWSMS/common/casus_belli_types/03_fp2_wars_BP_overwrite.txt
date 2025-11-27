@@ -24,11 +24,21 @@ fp2_border_raid = {
 			always = yes
 		}
 		trigger_else = {
-			can_use_struggle_cbs_trigger = yes
-			# Attacker must be Involved in Struggle during correct phase
-			any_character_struggle = {
-				involvement = involved
-				has_struggle_phase_parameter = unlocks_border_raid_casus_belli
+			OR = {
+				# Attacker must be Involved in Struggle during correct phase
+				AND = {
+					can_use_struggle_cbs_trigger = yes
+					any_character_struggle = {
+						involvement = involved
+						has_struggle_phase_parameter = unlocks_border_raid_casus_belli
+					}
+				}
+				#Attacker must be in situation with correct phase
+				any_character_situation ?= {
+					any_situation_sub_region = {
+						has_sub_region_phase_parameter = unlocks_border_raid_casus_belli
+					}
+				}
 			}
 			NOT = {
 				government_has_flag = government_is_landless_adventurer
@@ -46,12 +56,50 @@ fp2_border_raid = {
 				scope:attacker.culture = { has_innovation = innovation_tribal_warfare }
 				NOT = { scope:attacker.culture = { has_innovation = innovation_ius_ad_bellum } }
 			}
-			AND = {
-				can_use_struggle_cbs_trigger = yes
-				# Defender must be Involved in Struggle during correct phase
-				any_character_struggle = {
-					involvement = involved
-					has_struggle_phase_parameter = unlocks_border_raid_casus_belli
+			trigger_if = {
+				limit = { scope:attacker.primary_title.tier = tier_empire }
+				OR = {
+					scope:defender.primary_title.tier = tier_empire
+					scope:defender.primary_title.tier = tier_kingdom
+				}
+			}
+			trigger_else_if = {
+				limit = { scope:attacker.primary_title.tier = tier_kingdom }
+				OR = {
+					scope:defender.primary_title.tier = tier_empire
+					scope:defender.primary_title.tier = tier_kingdom
+					scope:defender.primary_title.tier = tier_duchy
+				}
+			}
+			trigger_else_if = {
+				limit = { scope:attacker.primary_title.tier = tier_duchy }
+				OR = {
+					scope:defender.primary_title.tier = tier_empire
+					scope:defender.primary_title.tier = tier_kingdom
+					scope:defender.primary_title.tier = tier_duchy
+					scope:defender.primary_title.tier = tier_county
+				}
+			}
+			trigger_else_if = {
+				limit = { scope:attacker.primary_title.tier = tier_county }
+				OR = {
+					scope:defender.primary_title.tier = tier_empire
+					scope:defender.primary_title.tier = tier_kingdom
+					scope:defender.primary_title.tier = tier_duchy
+					scope:defender.primary_title.tier = tier_county
+				}
+			}
+			trigger_else = { always = no }
+		}
+		trigger_else = {
+			# Defender must be Involved in Struggle during correct phase
+			OR = {
+				AND = {
+					can_use_struggle_cbs_trigger = yes
+					any_character_struggle = {
+						involvement = involved
+						has_struggle_phase_parameter = unlocks_border_raid_casus_belli
+					}
 				}
 			}
 		}

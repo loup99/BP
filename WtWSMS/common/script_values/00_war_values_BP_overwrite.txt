@@ -1,4 +1,4 @@
-﻿##### Changed from Vanilla: swapped out first innovation
+##### Changed from Vanilla: swapped out first innovation
 vassalization_size_limit = {
 	value = vassalize_default_size
 	scope:attacker = {
@@ -43,5 +43,81 @@ vassalization_size_limit = {
 				add = vassalize_growth_per_innovation
 			}
 		}
+	}
+}
+
+##### Changed from Vanilla: Extended to situations
+
+# Truce Durations
+## Since we want these to work out to nice, even numbers, we calc them manually rather than use multipliers.
+standard_truce_duration_days = {
+	value = 1825
+	# Deductions.
+	## Flexible truces perk.
+	if = {
+		limit = {
+			scope:attacker = { has_perk = flexible_truces_perk }
+		}
+		add = -450
+	}
+	## Certain struggle phases.
+	if = {
+		limit = {
+			##### Changed from Vanilla vvvvv
+			OR = {
+				scope:attacker = {
+					any_character_struggle = {
+						is_struggle_parameter_active_secondary_character_involvement_either_trigger = {
+							PARAMETER = truces_by_involved_or_interlopers_within_region_shorter
+							CHAR = scope:defender
+						}
+					}
+				}
+				scope:attacker = {
+					any_character_situation = {
+						has_situation_top_phase_parameter = truces_by_involved_or_interlopers_within_region_shorter
+						save_temporary_scope_as = situation_temp
+						scope:defender = { any_character_situation = { this = scope:situation_temp } }
+					}
+				}
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+		add = -900
+	}
+	if = {
+		limit = {
+			scope:attacker = {
+				any_character_struggle = {
+					is_struggle_parameter_active_secondary_character_involvement_either_trigger = {
+						PARAMETER = truces_by_involved_or_interlopers_within_region_longer
+						CHAR = scope:defender
+					}
+				}
+			}
+		}
+		add = 900
+	}
+	## Shorter truce if both sides are nomads
+	if = {
+		limit = {
+			scope:attacker = { government_has_flag = government_is_nomadic }
+			scope:defender = { government_has_flag = government_is_nomadic }
+		}
+		subtract = 730
+	}
+	# A truce should at least give a 2-year breather.
+	min = 730
+	if = {
+		limit = {
+			scope:attacker = {
+				any_character_war = {
+					primary_attacker = scope:attacker
+					primary_defender = scope:defender
+					using_cb = fp2_border_raid
+				}
+			}
+		}
+		multiply = 2
 	}
 }

@@ -1,0 +1,187 @@
+﻿##### Changed from Vanilla: Extended to Situation Parameters unlock_voluntary_laampdom
+become_landless_adventurer_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/ep3_decision_laamp_neutral_mountain.dds"
+	}
+	sort_order = 82
+	ai_check_interval = 120
+
+	desc = become_landless_adventurer_decision_desc
+	selection_tooltip = become_landless_adventurer_decision_tooltip
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		#DLC check.
+		has_ep3_dlc_trigger = yes
+		OR = {
+			ai_can_valid_to_create_laamp_trigger = yes
+			is_ai = no
+		}
+		#Standard filter checks.
+		is_landed = yes
+		# Relevant cultures/faiths
+		OR = {
+			any_character_situation = { has_situation_top_phase_parameter = unlock_voluntary_laampdom }
+			culture = { has_cultural_parameter = unlock_voluntary_laampdom }
+			faith = { has_doctrine_parameter = unlock_voluntary_laampdom_faith }
+			has_trait = nomadic_philosophy
+		}
+		save_temporary_scope_as = potential_laamp_temp
+		can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:potential_laamp_temp } # Registered fighting license
+	}
+	##### Changed from Vanilla ^^^^^
+
+	##### Changed from Vanilla vvvvv
+	is_valid = {
+		is_valid_for_laampdom = yes
+		# Is not HOF
+		custom_tooltip = {
+			text = become_landless_adventurer_decision_hof_tt
+			NOT = { faith.religious_head_title.holder = root }
+		}
+		# Counts and dukes only
+		custom_tooltip = {
+			text = become_landless_adventurer_decision_tier_tt
+			highest_held_title_tier >= tier_county
+			highest_held_title_tier <= tier_duchy
+		}
+		# Not too big
+		custom_tooltip = {
+			text = become_landless_adventurer_decision_domain_size_tt
+			domain_size <= 3
+		}
+		# Relevant cultures/faiths
+		OR = {
+			any_character_situation = { has_situation_top_phase_parameter = unlock_voluntary_laampdom }
+			culture = { has_cultural_parameter = unlock_voluntary_laampdom }
+			faith = { has_doctrine_parameter = unlock_voluntary_laampdom_faith }
+			has_trait = nomadic_philosophy
+			custom_tooltip = {
+				text = nomadic_government_tt
+				government_has_flag = government_is_nomadic
+			}
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		is_at_war = no
+		is_alive = yes
+		is_available_adult = yes
+		has_contagious_deadly_disease_trigger = no
+	}
+
+	effect = {
+		save_scope_as = adventurer
+		if = {
+			limit = {
+				player_heir ?= {
+					NOT = { this = root }
+					is_adult = yes
+				}
+			}
+			player_heir = {
+				save_scope_as = laamp_heir
+				save_scope_as = laamp_inheritor
+				custom_tooltip = become_landless_adventurer_decision_title_scope_tt
+			}
+		}
+		else_if = {
+			limit = { is_independent_ruler = no }
+			liege = {
+				save_scope_as = laamp_liege
+				save_scope_as = laamp_inheritor
+				custom_tooltip = become_landless_adventurer_decision_title_scope_tt
+			}
+		}
+		else = {
+			custom_tooltip = become_landless_adventurer_decision_title_created_tt
+			if = {
+				limit = {
+					NOT = { exists = scope:laamp_inheritor }
+				}
+				hidden_effect_new_object = {
+					create_character = {
+						template = laamp_inheritor_template
+						culture = root.capital_county.culture
+						faith = root.capital_county.faith
+						dynasty = generate
+						location = root.capital_province
+						after_creation = {
+							save_scope_as = laamp_inheritor
+							add_character_flag = new_laamp_inheritor
+						}
+					}
+				}
+			}
+		}
+		create_landless_adventurer_title_tooltip_effect = yes
+		show_as_tooltip = {
+			add_prestige = medium_prestige_gain
+			add_character_modifier = {
+				modifier = ep3_voluntary_laamp_character_modifier
+				years = 5
+			}
+		}
+		trigger_event = { id = ep3_laamps.0030 }
+		# Debug tracking
+		if = {
+			limit = {
+				is_ai = yes
+				debug_only = yes
+			}
+			if = {
+				limit = { exists = global_var:ai_voluntary_laamp_count }
+				change_global_variable = {
+					name = ai_voluntary_laamp_count
+					add = 1
+				}
+			}
+			else = {
+				set_global_variable = {
+					name = ai_voluntary_laamp_count
+					value = 1
+				}
+			}
+			debug_log = "AI became adventurer voluntarily"
+			debug_log_scopes = yes
+		}
+		stress_impact = {
+			craven = minor_stress_impact_gain
+			content = minor_stress_impact_gain
+			lazy = minor_stress_impact_gain
+		}
+	}
+
+	ai_potential = {
+		is_valid_for_laampdom = yes
+		trigger_if = { # Temujun stays, he needs to become Genghis Khan after all!
+			limit = {
+				exists = character:125501
+			}
+			NOT = { this = character:125501 }
+		}
+	}
+
+	ai_will_do = {
+		base = -75
+		modifier = { add = ep3_laamp_chance_score_value }
+		modifier = { # If we don't have this, everyone will leave your realm constantly
+			add = -45
+			culture = { has_cultural_parameter = much_more_likely_to_be_laamps }
+		}
+		modifier = { # If we don't have this, everyone will leave your realm constantly
+			add = -20
+			culture = { has_cultural_parameter = more_likely_to_be_laamps }
+		}
+		modifier = {
+			factor = 0
+			OR = {
+				#Stahp it, John de Courcy
+				this = character:214000
+				#No adventurer should want to be one again... right?
+				has_variable = adventurer_creation_reason
+			}
+		}
+	}
+}
