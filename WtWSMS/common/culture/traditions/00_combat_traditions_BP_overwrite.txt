@@ -198,6 +198,123 @@ tradition_malleable_invaders = {
 	}
 }
 
+##### Changed from Vanilla: Added note about Subjugation CB increase
+tradition_quarrelsome = {
+	category = combat
+
+	layers = {
+		0 = martial
+		1 = mediterranean
+		4 = speech.dds
+	}
+	
+	can_pick = {
+		culture_not_pacifistic_trigger = yes
+	}
+	
+	##### Changed from Vanilla vvvvv
+	parameters = {
+		can_use_conquest_cbs = yes
+		cb_lower_prestige_level_requirement = yes
+		cheaper_cbs = yes
+		disloyal_trait_less_spurned = yes
+		disloyal_trait_more_common = yes
+		increased_subjugation_limit = yes
+	}
+	##### Changed from Vanilla ^^^^^
+	character_modifier = {
+		monthly_county_control_growth_factor = -0.4
+		
+		ai_honor = -20
+		ai_war_chance = 0.5
+		ai_war_cooldown = -0.25
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_spiritual = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_or_spiritual_desc
+				}
+			}
+			if = {
+				limit = {
+					trigger_if = {
+						limit = {
+							scope:character = {
+								is_ai = no
+							}
+						}
+						NOT = {
+							any_ruler = {
+								count >= 5
+								culture = prev
+								primary_title.tier >= tier_county
+								is_at_war = yes
+							}
+						}
+					}
+					trigger_else = {
+						always = no
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = rulers_at_war_desc
+				}
+			}
+
+			if = {
+				limit = {
+					culture_tradition_reduction_trigger = { TRADITION = tradition_quarrelsome }
+				}
+				multiply = {
+					value = 0.5
+					desc = inspired_by_culture_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+	
+	ai_will_do = {
+		value = 50
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						government_has_flag = government_is_tribal
+					}
+				}
+			}
+			multiply = 0.25
+		}
+		if = {
+			limit = {
+				NOR = {
+					culture_pillar:heritage_turkic = { is_in_list = traits }
+					culture_pillar:heritage_mongolic = { is_in_list = traits }
+					is_divergent_culture = yes
+				}
+			}
+			multiply = 0
+		}
+	}
+}
+
 ##### NB: Put **only** transitively unselectable changes below this line for clarity during patches
 
 ##### Changed from Vanilla: Made transitively unselectable with new traditions

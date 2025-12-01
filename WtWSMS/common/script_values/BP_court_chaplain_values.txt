@@ -236,37 +236,32 @@ conversion_tenet_autocephaly_different_heritage_conversion_resistance = {
 	}
 }
 
-#Rigorism Values
-conversion_tenet_rigorism_conversion_resistor_value = 30#% for localization
-conversion_tenet_rigorism_conversion_convertor_value = 50#% for localization
-conversion_tenet_rigorism_conversion_resistance_both_ways = {
+#Redeeming Struggle Values
+tenet_redeeming_struggle_resistance_value = 0.3
+conversion_redeeming_struggle = {
 	value = 0
 	if = {
 		limit = {
-			#XOR condition; other rigorist faiths have no impediment like say Khawarijis...
-			AND = {
-				OR = {
-					scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-				}
-				NAND = {
-					scope:county.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-					scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways }
-				}
-			}
 			exists = scope:county
+			scope:county.faith = { has_doctrine_parameter = tenet_redeeming_struggle_resistance }
 		}
-		#If we're the rigorist and the county is not, apply the convertor value
-		if = {
-			limit = { scope:councillor.liege.faith = { has_doctrine_parameter = rigorism_conversion_resitance_both_ways } }
-			subtract = court_chaplain_conversion_base_total
-			multiply = conversion_tenet_rigorism_conversion_convertor_value
+		subtract = court_chaplain_conversion_base_total
+		multiply = tenet_redeeming_struggle_resistance_value
+	}
+}
+
+#Rigorism Values
+conversion_rigorism_conversion_speed_value = 30#For localization
+conversion_rigorism_conversion_speed = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.liege.faith = { has_doctrine_parameter = tenet_rigorism_conversion_speed }
+			exists = scope:county
+			NOT = { scope:county.faith = { has_doctrine_parameter = tenet_rigorism_conversion_speed } }
 		}
-		#Otherwise, the county is rigorist and we're not, apply the resistor value
-		else = {
-			subtract = court_chaplain_conversion_base_total
-			multiply = conversion_tenet_rigorism_conversion_resistor_value
-		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = conversion_rigorism_conversion_speed_value
 		divide = 100
 	}
 }

@@ -22,7 +22,7 @@ ep3_become_landed_transfer_effect = {
 		save_scope_as = title_change
 	}
 	##### Changed from Vanilla vvvvv
-	scope:target ?= {
+	scope:target.holder ?= {
 		save_scope_as = old_holder
 		switch = {
 			trigger = government_has_flag
@@ -53,7 +53,31 @@ ep3_become_landed_transfer_effect = {
 				save_scope_value_as = { name = old_government value = flag:clan }
 			}
 			government_is_tribal = {
-				save_scope_value_as = { name = old_government value = flag:tribal } #This is fine!
+				save_scope_value_as = { name = old_government value = flag:tribal }
+			}
+			government_is_wanua = {
+				save_scope_value_as = { name = old_government value = flag:wanua }
+			}
+			government_is_nomadic = {
+				save_scope_value_as = { name = old_government value = flag:nomad }
+			}
+			government_is_celestial = {
+				save_scope_value_as = { name = old_government value = flag:admin }
+			}
+			government_is_steppe_admin = {
+				save_scope_value_as = { name = old_government value = flag:admin }
+			}
+			government_is_meritocratic = {
+				save_scope_value_as = { name = old_government value = flag:admin }
+			}
+			government_is_japan_administrative = {
+				save_scope_value_as = { name = old_government value = flag:admin }
+			}
+			government_is_japan_feudal = {
+				save_scope_value_as = { name = old_government value = flag:japan_feudal }
+			}
+			government_is_mandala = {
+				save_scope_value_as = { name = old_government value = flag:mandala }
 			}
 		}
 	}
@@ -99,8 +123,8 @@ ep3_become_landed_transfer_effect = {
 		}
 	}
 	if = {
-		limit = { 
-			exists = scope:new_liege 
+		limit = {
+			exists = scope:new_liege
 			trigger_if = {
 				limit = {
 					exists = scope:ascended_throne_value
@@ -116,33 +140,53 @@ ep3_become_landed_transfer_effect = {
 		}
 	}
 	else_if = {
-		limit = { is_independent_ruler = no }
+		limit = { top_liege != this }
 		becomes_independent = { change = scope:title_change }
 	}
 	resolve_title_and_vassal_change = scope:title_change
-	
 	$TITLE_RECEIVER$ = {
-		save_scope_as = the_title_reciever
-		debug_log_scopes = yes
-		
 		# Change our government according to the government of our liege.
-		## Administrative.
+		## Nomad.
 		if = {
 			limit = {
 				OR = {
-					scope:new_liege ?= { government_has_flag = government_is_administrative }
+					government_has_flag = government_is_nomadic
+					scope:new_liege ?= { government_has_flag = government_is_nomadic }
+					scope:old_government ?= flag:nomad
+					scope:new_capital.title_province = {
+						OR = {
+							has_holding_type = nomad_holding
+							has_holding_type = herder_holding
+						}
+					}
+				}
+			}
+			change_government = nomad_government
+		}
+		## Administrative.
+		## Celestial.
+		## Steppe admin.
+		## Meritocratic.
+		## Soryo.
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_allows = administrative }
 					scope:old_government ?= flag:admin
 				}
 			}
-			change_government = administrative_government
+			change_to_administrative_effect = yes
 		}
 		## Clan.
 		else_if = {
 			limit = {
-				ep3_is_clan_inclined_trigger = yes
 				OR = {
 					scope:new_liege ?= { government_has_flag = government_is_clan }
 					scope:old_government ?= flag:clan
+					AND = {
+						ep3_is_clan_inclined_trigger = yes
+						top_liege = this
+					}
 				}
 			}
 			change_government = clan_government
@@ -157,6 +201,37 @@ ep3_become_landed_transfer_effect = {
 			}
 			change_government = tribal_government
 		}
+		## Wanua.
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_is_wanua }
+					scope:old_government ?= flag:wanua
+				}
+			}
+			change_government = wanua_government
+		}
+		## Ritsuryo.
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_is_japan_feudal }
+					scope:old_government ?= flag:japan_feudal
+				}
+			}
+			change_government = japan_feudal_government
+		}
+		## Mandala.
+		else_if = {
+			limit = {
+				OR = {
+					scope:new_liege ?= { government_has_flag = government_is_mandala }
+					scope:old_government ?= flag:mandala
+				}
+			}
+			change_government = mandala_government
+		}
+		
 		##### Changed from Vanilla vvvvv
 		else_if = {
 			limit = {
@@ -264,7 +339,7 @@ ep3_become_landed_transfer_effect = {
 			limit = {
 				calc_true_if = {
 					amount = 1
-					prestige_level <= 3 
+					prestige_level <= 3
 					scope:new_capital.culture ?= {
 						NOR = {
 							$TITLE_RECEIVER$.culture ?= this

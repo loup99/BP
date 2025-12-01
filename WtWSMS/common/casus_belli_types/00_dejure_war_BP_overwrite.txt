@@ -23,16 +23,18 @@ de_jure_cb = {
 		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
+
+	allowed_for_character_display_regardless = {
+		tgp_japan_offensive_wars_ban_trigger = yes
+	}
 	
 	allowed_against_character = {
 		scope:attacker = {
 			has_de_jure_claim_on = scope:defender
 		}
-		NOT = {
-			OR = {
-				scope:defender = { target_is_liege_or_above = scope:attacker }
-				scope:attacker = { target_is_liege_or_above = scope:defender }
-			}
+		NOR = {
+			scope:defender = { target_is_liege_or_above = scope:attacker }
+			scope:attacker = { target_is_liege_or_above = scope:defender }
 		}
 	}
 	target_titles = de_jure
@@ -45,8 +47,7 @@ de_jure_cb = {
 	valid_to_start = {
 		scope:target = {
 			any_this_title_or_de_jure_above = {
-				exists = holder
-				holder = {
+				holder ?= {
 					OR = {
 						this = scope:attacker
 						target_is_liege_or_above = scope:attacker
@@ -157,6 +158,9 @@ de_jure_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_white_peace_desc = {
@@ -238,8 +242,11 @@ de_jure_cb = {
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 
-		#EP2 accolade glory gain for winning against higher ranked enemy
-		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
+		scope:defender = {
+			mandala_peacemaker_perk_serenity_effect = yes
+			#EP2 accolade glory gain for winning against higher ranked enemy
+			accolade_defender_war_end_glory_gain_med_effect = yes
+		}
 
 		# Attacker must pay the defender war reparations.
 		scope:attacker = {
@@ -265,8 +272,6 @@ de_jure_cb = {
 			WINNER_ALLY_FAME_SCALE = 100
 			LOSER_ALLY_FAME_SCALE = 100
 		}
-
-
 	
 		# Truce
 		add_truce_attacker_defeat_effect = yes
@@ -278,6 +283,9 @@ de_jure_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	on_primary_attacker_death = inherit
@@ -302,18 +310,7 @@ de_jure_cb = {
 
 	ai_score_mult = {
 		value = 1
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 }
 
@@ -343,19 +340,21 @@ individual_county_de_jure_cb = {
 	}
 	##### Changed from Vanilla ^^^^^
 
+	allowed_for_character_display_regardless = {
+		tgp_japan_offensive_wars_ban_trigger = yes
+	}
+
 	allowed_against_character = {
 		scope:attacker = {
 			has_de_jure_claim_on = scope:defender
 		}
-		NOT = {
-			OR = {
-				scope:defender = { target_is_liege_or_above = scope:attacker }
-				scope:attacker = { target_is_liege_or_above = scope:defender }
-			}
+		NOR = {
+			scope:defender = { target_is_liege_or_above = scope:attacker }
+			scope:attacker = { target_is_liege_or_above = scope:defender }
 		}
 	}
 	target_titles = all
-	target_title_tier = all
+	target_title_tier = county
 	target_de_jure_regions_above = yes
 	ignore_effect = change_title_holder
 	ai_only_against_neighbors = yes
@@ -364,8 +363,7 @@ individual_county_de_jure_cb = {
 		scope:target = {
 			tier = tier_county
 			any_this_title_or_de_jure_above = {
-				exists = holder
-				holder = {
+				holder ?= {
 					OR = {
 						this = scope:attacker
 						target_is_liege_or_above = scope:attacker
@@ -507,6 +505,9 @@ individual_county_de_jure_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_white_peace_desc = {
@@ -579,9 +580,12 @@ individual_county_de_jure_cb = {
 		
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
-
-		#EP2 accolade glory gain for winning against higher ranked enemy
-		scope:defender = { accolade_defender_war_end_glory_gain_low_effect = yes }
+	
+		scope:defender = {
+			mandala_peacemaker_perk_serenity_effect = yes
+			#EP2 accolade glory gain for winning against higher ranked enemy
+			accolade_defender_war_end_glory_gain_low_effect = yes 
+		}
 
 		# Attacker must pay the defender war reparations.
 		scope:attacker = {
@@ -623,6 +627,9 @@ individual_county_de_jure_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	on_primary_attacker_death = inherit
@@ -648,18 +655,7 @@ individual_county_de_jure_cb = {
 
 	ai_score_mult = {
 		value = 1
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 }
 
@@ -679,7 +675,7 @@ individual_duchy_de_jure_cb = {
 			limit = { NOT = { government_has_flag = government_is_centralized } }
 			scope:attacker = {
 				culture = {
-					has_innovation = innovation_casus_belli
+					has_innovation = innovation_ius_ad_bellum
 				}
 				NOT = { government_has_flag = government_is_nomadic }
 			}
@@ -690,19 +686,21 @@ individual_duchy_de_jure_cb = {
 	}
 	##### Changed from Vanilla ^^^^^
 
+	allowed_for_character_display_regardless = {
+		tgp_japan_offensive_wars_ban_trigger = yes
+	}
+
 	allowed_against_character = {
 		scope:attacker = {
 			has_de_jure_claim_on = scope:defender
 		}
-		NOT = {
-			OR = {
-				scope:defender = { target_is_liege_or_above = scope:attacker }
-				scope:attacker = { target_is_liege_or_above = scope:defender }
-			}
+		NOR = {
+			scope:defender = { target_is_liege_or_above = scope:attacker }
+			scope:attacker = { target_is_liege_or_above = scope:defender }
 		}
 	}
 	target_titles = all
-	target_title_tier = all
+	target_title_tier = duchy
 	target_de_jure_regions_above = yes
 	ignore_effect = change_title_holder
 	ai_only_against_neighbors = yes
@@ -711,8 +709,7 @@ individual_duchy_de_jure_cb = {
 		scope:target = {
 			tier = tier_duchy
 			any_this_title_or_de_jure_above = {
-				exists = holder
-				holder = {
+				holder ?= {
 					OR = {
 						this = scope:attacker
 						target_is_liege_or_above = scope:attacker
@@ -880,6 +877,9 @@ individual_duchy_de_jure_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_white_peace_desc = {
@@ -956,9 +956,12 @@ individual_duchy_de_jure_cb = {
 		
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
-
-		#EP2 accolade glory gain for winning against higher ranked enemy
-		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
+	
+		scope:defender = {
+			mandala_peacemaker_perk_serenity_effect = yes
+			#EP2 accolade glory gain for winning against higher ranked enemy
+			accolade_defender_war_end_glory_gain_med_effect = yes 
+		}
 
 		# Attacker must pay the defender war reparations.
 		scope:attacker = {
@@ -1000,6 +1003,9 @@ individual_duchy_de_jure_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	on_primary_attacker_death = inherit
@@ -1025,18 +1031,7 @@ individual_duchy_de_jure_cb = {
 
 	ai_score_mult = {
 		value = 1
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 }
 
@@ -1147,6 +1142,9 @@ imperial_reconquest_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_white_peace_desc = {
@@ -1206,8 +1204,11 @@ imperial_reconquest_cb = {
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
 
-		#EP2 accolade glory gain for winning against higher ranked enemy
-		scope:defender = { accolade_defender_war_end_glory_gain_med_effect = yes }
+		scope:defender = {
+			mandala_peacemaker_perk_serenity_effect = yes
+			#EP2 accolade glory gain for winning against higher ranked enemy
+			accolade_defender_war_end_glory_gain_med_effect = yes
+		}
 	
 		scope:attacker = {
 			pay_short_term_gold_reparations_effect = {
@@ -1237,6 +1238,9 @@ imperial_reconquest_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	on_primary_attacker_death = inherit
@@ -1262,18 +1266,8 @@ imperial_reconquest_cb = {
 	on_invalidated_desc = msg_invalidate_war_title
 
 	ai_score_mult = {
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		value = 1
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 }
 
@@ -1350,6 +1344,9 @@ dismantle_holy_pretender_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_defeat_desc = {
@@ -1358,7 +1355,10 @@ dismantle_holy_pretender_cb = {
 	
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
-		scope:defender = { save_scope_as = hre_emperor }
+		scope:defender = {
+			mandala_peacemaker_perk_serenity_effect = yes
+			save_scope_as = hre_emperor
+		}
 		scope:attacker = {
 			save_scope_as = byz_emperor
 			add_character_flag = { #No repeats.
@@ -1404,6 +1404,9 @@ dismantle_holy_pretender_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	on_primary_attacker_death = inherit
@@ -1432,18 +1435,8 @@ dismantle_holy_pretender_cb = {
 	on_invalidated_desc = msg_invalidate_war_title
 
 	ai_score_mult = {
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		value = 1
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 }
 
@@ -1522,6 +1515,9 @@ dismantle_byz_pretender_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_victory_effects = yes
 	}
 
 	on_defeat_desc = {
@@ -1530,7 +1526,10 @@ dismantle_byz_pretender_cb = {
 	
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
-		scope:defender = { save_scope_as = byz_emperor }
+		scope:defender = { 
+			mandala_peacemaker_perk_serenity_effect = yes
+			save_scope_as = byz_emperor 
+		}
 		scope:attacker = {
 			save_scope_as = hre_emperor
 			add_character_flag = { #No repeats.
@@ -1576,6 +1575,9 @@ dismantle_byz_pretender_cb = {
 
 		# EP3: note gold gained from military assistance/join war contracts and their war contribution threshold
 		laamp_as_mercenary_payout_tooltip_effect = yes
+
+		#Mandalas gain or lose piety/devotion depending on Decree
+		mandala_war_defeat_effects = yes
 	}
 	
 	on_primary_attacker_death = inherit
@@ -1604,17 +1606,7 @@ dismantle_byz_pretender_cb = {
 	on_invalidated_desc = msg_invalidate_war_title
 	
 	ai_score_mult = {
-		#Declaring war on the frankokratia leader can really ruin the whole thing
-		if = {
-			limit = {
-				scope:defender = {
-					any_owned_story = {
-						story_type = frankokratia_story
-						NOT = { has_variable = franko_war_complete }
-					}
-				}
-			}
-			multiply = 0
-		}
+		value = 1
+		add = frankokratia_leader_protection_value #Set back to 0. Declaring war on the frankokratia leader can really ruin the whole thing
 	}
 }

@@ -75,33 +75,48 @@ unification_cb_title_management_effect = {
 		
 		this = { save_scope_as = the_target_title }
 		
-		#Go over counties to seize and vassals to transfer
+		#Go over counties to seize and vassals to transfer, as well as held duchies/kingdoms/empires to destroy
 		every_in_de_jure_hierarchy = {
-			limit = { tier = tier_county }
-			#Seize a county iff it is owned by the defender OR the holders capital is de jure part of target title
+			#The top dog's de jure...
 			if = {
-				limit = {
-					holder = {
+				limit = { this.holder = $DEFENDER$ }
+				#Counties get seized
+				if = {
+					limit = { this.tier = tier_county }
+					add_to_temporary_list = titles_taken
+				}
+				#Duchies/Kingdoms/Empires get destroyed
+				else_if = {
+					limit = {
 						OR = {
-							this = $DEFENDER$
-							AND = {
-								target_is_liege_or_above = $DEFENDER$
-								NOT = { this.capital_county = { target_is_de_jure_liege_or_above = scope:the_target_title } }
-							}
+							this.tier = tier_duchy
+							this.tier = tier_kingdom
+							this.tier = tier_empire #Hegemonies, maybe?
 						}
 					}
+					$DEFENDER$ = { destroy_title = prev }
 				}
-				add_to_temporary_list = titles_taken
 			}
-			#Transfer a vassal iff his capital is part of the de jare of the target title
-			else_if = {
+			#Vassals transfer if their capital is in the target region
+			else = {
 				limit = {
-					holder = {
-						target_is_liege_or_above = $DEFENDER$
-						this.capital_county = { target_is_de_jure_liege_or_above = scope:the_target_title }
-					}
+					this.tier = tier_county
+					this.holder.liege = $DEFENDER$
+					this.holder.capital_county = this
+					this.holder.primary_title.tier < $ATTACKER$.primary_title.tier
 				}
-				holder = { add_to_temporary_list = vassals_to_transfer }
+				this.holder = { add_to_temporary_list = vassals_to_transfer }
+			}
+		}
+	}
+	
+	#Transfer Vassals
+	every_in_list = {
+		list = vassals_to_transfer
+		this = {
+			change_liege = {
+				liege = $ATTACKER$
+				change = scope:change_vassal_status
 			}
 		}
 	}
@@ -114,18 +129,9 @@ unification_cb_title_management_effect = {
 			take_baronies = yes
 		}
 	}
-	#Transfer Vassals
-	every_in_list = {
-		list = vassals_to_transfer
-		this = {
-			change_liege = {
-				liege = $ATTACKER$
-				change = scope:change_vassal_status
-			}
-		}
-	}
-	resolve_title_and_vassal_change = scope:change_titles_taken
+	#Do in this order to prevent them from escaping by taking a vassal title
 	resolve_title_and_vassal_change = scope:change_vassal_status
+	resolve_title_and_vassal_change = scope:change_titles_taken
 }
 
 #Cross-Reference major_migration_county_development_damage_effect in BP_migration_effects.txt

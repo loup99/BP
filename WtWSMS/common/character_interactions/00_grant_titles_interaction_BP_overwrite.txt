@@ -20,7 +20,7 @@ grant_titles_interaction = {
 	# recipient character receiving the titles
 
 	is_shown = {
-		NOT = { scope:actor = scope:recipient }
+		scope:actor != scope:recipient
 		scope:actor = {
 			NOT = {
 				government_has_flag = government_is_landless_adventurer
@@ -32,7 +32,7 @@ grant_titles_interaction = {
 				is_pool_guest_of = scope:actor
 				AND = {
 					scope:actor.faith.religious_head = scope:recipient
-					is_independent_ruler = yes
+					top_liege = this
 				}
 			}
 		}
@@ -67,7 +67,6 @@ grant_titles_interaction = {
 			NOT = { is_at_war_with = scope:actor }
 			NOT = { has_trait = devoted } # Monks are disinherited, and should not have land granted to them
 			bp2_valid_for_standard_interactions_trigger = yes
-			is_busy_in_events_localised = yes
 			trigger_if = {
 				limit = { is_ruler = no }
 				is_imprisoned = no
@@ -81,7 +80,7 @@ grant_titles_interaction = {
 						is_acclaimed = yes
 						liege ?= {
 							is_ai = no
-							NOT = { this = scope:actor }
+							this != scope:actor
 						}
 					}
 					AND = {
@@ -92,6 +91,11 @@ grant_titles_interaction = {
 			}
 			# Gallivanters won't accept additional responsibilities.
 			NOT = { has_trait = gallivanter }
+			# TGP JAPAN
+			tgp_japan_grant_titles_restriction_trigger = {
+				GRANTER = scope:actor
+				GRANTEE = scope:recipient
+			}
 		}
 		custom_description = {
 			text = is_not_theocratic_court_chaplain
@@ -106,7 +110,7 @@ grant_titles_interaction = {
 					}
 					has_council_position = councillor_court_chaplain
 				}
-				NOT = { scope:actor.faith.religious_head = scope:recipient }
+				scope:actor.faith.religious_head != scope:recipient
 			}
 		}
 		scope:actor = {
@@ -114,6 +118,7 @@ grant_titles_interaction = {
 				count > 1
 			}
 		}
+		
 		##### Changed from Vanilla vvvvv
 		
 		#Rajamandala must give to family memebers if possible
@@ -173,7 +178,6 @@ grant_titles_interaction = {
 		}
 	}
 
-	##### Changed from Vanilla vvvvv
 	can_be_picked_title = {
 		scope:target = {
 			is_leased_out = no
@@ -220,9 +224,7 @@ grant_titles_interaction = {
 			trigger_if = {
 				limit = {
 					is_head_of_faith = yes
-					NOT = {
-						scope:recipient.faith.religious_head = scope:actor.faith.religious_head
-					}
+					scope:recipient.faith.religious_head != scope:actor.faith.religious_head
 				}
 				custom_tooltip = {
 					text = GRANT_TITLES_ITEM_CANT_HEAD_OF_FAITH_TO_INFIDEL
@@ -244,6 +246,10 @@ grant_titles_interaction = {
 			trigger_if = {
 				limit = { scope:target = title:k_fashion }
 				NOT = { scope:target = title:k_fashion }
+			}
+			custom_tooltip = {
+				text = cannot_grant_ceremonial_title
+				NOT = { exists = var:ceremonial_title }
 			}
 			##### Changed from Vanilla vvvvv
 			
@@ -281,7 +287,6 @@ grant_titles_interaction = {
 			}
 			##### Changed from Vanilla ^^^^^
 		}
-		##### Changed from Vanilla ^^^^^
 
 		custom_description = {
 			text = grant_titles_interaction_can_only_give_diarch_de_jure_liege_to_diarch
@@ -293,7 +298,7 @@ grant_titles_interaction = {
 				scope:target = {
 					any_dejure_vassal_title_holder = { this = scope:actor.diarch }
 					# ... _unless_ we're giving it _to_ the diarch.
-					NOT = { scope:recipient = scope:actor.diarch }
+					scope:recipient != scope:actor.diarch
 					# Plus we only care if the title is below our tier.
 					tier < scope:actor.highest_held_title_tier
 				}
@@ -336,7 +341,6 @@ grant_titles_interaction = {
 			}
 		}
 	}
-	##### Changed from Vanilla ^^^^^
 
 	auto_accept = yes
 
@@ -383,7 +387,7 @@ grant_titles_interaction = {
 		scope:recipient = {
 			if = {
 				limit = {
-					is_independent_ruler = yes
+					top_liege = this
 					save_temporary_scope_as = recipient_is_independent
 				}
 			}
@@ -433,7 +437,7 @@ grant_titles_interaction = {
 						list = target_titles
 						tier >= tier_duchy
 						title_capital_county = {
-							NOT = { culture = scope:actor.culture }
+							culture != scope:actor.culture
 							culture = scope:recipient.culture
 						}
 						NOT = {
@@ -547,6 +551,45 @@ grant_titles_interaction = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				any_in_list = {
+					list = target_titles
+					tier >= tier_county
+				}
+				exists = scope:actor.house
+				exists = scope:recipient.house
+				scope:actor.house = scope:recipient.house
+				scope:actor = {
+					is_close_family_of = scope:recipient
+				}
+			}
+			scope:actor.dynasty = {
+				add_dynasty_prestige = {
+					value = 0
+					every_in_list = {
+						list = target_titles
+						limit = { tier = tier_empire }
+						add = massive_influence_gain
+					}
+					every_in_list = {
+						list = target_titles
+						limit = { tier = tier_kingdom }
+						add = major_influence_gain
+					}
+					every_in_list = {
+						list = target_titles
+						limit = { tier = tier_duchy }
+						add = medium_influence_gain
+					}
+					every_in_list = {
+						list = target_titles
+						limit = { tier = tier_county }
+						add = minor_influence_gain
+					}
+				}
+			}
+		}
 
 		# Iterate over all given titles
 		#  - Add opinion modifiers
@@ -594,9 +637,7 @@ grant_titles_interaction = {
 											is_ai = no
 										}
 										every_vassal = {
-											limit = {
-												has_vassal_stance = courtly
-											}
+											vassal_stance = courtly
 											add_opinion = {
 												target = scope:actor
 												modifier = courtly_lowborn_grant_opinion
@@ -608,9 +649,7 @@ grant_titles_interaction = {
 										random = {
 											chance = 25
 											every_vassal = {
-												limit = {
-													has_vassal_stance = courtly
-												}
+												vassal_stance = courtly
 												add_opinion = {
 													target = scope:actor
 													modifier = courtly_lowborn_grant_opinion
@@ -642,9 +681,7 @@ grant_titles_interaction = {
 								}
 								scope:actor = {
 									every_vassal = {
-										limit = {
-											has_vassal_stance = courtly
-										}
+										vassal_stance = courtly
 										add_opinion = {
 											target = scope:actor
 											modifier = courtly_lowborn_grant_opinion
@@ -674,9 +711,7 @@ grant_titles_interaction = {
 								}
 								scope:actor = {
 									every_vassal = {
-										limit = {
-											has_vassal_stance = courtly
-										}
+										vassal_stance = courtly
 										add_opinion = {
 											target = scope:actor
 											modifier = courtly_lowborn_grant_opinion
@@ -706,9 +741,7 @@ grant_titles_interaction = {
 								}
 								scope:actor = {
 									every_vassal = {
-										limit = {
-											has_vassal_stance = courtly
-										}
+										vassal_stance = courtly
 										add_opinion = {
 											target = scope:actor
 											modifier = courtly_lowborn_grant_opinion
@@ -883,7 +916,7 @@ grant_titles_interaction = {
 					limit = { scope:actor = { is_ai = yes } }
 					scope:actor = {
 						any_vassal = {
-							has_vassal_stance = courtly
+							vassal_stance = courtly
 						}
 					}
 				}
@@ -1136,9 +1169,7 @@ grant_titles_interaction = {
 					}
 					scope:recipient = {
 						is_playable_character = no
-						NOT = {
-							culture = scope:actor.culture
-						}
+						culture != scope:actor.culture
 						any_in_list = {
 							list = target_titles
 							OR = {
@@ -1179,10 +1210,10 @@ grant_titles_interaction = {
 					send_interface_toast = {
 						type = event_toast_effect_neutral
 						title = grant_titles_interaction_notification
-						
+
 						left_icon = scope:actor
 						right_icon = scope:recipient
-						
+
 						custom_tooltip = grant_titles_interaction_notification_effect_7
 					}
 				}
@@ -1196,7 +1227,7 @@ grant_titles_interaction = {
 						NOT = { exists = scope:recipient_is_independent }
 						scope:recipient = {
 							any_held_title = {
-								tier > tier_barony
+								title_tier > barony
 								NOT = {
 									is_in_list = target_titles
 								}
@@ -1245,7 +1276,7 @@ grant_titles_interaction = {
 						NOT = { exists = scope:recipient_is_independent }
 						scope:recipient = {
 							any_held_title = {
-								tier > tier_barony
+								title_tier > barony
 								NOT = {
 									is_in_list = target_titles
 								}
@@ -1439,16 +1470,12 @@ grant_title_to_new_random_character_interaction = {
 
 	is_valid_showing_failures_only = {
 		scope:actor = {
-			NOT = {
-				this = scope:recipient
-			}
+			this != scope:recipient
 			any_held_title = {
 				count > 1
 			}
 		}
-		scope:recipient = { is_busy_in_events_localised = yes }
 	}
-	
 	##### Changed from Vanilla vvvvv
 	on_accept = {
 		#Wuzurgan expect counties on up in Iranian Feudal Governments

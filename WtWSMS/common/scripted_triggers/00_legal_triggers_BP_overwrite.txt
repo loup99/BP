@@ -1,13 +1,43 @@
 ﻿##### Changed from Vanilla: Added Advanced government flag ref
+## Can this character assign a dedicated heir?
+#
+# Check if a character can assign some designated heir,
+# but not if the heir is a valid candidate.
+#
+# root: Character that will assign an heir
+#
 can_designate_heir_trigger = {
-	OR = {
+	trigger_if = {
+		# Admin always has access to this
+		limit = { government_allows = administrative }
+
 		custom_description = {
-			text = "has_law_allowing_designate_heir"
+			text = "has_admin_allowing_designate_heir"
+			any_held_title = {
+				is_noble_family_title = yes
+			}
+		}
+	}
+	trigger_else_if = {
+		# Feudal and clan can get this by increasing crown authority
+		limit = { has_realm_law_in_group = crown_authority }
+
+		custom_description = {
+			text = "has_crown_authority_designate_heir"
 			has_realm_law_flag = can_designate_heirs
 		}
-		custom_tooltip = {
-			text = has_advanced_gov
-			government_has_flag = government_is_centralized
+	}
+	trigger_else = {
+		# Everyone else also needs a law to gain access to this interaction
+		OR = {
+			custom_description = {
+				text = "has_law_allowing_designate_heir"
+				has_realm_law_flag = can_designate_heirs
+			}
+			custom_tooltip = {
+				text = has_advanced_gov
+				government_has_flag = government_is_centralized
+			}
 		}
 	}
 }
@@ -49,7 +79,18 @@ can_change_succession_laws_realm_flag_trigger = {
 can_change_single_heir_dynasty_house_succession_law_trigger = {
 	trigger_if = {
 		limit = {
-			culture = { has_cultural_pillar = heritage_west_slavic }
+			culture = {
+				OR = {
+					this = culture:czech
+					this = culture:slovien
+					any_parent_culture_or_above = {
+						this = culture:czech
+					}
+					any_parent_culture_or_above = {
+						this = culture:slovien
+					}
+				}
+			}
 			NOT = {
 				has_realm_law_flag = can_change_succession_laws
 			}

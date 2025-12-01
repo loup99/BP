@@ -1,0 +1,99 @@
+﻿#Based on RICE_bp_animal_sacrifice_events, used with permission
+
+###############################################################################
+# 
+# Pamir
+# 
+###############################################################################
+
+namespace = bp_animal_sacrifice
+
+# Goat sacrifice start
+bp_animal_sacrifice.0035 = {
+	type = activity_event
+	title = bp_animal_sacrifice.0035.t
+	desc = bp_animal_sacrifice.0035.desc
+	theme = faith
+	
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+	
+	option = { # Small
+		name = bp_animal_sacrifice.0035.a
+	}	
+
+	after = {
+		trigger_event = {
+			id = bp_animal_sacrifice.0036
+			days = { 3 7 }
+		}
+	}
+}
+
+
+# Sacrifice time
+bp_animal_sacrifice.0036 = {
+	type = activity_event
+	title = bp_animal_sacrifice.0036.t
+	desc = bp_animal_sacrifice.0036.desc
+	theme = faith
+	
+	right_portrait = {
+		character = root
+		animation = personality_zealous
+	}
+	
+	option = { # High God
+		name = bp_animal_sacrifice.0036.a
+		animal_sacrifice_high_god_effect = yes
+	}	
+	option = { # War God
+		name = bp_animal_sacrifice.0036.b
+		animal_sacrifice_war_god_effect = yes
+	}
+	option = { # Wealth God
+		name = bp_animal_sacrifice.0036.c
+		animal_sacrifice_wealth_god_effect = yes
+	}
+	option = { # Household God
+		name = bp_animal_sacrifice.0036.d
+		animal_sacrifice_household_god_effect = yes
+	}
+	option = { # Knowledge God
+		name = bp_animal_sacrifice.0036.e
+		animal_sacrifice_knowledge_god_effect = yes
+	}
+	option = { # Fertility God
+		name = bp_animal_sacrifice.0036.f
+		animal_sacrifice_fertility_god_effect = yes
+	}
+	
+	after = {
+		show_as_tooltip = {
+			if = {
+				limit = { has_activity_intent = bp_animal_sacrifice_worship_intent }
+				add_piety = 50
+			}
+			else_if = {
+				limit = { has_activity_intent = bp_animal_sacrifice_reputation_intent }
+				add_prestige = 50
+			}
+		}
+		trigger_event = {
+			id = bp_animal_sacrifice.0037
+			days = 1
+		}
+	}
+	
+}
+
+# Misc cleanup
+bp_animal_sacrifice.0037 = {
+	hidden = yes
+	immediate = {
+		bp_animal_sacrifice_completed_log_entry_effect = yes
+		scope:activity = { hidden_effect = { skip_activity_phase = yes } }
+	}
+}

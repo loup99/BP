@@ -11,18 +11,7 @@ scripted_trigger valid_scandinavian_adventurer = {
 	is_available_ai_adult = yes
 	is_alive = yes
 	is_ruler = no
-	OR = {
-		any_heir_title = { count = 0 }
-		AND = {
-			save_temporary_scope_as = potential
-			any_heir_title = {
-				place_in_line_of_succession = {
-					target = scope:potential
-					value >= 3
-				}
-			}
-		}
-	}
+	any_heir_title = { count = 0 }
 	##### Changed from Vanilla vvvvv
 	bp_varangrian_conquest_trigger = yes
 	##### Changed from Vanilla ^^^^^
@@ -34,28 +23,22 @@ scripted_trigger significant_north_germanic_presence_trigger = {
 			culture = { has_cultural_pillar = heritage_north_germanic }
 			has_culture = culture:norman
 			has_character_modifier = embraced_local_traditions_modifier
-			AND = {
-				exists = dynasty
-				dynasty = {
+			dynasty ?= {
 					has_dynasty_modifier = settled_norse_dynasty_modifier
 				}
-			}
 		}
 		OR = {
 			AND = {
 				highest_held_title_tier >= tier_duchy
 				any_held_title = {
 					count >= 3
-					tier = tier_county
+					title_tier = county
 					title_province = { geographical_region = $SCANDI_ADV_TARGET_REGION$ }
 				}
 			}
-			AND = {
-				exists = dynasty
-				dynasty = {
+			dynasty ?= {
 					has_dynasty_modifier = settled_norse_dynasty_modifier
 				}
-			}
 		}
 	}
 }
@@ -66,12 +49,9 @@ scripted_trigger scattered_north_germanic_presence_trigger = {
 			culture = { has_cultural_pillar = heritage_north_germanic }
 			has_culture = culture:norman
 			has_character_modifier = embraced_local_traditions_modifier
-			AND = {
-				exists = dynasty
-				dynasty = {
+			dynasty ?= {
 					has_dynasty_modifier = settled_norse_dynasty_modifier
 				}
-			}
 		}
 	}
 }
@@ -83,12 +63,9 @@ scripted_trigger valid_adventurer_target_trigger = {
 			culture = { has_cultural_pillar = heritage_north_germanic }
 			has_culture = culture:norman
 			has_character_modifier = embraced_local_traditions_modifier
-			AND = {
-				exists = dynasty
-				dynasty = {
+			dynasty ?= {
 					has_dynasty_modifier = settled_norse_dynasty_modifier
 				}
-			}
 			#Plus any places already being attacked.
 			top_liege = {
 				any_character_war = { using_cb = fp1_scandi_adventurer_conquest }
@@ -96,7 +73,7 @@ scripted_trigger valid_adventurer_target_trigger = {
 			#Or which have already earnt a ceasefire with this particular adventurer. Or any of their liege
 			OR = {
 				any_truce_holder = { this = scope:scandi_adventurer }
-				any_liege_or_above = { 
+				any_liege_or_above = {
 					any_truce_holder = { this = scope:scandi_adventurer }
 				}
 			}
@@ -1095,7 +1072,7 @@ fp1_scandinavian_adventurers.0012 = {
 			exists = character:242
 			exists = character:163119
 		}
-		
+
 	}
 
 	immediate = {
