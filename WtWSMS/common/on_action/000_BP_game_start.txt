@@ -30,6 +30,7 @@ bp_game_start = {
 		other_religion_effects
 		#Culture Stuff
 		learn_the_language_of_your_capital
+		learn_liturgical_language_if_not_already
 		add_innovations_as_required
 		#Family Stuff
 		set_historical_dynasty_renown
@@ -212,7 +213,12 @@ setup_realm_and_title_succession_laws = {
 				}
 				add_realm_law_skip_effects = equal_law
 			}
-			else = { add_realm_law_skip_effects = male_only_law } #Fallback; male-only.
+			else = { #Fallback; male-only.
+				if = {
+					limit = { NOT = { has_realm_law = male_only_law } }
+					add_realm_law_skip_effects = male_only_law
+				}
+			}
 		}
 		### Other Realm-Succession laws that must be enforced
 		every_ruler = { #High Partition
@@ -1057,6 +1063,14 @@ learn_the_language_of_your_capital = {
 		}
 	}
 }
+learn_liturgical_language_if_not_already = {
+	effect = {
+		every_ruler = {
+			limit = { government_has_flag = government_is_theocracy }
+			bp_learn_liturgical_language_effect = yes
+		}
+	}
+}
 add_innovations_as_required = {
 	effect = {
 		if = { #Armenians should have Cataphracts if you don't have the DLC for their Vanilla MAA
@@ -1106,6 +1120,13 @@ trigger_needed_events = {
 		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
 		#Fix _all_ the barony governments; has to be some ruler for some reason
 		random_ruler = { trigger_event = { id = BP_maintenance_events.0002 } }
+		#Add theocratic traits to chaplain
+		every_ruler = {
+			limit = { exists = cp:councillor_court_chaplain }
+			cp:councillor_court_chaplain = {
+				bp_setup_priest_traits = yes
+			}
+		}
 	}
 }
 
