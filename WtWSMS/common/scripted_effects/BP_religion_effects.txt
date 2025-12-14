@@ -74,3 +74,109 @@
 	faith = { set_religious_head_title = scope:new_title }
 	scope:new_title = { generate_coa = religious_title }
 }
+
+bp_setup_priest_traits = {
+	if = { #Buddhists and Jains are always monastic holders
+		limit = {
+			faith = { has_doctrine_parameter = clergy_are_always_monks }
+			NOT = { has_trait = devoted }
+		}
+		add_trait = devoted
+	}
+	if = { #Sacred Eunuchs
+		limit = { faith = { has_doctrine_parameter = clergy_are_always_eunuchs } }
+		if = { limit = { NOT = { has_trait = eunuch_1 } } add_trait = eunuch_1 }
+	}
+	if = { #Scythian Pagan Court Chaplains are Enarei trait
+		limit = {
+			faith = { has_doctrine_parameter = utilizes_enarei }
+			is_male = yes
+			NOT = { has_trait = enarei }
+		}
+		add_trait = enarei
+	}
+	if = {
+		limit = {
+			faith = { has_doctrine_parameter = clerics_are_vegetarians }
+			NOT = { has_trait = vegetarian }
+		}
+		add_trait = vegetarian
+	}
+	bp_learn_liturgical_language_effect = yes
+}
+
+bp_learn_liturgical_language_effect = {
+	#Christianity
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_latin } }
+		learn_language = language_latin
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_greek } }
+		learn_language = language_greek
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_armenian } }
+		learn_language = language_armenian
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_coptic } }
+		learn_language = language_coptic
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_ethiopic } }
+		learn_language = language_ethiopic
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_aramaic } }
+		learn_language = language_aramaic
+	}
+	#Latin west/Greek east split for Chalcedonian
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_latin_greek } }
+		if = {
+			limit = {
+				location = {
+					OR = {
+						geographical_region = world_roman_empire_west
+						geographical_region = world_europe_west
+						geographical_region = world_europe_north
+					}
+				}
+			}
+			learn_language = language_latin
+		}
+		else = {
+			learn_language = language_greek
+		}
+	}
+	#Judaism
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_israelite } }
+		learn_language = language_israelite
+	}
+	#Zoroastrianism
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_iranian } }
+		learn_language = language_iranian
+	}
+	#Islam
+	if = {
+		#limit = { faith = { has_doctrine_parameter = liturgical_language_arabic } }
+		limit = { religion = religion:islam_religion } #TODO: Add to teachings of the prophet special doctrine
+		learn_language = language_arabic
+	}
+	#Eastern
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_sanskrit } }
+		learn_language = language_sanskrit
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_magadhan } }
+		learn_language = language_magadhan
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = liturgical_language_chinese } } #TODO: Add to sinitic religion special doctrine
+		learn_language = language_chinese
+	}
+}
