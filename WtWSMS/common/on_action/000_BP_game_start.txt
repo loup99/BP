@@ -44,6 +44,7 @@ bp_game_start_after_lobby = {
 	on_actions = {
 		#Other Events
 		trigger_needed_events
+		hunter_gatherer_mechanic
 		delay = { days = 1 }
 		cull_maa_from_single_county_tribals
 	}
@@ -1129,6 +1130,29 @@ trigger_needed_events = {
 			limit = { exists = cp:councillor_court_chaplain }
 			cp:councillor_court_chaplain = {
 				bp_setup_priest_traits_effect = yes
+			}
+		}
+	}
+}
+
+
+hunter_gatherer_mechanic = {
+	effect = {
+		limit = { has_game_rule = hunter_gatherer_mechanic_enabled }
+		every_independent_ruler = {
+			limit = {
+				is_ai = no
+				government = tribal_government
+				OR = {
+					culture = culture:fenni
+					culture = culture:sami
+				}
+			}
+			change_government = herder_government
+			set_holding_type = herder_holding
+			if = { # No baby herders
+				limit = { age < 16 }
+				death = yes
 			}
 		}
 	}
