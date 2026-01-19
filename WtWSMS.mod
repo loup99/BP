@@ -9,6 +9,10 @@ tags={
 	"Religion"
 	"Total Conversion"
 }
-version = "0.1.8.2"
+version = "0.1.8.3"
 supported_version="1.18.*"
 path = "mod/WtWSMS"
+replace_path="history/characters"
+replace_path="history/cultures"
+replace_path="history/provinces"
+replace_path="history/titles"
