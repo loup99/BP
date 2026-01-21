@@ -6,6 +6,7 @@
 	# Christian Faith Tenets	#
 	############################
 
+	##### Changed from Vanilla: Made unavailable to Nastika faiths (implicit to them)
 	tenet_aniconism = {
 		icon = core_tenet_aniconism
 		piety_cost = {
@@ -32,6 +33,7 @@
 
 		is_shown = {
 			has_doctrine = abrahamic_hostility_doctrine
+			NOT = { religion_tag = nastika_religion }
 		}
 
 		can_pick = {
@@ -54,6 +56,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: Made available to Hellenics with certain restrictions
 	tenet_alexandrian_catechism = {
 		icon = core_tenet_alexandrian_catechism
 		piety_cost = {
@@ -74,6 +77,12 @@
 					}
 					desc = tenet_alexandrian_catechism_name
 				}
+				triggered_desc = {
+					trigger = {
+						religion_tag = hellenism_religion
+					}
+					desc = tenet_philosophical_school_name
+				}
 				desc = tenet_islamic_rationalism_name
 			}
 		}
@@ -86,6 +95,12 @@
 					}
 					desc = tenet_alexandrian_catechism_desc
 				}
+				triggered_desc = {
+					trigger = {
+						religion_tag = hellenism_religion
+					}
+					desc = tenet_philosophical_school_desc
+				}
 				desc = tenet_islamic_rationalism_desc
 			}
 		}
@@ -93,7 +108,11 @@
 		is_shown = {
 			OR = {
 				religion_tag = christianity_religion
-				religion_tag = islam_religion 
+				religion_tag = islam_religion
+				trigger_if = {
+					limit = { religion_tag = hellenism_religion }
+					has_doctrine = special_doctrine_humanistic_philosophy
+				}
 			}
 		}
 
@@ -330,6 +349,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: Gave custom description for Hellenists
 	tenet_consolamentum = {
 		icon = core_tenet_consolamentum
 
@@ -342,6 +362,18 @@
 					desc = tenet_consolamentum_name
 				}
 				desc = tenet_consolamentum_name_alternate
+			}
+		}
+
+		desc = {
+			first_valid = {
+				triggered_desc = {
+					trigger = {
+						religion_tag = hellenism_religion
+					}
+					desc = tenet_consolamentum_hellenic_desc
+				}
+				desc = tenet_consolamentum_desc
 			}
 		}
 
@@ -578,7 +610,7 @@
 		}
 	}
 
-	##### Changed from Vanilla: No longer valid for Buddhists, Jains
+	##### Changed from Vanilla: No longer valid for Buddhists, Jains, Nastikas
 	tenet_monasticism = {
 		icon = core_tenet_monasticism
 		piety_cost = {
@@ -616,6 +648,7 @@
 		is_shown = {
 			NOT = { religion_tag = buddhism_religion }
 			NOT = { religion_tag = jainism_religion }
+			NOT = { religion_tag = nastika_religion }
 		}
 
 		can_pick = {
@@ -3487,6 +3520,7 @@
 		}
 	}
 
+	##### Changed from Vanilla: Added custom name, desc for Nastika faiths
 	tenet_sacred_shadows = {
 		icon = core_tenet_sacred_shadows
 
@@ -3515,6 +3549,30 @@
 			if = {
 				limit = { has_doctrine = tenet_sacred_shadows }
 				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		
+		name = {
+			first_valid = {
+				triggered_desc = {
+					trigger = {
+						religion_tag = nastika_religion
+					}
+					desc = tenet_sacred_shadows_nastika_name
+				}
+				desc = tenet_sacred_shadows_name
+			}
+		}
+
+		desc = {
+			first_valid = {
+				triggered_desc = {
+					trigger = {
+						religion_tag = nastika_religion
+					}
+					desc = tenet_sacred_shadows_nastika_desc
+				}
+				desc = tenet_sacred_shadows_desc
 			}
 		}
 		
@@ -4274,6 +4332,8 @@
 			opinion_of_parents = 20
 		}
 	}
+	
+	##### Changed from Vanilla: Gave custom name and description for Hellenics, made available to Hellenics under certain conditions
 	tenet_harmonious_society = {
 		icon = core_tenet_harmonious_society
 		is_shown = {
@@ -4282,11 +4342,44 @@
 				OR = {
 					this = religion:buddhism_religion
 					is_in_family = rf_sinitic
+					this = hellenism_religion
 				}
 			}
 		}
 		can_pick = {
-			always = yes
+			AND = {
+				always = yes
+				trigger_if = {
+					limit = { religion_tag = hellenism_religion }
+					has_doctrine = special_doctrine_humanistic_philosophy
+				}
+			}
+		}
+
+		name = {
+			first_valid = {
+				triggered_desc = {
+					trigger = {
+						religion_tag = hellenism_religion
+						has_doctrine = special_doctrine_humanistic_philosophy
+					}
+					desc = tenet_harmonious_society_hellenic_name
+				}
+				desc = tenet_harmonious_society_name
+			}
+		}
+
+		desc = {
+			first_valid = {
+				triggered_desc = {
+					trigger = {
+						religion_tag = hellenism_religion
+						has_doctrine = special_doctrine_humanistic_philosophy
+					}
+					desc = tenet_harmonious_society_hellenic_desc
+				}
+				desc = tenet_harmonious_society_desc
+			}
 		}
 
 		piety_cost = {
@@ -5062,10 +5155,6 @@
 					doctrine:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
 				}
 			}
-			custom_description = {
-				text = incompatible_tenet_cosmopolitanism_trigger
-				NOT = { doctrine:tenet_cosmopolitanism = { is_in_list = selected_doctrines } }
-			}
 		}
 		
 		parameters = {
@@ -5079,78 +5168,6 @@
 			virtues = { humble }
 			sins = { arrogant }
 		}
-	}
-	
-	#Similar to pacifism/Dharmic religions but more (philosophically) materially inclined so no piety gain, but 
-	#views other religions as astray instead of hostile or evil (unilaterally, that is).
-	tenet_cosmopolitanism = {
-		icon = core_tenet_cosmopolitanism ##### TODO (Beta): Needs Unique Icon
-		
-		is_shown = {
-			religion_tag = hellenism_religion
-		}
-		
-		can_pick = {
-			custom_description = {
-				text = doctrine_inverted_pluralism_pluralistic_trigger
-				NOR = {
-					doctrine:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines }
-					doctrine:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
-				}
-			}
-			custom_description = {
-				text = incompatible_tenet_interpretatio_romana_trigger
-				NOT = { doctrine:tenet_interpretatio_romana = { is_in_list = selected_doctrines } }
-			}
-			custom_description = {
-				text = incompatible_tenet_other_syncretism_trigger
-				NOR = {
-					doctrine:tenet_eastern_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_christian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_islamic_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_jewish_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_zoroastrian_syncretism = { is_in_list = selected_doctrines }
-					doctrine:tenet_hellenic_syncretism = { is_in_list = selected_doctrines }
-				}
-			}
-		}
-		
-		piety_cost = {
-			value = faith_tenet_cost_massive
-			
-			# Multiplier for keeping same tenet
-			if = {
-				limit = { has_doctrine = tenet_cosmopolitanism }
-				multiply = faith_unchanged_doctrine_cost_mult
-			}
-		}
-		
-		parameters = {
-			holy_wars_forbidden = yes
-			hostility_override_abrahamic_hostility_doctrine = 1
-			hostility_override_pagan_hostility_doctrine = 1
-			hostility_override_eastern_hostility_doctrine = 1
-			hostility_override_mazdan_hostility_doctrine = 1
-		}
-		
-		character_modifier = {
-			monthly_learning_lifestyle_xp_gain_mult = 0.2
-			domain_limit = 1
-			different_faith_county_opinion_mult = -0.5
-			vassal_opinion = 10
-		}
-		
-		traits = {
-			virtues = {
-				calm
-				humble
-			}
-			sins = {
-				wrathful
-				arrogant
-			}
-		}
-		
 	}
 
 	tenet_ethnic_religion = {
@@ -5204,10 +5221,6 @@
 			# custom_description = { #Can't use Interpratio Romana; it contradicts
 			# 	text = incompatible_tenet_interpretatio_romana_trigger
 			# 	NOT = { doctrine:tenet_interpretatio_romana = { is_in_list = selected_doctrines } }
-			# }
-			# custom_description = { #Can't use Cosmopolitanism; it contradicts
-			# 	text = incompatible_tenet_cosmopolitanism_trigger
-			# 	NOT = { doctrine:tenet_cosmopolitanism = { is_in_list = selected_doctrines } }
 			# }
 		}
 

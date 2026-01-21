@@ -191,21 +191,26 @@ doctrine_funeral = {
 	}
 }
 
-##### Changed from Vanilla: Added in Mazdan effects
+##### Changed from Vanilla: Added in Mazdan effects, added Monism and Agnosticism
 doctrine_theism = {
 	group = "main_group"
 	doctrine_monotheist = {
+		is_shown = { NOT = { religion_tag = nastika_religion } }
 		piety_cost = {
 			value = faith_doctrine_cost_high
 			if = {
-				limit = { 
+				limit = {
 					OR = {
 						has_doctrine = abrahamic_hostility_doctrine
 						has_doctrine = mazdan_hostility_doctrine
-						has_doctrine = doctrine_monotheist 
+						has_doctrine = doctrine_monotheist
 					}
 				}
 				multiply = faith_unchanged_doctrine_cost_mult
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_agnostic }
+				multiply = faith_changed_doctrine_cost_mult_four_step
 			}
 		}
 		parameters = {
@@ -213,6 +218,7 @@ doctrine_theism = {
 		}
 	}
 	doctrine_polytheist = {
+		is_shown = { NOT = { religion_tag = nastika_religion } }
 		piety_cost = {
 			value = faith_doctrine_cost_high
 			if = {
@@ -220,11 +226,92 @@ doctrine_theism = {
 				multiply = faith_changed_doctrine_cost_mult_three_step
 			}
 			else_if = {
+				limit = { has_doctrine = doctrine_agnostic }
+				multiply = faith_changed_doctrine_cost_mult_two_step
+			}
+			else_if = {
 				limit = { has_doctrine = doctrine_polytheist }
 				multiply = faith_unchanged_doctrine_cost_mult
 			}
 		}
 		parameters = {
+			hostility_others = 2
+		}
+	}
+	doctrine_monist = {
+		is_shown = { #Not available to the principal Monotheist faiths
+			NOT = {
+				has_doctrine = abrahamic_hostility_doctrine
+				has_doctrine = mazdan_hostility_doctrine
+				religion_tag = nastika_religion
+			}
+		}
+		can_pick = { #For safety
+			custom_description = {
+				text = doctrine_inverted_pluralism_pluralistic_trigger
+				NOR = {
+					doctrine:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines }
+					doctrine:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		piety_cost = {
+			value = faith_doctrine_cost_high
+			if = {
+				limit = {
+					has_doctrine = doctrine_monotheist
+					has_doctrine = doctrine_polytheist
+				}
+				multiply = faith_changed_doctrine_cost_mult_three_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_agnostic }
+				multiply = faith_changed_doctrine_cost_mult_two_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_monism }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		parameters = {
+			holy_wars_forbidden = yes
+			hostility_others = 1
+			hostility_same_religion = 1
+		}
+	}
+	doctrine_agnostic = {
+		is_shown = { #Only for the Nastika right now; really only applicable there and we want to avoid too much weirdness atm
+			religion_tag = nastika_religion
+		}
+		can_pick = { #For safety
+			custom_description = {
+				text = doctrine_inverted_pluralism_pluralistic_trigger
+				NOR = {
+					doctrine:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines }
+					doctrine:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		piety_cost = {
+			value = faith_doctrine_cost_high
+			if = {
+				limit = {
+					has_doctrine = doctrine_monotheist
+					has_doctrine = doctrine_polytheist
+				}
+				multiply = faith_changed_doctrine_cost_mult_three_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_monist }
+				multiply = faith_changed_doctrine_cost_mult_two_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_agnostic }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		parameters = {
+			holy_wars_forbidden = yes
 			hostility_others = 2
 		}
 	}
