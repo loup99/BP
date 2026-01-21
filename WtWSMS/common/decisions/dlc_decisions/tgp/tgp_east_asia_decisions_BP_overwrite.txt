@@ -1,0 +1,429 @@
+﻿##### Changed from Vanilla: Blocked before Classical Antiquity
+
+### Adopt Mandala Government ###
+convert_to_mandala_government_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/tgp_decision_mandala.dds"
+	}
+	decision_group_type = major
+	desc = convert_to_mandala_government_decision_desc
+
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 36
+		duchy = 36
+		kingdom = 36
+		empire = 36
+		hegemony = 36
+	}
+
+	is_shown = {
+		has_tgp_dlc_trigger = yes
+		is_landed = yes
+		has_mandala_culture_trigger = yes
+		NOT = { government_has_flag = government_is_mandala }
+		#We have a special decision for Mandala subjects...
+		trigger_if = {
+			limit = { is_tributary = yes }
+			NOT = { 
+				overlord = { government_has_flag = government_is_mandala }
+			}
+		}
+		highest_held_title_tier > tier_barony
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_valid = {
+		trigger_if = {
+			limit = {
+				has_legitimacy = yes
+				dynasty ?= {
+					NOT = { has_dynasty_perk = tgp_sea_legacy_3 } #Bypasses Tribal Authority Requirement
+				}
+			}
+			legitimacy_level >= 4
+		}
+		##### Changed from Vanilla vvvvv
+		culture = { has_cultural_era_or_later = culture_era_late_antiquity }
+		##### Changed from Vanilla ^^^^^
+		has_mandala_faith_trigger = yes
+		is_independent_ruler = yes
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		custom_tooltip = {
+			text = not_changed_government_recently_tt
+			NOT = { has_variable = changed_government_recently }
+		}
+		government_is_japanese_trigger = no
+	}
+
+	cost = {
+		prestige = {
+			value = 0
+			if = {
+				limit = { government_has_flag = government_is_tribal }
+				add = convert_to_mandala_government_tribal_value
+			}
+			else = { add = convert_to_mandala_government_nontribal_value }
+			#'s cheap!
+			if = {
+				limit = { has_character_modifier = divine_happenstance_modifier }
+				divide = 2
+			}
+		}
+	}
+
+	effect = {
+		#GoK stops really being GoK
+		gok_government_change_story_end_effect = yes
+		#Out with the old laws, in with the new
+		change_to_mandala_government_decree_effect = yes
+		#No Succession for this character pls
+		set_variable = {
+			name = not_subject_to_succession_trials
+			value = flag:adopted_mandala_government
+		}
+		if = {
+			limit = { var:not_subject_to_succession_trials ?= flag:adopted_mandala_government }
+			#To prevent 'unused except in loc' errors :catto:
+		}
+		show_as_tooltip = {
+			change_government = mandala_government
+		}
+		#Huh, guess you _are_ divine
+		if = {
+			limit = { has_variable = vying_for_mandala_divinity }
+			custom_description_no_bullet = { text = because_of_your_divine_happenstance_tt }
+			show_as_tooltip = { divine_happenstance_adopt_mandala_effect = yes }
+		}
+		if = {
+			limit = {
+				culture = {
+					has_cultural_parameter = mandala_tributaries 
+				}
+				exists = confederation
+			}
+			custom_tooltip = confederates_to_tributaries_tt
+		}
+		trigger_event = tgp_east_asia_decision_events.0010
+		hidden_effect = {
+			every_vassal = {
+				trigger_event = {
+					id = tgp_east_asia_decision_events.0015
+					days = 3
+				}
+			}
+		}
+	}
+
+	ai_potential = {
+		has_mandala_culture_trigger = yes
+		trigger_if = {
+			limit = { government_has_flag = government_is_tribal }
+			has_realm_law = tribal_authority_3
+			prestige >= convert_to_mandala_government_tribal_value
+		}
+		trigger_else = {
+			prestige >= convert_to_mandala_government_nontribal_value
+		}
+		trigger_if = {
+			limit = { 
+				OR = {
+					government_has_flag = government_is_feudal
+					government_has_flag = government_is_clan
+				}
+			}
+			primary_title.tier <= tier_duchy
+		}
+		primary_title.tier > tier_barony
+		NOR = {	
+			government_has_flag = government_is_republic
+			government_has_flag = government_is_theocracy
+			government_has_flag = government_is_mercenary
+			government_has_flag = government_is_holy_order
+			government_has_flag = government_is_administrative
+			government_has_flag = government_is_nomadic
+			government_has_flag = government_is_herder
+			government_has_flag = government_is_celestial
+			government_has_flag = government_is_steppe_admin
+			government_has_flag = government_is_meritocratic
+		}
+		NOT = {
+			any_owned_story = {
+				OR = {
+					story_type = story_greatest_of_khans
+					story_type = story_mongol_invasion
+				}
+			}
+		}
+	}
+
+	ai_will_do = {
+		base = 20
+		modifier = {
+			NOT = { government_has_flag = government_is_tribal }
+			add = -15
+		}
+	}
+}
+
+##### Changed from Vanilla: Blocked before Classical Antiquity
+
+### Assimilate to Mandala Rule ###
+assimilate_to_mandala_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/tgp_decision_mandala.dds"
+	}
+	decision_group_type = major
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { government_has_flag = government_is_mandala }
+				desc = assimilate_to_mandala_decision_faith_desc
+			}
+			triggered_desc = {
+				trigger = { faith = overlord.faith }
+				desc = assimilate_to_mandala_decision_government_desc
+			}
+			desc = assimilate_to_mandala_decision_desc
+		}
+	}
+	
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 36
+		duchy = 36
+		kingdom = 36
+		empire = 36
+		hegemony = 36
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		##### Changed from Vanilla vvvvv
+		culture = { has_cultural_era_or_later = culture_era_late_antiquity }
+		##### Changed from Vanilla ^^^^^
+		has_tgp_dlc_trigger = yes
+		overlord ?= { government_has_flag = government_is_mandala }
+		NAND = { 
+			government_has_flag = government_is_mandala
+			faith = overlord.faith
+		}
+		highest_held_title_tier > tier_barony
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		custom_tooltip = {
+			text = not_changed_government_recently_tt
+			NOT = { has_variable = changed_government_recently }
+		}
+	}
+
+	effect = {
+		#GoK stops really being GoK
+		gok_government_change_story_end_effect = yes
+		#No Succession for this character pls
+		set_variable = {
+			name = not_subject_to_succession_trials
+			value = flag:assimilated_to_mandala_government
+		}
+		if = {
+			limit = { var:not_subject_to_succession_trials ?= flag:assimilated_to_mandala_government }
+			#To prevent 'unused except in loc' errors :catto:
+		}
+		#Opinion, if Overlord is AI
+		overlord = {
+			if = {
+				limit = { is_ai = yes }
+				if = {
+					limit = { good_devaraja_quality_trigger = yes }
+					add_opinion = {
+						target = root
+						modifier = assimilated_to_devaraja_rule_opinion
+						opinion = 10
+					}
+				}
+				else_if = {
+					limit = { middling_devaraja_quality_trigger = yes }
+					add_opinion = {
+						target = root
+						modifier = assimilated_to_devaraja_rule_opinion
+						opinion = 30
+					}
+				}
+				else_if = {
+					limit = { poor_devaraja_quality_trigger = yes }
+					root = {
+						progress_towards_friend_effect = {
+							REASON = friend_supported_devaraja
+							CHARACTER = overlord
+							OPINION = 0
+						}
+					}
+					add_opinion = {
+						target = root
+						modifier = assimilated_to_devaraja_rule_opinion
+						opinion = 40
+					}
+				}
+				else_if = {
+					limit = { terrible_devaraja_quality_trigger = yes }
+					root = {
+						progress_towards_friend_effect = {
+							REASON = friend_supported_devaraja
+							CHARACTER = overlord
+							OPINION = 0
+						}
+					}
+					add_opinion = {
+						target = root
+						modifier = assimilated_to_devaraja_rule_opinion
+						opinion = 60
+					}
+				}
+			}
+		}
+		#Also notify the Devaraja of their Piety gain
+		mandala_assimilation_effect = yes
+		if = {
+			limit = {
+				NOR = { 
+					faith = overlord.faith 
+					faith.religious_head ?= root
+				}
+			}
+			custom_tooltip = tgp_east_asia_decision_events.0020.close_family_pre_tt
+		}
+		#You got in early? Good for you!
+		if = {
+			limit = { 
+				overlord = { 
+					OR = { 
+						middling_devaraja_quality_trigger = yes
+						poor_devaraja_quality_trigger = yes
+						terrible_devaraja_quality_trigger = yes
+					}
+				}
+			}
+			if = {
+				limit = { 
+					overlord = { middling_devaraja_quality_trigger = yes }
+				}
+				add_character_flag = assimilation_payout_t1
+				custom_tooltip = { text = assimilation_payout_t1_tt }
+			}
+			else_if = {
+				limit = { 
+					overlord = { poor_devaraja_quality_trigger = yes }
+				}
+				add_character_flag = assimilation_payout_t2
+				custom_tooltip = { text = assimilation_payout_t2_tt }
+			}
+			else_if = {
+				limit = { 
+					overlord = { terrible_devaraja_quality_trigger = yes }
+				}
+				add_character_flag = assimilation_payout_t3
+				custom_tooltip = { text = assimilation_payout_t3_tt }
+			}
+			#Delayed payout event with its own triggers
+			set_variable = {
+				name = mandala_assimilation_devaraja
+				value = overlord
+			}
+			set_variable = {
+				name = mandala_assimilation_devaraja_piety_level
+				value = overlord.piety_level
+			}
+			trigger_event = {
+				id = tgp_east_asia_decision_events.0100
+				years = assimilation_payout_years
+			}
+		}
+		#We actually set the government and faith in the event
+		trigger_event = tgp_east_asia_decision_events.0020
+		#And vassal(s)
+		hidden_effect = {
+			every_vassal = {
+				trigger_event = {
+					id = tgp_east_asia_decision_events.0025
+					days = 3
+				}
+			}
+		}
+		set_variable = {
+			name = changed_government_recently
+			years = 5
+		}
+	}
+
+	ai_potential = {
+		this != top_overlord
+		overlord = { government_has_flag = government_is_mandala }
+		primary_title.tier > tier_barony
+		#Keep the tributaries Wanua
+		trigger_if = {
+			limit = { 
+				government_has_flag = government_is_wanua
+				is_independent_ruler = yes
+			}
+			overlord.mandala_radiance_value >= 50
+		}
+		#... but be more lenient on the Vassals
+		trigger_if = {
+			limit = { 
+				government_has_flag = government_is_wanua
+				is_independent_ruler = no
+			}
+			overlord.mandala_radiance_value >= 10
+		}
+		NOT = {
+			any_owned_story = {
+				OR = {
+					story_type = story_mongol_invasion
+					story_type = story_greatest_of_khans
+				}
+			}
+		}
+	}
+
+	ai_will_do = {
+		base = 20
+		modifier = {
+			NOT = { government_has_flag = government_is_tribal }
+			add = -50
+		}
+		modifier = {
+			overlord = { terrible_devaraja_quality_trigger = yes }
+			add = -50
+		}
+		modifier = {
+			overlord = { poor_devaraja_quality_trigger = yes }
+			add = -25
+		}
+		modifier = {
+			overlord = { middling_devaraja_quality_trigger = yes }
+			add = 25
+		}
+		modifier = {
+			overlord = { good_devaraja_quality_trigger = yes }
+			add = 25
+		}
+		modifier = {
+			overlord = { great_devaraja_quality_trigger = yes }
+			add = 50
+		}
+		modifier = {
+			overlord = { exalted_devaraja_quality_trigger = yes }
+			add = 100
+		}
+		opinion_modifier = {
+			who = root
+			opinion_target = overlord
+			multiplier = 1
+		}
+	}
+}
