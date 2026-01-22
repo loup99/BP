@@ -171,13 +171,24 @@ BP_roman_decisions.0002 = {
 		if = {
 			limit = { exists = title:e_byzantium.holder }
 			title:e_byzantium.holder = { #Goes to Eastern Emperor
+				save_scope_as = the_other_emperor
 				trigger_event = {
 					id = BP_roman_decisions.0004
 					days = { 3 10 }
 				}
 			}
 		}
-		#Otherwise, no one can contradict the Pope's proclaimation
+		if = {
+			limit = { exists = title:h_eastern_roman_empire.holder }
+			title:h_eastern_roman_empire.holder = { #Goes to Eastern Emperor
+				save_scope_as = the_other_emperor
+				trigger_event = {
+					id = BP_roman_decisions.0004
+					days = { 3 10 }
+				}
+			}
+		}
+		#Otherwise, no one can contradict the Pope's proclamation
 		else = { create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_wre } }
 	}
 }
@@ -289,7 +300,7 @@ BP_roman_decisions.0005 = {
 	}
 	
 	right_portrait = {
-		character = title:e_byzantium.holder
+		character = scope:the_other_emperor
 		animation = admiration
 	}
 	
@@ -316,7 +327,7 @@ BP_roman_decisions.0006 = {
 	}
 	
 	right_portrait = {
-		character = title:e_byzantium.holder
+		character = scope:the_other_emperor
 		animation = dismissal
 	}
 	
@@ -346,7 +357,10 @@ BP_roman_decisions.0007 = {
 		first_valid = {
 			triggered_desc = { #Byzantium Approves
 				trigger = {
-					exists = title:e_byzantium.holder
+					OR = {
+						exists = title:e_byzantium.holder
+						exists = title:h_eastern_roman_empire.holder
+					}
 					scope:empire_petitoner.primary_title = title:e_wre
 				}
 				desc = BP_roman_decisions.0007.e_byzantium_approves
@@ -354,13 +368,17 @@ BP_roman_decisions.0007 = {
 			triggered_desc = { #Byzantium doesn't exist
 				trigger = {
 					NOT = { exists = title:e_byzantium.holder }
+					NOT = { exists = title:h_eastern_roman_empire.holder }
 					scope:empire_petitoner.primary_title = title:e_wre
 				}
 				desc = BP_roman_decisions.0007.e_byzantium_dead
 			}
 			triggered_desc = { #Byzantium Disapproves
 				trigger = {
-					exists = title:e_byzantium.holder
+					OR = {
+						exists = title:e_byzantium.holder
+						exists = title:h_eastern_roman_empire.holder
+					}
 					scope:empire_petitoner.primary_title = title:e_hre
 				}
 				desc = BP_roman_decisions.0007.e_byzantium_disapproves
