@@ -37,7 +37,6 @@ bp_game_start = {
 		block_specific_chars_from_having_families
 		#Other Actions
 		update_development_by_terrain_and_circumstances
-		setup_hunter_gatherers
 	}
 }
 
@@ -1136,47 +1135,21 @@ trigger_needed_events = {
 	}
 }
 
-
 hunter_gatherer_mechanic = {
 	effect = {
+		if = {
 		limit = { has_game_rule = hunter_gatherer_mechanic_enabled }
-		every_independent_ruler = {
-			limit = {
-				is_ai = no
-				government = tribal_government
-				OR = {
-					culture = culture:fenni
-					culture = culture:sami
+			every_independent_ruler = {
+				limit = {
+					is_ai = yes
+					has_government = tribal_government
+					NOT = { culture = { has_innovation_flag = hunter_gather_conversion } }
 				}
-			}
-			change_government = herder_government
-			set_holding_type = herder_holding
-			if = { # No baby herders
-				limit = { age < 16 }
-				death = yes
-			}
-		}
-	}
-}
-
-
-hunter_gatherer_mechanic = {
-	effect = {
-		limit = { has_game_rule = hunter_gatherer_mechanic_enabled }
-		every_independent_ruler = {
-			limit = {
-				is_ai = no
-				government = tribal_government
-				OR = {
-					culture = culture:fenni
-					culture = culture:sami
+				change_government = hunter_gatherer_government
+				if = { # No baby herders
+					limit = { age < 16 }
+					death = yes
 				}
-			}
-			change_government = herder_government
-			set_holding_type = herder_holding
-			if = { # No baby herders
-				limit = { age < 16 }
-				death = yes
 			}
 		}
 	}
@@ -1373,23 +1346,6 @@ cull_maa_from_single_county_tribals = {
 				}
 			}
 			every_maa_regiment = { destroy_maa_regiment = yes }
-		}
-	}
-}
-
-setup_hunter_gatherers = {
-	effect = {
-		if = {
-			limit = { has_game_rule = hunter_gatherer_mechanic_enabled }
-			every_ruler = {
-				limit = {
-					is_landed = yes
-					is_ai = yes
-					NOT = { culture = { has_innovation_flag = hunter_gather_conversion } }
-					has_government = tribal_government
-				}
-				change_government = hunter_gatherer_government
-			}
 		}
 	}
 }
