@@ -191,7 +191,7 @@ doctrine_funeral = {
 	}
 }
 
-##### Changed from Vanilla: Added in Mazdan effects, added Monism and Agnosticism
+##### Changed from Vanilla: Added in Mazdan effects, added Monism and Agnosticism, tweaked costs
 doctrine_theism = {
 	group = "main_group"
 	doctrine_monotheist = {
@@ -208,10 +208,7 @@ doctrine_theism = {
 				}
 				multiply = faith_unchanged_doctrine_cost_mult
 			}
-			else_if = {
-				limit = { has_doctrine = doctrine_agnostic }
-				multiply = faith_changed_doctrine_cost_mult_four_step
-			}
+			else = { multiply = faith_changed_doctrine_cost_mult_four_step }
 		}
 		parameters = {
 			hostility_others = 3
@@ -223,10 +220,14 @@ doctrine_theism = {
 			value = faith_doctrine_cost_high
 			if = {
 				limit = { has_doctrine = abrahamic_hostility_doctrine }
-				multiply = faith_changed_doctrine_cost_mult_three_step
+				multiply = faith_changed_doctrine_cost_mult_four_step
 			}
 			else_if = {
 				limit = { has_doctrine = doctrine_agnostic }
+				multiply = faith_changed_doctrine_cost_mult_three_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_roman_polytheist }
 				multiply = faith_changed_doctrine_cost_mult_two_step
 			}
 			else_if = {
@@ -236,6 +237,43 @@ doctrine_theism = {
 		}
 		parameters = {
 			hostility_others = 2
+			hostility_override_doctrine_roman_polytheist = 1
+		}
+	}
+	doctrine_roman_polytheist = {
+		is_shown = { religion_tag = hellenism_religion }
+		piety_cost = {
+			value = faith_doctrine_cost_high
+			if = {
+				limit = { has_doctrine = abrahamic_hostility_doctrine }
+				multiply = faith_changed_doctrine_cost_mult_four_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_agnostic }
+				multiply = faith_changed_doctrine_cost_mult_three_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_polytheist }
+				multiply = faith_changed_doctrine_cost_mult_two_step
+			}
+			else_if = {
+				limit = { has_doctrine = doctrine_roman_polytheist }
+				multiply = faith_unchanged_doctrine_cost_mult
+			}
+		}
+		can_pick = { #For safety
+			custom_description = {
+				text = doctrine_inverted_pluralism_pluralistic_trigger
+				NOR = {
+					doctrine:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines }
+					doctrine:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
+				}
+			}
+		}
+		parameters = {
+			hostility_override_doctrine_polytheist = 1
+			hostility_override_doctrine_roman_polytheist = 1
+			hostility_override_doctrine_monist = 1
 		}
 	}
 	doctrine_monist = {
@@ -261,6 +299,7 @@ doctrine_theism = {
 				limit = {
 					has_doctrine = doctrine_monotheist
 					has_doctrine = doctrine_polytheist
+					has_doctrine = doctrine_roman_polytheist
 				}
 				multiply = faith_changed_doctrine_cost_mult_three_step
 			}
@@ -299,6 +338,7 @@ doctrine_theism = {
 				limit = {
 					has_doctrine = doctrine_monotheist
 					has_doctrine = doctrine_polytheist
+					has_doctrine = doctrine_roman_polytheist
 				}
 				multiply = faith_changed_doctrine_cost_mult_three_step
 			}
@@ -314,6 +354,7 @@ doctrine_theism = {
 		parameters = {
 			holy_wars_forbidden = yes
 			hostility_others = 2
+			hostility_override_doctrine_roman_polytheist = 1
 		}
 	}
 }
