@@ -21,6 +21,7 @@ ask_for_hre = {
 		#Haven't already asked
 		root = { NOT = { has_variable = asked_for_hre } }
 		#WRE/HRE must not exist
+		NOT = { exists = title:h_western_roman_empire.holder }
 		NOT = { exists = title:e_wre.holder }
 		NOT = { exists = title:e_hre.holder }
 		#Have to be in communion with the Pope to do this
@@ -39,11 +40,11 @@ ask_for_hre = {
 			#Can't already be Roman Empire
 			has_title = title:e_wre
 			has_title = title:e_byzantium
+			has_title = title:h_western_roman_empire
+			has_title = title:h_eastern_roman_empire
 			has_title = title:h_roman_empire
 			#Axum is special
 			has_title = title:e_axum
-			#If you're Italy, why request Rome?
-			has_title = title:e_italy
 		}
 	}
 	
@@ -112,7 +113,7 @@ ask_for_wre = {
 		#Haven't already asked
 		root = { NOT = { has_variable = asked_for_wre } }
 		#WRE must not exist
-		NOT = { exists = title:e_wre.holder }
+		NOT = { exists = title:h_western_roman_empire.holder }
 		#ERE must have a holder
 		exists = title:e_byzantium.holder
 		#Have correct religion
@@ -127,13 +128,11 @@ ask_for_wre = {
 		#Can't be of a specially excluded title
 		NOR = {
 			#Can't already be Romanh
-			has_title = title:e_wre
 			has_title = title:e_byzantium
 			has_title = title:h_roman_empire
+			has_title = title:h_western_roman_empire
 			#Axum is special
 			has_title = title:e_axum
-			#If you're Italy, why request Rome?
-			has_title = title:e_italy
 		}
 	}
 	
@@ -199,14 +198,28 @@ sole_roman_empire = {
 	selection_tooltip = sole_roman_empire_tooltip
 	
 	is_shown = {
-		OR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
-		}
-		OR = {
-			NOT = { exists = title:e_wre.holder }
+		#Can't claim to be the sole empire if the other half (or its rump) exists
+		trigger_if = {
+			limit = {
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
 			NOT = { exists = title:e_byzantium.holder }
+			NOT = { exists = title:h_eastern_roman_empire }
 		}
+		trigger_else_if = {
+			limit = {
+				OR = {
+					has_title = title:e_byzantium
+					has_title = title:h_eastern_roman_empire
+				}
+			}
+			NOT = { exists = title:e_wre.holder }
+			NOT = { exists = title:h_western_roman_empire }
+		}
+		trigger_else = { always = no }
 		OR = {
 			religion = religion:christianity_religion
 			religion = religion:hellenism_religion
@@ -219,12 +232,24 @@ sole_roman_empire = {
 	is_valid = {
 		gold >= massive_gold_value
 		trigger_if = {
-			limit = { has_title = title:e_wre }
+			limit = {
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
 			NOT = { exists = title:e_byzantium.holder }
+			NOT = { exists = title:h_eastern_roman_empire.holder }
 		}
 		trigger_if = {
-			limit = { has_title = title:e_byzantium }
-			NOT = { exists = title:e_wre.holder }
+			limit = {
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
+			NOT = { exists = title:e_byzantium.holder }
+			NOT = { exists = title:h_eastern_roman_empire.holder }
 		}
 	}
 	
@@ -275,9 +300,21 @@ unite_roman_empires = {
 	selection_tooltip = unite_roman_empires_tooltip
 	
 	is_shown = {
-		OR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
+		AND = {
+			custom_description = {
+				text = has_a_western_roman_empire
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
+			custom_description = {
+				text = has_an_eastern_roman_empire
+				OR = {
+					has_title = title:e_byzantium
+					has_title = title:h_eastern_roman_empire
+				}
+			}
 		}
 		OR = {
 			religion = religion:christianity_religion
