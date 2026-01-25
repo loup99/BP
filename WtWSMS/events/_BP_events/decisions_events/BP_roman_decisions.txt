@@ -47,6 +47,37 @@ scripted_effect create_new_roman_empire_title_effect = {
 	}
 }
 
+scripted_effect unite_roman_empire_effect = {
+	#Shift allegiances
+	every_empire = {
+		limit = {
+			OR = {
+				this.hegemony = title:h_eastern_roman_empire
+				this.hegemony = title:h_western_roman_empire
+			}
+		}
+		set_de_jure_liege_title = title:h_roman_empire
+	}
+	#Create the new title
+	create_title_and_vassal_change = {
+		type = created
+		save_scope_as = change
+		add_claim_on_loss = no
+	}
+	title:h_roman_empire = {
+		change_title_holder = {
+			holder = root
+			change = scope:change
+		}
+	}
+	resolve_title_and_vassal_change = scope:change
+	#Destroy the other hegemonies
+	root = {
+		destroy_title = title:h_eastern_roman_empire
+		destroy_title = title:h_western_roman_empire
+	}
+}
+
 #The Pope gets the request
 BP_roman_decisions.0001 = {
 	type = character_event
@@ -445,9 +476,12 @@ BP_roman_decisions.0010 = { #WTWSMS id: imperial_legacy.10
 		animation = personality_honorable
 	}
 	
+	immediate = { add_pressed_claim = title:h_roman_empire }
+	
 	option = {
 		name = BP_roman_decisions.0010.a
 		custom_tooltip = BP_roman_decisions.0010.a.tooltip
+		show_as_tooltip = { add_pressed_claim = title:h_roman_empire }
 	}
 }
 #Sole Roman Empire
@@ -503,11 +537,12 @@ BP_roman_decisions.0011 = { #Cribbed from Vanilla roman_restoration.0001
 	immediate = {
 		play_music_cue = "mx_cue_epic_sacral_moment"
 		save_scope_as = scoped_emperor
-		bp_creath_roman_empire_scripted_effect = yes
+		unite_roman_empire_effect = yes
 	}
 	option = {
 		name = roman_restoration.0001.a
 		set_nickname_effect = { NICKNAME = nick_the_glorious }
+		show_as_tooltip = { unite_roman_empire_effect = yes }
 		# Send narrative fluff to other players (if any).
 		every_player = {
 			limit = {
