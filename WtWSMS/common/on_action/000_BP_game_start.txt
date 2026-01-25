@@ -30,6 +30,7 @@ bp_game_start = {
 		other_religion_effects
 		#Culture Stuff
 		learn_the_language_of_your_capital
+		learn_liturgical_language_if_not_already
 		add_innovations_as_required
 		#Family Stuff
 		set_historical_dynasty_renown
@@ -212,7 +213,12 @@ setup_realm_and_title_succession_laws = {
 				}
 				add_realm_law_skip_effects = equal_law
 			}
-			else = { add_realm_law_skip_effects = male_only_law } #Fallback; male-only.
+			else = { #Fallback; male-only.
+				if = {
+					limit = { NOT = { has_realm_law = male_only_law } }
+					add_realm_law_skip_effects = male_only_law
+				}
+			}
 		}
 		### Other Realm-Succession laws that must be enforced
 		every_ruler = { #High Partition
@@ -1004,7 +1010,7 @@ set_ethnic_religion_flags = {
 		#Donyipoloism
 		faith:sedism = { set_variable = { name = ethnic_religion_culture value = culture:kachari } }
 		faith:bathouism = { set_variable = { name = ethnic_religion_culture value = culture:kachari } }
-		faith:sanamahi_pagan = { set_variable = { name = ethnic_religion_culture value = culture:meitei } }
+		faith:sedism = { set_variable = { name = ethnic_religion_culture value = culture:meitei } }
 		#Dualism
 		faith:mandeaism = { set_variable = { name = ethnic_religion_culture value = culture:chaldean } }
 		faith:sabianism = { set_variable = { name = ethnic_religion_culture value = culture:assyrian } }
@@ -1033,6 +1039,10 @@ set_ethnic_religion_flags = {
 }
 other_religion_effects = {
 	effect = {
+		#Confucian effects
+		faith:daoxue = {
+			add_doctrine = special_doctrine_humanistic_philosophy
+		}
 		#Yazidism effects
 		RICE_setup_yazidi_flavor_pack_BP_subselect_effect = yes
 	}
@@ -1054,6 +1064,14 @@ learn_the_language_of_your_capital = {
 				}
 				learn_language_of_culture = this.capital_county.culture
 			}
+		}
+	}
+}
+learn_liturgical_language_if_not_already = {
+	effect = {
+		every_ruler = {
+			limit = { government_has_flag = government_is_theocracy }
+			bp_learn_liturgical_language_effect = yes
 		}
 	}
 }
@@ -1106,6 +1124,13 @@ trigger_needed_events = {
 		every_player = { trigger_event = { id = BP_maintenance_events.0001 } }
 		#Fix _all_ the barony governments; has to be some ruler for some reason
 		random_ruler = { trigger_event = { id = BP_maintenance_events.0002 } }
+		#Add theocratic traits to chaplain
+		every_ruler = {
+			limit = { exists = cp:councillor_court_chaplain }
+			cp:councillor_court_chaplain = {
+				bp_setup_priest_traits_effect = yes
+			}
+		}
 	}
 }
 
