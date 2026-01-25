@@ -209,7 +209,11 @@ swap_roman_province_decision = {
 		root.number_of_not_titular_kingdoms = 0 #On the off-chance we have a de-jure title, we don't get to do this
 		#Roman Chars do things differently if its within the Roman Empire
 		culture = { has_cultural_parameter = can_restore_roman_empire }
-		root.capital_county.title_province = { geographical_region = historic_roman_empire }
+		OR = {
+			root.capital_county.hegemony = title:h_roman_empire
+			root.capital_county.hegemony = title:h_western_roman_empire
+			root.capital_county.hegemony = title:h_eastern_roman_empire
+		}
 		#Can't be a different universality if we're Roman...
 		NOT = { government_has_flag = government_uses_rajamandala_authority }
 		NOT = { government_has_flag = government_uses_iranian_dynastic_authority }
@@ -409,8 +413,6 @@ establish_de_jure_empire_decision = {
 		#Roman Empires are special
 		NOT = { has_title = title:e_wre }
 		NOT = { has_title = title:e_byzantium }
-		NOT = { has_title = title:h_roman_empire }
-		NOT = { has_title = title:h_eastern_roman_empire }
 		#Roman Chars do things differently if it's within the Roman Empire
 		trigger_if = {
 			limit = { culture = { has_cultural_parameter = can_restore_roman_empire } }
@@ -567,198 +569,6 @@ establish_de_jure_empire_decision = {
 				has_realm_law = subroman_feudal_transition_9
 			}
 		}
-	}
-
-	ai_will_do = {
-		base = 100
-	}
-}
-
-#For the edge case where a Roman Empire is titular
-establish_de_jure_empire_roman_decision = { #TODO: The script values should be scopable for localization instead of using separate counters for Italy, Byz, &c.
-	picture = {
-		reference = "gfx/interface/illustrations/decisions/ep3_decision_roman_restoration.dds"
-	}
-	decision_group_type = major
-	
-	title = establish_de_jure_empire_roman_decision_title
-	desc = establish_de_jure_empire_roman_decision_desc
-	selection_tooltip = establish_de_jure_empire_roman_decision_tooltip
-	sort_order = 1000
-
-
-	is_shown = {
-		top_liege = this
-		OR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
-			has_title = title:h_roman_empire
-			has_title = title:h_eastern_roman_empire
-		}
-		root.primary_title = { is_titular = yes }
-		root.number_of_not_titular_empires = 0 #On the off-chance we have a de-jure title, we don't get to do this
-		#Can't be a different universality if we're Roman...
-		NOT = { government_has_flag = government_uses_rajamandala_authority }
-		NOT = { government_has_flag = government_uses_iranian_dynastic_authority }
-	}
-
-	is_valid = {
-		#Your capital is at a historic roman capital
-		trigger_if = {
-			limit = { root.primary_title = title:h_roman_empire }
-			OR = { #Historic Roman Capital
-				custom_description = { text = roman_capital root.capital_county = title:c_roma }
-				custom_description = { text = ravenna_capital root.capital_county = title:c_ravenna }
-				custom_description = { text = milan_capital root.capital_county = title:c_lombardia } #Mediolanum
-				custom_description = { text = constantinople_capital root.capital_county = title:c_byzantion }
-				custom_description = { text = nikomedia_capital root.capital_county = title:c_bithynia }
-			}
-			#Completely Control Italy Proper OR Byzantium Proper
-			AND = {
-				completely_controls = title:k_italia
-				completely_controls = title:k_annonaria
-				completely_controls = title:k_byzantium
-				completely_controls = title:k_achaia
-				completely_controls = title:k_macedonia
-				completely_controls = title:k_thrace
-			}
-			#Control 60% of Empire of Italy OR 60% of Byzantium
-			AND = {
-				custom_description = {
-					text = you_control_half_of_italy
-					subject = root
-					title:k_italia.empire = { any_de_jure_county = { percent > 0.60 this.holder.top_liege = root } }
-				}
-				custom_description = {
-					text = you_control_half_of_byzantium
-					subject = root
-					title:k_byzantium.empire = { any_de_jure_county = { percent > 0.60 this.holder.top_liege = root } }
-				}
-			}
-		}
-		trigger_else_if = {
-			limit = { root.primary_title = title:e_wre }
-			OR = { #Historic Roman Capital
-				custom_description = { text = roman_capital root.capital_county = title:c_roma }
-				custom_description = { text = ravenna_capital root.capital_county = title:c_ravenna }
-				custom_description = { text = milan_capital root.capital_county = title:c_lombardia } #Mediolanum
-			}
-			#Completely Control Italy Proper
-			completely_controls = title:k_italia
-			completely_controls = title:k_annonaria
-			#Control 60% of Empire of Italy
-			custom_description = {
-				text = you_control_half_of_italy
-				subject = root
-				title:k_italia.empire = { any_de_jure_county = { percent > 0.60 this.holder.top_liege = root } }
-			}
-		}
-		trigger_else_if = {
-			limit = {
-				OR = {
-					root.primary_title = title:e_byzantium
-					root.primary_title = title:h_eastern_roman_empire
-				}
-			}
-			OR = { #Historic Roman Capital
-				custom_description = { text = constantinople_capital root.capital_county = title:c_byzantion }
-				custom_description = { text = nikomedia_capital root.capital_county = title:c_bithynia }
-			}
-			#Completely Control Byzantium Proper
-			completely_controls = title:k_byzantium
-			completely_controls = title:k_achaia
-			completely_controls = title:k_macedonia
-			completely_controls = title:k_thrace
-			#Control 60% of Empire of Byzantium
-			custom_description = {
-				text = you_control_half_of_byzantium
-				subject = root
-				title:k_byzantium.empire = { any_de_jure_county = { percent > 0.60 this.holder.top_liege = root } }
-			}
-		}
-		trigger_else = { always = no } #Fall back
-		#Settlement Requirements: Capital region must be your culture & faith
-		custom_description = {
-			text = the_capital_duchy_is_your_faith_and_culture
-			subject = root
-			object = root.capital_county.duchy
-			root.capital_county.duchy = {
-				any_de_jure_county = {
-					count = all
-					this.culture = root.culture
-					this.faith = root.faith
-				}
-			}
-		}
-		#Character Cultural/Faith Requirements
-		culture = { #Have to be actually able to make some sort of claim
-			has_innovation = innovation_writing
-			has_innovation = innovation_social_stratification
-		}
-		NOT = { faith = { has_doctrine = unreformed_faith_doctrine } }
-		#Personal Requirements
-		legitimacy_level >= 4
-		prestige_level >= 5
-		#Governmental Requirements
-		trigger_if = {
-			limit = { government_has_flag = government_is_tribal }
-			custom_description = {
-				text = primitives_cannot_make_titles_de_jure
-				always = no
-			}
-		}
-		#Sub-Romans can do it anytime
-		trigger_if = { #If High Tribal, Max Organization
-			limit = { government_has_flag = government_uses_high_tribal_organization }
-			has_realm_law = high_tribal_organization_3
-		}
-		trigger_if = { #If Pre-Feudal, Max Authorithty
-			limit = { government_has_flag = government_uses_prefeudal_authority }
-			has_realm_law = prefeudal_authority_3
-		}
-		trigger_if = { #If Feudal or Clan, Max crown authority
-			limit = {
-				OR = {
-					government_has_flag = government_is_feudal
-					government_has_flag = government_is_clan
-				}
-			}
-			has_realm_law = crown_authority_3
-		}
-	}
-	
-	is_valid_showing_failures_only = {
-		is_available_at_peace_adult = yes
-		is_imprisoned = no
-		is_adult = yes
-	}
-
-	cost = {
-		gold = 1000
-		prestige = 10000
-	}
-
-	effect = {
-		gain_heroic_legend_seed_tooltip_effect = yes
-		custom_description = { text = wholly_owned_kingdoms_become_de_jure }
-		save_scope_as = new_empire_former
-		establish_de_jure_empire_decision_effect = { FORMER = scope:new_empire_former }
-		trigger_event = BP_establish_de_jure_decisions.0102 #The Roman Event
-	}
-
-	ai_check_interval_by_tier = {
-		barony = 0
-		county = 0
-		duchy = 0
-		kingdom = 0
-		empire = 120
-		hegemony = 0
-	}
-
-	#This is mostly to make it rare for the AI to actually attempt
-	ai_potential = {
-		prestige > 10000
-		gold > 500
 	}
 
 	ai_will_do = {
