@@ -1,0 +1,157 @@
+﻿namespace = bp_hegemonic_collapse
+
+#bp_hegemonic_collapse.0001 - A generic hegemony falls
+#bp_hegemonic_collapse.0010 - Roman Hegemonies collapse
+
+scripted_effect bp_destroy_hegemony_effect = {
+	scope:the_bag_holder = {
+		#If they exist as part of your realm, destroy empires and spin them off formally
+		create_title_and_vassal_change = {
+			type = independency
+			save_scope_as = change
+			add_claim_on_loss = no
+		}
+		every_vassal = {
+			limit = { this.primary_title.tier = tier_empire }
+			every_held_title = {
+				limit = { this.tier = tier_empire }
+				prev = { destroy_title = prev }
+			}
+			becomes_independent = { change = scope:change }
+		}
+		resolve_title_and_vassal_change = scope:change
+		#Destroy any held empires
+		every_held_title = {
+			limit = { this.tier = tier_empire }
+			prev = { destroy_title = prev }
+		}
+		#Destroy the hegemony
+		every_held_title = {
+			limit = { this.tier = tier_hegemony }
+			prev = { destroy_title = prev }
+		}
+	}
+}
+
+#A Hegemony Disappears
+bp_hegemonic_collapse.0001 = {
+	immediate = {
+		bp_destroy_hegemony_effect = yes
+	}
+	
+	title = bp_hegemonic_collapse.0001.name
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { root = scope:the_bag_holder }
+				desc = bp_hegemonic_collapse.0001.desc.me
+			}
+			#Default
+			desc = bp_hegemonic_collapse.0001.desc.others
+		}
+	}
+	type = character_event
+	theme = realm
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:last_hegemon
+		animation = disappointed
+	}
+	
+	left_portrait = {
+		character = scope:the_bag_holder
+		animation = shame
+	}
+	
+	option = {
+		name = bp_hegemonic_collapse.0001.a
+		show_as_tooltip = { bp_destroy_hegemony_effect = yes }
+		#The bag-holder spawns this even for everyone else
+		if = {
+			limit = { root = scope:the_bag_holder }
+			#Tell everyone of your incompetence
+			every_player = {
+				limit = {
+					is_ai = no
+					NOT = { this = root }
+				}
+				trigger_event = { id = bp_hegemonic_collapse.0001 }
+			}
+		}
+	}
+}
+
+#A Hegemony Disappears
+bp_hegemonic_collapse.0010 = {
+	immediate = {
+		bp_destroy_hegemony_effect = yes
+	}
+	
+	title = bp_hegemonic_collapse.0010.blah
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					root = scope:the_bag_holder
+					scope:the_hegemony = title:h_roman_empire
+				}
+				desc = bp_hegemonic_collapse.0010.desc.me_full_rome
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { root = scope:the_bag_holder }
+					scope:the_hegemony = title:h_roman_empire
+				}
+				desc = bp_hegemonic_collapse.0010.desc.others_full_rome
+			}
+			triggered_desc = {
+				trigger = {
+					root = scope:the_bag_holder
+					NOT = { scope:the_hegemony = title:h_roman_empire }
+				}
+				desc = bp_hegemonic_collapse.0010.desc.me_a_rome
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { root = scope:the_bag_holder }
+					NOT = { scope:the_hegemony = title:h_roman_empire }
+				}
+				desc = bp_hegemonic_collapse.0010.desc.others_a_rome
+			}
+			
+			#Default
+			desc = bp_hegemonic_collapse.0010.desc.others_a_rome
+		}
+	}
+	type = character_event
+	theme = realm
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:last_hegemon
+		animation = disappointed
+	}
+	
+	left_portrait = {
+		character = scope:the_bag_holder
+		animation = shame
+	}
+	
+	option = {
+		name = bp_hegemonic_collapse.0010.a
+		show_as_tooltip = { bp_destroy_hegemony_effect = yes }
+		#The bag-holder spawns this even for everyone else
+		if = {
+			limit = { root = scope:the_bag_holder }
+			#Tell everyone of your incompetence
+			every_player = {
+				limit = {
+					is_ai = no
+					NOT = { this = root }
+				}
+				trigger_event = { id = bp_hegemonic_collapse.0010 }
+			}
+		}
+	}
+}

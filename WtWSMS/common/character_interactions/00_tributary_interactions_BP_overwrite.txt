@@ -655,3 +655,601 @@ release_tributary_interaction = {
 		##### Changed from Vanilla ^^^^^
 	}
 }
+
+### Demand Tributary - bilateral
+# actor = offerer / potential suzerain
+# recipient = receiver / potential tributary
+
+##### Changed from Vanilla: Removed some error in Vanilla that is spamming the log. Stupid PDX; fix your own bugs!
+demand_tributary_interaction = {
+	category = interaction_category_diplomacy
+	common_interaction = yes
+	icon = demand_tributary_interaction
+
+	desc = demand_tributary_interaction_desc
+
+	is_shown = {
+		scope:actor = {
+			NOT = {
+				this = scope:recipient
+				top_suzerain = scope:recipient.top_suzerain # ensures the actor and recipient is not already in the same "suzerain bloc"
+			}
+			can_get_tributaries_peacefully_trigger = yes
+
+			highest_held_title_tier < tier_hegemony # hegemonies get tributaries from exacting tribute
+
+			#Mandala Embraces; not Demand
+			trigger_if = {
+				limit = { 
+					scope:actor = { government_has_flag = government_is_mandala }
+				}
+				always = no
+			}
+			trigger_else = { can_get_tributaries_peacefully_trigger = yes }
+			#Should be neighboring to increase growth organically
+			any_land_neighboring_realm_with_tributaries_owner = {
+				this = scope:recipient
+			}
+			trigger_if = {
+				limit = {
+					is_ai = yes
+				}
+				current_military_strength >= scope:recipient.one_and_a_half_times_current_military_strength
+				primary_title.tier >= scope:recipient.primary_title.tier
+			}
+		}
+		scope:recipient = {
+			highest_held_title_tier >= tier_county
+			is_independent_ruler = yes # target cannot be a vassal
+			NOR = {
+				government_has_flag = cannot_be_vassal_or_liege
+				government_has_flag = government_is_mandala
+			}
+		}
+		# Temujin cannot make Jamukha his subject once he leaves him
+		NOT = {
+			scope:actor = {
+				has_variable = had_mpo_temujin_flavor_0010
+				var:had_mpo_temujin_flavor_0010 ?= scope:recipient
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			NOT = { has_truce = scope:actor }
+			is_physically_able = yes
+			is_travelling = no
+			NOT = { exists = involved_activity }
+		}
+		scope:recipient = {
+			is_tributary = no
+			is_at_war = no
+			custom_tooltip = {
+				text = demand_tributary_interaction_cooldown_active_tt
+				NOT = {
+					has_opinion_modifier = {
+						modifier = tributary_demanded_opinion
+						target = scope:actor
+					}
+				}
+			}
+			is_confederation_member = no
+		}
+		scope:actor = {
+			custom_tooltip = {
+				text = mpo_interaction_not_neighbouring_tt
+				any_land_neighboring_realm_with_tributaries_owner = { 
+					this = scope:recipient
+				}
+			}
+		}
+	}
+
+	cost = {
+		prestige = minor_prestige_value
+	}
+
+	greeting = positive
+	notification_text = DEMAND_TRIBUTARY_INTERACTION_NOTIFICATION
+
+	on_accept = {
+		start_tributary_interaction_effect = {
+			TRIBUTARY = scope:recipient
+			SUZERAIN = scope:actor
+		}
+		scope:actor = {
+			trigger_event = char_interaction.0362
+		}
+		scope:recipient = {
+			add_opinion = {
+				modifier = tributary_demanded_opinion # this opinion also acts as a built-in cooldown
+				target = scope:actor
+			}
+		}
+		consume_all_criminal_reasons_effect = {
+			LIEGE = scope:actor
+			CRIMINAL = scope:recipient
+		}
+	}
+
+	on_decline = {
+		scope:recipient = {
+			add_opinion = {
+				modifier = tributary_demanded_opinion # this opinion also acts as a built-in cooldown
+				target = scope:actor
+			}
+			custom_tooltip = demand_tributary_interaction_cooldown_tt
+		}
+		scope:actor = {
+			trigger_event = char_interaction.0363
+			if = {
+				limit = { highest_held_title_tier >= tier_hegemony }
+				add_legitimacy = -50
+			}
+		}
+	}
+
+	ai_maybe = yes
+
+	ai_potential = {
+		highest_held_title_tier > 1 # at least a count-level ruler
+		is_independent_ruler = yes
+
+		# Hegemonic Tributary AIs never proactively demand tributaries, they wait for offers instead
+		NOT = { highest_held_title_tier >= tier_hegemony }
+	}
+
+	ai_targets = {
+		ai_recipients = neighboring_rulers_including_tributary_borders
+		max = 5
+	}
+	
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 12
+		duchy = 4
+		kingdom = 4
+		empire = 4
+		hegemony = 4
+	}
+
+	force_notification = yes
+
+	ai_will_do = {	# AI will often do this to valid targets that aren't a military threat to them, especially if they're rich
+		base = 0
+
+		modifier = {
+			add = {
+				add = scope:recipient.gold
+				divide = 10
+				max = 100
+			}
+			desc = accumulated_wealth_reason
+		}
+
+		ai_military_threat_modifier_with_cbs = {
+			SENDER = scope:actor
+			RECEIVER = scope:recipient
+			MULTIPLIER = -1
+		}
+
+		modifier = {
+			scope:recipient = { is_obedient_to = scope:actor }
+			add = 40
+			desc = obedient_interaction_reason
+		}
+
+		modifier = { # Generally don't try to tributarize those of higher rank than you
+			trigger = {
+				"scope:recipient.tier_difference(scope:actor)" > 1
+			}
+			add = -20
+		}
+
+		modifier = { # Generally don't try to tributarize those of higher dominance than you
+			trigger = {
+				scope:recipient.dominance_value > scope:actor.dominance_value
+			}
+			add = -30
+		}
+
+		modifier = { # Remote Realm.
+			trigger = {
+				scope:actor = {
+					NOT = {
+						any_neighboring_top_liege_realm_owner = { this = scope:recipient }
+					}
+				}
+				scope:actor.capital_province = { squared_distance = { target = scope:recipient.capital_province value >= squared_distance_major } }
+			}
+			add = -25
+		}
+
+		modifier = {
+			trigger = {
+				scope:recipient = { government_has_flag = government_is_herder }
+			}
+			add = 1000
+		}
+	}
+
+	ai_min_reply_days = 5
+	ai_max_reply_days = 10
+
+	auto_accept = {
+		custom_tooltip = {
+			text = scheme_agent_aptitude.is_herder
+			scope:recipient = { government_has_flag = government_is_herder }
+		}
+	}
+
+	ai_accept = {
+		base = -60
+
+		modifier = { # Hegemonic Tributaries are gentler and kinder
+			trigger = {
+				scope:actor = { highest_held_title_tier >= tier_hegemony }
+			}
+			add = 100
+			desc = tributary_interaction_aibehavior_actor_hegemon_tier_tt
+		}
+
+		modifier = { # Special case for Confucian-style governments towards China
+			 scope:actor = {
+				primary_title = title:h_china
+			 }
+			government_has_flag = government_is_meritocratic
+			add = 25
+			desc = tributary_interaction_aibehavior_recipient_confucian_government_tt
+		}
+
+		modifier = { # Perk boost
+			desc = offer_vassalization_true_ruler_perk_tt
+			trigger = {
+				scope:actor = { has_perk = true_ruler_perk }
+			}
+			add = true_ruler_value
+		}
+
+		#Yurt bonuses
+		modifier = {
+			desc = tributary_yurt_02_domicile_building
+			trigger = {
+				scope:actor.domicile ?= { has_domicile_parameter = nomad_yurt_increased_tributary_acceptance_lvl_1 }
+			}
+			add = 5
+		}
+
+		modifier = {
+			desc = tributary_yurt_02_domicile_building
+			trigger = {
+				scope:actor.domicile ?= { has_domicile_parameter = nomad_yurt_increased_tributary_acceptance_lvl_2 }
+			}
+			add = 10
+		}
+
+		modifier = {
+			desc = tributary_yurt_02_domicile_building
+			trigger = {
+				scope:actor.domicile ?= { has_domicile_parameter = nomad_yurt_increased_tributary_acceptance_lvl_3 }
+			}
+			add = 15
+		}
+
+		modifier = { # the bolder they are, the less likely they will agree to this and vice versa
+			NOT = { ai_boldness = 0 }
+			add = {
+				value = ai_boldness
+				multiply = -1
+				divide = 2
+			}
+			desc = TRIBUTARY_BOLDNESS_REASON
+		}
+
+		modifier = { # the greedier they are, the less likely they will agree to this
+			ai_greed > 0
+			add = {
+				value = ai_greed
+				multiply = -1
+				divide = 4
+			}
+			desc = TRIBUTARY_GREED_REASON
+		}
+
+		modifier = {
+			is_obedient_to = scope:actor
+			add = 40
+			desc = obedient_interaction_reason
+		}
+
+		modifier = {
+			scope:actor = { is_gurkhan = yes }
+			scope:recipient = { government_has_flag = government_is_nomadic }
+			add = 20
+			desc = gurkhan_interaction_reason
+		}
+
+		# Easier to make Tributaries during the Zud season
+		modifier = {
+			any_character_situation = {
+				any_situation_sub_region = {
+					has_sub_region_phase_parameter = the_great_steppe_easier_tributaries
+					any_situation_sub_region_participant_group = {
+						participant_group_type = nomad_rulers_capital
+						participant_group_has_character = scope:actor
+					}
+				}
+			}
+			scope:recipient = { government_has_flag = government_is_nomadic }
+			add = 25
+			desc = zud_season_reason
+		}
+
+  		# if the actor is a major threat to the recipient they're more likely to accept
+		ai_military_threat_modifier_with_cbs = {
+			SENDER = scope:recipient
+			RECEIVER = scope:actor
+			MULTIPLIER = 1
+		}
+
+		modifier = { # They are a King
+			desc = tributary_interaction_aibehavior_recipient_tier_tt
+			trigger = {
+				scope:recipient = { highest_held_title_tier = tier_kingdom }
+			}
+			add = -100
+		}
+
+		modifier = { # They are an Emperor or greater
+			desc = tributary_interaction_aibehavior_recipient_tier_tt
+			trigger = {
+				scope:recipient = { highest_held_title_tier >= tier_empire }
+			}
+			add = -200
+		}
+
+		modifier = { # Recipient has higher Dominance than the actor
+			desc = demand_tributary_interaction_aibehavior_dominance_tt
+			trigger = {
+				scope:actor = { government_has_flag = government_is_nomadic }
+				scope:recipient = { government_has_flag = government_is_nomadic }
+				scope:recipient.dominance_value > scope:actor.dominance_value
+			}
+			add = -20
+		}
+
+		modifier = { # Actor has higher Dominance than the recipient
+			desc = demand_tributary_interaction_aibehavior_dominance_tt
+			trigger = {
+				scope:actor = { government_has_flag = government_is_nomadic }
+				scope:recipient = { government_has_flag = government_is_nomadic }
+				scope:actor.dominance_value > scope:recipient.dominance_value
+			}
+			add = 20
+		}
+
+		modifier = { # Actor is a Meritocratic Khanate trying to tributarize a Nomad
+			desc = demand_tributary_interaction_steppe_admin
+			trigger = {
+				scope:actor = { government_has_flag = government_is_steppe_admin }
+				scope:recipient = { government_has_flag = government_is_nomadic }
+			}
+			add = 60 # This offsets base reluctance
+		}
+
+		# Non-nomadic
+		modifier = {
+			desc = AI_FILTHY_HORSE_LORD_REASON
+			trigger = {
+				scope:actor = { government_has_flag = government_is_nomadic }
+				scope:recipient = {
+					NOT = { government_has_flag = government_is_nomadic }
+				}
+			}
+			add = {
+				value = -50
+				if = {
+					limit = {
+						scope:recipient = { government_has_flag = government_is_tribal }
+					}
+					multiply = 0.5
+				}
+			}
+		}
+
+		# MINOR
+		modifier = { # Rivalry modifier.
+			desc = offer_vassalization_interaction_aibehavior_rival_tt
+			trigger = {
+				scope:recipient = {
+					has_relation_rival = scope:actor
+					NOT = { has_relation_nemesis = scope:actor }
+				}
+			}
+			add = -100
+		}
+		modifier = { # Nemesis modifier.
+			desc = offer_vassalization_interaction_aibehavior_nemesis_tt
+			trigger = {
+				scope:recipient = {
+					has_relation_nemesis = scope:actor
+				}
+			}
+			add = -200
+		}
+		modifier = { # Same Dynasty modifier.
+			desc = offer_vassalization_interaction_aibehavior_dynasty_tt
+			trigger = {
+				scope:recipient = {
+					dynasty = scope:actor.dynasty
+				}
+			}
+			add = 10
+		}
+		modifier = { # Different faith, no pluralism.
+			desc = offer_vassalization_interaction_aibehavior_differentfaith_tt
+			trigger = {
+				scope:actor = {
+					NOT = { # faith condition below doesn't have to apply if both actor and recipient have nomadic_philosophy
+						has_trait = nomadic_philosophy
+						scope:recipient = { has_trait = nomadic_philosophy }
+					}
+					faith = {
+						NOR = { # Of two different faiths AND the potential vassal's faith is not pluralistic
+							this = scope:recipient.faith
+							has_doctrine = doctrine_pluralism_pluralistic
+						}
+					}
+				}
+			}
+			add = {
+				value = -25
+				if = {
+					limit = {
+						scope:actor.faith = {
+							faith_hostility_level = {
+								target = scope:recipient.faith
+								value >= faith_hostile_level
+							}
+						}
+					}
+					add = -10
+				}
+				if = {
+					limit = {
+						scope:actor.faith = {
+							faith_hostility_level = {
+								target = scope:recipient.faith
+								value >= faith_evil_level
+							}
+						}
+					}
+					add = -25
+				}
+			}
+		}
+
+		#Borked beyond all recognition
+
+		#modifier = { # Encircled
+		#	desc = offer_vassalization_interaction_aibehavior_encircled_tt
+		#	trigger = {
+		#		scope:recipient ?= {
+		#			NOT = {
+		#				any_neighboring_top_suzerain_realm_owner = {
+		#					exists ?= this
+		#					NOT = { this = scope:actor }
+		#				}
+		#			}
+		#			NOT = {
+		#				any_realm_county = { is_coastal_county = yes }
+		#			}
+		#		}
+		#	}
+		#	add = 30
+		#}
+
+		modifier = { # Cultural Acceptance
+			scope:actor = {
+				NOT = { # cultural condition below doesn't have to apply if both actor and recipient have nomadic_philosophy
+					has_trait = nomadic_philosophy
+					scope:recipient = { has_trait = nomadic_philosophy }
+				}
+				NOT = { has_same_culture_as = scope:recipient }
+				culture = {
+					cultural_acceptance = { target = scope:recipient.culture value < 50 }
+				}
+			}
+			add = {
+				add = -10
+				if = {
+					limit = { scope:actor.culture = { has_cultural_pillar = ethos_bellicose } }
+					add = -10
+				}
+			}
+			desc = cultural_acceptance_interaction_reason
+		}
+
+		modifier = { # Same language
+			add = 5
+			desc = speaks_same_language_interaction_reason
+			trigger = {
+				scope:actor = {
+					knows_language_of_culture = scope:recipient.culture
+				}
+			}
+		}
+
+		#Legitimacy
+		modifier = {
+			desc = "LOW_LEGITIMACY_REASON"
+			add = -15
+			scope:actor = {
+				has_legitimacy_flag = slightly_reduced_tributarization_acceptance
+			}
+		}
+		modifier = {
+			desc = "LOW_LEGITIMACY_REASON"
+			add = -25
+			scope:actor = {
+				has_legitimacy_flag = reduced_tributarization_acceptance
+			}
+		}
+		modifier = {
+			desc = "LOW_LEGITIMACY_REASON"
+			add = -50
+			scope:actor = {
+				has_legitimacy_flag = very_reduced_tributarization_acceptance
+			}
+		}
+		modifier = {
+			desc = "LOW_LEGITIMACY_REASON"
+			add = -75
+			scope:actor = {
+				has_legitimacy_flag = massively_reduced_tributarization_acceptance
+			}
+		}
+
+		# HIGH LEGITIMACY
+		modifier = {
+			desc = "HIGH_LEGITIMACY_REASON"
+			add = 25
+			scope:actor = {
+				has_legitimacy_flag = increased_tributarization_acceptance
+			}
+		}
+		modifier = {
+			desc = "HIGH_LEGITIMACY_REASON"
+			add = 50
+			scope:actor = {
+				has_legitimacy_flag = very_increased_tributarization_acceptance
+			}
+		}
+		modifier = {
+			desc = "HIGH_LEGITIMACY_REASON"
+			add = 75
+			scope:actor = {
+				has_legitimacy_flag = extra_increased_tributarization_acceptance
+			}
+		}
+
+		# OPINION INFLUENCE
+		opinion_modifier = { # Compare Opinion modifier.
+			who = scope:recipient
+			opinion_target = scope:actor
+			multiplier = 1
+		}
+
+		#Severed head acceptance
+		modifier = {
+			add = 200
+			scope:actor = {
+				has_variable = severed_head_vassalization
+				var:severed_head_vassalization = {
+					this = scope:recipient
+				}
+			}
+		}
+	}
+}
