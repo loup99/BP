@@ -82,6 +82,7 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		trigger = { this = character:175110 }
 		if = {
 			limit = { NOT = { exists = title:h_western_roman_empire.holder } }
+			root = { save_scope_as = the_last_wre_holder }
 			trigger_event = { id = bp_narrative_events.0002 }
 		}
 	}
@@ -136,16 +137,19 @@ bp_narrative_events.0002 = { #WTWSMS id: zusk_event.26
 	option = {
 		name = bp_narrative_events.0002.a
 		get_title = title:h_western_roman_empire
-		every_ruler = {
-			limit = {
-				NOT = { this = scope:the_last_wre_holder }
-				is_ai = no
+		if = {
+			limit = { root ?= scope:the_last_wre_holder }
+			every_ruler = {
+				limit = {
+					NOT = { root = scope:the_last_wre_holder }
+					is_ai = no
+				}
+				trigger_event = { id = bp_narrative_events.0002 }
 			}
-			trigger_event = { id = bp_narrative_events.0002 }
 		}
 	}
 	option = {
-		trigger = { NOT = { root = scope:the_last_wre_holder } }
+		trigger = { NOT = { root ?= scope:the_last_wre_holder } }
 		name = bp_narrative_events.0002.b
 		fallback = yes
 		show_as_tooltip = { scope:the_last_wre_holder = { get_title = title:h_western_roman_empire } }
