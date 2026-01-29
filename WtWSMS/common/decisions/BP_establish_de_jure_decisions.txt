@@ -90,8 +90,13 @@
 		}
 		NOT = { faith = { has_doctrine = unreformed_faith_doctrine } }
 		#Personal Requirements
-		legitimacy_level >= 3
-		prestige_level >= 5
+		OR = {
+			has_trait = legendary_leader
+			AND = {
+				legitimacy_level >= 4
+				prestige_level >= 4
+			}
+		}
 		#Governmental Requirements
 		trigger_if = {
 			limit = { government_has_flag = government_is_tribal }
@@ -152,14 +157,14 @@
 
 	cost = {
 		gold = 500
-		prestige = 5000
+		prestige = 2500
 	}
 
 	effect = {
 		gain_heroic_legend_seed_tooltip_effect = yes
 		custom_description = { text = wholly_owned_duchies_become_de_jure }
-		save_scope_as = new_kingdom_or_empire_former
-		establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_or_empire_former }
+		save_scope_as = new_kingdom_or_empire_or_hegemony_former
+		establish_de_jure_kingdom_decision_effect = { FORMER = scope:new_kingdom_or_empire_or_hegemony_former }
 		trigger_event = BP_establish_de_jure_decisions.0100
 	}
 
@@ -272,8 +277,13 @@ swap_roman_province_decision = {
 		}
 		NOT = { faith = { has_doctrine = unreformed_faith_doctrine } }
 		#Personal Requirements
-		legitimacy_level >= 3
-		prestige_level >= 5
+		OR = {
+			has_trait = legendary_leader
+			AND = {
+				legitimacy_level >= 4
+				prestige_level >= 4
+			}
+		}
 		#Governmental Requirements
 		trigger_if = { #There are some Roman Tribes...
 			limit = { government_has_flag = government_is_tribal }
@@ -475,8 +485,13 @@ establish_de_jure_empire_decision = {
 		}
 		NOT = { faith = { has_doctrine = unreformed_faith_doctrine } }
 		#Personal Requirements
-		legitimacy_level >= 4
-		prestige_level >= 5
+		OR = {
+			has_trait = legendary_leader
+			AND = {
+				legitimacy_level >= 5
+				prestige_level >= 5
+			}
+		}
 		#Governmental Requirements
 		trigger_if = {
 			limit = { government_has_flag = government_is_tribal }
@@ -537,14 +552,211 @@ establish_de_jure_empire_decision = {
 
 	cost = {
 		gold = 750
-		prestige = 10000
+		prestige = 5000
 	}
 
 	effect = {
 		gain_heroic_legend_seed_tooltip_effect = yes
 		custom_description = { text = wholly_owned_kingdoms_become_de_jure }
-		save_scope_as = new_kingdom_or_empire_former
-		establish_de_jure_empire_decision_effect = { FORMER = scope:new_kingdom_or_empire_former }
+		save_scope_as = new_kingdom_or_empire_or_hegemony_former
+		establish_de_jure_empire_decision_effect = { FORMER = scope:new_kingdom_or_empire_or_hegemony_former }
+		trigger_event = BP_establish_de_jure_decisions.0100
+	}
+
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 0
+		kingdom = 0
+		empire = 120
+		hegemony = 0
+	}
+
+	#This is mostly to make it rare for the AI to actually attempt
+	ai_potential = {
+		prestige > 10000
+		gold > 500
+		trigger_if = { #If Sub-Roman, must be fairly degraded
+			limit = { government_has_flag = is_a_transitory_roman_government }
+			OR = {
+				has_realm_law = subroman_feudal_transition_7
+				has_realm_law = subroman_feudal_transition_8
+				has_realm_law = subroman_feudal_transition_9
+			}
+		}
+	}
+
+	ai_will_do = {
+		base = 100
+	}
+}
+
+establish_de_jure_hegemony_decision = {
+	picture = {
+		trigger = {
+			government_is_japanese_trigger = yes
+		}
+		reference = "gfx/interface/illustrations/event_story/tgp_japanese_shogunate.dds"
+	}
+	picture = {
+		trigger = { culture = { has_graphical_east_asia_culture_group_trigger = yes } }
+		reference = "gfx/interface/illustrations/event_story/tgp_dynastic_cycle_stability.dds"
+	}
+	picture = {
+		trigger = { culture = { has_graphical_india_culture_group_trigger = yes } }
+		reference = "gfx/interface/illustrations/decisions/tgp_decision_mandala.dds"
+	}
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_legitimacy.dds"
+	}
+	decision_group_type = major
+	
+	title = establish_de_jure_hegemony_decision_title
+	desc = establish_de_jure_hegemony_decision_desc
+	selection_tooltip = establish_de_jure_hegemony_decision_tooltip
+	sort_order = 90
+
+
+	is_shown = {
+		top_liege = this
+		highest_held_title_tier = tier_hegemony
+		root.primary_title = { is_titular = yes }
+		root.number_of_not_titular_hegemonies = 0 #On the off-chance we have a de-jure title, we don't get to do this
+		#Roman Empires are special
+		NOT = { has_title = title:h_western_roman_empire }
+		NOT = { has_title = title:h_eastern_roman_empire }
+		NOT = { has_title = title:h_roman_empire }
+		#Roman Chars restore Rome, not some knock-off
+		NOT = { culture = { has_cultural_parameter = can_restore_roman_empire } }
+	}
+
+	is_valid = {
+		root.primary_title = { title_held_years >= 30 }
+		#Temporal requirements; might *not* have the Empire (given PPO), so keep it a kingdom
+		trigger_if = {
+			limit = {
+				exists = root.capital_county.kingdom.holder
+				root = root.capital_county.kingdom.holder
+			}
+			root.capital_county.kingdom = { title_held_years >= 30 }
+		}
+		trigger_else = {
+			custom_description = {
+				text = you_hold_your_capital_kingdom
+				any_held_title = { this = root.capital_county.kingdom }
+			}
+		}
+		#Territorial Requirements
+		completely_controls = root.capital_county.empire #Controls capital empire
+		#   #controls at least one neighboring kingdom of the capital in the same kingdom
+		#   custom_description = {
+		#   	text = you_control_at_least_one_adjoining_kingdom
+		#   	subject = root
+		#   	root.capital_county.kingdom = {
+		#   		any_title_to_title_neighboring_kingdom = {
+		#   			NOT = { this = root.capital_county.kingdom }
+		#   			this.empire = root.capital_county.empire
+		#   			root = { completely_controls = prev }
+		#   		}
+		#   	}
+		#   }
+		#Control an hegemony-sized chunk of land
+		realm_size >= 225
+		#Settlement Requirements: Capital region must be your culture & faith
+		custom_description = {
+			text = the_capital_duchy_is_your_faith_and_culture
+			subject = root
+			object = root.capital_county.duchy
+			root.capital_county.duchy = {
+				any_de_jure_county = {
+					count = all
+					this.culture = root.culture
+					this.faith = root.faith
+				}
+			}
+		}
+		#Character Cultural/Faith Requirements
+		culture = { #Have the core innovations for Classical Antiquity
+			has_innovation = innovation_mundium
+			has_innovation = innovation_state_religion
+		}
+		NOT = { faith = { has_doctrine = unreformed_faith_doctrine } }
+		#Personal Requirements
+		OR = {
+			has_trait = legendary_leader
+			AND = {
+				legitimacy_level >= 5
+				prestige_level >= 5
+			}
+		}
+		#Governmental Requirements
+		trigger_if = {
+			limit = { government_has_flag = government_is_tribal }
+			custom_description = {
+				text = primitives_cannot_make_titles_de_jure
+				always = no
+			}
+		}
+		trigger_if = { #If Sub-Roman, must be sufficiently degraded if on Roman Territory
+			limit = {
+				government_has_flag = is_a_transitory_roman_government
+				root.capital_county.title_province = { geographical_region = historic_roman_empire }
+			}
+			custom_description = {
+				text = feudalization_is_at_least_level_4_on_roman_territory
+				OR = {
+					has_realm_law = subroman_feudal_transition_4
+					has_realm_law = subroman_feudal_transition_5
+					has_realm_law = subroman_feudal_transition_6
+					has_realm_law = subroman_feudal_transition_7
+					has_realm_law = subroman_feudal_transition_8
+					has_realm_law = subroman_feudal_transition_9
+				}
+			}
+		}
+		trigger_if = { #If High Tribal, Max Organization
+			limit = { government_has_flag = government_uses_high_tribal_organization }
+			has_realm_law = high_tribal_organization_3
+		}
+		trigger_if = { #If Pre-Feudal, Max Authorithty
+			limit = { government_has_flag = government_uses_prefeudal_authority }
+			has_realm_law = prefeudal_authority_3
+		}
+		trigger_if = { #If Rajamandala, Max Centralization
+			limit = { government_has_flag = government_uses_rajamandala_authority }
+			has_realm_law = rajamandala_authority_3
+		}
+		trigger_if = { #If Iranian_Dynastic, max authority
+			limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+			has_realm_law = iranian_dynastic_authority_3
+		}
+		trigger_if = { #If Feudal or Clan, Max crown authority
+			limit = {
+				OR = {
+					government_has_flag = government_is_feudal
+					government_has_flag = government_is_clan
+				}
+			}
+			has_realm_law = crown_authority_3
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_available_at_peace_adult = yes
+		is_imprisoned = no
+		is_adult = yes
+	}
+
+	cost = {
+		gold = 1000
+		prestige = 10000
+	}
+
+	effect = {
+		gain_heroic_legend_seed_tooltip_effect = yes
+		custom_description = { text = wholly_owned_empires_become_de_jure }
+		save_scope_as = new_kingdom_or_empire_or_hegemony_former
+		establish_de_jure_hegemony_decision_effect = { FORMER = scope:new_kingdom_or_empire_or_hegemony_former }
 		trigger_event = BP_establish_de_jure_decisions.0100
 	}
 
