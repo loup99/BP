@@ -23,12 +23,11 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 
 	valid_to_start = { always = yes }
 
-	should_invalidate = { NOT = { exists = title:e_wre } }
+	should_invalidate = { NOT = { exists = title:h_western_roman_empire } }
 
 	on_invalidated_desc = msg_invasion_war_invalidated_message
 	
-	#If invalidated, destroy the Kingdom of Italy but don't imprison Odacer
-	on_invalidated = { scope:attacker = { destroy_title = title:k_italy } }
+	on_invalidated = {  }
 
 	#No cost, event driven
 	cost = {}
@@ -120,7 +119,7 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			save_scope_as = title_change
 			add_claim_on_loss = no
 		}
-		title:k_italy = {
+		title:h_italy = {
 			change_title_holder = {
 				holder = scope:attacker
 				change = scope:title_change
@@ -192,13 +191,134 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		scope:attacker = { set_realm_capital = title:c_ravenna }
 		scope:attacker = { change_government = roman_dynastic_government }
 		scope:attacker = { add_legitimacy = 500 }
-		hidden_effect = { #Fix govenrment flipping issues
+		hidden_effect = { #Fix government flipping issues
 			scope:attacker = {
 				add_realm_law_skip_effects = single_heir_succession_law
 				every_vassal_or_below = {
 					limit = { has_government = subroman_dynastic_government }
 					change_government = roman_dynastic_government
 				}
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = { exists = 175110 }
+				character:175110 = {
+					save_scope_as = the_last_wre_holder
+					trigger_event = { id = bp_narrative_events.0002 }
+				}
+			}
+		}
+		#Odoacer starts at peace with his neighbors; railroading for now
+		scope:attacker = {
+			if = {
+				limit = { title:k_visigoths.holder ?= { is_ai = yes } }
+				create_title_and_vassal_change = {
+					type = conquest
+					save_scope_as = transfer_land_to_visigoths
+					add_claim_on_loss = no
+				}
+				
+				if = {
+					limit = { title:c_venaissin.holder.top_liege = scope:attacker }
+					title:c_venaissin = {
+						change_title_holder = {
+							holder = title:k_visigoths.holder
+							change = scope:transfer_land_to_visigoths
+							take_baronies = yes
+						}
+					}
+				}
+				if = {
+					limit = { title:c_forcalquier.holder.top_liege = scope:attacker }
+					title:c_forcalquier = {
+						change_title_holder = {
+							holder = title:k_visigoths.holder
+							change = scope:transfer_land_to_visigoths
+							take_baronies = yes
+						}
+					}
+				}
+				if = {
+					limit = { title:c_provence.holder.top_liege = scope:attacker }
+					title:c_provence = {
+						change_title_holder = {
+							holder = title:k_visigoths.holder
+							change = scope:transfer_land_to_visigoths
+							take_baronies = yes
+						}
+					}
+				}
+				if = {
+					limit = { title:c_nice.holder.top_liege = scope:attacker }
+					title:c_nice = {
+						change_title_holder = {
+							holder = title:k_visigoths.holder
+							change = scope:transfer_land_to_visigoths
+							take_baronies = yes
+						}
+					}
+				}
+				add_truce_both_ways = { character = title:k_visigoths.holder years = 10 name = odoacer_peace_visigoths }
+				add_truce_both_ways = { character = title:k_visigoths.holder.primary_heir years = 10 name = odoacer_peace_vandals }
+				resolve_title_and_vassal_change = scope:transfer_land_to_visigoths
+			}
+			if = {
+				limit = { title:k_vandalica.holder ?= { is_ai = yes } }
+				create_title_and_vassal_change = {
+					type = conquest
+					save_scope_as = transfer_land_from_vandals
+					add_claim_on_loss = no
+				}
+				
+				if = {
+					limit = { title:c_palermo.holder.top_liege = title:k_vandalica.holder }
+					title:c_palermo = {
+						change_title_holder = {
+							holder = title:h_italy.holder
+							change = scope:transfer_land_from_vandals
+							take_baronies = yes
+						}
+					}
+				}
+				if = {
+					limit = { title:c_messina.holder.top_liege = title:k_vandalica.holder }
+					title:c_messina = {
+						change_title_holder = {
+							holder = title:h_italy.holder
+							change = scope:transfer_land_from_vandals
+							take_baronies = yes
+						}
+					}
+				}
+				if = {
+					limit = { title:c_siracusa.holder.top_liege = title:k_vandalica.holder }
+					title:c_siracusa = {
+						change_title_holder = {
+							holder = title:h_italy.holder
+							change = scope:transfer_land_from_vandals
+							take_baronies = yes
+						}
+					}
+				}
+				if = {
+					limit = { title:c_agrigento.holder.top_liege = title:k_vandalica.holder }
+					title:c_agrigento = {
+						change_title_holder = {
+							holder = title:h_italy.holder
+							change = scope:transfer_land_from_vandals
+							take_baronies = yes
+						}
+					}
+				}
+				add_truce_both_ways = { character = title:k_vandalica.holder years = 10 name = odoacer_peace_vandals }
+				add_truce_both_ways = { character = title:k_vandalica.holder.primary_heir years = 10 name = odoacer_peace_vandals }
+				resolve_title_and_vassal_change = scope:transfer_land_from_vandals
+			}
+			#WRE peace if possible
+			if = {
+				limit = { exists = character:175110 }
+				add_truce_both_ways = { character = character:175110 years = 10 name = odoacer_peace_wre }
 			}
 		}
 	}
@@ -392,7 +512,8 @@ zenos_claim_cb = { #Like a claim_cb, but has war-scoped special troops
 			limit = {
 				OR = {
 					root = title:e_byzantium
-					root = title:e_roman_empire
+					root = title:h_eastern_roman_empire
+					root = title:h_roman_empire
 				}
 				scope:defender.culture = { has_cultural_pillar = heritage_byzantine }
 			}

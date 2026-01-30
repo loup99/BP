@@ -34,16 +34,47 @@ scripted_effect create_new_roman_empire_title_effect = {
 	#All your kingdom titles acknowledge your rule
 	every_held_title = {
 		every_in_de_jure_hierarchy = {
-			limit = { tier = tier_kingdom }
+			limit = { tier = $TIER_ACKNOWLEDGE$ }
 			set_de_jure_liege_title = title:$EMPIRE_TITLE$
 		}
 	}
 	#All your kingdom vassals acknowledge your rule
 	every_vassal = {
 		every_held_title = {
-			limit = { tier = tier_kingdom }
+			limit = { tier = $TIER_ACKNOWLEDGE$ }
 			set_de_jure_liege_title = title:$EMPIRE_TITLE$
 		}
+	}
+}
+
+scripted_effect unite_roman_empire_effect = {
+	#Shift allegiances
+	every_empire = {
+		limit = {
+			OR = {
+				this.hegemony = title:h_eastern_roman_empire
+				this.hegemony = title:h_western_roman_empire
+			}
+		}
+		set_de_jure_liege_title = title:h_roman_empire
+	}
+	#Create the new title
+	create_title_and_vassal_change = {
+		type = created
+		save_scope_as = change
+		add_claim_on_loss = no
+	}
+	title:h_roman_empire = {
+		change_title_holder = {
+			holder = root
+			change = scope:change
+		}
+	}
+	resolve_title_and_vassal_change = scope:change
+	#Destroy the other hegemonies
+	root = {
+		destroy_title = title:h_eastern_roman_empire
+		destroy_title = title:h_western_roman_empire
 	}
 }
 
@@ -78,7 +109,7 @@ BP_roman_decisions.0001 = {
 		ai_chance = {
 			base = 1
 			
-			#Petioner Heritage effects
+			#Petitioner Heritage effects
 			modifier = {
 				add = 3
 				scope:empire_petitoner = { has_cultural_pillar = heritage_byzantine }
@@ -92,7 +123,7 @@ BP_roman_decisions.0001 = {
 				add = 3
 				scope:empire_petitoner = { has_cultural_pillar = heritage_latin }
 			}
-			#Petioner Trait Effects
+			#Petitioner Trait Effects
 			modifier = {
 				add = 3
 				scope:empire_petitoner = { has_trait = roman_nostalgia }
@@ -125,7 +156,7 @@ BP_roman_decisions.0001 = {
 		ai_chance = {
 			base = 4
 			
-			#Petioner Heritage effects
+			#Petitioner Heritage effects
 			modifier = {
 				add = 10
 				scope:empire_petitoner = { has_cultural_pillar = heritage_iranian }
@@ -171,14 +202,30 @@ BP_roman_decisions.0002 = {
 		if = {
 			limit = { exists = title:e_byzantium.holder }
 			title:e_byzantium.holder = { #Goes to Eastern Emperor
+				save_scope_as = the_other_emperor
 				trigger_event = {
 					id = BP_roman_decisions.0004
 					days = { 3 10 }
 				}
 			}
 		}
-		#Otherwise, no one can contradict the Pope's proclaimation
-		else = { create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_wre } }
+		if = {
+			limit = { exists = title:h_eastern_roman_empire.holder }
+			title:h_eastern_roman_empire.holder = { #Goes to Eastern Emperor
+				save_scope_as = the_other_emperor
+				trigger_event = {
+					id = BP_roman_decisions.0004
+					days = { 3 10 }
+				}
+			}
+		}
+		#Otherwise, no one can contradict the Pope's proclamation
+		else = {
+			create_new_roman_empire_title_effect = {
+				EMPIRE_TITLE = h_western_roman_empire
+				TIER_ACKNOWLEDGE = tier_empire
+			}
+		}
 	}
 }
 #The Pope denies the request
@@ -233,7 +280,7 @@ BP_roman_decisions.0004 = {
 		ai_chance = {
 			base = 1
 			
-			#Petioner Heritage effects
+			#Petitioner Heritage effects
 			modifier = {
 				add = 3
 				scope:empire_petitoner = { has_cultural_pillar = heritage_byzantine }
@@ -242,7 +289,7 @@ BP_roman_decisions.0004 = {
 				add = 3
 				scope:empire_petitoner = { has_cultural_pillar = heritage_latin }
 			}
-			#Petioner Trait Effects
+			#Petitioner Trait Effects
 			modifier = {
 				add = 3
 				scope:empire_petitoner = { has_trait = roman_nostalgia }
@@ -289,14 +336,17 @@ BP_roman_decisions.0005 = {
 	}
 	
 	right_portrait = {
-		character = title:e_byzantium.holder
+		character = scope:the_other_emperor
 		animation = admiration
 	}
 	
 	option = { #Create the WRE
 		name = BP_roman_decisions.0005.a
 		
-		create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_wre }
+		create_new_roman_empire_title_effect = {
+			EMPIRE_TITLE = h_western_roman_empire
+			TIER_ACKNOWLEDGE = tier_empire
+		}
 		
 		#Inform people
 		every_player = { trigger_event = { id = BP_roman_decisions.0007 } }
@@ -316,7 +366,7 @@ BP_roman_decisions.0006 = {
 	}
 	
 	right_portrait = {
-		character = title:e_byzantium.holder
+		character = scope:the_other_emperor
 		animation = dismissal
 	}
 	
@@ -331,7 +381,10 @@ BP_roman_decisions.0006 = {
 		trigger = { scope:empire_petitoner = { has_variable = asked_for_hre } }
 		name = BP_roman_decisions.0006.hre_instead
 		
-		create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_hre }
+		create_new_roman_empire_title_effect = {
+			EMPIRE_TITLE = e_hre
+			TIER_ACKNOWLEDGE = tier_kingdom
+		}
 		
 		#Inform people
 		every_player = { trigger_event = { id = BP_roman_decisions.0007 } }
@@ -346,21 +399,28 @@ BP_roman_decisions.0007 = {
 		first_valid = {
 			triggered_desc = { #Byzantium Approves
 				trigger = {
-					exists = title:e_byzantium.holder
-					scope:empire_petitoner.primary_title = title:e_wre
+					OR = {
+						exists = title:e_byzantium.holder
+						exists = title:h_eastern_roman_empire.holder
+					}
+					scope:empire_petitoner.primary_title = title:h_western_roman_empire
 				}
 				desc = BP_roman_decisions.0007.e_byzantium_approves
 			}
 			triggered_desc = { #Byzantium doesn't exist
 				trigger = {
 					NOT = { exists = title:e_byzantium.holder }
-					scope:empire_petitoner.primary_title = title:e_wre
+					NOT = { exists = title:h_eastern_roman_empire.holder }
+					scope:empire_petitoner.primary_title = title:h_western_roman_empire
 				}
 				desc = BP_roman_decisions.0007.e_byzantium_dead
 			}
 			triggered_desc = { #Byzantium Disapproves
 				trigger = {
-					exists = title:e_byzantium.holder
+					OR = {
+						exists = title:e_byzantium.holder
+						exists = title:h_eastern_roman_empire.holder
+					}
 					scope:empire_petitoner.primary_title = title:e_hre
 				}
 				desc = BP_roman_decisions.0007.e_byzantium_disapproves
@@ -416,9 +476,12 @@ BP_roman_decisions.0010 = { #WTWSMS id: imperial_legacy.10
 		animation = personality_honorable
 	}
 	
+	immediate = { add_pressed_claim = title:h_roman_empire }
+	
 	option = {
 		name = BP_roman_decisions.0010.a
 		custom_tooltip = BP_roman_decisions.0010.a.tooltip
+		show_as_tooltip = { add_pressed_claim = title:h_roman_empire }
 	}
 }
 #Sole Roman Empire
@@ -474,11 +537,12 @@ BP_roman_decisions.0011 = { #Cribbed from Vanilla roman_restoration.0001
 	immediate = {
 		play_music_cue = "mx_cue_epic_sacral_moment"
 		save_scope_as = scoped_emperor
-		bp_create_roman_empire_scripted_effect = yes
+		unite_roman_empire_effect = yes
 	}
 	option = {
 		name = roman_restoration.0001.a
 		set_nickname_effect = { NICKNAME = nick_the_glorious }
+		show_as_tooltip = { unite_roman_empire_effect = yes }
 		# Send narrative fluff to other players (if any).
 		every_player = {
 			limit = {
@@ -499,7 +563,7 @@ BP_roman_decisions.0050 = { #WTWSMS id: imperial_legacy.11
 	title = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { scope:requested_title = title:e_wre }
+				trigger = { scope:requested_title = title:h_western_roman_empire }
 				desc = BP_roman_decisions.0050.t.west
 			}
 			desc = BP_roman_decisions.0050.t.east
@@ -508,7 +572,7 @@ BP_roman_decisions.0050 = { #WTWSMS id: imperial_legacy.11
 	desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { scope:requested_title = title:e_wre }
+				trigger = { scope:requested_title = title:h_western_roman_empire }
 				desc = BP_roman_decisions.0050.desc.west
 			}
 			desc = BP_roman_decisions.0050.desc.east
@@ -529,12 +593,15 @@ BP_roman_decisions.0050 = { #WTWSMS id: imperial_legacy.11
 	
 	
 	immediate = {
-		create_new_roman_empire_title_effect = { EMPIRE_TITLE = e_wre }
+		create_new_roman_empire_title_effect = {
+			EMPIRE_TITLE = h_western_roman_empire
+			TIER_ACKNOWLEDGE = tier_empire
+		}
 		play_music_cue = "mx_cue_epic_sacral_moment"
 	}
 	
 	option = {
-		trigger = { scope:requested_title = title:e_wre }
+		trigger = { scope:requested_title = title:h_western_roman_empire }
 		name = BP_roman_decisions.0050.a
 		custom_tooltip = BP_roman_decisions.0050.a.tooltip.west
 		
@@ -565,7 +632,7 @@ BP_roman_decisions.0051 = { #WTWSMS id: imperial_legacy.12
 	title = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { scope:requested_title = title:e_wre }
+				trigger = { scope:requested_title = title:h_western_roman_empire }
 				desc = BP_roman_decisions.0051.t.west
 			}
 			desc = BP_roman_decisions.0051.t.east
@@ -574,7 +641,7 @@ BP_roman_decisions.0051 = { #WTWSMS id: imperial_legacy.12
 	desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { scope:requested_title = title:e_wre }
+				trigger = { scope:requested_title = title:h_western_roman_empire }
 				desc = BP_roman_decisions.0051.desc.west
 			}
 			desc = BP_roman_decisions.0051.desc.east
@@ -598,7 +665,7 @@ BP_roman_decisions.0051 = { #WTWSMS id: imperial_legacy.12
 			text = {
 				first_valid = {
 					triggered_desc = {
-						trigger = { scope:requested_title = title:e_wre }
+						trigger = { scope:requested_title = title:h_western_roman_empire }
 						desc = BP_roman_decisions.0051.a.west
 					}
 					desc = BP_roman_decisions.0051.a.east
@@ -609,12 +676,12 @@ BP_roman_decisions.0051 = { #WTWSMS id: imperial_legacy.12
 		custom_tooltip = BP_roman_decisions.0051.a.tooltip
 		
 		if = {
-			limit = { has_claim_on = title:e_roman_empire }
-			remove_claim = title:e_roman_empire
+			limit = { has_claim_on = title:h_roman_empire }
+			remove_claim = title:h_roman_empire
 		}
 		if = {
-			limit = { has_claim_on = title:e_wre }
-			remove_claim = title:e_wre
+			limit = { has_claim_on = title:h_western_roman_empire }
+			remove_claim = title:h_western_roman_empire
 		}
 		
 		scope:asking_emperor = { trigger_event = { id = BP_roman_decisions.0052 } }
@@ -630,10 +697,10 @@ BP_roman_decisions.0051 = { #WTWSMS id: imperial_legacy.12
 				factor = 0
 				OR = {
 					opinion = {
-						target = title:e_wre.holder
+						target = title:h_western_roman_empire.holder
 						value = {-100 -50}
 					}
-					has_relation_rival = title:e_wre.holder
+					has_relation_rival = title:h_western_roman_empire.holder
 				}
 			}
 			modifier = {
@@ -655,25 +722,25 @@ BP_roman_decisions.0051 = { #WTWSMS id: imperial_legacy.12
 			#Don't do if has claim to WRE/Roman Empire, or has a positive opinion
 			modifier = {
 				add = 10
-				has_claim_on = title:e_roman_empire
+				has_claim_on = title:h_roman_empire
 				has_trait = ambitious
 			}
 			modifier = {
 				add = 5
-				has_claim_on = title:e_roman_empire
+				has_claim_on = title:h_roman_empire
 				has_trait = arrogant
 			}
 			modifier = { #You Support your friends and lovers
 				factor = 0
 				OR = {
 					opinion = {
-						target = title:e_wre.holder
+						target = title:h_western_roman_empire.holder
 						value = { 50 100 }
 					}
 					OR = {
-						has_relation_friend = title:e_wre.holder
-						has_relation_best_friend = title:e_wre.holder
-						has_relation_soulmate = title:e_wre.holder
+						has_relation_friend = title:h_western_roman_empire.holder
+						has_relation_best_friend = title:h_western_roman_empire.holder
+						has_relation_soulmate = title:h_western_roman_empire.holder
 					}
 				}
 			}
@@ -686,7 +753,7 @@ BP_roman_decisions.0052 = { #CK2 ID: imperial_legacy.13
 	desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { scope:requested_title = title:e_wre }
+				trigger = { scope:requested_title = title:h_western_roman_empire }
 				desc = BP_roman_decisions.0052.desc.west
 			}
 			desc = BP_roman_decisions.0052.desc.east
@@ -711,7 +778,7 @@ BP_roman_decisions.0052 = { #CK2 ID: imperial_legacy.13
 		add_prestige = 100
 		
 		if = { #Inform the Nicene Pope
-			limit = { title:e_wre.holder.faith = faith:nicene }
+			limit = { title:h_western_roman_empire.holder.faith = faith:nicene }
 			title:d_papal_state.holder = { trigger_event = { id = BP_roman_decisions.0060 } }
 		}
 	}
@@ -722,7 +789,7 @@ BP_roman_decisions.0053 = { #CK2 ID: imperial_legacy.14
 	desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { scope:requested_title = title:e_wre }
+				trigger = { scope:requested_title = title:h_western_roman_empire }
 				desc = BP_roman_decisions.0053.desc.west
 			}
 			desc = BP_roman_decisions.0053.desc.east
@@ -748,8 +815,8 @@ BP_roman_decisions.0053 = { #CK2 ID: imperial_legacy.14
 		
 		if = { #Inform the Nicene Pope if this is about Italy
 			limit = {
-				scope:requested_title = title:e_wre
-				title:e_wre.holder.faith = faith:nicene
+				scope:requested_title = title:h_western_roman_empire
+				title:h_western_roman_empire.holder.faith = faith:nicene
 			}
 			title:d_papal_state.holder = { trigger_event = { id = BP_roman_decisions.0060 } }
 		}
@@ -776,7 +843,7 @@ BP_roman_decisions.0060 = { #WTWSMS id: imperial_legacy.15
 		}
 		
 		#Inform the WRE
-		title:e_wre.holder = { trigger_event = { id = BP_roman_decisions.0061 } }
+		title:h_western_roman_empire.holder = { trigger_event = { id = BP_roman_decisions.0061 } }
 		
 		ai_chance = {
 			base = 10
@@ -785,10 +852,10 @@ BP_roman_decisions.0060 = { #WTWSMS id: imperial_legacy.15
 				factor = 0
 				OR = {
 					opinion = {
-						target = title:e_wre.holder
+						target = title:h_western_roman_empire.holder
 						value = {-100 -50}
 					}
-					has_relation_rival = title:e_wre.holder
+					has_relation_rival = title:h_western_roman_empire.holder
 				}
 			}
 		}
@@ -798,7 +865,7 @@ BP_roman_decisions.0060 = { #WTWSMS id: imperial_legacy.15
 		name = GENERIC_STRING
 		
 		#Inform the WRE
-		title:e_wre.holder = { trigger_event = { id = BP_roman_decisions.0062 } }
+		title:h_western_roman_empire.holder = { trigger_event = { id = BP_roman_decisions.0062 } }
 		
 		ai_chance = {
 			base = 0
@@ -807,10 +874,10 @@ BP_roman_decisions.0060 = { #WTWSMS id: imperial_legacy.15
 				add = 10
 				OR = {
 					opinion = {
-						target = title:e_wre.holder
+						target = title:h_western_roman_empire.holder
 						value = {-100 -50}
 					}
-					has_relation_rival = title:e_wre.holder
+					has_relation_rival = title:h_western_roman_empire.holder
 				}
 			}
 		}
@@ -859,7 +926,7 @@ BP_roman_decisions.0062 = { #CK2 ID: imperial_legacy.17
 		name = BP_roman_decisions.0062.a
 		add_piety = -100
 	}
-	##### TODO (Beta): Add option b when toppeling religious rulers is an option
+	##### TODO (Beta): Add option b when toppling religious rulers is an option
 }
 ##### TODO (Beta): d_orthodox holder events
 

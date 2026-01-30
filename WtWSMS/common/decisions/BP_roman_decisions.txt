@@ -20,7 +20,8 @@ ask_for_hre = {
 	is_shown = {
 		#Haven't already asked
 		root = { NOT = { has_variable = asked_for_hre } }
-		#WRE/HRE must not exist
+		#West Rome must not exist
+		NOT = { exists = title:h_western_roman_empire.holder }
 		NOT = { exists = title:e_wre.holder }
 		NOT = { exists = title:e_hre.holder }
 		#Have to be in communion with the Pope to do this
@@ -39,22 +40,43 @@ ask_for_hre = {
 			#Can't already be Roman Empire
 			has_title = title:e_wre
 			has_title = title:e_byzantium
-			has_title = title:e_roman_empire
+			has_title = title:h_western_roman_empire
+			has_title = title:h_eastern_roman_empire
+			has_title = title:h_roman_empire
 			#Axum is special
 			has_title = title:e_axum
-			#If you're Italy, why request Rome?
-			has_title = title:e_italy
 		}
 	}
 	
 	is_valid = {
-		gold >= massive_gold_value
+		gold >= 500
+		custom_tooltip = {
+			text = primary_title_must_be_empire
+			primary_title.tier = tier_empire
+		}
+		realm_size >= 255
+		custom_description = {
+			text = must_control_at_least_33_percent_of_wre_territory
+			subject = root
+			title:h_western_roman_empire = {
+				any_county = {
+					percent >= 0.33
+					this.holder.top_liege = root
+				}
+			}
+		}
+		OR = {
+			has_trait = legendary_leader
+			AND = {
+				prestige_level >= 5
+				legitimacy_level >= 5
+			}
+		}
 	}
 	
 	is_valid_showing_failures_only = {
 		is_available_adult = yes
 		is_at_war = no
-		NOT = { realm_size < 255 }
 	}
 	
 	cost = {
@@ -112,43 +134,66 @@ ask_for_wre = {
 		#Haven't already asked
 		root = { NOT = { has_variable = asked_for_wre } }
 		#WRE must not exist
-		NOT = { exists = title:e_wre.holder }
+		NOT = { exists = title:h_western_roman_empire.holder }
 		#ERE must have a holder
-		exists = title:e_byzantium.holder
+		OR = {
+			exists = title:e_byzantium.holder
+			exists = title:h_eastern_roman_empire.holder
+		}
 		#Have correct religion
 		OR = {
 			religion = religion:christianity_religion
 			religion = religion:hellenism_religion
 		}
-		age >= 16
-		primary_title.tier = tier_empire
+		
 		#Only Romans would dare broach this subject this way
 		culture = { has_ability_to_reform_rome_directly_trigger = yes }
+		root.primary_title.tier < tier_hegemony
 		#Can't be of a specially excluded title
 		NOR = {
-			#Can't already be Romanh
-			has_title = title:e_wre
+			#Can't already be Roman or other
 			has_title = title:e_byzantium
-			has_title = title:e_roman_empire
+			has_title = title:h_roman_empire
+			has_title = title:h_western_roman_empire
 			#Axum is special
 			has_title = title:e_axum
-			#If you're Italy, why request Rome?
-			has_title = title:e_italy
 		}
 	}
 	
 	is_valid = {
-		gold >= massive_gold_value
+		gold >= 500
+		custom_tooltip = {
+			text = primary_title_must_be_empire
+			primary_title.tier = tier_empire
+		}
+		realm_size >= 300 #Regardless of the size of Rome, it needs to be *big*;
+		#Control 80% of whatever remains of Western Rome
+		custom_description = {
+			text = must_control_at_least_80_percent_of_wre_territory
+			subject = root
+			title:h_western_roman_empire = {
+				any_county = {
+					percent >= 0.8
+					this.holder.top_liege = root
+				}
+			}
+		}
+		OR = {
+			has_trait = legendary_leader
+			AND = {
+				prestige_level >= 5
+				legitimacy_level >= 5
+			}
+		}
 	}
 	
 	is_valid_showing_failures_only = {
 		is_available_adult = yes
 		is_at_war = no
-		NOT = { realm_size < 255 }
 	}
 	
 	cost = {
-		gold = massive_gold_value
+		gold = 1500
 	}
 	
 	effect = {
@@ -156,7 +201,13 @@ ask_for_wre = {
 			set_variable = { name = asked_for_wre }
 			save_scope_as = empire_petitoner
 		}
-		title:e_byzantium.holder = { trigger_event = { id = BP_roman_decisions.0004 days = { 5 17 } } } #The emperor hears the request
+		if = {
+			limit = { exists = title:h_eastern_roman_empire.holder }
+			title:h_eastern_roman_empire.holder = { trigger_event = { id = BP_roman_decisions.0004 days = { 5 17 } } } #The emperor hears the request
+		}
+		else = {
+			title:e_byzantium.holder = { trigger_event = { id = BP_roman_decisions.0004 days = { 5 17 } } } #The emperor hears the request
+		}
 	}
 	
 	ai_potential = { always = yes }
@@ -168,7 +219,7 @@ ask_for_wre = {
 		#Won't do without enough gold
 		modifier = {
 			factor = 0
-			NOT = { gold >= massive_gold_value }
+			NOT = { gold >= 500 }
 		}
 		modifier = {
 			factor = 2.5
@@ -199,32 +250,45 @@ sole_roman_empire = {
 	selection_tooltip = sole_roman_empire_tooltip
 	
 	is_shown = {
-		OR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
-		}
-		OR = {
-			NOT = { exists = title:e_wre.holder }
+		#Can't claim to be the sole empire if the other half (or its rump) exists
+		trigger_if = {
+			limit = {
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
 			NOT = { exists = title:e_byzantium.holder }
+			NOT = { exists = title:h_eastern_roman_empire.holder }
 		}
+		trigger_else_if = {
+			limit = {
+				OR = {
+					has_title = title:e_byzantium
+					has_title = title:h_eastern_roman_empire
+				}
+			}
+			NOT = { exists = title:e_wre.holder }
+			NOT = { exists = title:h_western_roman_empire.holder }
+		}
+		trigger_else = { always = no }
 		OR = {
 			religion = religion:christianity_religion
 			religion = religion:hellenism_religion
 		}
-		NOT = { has_claim_on = title:e_roman_empire }
+		NOT = { has_claim_on = title:h_roman_empire }
 		culture = { has_ability_to_reform_rome_directly_trigger = yes }
 		NOT = { has_global_variable = sole_roman_empire }
 	}
 	
 	is_valid = {
-		gold >= massive_gold_value
-		trigger_if = {
-			limit = { has_title = title:e_wre }
-			NOT = { exists = title:e_byzantium.holder }
-		}
-		trigger_if = {
-			limit = { has_title = title:e_byzantium }
-			NOT = { exists = title:e_wre.holder }
+		gold >= 1000
+		OR = {
+			has_trait = legendary_leader
+			AND = {
+				prestige_level >= 5
+				legitimacy_level >= 5
+			}
 		}
 	}
 	
@@ -234,13 +298,14 @@ sole_roman_empire = {
 	}
 	
 	cost = {
-		gold = massive_gold_value
+		gold = 1000
 		prestige = 1500
 	}
 	
 	effect = {
 		set_global_variable = { name = sole_roman_empire }
-		add_pressed_claim = title:e_roman_empire
+		show_as_tooltip = { add_pressed_claim = title:h_roman_empire }
+		custom_tooltip = { text = roman_empire_claim_allows_for_conquest }
 		root = { trigger_event = { id = BP_roman_decisions.0010 } }
 	}
 	
@@ -252,7 +317,7 @@ sole_roman_empire = {
 		#Won't do without enough gold
 		modifier = {
 			factor = 0
-			NOT = { gold >= massive_gold_value }
+			NOT = { gold >= 1000 }
 		}
 	}
 }
@@ -275,24 +340,32 @@ unite_roman_empires = {
 	selection_tooltip = unite_roman_empires_tooltip
 	
 	is_shown = {
-		OR = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
+		AND = {
+			custom_description = {
+				text = has_a_western_roman_empire
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
+			custom_description = {
+				text = has_an_eastern_roman_empire
+				OR = {
+					has_title = title:e_byzantium
+					has_title = title:h_eastern_roman_empire
+				}
+			}
 		}
 		OR = {
 			religion = religion:christianity_religion
 			religion = religion:hellenism_religion
 		}
-		NOT = { has_claim_on = title:e_roman_empire }
+		NOT = { has_claim_on = title:h_roman_empire }
 		NOT = { has_global_variable = rome_restored }
 	}
 	
 	is_valid = {
-		AND = {
-			has_title = title:e_wre
-			has_title = title:e_byzantium
-		}
-		gold >= massive_gold_value
+		gold >= 5000
 	}
 	
 	is_valid_showing_failures_only = {
@@ -301,13 +374,13 @@ unite_roman_empires = {
 	}
 	
 	cost = {
-		gold = massive_gold_value
+		gold = 5000
 		prestige = 3000
 	}
 	
 	effect = {
 		set_global_variable = { name = rome_restored }
-		add_pressed_claim = title:e_roman_empire
+		custom_tooltip = { text = roman_empire_reunification_tooltip }
 		root = { trigger_event = { id = BP_roman_decisions.0011 } }
 	}
 	
@@ -319,7 +392,7 @@ unite_roman_empires = {
 		#Won't do without enough gold
 		modifier = {
 			factor = 0
-			NOT = { gold >= massive_gold_value }
+			NOT = { gold >= 5000 }
 		}
 	}
 }
@@ -343,12 +416,14 @@ restore_western_roman_empire = {
 	
 	is_shown = {
 		NOT = { exists = title:e_wre.holder }
-		NOT = { exists = title:e_roman_empire.holder }
+		NOT = { exists = title:h_western_roman_empire.holder }
+		NOT = { exists = title:h_roman_empire.holder }
+		NOT = { exists = title:h_eastern_roman_empire.holder } #They can reform directly
 		culture = { has_ability_to_reform_rome_directly_trigger = yes }
 	}
 	
 	is_valid = {
-		gold >= massive_gold_value
+		gold >= 1500
 		completely_controls_region = world_roman_empire_west_italy
 		OR = {
 			custom_description = { text = roman_capital root.capital_county = title:c_roma }
@@ -366,7 +441,13 @@ restore_western_roman_empire = {
 			tier = tier_kingdom
 			count >= 3
 		}
-		prestige_level >= 3
+		OR = {
+		has_trait = legendary_leader
+			AND = {
+				prestige_level >= 5
+				legitimacy_level >= 5
+			}
+		}
 		##### TODO (Beta): Add legion requirements
 	}
 	
@@ -376,16 +457,28 @@ restore_western_roman_empire = {
 	}
 	
 	cost = {
-		gold = massive_gold_value
+		gold = 1500
 	}
 	
 	effect = {
 		root = { save_scope_as = asking_emperor }
-		title:e_wre = { save_scope_as = requested_title }
+		title:h_western_roman_empire = { save_scope_as = requested_title }
 		if = {
-			limit = { exists = title:e_byzantium.holder }
-			title:e_byzantium.holder = { save_scope_as = other_emperor }
-			title:e_byzantium = { save_scope_as = other_empire }
+			limit = {
+				OR = {
+					exists = title:h_eastern_roman_empire.holder
+					exists = title:e_byzantium.holder
+				}
+			}
+			if = {
+				limit = { exists = title:h_eastern_roman_empire.holder }
+				title:h_eastern_roman_empire.holder = { save_scope_as = other_emperor }
+				title:h_eastern_roman_empire = { save_scope_as = other_empire }
+			}
+			else = {
+				title:e_byzantium.holder = { save_scope_as = other_emperor }
+				title:e_byzantium = { save_scope_as = other_empire }
+			}
 		}
 		root = { trigger_event = { id = BP_roman_decisions.0050 } }
 	}
@@ -422,7 +515,9 @@ restore_eastern_roman_empire = {
 	
 	is_shown = {
 		NOT = { exists = title:e_byzantium.holder }
-		NOT = { exists = title:e_roman_empire.holder }
+		NOT = { exists = title:h_eastern_roman_empire.holder }
+		NOT = { exists = title:h_western_roman_empire.holder }
+		NOT = { exists = title:h_roman_empire.holder }
 		culture = { has_ability_to_reform_rome_directly_trigger = yes }
 	}
 	
@@ -459,11 +554,23 @@ restore_eastern_roman_empire = {
 	
 	effect = {
 		root = { save_scope_as = asking_emperor }
-		title:e_byzantium = { save_scope_as = requested_title }
+		title:h_eastern_roman_empire = { save_scope_as = requested_title }
 		if = {
-			limit = { exists = title:e_wre.holder }
-			title:e_wre.holder = { save_scope_as = other_emperor }
-			title:e_wre = { save_scope_as = other_empire }
+			limit = {
+				OR = {
+					exists = title:h_western_roman_empire.holder
+					exists = title:e_wre.holder
+				}
+			}
+			if = {
+				limit = { exists = title:h_western_roman_empire.holder }
+				title:h_western_roman_empire.holder = { save_scope_as = other_emperor }
+				title:h_western_roman_empire = { save_scope_as = other_empire }
+			}
+			else = {
+				title:e_wre.holder = { save_scope_as = other_emperor }
+				title:e_wre = { save_scope_as = other_empire }
+			}
 		}
 		root = { trigger_event = { id = BP_roman_decisions.0050 } }
 	}
