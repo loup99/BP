@@ -2,8 +2,6 @@
 
 #bp_narrative_events.0001 - Fall of Rome to Barbarians
 #bp_narrative_events.0002 - Julius Nepos becomes WRE
-#bp_narrative_events.0010 - A Roman Empire Disappears (specific; historically, this was what happened to Nepos)
-#bp_narrative_events.0011 - A Roman Empire Disappears (informational)
 
 #Fall of Rome
 bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
@@ -29,6 +27,7 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		name = bp_narrative_events.0001.general_response
 		trigger = {
 			NOT = { has_title = title:e_byzantium }
+			NOT = { has_title = title:h_eastern_roman_empire }
 			NOT = { religion = religion:germanic_religion }
 			NOT = { this = scope:barbarian_ruler }
 			NOT = { this = character:93 }
@@ -43,6 +42,7 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		name = bp_narrative_events.0001.germanic_religion_response
 		trigger = {
 			NOT = { has_title = title:e_byzantium }
+			NOT = { has_title = title:h_eastern_roman_empire }
 			NOT = { faith = faith:nicene }
 			NOT = { this = scope:barbarian_ruler }
 			NOT = { this = character:93 }
@@ -55,6 +55,7 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		name = bp_narrative_events.0001.imperial_christian_response
 		trigger = {
 			NOT = { has_title = title:e_byzantium }
+			NOT = { has_title = title:h_eastern_roman_empire }
 			NOT = { faith = faith:nicene }
 			NOT = { this = scope:barbarian_ruler }
 			NOT = { this = character:93 }
@@ -80,14 +81,18 @@ bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
 		name = bp_narrative_events.0001.nepos_response
 		trigger = { this = character:175110 }
 		if = {
-			limit = { NOT = { exists = title:e_wre.holder } }
+			limit = { NOT = { exists = title:h_western_roman_empire.holder } }
+			root = { save_scope_as = the_last_wre_holder }
 			trigger_event = { id = bp_narrative_events.0002 }
 		}
 	}
 	option = { #Byzantine Option
 		name = bp_narrative_events.0001.byzantine_response
 		trigger = {
-			has_title = title:e_byzantium
+			OR = {
+				has_title = title:e_byzantium
+				has_title = title:h_eastern_roman_empire
+			}
 			NOT = { this = scope:barbarian_ruler }
 			NOT = { this = character:93 }
 			NOT = { this = character:175110 }
@@ -111,67 +116,33 @@ bp_narrative_events.0002 = { #WTWSMS id: zusk_event.26
 	}
 	
 	option = {
+		trigger = { root = scope:the_last_wre_holder }
 		name = bp_narrative_events.0002.a
-		get_title = title:e_wre
-	}
-}
-
-#TODO: Combine 0010 & 0011 into a single event for clarity
-
-#A Roman Empire Disappears
-bp_narrative_events.0010 = { #CK2 id: historical_wtwsms.6
-	immediate = {
+		get_title = title:h_western_roman_empire
 		if = {
-			limit = { NOT = { exists = scope:the_bag_holder } }
-			save_scope_as = the_bag_holder
-			#You maniacs! You blew it up! Damn you all to hell...!
-			destroy_title = scope:destroyed_roman_empire
-		}
-	}
-	
-	title = bp_narrative_events.0010.name
-	desc = {
-		first_valid = {
-			triggered_desc = {
-				trigger = { root = scope:the_bag_holder }
-				desc = bp_narrative_events.0010.desc.me
-			}
-			#Default
-			desc = bp_narrative_events.0010.desc.others
-		}
-	}
-	type = character_event
-	theme = realm
-	content_source = dlc_WtWSMS
-	
-	right_portrait = {
-		character = scope:last_roman_emperor
-		animation = disappointed
-	}
-	
-	left_portrait = {
-		character = scope:the_bag_holder
-		animation = shame
-	}
-	
-	option = {
-		name = bp_narrative_events.0010.a
-		#The bag-holder spawns this even for everyone else
-		if = {
-			limit = { root = scope:the_bag_holder }
-			#And you loose Roman Government
-			if = {
-				limit = { has_government = roman_dynastic_government }
-				change_government = subroman_dynastic_government
-			}
-			#Tell everyone of your incompetence
+			limit = { root ?= scope:the_last_wre_holder }
 			every_player = {
 				limit = {
+					NOT = { root = scope:the_last_wre_holder }
 					is_ai = no
-					NOT = { this = root }
+					OR = {
+						is_landed = yes
+						is_landless_ruler = yes
+					}
 				}
-				trigger_event = { id = bp_narrative_events.0010 }
+				trigger_event = { id = bp_narrative_events.0002 }
 			}
 		}
+	}
+	option = {
+		trigger = { NOT = { root = scope:the_last_wre_holder } }
+		name = bp_narrative_events.0002.a
+		show_as_tooltip = { scope:the_last_wre_holder = { get_title = title:h_western_roman_empire } }
+	}
+	option = {
+		trigger = { NOT = { root = scope:the_last_wre_holder } }
+		name = bp_narrative_events.0002.b
+		fallback = yes
+		show_as_tooltip = { scope:the_last_wre_holder = { get_title = title:h_western_roman_empire } }
 	}
 }

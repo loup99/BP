@@ -6,7 +6,6 @@ on_death = {
 		bp_shatter_tribal_peoples_without_leges_barbarorum
 		bp_return_roman_dynastic_duchies_and_kingdoms_to_liege
 		bp_destroy_specific_landless_titles
-		bp_flag_roman_title_for_destruction
 	}
 }
 
@@ -86,71 +85,6 @@ bp_destroy_specific_landless_titles = {
 		else_if = {
 			limit = { this.primary_title = title:d_laamp_ajax_of_suebia }
 			destroy_title = title:d_laamp_severinus_of_noricum
-		}
-	}
-}
-
-#We set a variable because then the title will be passed to a new char and we can check it then
-#Otherwise, it would trigger directly when Nepos gets it, which would not be good.
-bp_flag_roman_title_for_destruction = {
-	trigger = {
-		OR = {
-			AND = {
-				title:e_wre = { is_titular = yes }
-				exists = title:e_wre.holder
-				root = title:e_wre.holder
-			}
-			AND = {
-				title:e_byzantium = { is_titular = yes }
-				exists = title:e_byzantium.holder
-				root = title:e_byzantium.holder
-			}
-			AND = {
-				title:e_roman_empire = { is_titular = yes }
-				exists = title:e_roman_empire.holder
-				root = title:e_roman_empire.holder
-			}
-		}
-	}
-	effect = {
-		if = {
-			limit = {
-				exists = title:e_wre
-				title:e_wre = { is_titular = yes }
-				NOR = {
-					title:c_roma.holder.top_liege = title:e_wre.holder
-					title:c_lombardia.holder.top_liege = title:e_wre.holder
-					title:c_ravenna.holder.top_liege = title:e_wre.holder
-					title:c_trier.holder.top_liege = title:e_wre.holder
-				}
-			}
-			title:e_wre = { set_variable = destroy_me }
-		}
-		else_if = {
-			limit = {
-				exists = title:e_byzantium
-				title:e_byzantium = { is_titular = yes }
-				NOR = {
-					title:c_byzantion.holder.top_liege = title:e_byzantium.holder
-					title:c_bithynia.holder.top_liege = title:e_byzantium.holder
-				}
-			}
-			title:e_byzantium = { set_variable = destroy_me }
-		}
-		else_if = {
-			limit = {
-				exists = title:e_roman_empire
-				title:e_roman_empire = { is_titular = yes }
-				NOR = {
-					title:c_roma.holder.top_liege = title:e_roman_empire.holder
-					title:c_lombardia.holder.top_liege = title:e_roman_empire.holder
-					title:c_ravenna.holder.top_liege = title:e_roman_empire.holder
-					title:c_trier.holder.top_liege = title:e_roman_empire.holder
-					title:c_byzantion.holder.top_liege = title:e_roman_empire.holder
-					title:c_bithynia.holder.top_liege = title:e_roman_empire.holder
-				}
-			}
-			title:e_roman_empire = { set_variable = destroy_me }
 		}
 	}
 }
