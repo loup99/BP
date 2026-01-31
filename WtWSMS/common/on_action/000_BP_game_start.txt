@@ -19,7 +19,6 @@ bp_game_start = {
 		ccu_startup_debug
 		create_BP_artifacts
 		#Legal Stuff
-		setup_governments_based_on_dlc
 		setup_realm_and_title_succession_laws
 		game_start_fix_barony_government
 		setup_initial_variable_lists
@@ -38,6 +37,8 @@ bp_game_start = {
 		block_specific_chars_from_having_families
 		#Other Actions
 		update_development_by_terrain_and_circumstances
+		#Things that have to be done last
+		setup_governments_based_on_dlc
 	}
 }
 
@@ -163,53 +164,6 @@ create_BP_artifacts = {
 					decaying = no
 					modifier = branch_of_the_keshmar_cypress_modifier
 					visuals = flowers
-				}
-			}
-		}
-	}
-}
-
-## Government Stuff ##
-setup_governments_based_on_dlc = {
-	effect = {
-		#Flip Roman governments to administrative if DLC is available
-		if = {
-			limit = {
-				OR = {
-					has_dlc_feature = roads_to_power
-					has_dlc_feature = all_under_heaven
-				}
-			}
-			every_ruler = {
-				limit = { has_government = roman_dynastic_government }
-				change_government = roman_administrative_government
-				
-				if = {
-					limit = { this = this.house.house_head }
-					give_noble_family_title = {
-						name = noble_family_name
-						tier = duchy
-						article = DEFAULT_TITLE_NAME_ARTICLE
-						government = roman_administrative_government
-						save_scope_as = new_title
-					}
-					scope:new_title.holder ?= {
-						save_scope_as = noble_family_head
-						scope:new_title = { set_coa = scope:noble_family_head.house }
-					}
-				}
-				
-				#Move Estate to actual capital location
-				
-				every_vassal_or_below = {
-					limit = {
-						this.primary_title.tier = tier_barony
-						OR = {
-							has_government = roman_dynastic_government
-							has_government = republic_government
-						}
-					}
-					change_government = roman_administrative_government
 				}
 			}
 		}
@@ -1373,3 +1327,61 @@ cull_maa_from_single_county_tribals = {
 		}
 	}
 }
+
+## Government Stuff ##
+setup_governments_based_on_dlc = {
+	effect = {
+		#Flip Roman governments to administrative if DLC is available
+		if = {
+			limit = {
+				OR = {
+					has_dlc_feature = roads_to_power
+					has_dlc_feature = all_under_heaven
+				}
+			}
+			every_ruler = {
+				limit = { has_government = roman_dynastic_government }
+				change_government = roman_administrative_government
+				
+				if = {
+					limit = { this.top_liege = this }
+					this.primary_title = { clear_title_laws = yes }
+					add_realm_law = acclamation_succession_law
+				}
+				else = { add_realm_law = appointment_succession_law }
+				
+				if = {
+					limit = { this = this.house.house_head }
+					give_noble_family_title = {
+						name = noble_family_name
+						tier = duchy
+						article = DEFAULT_TITLE_NAME_ARTICLE
+						government = roman_administrative_government
+						save_scope_as = new_title
+					}
+					scope:new_title.holder ?= {
+						save_scope_as = noble_family_head
+						scope:new_title = { set_coa = scope:noble_family_head.house }
+					}
+				}
+				
+				every_vassal_or_below = {
+					limit = {
+						this.primary_title.tier = tier_barony
+						OR = {
+							has_government = roman_dynastic_government
+							has_government = republic_government
+						}
+					}
+					change_government = roman_administrative_government
+				}
+				
+				#Move Estate to actual capital location
+				this.domicile ?= {
+					move_domicile = prev.capital_county.title_province
+				}
+			}
+		}
+	}
+}
+
