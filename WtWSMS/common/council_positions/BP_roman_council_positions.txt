@@ -140,22 +140,12 @@ councillor_marshal_roman = {
 
 	valid_character = {
 		exists = root.liege_or_court_owner
-		trigger_if = { # If the liege has a ministry, we check a separate minister trigger
-			limit = {
-				root.liege_or_court_owner = { tgp_has_access_to_ministry_trigger = yes }
-			}
-			tgp_can_be_a_minister_trigger = { COURT_OWNER = root.liege_or_court_owner }
-		}
-		trigger_else = {
-			can_be_marshal_trigger = { COURT_OWNER = root.liege_or_court_owner }
-		}
-		NOT = { this = character:528 }
+		bp_can_be_roman_minister_trigger = { COURT_OWNER = root.liege_or_court_owner }
 		tgp_is_ceremonial_liege_trigger = no
 	}
 
 	on_get_position = {
 		got_council_position_effect = yes
-		got_minister_position_effect = { MINISTER_TITLE = e_minister_of_war MINISTER_POSITION = councillor_marshal }
 	}
 
 	on_fired_from_position = {
@@ -170,6 +160,81 @@ councillor_marshal_roman = {
 
 	barbershop_data = {
 		position = { 558.0 172.0 }
+		click_to_front = no
+	}
+}
+
+#Magister Officorum Bureaus
+councillor_clerical_bureau_director = {
+	skill = stewardship
+	
+	name = councillor_clerical_bureau_director
+
+	tooltip = councillor_clerical_bureau_director_tooltip
+	
+	auto_fill = {
+	}
+	
+	valid_position = {
+		bp_has_access_to_roman_ministry_trigger = yes
+	}
+
+	modifier = {
+		name = councillor_steward_modifier
+		monthly_income = 1
+		scale = council_scaled_monthly_income
+	}
+
+	modifier = {
+		name = councillor_steward_modifier
+		build_gold_cost = -0.025
+		monthly_stewardship_lifestyle_xp_gain_mult = 0.05
+		domain_tax_mult = 0.025
+		scale = council_scaled_by_liege_tier
+	}
+
+	modifier = {
+		name = councillor_steward_modifier
+		monthly_influence = 1
+		domicile_build_gold_cost = -0.05
+		scale = council_scaled_admin_value
+	}
+
+	council_owner_modifier = {
+		name = learn_on_the_job_modifier
+		stewardship = 1
+		scale = steward_learn_on_the_job_scale
+	}
+
+	council_owner_modifier = {
+		name = reliable_house_modifier
+		stewardship = 1
+		scale = steward_reliable_house_scale
+	}
+
+	valid_character = {
+		exists = root.liege_or_court_owner
+		bp_can_be_roman_minister_trigger = { COURT_OWNER = root.liege_or_court_owner }
+		tgp_is_ceremonial_liege_trigger = no
+	}
+
+	on_get_position = {
+		got_council_position_effect = yes
+		got_minister_position_effect = { MINISTER_TITLE = e_minister_of_revenue MINISTER_POSITION = councillor_steward }
+	}
+
+	on_fired_from_position = {
+		fired_from_council_position_effect = yes
+	}
+
+	on_lose_position = {
+		fired_minister_position_effect = yes
+	}
+
+	portrait_animation = steward
+
+	barbershop_data = {
+		position = { 1268.0 172.0 }
 		click_to_front = no
 	}
 }
