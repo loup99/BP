@@ -1,8 +1,9 @@
-﻿councillor_chancellor_roman = {
+﻿#Major Roman Offices
+councillor_chancellor_roman = {
 	skill = diplomacy
 	
 	name = councillor_chancellor_roman
-	tooltip = councillor_chancellor_roman
+	tooltip = councillor_chancellor_roman_tooltip
 	
 	valid_position = {
 		bp_has_access_to_roman_ministry_trigger = yes
@@ -80,6 +81,95 @@
 
 	barbershop_data = {
 		position = { 918.0 172.0 }
+		click_to_front = no
+	}
+}
+
+councillor_marshal_roman = {
+	skill = martial
+	
+	name = councillor_marshal_roman
+
+	tooltip = councillor_marshal_roman_tooltip
+	
+	auto_fill = {
+	}
+
+	valid_position = {
+		bp_has_access_to_roman_ministry_trigger = yes
+	}
+
+	modifier = {
+		name = councillor_marshal_modifier
+		prowess = 1
+		army_maintenance_mult = -0.05
+		monthly_martial_lifestyle_xp_gain_mult = 0.05
+		scale = council_scaled_by_liege_tier
+	}
+
+	modifier = {
+		name = councillor_marshal_modifier
+		levy_size = 0.05
+		scale = council_scaled_by_liege_tier_not_admin
+	}
+
+	modifier = {
+		name = councillor_marshal_modifier
+		monthly_influence = 1
+		maa_toughness_mult = 0.04
+		scale = council_scaled_admin_value
+	}
+
+	modifier = { # Minister modifiers
+		name = minister_war_modifier
+		monthly_merit = 1
+		scale = council_scaled_celestial_ministry_value
+	}
+
+	council_owner_modifier = {
+		name = learn_on_the_job_modifier
+		martial = 1
+		scale = marshal_learn_on_the_job_scale
+	}
+
+	council_owner_modifier = {
+		name = reliable_house_modifier
+		martial = 1
+		scale = marshal_reliable_house_scale
+	}
+
+	valid_character = {
+		exists = root.liege_or_court_owner
+		trigger_if = { # If the liege has a ministry, we check a separate minister trigger
+			limit = {
+				root.liege_or_court_owner = { tgp_has_access_to_ministry_trigger = yes }
+			}
+			tgp_can_be_a_minister_trigger = { COURT_OWNER = root.liege_or_court_owner }
+		}
+		trigger_else = {
+			can_be_marshal_trigger = { COURT_OWNER = root.liege_or_court_owner }
+		}
+		NOT = { this = character:528 }
+		tgp_is_ceremonial_liege_trigger = no
+	}
+
+	on_get_position = {
+		got_council_position_effect = yes
+		got_minister_position_effect = { MINISTER_TITLE = e_minister_of_war MINISTER_POSITION = councillor_marshal }
+	}
+
+	on_fired_from_position = {
+		fired_from_council_position_effect = yes
+	}
+
+	on_lose_position = {
+		fired_minister_position_effect = yes
+	}
+
+	portrait_animation = marshal
+
+	barbershop_data = {
+		position = { 558.0 172.0 }
 		click_to_front = no
 	}
 }
