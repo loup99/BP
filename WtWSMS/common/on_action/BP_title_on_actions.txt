@@ -26,7 +26,32 @@
 on_title_destroyed = {
 	events = {}
 	on_actions = {
-		BP_check_independent_roman_polities
+		BP_handle_independent_roman_duchies
+	}
+}
+
+BP_handle_independent_roman_duchies = {
+	effect = {
+		# If the title of an independent Roman Dynastic ruler is destroyed,
+		# let's make sure we handle any stray Roman Dynastic vassals
+		if = {
+			limit = {
+				government_has_flag = government_only_valid_for_kingdoms_empires
+				government_has_flag = government_uses_roman_dynastic_authority
+				is_independent_ruler = yes
+				NOT = {
+					any_held_title = {
+						tier > tier_duchy
+						NOT = { this = scope:landed_title }
+					}
+				}
+			}
+			root = { change_government = subroman_dynastic_government }
+			every_vassal_or_below = {
+				limit = { government_has_flag = government_uses_roman_dynastic_authority }
+				change_government = subroman_dynastic_government
+			}
+		}
 	}
 }
 
@@ -38,6 +63,7 @@ on_title_gain = {
 	on_actions = {
 		BP_handle_centralized_realm_stuff
 		BP_apply_title_laws
+		BP_update_tributary_modifiers
 		#Specific other on-actions
 		BP_add_theocratic_traits
 		BP_fall_of_rome
@@ -106,7 +132,7 @@ BP_apply_title_laws = {
 				scope:title.tier = tier_empire
 				scope:transfer_type = flag:created
 			}
-			#Roman Governments, no DLC
+			#Roman Governments
 			if = {
 				limit = { government_has_flag = empires_use_imperial_elective_succession }
 				scope:title = { add_title_law = imperial_elective_succession_law }
@@ -135,6 +161,18 @@ BP_hegemonic_collapse = {
 		NOT = { scope:title = title:h_china }
 		#Only Hegemonies
 		scope:title.tier = tier_hegemony
+		#Valid transfer for checks
+		OR = {
+			scope:transfer_type = flag:conquest
+			scope:transfer_type = flag:conquest_holy_war
+			scope:transfer_type = flag:conquest_claim
+			scope:transfer_type = flag:inheritance
+			scope:transfer_type = flag:destroyed
+			scope:transfer_type = flag:usurped
+			scope:transfer_type = flag:election
+			scope:transfer_type = flag:faction_demand
+			scope:transfer_type = flag:stepped_down
+		}
 		#Your territory has to be too small for hegemonic pretensions
 		realm_size < 50
 		NOT = { scope:transfer_type = flag:created }
@@ -171,21 +209,22 @@ BP_hegemonic_collapse = {
 on_vassal_change = {
 	on_actions = {
 		BP_degrade_roman_government
+		BP_update_tributary_modifiers
 		BP_fall_of_rome
 	}
 }
 
 BP_degrade_roman_government = {
-	trigger = { is_independent_ruler = yes }
 	effect = {
 		### If an admin ruler becomes independent, who are not of a high enough rank, changes government
 		if = {
 			limit = {
-				government_has_flag = government_only_valid_for_empires_hegemonies
-				has_main_roman_government_trigger = yes
-				highest_held_title_tier < tier_empire
+				liege = root # I.e. root is independent
+				government_has_flag = government_only_valid_for_kingdoms_empires
+				government_has_flag = government_uses_roman_dynastic_authority
+				highest_held_title_tier < tier_kingdom
 			}
-			convert_to_subroman_government_effect = yes
+			change_government = subroman_dynastic_government
 		}
 	}
 }
@@ -205,14 +244,17 @@ BP_subroman_to_roman = {
 		#Sub-Romans change government to roman if they get vassalized
 		if = {
 			limit = {
-				root = { has_main_roman_government_trigger = yes }
-				scope:vassal = { has_subroman_government_trigger = yes }
+				root = {
+					government_has_flag = is_a_roman_government
+					NOT = { government_has_flag = is_a_transitory_roman_government }
+					scope:vassal = { government_has_flag = is_a_transitory_roman_government }
+				}
 			}
 			scope:vassal = {
-				convert_to_roman_government_effect = yes
+				change_government = roman_dynastic_government
 				every_vassal_or_below = {
-					limit = { has_subroman_government_trigger = yes }
-					convert_to_roman_government_effect = yes
+					limit = { government_has_flag = is_a_transitory_roman_government }
+					change_government = roman_dynastic_government
 				}
 			}
 		}
@@ -221,7 +263,17 @@ BP_subroman_to_roman = {
 
 on_title_lost = {
 	on_actions = {
+		BP_update_tributary_modifiers
 		BP_fall_of_rome
+	}
+}
+
+##### Generic Modifiers
+
+#Updates suzerain/tributary modifiers, if any
+BP_update_tributary_modifiers = {
+	effect = {
+		#trigger_event = { id = BP_maintenance_events.1000 delayed = yes }
 	}
 }
 

@@ -20,6 +20,7 @@ scripted_trigger basic_character_requirements_for_transition_trigger = {
 	OR = {
 		government_has_flag = government_is_roman_federate
 		government_has_flag = government_is_subroman_administrative
+		government_has_flag = government_is_subroman_dynastic
 	}
 	primary_title = { tier > tier_barony }
 }
@@ -65,6 +66,28 @@ scripted_effect increase_hereditary_rights_one_level_effect = {
 			else_if = {
 				limit = { has_realm_law_flag = succession_weight_dynastic_4 }
 				add_realm_law = subroman_admin_aristocracy_law_4
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_is_purely_dynastic }
+				add_realm_law = confederate_partition_succession_law
+			}
+		}
+		government_is_subroman_dynastic = {
+			if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_1 }
+				add_realm_law = subroman_dynastic_aristocracy_law_1
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_2 }
+				add_realm_law = subroman_dynastic_aristocracy_law_2
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_3 }
+				add_realm_law = subroman_adynastic_aristocracy_law_3
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_4 }
+				add_realm_law = subroman_dynastic_aristocracy_law_4
 			}
 			else_if = {
 				limit = { has_realm_law_flag = succession_is_purely_dynastic }
@@ -122,6 +145,30 @@ scripted_effect increase_military_landing_one_level_effect = {
 				}
 			}
 		}
+		government_is_subroman_dynastic = {
+			this.top_liege = {
+				if = {
+					limit = { has_realm_law = subroman_dynastic_military_centralization_top_liege_law_0 }
+					add_realm_law = subroman_dynastic_military_centralization_top_liege_law_1
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_dynastic_military_centralization_top_liege_law_1 }
+					add_realm_law = subroman_dynastic_military_centralization_top_liege_law_2
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_dynastic_military_centralization_top_liege_law_2 }
+					add_realm_law = subroman_dynastic_military_centralization_top_liege_law_3
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_dynastic_military_centralization_top_liege_law_3 }
+					add_realm_law = subroman_dynastic_military_centralization_top_liege_law_4
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_dynastic_military_centralization_top_liege_law_4 }
+					add_realm_law = subroman_dynastic_military_centralization_top_liege_law_5
+				}
+			}
+		}
 	}
 }
 scripted_effect decay_domestic_taxation_one_level_effect = {
@@ -162,6 +209,26 @@ scripted_effect decay_domestic_taxation_one_level_effect = {
 				else_if = {
 					limit = { has_realm_law = subroman_admin_taxation_top_liege_law_3 }
 					add_realm_law = subroman_admin_taxation_top_liege_law_4
+				}
+			}
+		}
+		government_is_subroman_dynastic = {
+			this.top_liege = {
+				if = {
+					limit = { has_realm_law = subroman_dynastic_taxation_top_liege_law_0 }
+					add_realm_law = subroman_dynastic_taxation_top_liege_law_1
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_dynastic_taxation_top_liege_law_1 }
+					add_realm_law = subroman_dynastic_taxation_top_liege_law_2
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_dynastic_taxation_top_liege_law_2 }
+					add_realm_law = subroman_dynastic_taxation_top_liege_law_3
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_dynastic_taxation_top_liege_law_3 }
+					add_realm_law = subroman_dynastic_taxation_top_liege_law_4
 				}
 			}
 		}
@@ -215,6 +282,10 @@ scripted_effect shift_government_effect = {
 		remove_realm_law_if_has_it_effect = { LAW = imperial_bureaucracy_1 }
 		remove_realm_law_if_has_it_effect = { LAW = imperial_bureaucracy_2 }
 		remove_realm_law_if_has_it_effect = { LAW = imperial_bureaucracy_3 }
+		remove_realm_law_if_has_it_effect = { LAW = roman_dynastic_authority_0 }
+		remove_realm_law_if_has_it_effect = { LAW = roman_dynastic_authority_1 }
+		remove_realm_law_if_has_it_effect = { LAW = roman_dynastic_authority_2 }
+		remove_realm_law_if_has_it_effect = { LAW = roman_dynastic_authority_3 }
 	}
 	
 	switch = {
@@ -270,13 +341,14 @@ scripted_effect more_feudalization_effect = {
 			OR = {
 				government_has_flag = government_is_roman_federate
 				government_has_flag = government_is_subroman_administrative
+				government_has_flag = government_is_subroman_dynastic
 				NOT = { has_character_flag = had_a_feudal_transition_event }
 			}
 		}
 		if = {
 			limit = { is_ai = no }
 			send_interface_message = {
-				type = event_generic_neutral
+				type = msg_governor_duties
 				title = feudal_transition_accelerates_tt
 				desc = feudal_transition_accelerates_desc
 			}
@@ -300,7 +372,7 @@ scripted_effect more_feudalization_effect = {
 scripted_effect vassals_transiton_government_effect = {
 	#every sub-roman converts to Feudal
 	every_vassal_or_below = {
-		limit = { government_has_flag = government_is_subroman_administrative }
+		limit = { government_has_flag = government_is_subroman_administrative_or_dynastic }
 		if = {
 			limit = { this.top_liege = { government_has_flag = government_is_feudal } }
 			add_character_flag = transition_to_feudal_government
@@ -308,7 +380,7 @@ scripted_effect vassals_transiton_government_effect = {
 		}
 		else_if = {
 			limit = { this.top_liege = { government_has_flag = government_is_clan } }
-			add_character_flag = transition_to_feudal_government
+			add_character_flag = transition_to_clan_government
 			shift_government_effect = yes
 		}
 		else = {
@@ -389,6 +461,8 @@ BP_admin_to_feudal_events.0060 = {
 	desc = BP_admin_to_feudal_events.0060.desc
 	
 	theme = realm
+	window = fullscreen_event
+	override_background = BP_feudal_mutation
 	content_source = dlc_WtWSMS
 	
 	right_portrait = {
@@ -609,13 +683,17 @@ BP_admin_to_feudal_events.0110 = {
 	theme = diplomacy
 	content_source = dlc_WtWSMS
 	
-	right_portrait = {
+	left_portrait = {
 		character = ROOT
 		animation = steward
 	}
+	right_portrait = scope:the_top_liege
 	
 	immediate = {
-		ROOT.top_liege = { save_scope_as = the_top_liege }
+		ROOT.top_liege = {
+			save_scope_as = the_top_liege
+			save_scope_as = bg_override_char
+		}
 	}
 	
 	option = {
@@ -832,7 +910,7 @@ BP_admin_to_feudal_events.0210 = {
 	title = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { government_has_flag = government_is_subroman_administrative }
+				trigger = { government_has_flag = government_is_subroman_administrative_or_dynastic }
 				desc = BP_admin_to_feudal_events.0210.title_subroman
 			}
 			desc = BP_admin_to_feudal_events.0210.title
@@ -841,7 +919,7 @@ BP_admin_to_feudal_events.0210 = {
 	desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { government_has_flag = government_is_subroman_administrative }
+				trigger = { government_has_flag = government_is_subroman_administrative_or_dynastic }
 				desc = BP_admin_to_feudal_events.0210.desc_subroman
 			}
 			desc = BP_admin_to_feudal_events.0210.desc
@@ -851,9 +929,12 @@ BP_admin_to_feudal_events.0210 = {
 	theme = martial
 	content_source = dlc_WtWSMS
 	
-	right_portrait = {
+	left_portrait = {
 		character = ROOT
 		animation = marshal
+	}
+	right_portrait = {
+		character = scope:the_top_liege
 	}
 	
 	immediate = {
@@ -907,10 +988,10 @@ BP_admin_to_feudal_events.0210 = {
 		every_vassal = {
 			limit = {
 				is_ai = no
-				government_has_flag = government_is_subroman_administrative
+				government_has_flag = government_is_subroman_administrative_or_dynastic
 			}
 			send_interface_message = {
-				type = event_generic_neutral
+				type = msg_governor_duties
 				title = subroman_centralized_military_declines_tt
 				desc = subroman_centralized_military_declines_desc
 			}
@@ -1157,7 +1238,7 @@ BP_admin_to_feudal_events.0310 = {
 	title = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { government_has_flag = government_is_subroman_administrative }
+				trigger = { government_has_flag = government_is_subroman_administrative_or_dynastic }
 				desc = BP_admin_to_feudal_events.0310.title_subroman
 			}
 			desc = BP_admin_to_feudal_events.0310.title
@@ -1166,7 +1247,7 @@ BP_admin_to_feudal_events.0310 = {
 	desc = {
 		first_valid = {
 			triggered_desc = {
-				trigger = { government_has_flag = government_is_subroman_administrative }
+				trigger = { government_has_flag = government_is_subroman_administrative_or_dynastic }
 				desc = BP_admin_to_feudal_events.0310.desc_subroman
 			}
 			desc = BP_admin_to_feudal_events.0310.desc
@@ -1176,9 +1257,12 @@ BP_admin_to_feudal_events.0310 = {
 	theme = stewardship
 	content_source = dlc_WtWSMS
 	
-	right_portrait = {
+	left_portrait = {
 		character = ROOT
 		animation = steward
+	}
+	bottom_right_portrait = {
+		character = scope:the_top_liege
 	}
 	
 	immediate = {
@@ -1228,10 +1312,10 @@ BP_admin_to_feudal_events.0310 = {
 		every_vassal = {
 			limit = {
 				is_ai = no
-				government_has_flag = government_is_subroman_administrative
+				government_has_flag = government_is_subroman_administrative_or_dynastic
 			}
 			send_interface_message = {
-				type = event_generic_neutral
+				type = msg_governor_duties
 				title = roman_taxation_infrastructure_declines_tt
 				desc = roman_taxation_infrastructure_declines_desc
 			}

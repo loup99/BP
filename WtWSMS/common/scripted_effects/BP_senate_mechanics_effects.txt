@@ -50,15 +50,15 @@
 	}
 	#Non-Senatorial Families are annoyed at their loss of prestige
 	#custom_tooltip = {
-		#text = senatorial_families_hate_you
-		every_living_character = {
-			limit = {
-				exists = dynasty
-				this.dynasty = { has_dynasty_modifier = roman_senate_family_$REGION$ }
-				this = this.dynasty.dynast
-			}
-			this.dynasty = { remove_dynasty_modifier = roman_senate_family_$REGION$ }
+	#text = senatorial_families_hate_you
+	every_living_character = {
+		limit = {
+			exists = dynasty
+			this.dynasty = { has_dynasty_modifier = roman_senate_family_$REGION$ }
+			this = this.dynasty.dynast
 		}
+		this.dynasty = { remove_dynasty_modifier = roman_senate_family_$REGION$ }
+	}
 	#}
 	
 	remove_global_variable = $REGION$_senate_is_established
@@ -142,7 +142,7 @@ senate_election_effect = {
 				title:$BARONY$.holder.top_liege = { has_character_modifier = rejected_by_the_senate }
 				title:$BARONY$.holder.top_liege = { has_character_modifier = ignored_the_senate }
 			}
-		
+			
 		}
 		every_living_character = { limit = { has_character_modifier = roman_consul_$REGION$ } save_scope_as = the_consul_$REGION$ }
 		if = {
@@ -562,7 +562,106 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 
 make_east_senate_family_effect = {
 	add_dynasty_modifier = { modifier = roman_senate_family_east }
+	make_senate_noble_families_effect = yes
+	
 }
 make_west_senate_family_effect = {
 	add_dynasty_modifier = { modifier = roman_senate_family_west }
+	make_senate_noble_families_effect = yes
+}
+
+make_senate_noble_families_effect = {
+	if = {
+		limit = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+		every_dynasty_member = {
+			limit = {
+				is_house_head = yes
+				any_held_title = { count < 1 is_noble_family_title = yes }
+				this.primary_title.tier < tier_duchy
+			}
+			make_senate_noble_family_effect = yes
+		}
+	}
+}
+
+make_senate_noble_family_effect = {
+	# Byzantine senate
+	if = {
+		limit = { this.dynasty = { has_dynasty_modifier = roman_senate_family_east } }
+		if = {
+			limit = { exists = title:h_eastern_roman_empire.holder }
+			title:h_eastern_roman_empire.holder = { save_temporary_scope_as = new_liege }
+		}
+		else_if = {
+			limit = { exists = title:e_byzantium.holder }
+			title:e_byzantium.holder = { save_temporary_scope_as = new_liege }
+		}
+	}
+	# Roman senate
+	else = {
+		if = {
+			limit = { exists = title:h_western_roman_empire.holder }
+			title:h_western_roman_empire.holder = { save_temporary_scope_as = new_liege }
+		}
+		else_if = {
+			limit = { exists = title:e_wre.holder }
+			title:e_wre.holder = { save_temporary_scope_as = new_liege }
+		}
+	}
+	
+	# Specific character overrides
+	if = {
+		limit = { this = character:AquilinusOfLyon }
+		title:k_burgundians.holder = { save_temporary_scope_as = new_liege }
+	}
+	else_if = {
+		limit = { this = character:PlaceholderFatherOfImpetratusAndLeocadia }
+		title:k_soissons.holder = { save_temporary_scope_as = new_liege }
+	}
+	# If in sub-Roman lands, work for them
+	#else_if = {
+	#	limit = { employer = { government_has_flag = government_is_subroman_administrative } }
+	#	employer = { save_temporary_scope_as = new_liege }
+	#}
+	
+	# Create title
+	give_noble_family_title = {
+		name = noble_family_name
+		tier = county
+		article = DEFAULT_TITLE_NAME_ARTICLE
+		government = roman_administrative_government
+		save_scope_as = new_title
+	}
+	
+	# Set liege
+	if = {
+		limit = { is_landed = no }
+		create_title_and_vassal_change = {
+			type = granted
+			save_scope_as = change
+		}
+		change_liege = {
+			liege = scope:new_liege
+			change = scope:change
+		}
+		resolve_title_and_vassal_change = scope:change
+	}
+	# Match Roman government
+	if = {
+		limit = { this.liege = { government_has_flag = government_is_subroman_administrative } }
+		change_government = subroman_administrative_government
+	}
+	# Move to capital if outside of realm
+	if = {
+		limit = { NOT = { default_location.barony_controller.top_liege = this.top_liege } }
+		
+		# Prefer Rome over Ravenna
+		if = {
+			limit = { top_liege.capital_county = title:c_ravenna }
+			domicile = { move_domicile = title:c_roma.title_province }
+		}
+		else = {
+			domicile = { move_domicile = prev.top_liege.capital_province }
+		}
+	}	
 }

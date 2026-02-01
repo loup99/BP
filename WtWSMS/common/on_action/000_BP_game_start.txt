@@ -1136,6 +1136,13 @@ trigger_needed_events = {
 		every_ruler = {
 			limit = { exists = cp:councillor_court_chaplain }
 			cp:councillor_court_chaplain = {
+				if = { #Sacred Eunuchs
+					limit = {
+						faith = { has_doctrine_parameter = clergy_are_always_eunuchs }
+						NOT = { has_trait = eunuch }
+					}
+					add_trait = beardless_eunuch
+				}
 				bp_setup_priest_traits_effect = yes
 			}
 		}
@@ -1463,7 +1470,11 @@ setup_governments_based_on_dlc = {
 				if = {
 					limit = {
 						this = this.house.house_head
-						this.primary_title.tier >= tier_duchy #Don't want nf running counties...
+						OR = {
+							this.primary_title.tier >= tier_duchy #Don't want nf running counties...
+							dynasty = { has_dynasty_modifer = roman_senate_family_east }
+							dynasty = { has_dynasty_modifer = roman_senate_family_west }
+						}
 						any_held_title = { count < 1 is_noble_family_title = yes }
 					}
 					if = {
