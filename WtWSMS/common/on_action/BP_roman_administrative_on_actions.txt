@@ -1,0 +1,53 @@
+﻿on_title_gain = {
+	events = {}
+	on_actions = {
+		BP_got_a_roman_ministry
+	}
+}
+
+BP_got_a_roman_ministry = {
+	effect = {
+		if = {
+			limit = { scope:title = { has_variable = is_supreme_roman_military_title } }
+			# set up the council holder as dejure liege of the ministry title, as this effect is not called with the same scope as council onactions
+			scope:title.de_jure_liege.holder = { save_scope_as = councillor_liege }
+			scope:title = { save_scope_as = the_ministry_title }
+			#Set up things correctly
+			got_roman_administrative_minister_position_effect = {
+				MINISTER_TITLE = scope:the_ministry_title
+				MINISTER_POSITION = councillor_marshal_roman
+			}
+		}
+	}
+}
+
+on_vassal_change = {
+	events = {}
+	on_actions = {
+		BP_vassal_changed_roman_admin
+	}
+}
+
+BP_vassal_changed_roman_admin = {
+	effect = {
+		if = {
+			limit = {
+				# independent title
+				OR = {
+					liege ?= { bp_has_access_to_roman_ministry_trigger = no }
+					this = top_liege
+				}
+				any_held_title = {
+					this.tier = tier_empire
+					this = { has_variable = is_supreme_roman_military_title }
+				}
+			}
+			every_held_title = {
+				if = {
+					limit = { this = { has_variable = is_supreme_roman_military_title } }
+					root = { destroy_title = prev }
+				}
+			}
+		}
+	}
+}

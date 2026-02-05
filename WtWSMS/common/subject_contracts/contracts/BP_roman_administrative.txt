@@ -19,6 +19,7 @@ roman_administrative_themes = {
 	display_mode = radiobutton
 	is_shown = {
 		scope:subject.primary_title.tier >= tier_duchy
+		#scope:subject = { is_landless_ruler = no }
 	}
 	obligation_levels = {
 		roman_admin_theme_civilian = {
@@ -245,6 +246,52 @@ roman_administrative_themes = {
 			flag = admin_tradeport_obligation_bonus
 			flag = admin_theme_naval
 		}
+		#Special "hidden" themes for landless rulers
+		roman_admin_theme_ministry_civilian = {
+			position = { 1 0 }
+			icon = "gfx/interface/icons/theme_administration_types/icon_civilian_administration.dds"
+			gui_tags = { byzantine_purple }
+			
+			#is_shown = { always = no }
+			is_valid = {
+				scope:subject = { is_landless_ruler = yes }
+				#scope:subject = { any_held_title = { count <= 0 has_variable = is_supreme_roman_military_title } }
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			score = 0
+			color = { 0.2 0.7 0.2 1.0 }
+			
+			enable_title_maa = no
+
+			subject_modifier = {}
+		}
+		roman_admin_theme_ministry_military = {
+			position = { 1 0 }
+			icon = "gfx/interface/icons/theme_administration_types/icon_frontier_administration.dds"
+			gui_tags = { byzantine_purple }
+			
+			#is_shown = { always = no }
+			is_valid = {
+				scope:subject = { is_landless_ruler = yes }
+				#scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			score = 0
+			color = { 0.2 0.7 0.2 1.0 }
+			
+			enable_title_maa = yes
+
+			subject_modifier = {
+				men_at_arms_title_cap = 5
+				men_at_arms_title_limit = 5
+			}
+		}
 	}
 }
 
@@ -322,6 +369,108 @@ roman_administrative_salary_rank = {
 	}
 }
 
+roman_administrative_ministry_obligations = {
+	display_mode = tree
+	defaults_to_highest_valid_level = yes
+	is_shown = {
+		scope:subject = {
+			OR = {
+				any_held_title = { has_variable = is_supreme_roman_military_title }
+			}
+		}
+	}
+	can_be_changed = {
+		scope:subject = {
+			trigger_if = {
+				limit = {
+					any_held_title = { has_variable = is_supreme_roman_military_title }
+				}
+				NOT = { vassal_contract_has_flag = roman_administrative_marshal_obligation }
+			}
+			trigger_else = {
+				always = no
+			}
+		}
+	}
+	obligation_levels = {
+		roman_administrative_minister_none = {
+			position = { 0 0 }
+			icon = "gfx/interface/icons/celestial_administration_types/icon_standard_administration.dds"
+			gui_tags = { civilian }
+			default = yes
 
+			ai_liege_desire = {
+				value = 1
+			}
+			ai_subject_desire = 0
+
+			score = 1
+			color = { 0.7 0.7 0.7 1.0 }
+
+			subject_modifier = {
+			}
+
+			flag = roman_administrative_minister_obligation
+		}
+		roman_administrative_minister_civil = {
+			position = { 1 0 }
+			icon = "gfx/interface/icons/celestial_administration_types/icon_standard_administration.dds"
+			gui_tags = { civilian }
+			parent = roman_administrative_minister_none
+
+			ai_liege_desire = {
+				value = 2
+			}
+			ai_subject_desire = 0
+			
+			is_valid = {
+				NOT = { scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } } }
+			}
+
+			score = 2
+			color = { 0.7 0.7 0.7 1.0 }
+
+			enable_title_maa = no
+
+			subject_modifier = {
+				monthly_treasury_from_ministry_budget_base = 1
+			}
+
+			flag = roman_administrative_minister_obligation
+			appointment_trait_flag = civilian_province
+		}
+		roman_administrative_minister_military = {
+			position = { 2 0 }
+			icon = "gfx/interface/icons/celestial_administration_types/icon_military_administration.dds"
+			gui_tags = { military }
+			parent = roman_administrative_minister_none
+		
+			ai_liege_desire = {
+				value = 3
+			}
+			ai_subject_desire = 0
+			
+			is_valid = {
+				scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+			}
+			
+			score = 3
+			color = { 0.7 0.7 0.7 1.0 }
+			
+			enable_title_maa = yes
+			
+			subject_modifier = {
+				men_at_arms_recruitment_cost = -0.5
+				men_at_arms_maintenance = -0.5
+				monthly_treasury_from_military_budget_base = 2.5
+				monthly_treasury_from_ministry_budget_base = 1
+			}
+		
+			flag = roman_administrative_minister_obligation
+			flag = roman_administrative_marshal_obligation
+			appointment_trait_flag = military_province
+		}
+	}
+}
 
 

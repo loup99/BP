@@ -1,0 +1,278 @@
+﻿got_roman_administrative_minister_position_effect = {
+	save_scope_as = new_minister
+	scope:councillor_liege = { save_scope_as = the_top_liege }
+
+	if = { # If your liege has a ministry, set up titles if needed
+		limit = {
+			scope:councillor_liege = {
+				this != scope:new_minister
+				bp_has_access_to_roman_ministry_trigger = yes
+			}
+			not = { exists = scope:swapped_position }
+		}
+		# Grant the ministry title if councillor doesn't have it
+		if = {
+			limit = {
+				NOT = { has_title = $MINISTER_TITLE$ }
+			}
+			create_title_and_vassal_change = {
+				type = appointment
+				save_scope_as = minister_title_change
+				add_claim_on_loss = no
+			}
+
+			if = {
+				limit = {
+					scope:councillor_liege = {
+						bp_has_access_to_roman_ministry_trigger = yes
+					}
+					# retire from other ministry primary titles
+					OR = {
+						scope:new_minister.primary_title ?= { has_variable = is_supreme_roman_military_title }
+					}
+					scope:new_minister.primary_title != $MINISTER_TITLE$
+				}
+				primary_title = {
+					save_scope_as = old_ministry_title
+					change_title_holder = {
+						holder = current_heir
+						change = scope:minister_title_change
+					}
+				}
+			}
+
+			$MINISTER_TITLE$ = {
+				change_title_holder = {
+					holder = scope:new_minister
+					change = scope:minister_title_change
+				}
+			}
+			resolve_title_and_vassal_change = scope:minister_title_change
+		}
+		#Make sure they stay your vassal
+		if = {
+			limit = { scope:new_minister = { is_independent_ruler = yes } }
+			create_title_and_vassal_change = {
+				type = swear_fealty
+				save_scope_as = minister_vassalization
+			}
+			change_liege = {
+				liege = scope:the_top_liege
+				change = scope:minister_vassalization
+			}
+			resolve_title_and_vassal_change = scope:minister_vassalization
+		}
+		
+		#Fix Government if needed
+		if = {
+			limit = {
+				NOT = { scope:new_minister = { has_government = roman_administrative_government } }
+				 is_landless_ruler = yes
+			}
+			scope:new_minister = { change_government = roman_administrative_government }
+		}
+		if = {
+			limit = { scope:new_minister.primary_title ?= { has_variable = is_supreme_roman_military_title } }
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = 3
+			}
+		}
+		
+		# Add the correct title law if it doesn't have it already
+		if = {
+			limit = {
+				exists = $MINISTER_TITLE$.holder
+				$MINISTER_TITLE$ = { has_variable = is_supreme_roman_military_title }
+				NOT = {
+					$MINISTER_TITLE$ = {
+						has_title_law = roman_administrativ_magister_militum_appointment_succession_law
+					}
+				}
+			}
+			$MINISTER_TITLE$ = {
+				add_title_law = roman_administrativ_magister_militum_appointment_succession_law
+			}
+		}
+		else_if = {
+			limit = {
+				exists = $MINISTER_TITLE$.holder
+				NOT = {
+					$MINISTER_TITLE$ = {
+						has_title_law = roman_administrative_ministry_appointment_succession_law
+					}
+				}
+			}
+			$MINISTER_TITLE$ = {
+				add_title_law = roman_administrative_ministry_appointment_succession_law
+			}
+		}
+
+		# Make them a minister if they don't have the council position
+		if = {
+			limit = {
+				NOT = { has_council_position = $MINISTER_POSITION$ }
+			}
+			top_liege = {
+				assign_councillor_type = {
+					type = $MINISTER_POSITION$
+					target = scope:new_minister
+					remove_existing_councillor = yes
+				}
+			}
+		}
+		# If we have any noble family vassals remaining, let's move them to where they are supposed to be
+		if = {
+			limit = {
+				vassal_count > 0
+			}
+			create_title_and_vassal_change = {
+				type = granted
+				save_scope_as = minister_vassal_change
+			}
+			every_vassal = {
+				limit = {
+					any_held_title = {
+						is_noble_family_title = yes
+					}
+					NOT = {
+						any_held_title = {
+							is_noble_family_title = no
+						}
+					}
+				}
+				change_liege = {
+					liege = top_liege # I.e. the top liege
+					change = scope:minister_vassal_change
+				}
+			}
+			resolve_title_and_vassal_change = scope:minister_vassal_change
+		}
+		#### # If the new minister should be the diarch, make it so
+		#### if = {
+		#### 	limit = {
+		#### 		OR = {
+		#### 			AND = {
+		#### 				top_liege ?= {
+		#### 					has_realm_law = grand_chancellor_law
+		#### 				}
+		#### 				title:e_minister_chancellor = {
+		#### 					this = title:$MINISTER_TITLE$
+		#### 					holder = scope:new_minister
+		#### 				}
+		#### 			}
+		#### 			AND = {
+		#### 				top_liege ?= {
+		#### 					has_realm_law = grand_marshal_law
+		#### 				}
+		#### 				title:e_minister_grand_marshal = {
+		#### 					this = title:$MINISTER_TITLE$
+		#### 					holder = scope:new_minister
+		#### 				}
+		#### 			}
+		#### 			AND = {
+		#### 				top_liege ?= {
+		#### 					has_realm_law = grand_censor_law
+		#### 				}
+		#### 				title:e_minister_censor = {
+		#### 					this = title:$MINISTER_TITLE$
+		#### 					holder = scope:new_minister
+		#### 				}
+		#### 			}
+		#### 		}
+		#### 	}
+		#### 	top_liege = {
+		#### 		if = {
+		#### 			limit = {
+		#### 				diarch != scope:new_minister
+		#### 			}
+		#### 			if = {
+		#### 				limit = {
+		#### 					NOT = { has_diarchy_type = grand_secretariat }
+		#### 				}
+		#### 				if = {#  Clear out any old diarchy
+		#### 					limit = { has_active_diarchy = yes }
+		#### 					end_diarchy = yes
+		#### 				}
+		#### 				try_start_diarchy = grand_secretariat
+		#### 			}
+		#### 			set_diarch = scope:new_minister
+		#### 		}
+		#### 	}
+		#### }
+	}
+}
+
+fired_roman_minister_position_effect = {
+	if = {
+		limit = {
+			scope:councillor_liege = {
+				bp_has_access_to_roman_ministry_trigger = yes
+			}
+			NOT = { exists = scope:new_councillor }
+		}
+		switch = { #GENERALIZE
+			trigger = primary_title
+			title:e_magister_militium_roman_empire = {
+				if = {
+					limit = {
+						exists = title:e_magister_militium_roman_empire.current_heir
+					}
+					title:e_magister_militium_roman_empire.current_heir = {
+						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
+					}
+				}
+				else = {
+					destroy_and_fire_minister_effect = {
+						MINISTER = e_magister_militium_roman_empire
+					}
+				}
+			}
+			title:e_magister_militium_roman_empire = {
+				if = {
+					limit = {
+						exists = title:e_magister_militium_roman_empire.current_heir
+					}
+					title:e_magister_militium_roman_empire.current_heir = {
+						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
+					}
+				}
+				else = {
+					destroy_and_fire_minister_effect = {
+						MINISTER = e_magister_militium_roman_empire
+					}
+				}
+			}
+			title:e_magister_militium_roman_empire = {
+				if = {
+					limit = {
+						exists = title:e_magister_militium_roman_empire.current_heir
+					}
+					title:e_magister_militium_roman_empire.current_heir = {
+						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
+					}
+				}
+				else = {
+					destroy_and_fire_minister_effect = {
+						MINISTER = e_magister_militium_roman_empire
+					}
+				}
+			}
+			title:e_magister_militium_roman_empire = {
+				if = {
+					limit = {
+						exists = title:e_magister_militium_roman_empire.current_heir
+					}
+					title:e_magister_militium_roman_empire.current_heir = {
+						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
+					}
+				}
+				else = {
+					destroy_and_fire_minister_effect = {
+						MINISTER = e_magister_militium_roman_empire
+					}
+				}
+			}
+		}
+	}
+}
