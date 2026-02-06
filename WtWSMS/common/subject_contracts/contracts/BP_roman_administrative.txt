@@ -19,10 +19,10 @@ roman_administrative_themes = {
 	display_mode = radiobutton
 	is_shown = {
 		scope:subject.primary_title.tier >= tier_duchy
-		#scope:subject = { is_landless_ruler = no }
 	}
 	obligation_levels = {
 		roman_admin_theme_civilian = {
+			is_shown = { scope:subject = { is_landed = yes } }
 			default = yes
 			position = { 0 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_civilian_administration.dds"
@@ -78,6 +78,7 @@ roman_administrative_themes = {
 			flag = obligation_high_taxes
 		}
 		roman_admin_theme_limitanei = {
+			is_shown = { scope:subject = { is_landed = yes } }
 			position = { 0 1 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_frontier_administration.dds"
 			gui_tags = { byzantine_purple }
@@ -136,6 +137,7 @@ roman_administrative_themes = {
 			flag = admin_theme_can_raid
 		}
 		roman_admin_theme_naval = {
+			is_shown = { scope:subject = { is_landed = yes } }
 			position = { 0 2 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_naval_administration.dds"
 			gui_tags = { byzantine_purple }
@@ -246,16 +248,19 @@ roman_administrative_themes = {
 			flag = admin_tradeport_obligation_bonus
 			flag = admin_theme_naval
 		}
-		#Special "hidden" themes for landless rulers
+		#Special "hidden" themes for landless rulers as this seems to break things...
 		roman_admin_theme_ministry_civilian = {
 			position = { 1 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_civilian_administration.dds"
 			gui_tags = { byzantine_purple }
 			
-			#is_shown = { always = no }
+			is_shown = { scope:subject = { is_landed = no } }
 			is_valid = {
-				scope:subject = { is_landless_ruler = yes }
-				#scope:subject = { any_held_title = { count <= 0 has_variable = is_supreme_roman_military_title } }
+				custom_tooltip = {
+					text = available_only_for_ministers
+					scope:subject = { is_landless_ruler = yes }
+					scope:subject = { any_held_title = { count <= 0 has_variable = is_supreme_roman_military_title } }
+				}
 			}
 			
 			ai_liege_desire = 0
@@ -273,10 +278,10 @@ roman_administrative_themes = {
 			icon = "gfx/interface/icons/theme_administration_types/icon_frontier_administration.dds"
 			gui_tags = { byzantine_purple }
 			
-			#is_shown = { always = no }
+			is_shown = { scope:subject = { is_landed = no } }
 			is_valid = {
 				scope:subject = { is_landless_ruler = yes }
-				#scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+				scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } }
 			}
 			
 			ai_liege_desire = 0
@@ -394,6 +399,7 @@ roman_administrative_ministry_obligations = {
 	}
 	obligation_levels = {
 		roman_administrative_minister_none = {
+			is_shown = { always = no }
 			position = { 0 0 }
 			icon = "gfx/interface/icons/celestial_administration_types/icon_standard_administration.dds"
 			gui_tags = { civilian }
