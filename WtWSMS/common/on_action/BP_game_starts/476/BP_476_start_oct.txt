@@ -446,6 +446,11 @@ bp_game_start_after_lobby_476_oct = {
 		BP_update_specific_title_courtiers_476_oct
 		BP_reduce_hunnic_herd_476_oct
 		BP_setup_roman_council_476_oct
+		#Laws & Obligations
+		BP_setup_roman_province_troops_476_oct
+		BP_setup_roman_council_476_oct
+		#Other details
+		BP_place_specific_domiciles_476_oct
 	}
 	effect = {
 		trigger_event = { on_action = BP_update_specific_title_courtiers_476_oct delayed = yes }
@@ -688,35 +693,232 @@ BP_setup_capitals_476_oct = {
 	}
 }
 
+BP_setup_roman_province_troops_476_oct = {
+	trigger = {
+		OR = {
+			has_dlc_feature = roads_to_power
+			has_dlc_feature = all_under_heaven
+		}
+	}
+	effect = {
+		title:d_noricum_ripense.holder = {
+			title:d_noricum_ripense = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_noricum_ripense
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_noricum_ripense
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_noricum_ripense
+			}
+		}
+		title:d_moesia_prima.holder = {
+			title:d_moesia_prima = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_moesia_prima
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_moesia_prima
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_moesia_prima
+			}
+		}
+	}
+}
+
 BP_setup_roman_council_476_oct = {
+	trigger = {
+		OR = {
+			has_dlc_feature = roads_to_power
+			has_dlc_feature = all_under_heaven
+		}
+	}
 	effect = {
 		#Set Various Roman Offices
+		title:h_western_roman_empire.holder ?= { #Populate Nepos' realm with a few characters so he can fill his council
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+			create_character = {
+				culture = title:h_western_roman_empire.holder.culture
+				faith = title:h_western_roman_empire.holder.faith
+				age = { 25 45 }
+				employer = title:h_western_roman_empire.holder
+			}
+		}
 		title:e_magister_military_wre.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
 				level = 4
 			}
 		}
-		title:e_magister_offices_wre.holder = {
+		#Create the WRE MM Army
+		title:h_western_roman_empire.holder = {
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 3
+				title = title:h_western_roman_empire
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 3
+				title = title:h_western_roman_empire
+			}
+			create_maa_regiment = {
+				type = armored_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:h_western_roman_empire
+			}
+			create_maa_regiment = {
+				type = ballista
+				check_can_recruit = no
+				size = 1
+				title = title:h_western_roman_empire
+			}
+		}
+		title:e_magister_offices_wre.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
 				level = 3
 			}
 		}
 		
-		title:h_eastern_roman_empire.holder = {
-			assign_councillor_type = {
-				type = councillor_marshal_roman
-				target = title:e_magister_military_ere.holder
+		title:h_eastern_roman_empire.holder ?= {
+			if = {
+				limit = { any_councillor = { has_council_position = councillor_marshal_roman } }
+				assign_councillor_type = {
+					type = councillor_marshal_roman
+					target = title:e_magister_military_ere.holder
+				}
 			}
 		}
-		title:e_magister_military_ere.holder = {
+		title:e_magister_military_ere.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
 				level = 4
 			}
 		}
-		title:e_magister_offices_ere.holder = {
+		#Create the Eastern MM Army
+		title:e_magister_military_ere.holder = {
+			#Create the WRE MM Army
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = armored_horsemen
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = ballista
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+		}
+		title:e_magister_offices_ere.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
 				level = 3
@@ -730,11 +932,60 @@ BP_setup_roman_council_476_oct = {
 				level = 4
 			}
 		}
-		title:e_magister_offices_italy.holder = {
+		title:e_magister_offices_italy.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
 				level = 3
 			}
+		}
+		#Create the Italian MM Army
+		title:h_italy.holder = {
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = no
+				size = 8
+				title = title:h_italy
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 8
+				title = title:h_italy
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 6
+				title = title:h_italy
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:h_italy
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 3
+				title = title:h_italy
+			}
+			create_maa_regiment = {
+				type = onager
+				check_can_recruit = no
+				size = 2
+				title = title:h_italy
+			}
+		}
+	}
+}
+
+BP_place_specific_domiciles_476_oct = {
+	effect = {
+		#Romulus Augustulus' retires to Naples
+		title:d_nf_roman_dynn_Caecina = {
+			set_capital_county = title:c_napoli
+			this.holder.domicile ?= { move_domicile = title:b_napoli.title_province }
 		}
 	}
 }
