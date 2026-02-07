@@ -1,4 +1,6 @@
-﻿title_succession_laws = {
+﻿@admin_law_cooldown_value = 5
+
+title_succession_laws = {
 	# Celestial Ministry Succession
 	roman_administrative_ministry_appointment_succession_law = {
 		can_have = {
@@ -56,4 +58,183 @@
 		}
 		flag = appointment_type_succession
 	}
+}
+
+roman_diarchy_law = {
+	default = free_diarchy_law
+	cumulative = no
+	flag = imperial_policy
+
+	free_diarchy_law = {
+		flag = free_diarchy_law
+		
+		can_have = {
+			bp_has_access_to_roman_ministry_trigger = yes
+		}
+
+		can_pass = {
+			custom_tooltip = {
+				text = admin_law_cooldown_desc
+				NOT = { has_variable = admin_law_cooldown }
+			}
+			#Other Diarchy Requirements
+			trigger_if = {
+				limit = { has_realm_law = roman_chancellor_law }
+				custom_tooltip = {
+					text = current_diarch_must_be_weak_or_loyal
+					NOT = { root.diarch ?= { has_hook = root } }
+					OR = {
+						root.diarch = { diarch_loyalty >= 75 }
+						root = { diarchy_swing < 10 }
+					}
+				}
+			}
+			trigger_if = {
+				limit = { has_realm_law = roman_marshal_law }
+				custom_tooltip = {
+					text = current_diarch_must_be_weak_or_loyal
+					NOT = { root.diarch ?= { has_hook = root } }
+					OR = {
+						root.diarch = { diarch_loyalty >= 75 }
+						root = { diarchy_swing < 10 }
+					}
+				}
+			}
+		}
+
+		on_pass = {
+			## Set cooldown
+			diarch = { depose_diarch = yes }
+			set_variable = {
+				name = admin_law_cooldown
+				years = @admin_law_cooldown_value
+			}
+		}
+
+		ai_will_do = {
+			value = 1
+		}
+	}
+
+	roman_chancellor_law = {
+		flag = roman_chancellor_law
+		can_have = {
+			bp_has_access_to_roman_ministry_trigger = yes
+			any_vassal = { any_held_title = { has_variable = is_supreme_roman_ministry_title } }
+		}
+		can_pass = {
+			custom_tooltip = {
+				text = has_a_magister_officiorum
+				any_vassal = { any_held_title = { has_variable = is_supreme_roman_ministry_title } }
+			}
+			custom_tooltip = {
+				text = admin_law_cooldown_desc
+				NOT = { has_variable = admin_law_cooldown }
+			}
+			#Other Diarchy Requirements
+			trigger_if = {
+				limit = { has_realm_law = roman_chancellor_law }
+				custom_tooltip = {
+					text = current_diarch_must_be_weak_or_loyal
+					NOT = { root.diarch ?= { has_hook = root } }
+					OR = {
+						root.diarch = { diarch_loyalty >= 75 }
+						root = { diarchy_swing < 10 }
+					}
+				}
+			}
+			trigger_if = {
+				limit = { has_realm_law = roman_marshal_law }
+				custom_tooltip = {
+					text = current_diarch_must_be_weak_or_loyal
+					NOT = { root.diarch ?= { has_hook = root } }
+					OR = {
+						root.diarch = { diarch_loyalty >= 75 }
+						root = { diarchy_swing < 10 }
+					}
+				}
+			}
+		}
+
+		on_pass = {
+			hidden_effect = {
+				random_vassal = {
+					limit = { any_held_title = { has_variable = is_supreme_roman_ministry_title } }
+					designate_diarch = this
+				}
+				diarch = { depose_diarch = yes }
+			}
+			## Set cooldown
+			set_variable = {
+				name = admin_law_cooldown
+				years = @admin_law_cooldown_value
+			}
+		}
+
+		ai_will_do = {
+			value = 1
+		}
+	}
+
+	roman_marshal_law = {
+		flag = roman_marshal_law
+		can_have = {
+			bp_has_access_to_roman_ministry_trigger = yes
+			any_vassal = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+		}
+
+		can_pass = {
+			custom_tooltip = {
+				text = has_a_magister_militum
+				any_vassal = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+			}
+			custom_tooltip = {
+				text = admin_law_cooldown_desc
+				NOT = { has_variable = admin_law_cooldown }
+			}
+			#Other Diarchy Requirements
+			trigger_if = {
+				limit = { has_realm_law = roman_chancellor_law }
+				custom_tooltip = {
+					text = current_diarch_must_be_weak_or_loyal
+					NOT = { root.diarch ?= { has_hook = root } }
+					OR = {
+						root.diarch = { diarch_loyalty >= 75 }
+						root = { diarchy_swing < 10 }
+					}
+				}
+			}
+			trigger_if = {
+				limit = { has_realm_law = roman_marshal_law }
+				custom_tooltip = {
+					text = current_diarch_must_be_weak_or_loyal
+					NOT = { root.diarch ?= { has_hook = root } }
+					OR = {
+						root.diarch = { diarch_loyalty >= 75 }
+						root = { diarchy_swing < 10 }
+					}
+				}
+			}
+		}
+
+		on_pass = {
+			hidden_effect = {
+				random_vassal = {
+					limit = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+					designate_diarch = this
+				}
+				diarch = { depose_diarch = yes }
+			}
+			## Set cooldown
+			set_variable = {
+				name = admin_law_cooldown
+				years = @admin_law_cooldown_value
+			}
+		}
+
+		ai_will_do = {
+			value = 1
+		}
+	}
+
 }
