@@ -75,7 +75,7 @@
 			limit = { scope:new_minister.primary_title ?= { has_variable = is_supreme_roman_military_title } }
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
-				level = 3
+				level = 4
 			}
 		}
 		
@@ -84,27 +84,24 @@
 			limit = {
 				exists = $MINISTER_TITLE$.holder
 				$MINISTER_TITLE$ = { has_variable = is_supreme_roman_military_title }
-				NOT = {
-					$MINISTER_TITLE$ = {
-						has_title_law = roman_administrativ_magister_militum_appointment_succession_law
-					}
-				}
 			}
-			$MINISTER_TITLE$ = {
-				add_title_law = roman_administrativ_magister_militum_appointment_succession_law
+			if = {
+				limit = { NOT = { $MINISTER_TITLE$ = { has_title_law = roman_administrative_magister_militum_appointment_succession_law } } }
+				$MINISTER_TITLE$ = {
+					add_title_law = roman_administrative_magister_militum_appointment_succession_law
+				}
 			}
 		}
 		else_if = {
 			limit = {
 				exists = $MINISTER_TITLE$.holder
-				NOT = {
-					$MINISTER_TITLE$ = {
-						has_title_law = roman_administrative_ministry_appointment_succession_law
-					}
-				}
+				#Here is the variable check for ministries
 			}
-			$MINISTER_TITLE$ = {
-				add_title_law = roman_administrative_ministry_appointment_succession_law
+			if = {
+				limit = { NOT = { $MINISTER_TITLE$ = { has_title_law = roman_administrative_ministry_appointment_succession_law } } }
+				$MINISTER_TITLE$ = {
+					add_title_law = roman_administrative_ministry_appointment_succession_law
+				}
 			}
 		}
 
@@ -211,68 +208,53 @@ fired_roman_minister_position_effect = {
 			}
 			NOT = { exists = scope:new_councillor }
 		}
-		switch = { #GENERALIZE
-			trigger = primary_title
-			title:e_magister_militium_roman_empire = {
-				if = {
-					limit = {
-						exists = title:e_magister_militium_roman_empire.current_heir
+		root.primary_title = {
+			save_scope_as = the_title
+			switch = {
+				trigger = has_variable
+				is_supreme_roman_military_title = {
+					if = {
+						limit = { exists = scope:the_title.current_heir }
+						root.primary_title.current_heir = {
+							got_roman_administrative_minister_position_effect = {
+								MINISTER_TITLE = scope:the_title
+								MINISTER_POSITION = councillor_marshal_roman
+							}
+						}
 					}
-					title:e_magister_militium_roman_empire.current_heir = {
-						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
-					}
-				}
-				else = {
-					destroy_and_fire_minister_effect = {
-						MINISTER = e_magister_militium_roman_empire
-					}
-				}
-			}
-			title:e_magister_militium_roman_empire = {
-				if = {
-					limit = {
-						exists = title:e_magister_militium_roman_empire.current_heir
-					}
-					title:e_magister_militium_roman_empire.current_heir = {
-						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
-					}
-				}
-				else = {
-					destroy_and_fire_minister_effect = {
-						MINISTER = e_magister_militium_roman_empire
-					}
-				}
-			}
-			title:e_magister_militium_roman_empire = {
-				if = {
-					limit = {
-						exists = title:e_magister_militium_roman_empire.current_heir
-					}
-					title:e_magister_militium_roman_empire.current_heir = {
-						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
-					}
-				}
-				else = {
-					destroy_and_fire_minister_effect = {
-						MINISTER = e_magister_militium_roman_empire
-					}
-				}
-			}
-			title:e_magister_militium_roman_empire = {
-				if = {
-					limit = {
-						exists = title:e_magister_militium_roman_empire.current_heir
-					}
-					title:e_magister_militium_roman_empire.current_heir = {
-						got_minister_position_effect = { MINISTER_TITLE = e_magister_militium_roman_empire MINISTER_POSITION = councillor_marshal_roman }
-					}
-				}
-				else = {
-					destroy_and_fire_minister_effect = {
-						MINISTER = e_magister_militium_roman_empire
+					else = {
+						root = {
+							destroy_and_fire_minister_roman_effect = {
+								MINISTER = scope:the_title
+							}
+						}
 					}
 				}
 			}
 		}
+	}
+}
+
+destroy_and_fire_minister_roman_effect = {
+	save_temporary_scope_as = fired_minister
+	scope:councillor_liege = {
+		set_variable = {
+			name = can_fire_minister
+			value = yes
+		}
+		hidden_effect = {
+			destroy_title = $MINISTER$
+			if = {
+				limit = {
+					scope:fired_minister = {
+						is_councillor_of = scope:councillor_liege
+					}
+				}
+				scope:councillor_liege = {
+					fire_councillor = scope:fired_minister
+				}
+			}
+		}
+		remove_variable = can_fire_minister
 	}
 }
