@@ -8,7 +8,7 @@
 				this != scope:new_minister
 				bp_has_access_to_roman_ministry_trigger = yes
 			}
-			not = { exists = scope:swapped_position }
+			NOT = { exists = scope:swapped_position }
 		}
 		# Grant the ministry title if councillor doesn't have it
 		if = {
@@ -29,6 +29,7 @@
 					# retire from other ministry primary titles
 					OR = {
 						scope:new_minister.primary_title ?= { has_variable = is_supreme_roman_military_title }
+						scope:new_minister.primary_title ?= { has_variable = is_supreme_roman_ministry_title }
 					}
 					scope:new_minister.primary_title != $MINISTER_TITLE$
 				}
@@ -78,6 +79,12 @@
 				level = 4
 			}
 		}
+		else = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = 3
+			}
+		}
 		
 		# Add the correct title law if it doesn't have it already
 		if = {
@@ -95,7 +102,6 @@
 		else_if = {
 			limit = {
 				exists = $MINISTER_TITLE$.holder
-				#Here is the variable check for ministries
 			}
 			if = {
 				limit = { NOT = { $MINISTER_TITLE$ = { has_title_law = roman_administrative_ministry_appointment_succession_law } } }
@@ -208,7 +214,7 @@ fired_roman_minister_position_effect = {
 			}
 			NOT = { exists = scope:new_councillor }
 		}
-		root.primary_title = {
+		root.primary_title ?= {
 			save_scope_as = the_title
 			switch = {
 				trigger = has_variable
@@ -219,6 +225,24 @@ fired_roman_minister_position_effect = {
 							got_roman_administrative_minister_position_effect = {
 								MINISTER_TITLE = scope:the_title
 								MINISTER_POSITION = councillor_marshal_roman
+							}
+						}
+					}
+					else = {
+						root = {
+							destroy_and_fire_minister_roman_effect = {
+								MINISTER = scope:the_title
+							}
+						}
+					}
+				}
+				is_supreme_roman_ministry_title = {
+					if = {
+						limit = { exists = scope:the_title.current_heir }
+						root.primary_title.current_heir = {
+							got_roman_administrative_minister_position_effect = {
+								MINISTER_TITLE = scope:the_title
+								MINISTER_POSITION = councillor_chancellor_roman
 							}
 						}
 					}
