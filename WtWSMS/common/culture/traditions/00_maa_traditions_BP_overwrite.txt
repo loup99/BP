@@ -475,3 +475,130 @@ tradition_hird = {
 		}
 	}
 }
+
+##### Changed from Vanilla: Made available to Georgians, Colchiscans
+tradition_caucasian_wolves = {
+	category = regional
+
+	layers = {
+		0 = steward
+		1 = mena
+		4 = mountain.dds
+	}
+	
+	#For Georgians this replaces the Mountaineers tradition
+	is_shown = {
+		OR = {
+			the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:abaza }
+			the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:svan }
+			the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:colchiscan }
+			the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:georgian }
+			the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:caucasian_albanian }
+			the_culture_or_parent_or_above_with_heritage_is_trigger = { CULTURE = culture:corduenian }
+		}
+		NOR = {
+			has_cultural_tradition = tradition_mountaineers
+			has_cultural_tradition = tradition_horn_mountain_skirmishing
+		}
+	}
+	can_pick = {
+		custom_description = {
+			text = culture_in_mountains_desc
+			any_culture_county = {
+				county_has_province_with_terrain = {
+					terrain = mountains
+					terrain = desert_mountains
+				}
+			}
+		}
+	}
+	
+	parameters = {
+		unlock_maa_monaspa = yes
+		rough_terrain_expert_trait_more_common = yes
+		mountain_trait_bonuses = yes
+		can_recruit_mountain_specialist = yes
+	}
+	province_modifier = {
+		mountains_levy_size = 0.1
+		desert_mountains_levy_size = 0.1
+		mountains_supply_limit_mult = 0.25
+		desert_mountains_supply_limit_mult = 0.25
+	}
+	character_modifier = {
+		mountains_travel_danger = mountains_medium_danger_reduction
+		desert_mountains_travel_danger = desert_mountains_medium_danger_reduction
+	}
+	
+	cost = {
+		prestige = {
+			add = {
+				value = tradition_base_cost
+				desc = BASE
+				format = "BASE_VALUE_FORMAT"
+			}
+			if = {
+				limit = {
+					NOR = {
+						culture_pillar:ethos_bellicose = { is_in_list = traits }
+						culture_pillar:ethos_stoic = { is_in_list = traits }
+						culture_pillar:ethos_communal = { is_in_list = traits }
+					}
+				}
+				add = {
+					value = tradition_incompatible_ethos_penalty
+					desc = not_bellicose_stoic_or_communal_desc
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						any_culture_county = {
+							percent >= 0.3
+							county_has_province_with_terrain = {
+								terrain = mountains
+								terrain = desert_mountains
+							}
+						}
+					}
+				}
+				add = {
+					value = tradition_unfulfilled_criteria_penalty
+					desc = mountain_percentage_desc
+				}
+			}
+
+			if = {
+				limit = {
+					culture_tradition_reduction_trigger = { TRADITION = tradition_caucasian_wolves }
+				}
+				multiply = {
+					value = 0.5
+					desc = inspired_by_culture_desc
+				}
+			}
+			
+			multiply = tradition_replacement_cost_if_relevant
+		}
+	}
+
+	ai_will_do = {
+		value = 1000 
+		if = {
+			limit = {
+				NOT = {
+					scope:character = {
+						any_sub_realm_county = {
+							culture = scope:character.culture
+							county_has_province_with_terrain = {
+								terrain = mountains
+								terrain = desert_mountains
+							}
+						}
+					}
+				}
+			}
+			multiply = 0
+		}
+	}
+}
