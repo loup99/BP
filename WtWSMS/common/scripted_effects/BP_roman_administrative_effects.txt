@@ -282,3 +282,59 @@ destroy_and_fire_minister_roman_effect = {
 		remove_variable = can_fire_minister
 	}
 }
+
+establish_premiership_if_necessary_effect = { #Scope is top liege
+	if = {
+		limit = {
+			bp_has_access_to_roman_ministry_trigger = yes
+			OR = {
+				has_realm_law = roman_chancellor_law
+				has_realm_law = roman_marshal_law
+			}
+			#If we have an active diarchy, it has to be a wrong kind of diarchy.
+			#If no active diarchy, always is true
+			trigger_if = {
+				limit = { has_active_diarchy = yes }
+				OR = {
+					NOT = { has_diarchy_type = roman_admin_premier }
+					AND = {
+						has_realm_law = roman_chancellor_law
+						this.diarch = { any_held_title = { count < 1 has_variable = is_a_roman_ministry_title } }
+					}
+					AND = {
+						has_realm_law = roman_marshal_law
+						this.diarch = { any_held_title = { count < 1 has_variable = is_supreme_roman_military_title } }
+					}
+				}
+			}
+			trigger_else = { always = yes }
+		}
+		# Clear out any old diarchy
+		if = {
+			limit = { has_active_diarchy = yes }
+			end_diarchy = yes
+		}
+		if = {
+			limit = {
+				has_realm_law = roman_chancellor_law
+				any_vassal = { any_held_title = { has_variable = is_a_roman_ministry_title } }
+			}
+			try_start_diarchy = roman_admin_premier
+			random_vassal = {
+				limit = { any_held_title = { has_variable = is_a_roman_ministry_title } }
+				prev = { set_diarch = prev }
+			}
+		}
+		else_if = {
+			limit = {
+				has_realm_law = roman_marshal_law
+				any_vassal = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+			}
+			try_start_diarchy = roman_admin_premier
+			random_vassal = {
+				limit = { any_held_title = { has_variable = is_supreme_roman_military_title } }
+				prev = { set_diarch = prev }
+			}
+		}
+	}
+}
