@@ -51,7 +51,7 @@ task_promote_culture_roman = {
 	position = councillor_clerical_bureau_director
 	clone = task_promote_culture
 }
-task_promulgate_laws = { #Clone of Domestic Affairs; TODO: Make unique, provide influence (for candidacy)
+task_promulgate_laws = { #Provides a multiplier to influence
 	default_task = yes
 	position = councillor_clerical_bureau_director
 	task_type = task_type_general
@@ -82,7 +82,7 @@ task_promulgate_laws = { #Clone of Domestic Affairs; TODO: Make unique, provide 
 			desc = task_promulgate_laws_desc_consulted_house_bonus_influence
 		}
 		desc = {
-			desc = council_task_possible_side_effects #FIXME!!!!
+			desc = council_task_possible_side_effects
 			
 			triggered_desc = {
 				trigger = {
@@ -165,43 +165,11 @@ task_promulgate_laws = { #Clone of Domestic Affairs; TODO: Make unique, provide 
 		}
 	}
 
-	ai_will_do = { #FIX ME!!!!
-		value = 0
-		if = { # Do this if you have a faction against you, every little bit helps
-			limit = {
-				scope:councillor_liege = {
-					any_targeting_faction = {
-						OR = {
-							faction_is_type = independence_faction
-							faction_is_type = nation_fracturing_faction
-							faction_is_type = liberty_faction
-							faction_is_type = claimant_faction
-						}
-					}
-				}
-			}
+	ai_will_do = {
+		value = 1 #Always a good backup
+		if = { #If you're running low on influence, this is much higher priority
+			limit = { root.influence < 200 }
 			add = 1000
-		}
-		if = { # Get rid of tyranny
-			limit = {
-				scope:councillor_liege = {
-					OR = {
-						AND = { # Somewhat rational characters prefer this over the prestige of foreign affairs
-							ai_rationality > -25
-							NOT = { has_trait = arrogant }
-							tyranny >= 5
-						}
-						AND = { # If you're arrogant or deeply irrational, it'll take a long time for you to realize
-							OR = {
-								ai_rationality <= -25
-								has_trait = arrogant
-							}
-							tyranny >= 15
-						}
-					}
-				}
-			}
-			add = 500
 		}
 	}
 }
