@@ -1,0 +1,104 @@
+﻿namespace = bp_clerical_bureau_task_events
+
+#0001-0999: Task outcome events and maintenance
+
+
+#1000-1999: task_promulgate_laws side effects
+# 1001-1099 - Positive Events
+# 1101-1199 - Negative Events
+
+###########################
+# task_promulgate_laws side effects
+###########################
+# 1001 - Gain Influence
+# 1101 - Loose Influence
+
+#Gain Influence
+bp_clerical_bureau_task_events.1001 = {
+	hidden = yes
+
+	trigger = {
+		NOT = { has_character_flag = had_msg_bp_council_task_1001 }
+		exists = cp:councillor_clerical_bureau_director
+		scope:councillor = cp:councillor_clerical_bureau_director
+		scope:councillor = { stewardship > mediocre_skill_rating }
+	}
+
+	immediate = {
+		cp:councillor_clerical_bureau_director = { save_scope_as = active_councillor }
+		add_character_flag = {
+			flag = had_msg_bp_council_task_1001
+			years = 5
+		}
+		set_variable = {
+			name = had_clerical_bureau_task_side_effect
+			value = yes
+			days = clerical_bureau_director_side_effect_cooldown
+		}
+		
+		send_interface_message = {
+			type = msg_steward_task_good
+			title = bp_clerical_bureau_task_events.1001.message
+			desc = {
+				triggered_desc = {
+					trigger = { scope:active_councillor = { stewardship <= average_skill_level } }
+					desc = task_stewardship_good_unskilled_notification_tooltip
+				}
+				triggered_desc = {
+					trigger = { scope:active_councillor = { stewardship > average_skill_level } }
+					desc = task_stewardship_good_skilled_notification_tooltip
+				}
+			}
+			tooltip = task_promulgate_laws_notification_tooltip
+
+			left_icon = scope:councillor
+		}
+		
+		change_influence = clerical_bureau_minor_influence_gain
+	}
+}
+
+#Loose Influence
+bp_clerical_bureau_task_events.1101 = {
+	hidden = yes
+
+	trigger = {
+		NOT = { has_character_flag = had_msg_bp_council_task_1101 }
+		exists = cp:councillor_clerical_bureau_director
+		scope:councillor = cp:councillor_clerical_bureau_director
+		scope:councillor = { stewardship < high_skill_rating }
+	}
+
+	immediate = {
+		cp:councillor_clerical_bureau_director = { save_scope_as = active_councillor }
+		add_character_flag = {
+			flag = had_msg_bp_council_task_1101
+			years = 5
+		}
+		set_variable = {
+			name = had_clerical_bureau_task_side_effect
+			value = yes
+			days = clerical_bureau_director_side_effect_cooldown
+		}
+		
+		send_interface_message = {
+			type = msg_steward_task_bad
+			title = bp_clerical_bureau_task_events.1101.message
+			desc = {
+				triggered_desc = {
+					trigger = { scope:active_councillor = { stewardship <= average_skill_level } }
+					desc = task_stewardship_bad_unskilled_notification_tooltip
+				}
+				triggered_desc = {
+					trigger = { scope:active_councillor = { stewardship > average_skill_level } }
+					desc = task_stewardship_bad_skilled_notification_tooltip
+				}
+			}
+			tooltip = task_promulgate_laws_notification_tooltip
+
+			left_icon = scope:councillor
+		}
+		
+		change_influence = clerical_bureau_minor_influence_loss
+	}
+}
