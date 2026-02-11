@@ -1,4 +1,4 @@
-﻿#Magister Officorum
+﻿#Magister Officiorum
 
 #Basically a spouse/vizier + bestow royal favor; they're running the realm
 task_manage_realm_roman = {
@@ -42,145 +42,10 @@ task_lead_troops_marshal_roman = {
 	position = councillor_marshal_roman
 	clone = task_lead_troops
 }
-#councillor_clerical_bureau_director
-task_convince_dejure_roman = {
-	position = councillor_clerical_bureau_director
-	clone = task_convince_dejure
-}
-task_promote_culture_roman = {
-	position = councillor_clerical_bureau_director
-	clone = task_promote_culture
-}
-task_promulgate_laws = { #Provides a multiplier to influence
-	default_task = yes
-	position = councillor_clerical_bureau_director
-	task_type = task_type_general
-	task_progress = task_progress_infinite
-
-	asset = {
-		icon = "gfx/interface/icons/council_task_types/task_domestic_affairs.dds"
-		background = "gfx/interface/buttons/button_round_bg.dds"
-		frame = "gfx/interface/buttons/button_round_frame.dds"
-		glow = "gfx/particles/halo.dds"
-	}
-
-	effect_desc = { #TODO: Complete
-		desc = task_promulgate_laws_effect_desc
-		# Bureaucrats tooltip
-		triggered_desc = {
-			trigger = { councillor_liege_has_erudition_legacy_5_perk = yes }
-			desc = task_promulgate_laws_desc_bureaucrats_bonus_influence
-		}
-		# Family Business tooltip
-		triggered_desc = {
-			trigger = { councillor_liege_has_family_business_bonus = yes }
-			desc = task_promulgate_laws_desc_family_business_bonus_influence
-		}
-		# Fp3 Consulted House Member tooltip
-		triggered_desc = {
-			trigger = { councillor_liege_has_consulted_house_bonus = yes }
-			desc = task_promulgate_laws_desc_consulted_house_bonus_influence
-		}
-		desc = {
-			desc = council_task_possible_side_effects
-			
-			triggered_desc = {
-				trigger = {
-					diplomacy > mediocre_skill_rating
-				}
-				desc = task_promulgate_laws_gain_influence
-			}
-			triggered_desc = {
-				trigger = {
-					diplomacy < high_skill_rating
-				}
-				desc = task_promulgate_laws_loose_influence
-			}
-		}
-	}
-
-	on_start_task = {
-		liege = {
-			set_variable = {
-				name = clerical_bureau_director_influence_value
-				value = 0
-			}
-		}
-	}
-
-	on_cancel_task = {
-		if = {
-			limit = {
-				is_alive = yes
-				has_variable = clerical_bureau_director_influence_value
-			}
-			remove_variable = clerical_bureau_director_influence_value
-		}
-	}
-
-	council_owner_modifier = {
-		name = task_promulgate_laws_influence_multiplier
-		monthly_influence_mult = 0.1
-		scale = clerical_bureau_director_influence_scale
-	}
-
-	monthly_on_action = task_promulgate_laws_side_effects
-
-	on_monthly = {
-		if = {
-			limit = {
-				liege = { is_ai = no }
-			}
-			if = {
-				limit = { liege = { has_variable = clerical_bureau_director_influence_value } }
-				liege = {
-					if = {
-						limit = {
-							var:clerical_bureau_director_influence_value < root.clerical_bureau_director_influence_max
-						}
-						change_variable = {
-							name = clerical_bureau_director_influence_value
-							add = root.chancellor_domestic_affairs_monthly_increase
-						}
-					}
-					if = {
-						limit = {
-							var:clerical_bureau_director_influence_value > root.clerical_bureau_director_influence_max
-						}
-						set_variable = {
-							name = clerical_bureau_director_influence_value
-							value = root.clerical_bureau_director_influence_max
-						}
-					}
-				}
-			}
-			else = {
-				liege = {
-					set_variable = {
-						name = clerical_bureau_director_influence_value
-						value = 0
-					}
-				}
-			}
-		}
-	}
-
-	ai_will_do = {
-		value = 1 #Always a good backup
-		if = { #If you're running low on influence, this is much higher priority
-			limit = { root.influence < 200 }
-			add = 1000
-		}
-	}
-}
 #councillor_correspondence_bureau_director
 task_integrate_title_roman = {
 	position = councillor_correspondence_bureau_director
 	clone = task_integrate_title
-}
-task_accept_culture_roman = { #TODO: Need a link into the actual task to give diplo advantages
-	position = councillor_correspondence_bureau_director
-	clone = task_accept_culture
 }
 task_domestic_affairs_roman = {
 	position = councillor_correspondence_bureau_director
@@ -191,13 +56,13 @@ task_foreign_affairs_roman = {
 	clone = task_foreign_affairs
 }
 #councillor_legal_bureau_director
+task_promote_culture_roman = {
+	position = councillor_legal_bureau_director
+	clone = task_promote_culture
+}
 task_increase_control_roman = { #TODO: make learning-based
 	position = councillor_legal_bureau_director
 	clone = task_increase_control
-}
-task_fabricate_claim_roman = {
-	position = councillor_clerical_bureau_director
-	clone = task_fabricate_claim
 }
 task_hear_appeals = { #Clone of Domestic Affairs; TODO: Make unique, provide vassal opinion
 	default_task = yes

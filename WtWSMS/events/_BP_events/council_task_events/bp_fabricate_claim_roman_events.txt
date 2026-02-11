@@ -1,0 +1,811 @@
+﻿#Events related to the Court Chaplain's tasks
+
+namespace = bp_clerical_bureau_director_fabricate_claim
+
+scripted_effect bp_clerical_bureau_director_fabricate_claim_0301_charge_prestige_or_gold_effect = {
+	# Either we charge prestige during certain struggle phases...
+		if = {
+			limit = {
+				any_character_struggle = {
+					involvement = involved
+					is_struggle_parameter_active_secondary_county_trigger = {
+						PARAMETER = claims_in_region_cost_prestige_not_gold_for_involved_parties
+						COUNTY = scope:county
+					}
+				}
+			}
+			add_prestige = {
+				value = $COST$
+				multiply = -1
+			}
+		}
+		# ... or else gold the rest of the time.
+		else = { remove_short_term_gold = $COST$ }
+}
+
+#Fabricate Claim?
+# by Petter Vilberg
+bp_clerical_bureau_director_fabricate_claim.0301 = {
+	type = letter_event
+	opening = {
+		desc = bp_clerical_bureau_director_fabricate_claim.0201.opening
+	}
+	desc = bp_clerical_bureau_director_fabricate_claim.0301.desc
+	sender = scope:councillor
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0301.a
+		bp_clerical_bureau_director_fabricate_claim_0301_charge_prestige_or_gold_effect = { COST = scope:councillor.court_chaplain_fabricate_claim_county_cost }
+		add_unpressed_claim = scope:county
+		show_as_tooltip = {
+			scope:county_holder = {
+				add_opinion = {
+					target = root
+					modifier = court_chaplain_fabricated_claim_opinion
+					days = 3650
+				}
+			}
+			if = {
+				limit = {
+					scope:county_holder = { top_liege != this }
+					scope:county_holder.top_liege != root.top_liege
+				}
+				scope:county_holder.top_liege = {
+					add_opinion = {
+						target = root
+						modifier = court_chaplain_fabricated_claim_on_vassal_opinion
+						days = 3650
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					scope:councillor = {
+						has_council_position = councillor_court_chaplain
+					}
+				}
+				scope:councillor = {
+					start_default_task = yes
+				}
+			}
+			scope:county_holder = {
+				trigger_event = bp_clerical_bureau_director_fabricate_claim.0311
+			}
+			if = {
+				limit = {
+					scope:county_holder = { top_liege != this }
+					scope:county_holder.top_liege != root.top_liege
+				}
+				scope:county_holder.top_liege = {
+					trigger_event = bp_clerical_bureau_director_fabricate_claim.0312		
+				}
+			}
+		}
+		ai_chance = {
+			base = 100
+			modifier = {
+				add = -80
+				short_term_gold < scope:councillor.court_chaplain_fabricate_claim_county_cost
+			}	
+			modifier = {
+				factor = 0
+				short_term_gold < 0
+			}
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0301.b
+		custom_tooltip = bp_clerical_bureau_director_fabricate_claim.0301.b.tt
+		ai_chance = {
+			base = 10
+		}
+	}
+}
+
+
+#Fabricate Claim on a Duchy
+bp_clerical_bureau_director_fabricate_claim.0302 = {
+	type = letter_event
+	opening = {
+		desc = bp_clerical_bureau_director_fabricate_claim.0201.opening
+	}
+	desc = bp_clerical_bureau_director_fabricate_claim.0302.desc
+	
+	sender = scope:councillor
+
+	trigger = {
+		scope:county = {
+			duchy = {
+				is_title_created = yes
+				exists = holder
+				holder != root
+				holder.top_liege = scope:county.holder.top_liege
+				save_temporary_scope_as = duchy
+				root = {
+					NOT = {
+						has_claim_on = scope:duchy
+					}
+					#The recipient of this event must either hold land in the Duchy, or be Duke or above
+					OR = {
+						any_held_title = {
+							title_tier = county
+							duchy = scope:duchy
+						}
+						highest_held_title_tier > tier_county
+					}
+				}
+			}
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = learning
+			offset = -10
+			multiplier = 0.1
+		}
+		modifier = {
+			add = 4
+			scope:councillor.liege = {
+				top_liege != this
+			}
+			scope:councillor.liege.faith = scope:councillor.liege.top_liege.faith
+			scope:county = {
+				duchy = {
+					is_title_created = yes
+					exists = holder
+					holder.faith != scope:councillor.liege.faith
+					holder.top_liege = scope:councillor.liege.top_liege
+				}
+			}
+		}
+		modifier = {
+			add = 1
+			scope:county = {
+				duchy = {
+					is_title_created = yes
+					exists = holder
+					holder.faith != scope:councillor.liege.faith
+				}
+			}
+		}
+	}
+
+	immediate = {
+		scope:county = {
+			duchy = {
+				save_scope_as = duchy
+				holder = {
+					save_scope_as = duchy_holder
+				}
+			}
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0302.a
+		bp_clerical_bureau_director_fabricate_claim_0301_charge_prestige_or_gold_effect = { COST = scope:councillor.court_chaplain_fabricate_claim_county_cost }
+		add_unpressed_claim = scope:county
+		show_as_tooltip = {
+			scope:county_holder = {
+				add_opinion = {
+					target = root
+					modifier = court_chaplain_fabricated_claim_opinion
+					days = 3650
+				}
+			}
+			if = {
+				limit = {
+					scope:county_holder = { top_liege != this }
+					scope:county_holder.top_liege != root.top_liege
+				}
+				scope:county_holder.top_liege = {
+					add_opinion = {
+						target = root
+						modifier = court_chaplain_fabricated_claim_on_vassal_opinion
+						days = 3650
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					scope:councillor = {
+						has_council_position = councillor_court_chaplain
+					}
+				}
+				scope:councillor = {
+					start_default_task = yes
+				}
+			}
+			scope:county_holder = {
+				trigger_event = bp_clerical_bureau_director_fabricate_claim.0311
+			}
+			if = {
+				limit = {
+					scope:county_holder = { top_liege != this }
+					scope:county_holder.top_liege != root.top_liege
+				}
+				scope:county_holder.top_liege = {
+					trigger_event = bp_clerical_bureau_director_fabricate_claim.0312		
+				}
+			}
+		}
+		ai_chance = {
+			base = 100
+			modifier = {
+				add = -90
+				short_term_gold < scope:councillor.court_chaplain_fabricate_claim_county_cost
+			}	
+			modifier = {
+				factor = 0
+				short_term_gold < 0
+			}
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0302.b
+		bp_clerical_bureau_director_fabricate_claim_0301_charge_prestige_or_gold_effect = { COST = scope:councillor.court_chaplain_fabricate_claim_duchy_cost }
+		add_unpressed_claim = scope:duchy
+		show_as_tooltip = {
+			scope:duchy_holder = {
+				add_opinion = {
+					target = root
+					modifier = court_chaplain_fabricated_claim_opinion
+					days = 3650
+				}
+			}
+			if = {
+				limit = {
+					scope:county_holder = { top_liege != this }
+					scope:duchy_holder.top_liege != root.top_liege
+					scope:duchy_holder.top_liege != scope:duchy_holder
+				}
+				scope:duchy_holder.top_liege = {
+					add_opinion = {
+						target = root
+						modifier = court_chaplain_fabricated_claim_on_vassal_opinion
+						days = 3650
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					scope:councillor = {
+						has_council_position = councillor_court_chaplain
+					}
+				}
+				scope:councillor = {
+					start_default_task = yes
+				}
+			}
+			scope:duchy_holder = {
+				trigger_event = bp_clerical_bureau_director_fabricate_claim.0313
+			}
+			if = {
+				limit = {
+					scope:county_holder = { top_liege != this }
+					scope:duchy_holder.top_liege != root.top_liege
+					scope:duchy_holder.top_liege != scope:duchy_holder
+				}
+				scope:duchy_holder.top_liege = {
+					trigger_event = bp_clerical_bureau_director_fabricate_claim.0314		
+				}
+			}
+		}
+
+		# Struggle Catalysts.
+		if = {
+			limit = {
+				any_character_struggle = {
+					involvement = involved
+					activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+						CATALYST = catalyst_fabricating_duchy_level_claims
+						CHAR = scope:duchy_holder
+					}
+				}
+			}
+			every_character_struggle = {
+				involvement = involved
+				limit = {
+					activate_struggle_catalyst_secondary_character_involvement_involved_trigger = {
+						CATALYST = catalyst_fabricating_duchy_level_claims
+						CHAR = scope:duchy_holder
+					}
+				}
+				activate_struggle_catalyst = {
+					catalyst = catalyst_fabricating_duchy_level_claims
+					character = scope:councillor_liege
+				}
+			}
+		}
+
+		ai_chance = {
+			base = 100
+			modifier = {
+				add = -95
+				short_term_gold < scope:councillor.court_chaplain_fabricate_claim_duchy_cost
+			}	
+			modifier = {
+				factor = 0
+				short_term_gold < 0
+			}
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0301.b
+		custom_tooltip = bp_clerical_bureau_director_fabricate_claim.0301.b.tt
+		ai_chance = {
+			base = 10
+		}
+	}
+}
+
+###
+# Responses to claim fabrication
+# 0311-0314
+
+#County Owner
+bp_clerical_bureau_director_fabricate_claim.0311 = {
+	type = character_event
+	title = bp_clerical_bureau_director_fabricate_claim.0311.t
+	desc = {
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.opening
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.end
+	}
+	theme = learning
+	left_portrait = {
+		character = scope:councillor_liege
+		animation = schadenfreude
+	}
+	lower_left_portrait = {
+		character = scope:councillor
+		animation = scheme
+	}
+
+	immediate = {
+		show_as_tooltip = {
+			scope:councillor_liege = {
+				add_unpressed_claim = scope:county
+			}
+		}
+	}
+	
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0311.a
+		add_opinion = {
+			target = scope:councillor_liege
+			modifier = court_chaplain_fabricated_claim_opinion
+			days = 3650
+		}
+	}
+}
+
+#County Owner Lieges
+bp_clerical_bureau_director_fabricate_claim.0312 = {
+	type = character_event
+	title = bp_clerical_bureau_director_fabricate_claim.0311.t
+	desc = {
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.opening
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.end
+	}
+	theme = learning
+	left_portrait = {
+		character = scope:county_holder
+		animation = shock
+	}
+	right_portrait = {
+		character = scope:councillor_liege
+		animation = scheme
+	}
+	lower_right_portrait = scope:councillor
+
+	immediate = {
+		show_as_tooltip = {
+			scope:councillor_liege = {
+				add_unpressed_claim = scope:county
+			}
+		}
+	}
+	
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0312.a
+		add_opinion = {
+			target = scope:councillor_liege
+			modifier = court_chaplain_fabricated_claim_on_vassal_opinion
+			days = 3650
+		}
+	}
+}
+
+#Holder receives notification about Duchy claim
+bp_clerical_bureau_director_fabricate_claim.0313 = {
+	type = character_event
+	title = bp_clerical_bureau_director_fabricate_claim.0313.t
+	desc = {
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.opening
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.end
+	}
+	theme = learning
+	left_portrait = {
+		character = scope:councillor_liege
+		animation = scheme
+	}
+	lower_left_portrait = {
+		character = scope:councillor
+		animation = schadenfreude
+	}
+
+	immediate = {
+		show_as_tooltip = {
+			scope:councillor_liege = {
+				add_unpressed_claim = scope:duchy
+			}
+		}
+	}
+	
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0311.a
+		add_opinion = {
+			target = scope:councillor_liege
+			modifier = court_chaplain_fabricated_claim_opinion
+			days = 3650
+		}
+	}
+}
+
+#Top liege receives notification about Duchy claim
+bp_clerical_bureau_director_fabricate_claim.0314 = {
+	type = character_event
+	title = bp_clerical_bureau_director_fabricate_claim.0313.t
+	desc = {
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.opening
+		desc = bp_clerical_bureau_director_fabricate_claim.0311.end
+	}
+	theme = learning
+	left_portrait = {
+		character = scope:duchy_holder
+		animation = shock
+	}
+	right_portrait = {
+		character = scope:councillor_liege
+		animation = scheme
+	}
+	lower_right_portrait = scope:councillor
+
+	immediate = {
+		show_as_tooltip = {
+			scope:councillor_liege = {
+				add_unpressed_claim = scope:duchy
+			}
+		}
+	}
+	
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.0312.a
+		add_opinion = {
+			target = scope:councillor_liege
+			modifier = court_chaplain_fabricated_claim_on_vassal_opinion
+			days = 3650
+		}
+	}
+}
+
+####################
+# Fabricate Claim Side Effects
+# 3000-3999
+####################
+
+###BAD Side Effects
+
+#Vassals Dislike Claim Fabrication
+# by Petter Vilberg
+bp_clerical_bureau_director_fabricate_claim.3001 = {
+	type = character_event
+	title = bp_clerical_bureau_director_fabricate_claim.3001.t
+	desc = bp_clerical_bureau_director_fabricate_claim.3001.desc
+	theme = stewardship
+	left_portrait = {
+		character = scope:councillor
+		animation = shame
+	}
+
+	trigger = {
+		exists = cp:councillor_clerical_bureau_director
+		scope:councillor = cp:councillor_clerical_bureau_director
+		scope:councillor = {
+			stewardship < high_skill_rating
+		}
+		scope:county = {
+			holder = {
+				target_is_liege_or_above = root
+			}
+		}
+		any_vassal = {
+			highest_held_title_tier >= tier_county
+		}
+		NOT = { has_character_modifier = court_chaplain_vassal_claim_upset_modifier }
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = stewardship
+			multiplier = -0.2
+			offset = inverted_high_skill_rating
+		}
+	}
+
+	immediate = {
+		set_variable = {
+			name = had_bp_clerical_bureau_director_fabricate_claim_side_effect
+			value = yes
+			days = court_chaplain_task_side_effect_cooldown
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.3001.a
+		add_character_modifier = {
+			modifier = court_chaplain_vassal_claim_upset_modifier
+			days = court_chaplain_task_modifier_duration
+		}
+	}
+}
+
+#Loss of Piety
+# by Petter Vilberg
+bp_clerical_bureau_director_fabricate_claim.3002 = {
+	hidden = yes
+
+	trigger = {
+		exists = cp:councillor_clerical_bureau_director
+		scope:councillor = cp:councillor_clerical_bureau_director
+		scope:councillor = {
+			stewardship < high_skill_rating
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = stewardship
+			multiplier = -0.2
+			offset = inverted_high_skill_rating
+		}
+	}
+
+	immediate = {
+		cp:councillor_clerical_bureau_director = {
+			save_scope_as = active_councillor
+		}
+		set_variable = {
+			name = had_bp_clerical_bureau_director_fabricate_claim_side_effect
+			value = yes
+			days = court_chaplain_task_side_effect_cooldown
+		}
+		send_interface_message = {
+			type = msg_court_chaplain_task_bad
+			title = bp_clerical_bureau_director_fabricate_claim.3002.notification
+			desc = {
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor = { stewardship <= average_skill_level }
+					}
+					desc = task_stewardship_bad_unskilled_notification_tooltip
+				}
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor = { stewardship > average_skill_level }
+					}
+					desc = task_stewardship_bad_skilled_notification_tooltip
+				}
+			}
+			tooltip = task_fabricate_claim_notification_tooltip
+
+			left_icon = scope:councillor
+
+			add_piety = medium_piety_loss
+		}
+	}
+}
+
+
+#Powerful Vassals upset
+# by Petter Vilberg
+scripted_trigger bp_clerical_bureau_director_fabricate_claim_3003_powerful_vassal_trigger = {
+	is_powerful_vassal = yes
+	this != scope:councillor
+	save_temporary_scope_as = vassal
+	scope:county = {
+		holder != scope:vassal
+	}
+	NOT = {
+		has_opinion_modifier = {
+			target = root
+			modifier = court_chaplain_upsetting_claim_fabrication_opinion
+		}
+	}
+}
+
+bp_clerical_bureau_director_fabricate_claim.3003 = {
+	type = letter_event
+	opening = bp_clerical_bureau_director_fabricate_claim.3003.opening
+	desc = bp_clerical_bureau_director_fabricate_claim.3003.desc
+	sender = scope:vassal
+
+	trigger = {
+		exists = cp:councillor_clerical_bureau_director
+		scope:councillor = cp:councillor_clerical_bureau_director
+		scope:councillor = {
+			stewardship < high_skill_rating
+		}
+		any_vassal = {
+			bp_clerical_bureau_director_fabricate_claim_3003_powerful_vassal_trigger = yes
+		}
+		NOT = { has_character_modifier = court_chaplain_vassal_claim_upset_modifier }
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = stewardship
+			multiplier = -0.2
+			offset = inverted_high_skill_rating
+		}
+		compare_modifier = {
+			value = dread
+			multiplier = -0.05
+		}
+	}
+
+	immediate = {
+		set_variable = {
+			name = had_bp_clerical_bureau_director_fabricate_claim_side_effect
+			value = yes
+			days = court_chaplain_task_side_effect_cooldown
+		}
+		random_vassal = {
+			limit = {
+				bp_clerical_bureau_director_fabricate_claim_3003_powerful_vassal_trigger = yes
+			}
+			weight = {
+				base = 1
+				modifier = {
+					add = 3
+					has_claim_on = scope:county
+				}
+			}
+			if = {
+				limit = { root = { is_ai = no }	}
+				assign_quirk_effect = yes
+			}
+			save_scope_as = vassal
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.3003.a
+		scope:vassal = {
+			add_opinion = {
+				target = root
+				modifier = court_chaplain_upsetting_claim_fabrication_opinion
+				days = bp_clerical_bureau_director_fabricate_claim_modifier_duration
+			}
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.3003.b
+		trigger = {
+			OR = {
+				has_trait = arrogant
+				has_trait = callous
+				dread > 50
+			}
+		}
+		exclusive = yes
+		scope:vassal = {
+			add_opinion = {
+				target = root
+				modifier = court_chaplain_upsetting_claim_fabrication_opinion
+				days = bp_clerical_bureau_director_fabricate_claim_modifier_duration
+			}
+		}
+	}
+}
+
+
+#Target upset
+# by Petter Vilberg
+bp_clerical_bureau_director_fabricate_claim.3004 = {
+	type = letter_event
+	opening = bp_clerical_bureau_director_fabricate_claim.3004.opening
+	desc = bp_clerical_bureau_director_fabricate_claim.3004.desc
+	sender = scope:target
+
+	trigger = {
+		exists = cp:councillor_clerical_bureau_director
+		scope:councillor = cp:councillor_clerical_bureau_director
+		scope:councillor = {
+			stewardship < high_skill_rating
+		}
+		scope:county = {
+			holder = {
+				NOT = {
+					has_opinion_modifier = {
+						target = root
+						modifier = court_chaplain_vassal_claim_target_upset_modifier
+					}
+				}
+				NOT = { target_is_liege_or_above = root }
+			}
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = stewardship
+			multiplier = 0.2
+			offset = inverted_mediocre_skill_rating
+		}
+	}
+
+	immediate = {
+		set_variable = {
+			name = had_bp_clerical_bureau_director_fabricate_claim_side_effect
+			value = yes
+			days = court_chaplain_task_side_effect_cooldown
+		}
+		scope:county = {
+			holder = {
+				save_scope_as = target
+			}
+		}
+		if = {
+			limit = {
+				scope:target = { top_liege != this }
+			}
+			scope:target.top_liege = {
+				save_scope_as = target_liege
+			}
+		}
+	}
+
+	option = {
+		name = bp_clerical_bureau_director_fabricate_claim.3004.a
+		add_prestige = minor_prestige_loss
+		scope:target = {
+			add_opinion = {
+				target = root
+				modifier = court_chaplain_vassal_claim_target_upset_modifier
+				days = bp_clerical_bureau_director_fabricate_claim_modifier_duration
+			}
+		}
+		if = {
+			limit = { exists = scope:target_liege }
+			scope:target_liege = {
+				add_opinion = {
+					target = root
+					modifier = court_chaplain_vassal_claim_target_upset_modifier
+					days = bp_clerical_bureau_director_fabricate_claim_modifier_duration
+				}
+			}
+		}
+	}
+}
