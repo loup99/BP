@@ -34,3 +34,18 @@ bp_can_be_roman_minister_trigger = {
 		}
 	}
 }
+bp_can_be_bureau_member_trigger = {
+	exists = root.liege_or_court_owner.cp:councillor_chancellor_roman
+	root.liege_or_court_owner.cp:councillor_chancellor_roman = { save_temporary_scope_as = councillor_mo }
+	scope:councillor_mo ?= {
+		OR = {
+			#Can't be to unhappy with them
+			opinion = { target = root value > -25 }
+			#MO must not have an active reason to dislike the character, even if the opinion is high enough
+			NOT = { has_relation_grudge = root }
+			NOT = { has_relation_rival = root }
+			NOT = { has_relation_nemesis = root }
+			NOT = { has_secret_relation_nemesis = root }
+		}
+	}
+}
