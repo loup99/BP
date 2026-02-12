@@ -1,0 +1,340 @@
+namespace = task_manage_guards_roman
+
+##################
+# Side Effects from Manage Royal Guard
+# 4001-4999
+##################
+
+####
+# Bad Side Effects
+####
+
+# Knight is Wounded
+# by Claudia Baldassi
+scripted_trigger task_manage_guards_roman_4001_knight_trigger = {
+	NOT = { this = root.cp:councillor_imperial_guard_director }
+	NOT = { has_trait = wounded }
+}
+
+task_manage_guards_roman.4001 = {
+	hidden = yes
+
+	trigger = {
+		exists = cp:councillor_imperial_guard_director
+		scope:councillor = cp:councillor_imperial_guard_director
+		cp:councillor_imperial_guard_director = {
+			martial < high_skill_rating
+		}
+		any_knight = {
+			can_be_trained_as_knight_now_light_trigger = yes
+			task_manage_guards_roman_4001_knight_trigger = yes
+			NOT = { is_vassal_of = root }
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = martial
+			multiplier = -0.2
+			offset = inverted_high_skill_rating
+		}
+	}
+
+	immediate = {
+		cp:councillor_imperial_guard_director = {
+			save_scope_as = active_councillor
+		}
+		set_variable = {
+			name = had_imperial_guard_director_task_side_effect
+			value = yes
+			days = imperial_guard_task_side_effect_cooldown
+		}
+		random_knight = {
+			limit = {
+				can_be_trained_as_knight_now_light_trigger = yes
+				task_manage_guards_roman_4001_knight_trigger = yes
+				NOT = { is_vassal_of = root }
+			}
+			weight = {
+				base = 2
+				compare_modifier = {
+					value = prowess
+					multiplier = -0.1
+				}
+			}
+			save_scope_as = knight
+		}
+
+		send_interface_message = {
+			type = msg_marshal_task_bad
+			title = task_manage_guards_roman.2001.notification
+			desc = {
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor ?= { martial <= average_skill_level }
+					}
+					desc = task_martial_bad_unskilled_notification_tooltip
+				}
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor ?= { martial > average_skill_level }
+					}
+					desc = task_martial_bad_skilled_notification_tooltip
+				}
+			}
+			tooltip = task_manage_guards_notification_tooltip
+
+			left_icon = scope:knight
+			right_icon = scope:active_councillor
+
+			scope:knight = {
+				increase_wounds_effect = {
+					REASON = duel
+				}
+			}
+		}
+	}
+}
+
+#Disorganized Royal Guards
+# by Claudia Baldassi
+
+task_manage_guards_roman.4002 = {
+	hidden = yes
+
+	trigger = {
+		exists = cp:councillor_imperial_guard_director
+		scope:councillor = cp:councillor_imperial_guard_director
+		scope:councillor ?= {
+			martial < high_skill_rating
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = martial
+			multiplier = -0.2
+			offset = inverted_high_skill_rating
+		}
+	}
+
+	immediate = {
+		cp:councillor_imperial_guard_director = {
+			save_scope_as = active_councillor
+		}
+		set_variable = {
+			name = had_imperial_guard_director_task_side_effect
+			value = yes
+			days = imperial_guard_task_side_effect_cooldown
+		}
+
+		send_interface_message = {
+			type = msg_marshal_task_bad
+			title = task_manage_guards_roman.4002.notification
+			desc = {
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor ?= { martial <= average_skill_level }
+					}
+					desc = task_martial_bad_unskilled_notification_tooltip
+				}
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor ?= { martial > average_skill_level }
+					}
+					desc = task_martial_bad_skilled_notification_tooltip
+				}
+			}
+			tooltip = task_manage_guards_notification_tooltip
+
+			left_icon = scope:active_councillor
+
+			scope:councillor_liege = {
+				add_character_modifier = {
+					modifier = task_manage_guards_disorganized_modifier
+					months = 6
+				}
+			}
+		}
+	}
+}
+
+####
+# Good Side Effects
+####
+
+#Knight Improved
+# by Claudia Baldassi
+task_manage_guards_roman.4101 = {
+	hidden = yes
+
+	trigger = {
+		exists = cp:councillor_imperial_guard_director
+		scope:councillor = cp:councillor_imperial_guard_director
+		cp:councillor_imperial_guard_director = {
+			
+			martial > mediocre_skill_rating
+		}
+
+		any_knight = {
+			can_be_trained_as_knight_now_light_trigger = yes
+			add_to_temporary_list = possible_commanders
+		}
+
+		any_in_list = {
+			list = possible_commanders
+			NOT = { this = root.cp:councillor_imperial_guard_director }
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = martial
+			multiplier = 0.2
+			offset = inverted_mediocre_skill_rating
+		}
+	}
+
+	immediate = {
+		cp:councillor_imperial_guard_director = {
+			save_scope_as = active_councillor
+		}
+		set_variable = {
+			name = had_imperial_guard_director_task_side_effect
+			value = yes
+			days = imperial_guard_task_side_effect_cooldown
+		}
+
+		#Build a list of possible characters involved
+		every_knight = {
+			limit = {
+				can_be_trained_as_knight_now_light_trigger = yes
+			}
+			add_to_list = possible_knights
+		}
+
+		#Find a knight to improve
+		random_in_list = {
+			list = possible_knights
+			limit = {
+				NOT = { this = root.cp:councillor_imperial_guard_director }
+			}
+			save_scope_as = commander
+		}
+
+		send_interface_message = {
+			type = msg_marshal_task_good
+			title = task_manage_guards_roman.2102.notification
+			desc = {
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor ?= { martial <= average_skill_level }
+					}
+					desc = task_martial_good_unskilled_notification_tooltip
+				}
+				triggered_desc = {
+					trigger = {
+						scope:active_councillor ?= { martial > average_skill_level }
+					}
+					desc = task_martial_good_skilled_notification_tooltip
+				}
+			}
+			tooltip = task_manage_guards_notification_tooltip
+
+			left_icon = scope:commander
+			right_icon = scope:active_councillor
+
+			scope:commander = {
+				add_prowess_skill = 1
+			}
+		}
+	}
+}
+
+# Hostile Scheme Disrupted
+#by Claudia Baldassi
+scripted_trigger task_manage_guards_roman_4102_scheme_trigger = {
+	hostile_scheme_trigger = yes
+	scheme_owner = { is_ai = yes }
+	save_temporary_scope_as = scheme
+	scheme_progress >= scheme_progress_33
+}
+
+task_manage_guards_roman.4102 = {
+	type = letter_event
+	opening = {
+		desc = spymaster_task.0399.opening
+	}
+	desc = {
+		desc = spymaster_task.1101.desc_opening
+		first_valid = {
+			triggered_desc = {
+				trigger = { scope:scheme = { scheme_type = murder } }
+				desc = spymaster_task.1101.murder
+			}
+			triggered_desc = {
+				trigger = { scope:scheme = { scheme_type = abduct } }
+				desc = spymaster_task.1101.abduct
+			}
+			desc = spymaster_task.1101.fallback
+		}
+		desc = spymaster_task.1101.ending
+	}
+	sender = scope:councillor
+
+	trigger = {
+		exists = cp:councillor_imperial_guard_director
+		scope:councillor = cp:councillor_imperial_guard_director
+		any_targeting_scheme = {
+			task_manage_guards_roman_4102_scheme_trigger = yes
+		}
+		scope:councillor ?= {
+			
+			martial >= medium_skill_rating
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		compare_modifier = {
+			target = scope:councillor
+			value = martial
+			multiplier = 0.2
+			offset = inverted_mediocre_skill_rating
+		}
+	}
+
+	immediate = {
+		random_targeting_scheme = {
+			limit = {
+				task_manage_guards_roman_4102_scheme_trigger = yes
+			}
+			save_scope_as = scheme
+			scheme_owner = {
+				save_scope_as = owner
+			}
+			if = {
+				limit = {
+					is_scheme_exposed = no
+				}
+				hidden_effect = {
+					expose_scheme = yes
+				}
+				custom_tooltip = spymaster_task.1101.exposure_tt
+			}
+		}
+	}
+
+	option = {
+		name = spymaster_task.1101.a
+		scope:scheme = {
+			end_scheme = yes
+		}
+	}
+}

@@ -1,0 +1,177 @@
+﻿#councillor_imperial_guard_director
+task_manage_guards_roman = {
+	default_task = yes
+	position = councillor_imperial_guard_director
+	task_type = task_type_general
+	task_progress = task_progress_infinite
+
+	asset = {
+		icon = "gfx/interface/icons/council_task_types/task_manage_guards.dds"
+		background = "gfx/interface/buttons/button_round_bg.dds"
+		frame = "gfx/interface/buttons/button_round_frame.dds"
+		glow = "gfx/particles/halo.dds"
+	}
+	
+	effect_desc = {
+		desc = task_manage_guards_knights_desc
+		triggered_desc = {
+			trigger = {
+				councillor_liege_has_erudition_legacy_5_perk = yes
+			}
+			desc = task_manage_guards_erudition_bonus_knights
+		}
+		triggered_desc = {
+			trigger = {
+				councillor_liege_has_family_business_bonus = yes
+			}
+			desc = task_manage_guards_family_business_bonus_knights
+		}
+		triggered_desc = {
+			trigger = {
+				councillor_liege_has_consulted_house_bonus = yes
+			}
+			desc = task_manage_guards_consulted_house_bonus_knights
+		}
+		desc = task_manage_guards_scheme_desc
+		triggered_desc = {
+			trigger = {
+				councillor_liege_has_erudition_legacy_5_perk = yes
+			}
+			desc = task_manage_guards_erudition_bonus_scheme
+		}
+		triggered_desc = {
+			trigger = {
+				councillor_liege_has_family_business_bonus = yes
+			}
+			desc = task_manage_guards_family_business_bonus_scheme
+		}
+		triggered_desc = {
+			trigger = {
+				councillor_liege_has_consulted_house_bonus = yes
+			}
+			desc = task_manage_guards_consulted_house_bonus_scheme
+		}
+
+		desc = {
+			desc = council_task_possible_side_effects
+			triggered_desc = {
+				trigger = {
+					martial > mediocre_skill_rating
+				}
+				desc = task_manage_guards_knight_improved
+			}
+			triggered_desc = {
+				trigger = {
+					martial > mediocre_skill_rating
+				}
+				desc = task_manage_guards_scheme_disrupted
+			}
+			triggered_desc = {
+				trigger = {
+					martial < high_skill_rating
+				}
+				desc = task_manage_guards_knight_wounded
+			}
+			triggered_desc = {
+				trigger = {
+					martial < high_skill_rating
+				}
+				desc = task_manage_guards_disorganized
+			}
+		}
+	}
+
+	is_shown = {
+		has_dlc_feature = royal_court
+	}
+
+	council_owner_modifier = {
+		name = task_manage_guards_knight_modifier
+		knight_effectiveness_mult = 1
+		scale = {
+			value = marshal_overtime_boost_scale
+			divide = 100
+		}
+	}
+	council_owner_modifier = {
+		name = task_manage_guards_scheme_modifier
+		enemy_hostile_scheme_success_chance_add = -1
+		scale = {
+			value = marshal_overtime_decrease_scale
+		}
+	}
+
+	on_start_task = {
+		liege = {
+			set_variable = {
+				name = marshal_overtime_boost
+				value = 0
+			}
+			set_variable = {
+				name = marshal_overtime_decrease
+				value = 0
+			}
+		}
+	}
+
+	on_cancel_task = {
+		liege = {
+			remove_variable = marshal_overtime_boost
+			remove_variable = marshal_overtime_decrease
+		}
+	}
+
+	monthly_on_action = roman_manage_guards_imperial_guard_director_task_side_effects
+
+	on_monthly = {
+		if = {
+			limit = {
+				liege = { is_ai = no }
+			}
+			if = {
+				limit = {
+					liege = {
+						has_variable = marshal_overtime_boost
+						var:marshal_overtime_boost < marshal_overtime_boost_max
+					}
+				}
+				liege = {
+					change_variable = {
+						name = marshal_overtime_boost
+						add = root.marshal_overtime_boost_monthly_increase
+					}
+				}
+			}
+			if = {
+				limit = {
+					liege = {
+						has_variable = marshal_overtime_decrease
+						var:marshal_overtime_decrease > marshal_overtime_decrease_max
+					}
+				}
+				liege = {
+					change_variable = {
+						name = marshal_overtime_decrease
+						add = root.marshal_overtime_decrease_monthly_increase
+					}
+				}
+			}
+		}
+		else = {
+			liege = {
+				set_variable = {
+					name = marshal_overtime_boost
+					value = root.marshal_overtime_boost_monthly_increase
+				}
+				set_variable = {
+					name = marshal_overtime_decrease
+					value = root.marshal_overtime_decrease_monthly_increase
+				}
+			}
+		}
+	}
+
+	ai_will_do = {
+		value = 1
+	}
+}
