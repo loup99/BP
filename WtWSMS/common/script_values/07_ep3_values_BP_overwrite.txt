@@ -1,0 +1,225 @@
+﻿##### Changed from Vanilla: Roman Admin _really_ spikes the cost down
+admin_title_troop_command_cost_value = {
+	save_temporary_scope_as = recipient_title
+
+	# Base cost - Set in 00_defines.txt
+	value = {
+		value = define:NAdministrative|BASE_REASSIGN_COST
+		format = "BASE_VALUE_FORMAT"
+		desc = "BASE_VALUE"
+	}
+
+	if = { # Increase cost based on the total number of regiments - The first three regiments are not accounted for, we consider them a part of the base cost
+		limit = {
+			scope:recipient_title = {
+				OR = {
+					any_owned_title_maa_regiment = {
+						count > 3
+					}
+					any_owned_title_maa_regiment = {
+						maa_size > 3
+					}
+					AND = {
+						any_owned_title_maa_regiment = {
+							count > 2
+						}
+						any_owned_title_maa_regiment = {
+							maa_size > 1
+						}
+					}
+					AND = {
+						any_owned_title_maa_regiment = {
+							count > 1
+						}
+						any_owned_title_maa_regiment = {
+							maa_size > 2
+						}
+					}
+				}
+			}
+		}
+		add = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = {
+				value = {
+					scope:recipient_title = {
+						every_title_maa_regiment = {
+							add = maa_size
+						}
+					}
+					subtract = 3
+					divide = 20
+				}
+			}
+			desc = ADMIN_TITLE_TROOP_COST_ARMY_SIZE_DESC
+		}
+	}
+
+	# You are fighting a defensive war
+	if = {
+		limit = {
+			scope:actor = {
+				any_character_war = {
+					is_war_leader = scope:actor
+					is_defender = scope:actor
+				}
+			}
+		}
+		subtract = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 0.25
+			desc = ADMIN_TITLE_TROOP_COST_DEFENDER_DESC
+		}
+	}
+	# You are fighting an offensive war, and the troop owner is far away
+	else_if = {
+		limit = {
+			scope:recipient_title.holder = { top_liege != this }
+			scope:actor = {
+				any_war_enemy = {
+					realm_to_title_distance_squared = {
+						target = scope:recipient_title
+						value > 100000
+					}
+				}
+			}
+		}
+		add = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 0.25
+			desc = ADMIN_TITLE_TROOP_COST_ATTACKER_DESC
+		}
+	}
+
+	# The Troop owner is inside the war goal
+	if = {
+		limit = {
+			holder = {
+				target_is_liege_or_above = scope:actor
+				OR = {
+					any_held_title = { is_contested = yes }
+					any_vassal = {
+						any_held_title = { is_contested = yes }
+					}
+				}
+			}
+		}
+		subtract = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 0.25
+			desc = ADMIN_TITLE_TROOP_COST_OWNER_IN_WAR_GOAL_DESC
+		}
+	}
+
+	##### Changed from Vanillla vvvvv
+	if = {
+		limit = {
+			scope:actor = {
+				top_liege = this
+				government_has_flag = is_a_roman_administrative_government
+			}
+			root.holder = { vassal_contract_has_flag = roman_admin_military_contract }
+		}
+		subtract = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 1.25
+			desc = ROMAN_ADMIN_TROOP_COST_REDUCTION
+		}
+	}
+	# If you are independent - The cost is reduced with your laws
+	# Imperial Bureaucracy for admin, and Army Command Structure for celestial
+	else_if = { # Admin
+	##### Changed from Vanillla ^^^^^
+		limit = {
+			scope:actor = {
+				top_liege = this
+				realm_law_use_imperial_bureaucracy = yes
+			}
+		}
+		if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction_high
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_high_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_2_DESC
+			}
+		}
+		else_if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_1_DESC
+			}
+		}
+	}
+	else_if = { # Celestial
+		limit = {
+			scope:actor = {
+				top_liege = this
+				realm_law_use_celestial_bureaucracy = yes
+			}
+		}
+		if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction_very_high
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_very_high_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_3_CELESTIAL_DESC
+			}
+		}
+		else_if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction_high
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_high_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_2_CELESTIAL_DESC
+			}
+		}
+		else_if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_1_CELESTIAL_DESC
+			}
+		}
+	}
+
+	# In Meritocratic governments, we prefer to not let the AI borrow from players, since they can be
+	# called in via 'request_military_aid_interaction' / 'send_military_aid_interaction'
+	if = {
+		limit = {
+			scope:actor = {
+				government_has_flag = government_has_merit
+				is_ai = yes
+			}
+			scope:recipient_title = {
+				holder = {
+					is_ai = no
+				}
+			}
+		}
+		multiply = 100000
+	}
+}
