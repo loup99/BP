@@ -50,7 +50,6 @@
 					desc = trait_power_behind_the_throne
 				}
 			}
-			}
 			if = {
 				limit = { has_trait = deposed }
 				subtract = {
@@ -259,8 +258,59 @@
 				}
 			}
 
+			###### Changed from Vanilla vvvvv
+			if = {
+				limit = { scope:title.holder = { has_realm_law_flag = only_same_culture_appointment_succession } }
+				
+				#Imperial heir gets a boost regardless of their actual culture
+				if = {
+					limit = {
+						scope:title.holder = { has_realm_law_flag = close_family_gets_appointment_exception }
+						#Heirs and close family are the exception; see Ostrogoths
+						is_player_heir_of = scope:title.holder
+					}
+					add = {
+						value = 75
+						desc = same_culture_succession_heir
+					}
+				}
+				#Close Family gets a boost regardless of their actual culture
+				else_if = {
+					limit = {
+						scope:title.holder = { has_realm_law_flag = close_family_gets_appointment_exception }
+						#Heirs and close family are the exception; see Ostrogoths
+						is_close_family_of = scope:title.holder
+					}
+					add = {
+						value = 50
+						desc = same_culture_succession_family
+					}
+				}
+				#People of our culture get a boost
+				else_if = {
+					limit = { root.culture = scope:title.holder.culture }
+					add = {
+						value = 25
+						desc = same_culture_succession
+					}
+				}
+				#Others get nerfed
+				else_if = {
+					limit = { NOT = { root.culture = scope:title.holder.culture } }
+					subtract = {
+						value = 1000
+						desc = only_same_culture_acclaimation
+					}
+				}
+			}
+			# DIFFERENT CULTURE FROM IMPERIAL CAPITAL
+			if = {
+				limit = { scope:title.holder = { has_realm_law_flag = only_same_culture_appointment_succession } }
+				#Ignore the Romans opinion
+			}
 			# POPULAR OPINION
 			if = {
+			###### Changed from Vanilla ^^^^^
 				limit = { is_landed = yes }
 				add = {
 					value = {
