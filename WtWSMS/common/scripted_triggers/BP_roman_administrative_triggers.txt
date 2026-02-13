@@ -49,3 +49,31 @@ bp_can_be_bureau_member_trigger = {
 		}
 	}
 }
+
+bp_county_has_roman_faith_trigger = {
+	scope:county.culture = { has_cultural_parameter = greco_roman_social_tradition }
+	trigger_if = { #Roman Empire Faith; this is a universal check
+		limit = { exists = title:h_roman_empire.holder }
+		title:h_roman_empire.state_faith ?= scope:county.faith
+	}
+	trigger_else_if = { #Western Roman Empire Faith
+		limit = { exists = title:h_western_roman_empire.holder }
+		scope:county.hegemony = title:h_western_roman_empire
+		title:h_western_roman_empire.state_faith ?= scope:county.faith
+	}
+	trigger_else_if = { #Eastern Roman Empire Faith
+		limit = { exists = title:h_eastern_roman_empire.holder }
+		scope:county.hegemony = title:h_eastern_roman_empire
+		title:h_eastern_roman_empire.state_faith ?= scope:county.faith
+	}
+	trigger_else = { bp_protect_religion_specific_trigger = yes } #Fallback
+}
+bp_protect_religion_specific_trigger = {
+	trigger_if = { #Christianity is special
+		limit = { $TITLE$.state_faith.religion = religion:christianity_religion }
+		scope:county.faith = { has_doctrine = special_doctrine_nicene_ecumenism }
+	}
+	trigger_else = { #Same religion gets protected
+		scope:county.faith.religion = scope:councillor_liege.faith.religion
+	}
+}

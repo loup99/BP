@@ -1,4 +1,5 @@
-﻿##### Changed from Vanilla: Updated progress with various modifiers for BP
+﻿##### Changed from Vanilla: Nerfed State Faith bonus unless having "State Religion" innovation
+##### Changed from Vanilla: Updated progress with various modifiers for BP
 ##### Changed from Vanilla: Updated targets, added new game rule effects
 ##### Changed from Vanilla: shared_hof_converts_counties_to_hof_religion effect
 ##### Changed from Vanilla: integrated SEA minorities stuff
@@ -306,6 +307,9 @@ task_conversion = {
 					this != scope:county.faith
 					this = scope:councillor.top_liege.faith
 				}
+				##### Changed from Vanilla vvvvv
+				scope:councillor_liege.culture = { has_innovation = innovation_state_religion }
+				##### Changed from Vanilla ^^^^^
 			}
 			multiply = {
 				value = ep3_state_faith_conversion_mult_value
@@ -750,6 +754,15 @@ task_conversion = {
 					exists = scope:councillor_liege.faith.religious_head.faith
 				}
 				NOT = { this.faith = scope:councillor_liege.faith.religious_head.faith }
+			}
+			#Roman government minority rulers can't convert if they've aligned themselves with the Romans
+			trigger_if = {
+				limit = { scope:councillor_liege = { has_realm_law_flag = imperial_church_protected } }
+				
+				custom_description = {
+					text = imperial_church_protected_state
+					bp_county_has_roman_faith_trigger = no
+				}
 			}
 			##### Changed from Vanilla ^^^^^
 		}
