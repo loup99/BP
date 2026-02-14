@@ -6,7 +6,9 @@ bp_game_start_476_oct = {
 		#Characters
 		BP_character_events_476_oct
 		BP_setup_realm_laws_476_oct
+		BP_setup_realm_laws_476_oct_DLC
 		BP_setup_vassal_contracts_476_oct
+		BP_setup_vassal_contracts_476_oct_DLC
 		BP_setup_landless_chars_476_oct
 		BP_set_lieges_476_oct
 		BP_remove_claims_476_oct
@@ -103,7 +105,12 @@ BP_setup_realm_laws_476_oct = {
 		}
 		#To give the danes proper Tributaries
 		title:d_danes.holder = { add_realm_law_skip_effects = tribal_authority_1 }
-		#Roman Diarchy Laws
+	}
+}
+BP_setup_realm_laws_476_oct_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#Roman Diarchy/Minority Laws
 		title:h_eastern_roman_empire.holder = {
 			add_realm_law_skip_effects = roman_chancellor_law
 			add_realm_law_skip_effects = non_roman_minority_rule_law_4 #Zeno is initially aligned with Rome
@@ -198,6 +205,13 @@ BP_setup_vassal_contracts_476_oct = {
 					level = 1
 				}
 			}
+		}
+	}
+}
+BP_setup_vassal_contracts_476_oct_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		every_ruler = {
 			#Roman Province designations
 			if = {
 				limit = { this.primary_title = title:d_noricum_ripense }
@@ -700,12 +714,7 @@ BP_setup_capitals_476_oct = {
 }
 
 BP_setup_roman_province_troops_476_oct = {
-	trigger = {
-		OR = {
-			has_dlc_feature = roads_to_power
-			has_dlc_feature = all_under_heaven
-		}
-	}
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
 	effect = {
 		title:d_noricum_ripense.holder = {
 			title:d_noricum_ripense = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
@@ -753,12 +762,7 @@ BP_setup_roman_province_troops_476_oct = {
 }
 
 BP_setup_roman_council_476_oct = {
-	trigger = {
-		OR = {
-			has_dlc_feature = roads_to_power
-			has_dlc_feature = all_under_heaven
-		}
-	}
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
 	effect = {
 		#Set Various Roman Offices
 		title:h_western_roman_empire.holder ?= { #Populate Nepos' realm with a few characters so he can fill his council
@@ -868,12 +872,15 @@ BP_setup_roman_council_476_oct = {
 		}
 		
 		title:h_eastern_roman_empire.holder ?= {
-			if = {
-				limit = { NOT = { any_councillor = { has_council_position = councillor_marshal_roman } } }
-				assign_councillor_type = {
-					type = councillor_marshal_roman
-					target = title:e_magister_military_ere.holder
-				}
+			assign_councillor_type = {
+				type = councillor_marshal_roman
+				target = title:e_magister_military_ere.holder
+				remove_existing_councillor = yes
+			}
+			assign_councillor_type = {
+				type = councillor_chancellor_roman
+				target = title:e_magister_offices_ere.holder
+				remove_existing_councillor = yes
 			}
 		}
 		title:e_magister_military_ere.holder ?= {
@@ -960,6 +967,7 @@ BP_setup_roman_council_476_oct = {
 			assign_councillor_type = {
 				type = councillor_chancellor_roman
 				target = title:e_magister_offices_italy.holder
+				remove_existing_councillor = yes
 			}
 		}
 		title:e_magister_offices_italy.holder ?= {

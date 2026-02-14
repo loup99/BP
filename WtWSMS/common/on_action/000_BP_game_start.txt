@@ -20,6 +20,7 @@ bp_game_start = {
 		create_BP_artifacts
 		#Legal Stuff
 		setup_realm_and_title_succession_laws
+		setup_realm_and_title_succession_laws_DLC
 		game_start_fix_barony_government
 		setup_initial_variable_lists
 		#Religious Stuff
@@ -341,21 +342,6 @@ setup_realm_and_title_succession_laws = {
 				add_title_law = mahestan_elective_succession_law
 			}
 		}
-		#Imperial Elective
-		every_ruler = {
-			every_held_title = {
-				limit = {
-					OR = {
-						this = title:e_byzantium
-						this = title:e_wre
-						this = title:h_roman_empire
-						this = title:h_eastern_roman_empire
-						this = title:h_western_roman_empire
-					}
-				}
-				add_title_law = imperial_elective_succession_law
-			}
-		}
 		#Feudal Elective
 		every_ruler = {
 			every_held_title = {
@@ -555,6 +541,29 @@ setup_realm_and_title_succession_laws = {
 		}
 	}
 }
+setup_realm_and_title_succession_laws_DLC = {
+	effect = {
+		if = {
+			limit = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
+			#Imperial Elective
+			every_ruler = {
+				every_held_title = {
+					limit = {
+						OR = {
+							this = title:e_byzantium
+							this = title:e_wre
+							this = title:h_roman_empire
+							this = title:h_eastern_roman_empire
+							this = title:h_western_roman_empire
+						}
+					}
+					add_title_law = imperial_elective_succession_law
+				}
+			}
+		}
+	}
+}
+
 #Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
 #in through the back door
 game_start_fix_barony_government = {
@@ -1332,33 +1341,37 @@ cull_maa_from_single_county_tribals = {
 ## Government Stuff ##
 setup_governments_based_on_dlc = {
 	effect = {
-		#Flip Roman governments to administrative if DLC is available
+		#Flip Roman governments from administrative to Dynastic if DLC is not available
 		if = {
-			limit = {
-				OR = {
-					has_dlc_feature = roads_to_power
-					has_dlc_feature = all_under_heaven
-				}
-			}
+			limit = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
 			every_ruler = {
-				limit = { has_government = roman_dynastic_government }
-				change_government = roman_administrative_government
+				limit = { government_has_flag = government_is_roman_administrative }
+				change_government = roman_dynastic_government
 				
+				#Destroy PP titles
+				destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_east }
+				destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_illyria }
+				destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_gaul }
+				destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_italy }
+				
+				#Fixup Laws
+				remove_realm_law_if_has_it_effect = { LAW = appointment_succession_law }
+				remove_realm_law_if_has_it_effect = { LAW = acclamation_succession_law }
+				add_law_if_not_has_it_effect = { LAW = roman_dynastic_authority_1 }
+			}
+		}
+		else = {
+			every_ruler = {
+				limit = { government_has_flag = government_is_roman_administrative }
+				
+				#Set Up Realm Laws
 				if = {
-					limit = { this.top_liege = this }
-					this.primary_title = { clear_title_laws = yes }
-					if = {
-						limit = { NOT = { has_realm_law = acclamation_succession_law } }
-						add_realm_law = acclamation_succession_law
-					}
+					limit = { top_liege = this }
+					add_law_if_not_has_it_effect = { LAW = acclamation_succession_law }
 				}
-				else = {
-					if = {
-						limit = { NOT = { has_realm_law = appointment_succession_law } }
-						add_realm_law = appointment_succession_law
-					}
-				}
+				else = { add_law_if_not_has_it_effect = { LAW = appointment_succession_law } }
 				
+				#Setup missing NF titles
 				if = {
 					limit = {
 						this = this.house.house_head
@@ -1376,62 +1389,44 @@ setup_governments_based_on_dlc = {
 						scope:new_title = { set_coa = scope:noble_family_head.house }
 					}
 				}
-				
-				every_vassal_or_below = {
-					limit = {
-						this.primary_title.tier = tier_barony
-						OR = {
-							has_government = roman_dynastic_government
-							has_government = republic_government
-						}
-					}
-					change_government = roman_administrative_government
-				}
-				
 				#Move Estate to actual capital location
-				this.domicile ?= {
-					move_domicile = prev.capital_county.title_province
-				}
+				this.domicile ?= { move_domicile = prev.capital_county.title_province }
 			}
-		}
-	}
-}
-
-set_various_title_flags = {
-	effect = {
-		#Roman Offices need the appropriate flags at start
-		title:e_magister_military_roman_empire = {
-			set_variable = is_supreme_roman_military_title
-			set_variable = is_a_roman_ministry_title
-		}
-		title:e_magister_military_ere = {
-			set_variable = is_supreme_roman_military_title
-			set_variable = is_a_roman_ministry_title
-		}
-		title:e_magister_military_wre = {
-			set_variable = is_supreme_roman_military_title
-			set_variable = is_a_roman_ministry_title
-		}
-		title:e_magister_military_italy = {
-			set_variable = is_supreme_roman_military_title
-			set_variable = is_a_roman_ministry_title
-		}
-		
-		title:e_magister_offices_roman_empire = {
-			set_variable = is_supreme_roman_ministry_title
-			set_variable = is_a_roman_ministry_title
-		}
-		title:e_magister_offices_ere = {
-			set_variable = is_supreme_roman_ministry_title
-			set_variable = is_a_roman_ministry_title
-		}
-		title:e_magister_offices_wre = {
-			set_variable = is_supreme_roman_ministry_title
-			set_variable = is_a_roman_ministry_title
-		}
-		title:e_magister_offices_italy = {
-			set_variable = is_supreme_roman_ministry_title
-			set_variable = is_a_roman_ministry_title
+			
+			#Roman Offices need the appropriate flags at start
+			title:e_magister_military_roman_empire = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_military_ere = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_military_wre = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_military_italy = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			
+			title:e_magister_offices_roman_empire = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_offices_ere = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_offices_wre = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_offices_italy = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
 		}
 	}
 }
