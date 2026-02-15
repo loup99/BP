@@ -18,11 +18,17 @@
 roman_administrative_themes = {
 	display_mode = radiobutton
 	is_shown = {
-		scope:subject.primary_title.tier >= tier_duchy
+		scope:subject = {
+			OR = {
+				highest_held_title_tier >= main_administrative_tier
+				highest_held_title_tier >= min_title_maa_tier
+			}
+		}
 	}
 	obligation_levels = {
 		roman_admin_theme_civilian = {
 			is_shown = { scope:subject = { is_landed = yes } }
+			is_valid = { scope:subject = { is_landed = yes } }
 			default = yes
 			position = { 0 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_civilian_administration.dds"
@@ -67,6 +73,7 @@ roman_administrative_themes = {
 				development_growth_factor = 0.2
 				build_gold_cost = -0.1
 				build_speed = -0.1
+				monthly_treasury_from_liege_mult = -0.50
 			}
 			
 			enable_title_maa = no
@@ -127,6 +134,7 @@ roman_administrative_themes = {
 				defender_advantage = 3
 				hostile_county_attrition = -0.2
 				hostile_raid_time = 0.50
+				monthly_treasury_from_liege_mult = -0.50
 				
 				monthly_treasury_from_military_budget_base = 1.5
 			}
@@ -248,58 +256,46 @@ roman_administrative_themes = {
 			flag = admin_tradeport_obligation_bonus
 			flag = admin_theme_naval
 		}
-		#Special "hidden" themes for landless rulers as this seems to break things...
-		roman_admin_theme_ministry_civilian = {
+		##### Hidden ministry level-theme to avoid title MAA issues
+		roman_admin_theme_ministry = {
+			is_shown = { scope:subject = { is_landless_ruler = yes } }
+			is_valid = { scope:subject = { any_held_title = { has_variable = is_supreme_roman_ministry_title } } }
 			position = { 1 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_civilian_administration.dds"
 			gui_tags = { byzantine_purple }
 			
-			is_shown = { scope:subject = { is_landed = no } }
-			is_valid = {
-				custom_tooltip = {
-					text = available_only_for_ministers
-					scope:subject = { is_landless_ruler = yes }
-					scope:subject = { any_held_title = { count <= 0 has_variable = is_supreme_roman_military_title } }
-				}
-			}
-			
 			ai_liege_desire = 0
 			ai_subject_desire = 0
 			
 			score = 0
-			color = { 0.2 0.7 0.2 1.0 }
+			color = { 0.2 0.2 0.7 1.0 }
+
+			tax_factor = 0.5
+			levies_factor = -0.75
+
+			subject_modifier = {}
 			
 			enable_title_maa = no
-		
-			subject_modifier = {
-				monthly_treasury_from_ministry_budget_base = 2.5
-			}
 		}
 		roman_admin_theme_ministry_military = {
+			is_shown = { scope:subject = { is_landless_ruler = yes } }
+			is_valid = { scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } } }
 			position = { 1 0 }
-			icon = "gfx/interface/icons/theme_administration_types/icon_frontier_administration.dds"
+			icon = "gfx/interface/icons/theme_administration_types/icon_military_administration.dds"
 			gui_tags = { byzantine_purple }
-			
-			is_shown = { scope:subject = { is_landed = no } }
-			is_valid = {
-				scope:subject = { is_landless_ruler = yes }
-				scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } }
-			}
 			
 			ai_liege_desire = 0
 			ai_subject_desire = 0
 			
 			score = 0
-			color = { 0.2 0.7 0.2 1.0 }
+			color = { 0.2 0.2 0.7 1.0 }
+
+			tax_factor = 0.5
+			levies_factor = -0.75
+
+			subject_modifier = {}
 			
 			enable_title_maa = yes
-		
-			subject_modifier = {
-				men_at_arms_title_cap = 5
-				men_at_arms_title_limit = 5
-				
-				monthly_treasury_from_military_budget_mult = 2.5
-			}
 			flag = roman_admin_military_contract
 		}
 	}
@@ -415,6 +411,9 @@ roman_administrative_ministry_obligations = {
 				}
 				NOT = { vassal_contract_has_flag = roman_administrative_marshal_obligation }
 			}
+			trigger_else = {
+				NOT = { vassal_contract_has_flag = roman_administrative_minister_civil }
+			}
 		}
 	}
 	obligation_levels = {
@@ -423,8 +422,6 @@ roman_administrative_ministry_obligations = {
 			icon = "gfx/interface/icons/celestial_administration_types/icon_standard_administration.dds"
 			gui_tags = { civilian }
 			default = yes
-			
-			is_valid = { always = no }
 
 			ai_liege_desire = {
 				value = 1
@@ -457,13 +454,13 @@ roman_administrative_ministry_obligations = {
 			score = 2
 			color = { 0.7 0.7 0.7 1.0 }
 
-			enable_title_maa = no
-
 			subject_modifier = {
 				monthly_treasury_from_salary_budget_base = 1.0
 				
-				#monthly_treasury_from_ministry_budget_base = 1.5
+				monthly_treasury_from_ministry_budget_base = 1.5
 			}
+			
+			enable_title_maa = no
 
 			flag = roman_administrative_minister_obligation
 			appointment_trait_flag = civilian_province
@@ -486,18 +483,21 @@ roman_administrative_ministry_obligations = {
 			score = 3
 			color = { 0.7 0.7 0.7 1.0 }
 			
-			enable_title_maa = yes
-			
 			subject_modifier = {
 				men_at_arms_recruitment_cost = -0.5
 				men_at_arms_maintenance = -0.5
 				
+				men_at_arms_title_limit = 5
+				men_at_arms_title_cap = 5
+				
 				monthly_treasury_from_salary_budget_base = 1.0
 				
 				monthly_treasury_from_ministry_budget_base = 1
-				#monthly_treasury_from_military_budget_base = 2.5
+				monthly_treasury_from_military_budget_base = 2.5
 			}
-		
+			
+			enable_title_maa = yes
+			
 			flag = roman_administrative_minister_obligation
 			flag = roman_administrative_marshal_obligation
 			appointment_trait_flag = military_province

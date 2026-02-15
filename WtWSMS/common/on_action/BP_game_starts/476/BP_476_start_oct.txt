@@ -471,6 +471,7 @@ bp_game_start_after_lobby_476_oct = {
 		BP_setup_roman_council_476_oct
 		#Other details
 		BP_place_specific_domiciles_476_oct
+		BP_set_employers_476_oct_no_DLC
 	}
 	effect = {
 		trigger_event = { on_action = BP_update_specific_title_courtiers_476_oct delayed = yes }
@@ -823,14 +824,16 @@ BP_setup_roman_council_476_oct = {
 				employer = title:h_western_roman_empire.holder
 			}
 		}
+		title:e_magister_offices_wre.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
+			}
+		}
 		title:e_magister_military_wre.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
-				level = 4
-			}
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_ministry_obligations
-				level = 2
+				level = roman_admin_theme_ministry_military_value
 			}
 		}
 		#Create the WRE MM Army
@@ -860,37 +863,27 @@ BP_setup_roman_council_476_oct = {
 				title = title:h_western_roman_empire
 			}
 		}
-		title:e_magister_offices_wre.holder ?= {
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_themes
-				level = 3
-			}
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_ministry_obligations
-				level = 1
-			}
-		}
 		
 		title:h_eastern_roman_empire.holder ?= {
-			assign_councillor_type = {
-				type = councillor_marshal_roman
-				target = title:e_magister_military_ere.holder
-				remove_existing_councillor = yes
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_military_ere.holder
+				POSITION = councillor_marshal_roman
 			}
-			assign_councillor_type = {
-				type = councillor_chancellor_roman
-				target = title:e_magister_offices_ere.holder
-				remove_existing_councillor = yes
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_offices_ere.holder
+				POSITION = councillor_chancellor_roman
+			}
+		}
+		title:e_magister_offices_ere.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
 			}
 		}
 		title:e_magister_military_ere.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
-				level = 4
-			}
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_ministry_obligations
-				level = 2
+				level = roman_admin_theme_ministry_military_value
 			}
 		}
 		#Create the Eastern MM Army
@@ -951,43 +944,24 @@ BP_setup_roman_council_476_oct = {
 				title = title:e_magister_military_ere
 			}
 		}
-		title:e_magister_offices_ere.holder ?= {
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_themes
-				level = 3
-			}
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_ministry_obligations
-				level = 1
-			}
-		}
 		
 		#Italia
 		title:h_italy.holder = {
-			assign_councillor_type = {
-				type = councillor_chancellor_roman
-				target = title:e_magister_offices_italy.holder
-				remove_existing_councillor = yes
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_offices_italy.holder
+				POSITION = councillor_chancellor_roman
 			}
 		}
 		title:e_magister_offices_italy.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
-				level = 3
-			}
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_ministry_obligations
-				level = 1
+				level = roman_admin_theme_ministry_civilian_value
 			}
 		}
 		title:e_magister_military_italy.holder ?= {
 			vassal_contract_set_obligation_level = {
 				type = roman_administrative_themes
-				level = 4
-			}
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_ministry_obligations
-				level = 2
+				level = roman_admin_theme_ministry_military_value
 			}
 		}
 		#Create the Italian MM Army
@@ -1039,5 +1013,13 @@ BP_place_specific_domiciles_476_oct = {
 			set_capital_county = title:c_napoli
 			this.holder.domicile ?= { move_domicile = title:b_napoli.title_province }
 		}
+	}
+}
+
+BP_set_employers_476_oct_no_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
+	#Otherwise landed chars should be sent to employers
+	effect = {
+		character:1100013 = { set_employer = character:70515 } #Basilicus
 	}
 }
