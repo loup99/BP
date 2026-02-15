@@ -1373,7 +1373,12 @@ setup_governments_based_on_dlc = {
 		}
 		else = {
 			every_ruler = {
-				limit = { government_has_flag = government_is_roman_administrative }
+				limit = {
+					OR = {
+						government_has_flag = government_is_roman_administrative
+						government_has_flag = government_is_roman_subordinate_federate
+					}
+				}
 				
 				#Set Up Realm Laws
 				if = {
@@ -1388,12 +1393,24 @@ setup_governments_based_on_dlc = {
 						this = this.house.house_head
 						any_held_title = { count < 1 is_noble_family_title = yes }
 					}
-					give_noble_family_title = {
-						name = noble_family_name
-						tier = duchy
-						article = DEFAULT_TITLE_NAME_ARTICLE
-						government = roman_administrative_government
-						save_scope_as = new_title
+					if = {
+						limit = { government_has_flag = government_is_roman_administrative }
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = duchy
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = roman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+					else = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = duchy
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = roman_subordinate_federate_government
+							save_scope_as = new_title
+						}
 					}
 					scope:new_title.holder ?= {
 						save_scope_as = noble_family_head

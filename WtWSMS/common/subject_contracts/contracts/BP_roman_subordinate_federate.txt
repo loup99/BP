@@ -1,0 +1,299 @@
+﻿roman_subordinate_federate_obligations = {
+	obligation_levels = {
+		default = {
+			levies = 0.75
+			tax = 0.25
+		}
+	}
+}
+
+#This is separate from the professionalization and represents tax abatements
+#that could be relatively removed at will
+roman_subordinate_federate_taxes = {
+	display_mode = tree
+	icon = gold_icon
+	obligation_levels = {
+		roman_subordinate_federate_taxes_exempt = {
+			default = yes
+			position = { 0 0 }
+
+			tax = 0.0
+
+			ai_liege_desire = 1
+			ai_subject_desire = 5
+			score = 2
+		}
+		roman_subordinate_federate_taxes_low = {
+			parent = roman_subordinate_federate_taxes_exempt
+			position = { 1 0 }
+
+			tax = 0.1
+			subject_opinion = -5
+
+			ai_liege_desire = {
+				value = 2
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_roman_subordinate_federate
+								vassal_contract_obligation_level:feudal_government_taxes <= 0
+							}
+						}
+					}
+					add = 8
+				}
+			}
+			ai_subject_desire = 4
+			score = 1
+		}
+		roman_subordinate_federate_taxes_moderate = {
+			parent = roman_subordinate_federate_taxes_low
+			position = { 2 0 }
+
+			tax = 0.25
+			subject_opinion = -10
+
+			ai_liege_desire = {
+				value = 3
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_feudal
+								vassal_contract_obligation_level:feudal_government_taxes <= feudal_tax_low_level
+							}
+						}
+					}
+					add = 7
+				}
+			}
+			ai_subject_desire = 3
+			score = 0
+		}
+		roman_subordinate_federate_taxes_high = {
+			parent = roman_subordinate_federate_taxes_moderate
+			position = { 3 0 }
+			
+			tax = 0.5
+			subject_opinion = -20
+
+			ai_liege_desire = {
+				value = 5
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_roman_subordinate_federate
+								vassal_contract_obligation_level:feudal_government_taxes <= 1
+							}
+						}
+					}
+					add = 6
+				}
+			}
+			ai_subject_desire = 2
+			score = -2
+			flag = obligation_high_taxes
+		}
+	}
+}
+
+#Measures the professionalization of the region's troops
+#More professional => more title troops, more expensive
+roman_federate_military_landed = {
+	display_mode = tree
+	icon = levy_icon
+	obligation_levels = {
+		roman_federate_military_landed_0 = { #Fully standing army
+			default = yes
+			position = { 0 0 }
+			
+			is_valid = {
+				NOT = {
+					scope:subject = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+				}
+			}
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 2
+				men_at_arms_title_cap = 2
+				
+				#Personal Troops
+				men_at_arms_cap = 0
+				men_at_arms_limit = 0
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = 0.04
+				army_maintenance_mult = 0.04
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+		}
+		roman_federate_military_landed_1 = {
+			parent = roman_federate_military_landed_0
+			position = { 1 0 }
+			
+			is_valid = {
+				NOT = {
+					scope:subject = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+				}
+			}
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 1
+				men_at_arms_title_cap = 1
+				#Personal Troops
+				men_at_arms_cap = 1
+				men_at_arms_limit = 1
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = 0.03
+				army_maintenance_mult = 0.03
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+		}
+		
+		roman_federate_military_landed_2 = {
+			parent = roman_federate_military_landed_1
+			position = { 2 0 }
+			
+			is_valid = {
+				NOT = {
+					scope:subject = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+				}
+			}
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 0
+				men_at_arms_title_cap = 0
+				#Personal Troops
+				men_at_arms_cap = 2
+				men_at_arms_limit = 2
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = 0.02
+				army_maintenance_mult = 0.02
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+		}
+		
+		roman_federate_military_landed_3 = {
+			parent = roman_federate_military_landed_2
+			position = { 3 0 }
+			
+			is_valid = {
+				NOT = {
+					scope:subject = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+				}
+			}
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = -1
+				men_at_arms_title_cap = -1
+				#Personal Troops
+				men_at_arms_cap = 3
+				men_at_arms_limit = 3
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = 0.01
+				army_maintenance_mult = 0.01
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+		}
+		
+		roman_federate_military_landed_4 = {
+			parent = roman_federate_military_landed_3
+			position = { 4 0 }
+			
+			is_valid = {
+				NOT = {
+					scope:subject = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+				}
+			}
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = -2
+				men_at_arms_title_cap = -2
+				#Personal Troops
+				men_at_arms_cap = 4
+				men_at_arms_limit = 4
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = 0.01
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+		}
+		
+		roman_federate_military_landed_5 = { #Fully landed; no more title MAA, can't go back from this state
+			parent = roman_federate_military_landed_4
+			position = { 5 0 }
+			
+			is_valid = {}
+			
+			subject_modifier = {
+				#Personal Troops
+				men_at_arms_cap = 4
+				men_at_arms_limit = 4
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			liege_modifier = {}
+			
+			enable_title_maa = no
+			
+			flag = roman_federate_military_landed_permanent
+		}
+	}
+}
+
+#TODO: Title maa vs. personal maa path
+
+#TODO: Title Revocation Rights (in this sense, prohibiting governorship removal)
+
+#TODO: Succession Rights (in this sense, shifting to primogeniture)
