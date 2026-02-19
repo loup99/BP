@@ -1361,8 +1361,9 @@ setup_governments_based_on_dlc = {
 			destroy_title_if_landless_effect = { TITLE = title:e_magister_military_ere }
 			destroy_title_if_landless_effect = { TITLE = title:e_magister_military_italy }
 			
+			#Roman Admin
 			every_ruler = {
-				limit = { government_has_flag = government_is_roman_administrative }
+				limit = { has_government = roman_administrative_government }
 				change_government = roman_dynastic_government
 				
 				#Fixup Laws
@@ -1370,12 +1371,41 @@ setup_governments_based_on_dlc = {
 				remove_realm_law_if_has_it_effect = { LAW = acclamation_succession_law }
 				add_law_if_not_has_it_effect = { LAW = roman_dynastic_authority_1 }
 			}
+			#Sub-Roman Admin
+			every_ruler = {
+				limit = { has_government = subroman_administrative_government }
+				change_government = subroman_dynastic_government
+				
+				#Fixup Laws
+				remove_realm_law_if_has_it_effect = { LAW = appointment_succession_law }
+				remove_realm_law_if_has_it_effect = { LAW = acclamation_succession_law }
+				add_law_if_not_has_it_effect = { LAW = roman_dynastic_authority_1 }
+			}
+			#Federates
+			every_ruler = {
+				limit = { has_government = roman_federate_government }
+				
+				if = {
+					limit = { culture = { has_cultural_era_or_later = culture_era_classical_antiquity } }
+					change_government = high_tribal_government
+					add_law_if_not_has_it_effect = { LAW = high_tribal_organization_0 }
+				}
+				else = {
+					change_government = tribal_government
+					add_law_if_not_has_it_effect = { LAW = tribal_authority_0 }
+				}
+				
+				#Fixup Laws
+				remove_realm_law_if_has_it_effect = { LAW = appointment_succession_law }
+				remove_realm_law_if_has_it_effect = { LAW = acclamation_succession_law }
+			}
 		}
 		else = {
 			every_ruler = {
 				limit = {
 					OR = {
 						government_has_flag = government_is_roman_administrative
+						government_has_flag = government_is_subroman_administrative
 						government_has_flag = government_is_roman_subordinate_federate
 					}
 				}
@@ -1391,6 +1421,7 @@ setup_governments_based_on_dlc = {
 				if = {
 					limit = {
 						this = this.house.house_head
+						this.primary_title.tier >= tier_duchy #Don't want nf running counties...
 						any_held_title = { count < 1 is_noble_family_title = yes }
 					}
 					if = {
@@ -1400,6 +1431,16 @@ setup_governments_based_on_dlc = {
 							tier = duchy
 							article = DEFAULT_TITLE_NAME_ARTICLE
 							government = roman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+					else_if = {
+						limit = { government_has_flag = government_is_subroman_administrative }
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = duchy
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = subroman_administrative_government
 							save_scope_as = new_title
 						}
 					}

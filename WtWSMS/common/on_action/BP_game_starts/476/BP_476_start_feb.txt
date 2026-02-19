@@ -113,6 +113,14 @@ BP_setup_realm_laws_476_feb_DLC = {
 		#Roman Diarchy Laws
 		title:h_eastern_roman_empire.holder = { add_realm_law_skip_effects = roman_chancellor_law }
 		title:h_western_roman_empire.holder = { add_realm_law_skip_effects = roman_marshal_law }
+		#Barbarian State Roman Orientations
+		title:k_visigoths.holder = { add_realm_law_skip_effects = non_roman_minority_rule_law_2 }
+		title:k_suebia.holder = { add_realm_law_skip_effects = non_roman_minority_rule_law_2 }
+		title:k_burgundians.holder = { add_realm_law_skip_effects = non_roman_minority_rule_law_3 }
+		title:k_vandalica.holder = { add_realm_law_skip_effects = non_roman_minority_rule_law_0 }
+		title:k_altava.holder = { add_realm_law_skip_effects = non_roman_minority_rule_law_3 }
+		title:d_auresia.holder = { add_realm_law_skip_effects = non_roman_minority_rule_law_3 }
+		title:d_triveria.holder = { add_realm_law_skip_effects = non_roman_minority_rule_law_4 }
 	}
 }
 BP_setup_vassal_contracts_476_feb = {
@@ -214,14 +222,28 @@ BP_setup_vassal_contracts_476_feb_DLC = {
 				limit = { this.primary_title = title:d_noricum_ripense }
 				vassal_contract_set_obligation_level = {
 					type = roman_administrative_themes
-					level = 1
+					level = roman_admin_theme_limitanei_value
 				}
 			}
 			if = {
 				limit = { this.primary_title = title:d_moesia_prima }
 				vassal_contract_set_obligation_level = {
 					type = roman_administrative_themes
-					level = 1
+					level = roman_admin_theme_limitanei_value
+				}
+			}
+			if = {
+				limit = { this.primary_title = title:d_verodunum }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_themes
+					level = roman_admin_theme_limitanei_value
+				}
+			}
+			if = {
+				limit = { this.primary_title = title:d_celtica }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_themes
+					level = roman_admin_theme_limitanei_value
 				}
 			}
 		}
@@ -1045,13 +1067,15 @@ bp_game_start_after_lobby_476_feb = {
 	trigger = { current_date = 476.2.2 }
 	on_actions = {
 		#Laws & Obligations
-		BP_setup_roman_province_troops_476_feb
+		BP_setup_roman_border_troops_476_feb_DLC
+		BP_setup_federate_troops_476_feb_DLC
 		BP_setup_roman_council_476_feb
 		BP_set_employers_476_feb_no_DLC
+		BP_set_armies_476_feb_DLC
 	}
 }
 
-BP_setup_roman_province_troops_476_feb = {
+BP_setup_roman_border_troops_476_feb_DLC = {
 	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
 	effect = {
 		title:d_noricum_ripense.holder = {
@@ -1096,8 +1120,78 @@ BP_setup_roman_province_troops_476_feb = {
 				title = title:d_moesia_prima
 			}
 		}
+		title:d_celtica.holder = {
+			title:d_celtica = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_celtica
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_celtica
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_celtica
+			}
+		}
+		title:d_verodunum.holder = {
+			title:d_verodunum = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_verodunum
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_verodunum
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_verodunum
+			}
+		}
 	}
 }
+
+BP_setup_federate_troops_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:d_orleans_alans.holder = {
+			title:d_orleans_alans = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans_alans
+			}
+			create_maa_regiment = {
+				type = horse_archers
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans_alans
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans_alans
+			}
+		}
+	}
+}
+
 
 BP_setup_roman_council_476_feb = {
 	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
@@ -1125,7 +1219,36 @@ BP_setup_roman_council_476_feb = {
 				level = roman_admin_theme_ministry_military_value
 			}
 		}
-		#Create the WRE MM Army
+		
+		#ERE
+		title:h_eastern_roman_empire.holder = {
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_military_ere.holder
+				POSITION = councillor_marshal_roman
+			}
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_offices_ere.holder
+				POSITION = councillor_chancellor_roman
+			}
+		}
+		title:e_magister_offices_ere.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
+			}
+		}
+		title:e_magister_military_ere.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_military_value
+			}
+		}
+	}
+}
+
+BP_set_armies_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
 		title:e_magister_military_wre.holder = {
 			create_maa_regiment = {
 				type = praetorian
@@ -1152,31 +1275,6 @@ BP_setup_roman_council_476_feb = {
 				title = title:e_magister_military_wre
 			}
 		}
-		
-		#ERE
-		title:h_eastern_roman_empire.holder = {
-			make_councilor_of_type_if_not_already_effect = {
-				TARGET_CHAR = title:e_magister_military_ere.holder
-				POSITION = councillor_marshal_roman
-			}
-			make_councilor_of_type_if_not_already_effect = {
-				TARGET_CHAR = title:e_magister_offices_ere.holder
-				POSITION = councillor_chancellor_roman
-			}
-		}
-		title:e_magister_offices_ere.holder = {
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_themes
-				level = roman_admin_theme_ministry_civilian_value
-			}
-		}
-		title:e_magister_military_ere.holder = {
-			vassal_contract_set_obligation_level = {
-				type = roman_administrative_themes
-				level = roman_admin_theme_ministry_military_value
-			}
-		}
-		#Create the Eastern MM Army
 		title:e_magister_military_ere.holder = {
 			#Create the WRE MM Army
 			create_maa_regiment = {
@@ -1232,6 +1330,32 @@ BP_setup_roman_council_476_feb = {
 				check_can_recruit = no
 				size = 5
 				title = title:e_magister_military_ere
+			}
+		}
+		title:k_soissons.holder = {
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
 			}
 		}
 	}
