@@ -2,6 +2,7 @@
 	events = {}
 	on_actions = {
 		BP_got_a_roman_ministry
+		BP_keep_roman_federate_government
 	}
 }
 
@@ -33,6 +34,22 @@ BP_got_a_roman_ministry = {
 		}
 		#Set Up Roman Premiership if possible
 		this.liege_or_court_owner ?= { establish_premiership_if_necessary_effect = yes }
+	}
+}
+BP_keep_roman_federate_government = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		is_independent_ruler = no
+	}
+	effect = {
+		if = {
+			limit = {
+				
+				scope:title = { has_variable = roman_federate_title }
+				scope:previous_holder = { has_government = roman_subordinate_federate_government }
+			}
+			change_government = roman_subordinate_federate_government
+		}
 	}
 }
 
@@ -67,6 +84,25 @@ BP_vassal_changed_roman_admin = {
 					limit = { this = { has_variable = is_supreme_roman_ministry_title } }
 					root = { destroy_title = prev }
 				}
+			}
+		}
+	}
+}
+
+on_title_lost = {
+	events = {}
+	on_actions = {
+		BP_flip_federate_to_admin
+	}
+}
+BP_flip_federate_to_admin = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		if = {
+			limit = { is_landless_ruler = yes }
+			if = {
+				limit = { root.top_liege = { has_government = roman_administrative_government } }
+				change_government = roman_administrative_government
 			}
 		}
 	}
