@@ -1,0 +1,332 @@
+﻿namespace = BP_admin_to_feudal_events
+
+#####
+# 0000-0099: Various meta/management/hidden things & globals
+# 0100-0199: Solidification of Aristocracy
+#####
+
+scripted_trigger basic_game_requirements_for_transition_trigger = {
+	#CK2 was game start +50, but this won't work well with later bookmarks
+	#So using game_start+10 (to prevent from firing _too_ early, with events
+	#applicable after AD 500
+	current_date >= 450.1.1
+	#years_from_game_start > 10
+}
+scripted_trigger basic_character_requirements_for_transition_trigger = {
+	government_has_flag = government_is_roman_federate
+	primary_title = { tier > tier_barony }
+}
+
+#####
+# Aristocracy Solidification
+#####
+# 0100-0109: Hidden events
+# 0111-0199: Solidification of Aristocracy events
+#####
+
+scripted_effect increase_hereditary_rights_one_level_effect = {
+	if = {
+		limit = { vassal_contract_has_flag = succession_weight_dynastic_1 }
+		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_1 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = succession_weight_dynastic_2 }
+		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_2 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = succession_weight_dynastic_3 }
+		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_3 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = succession_weight_dynastic_4 }
+		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_4 }
+	}
+}
+scripted_effect advance_hereditary_rights_effect = {
+	if = {
+		limit = { NOT = { $CHAR$ = { vassal_contract_has_flag = succession_is_purely_dynastic } } }
+		$CHAR$ = { increase_hereditary_rights_one_level_effect = yes }
+	}
+	#If you're already at max, you get confed partition
+	#NB: this is *not* required for feudalism, but can be stacked to it
+	else = {
+		$CHAR$ = { add_realm_law_skip_effects = confederate_partition_succession_law }
+	}
+}
+scripted_effect apply_opinions_for_action = {
+	$KEY_CHAR$ = {
+		add_opinion = {
+			modifier = subroman_$TYPE$_my_hereditary_customs
+			target = $KEY_CHAR$.top_liege
+		}
+	}
+	$KEY_CHAR$.top_liege = {
+		every_vassal_or_below = {
+			limit = {
+				government_has_flag = government_is_roman_federate
+				NOT = { this = $KEY_CHAR$ }
+			}
+			add_opinion = {
+				modifier = subroman_$TYPE$_others_hereditary_customs
+				target = $KEY_CHAR$.top_liege
+			}
+		}
+	}
+}
+scripted_effect build_grudge_rivalry_effect = {
+	$KEY_CHAR$ = {
+		if = {
+			limit = {
+				has_trait = ambitious
+				NOT = { has_relation_rival = $KEY_CHAR$.top_liege }
+			}
+			random_list = {
+				1 = {
+					set_relation_rival = $KEY_CHAR$.top_liege
+					if = {
+						limit = { has_relation_grudge = $KEY_CHAR$.top_liege }
+						remove_relation_grudge = $KEY_CHAR$.top_liege
+					}
+					modifier = {
+						factor = 0
+						NOT = { has_relation_potential_rival = $KEY_CHAR$.liege }
+					}
+				}
+				1 = {
+					set_relation_potential_rival = $KEY_CHAR$.top_liege
+					modifier = {
+						factor = 0
+						has_relation_potential_rival = $KEY_CHAR$.liege
+					}
+				}
+				1 = {
+					set_relation_grudge = $KEY_CHAR$.top_liege
+					modifier = {
+						factor = 0
+						OR = {
+							has_relation_potential_rival = $KEY_CHAR$.top_liege
+							has_relation_rival = $KEY_CHAR$.top_liege
+						}
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_trait = content }
+				NOT = { has_relation_rival = $KEY_CHAR$.top_liege }
+			}
+			random_list = {
+				1 = {
+					set_relation_rival = $KEY_CHAR$.top_liege
+					if = {
+						limit = { has_relation_grudge = $KEY_CHAR$.top_liege }
+						remove_relation_grudge = $KEY_CHAR$.top_liege
+					}
+					modifier = {
+						factor = 0
+						NOT = { has_relation_potential_rival = $KEY_CHAR$.liege }
+					}
+				}
+				1 = {
+					set_relation_potential_rival = $KEY_CHAR$.top_liege
+					modifier = {
+						factor = 0
+						has_relation_potential_rival = $KEY_CHAR$.liege
+					}
+				}
+				1 = {
+					set_relation_grudge = $KEY_CHAR$.top_liege
+					modifier = {
+						factor = 0
+						OR = {
+							has_relation_potential_rival = $KEY_CHAR$.top_liege
+							has_relation_rival = $KEY_CHAR$.top_liege
+						}
+					}
+				}
+				1 = {}
+			}
+		}
+	}
+}
+
+
+BP_admin_to_feudal_events.0100 = { #Hidden event, fire to the *top* liege, not the actual character
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		basic_game_requirements_for_transition_trigger = yes
+		ROOT = {
+			basic_character_requirements_for_transition_trigger = yes
+			#Hasn't recently had a subroman decay event for this ruler
+			NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
+			NOT = { has_variable = aristocracy_solidification_cooldown }
+			NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
+			NOT = { has_realm_law = confederate_partition_succession_law }
+		}
+	}
+	
+	immediate = {
+		save_scope_as = the_vassal
+		if = {
+			limit = { ROOT = { is_ai = no } }
+			trigger_event = { id = BP_admin_to_feudal_events.0110 }
+		}
+		else = { #AI should always go for it; don't bother with asking or its effects
+			ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0111 } }
+		}
+	}
+}
+
+#Aristocracy Solidification moves a step towards feudalism
+BP_admin_to_feudal_events.0110 = { #Tell non-ai they have a chance
+	type = character_event
+	title = BP_admin_to_feudal_events.0110.title
+	desc = BP_admin_to_feudal_events.0110.desc
+	
+	theme = stewardship_domain_focus
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = ROOT
+		animation = steward
+	}
+	
+	immediate = {
+		ROOT.top_liege = { save_scope_as = the_top_liege }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0110.inform_top_liege
+		
+		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0111 } }
+		
+		add_prestige = 100
+		change_influence = 100
+	}
+	option = {
+		name = BP_admin_to_feudal_events.0110.decline
+		
+		add_prestige = -100
+		change_influence = -100
+	}
+}
+BP_admin_to_feudal_events.0111 = {
+	type = character_event
+	title = BP_admin_to_feudal_events.0111.title
+	desc = BP_admin_to_feudal_events.0111.desc
+	
+	theme = stewardship_domain_focus
+	content_source = dlc_WtWSMS
+	
+	left_portrait = {
+		character = scope:the_vassal
+		animation = steward
+	}
+	
+	right_portrait = {
+		character = ROOT
+		animation = personality_rational
+	}
+	
+	option = {
+		trigger = { scope:the_vassal = { is_ai = yes } }
+		name = BP_admin_to_feudal_events.0111.enforce_law_ai
+		
+		apply_opinions_for_action = {
+			KEY_CHAR = scope:the_vassal
+			TYPE = blocked
+		}
+		
+		ai_chance = { base = 10 }
+	}
+	
+	option = {
+		trigger = { scope:the_vassal = { is_ai = no } }
+		name = BP_admin_to_feudal_events.0111.enforce_law
+		
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0113 } }
+		show_as_tooltip = {
+			apply_opinions_for_action = {
+				KEY_CHAR = scope:the_vassal
+				TYPE = blocked
+			}
+		}
+		
+		ai_chance = { base = 10 }
+	}
+	
+	option = {
+		trigger = { scope:the_vassal = { is_ai = yes } }
+		name = BP_admin_to_feudal_events.0111.allow_custom_ai
+		
+		advance_hereditary_rights_effect = { CHAR = scope:the_vassal }
+		apply_opinions_for_action = {
+			KEY_CHAR = scope:the_vassal
+			TYPE = allowed
+		}
+		
+		ai_chance = { base = 90 }
+	}
+	
+	option = {
+		trigger = { scope:the_vassal = { is_ai = no } }
+		name = BP_admin_to_feudal_events.0111.allow_custom
+		
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0112 } }
+		
+		show_as_tooltip = {
+			advance_hereditary_rights_effect = { CHAR = scope:the_vassal }
+			apply_opinions_for_action = {
+				KEY_CHAR = scope:the_vassal
+				TYPE = allowed
+			}
+		}
+		
+		ai_chance = { base = 90 }
+	}
+}
+BP_admin_to_feudal_events.0112 = { #Tell non-ai liege approved
+	type = letter_event
+	sender = root.top_liege
+	opening = BP_admin_to_feudal_events.0112.title
+	desc = BP_admin_to_feudal_events.0112.desc
+	
+	content_source = dlc_WtWSMS
+	
+	immediate = {
+		root.top_liege = { save_scope_as = target }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0112.ok
+		advance_hereditary_rights_effect = { CHAR = root }
+		apply_opinions_for_action = {
+			KEY_CHAR = root
+			TYPE = allowed
+		}
+	}
+}
+BP_admin_to_feudal_events.0113 = { #Tell non-ai liege declined
+	type = letter_event
+	sender = root.top_liege
+	opening = BP_admin_to_feudal_events.0113.title
+	desc = BP_admin_to_feudal_events.0113.desc
+	
+	content_source = dlc_WtWSMS
+	
+	immediate = {
+		root.top_liege = { save_scope_as = target }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0113.ok
+		apply_opinions_for_action = {
+			KEY_CHAR = root
+			TYPE = blocked
+		}
+		build_grudge_rivalry_effect = { KEY_CHAR = scope:the_vassal }
+	}
+} 
