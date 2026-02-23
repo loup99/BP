@@ -1,18 +1,16 @@
 ﻿five_year_playable_pulse = {
 	on_actions = {
 		delay = { days = { 30 1095 } } #one month to 3 years
-		BP_feudal_mutation
-		BP_admin_aristocracy_solidification
+		BP_admin_to_feudal_mutation
+		BP_admin_to_feudal_aristocracy_solidification
+		BP_admin_to_feudal_military_landing
 	}
 }
 
-BP_feudal_mutation = {
+BP_admin_to_feudal_mutation = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_governments_trigger = yes
-		government_has_flag = government_is_roman_federate
-		NOT = { has_character_flag = had_a_feudal_transition_event }
-		#Maximal transitions
-		NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
+		bp_meets_requirements_to_fedualize_trigger = yes
 	}
 	random_events = {
 		chance_to_happen = 7 #7% every 5 years implies a bit less than 67% chance every 75 years
@@ -20,18 +18,46 @@ BP_feudal_mutation = {
 	}
 }
 
-#Solidification of the Aristocracy as a hereditary institution
-BP_admin_aristocracy_solidification = {
+BP_admin_to_feudal_aristocracy_solidification = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_governments_trigger = yes
-		government_has_flag = government_is_roman_federate
-		NOT = { has_character_flag = had_a_feudal_transition_event }
-		#Specific Values
-		NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
-		NOT = { has_realm_law = confederate_partition_succession_law }
+		bp_meets_requirements_for_hereditary_increase_trigger = yes
 	}
 	random_events = {
 		chance_to_happen = 7 #7% every 5 years implies a bit less than 67% chance every 75 years
 		100 = BP_admin_to_feudal_events.0100
+	}
+}
+
+BP_admin_to_feudal_military_landing = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		bp_meets_requirements_for_military_increase_trigger = yes
+	}
+	random_events = {
+		chance_to_happen = 7 #7% every 5 years implies a bit less than 67% chance every 75 years
+		100 = BP_admin_to_feudal_events.0200
+	}
+}
+
+on_war_won_attacker = {
+	on_actions = {
+		delay = { days = { 7 28 } } #one to four weeks
+		BP_admin_to_fedual_military_landing_post_war
+	}
+}
+
+#When we _win_ wars we have a chance of having landing fire off
+#As is per-war instead of per 5 year block, it's a 50% chance every 10 wars won
+BP_admin_to_fedual_military_landing_post_war = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		this.top_liege = this
+	}
+	effect = {
+		random_vassal = {
+			limit = { bp_general_feudalization_event_trigger = yes }
+			trigger_event = { on_action = BP_admin_to_feudal_military_landing }
+		}
 	}
 }

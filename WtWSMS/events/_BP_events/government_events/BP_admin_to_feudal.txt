@@ -4,6 +4,7 @@
 # 0000-0049: Various meta/management/hidden things
 # 0050-0099: Feudal Mutation
 # 0100-0199: Solidification of Aristocracy
+# 0200-0299: Landing of Military
 #####
 
 #Global Triggers
@@ -48,6 +49,28 @@ scripted_effect advance_hereditary_rights_effect = {
 		$CHAR$ = { add_realm_law_skip_effects = confederate_partition_succession_law }
 	}
 }
+scripted_effect increase_military_landing_one_level_effect = {
+	if = {
+		limit = { vassal_contract_has_flag = roman_federate_military_landed_0 }
+		vassal_contract_set_obligation_level = { type = roman_federate_military_landed level = roman_federate_military_landed_1 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = roman_federate_military_landed_1 }
+		vassal_contract_set_obligation_level = { type = roman_federate_military_landed level = roman_federate_military_landed_2 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = roman_federate_military_landed_2 }
+		vassal_contract_set_obligation_level = { type = roman_federate_military_landed level = roman_federate_military_landed_3 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = roman_federate_military_landed_3 }
+		vassal_contract_set_obligation_level = { type = roman_federate_military_landed level = roman_federate_military_landed_4 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = roman_federate_military_landed_4 }
+		vassal_contract_set_obligation_level = { type = roman_federate_military_landed level = roman_federate_military_landed_5 }
+	}
+}
 scripted_effect set_feudal_transition_cooldown_effect = {
 	add_character_flag = {
 		flag = had_a_feudal_transition_event
@@ -73,16 +96,6 @@ scripted_effect set_feudal_transition_cooldown_effect = {
 # 0060-0069: Feudal Mutation Roman Federate events
 #####
 
-#Scripted Triggers
-scripted_trigger meets_requirements_to_fedualize_trigger = {
-	basic_character_requirements_for_transition_trigger = yes
-	NOT = { has_character_flag = had_a_feudal_transition_event }
-	#Is not still in cooldown from last transition
-	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
-	NOT = { has_variable = aristocracy_solidification_cooldown }
-	#Has met the general requirements
-	vassal_contract_has_flag = succession_is_purely_dynastic
-}
 #Scripted Effects
 scripted_effect shift_government_effect = {
 	remove_realm_law_if_has_it_effect = { LAW = roman_federate_appointment_succession_law }
@@ -110,15 +123,22 @@ scripted_effect shift_government_effect = {
 }
 scripted_effect more_feudalization_effect = {
 	if = {
-		limit = { meets_requirements_to_fedualize_trigger = yes }
+		limit = { bp_meets_requirements_to_fedualize_trigger = yes }
 		trigger_event = { id = BP_admin_to_feudal_events.0060 }
 	}
 	else_if = {
 		limit = { government_has_flag = government_is_roman_federate }
+		add_character_flag = {
+			flag = had_a_feudal_transition_event
+			years = had_a_feudal_transition_event_cooldown_years
+		}
 		#All the rights shift instead, and attach variables
 		increase_hereditary_rights_one_level_effect = yes
 		this.primary_title = { set_variable = aristocracy_solidification_cooldown }
 		this = { set_variable = aristocracy_solidification_cooldown }
+		increase_military_landing_one_level_effect = yes
+		this.primary_title = { set_variable = military_landing_cooldown }
+		this = { set_variable = military_landing_cooldown }
 	}
 }
 scripted_effect further_feudalization_of_vassals_neighbors_effect = {
@@ -139,7 +159,7 @@ BP_admin_to_feudal_events.0050 = { #Hidden Event; sets up everything
 	
 	trigger = {
 		basic_game_requirements_for_transition_trigger = yes
-		meets_requirements_to_fedualize_trigger = yes
+		bp_meets_requirements_to_fedualize_trigger = yes
 	}
 	
 	immediate = {
@@ -241,19 +261,6 @@ BP_admin_to_feudal_events.0061 = { #Inform the liege
 # 0111-0199: Solidification of Aristocracy events
 #####
 
-#Scripted Triggers
-scripted_trigger meets_requirements_for_hereditary_increase_trigger = {
-		#Hasn't recently had a subroman decay event for this ruler
-		NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
-		NOT = { has_variable = aristocracy_solidification_cooldown }
-		trigger_if = {
-			limit = { vassal_contract_has_flag = succession_is_purely_dynastic }
-			NOT = { has_realm_law = confederate_partition_succession_law }
-		}
-		trigger_else = {
-			NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
-		}
-}
 #Scripted Effects
 scripted_effect apply_opinions_for_action = {
 	$KEY_CHAR$ = {
@@ -353,7 +360,7 @@ scripted_effect build_grudge_rivalry_effect = {
 	}
 }
 
-BP_admin_to_feudal_events.0100 = { #Hidden event, fire to the *top* liege, not the actual character
+BP_admin_to_feudal_events.0100 = {
 	type = character_event
 	hidden = yes
 	
@@ -361,7 +368,7 @@ BP_admin_to_feudal_events.0100 = { #Hidden event, fire to the *top* liege, not t
 		basic_game_requirements_for_transition_trigger = yes
 		ROOT = {
 			basic_character_requirements_for_transition_trigger = yes
-			meets_requirements_for_hereditary_increase_trigger = yes
+			bp_meets_requirements_for_hereditary_increase_trigger = yes
 		}
 	}
 	
@@ -503,5 +510,219 @@ BP_admin_to_feudal_events.0113 = { #Tell liege declined
 			TYPE = blocked
 		}
 		build_grudge_rivalry_effect = { KEY_CHAR = scope:the_vassal }
+	}
+}
+
+#####
+# Military Landing
+#####
+# 0200-0209: Hidden events
+# 0211-0299: Landing of Military Events
+#####
+
+#Scripted Effects
+scripted_effect title_maa_desertion = {
+	#Desertions
+	custom_tooltip = {
+		text = title_soldiers_may_desert_tt
+		every_title_maa_regiment = {
+			if = {
+				limit = { maa_size > 1 }
+				random_list = {
+					100 = { #At 0: 395/395/525
+						destroy_maa_regiment = yes
+						#The likelihood of desertion grows the worse your martial is
+						modifier = { factor = 0 maa_size > 1 }
+						modifier = { factor = 0 prev.holder = { martial > 10 } }
+						modifier = { add = 5 prev.holder = { martial <= 9 } }
+						modifier = { add = 10 prev.holder = { martial <= 8 } }
+						modifier = { add = 15 prev.holder = { martial <= 7 } }
+						modifier = { add = 20 prev.holder = { martial <= 6 } }
+						modifier = { add = 25 prev.holder = { martial <= 5 } }
+						modifier = { add = 30 prev.holder = { martial <= 4 } }
+						modifier = { add = 40 prev.holder = { martial <= 3 } }
+						modifier = { add = 50 prev.holder = { martial <= 2 } }
+						modifier = { add = 100 prev.holder = { martial <= 1 } }
+					}
+					100 = {
+						change_maa_regiment_size = {
+							size = -2
+							reinforce = no
+						}
+						#The likelihood of desertion grows the worse your martial is
+						modifier = { factor = 0 maa_size < 2 } #Can't have this occur for small MAAs
+						modifier = { factor = 0 prev.holder = { martial > 20 } }
+						modifier = { add = 5 prev.holder = { martial <= 19 } }
+						modifier = { add = 10 prev.holder = { martial <= 17 } }
+						modifier = { add = 15 prev.holder = { martial <= 15 } }
+						modifier = { add = 20 prev.holder = { martial <= 13 } }
+						modifier = { add = 25 prev.holder = { martial <= 11 } }
+						modifier = { add = 30 prev.holder = { martial <= 9 } }
+						modifier = { add = 40 prev.holder = { martial <= 7 } }
+						modifier = { add = 50 prev.holder = { martial <= 5 } }
+						modifier = { add = 100 prev.holder = { martial <= 3 } }
+					}
+					100 = {
+						change_maa_regiment_size = {
+							size = -1
+							reinforce = no
+						}
+						#The likelihood of desertion grows the worse your martial is
+						modifier = { factor = 0 maa_size <= 1 }
+						modifier = { factor = 0 prev.holder = { martial > 30 } }
+						modifier = { add = 10 prev.holder = { martial <= 29 } }
+						modifier = { add = 20 prev.holder = { martial <= 25 } }
+						modifier = { add = 30 prev.holder = { martial <= 21 } }
+						modifier = { add = 40 prev.holder = { martial <= 17 } }
+						modifier = { add = 50 prev.holder = { martial <= 13 } }
+						modifier = { add = 75 prev.holder = { martial <= 9 } }
+						modifier = { add = 100 prev.holder = { martial <= 5 } }
+						modifier = { add = 200 prev.holder = { martial <= 1 } }
+					}
+					100 = { modifier = { factor = 0 prev.holder = { martial <= 5 } } } #If you're a dolt, it's over
+				}
+			}
+		}
+	}
+}
+
+BP_admin_to_feudal_events.0200 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		basic_game_requirements_for_transition_trigger = yes
+		ROOT = {
+			basic_character_requirements_for_transition_trigger = yes
+			bp_meets_requirements_for_military_increase_trigger = yes
+		}
+	}
+	
+	immediate = {
+		save_scope_as = the_vassal
+		set_feudal_transition_cooldown_effect = { SPECIFIC_TYPE = military_landing_cooldown }
+		trigger_event = { id = BP_admin_to_feudal_events.0210 }
+	}
+}
+
+#Aristocracy Solidification moves a step towards feudalism
+BP_admin_to_feudal_events.0210 = {
+	type = character_event
+	title = BP_admin_to_feudal_events.0210.title
+	desc = BP_admin_to_feudal_events.0210.desc
+	
+	theme = martial_authority_focus
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = ROOT
+		animation = marshal
+	}
+	
+	immediate = {
+		ROOT.top_liege = { save_scope_as = the_top_liege }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0210.inform_top_liege
+		
+		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0211 } }
+		
+		add_prestige = 50
+		
+		ai_chance = { base = 100 }
+	}
+	option = {
+		name = BP_admin_to_feudal_events.0210.decline
+		
+		add_prestige = -50
+		add_character_modifier = {
+			modifier = roman_federate_refused_to_land_troops
+			years = had_a_feudal_transition_event_cooldown_years
+		}
+		
+		ai_chance = { base = 0 }
+	}
+}
+BP_admin_to_feudal_events.0211 = {
+	type = character_event
+	title = BP_admin_to_feudal_events.0211.title
+	desc = BP_admin_to_feudal_events.0211.desc
+	
+	theme = stewardship_domain_focus
+	content_source = dlc_WtWSMS
+	
+	left_portrait = {
+		character = scope:the_vassal
+		animation = steward
+	}
+	
+	right_portrait = {
+		character = ROOT
+		animation = personality_rational
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0211.keep_standing
+		
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0213 } }
+		
+		show_as_tooltip = {
+			scope:the_vassal.primary_title = { title_maa_desertion = yes }
+		}
+		
+		ai_chance = {
+			base = 10
+			modifier = { factor = 0 scope:the_vassal.martial < 5 } #We can't afford not to...
+		}
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0211.allow_landing
+		
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0212 } }
+		
+		show_as_tooltip = {
+			scope:the_vassal = { increase_military_landing_one_level_effect = yes }
+		}
+		
+		ai_chance = {
+			base = 90
+			modifier = { factor = 0 scope:the_vassal.martial > 30 } #Won't be impacted by desertion
+		}
+	}
+}
+BP_admin_to_feudal_events.0212 = { #Tell liege approved
+	type = letter_event
+	sender = root.top_liege
+	opening = BP_admin_to_feudal_events.0212.title
+	desc = BP_admin_to_feudal_events.0212.desc
+	
+	content_source = dlc_WtWSMS
+	
+	immediate = {
+		root.top_liege = { save_scope_as = target }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0212.ok
+		increase_military_landing_one_level_effect = yes
+	}
+}
+BP_admin_to_feudal_events.0213 = { #Tell liege declined
+	type = letter_event
+	sender = root.top_liege
+	opening = BP_admin_to_feudal_events.0213.title
+	desc = BP_admin_to_feudal_events.0213.desc
+	
+	content_source = dlc_WtWSMS
+	
+	immediate = {
+		root.top_liege = { save_scope_as = target }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0213.ok
+		title_maa_desertion = yes
 	}
 }
