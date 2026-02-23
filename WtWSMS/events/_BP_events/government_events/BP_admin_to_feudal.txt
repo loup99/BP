@@ -1,10 +1,12 @@
 ﻿namespace = BP_admin_to_feudal_events
 
 #####
-# 0000-0099: Various meta/management/hidden things & globals
+# 0000-0049: Various meta/management/hidden things
+# 0050-0099: Feudal Mutation
 # 0100-0199: Solidification of Aristocracy
 #####
 
+#Global Triggers
 scripted_trigger basic_game_requirements_for_transition_trigger = {
 	#CK2 was game start +50, but this won't work well with later bookmarks
 	#So using game_start+10 (to prevent from firing _too_ early, with events
@@ -16,14 +18,7 @@ scripted_trigger basic_character_requirements_for_transition_trigger = {
 	government_has_flag = government_is_roman_federate
 	primary_title = { tier > tier_barony }
 }
-
-#####
-# Aristocracy Solidification
-#####
-# 0100-0109: Hidden events
-# 0111-0199: Solidification of Aristocracy events
-#####
-
+#Global Effects
 scripted_effect increase_hereditary_rights_one_level_effect = {
 	if = {
 		limit = { vassal_contract_has_flag = succession_weight_dynastic_1 }
@@ -53,6 +48,195 @@ scripted_effect advance_hereditary_rights_effect = {
 		$CHAR$ = { add_realm_law_skip_effects = confederate_partition_succession_law }
 	}
 }
+
+#####
+# Feudal Mutation
+#####
+# 0050-0059: Feudal Mutation hidden events
+# 0060-0069: Feudal Mutation Roman Federate events
+#####
+
+#Scripted Triggers
+scripted_trigger meets_requirements_to_fedualize_trigger = {
+	basic_character_requirements_for_transition_trigger = yes
+	#Is not still in cooldown from last transition
+	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
+	NOT = { has_variable = aristocracy_solidification_cooldown }
+	#Has met the general requirements
+	vassal_contract_has_flag = succession_is_purely_dynastic
+}
+#Scripted Effects
+scripted_effect shift_government_effect = {
+	remove_realm_law_if_has_it_effect = { LAW = roman_federate_appointment_succession_law }
+	remove_realm_law_if_has_it_effect = { LAW = imperial_bureaucracy_0 }
+	remove_realm_law_if_has_it_effect = { LAW = imperial_bureaucracy_1 }
+	remove_realm_law_if_has_it_effect = { LAW = imperial_bureaucracy_2 }
+	remove_realm_law_if_has_it_effect = { LAW = imperial_bureaucracy_3 }
+	
+	switch = {
+		trigger = has_character_flag
+		
+		transition_to_feudal_government = {
+			change_government = feudal_government
+			add_law_if_not_has_it_effect = { LAW = confederate_partition_succession_law }
+			add_law_if_not_has_it_effect = { LAW = crown_authority_0 }
+			remove_character_flag = transition_to_feudal_government
+		}
+		transition_to_clan_government = {
+			change_government = clan_government
+			add_law_if_not_has_it_effect = { LAW = clan_impassive_partition_succession_law }
+			add_law_if_not_has_it_effect = { LAW = crown_authority_0 }
+			remove_character_flag = transition_to_clan_government
+		}
+	}
+}
+scripted_effect more_feudalization_effect = {
+	if = {
+		limit = { meets_requirements_to_fedualize_trigger = yes }
+		trigger_event = { id = BP_admin_to_feudal_events.0060 }
+	}
+	else_if = {
+		limit = { government_has_flag = government_is_roman_federate }
+		#All the rights shift instead, and attach variables
+		increase_hereditary_rights_one_level_effect = yes
+		this.primary_title = { set_variable = aristocracy_solidification_cooldown }
+		this = { set_variable = aristocracy_solidification_cooldown }
+	}
+}
+scripted_effect further_feudalization_of_vassals_neighbors_effect = {
+	every_vassal = { more_feudalization_effect = yes }
+	#Spreads out to neighbors
+	every_realm_county = {
+		every_neighboring_county = {
+			limit = { NOT = { this.holder = $KEY_CHAR$ } }
+			this.holder = { more_feudalization_effect = yes }
+		}
+	}
+}
+
+#The actual feudalization chain
+BP_admin_to_feudal_events.0050 = { #Hidden Event; sets up everything
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		basic_game_requirements_for_transition_trigger = yes
+		meets_requirements_to_fedualize_trigger = yes
+	}
+	
+	immediate = {
+		save_scope_as = the_key_feudalizing_char
+		add_character_flag = { flag = the_key_feudalizing_char days = 30 }
+		trigger_event = { id = BP_admin_to_feudal_events.0060 }
+	}
+}
+#Federate transition to Feudalism
+BP_admin_to_feudal_events.0060 = {
+	type = character_event
+	title = BP_admin_to_feudal_events.0060.title
+	desc = BP_admin_to_feudal_events.0060.desc
+	
+	theme = stewardship_domain_focus
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = ROOT
+		animation = steward
+	}
+	
+	immediate = {
+		save_scope_as = the_feudal_mutation_char
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				root.faith = { has_doctrine_parameter = right_to_rule_clan }
+				root.culture = { has_cultural_parameter = right_to_rule_clan }
+			}
+		}
+		name = BP_admin_to_feudal_events.0060.clan
+		
+		add_character_flag = transition_to_clan_government
+		shift_government_effect = yes
+		further_feudalization_of_vassals_neighbors_effect = { KEY_CHAR = scope:the_feudal_mutation_char }
+		
+		#Inform the liege if the key triggering character is the char
+		if = {
+			limit = { root = { has_character_flag = the_key_feudalizing_char } }
+			every_liege_or_above = { trigger_event = { id = BP_admin_to_feudal_events.0061 } }
+		}
+	}
+	option = {
+		trigger = {
+			OR = {
+				root.faith = { has_doctrine_parameter = right_to_rule_feudal }
+				root.culture = { has_cultural_parameter = right_to_rule_feudal }
+			}
+		}
+		fallback = yes
+		name = BP_admin_to_feudal_events.0060.feudal
+		
+		add_character_flag = transition_to_feudal_government
+		shift_government_effect = yes
+		further_feudalization_of_vassals_neighbors_effect = { KEY_CHAR = scope:the_feudal_mutation_char }
+		
+		#Inform the liege if the key triggering character is the char
+		if = {
+			limit = { root = { has_character_flag = the_key_feudalizing_char } }
+			every_liege_or_above = { trigger_event = { id = BP_admin_to_feudal_events.0061 } }
+		}
+	}
+}
+BP_admin_to_feudal_events.0061 = { #Inform the liege
+	type = character_event
+	title = BP_admin_to_feudal_events.0061.title
+	desc = BP_admin_to_feudal_events.0061.desc
+	theme = realm
+	
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = scope:the_key_feudalizing_char
+		animation = steward
+	}
+	
+	immediate = {}
+	
+	option = {
+		trigger = { scope:the_key_feudalizing_char = { has_government = clan_government } }
+		name = BP_admin_to_feudal_events.0061.ok
+		custom_tooltip = { text = the_vassal_has_changed_to_clan }
+	}
+	option = {
+		trigger = { scope:the_key_feudalizing_char = { has_government = feudal_government } }
+		fallback = yes
+		name = BP_admin_to_feudal_events.0061.ok
+		custom_tooltip = { text = the_vassal_has_changed_to_feudalism }
+	}
+}
+
+#####
+# Aristocracy Solidification
+#####
+# 0100-0109: Hidden events
+# 0111-0199: Solidification of Aristocracy events
+#####
+
+#Scripted Triggers
+scripted_trigger meets_requirements_for_hereditary_increase_trigger = {
+		#Hasn't recently had a subroman decay event for this ruler
+		NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
+		NOT = { has_variable = aristocracy_solidification_cooldown }
+		trigger_if = {
+			limit = { vassal_contract_has_flag = succession_is_purely_dynastic }
+			NOT = { has_realm_law = confederate_partition_succession_law }
+		}
+		trigger_else = {
+			NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
+		}
+}
+#Scripted Effects
 scripted_effect apply_opinions_for_action = {
 	$KEY_CHAR$ = {
 		add_opinion = {
@@ -151,7 +335,6 @@ scripted_effect build_grudge_rivalry_effect = {
 	}
 }
 
-
 BP_admin_to_feudal_events.0100 = { #Hidden event, fire to the *top* liege, not the actual character
 	type = character_event
 	hidden = yes
@@ -160,11 +343,7 @@ BP_admin_to_feudal_events.0100 = { #Hidden event, fire to the *top* liege, not t
 		basic_game_requirements_for_transition_trigger = yes
 		ROOT = {
 			basic_character_requirements_for_transition_trigger = yes
-			#Hasn't recently had a subroman decay event for this ruler
-			NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
-			NOT = { has_variable = aristocracy_solidification_cooldown }
-			NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
-			NOT = { has_realm_law = confederate_partition_succession_law }
+			meets_requirements_for_hereditary_increase_trigger = yes
 		}
 	}
 	
@@ -175,7 +354,7 @@ BP_admin_to_feudal_events.0100 = { #Hidden event, fire to the *top* liege, not t
 }
 
 #Aristocracy Solidification moves a step towards feudalism
-BP_admin_to_feudal_events.0110 = { #Tell non-ai they have a chance
+BP_admin_to_feudal_events.0110 = {
 	type = character_event
 	title = BP_admin_to_feudal_events.0110.title
 	desc = BP_admin_to_feudal_events.0110.desc
@@ -259,7 +438,7 @@ BP_admin_to_feudal_events.0111 = {
 		ai_chance = { base = 90 }
 	}
 }
-BP_admin_to_feudal_events.0112 = { #Tell non-ai liege approved
+BP_admin_to_feudal_events.0112 = { #Tell liege approved
 	type = letter_event
 	sender = root.top_liege
 	opening = BP_admin_to_feudal_events.0112.title
@@ -280,7 +459,7 @@ BP_admin_to_feudal_events.0112 = { #Tell non-ai liege approved
 		}
 	}
 }
-BP_admin_to_feudal_events.0113 = { #Tell non-ai liege declined
+BP_admin_to_feudal_events.0113 = { #Tell liege declined
 	type = letter_event
 	sender = root.top_liege
 	opening = BP_admin_to_feudal_events.0113.title
@@ -300,4 +479,4 @@ BP_admin_to_feudal_events.0113 = { #Tell non-ai liege declined
 		}
 		build_grudge_rivalry_effect = { KEY_CHAR = scope:the_vassal }
 	}
-} 
+}
