@@ -248,6 +248,11 @@ offer_foederatus_interaction = {
 			save_scope_as = liberate_vassals
 			add_claim_on_loss = no
 		}
+		create_title_and_vassal_change = {
+			type = swear_fealty
+			save_scope_as = vassalize_federate
+			add_claim_on_loss = no
+		}
 		scope:recipient = {
 			#Mark former counties for release
 			every_held_title = {
@@ -305,17 +310,15 @@ offer_foederatus_interaction = {
 				}
 			}
 		}
+		#Make new Liege
+		scope:recipient = { change_liege = { liege = scope:actor change = scope:vassalize_federate } }
+		
 		resolve_title_and_vassal_change = scope:grant_new_counties_to_recipient
 		resolve_title_and_vassal_change = scope:grant_old_titles_to_new_chars
 		resolve_title_and_vassal_change = scope:liberate_vassals
+		resolve_title_and_vassal_change = scope:vassalize_federate
 		
-		#scope:recipient = {
-		#	add_character_flag = default_federate
-		#	BP_break_subject_contract_and_establish_tributary_effect = {
-		#		TRIBUTARY = this
-		#		SUZERAIN = scope:actor
-		#	}
-		#}
+		scope:recipient = { change_government_roman_federate_effect = yes }
 		
 		#Create Titular title if primary isn't titular
 		#Avoids the edge case of migrating a landed title getting usurped almost immediately after migration
@@ -352,6 +355,7 @@ offer_foederatus_interaction = {
 ##### TODO (Beta): Convert request_foederatus_interaction to an actual negotiation
 request_foederatus_interaction = {
 	category = interaction_category_diplomacy
+	icon = federate
 	desc = request_foederatus_interaction_desc
 
 	is_shown = {
@@ -607,13 +611,14 @@ request_foederatus_interaction = {
 			}
 		}
 		
-		#scope:actor = {
-		#	add_character_flag = default_federate
-		#	BP_break_subject_contract_and_establish_tributary_effect = {
-		#		TRIBUTARY = this
-		#		SUZERAIN = scope:recipient
-		#	}
-		#}
+		create_title_and_vassal_change = {
+			type = swear_fealty
+			save_scope_as = vassalize_federate
+			add_claim_on_loss = no
+		}
+		scope:actor = { change_liege = { liege = scope:recipient change = scope:vassalize_federate } }
+		resolve_title_and_vassal_change = scope:vassalize_federate
+		scope:actor = { change_government_roman_federate_effect = yes }
 		
 		scope:actor = { trigger_event = BP_federate_interaction_events.0003 }
 	}
