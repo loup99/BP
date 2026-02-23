@@ -5,6 +5,7 @@
 # 0050-0099: Feudal Mutation
 # 0100-0199: Solidification of Aristocracy
 # 0200-0299: Landing of Military
+# 0300-0399: Domestic Taxation
 #####
 
 #Global Triggers
@@ -13,7 +14,7 @@ scripted_trigger basic_game_requirements_for_transition_trigger = {
 	#So using game_start+10 (to prevent from firing _too_ early, with events
 	#applicable after AD 500
 	current_date >= 450.1.1
-	#years_from_game_start > 10
+	years_from_game_start > 10
 }
 scripted_trigger basic_character_requirements_for_transition_trigger = {
 	government_has_flag = government_is_roman_federate
@@ -71,6 +72,24 @@ scripted_effect increase_military_landing_one_level_effect = {
 		vassal_contract_set_obligation_level = { type = roman_federate_military_landed level = roman_federate_military_landed_5 }
 	}
 }
+scripted_effect decay_domestic_taxation_one_level_effect = {
+	if = {
+		limit = { vassal_contract_has_flag = roman_federate_domestic_taxation_0 }
+		vassal_contract_set_obligation_level = { type = roman_federate_domestic_taxation level = roman_federate_domestic_taxation_1 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = roman_federate_domestic_taxation_1 }
+		vassal_contract_set_obligation_level = { type = roman_federate_domestic_taxation level = roman_federate_domestic_taxation_2 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = roman_federate_domestic_taxation_2 }
+		vassal_contract_set_obligation_level = { type = roman_federate_domestic_taxation level = roman_federate_domestic_taxation_3 }
+	}
+	else_if = {
+		limit = { vassal_contract_has_flag = roman_federate_domestic_taxation_3 }
+		vassal_contract_set_obligation_level = { type = roman_federate_domestic_taxation level = roman_federate_domestic_taxation_4 }
+	}
+}
 scripted_effect set_feudal_transition_cooldown_effect = {
 	add_character_flag = {
 		flag = had_a_feudal_transition_event
@@ -124,7 +143,7 @@ scripted_effect shift_government_effect = {
 scripted_effect more_feudalization_effect = {
 	if = {
 		limit = { bp_meets_requirements_to_fedualize_trigger = yes }
-		trigger_event = { id = BP_admin_to_feudal_events.0060 }
+		trigger_event = { id = BP_admin_to_feudal_events.0060  days = { 3 7 } }
 	}
 	else_if = {
 		limit = { government_has_flag = government_is_roman_federate }
@@ -139,6 +158,9 @@ scripted_effect more_feudalization_effect = {
 		increase_military_landing_one_level_effect = yes
 		this.primary_title = { set_variable = military_landing_cooldown }
 		this = { set_variable = military_landing_cooldown }
+		decay_domestic_taxation_one_level_effect = yes
+		this.primary_title = { set_variable = taxation_decay_cooldown }
+		this = { set_variable = taxation_decay_cooldown }
 	}
 }
 scripted_effect further_feudalization_of_vassals_neighbors_effect = {
@@ -165,7 +187,7 @@ BP_admin_to_feudal_events.0050 = { #Hidden Event; sets up everything
 	immediate = {
 		save_scope_as = the_key_feudalizing_char
 		add_character_flag = { flag = the_key_feudalizing_char days = 30 }
-		trigger_event = { id = BP_admin_to_feudal_events.0060 }
+		trigger_event = { id = BP_admin_to_feudal_events.0060 days = { 3 7 } }
 	}
 }
 #Federate transition to Feudalism
@@ -174,7 +196,7 @@ BP_admin_to_feudal_events.0060 = {
 	title = BP_admin_to_feudal_events.0060.title
 	desc = BP_admin_to_feudal_events.0060.desc
 	
-	theme = stewardship_domain_focus
+	theme = realm
 	content_source = dlc_WtWSMS
 	
 	right_portrait = {
@@ -202,7 +224,7 @@ BP_admin_to_feudal_events.0060 = {
 		#Inform the liege if the key triggering character is the char
 		if = {
 			limit = { root = { has_character_flag = the_key_feudalizing_char } }
-			every_liege_or_above = { trigger_event = { id = BP_admin_to_feudal_events.0061 } }
+			every_liege_or_above = { trigger_event = { id = BP_admin_to_feudal_events.0061 days = { 3 7 } } }
 		}
 	}
 	option = {
@@ -222,7 +244,7 @@ BP_admin_to_feudal_events.0060 = {
 		#Inform the liege if the key triggering character is the char
 		if = {
 			limit = { root = { has_character_flag = the_key_feudalizing_char } }
-			every_liege_or_above = { trigger_event = { id = BP_admin_to_feudal_events.0061 } }
+			every_liege_or_above = { trigger_event = { id = BP_admin_to_feudal_events.0061 days = { 3 7 } } }
 		}
 	}
 }
@@ -230,8 +252,8 @@ BP_admin_to_feudal_events.0061 = { #Inform the liege
 	type = character_event
 	title = BP_admin_to_feudal_events.0061.title
 	desc = BP_admin_to_feudal_events.0061.desc
-	theme = realm
 	
+	theme = realm
 	content_source = dlc_WtWSMS
 	
 	right_portrait = {
@@ -375,7 +397,7 @@ BP_admin_to_feudal_events.0100 = {
 	immediate = {
 		save_scope_as = the_vassal
 		set_feudal_transition_cooldown_effect = { SPECIFIC_TYPE = aristocracy_solidification_cooldown }
-		trigger_event = { id = BP_admin_to_feudal_events.0110 }
+		trigger_event = { id = BP_admin_to_feudal_events.0110 days = { 3 7 } }
 	}
 }
 
@@ -385,7 +407,7 @@ BP_admin_to_feudal_events.0110 = {
 	title = BP_admin_to_feudal_events.0110.title
 	desc = BP_admin_to_feudal_events.0110.desc
 	
-	theme = stewardship_domain_focus
+	theme = diplomacy
 	content_source = dlc_WtWSMS
 	
 	right_portrait = {
@@ -400,7 +422,7 @@ BP_admin_to_feudal_events.0110 = {
 	option = {
 		name = BP_admin_to_feudal_events.0110.inform_top_liege
 		
-		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0111 } }
+		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0111 days = { 3 7 } } }
 		
 		add_prestige = 50
 		change_influence = 50
@@ -421,7 +443,7 @@ BP_admin_to_feudal_events.0111 = {
 	title = BP_admin_to_feudal_events.0111.title
 	desc = BP_admin_to_feudal_events.0111.desc
 	
-	theme = stewardship_domain_focus
+	theme = diplomacy
 	content_source = dlc_WtWSMS
 	
 	left_portrait = {
@@ -440,7 +462,7 @@ BP_admin_to_feudal_events.0111 = {
 		add_prestige = 50
 		change_influence = 50
 		
-		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0113 } }
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0113 days = { 3 7 } } }
 		show_as_tooltip = {
 			apply_opinions_for_action = {
 				KEY_CHAR = scope:the_vassal
@@ -454,7 +476,7 @@ BP_admin_to_feudal_events.0111 = {
 	option = {
 		name = BP_admin_to_feudal_events.0111.allow_custom
 		
-		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0112 } }
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0112 days = { 3 7 } } }
 		
 		add_prestige = -50
 		change_influence = -50
@@ -601,17 +623,17 @@ BP_admin_to_feudal_events.0200 = {
 	immediate = {
 		save_scope_as = the_vassal
 		set_feudal_transition_cooldown_effect = { SPECIFIC_TYPE = military_landing_cooldown }
-		trigger_event = { id = BP_admin_to_feudal_events.0210 }
+		trigger_event = { id = BP_admin_to_feudal_events.0210 days = { 3 7 } }
 	}
 }
 
-#Aristocracy Solidification moves a step towards feudalism
+#Military landing moves a step towards feudalism
 BP_admin_to_feudal_events.0210 = {
 	type = character_event
 	title = BP_admin_to_feudal_events.0210.title
 	desc = BP_admin_to_feudal_events.0210.desc
 	
-	theme = martial_authority_focus
+	theme = martial
 	content_source = dlc_WtWSMS
 	
 	right_portrait = {
@@ -626,7 +648,7 @@ BP_admin_to_feudal_events.0210 = {
 	option = {
 		name = BP_admin_to_feudal_events.0210.inform_top_liege
 		
-		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0211 } }
+		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0211 days = { 3 7 } } }
 		
 		add_prestige = 50
 		
@@ -649,7 +671,7 @@ BP_admin_to_feudal_events.0211 = {
 	title = BP_admin_to_feudal_events.0211.title
 	desc = BP_admin_to_feudal_events.0211.desc
 	
-	theme = stewardship_domain_focus
+	theme = martial
 	content_source = dlc_WtWSMS
 	
 	left_portrait = {
@@ -665,7 +687,7 @@ BP_admin_to_feudal_events.0211 = {
 	option = {
 		name = BP_admin_to_feudal_events.0211.keep_standing
 		
-		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0213 } }
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0213 days = { 3 7 } } }
 		
 		show_as_tooltip = {
 			scope:the_vassal.primary_title = { title_maa_desertion = yes }
@@ -680,7 +702,7 @@ BP_admin_to_feudal_events.0211 = {
 	option = {
 		name = BP_admin_to_feudal_events.0211.allow_landing
 		
-		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0212 } }
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0212 days = { 3 7 } } }
 		
 		show_as_tooltip = {
 			scope:the_vassal = { increase_military_landing_one_level_effect = yes }
@@ -724,5 +746,269 @@ BP_admin_to_feudal_events.0213 = { #Tell liege declined
 	option = {
 		name = BP_admin_to_feudal_events.0213.ok
 		title_maa_desertion = yes
+	}
+}
+
+#####
+# Taxation Decay
+#####
+# 0300-0309: Hidden events
+# 0311-0399: Solidification of Aristocracy events
+#####
+
+#Scripted Effects
+scripted_effect kept_roman_taxation_liege_effect = {
+	#Desertions
+	custom_tooltip = {
+		text = peasants_may_abandon_the_lands_tt
+		every_sub_realm_county = {
+			random_list = {
+				100 = {
+					change_development_level = this.roman_federate_30_percent_development
+					add_county_modifier = { modifier = roman_federate_severe_depopulation years = feudalization_component_specific_cooldown_years }
+					#The likelihood of abandonment grows the worse your stewardship is
+					modifier = { factor = 0 development < 6 }
+					modifier = { factor = 0 this.holder = { stewardship > 10 } }
+					modifier = { add = 5 this.holder = { stewardship <= 9 } }
+					modifier = { add = 10 this.holder = { stewardship <= 8 } }
+					modifier = { add = 15 this.holder = { stewardship <= 7 } }
+					modifier = { add = 20 this.holder = { stewardship <= 6 } }
+					modifier = { add = 25 this.holder = { stewardship <= 5 } }
+					modifier = { add = 30 this.holder = { stewardship <= 4 } }
+					modifier = { add = 40 this.holder = { stewardship <= 3 } }
+					modifier = { add = 50 this.holder = { stewardship <= 2 } }
+					modifier = { add = 100 this.holder = { stewardship <= 1 } }
+				}
+				100 = {
+					change_development_level = this.roman_federate_20_percent_development
+					add_county_modifier = { modifier = roman_federate_moderate_depopulation years = feudalization_component_specific_cooldown_years }
+					#The likelihood of desertion grows the worse your stewardship is
+					modifier = { factor = 0 development < 5 }
+					modifier = { factor = 0 this.holder = { stewardship > 20 } }
+					modifier = { add = 5 this.holder = { stewardship <= 19 } }
+					modifier = { add = 10 this.holder = { stewardship <= 17 } }
+					modifier = { add = 15 this.holder = { stewardship <= 15 } }
+					modifier = { add = 20 this.holder = { stewardship <= 13 } }
+					modifier = { add = 25 this.holder = { stewardship <= 11 } }
+					modifier = { add = 30 this.holder = { stewardship <= 9 } }
+					modifier = { add = 40 this.holder = { stewardship <= 7 } }
+					modifier = { add = 50 this.holder = { stewardship <= 5 } }
+					modifier = { add = 100 this.holder = { stewardship <= 3 } }
+				}
+				100 = {
+					change_development_level = this.roman_federate_10_percent_development
+					add_county_modifier = { modifier = roman_federate_mild_depopulation years = feudalization_component_specific_cooldown_years }
+					#The likelihood of desertion grows the worse your stewardship is
+					modifier = { factor = 0 development < 2 }
+					modifier = { factor = 0 this.holder = { stewardship > 30 } }
+					modifier = { add = 10 this.holder = { stewardship <= 29 } }
+					modifier = { add = 20 this.holder = { stewardship <= 25 } }
+					modifier = { add = 30 this.holder = { stewardship <= 21 } }
+					modifier = { add = 40 this.holder = { stewardship <= 17 } }
+					modifier = { add = 50 this.holder = { stewardship <= 13 } }
+					modifier = { add = 75 this.holder = { stewardship <= 9 } }
+					modifier = { add = 100 this.holder = { stewardship <= 5 } }
+					modifier = { add = 200 this.holder = { stewardship <= 1 } }
+				}
+				100 = { modifier = { factor = 0 this.holder = { stewardship <= 5 } } } #If you're a dolt, it's over
+			}
+		}
+	}
+}
+scripted_effect kept_roman_taxation_vassal_effect = {
+	#Desertions
+	custom_tooltip = {
+		text = peasants_may_abandon_the_lands_tt
+		every_sub_realm_county = {
+			random_list = {
+				100 = {
+					change_development_level = this.roman_federate_15_percent_development
+					#The likelihood of abandonment grows the worse your stewardship is
+					modifier = { factor = 0 development < 3 }
+					modifier = { factor = 0 this.holder = { stewardship > 10 } }
+					modifier = { add = 5 this.holder = { stewardship <= 9 } }
+					modifier = { add = 10 this.holder = { stewardship <= 8 } }
+					modifier = { add = 15 this.holder = { stewardship <= 7 } }
+					modifier = { add = 20 this.holder = { stewardship <= 6 } }
+					modifier = { add = 25 this.holder = { stewardship <= 5 } }
+					modifier = { add = 30 this.holder = { stewardship <= 4 } }
+					modifier = { add = 40 this.holder = { stewardship <= 3 } }
+					modifier = { add = 50 this.holder = { stewardship <= 2 } }
+					modifier = { add = 100 this.holder = { stewardship <= 1 } }
+				}
+				100 = {
+					change_development_level = this.roman_federate_10_percent_development
+					#The likelihood of desertion grows the worse your stewardship is
+					modifier = { factor = 0 development < 2 }
+					modifier = { factor = 0 this.holder = { stewardship > 20 } }
+					modifier = { add = 5 this.holder = { stewardship <= 19 } }
+					modifier = { add = 10 this.holder = { stewardship <= 17 } }
+					modifier = { add = 15 this.holder = { stewardship <= 15 } }
+					modifier = { add = 20 this.holder = { stewardship <= 13 } }
+					modifier = { add = 25 this.holder = { stewardship <= 11 } }
+					modifier = { add = 30 this.holder = { stewardship <= 9 } }
+					modifier = { add = 40 this.holder = { stewardship <= 7 } }
+					modifier = { add = 50 this.holder = { stewardship <= 5 } }
+					modifier = { add = 100 this.holder = { stewardship <= 3 } }
+				}
+				100 = {
+					change_development_level = this.roman_federate_5_percent_development
+					#The likelihood of desertion grows the worse your stewardship is
+					modifier = { factor = 0 development < 1 }
+					modifier = { factor = 0 this.holder = { stewardship > 30 } }
+					modifier = { add = 10 this.holder = { stewardship <= 29 } }
+					modifier = { add = 20 this.holder = { stewardship <= 25 } }
+					modifier = { add = 30 this.holder = { stewardship <= 21 } }
+					modifier = { add = 40 this.holder = { stewardship <= 17 } }
+					modifier = { add = 50 this.holder = { stewardship <= 13 } }
+					modifier = { add = 75 this.holder = { stewardship <= 9 } }
+					modifier = { add = 100 this.holder = { stewardship <= 5 } }
+					modifier = { add = 200 this.holder = { stewardship <= 1 } }
+				}
+				100 = { modifier = { factor = 0 this.holder = { stewardship <= 5 } } } #If you're a dolt, it's over
+			}
+		}
+	}
+}
+
+BP_admin_to_feudal_events.0300 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		basic_game_requirements_for_transition_trigger = yes
+		ROOT = {
+			basic_character_requirements_for_transition_trigger = yes
+			bp_meets_requirements_for_taxation_decay_trigger = yes
+		}
+	}
+	
+	immediate = {
+		save_scope_as = the_vassal
+		set_feudal_transition_cooldown_effect = { SPECIFIC_TYPE = taxation_decay_cooldown }
+		trigger_event = { id = BP_admin_to_feudal_events.0310 days = { 3 7 } }
+	}
+}
+
+#Taxation decay moves a step towards feudalism
+BP_admin_to_feudal_events.0310 = {
+	type = character_event
+	title = BP_admin_to_feudal_events.0310.title
+	desc = BP_admin_to_feudal_events.0310.desc
+	
+	theme = stewardship
+	content_source = dlc_WtWSMS
+	
+	right_portrait = {
+		character = ROOT
+		animation = steward
+	}
+	
+	immediate = {
+		ROOT.top_liege = { save_scope_as = the_top_liege }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0310.seek_relief_top_liege
+		
+		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0311 days = { 3 7 } } }
+		
+		change_influence = -50
+		
+		ai_chance = { base = 100 }
+	}
+	option = {
+		name = BP_admin_to_feudal_events.0310.keep_taxes
+		
+		change_influence = 50
+		kept_roman_taxation_vassal_effect = yes
+		
+		ai_chance = { base = 0 }
+	}
+}
+BP_admin_to_feudal_events.0311 = {
+	type = character_event
+	title = BP_admin_to_feudal_events.0311.title
+	desc = BP_admin_to_feudal_events.0311.desc
+	
+	theme = stewardship
+	content_source = dlc_WtWSMS
+	
+	left_portrait = {
+		character = scope:the_vassal
+		animation = steward
+	}
+	
+	right_portrait = {
+		character = ROOT
+		animation = personality_rational
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0311.keep_taxation
+		
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0313 days = { 3 7 } } }
+		
+		show_as_tooltip = {
+			scope:the_vassal = { kept_roman_taxation_liege_effect = yes }
+			build_grudge_rivalry_effect = { KEY_CHAR = scope:the_vassal }
+		}
+		
+		ai_chance = {
+			base = 10
+			modifier = { factor = 0 scope:the_vassal.stewardship < 5 } #We can't afford to maintain it
+		}
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0311.allow_landing
+		
+		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0312 days = { 3 7 } } }
+		
+		show_as_tooltip = {
+			scope:the_vassal = {
+				decay_domestic_taxation_one_level_effect = yes
+			}
+		}
+		
+		ai_chance = {
+			base = 90
+			modifier = { factor = 0 scope:the_vassal.martial > 30 } #Won't be impacted by taxation losses
+		}
+	}
+}
+BP_admin_to_feudal_events.0312 = { #Tell liege approved
+	type = letter_event
+	sender = root.top_liege
+	opening = BP_admin_to_feudal_events.0312.title
+	desc = BP_admin_to_feudal_events.0312.desc
+	
+	content_source = dlc_WtWSMS
+	
+	immediate = {
+		root.top_liege = { save_scope_as = target }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0312.ok
+		decay_domestic_taxation_one_level_effect = yes
+	}
+}
+BP_admin_to_feudal_events.0313 = { #Tell liege declined
+	type = letter_event
+	sender = root.top_liege
+	opening = BP_admin_to_feudal_events.0313.title
+	desc = BP_admin_to_feudal_events.0313.desc
+	
+	content_source = dlc_WtWSMS
+	
+	immediate = {
+		root.top_liege = { save_scope_as = target }
+	}
+	
+	option = {
+		name = BP_admin_to_feudal_events.0313.ok
+		kept_roman_taxation_liege_effect = yes
+		build_grudge_rivalry_effect = { KEY_CHAR = scope:the_vassal }
 	}
 }
