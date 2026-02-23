@@ -1,0 +1,37 @@
+﻿#Feudalization
+bp_general_feudalization_event_trigger = {
+	this.top_liege = { government_has_flag = is_a_transitory_roman_government }
+	government_has_flag = government_is_roman_federate
+	NOT = { has_character_flag = had_a_feudal_transition_event }
+}
+bp_meets_requirements_to_fedualize_trigger = {
+	bp_general_feudalization_event_trigger = yes
+	#Is not still in cooldown from last transition
+	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
+	NOT = { has_variable = aristocracy_solidification_cooldown }
+	#Has met the general contract requirements
+	vassal_contract_has_flag = succession_is_purely_dynastic
+	vassal_contract_has_flag = roman_federate_military_landed_permanent
+}
+bp_meets_requirements_for_hereditary_increase_trigger = {
+	bp_general_feudalization_event_trigger = yes
+	#Hasn't recently had a subroman decay event for this ruler
+	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
+	NOT = { has_variable = aristocracy_solidification_cooldown }
+	trigger_if = {
+		limit = { vassal_contract_has_flag = succession_is_purely_dynastic }
+		NOT = { has_realm_law = confederate_partition_succession_law }
+	}
+	trigger_else = {
+		NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
+	}
+}
+bp_meets_requirements_for_military_increase_trigger = {
+	bp_general_feudalization_event_trigger = yes
+	is_at_war = no #Don't muck with the military when fighting; we have additional event fires to compensate
+	this.top_liege = { is_at_war = no } #Don't muck with the military when fighting; we have additional event fires to compensate
+	#Hasn't recently had a subroman decay event for this ruler
+	NOT = { this.primary_title = { has_variable = military_landing_cooldown } }
+	NOT = { has_variable = military_landing_cooldown }
+	NOT = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+}
