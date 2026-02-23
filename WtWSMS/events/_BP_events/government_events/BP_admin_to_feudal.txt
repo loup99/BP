@@ -48,6 +48,23 @@ scripted_effect advance_hereditary_rights_effect = {
 		$CHAR$ = { add_realm_law_skip_effects = confederate_partition_succession_law }
 	}
 }
+scripted_effect set_feudal_transition_cooldown_effect = {
+	add_character_flag = {
+		flag = had_a_feudal_transition_event
+		years = had_a_feudal_transition_event_cooldown_years
+	}
+	add_character_flag = {
+		flag = $SPECIFIC_TYPE$
+		years = feudalization_component_specific_cooldown_years
+	}
+	this.primary_title ?= {
+		set_variable = {
+			name = $SPECIFIC_TYPE$
+			years = feudalization_component_specific_cooldown_years
+		}
+	}
+}
+
 
 #####
 # Feudal Mutation
@@ -59,6 +76,7 @@ scripted_effect advance_hereditary_rights_effect = {
 #Scripted Triggers
 scripted_trigger meets_requirements_to_fedualize_trigger = {
 	basic_character_requirements_for_transition_trigger = yes
+	NOT = { has_character_flag = had_a_feudal_transition_event }
 	#Is not still in cooldown from last transition
 	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
 	NOT = { has_variable = aristocracy_solidification_cooldown }
@@ -349,6 +367,7 @@ BP_admin_to_feudal_events.0100 = { #Hidden event, fire to the *top* liege, not t
 	
 	immediate = {
 		save_scope_as = the_vassal
+		set_feudal_transition_cooldown_effect = { SPECIFIC_TYPE = aristocracy_solidification_cooldown }
 		trigger_event = { id = BP_admin_to_feudal_events.0110 }
 	}
 }
@@ -376,16 +395,16 @@ BP_admin_to_feudal_events.0110 = {
 		
 		ROOT.top_liege = { trigger_event = { id = BP_admin_to_feudal_events.0111 } }
 		
-		add_prestige = 100
-		change_influence = 100
+		add_prestige = 50
+		change_influence = 50
 		
 		ai_chance = { base = 100 }
 	}
 	option = {
 		name = BP_admin_to_feudal_events.0110.decline
 		
-		add_prestige = -100
-		change_influence = -100
+		add_prestige = -50
+		change_influence = -50
 		
 		ai_chance = { base = 0 }
 	}
@@ -411,6 +430,9 @@ BP_admin_to_feudal_events.0111 = {
 	option = {
 		name = BP_admin_to_feudal_events.0111.enforce_law
 		
+		add_prestige = 50
+		change_influence = 50
+		
 		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0113 } }
 		show_as_tooltip = {
 			apply_opinions_for_action = {
@@ -426,6 +448,9 @@ BP_admin_to_feudal_events.0111 = {
 		name = BP_admin_to_feudal_events.0111.allow_custom
 		
 		scope:the_vassal = { trigger_event = { id = BP_admin_to_feudal_events.0112 } }
+		
+		add_prestige = -50
+		change_influence = -50
 		
 		show_as_tooltip = {
 			advance_hereditary_rights_effect = { CHAR = scope:the_vassal }
