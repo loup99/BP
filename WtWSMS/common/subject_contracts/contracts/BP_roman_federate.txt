@@ -14,20 +14,20 @@ roman_federate_liege_taxes = {
 	icon = gold_icon
 	obligation_levels = {
 		roman_federate_liege_taxes_exempt = {
-			default = yes
+			parent = roman_federate_liege_taxes_moderate
 			position = { 0 0 }
 
-			tax = 0.0
+			tax_factor = -1.0
 
 			ai_liege_desire = 1
 			ai_subject_desire = 5
 			score = 2
 		}
 		roman_federate_liege_taxes_low = {
-			parent = roman_federate_liege_taxes_exempt
+			parent = roman_federate_liege_taxes_moderate
 			position = { 1 0 }
 
-			tax = 0.1
+			tax_factor = -0.75
 			subject_opinion = -5
 
 			ai_liege_desire = {
@@ -51,10 +51,11 @@ roman_federate_liege_taxes = {
 			score = 1
 		}
 		roman_federate_liege_taxes_moderate = {
-			parent = roman_federate_liege_taxes_low
+			default = yes
+			parent = roman_federate_liege_taxes_moderate
 			position = { 2 0 }
 
-			tax = 0.25
+			tax_factor = -0.5
 			subject_opinion = -10
 
 			ai_liege_desire = {
@@ -81,8 +82,36 @@ roman_federate_liege_taxes = {
 			parent = roman_federate_liege_taxes_moderate
 			position = { 3 0 }
 			
-			tax = 0.5
+			tax_factor = -0.25
 			subject_opinion = -20
+
+			ai_liege_desire = {
+				value = 5
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_roman_federate
+								vassal_contract_obligation_level:feudal_government_taxes <= 1
+							}
+						}
+					}
+					add = 6
+				}
+			}
+			ai_subject_desire = 2
+			score = -2
+			flag = obligation_high_taxes
+		}
+		roman_federate_liege_taxes_extortionate = {
+			parent = roman_federate_liege_taxes_moderate
+			position = { 4 0 }
+			
+			tax_factor = 0.0
+			subject_opinion = -30
 
 			ai_liege_desire = {
 				value = 5
