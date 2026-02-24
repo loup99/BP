@@ -2,6 +2,7 @@
 	events = {}
 	on_actions = {
 		BP_got_a_roman_ministry
+		BP_got_a_roman_province
 		BP_keep_roman_federate_government
 		BP_flip_federate_when_not_roman
 	}
@@ -37,6 +38,18 @@ BP_got_a_roman_ministry = {
 		this.liege_or_court_owner ?= { establish_premiership_if_necessary_effect = yes }
 	}
 }
+BP_got_a_roman_province = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		if = {
+			limit = {
+				is_landless_ruler = yes
+				vassal_contract_has_flag = roman_ministry_contact
+			}
+			vassal_contract_set_obligation_level = { type = roman_administrative_themes level = roman_admin_theme_civilian_value }
+		}
+	}
+}
 BP_keep_roman_federate_government = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_governments_trigger = yes
@@ -45,7 +58,7 @@ BP_keep_roman_federate_government = {
 	effect = {
 		if = {
 			limit = { scope:previous_holder ?= { has_government = roman_federate_government } }
-			change_government = roman_federate_government
+			change_government_roman_federate_effect = yes
 		}
 	}
 }
@@ -109,7 +122,7 @@ BP_independent_roman_government_checks = {
 	effect = {
 		if = { #Independent Roman Admin governments must be kingdoms, or they become subroman
 			limit = {
-				government_has_flag = government_only_valid_for_kingdoms_empires
+				government_has_flag = government_only_valid_for_empires_hegemonies
 				root = top_liege
 				primary_title.tier < tier_kingdom
 			}

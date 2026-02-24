@@ -502,8 +502,9 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 			geographical_region = custom_$REGION$ern_senate
 			has_holding_type = city_holding
 			this.barony = { is_capital_barony = no }
-			#So that holdings in (merchant) republics aren't seized
+			#So that holdings in (merchant) republics and federates aren't seized
 			NOT = { this.county.holder = { government_has_flag = government_is_republic } }
+			NOT = { this.county.holder = { government_has_flag = government_is_roman_federate } }
 		}
 		add_to_temporary_list = provinces_with_city_holdings_in_$REGION$
 	}
@@ -525,7 +526,7 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 	every_in_list = {
 		list = senators_without_land_$REGION$
 		this = { save_temporary_scope_as = the_landless_senator }
-		random_in_list = {
+		random_in_list = { #Pick stuff that isn't in Federate land
 			list = provinces_with_city_holdings_in_$REGION$
 			save_scope_as = the_province_with_available_city_holdings
 		}
@@ -538,19 +539,20 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 				get_title = scope:the_province_with_available_city_holdings.barony
 				#Match up governments
 				if = {
-					limit = {
-						this.liege = {
-							government_has_flag = government_uses_roman_dynastic_authority
-							NOT = { government_has_flag = is_a_transitory_roman_government }
-						}
-					}
+					limit = { this.liege = { government_has_flag = government_is_roman_dynastic } }
 					this = { change_government = roman_dynastic_government }
 				}
 				else_if = {
-					limit = {
-						this.liege = { government_has_flag = is_a_transitory_roman_government }
-					}
+					limit = { this.liege = { government_has_flag = government_is_subroman_dynastic } }
 					this = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.liege.top_liege = { government_has_flag = roman_administrative_government } }
+					change_government_roman_administrative_effect = yes
+				}
+				else_if = {
+					limit = { this.liege = { government_has_flag = government_is_subroman_administrative } }
+					change_government_subroman_administrative_effect = yes
 				}
 			}
 		}
