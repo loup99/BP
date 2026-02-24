@@ -26,56 +26,25 @@
 on_title_destroyed = {
 	events = {}
 	on_actions = {
-		BP_handle_independent_roman_polities_noDLC
-		BP_handle_independent_roman_polities_DLC
+		BP_handle_independent_roman_polities
 	}
 }
 
-BP_handle_independent_roman_polities_noDLC = {
+BP_handle_independent_roman_polities = {
+	trigger = { is_independent_ruler = yes }
 	effect = {
 		# If the title of an independent Roman Dynastic ruler is destroyed,
 		# let's make sure we handle any stray Roman Dynastic vassals
 		if = {
 			limit = {
 				government_has_flag = government_only_valid_for_empires_hegemonies
-				government_has_flag = government_uses_roman_dynastic_authority
-				is_independent_ruler = yes
-				NOT = {
-					any_held_title = {
-						tier > tier_kingdom
-						NOT = { this = scope:landed_title }
-					}
-				}
+				has_main_roman_government_trigger = yes
+				primary_title.tier < tier_empire
 			}
-			root = { change_government = subroman_dynastic_government }
+			root = { convert_to_subroman_government_effect = yes }
 			every_vassal_or_below = {
-				limit = { government_has_flag = government_uses_roman_dynastic_authority }
-				change_government = subroman_dynastic_government
-			}
-		}
-	}
-}
-
-BP_handle_independent_roman_polities_DLC = {
-	effect = {
-		# If the title of an independent Roman Dynastic ruler is destroyed,
-		# let's make sure we handle any stray Roman Dynastic vassals
-		if = {
-			limit = {
-				government_has_flag = government_only_valid_for_empires_hegemonies
-				government_has_flag = government_is_roman_administrative
-				is_independent_ruler = yes
-				NOT = {
-					any_held_title = {
-						tier > tier_kingdom
-						NOT = { this = scope:landed_title }
-					}
-				}
-			}
-			root = { change_government_subroman_administrative_effect = yes }
-			every_vassal_or_below = {
-				limit = { government_has_flag = government_is_roman_administrative }
-				change_government_subroman_administrative_effect = yes
+				limit = { has_main_roman_government_trigger = yes }
+				convert_to_subroman_government_effect = yes
 			}
 		}
 	}
@@ -195,16 +164,16 @@ on_vassal_change = {
 }
 
 BP_degrade_roman_government = {
+	trigger = { is_independent_ruler = yes }
 	effect = {
 		### If an admin ruler becomes independent, who are not of a high enough rank, changes government
 		if = {
 			limit = {
-				liege = root # I.e. root is independent
 				government_has_flag = government_only_valid_for_empires_hegemonies
-				government_has_flag = government_uses_roman_dynastic_authority
-				highest_held_title_tier < tier_kingdom
+				has_main_roman_government_trigger = yes
+				highest_held_title_tier < tier_empire
 			}
-			change_government = subroman_dynastic_government
+			convert_to_subroman_government_effect = yes
 		}
 	}
 }
