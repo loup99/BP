@@ -118,12 +118,14 @@ BP_independent_ministry_cleanup = {
 	}
 }
 BP_independent_roman_government_checks = {
-	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		is_independent_ruler = yes
+	}
 	effect = {
 		if = { #Independent Roman Admin governments must be kingdoms, or they become subroman
 			limit = {
 				government_has_flag = government_only_valid_for_empires_hegemonies
-				root = top_liege
 				primary_title.tier < tier_kingdom
 			}
 			change_government = roman_administrative_government
@@ -131,14 +133,44 @@ BP_independent_roman_government_checks = {
 		#Independent Federates go tribal/high tribal
 		if = {
 			limit = {
-				government_has_flag =  government_becomes_tribal_high_tribal_if_independent_or_not_under_roman
-				root = top_liege
+				government_has_flag = government_becomes_tribal_high_tribal_if_independent_or_not_under_roman
 			}
 			if = {
 				limit = { root.culture = { has_cultural_era_or_later = culture_era_classical_antiquity } }
 				change_government = high_tribal_government
 			}
 			else = { change_government = tribal_government }
+		}
+		#Independent SubRoman Admins swap their existing laws for liege laws
+		if = {
+			limit = { government_has_flag = subroman_administrative_government }
+			switch = {
+				trigger = has_realm_law
+				subroman_admin_taxation_vassal_law_0 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_0
+					add_realm_law_skip_effects = subroman_admin_military_centralization_law_0
+				}
+				subroman_admin_taxation_vassal_law_1 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_1
+					add_realm_law_skip_effects = subroman_admin_military_centralization_law_1
+				}
+				subroman_admin_taxation_vassal_law_2 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_2
+					add_realm_law_skip_effects = subroman_admin_military_centralization_law_2
+				}
+				subroman_admin_taxation_vassal_law_3 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_3
+					add_realm_law_skip_effects = subroman_admin_military_centralization_law_3
+				}
+				subroman_admin_taxation_vassal_law_4 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_4
+					add_realm_law_skip_effects = subroman_admin_military_centralization_law_4
+				}
+				fallback = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_0
+					add_realm_law = subroman_admin_military_centralization_law_0
+				}
+			}
 		}
 	}
 }

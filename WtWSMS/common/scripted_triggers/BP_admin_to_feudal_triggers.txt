@@ -1,26 +1,32 @@
 ﻿#Feudalization
 bp_general_feudalization_event_trigger = { #TODO: 0.2.0
-	this.top_liege = { government_has_flag = is_a_transitory_roman_government }
+	this.top_liege ?= { government_has_flag = is_a_transitory_roman_government }
 	OR = {
 		government_has_flag = government_is_roman_federate
 		government_has_flag = government_is_subroman_administrative
 	}
-	NOT = { has_character_flag = had_a_feudal_transition_event }
+	#NOT = { has_character_flag = had_a_feudal_transition_event }
 }
 bp_meets_requirements_to_fedualize_trigger = { #Feudal Mutation trigger
 	bp_general_feudalization_event_trigger = yes
 	#Is not still in cooldown from last transition
-	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
-	NOT = { has_variable = aristocracy_solidification_cooldown }
-	#Has met the general contract requirements
-	switch = {
-		trigger = government_has_flag
-		government_is_roman_federate = {
-			vassal_contract_has_flag = succession_is_purely_dynastic
-			vassal_contract_has_flag = roman_federate_military_landed_permanent
-			vassal_contract_has_flag = roman_federate_domestic_taxation_permanent
-		}
+	#NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
+	#NOT = { has_variable = aristocracy_solidification_cooldown }
+	trigger_if = {
+		limit = { government_has_flag = government_is_roman_federate }
+		vassal_contract_has_flag = succession_is_purely_dynastic
+		vassal_contract_has_flag = roman_federate_military_landed_permanent
+		vassal_contract_has_flag = roman_federate_domestic_taxation_permanent
 	}
+	trigger_else_if = {
+		limit = { government_has_flag = government_is_subroman_administrative }
+		trigger_if = { #Top-level Roman Admin special case
+			limit = { is_independent_ruler = yes }
+			has_realm_law_flag = subroman_final_military_phase
+		}
+		has_realm_law_flag = subroman_final_taxation_phase
+	}
+	trigger_else = { always = no }
 }
 bp_meets_requirements_for_hereditary_increase_trigger = {
 	bp_general_feudalization_event_trigger = yes
@@ -28,12 +34,18 @@ bp_meets_requirements_for_hereditary_increase_trigger = {
 	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
 	NOT = { has_variable = aristocracy_solidification_cooldown }
 	trigger_if = {
-		limit = { vassal_contract_has_flag = succession_is_purely_dynastic }
-		NOT = { has_realm_law = confederate_partition_succession_law }
+		limit = { government_has_flag = government_is_roman_federate }
+		trigger_if = {
+			limit = { vassal_contract_has_flag = succession_is_purely_dynastic }
+			NOT = { has_realm_law = confederate_partition_succession_law }
+		}
+		trigger_else = { NOT = { vassal_contract_has_flag = succession_is_purely_dynastic } }
 	}
-	trigger_else = {
-		NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
+	trigger_else_if = {
+		limit = { government_has_flag = government_is_subroman_administrative }
+		always = no
 	}
+	trigger_else = { always = no }
 }
 bp_meets_requirements_for_military_increase_trigger = {
 	bp_general_feudalization_event_trigger = yes
@@ -42,20 +54,29 @@ bp_meets_requirements_for_military_increase_trigger = {
 	#Hasn't recently had a subroman decay event for this ruler
 	NOT = { this.primary_title = { has_variable = military_landing_cooldown } }
 	NOT = { has_variable = military_landing_cooldown }
-	switch = {
-		trigger = government_has_flag
-		government_is_roman_federate = {
-			NOT = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
-		}
-		government_is_subroman_administrative = {
-			NOT = { has_realm_law = subroman_military_centralization_law_5 }
-		}
+	trigger_if = {
+		limit = { government_has_flag = government_is_roman_federate }
+		NOT = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
 	}
+	trigger_else_if = {
+		limit = { government_has_flag = government_is_subroman_administrative }
+		is_independent_ruler = yes
+		NOT = { has_realm_law_flag = subroman_final_military_phase }
+	}
+	trigger_else = { always = no }
 }
 bp_meets_requirements_for_taxation_decay_trigger = {
 	bp_general_feudalization_event_trigger = yes
 	#Hasn't recently had a subroman decay event for this ruler
 	NOT = { this.primary_title = { has_variable = taxation_decay_cooldown } }
 	NOT = { has_variable = taxation_decay_cooldown }
-	NOT = { vassal_contract_has_flag = roman_federate_domestic_taxation_permanent }
+	trigger_if = {
+		limit = { government_has_flag = government_is_roman_federate }
+		NOT = { vassal_contract_has_flag = roman_federate_domestic_taxation_permanent }
+	}
+	trigger_else_if = {
+		limit = { government_has_flag = government_is_subroman_administrative }
+			NOT = { has_realm_law_flag = subroman_final_taxation_phase }
+	}
+	trigger_else = { always = no }
 }
