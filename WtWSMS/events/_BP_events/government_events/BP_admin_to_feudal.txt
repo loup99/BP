@@ -25,32 +25,52 @@ scripted_trigger basic_character_requirements_for_transition_trigger = {
 }
 #Global Effects
 scripted_effect increase_hereditary_rights_one_level_effect = {
-	if = {
-		limit = { vassal_contract_has_flag = succession_weight_dynastic_1 }
-		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_1 }
-	}
-	else_if = {
-		limit = { vassal_contract_has_flag = succession_weight_dynastic_2 }
-		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_2 }
-	}
-	else_if = {
-		limit = { vassal_contract_has_flag = succession_weight_dynastic_3 }
-		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_3 }
-	}
-	else_if = {
-		limit = { vassal_contract_has_flag = succession_weight_dynastic_4 }
-		vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_4 }
-	}
-}
-scripted_effect advance_hereditary_rights_effect = {
-	if = {
-		limit = { NOT = { $CHAR$ = { vassal_contract_has_flag = succession_is_purely_dynastic } } }
-		$CHAR$ = { increase_hereditary_rights_one_level_effect = yes }
-	}
-	#If you're already at max, you get confed partition
-	#NB: this is *not* required for feudalism, but can be stacked to it
-	else = {
-		$CHAR$ = { add_realm_law_skip_effects = confederate_partition_succession_law }
+	switch = {
+		trigger = government_has_flag
+		government_is_roman_federate = {
+			if = {
+				limit = { vassal_contract_has_flag = succession_weight_dynastic_1 }
+				vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_1 }
+			}
+			else_if = {
+				limit = { vassal_contract_has_flag = succession_weight_dynastic_2 }
+				vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_2 }
+			}
+			else_if = {
+				limit = { vassal_contract_has_flag = succession_weight_dynastic_3 }
+				vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_3 }
+			}
+			else_if = {
+				limit = { vassal_contract_has_flag = succession_weight_dynastic_4 }
+				vassal_contract_set_obligation_level = { type = roman_federate_aristocracy level = roman_federate_aristocracy_4 }
+			}
+			else_if = {
+				limit = { vassal_contract_has_flag = succession_is_purely_dynastic }
+				add_realm_law_skip_effects = confederate_partition_succession_law
+			}
+		}
+		government_is_subroman_administrative = {
+			if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_1 }
+				add_realm_law = subroman_aristocracy_law_1
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_2 }
+				add_realm_law = subroman_aristocracy_law_2
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_3 }
+				add_realm_law = subroman_aristocracy_law_3
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_weight_dynastic_4 }
+				add_realm_law = subroman_aristocracy_law_4
+			}
+			else_if = {
+				limit = { has_realm_law_flag = succession_is_purely_dynastic }
+				add_realm_law = confederate_partition_succession_law
+			}
+		}
 	}
 }
 scripted_effect increase_military_landing_one_level_effect = {
@@ -555,7 +575,7 @@ BP_admin_to_feudal_events.0100 = {
 	immediate = {
 		save_scope_as = the_vassal
 		set_feudal_transition_cooldown_effect = { SPECIFIC_TYPE = aristocracy_solidification_cooldown }
-		trigger_event = { id = BP_admin_to_feudal_events.0110 days = { 3 7 } }
+		trigger_event = { id = BP_admin_to_feudal_events.0110 }#days = { 3 7 } }
 	}
 }
 
@@ -640,7 +660,7 @@ BP_admin_to_feudal_events.0111 = {
 		change_influence = -50
 		
 		show_as_tooltip = {
-			advance_hereditary_rights_effect = { CHAR = scope:the_vassal }
+			scope:vassal = { increase_hereditary_rights_one_level_effect = yes }
 			apply_opinions_for_action = {
 				KEY_CHAR = scope:the_vassal
 				TYPE = allowed
@@ -664,7 +684,7 @@ BP_admin_to_feudal_events.0112 = { #Tell liege approved
 	
 	option = {
 		name = BP_admin_to_feudal_events.0112.ok
-		advance_hereditary_rights_effect = { CHAR = root }
+		increase_hereditary_rights_one_level_effect = yes
 		apply_opinions_for_action = {
 			KEY_CHAR = root
 			TYPE = allowed
