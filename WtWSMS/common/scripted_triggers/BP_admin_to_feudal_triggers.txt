@@ -1,17 +1,26 @@
 ﻿#Feudalization
 bp_general_feudalization_event_trigger = { #TODO: 0.2.0
 	this.top_liege = { government_has_flag = is_a_transitory_roman_government }
-	government_has_flag = government_is_roman_federate
+	OR = {
+		government_has_flag = government_is_roman_federate
+		government_has_flag = government_is_subroman_administrative
+	}
 	NOT = { has_character_flag = had_a_feudal_transition_event }
 }
-bp_meets_requirements_to_fedualize_trigger = {
+bp_meets_requirements_to_fedualize_trigger = { #Feudal Mutation trigger
 	bp_general_feudalization_event_trigger = yes
 	#Is not still in cooldown from last transition
 	NOT = { this.primary_title = { has_variable = aristocracy_solidification_cooldown } }
 	NOT = { has_variable = aristocracy_solidification_cooldown }
 	#Has met the general contract requirements
-	vassal_contract_has_flag = succession_is_purely_dynastic
-	vassal_contract_has_flag = roman_federate_military_landed_permanent
+	switch = {
+		trigger = government_has_flag
+		government_is_roman_federate = {
+			vassal_contract_has_flag = succession_is_purely_dynastic
+			vassal_contract_has_flag = roman_federate_military_landed_permanent
+			vassal_contract_has_flag = roman_federate_domestic_taxation_permanent
+		}
+	}
 }
 bp_meets_requirements_for_hereditary_increase_trigger = {
 	bp_general_feudalization_event_trigger = yes
@@ -33,7 +42,15 @@ bp_meets_requirements_for_military_increase_trigger = {
 	#Hasn't recently had a subroman decay event for this ruler
 	NOT = { this.primary_title = { has_variable = military_landing_cooldown } }
 	NOT = { has_variable = military_landing_cooldown }
-	NOT = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+	switch = {
+		trigger = government_has_flag
+		government_is_roman_federate = {
+			NOT = { vassal_contract_has_flag = roman_federate_military_landed_permanent }
+		}
+		government_is_subroman_administrative = {
+			NOT = { has_realm_law = subroman_military_centralization_law_5 }
+		}
+	}
 }
 bp_meets_requirements_for_taxation_decay_trigger = {
 	bp_general_feudalization_event_trigger = yes
