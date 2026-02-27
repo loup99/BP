@@ -57,23 +57,6 @@ bp_can_be_bureau_member_trigger = {
 	}
 }
 
-bp_can_have_roman_minority_law_trigger = {
-	OR = {
-		government_has_flag = government_is_subroman_administrative
-		government_has_flag = government_is_roman_federate
-	}
-	#Only valid if your top liege is not a Roman
-	NOT = { top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition } }
-	#Only valid if you match your top liege or are a migratory culture
-	OR = {
-		this.culture = top_liege.culture
-		this.culture = { has_cultural_parameter = is_changed_if_enough_counties }
-	}
-	#Only for landed
-	is_landed = yes
-	this.primary_title.tier >= tier_county
-}
-
 bp_county_has_roman_faith_trigger = {
 	scope:county.culture = { has_cultural_parameter = greco_roman_social_tradition }
 	trigger_if = { #Roman Empire Faith; this is a universal check
@@ -96,6 +79,47 @@ bp_protect_religion_specific_trigger = {
 	#NB: If we need special religion checks, this is where we'd do it
 	scope:county.faith.religion = scope:councillor_liege.faith.religion
 }
+
+bp_can_have_roman_minority_law_trigger = {
+	OR = {
+		government_has_flag = government_is_subroman_administrative
+		government_has_flag = government_is_roman_federate
+	}
+	#Only valid if your top liege is not a Roman
+	NOT = { top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition } }
+	#Only valid if you match your top liege or are a migratory culture
+	OR = {
+		this.culture = top_liege.culture
+		this.culture = { has_cultural_parameter = is_changed_if_enough_counties }
+	}
+	#Only for landed
+	is_landed = yes
+	this.primary_title.tier >= tier_county
+}
+
+#Control if certain roman succession stuff happens or not depending on law/contract
+bp_succession_weight_dynastic_general_trigger = {
+OR = {
+		has_realm_law_flag = $WEIGHT$
+		vassal_contract_has_flag = $WEIGHT$
+	}
+}
+bp_succession_weight_dynastic_1_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_1 }
+}
+bp_succession_weight_dynastic_2_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_2 }
+}
+bp_succession_weight_dynastic_3_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_3 }
+}
+bp_succession_weight_dynastic_4_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_41 }
+}
+bp_succession_weight_purely_dynastic_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_is_purely_dynastic_value }
+}
+
 #Sub-Roman Law Stuff
 bp_realm_law_use_subroman_administrative_laws_trigger = {
 	is_landed = yes
