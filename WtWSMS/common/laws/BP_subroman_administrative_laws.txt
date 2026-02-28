@@ -1,7 +1,7 @@
 ﻿@subroman_admin_aristocracy_law_cooldown = 10
+@non_roman_minority_rule_law_cooldown = 30
 
 #Covers Non-Romans ruling a Roman Realm; Visigothica, Ostrogothica, Vandalica, Italia, &c. ...
-#TODO: Add cooldown, inability to move except adjacent, church oppressed/not oppressed
 non_roman_minority_rule_law = {
 	default = non_roman_minority_rule_law_2
 	cumulative = no
@@ -27,13 +27,168 @@ non_roman_minority_rule_law = {
 		flag = only_same_culture_appointment_succession
 		flag = will_not_convert_to_local_culture
 		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			has_realm_law = non_roman_minority_rule_law_1
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
 		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		pass_cost = {}
-		on_pass = {}
-		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		revoke_cost = {}
-		on_revoke = {}
-		ai_will_do = {}
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_1
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			if = { #Vandals *want* to oppress Romans
+				limit = { culture = culture:vandalic }
+				value = 1000
+			}
+			#Ethos
+			if = { #Communal Ethos like themselves
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 50
+			}
+			if = { #Egalitarians are disinclined to oppress
+				limit = { culture = { has_cultural_pillar = ethos_egalitarian } }
+				add = -50
+			}
+			#Bonuses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = 200
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = 75
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 75
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = 75
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				value = 50
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = 50
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = 50
+			}
+			#Maluses
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = -50
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = -25
+			}
+		}
 	}
 	non_roman_minority_rule_law_1 = { #Minor Oppression
 		can_keep = {
@@ -55,13 +210,230 @@ non_roman_minority_rule_law = {
 		flag = only_same_culture_appointment_succession
 		flag = will_not_convert_to_local_culture
 		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			OR = {
+				has_realm_law = non_roman_minority_rule_law_0
+				has_realm_law = non_roman_minority_rule_law_2
+			}
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
 		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		pass_cost = {}
-		on_pass = {}
-		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		revoke_cost = {}
-		on_revoke = {}
-		ai_will_do = {}
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_2
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_0
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			value = 1
+			#Ethos
+			if = { #Communal Ethos like themselves
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 50
+			}
+			if = { #Egalitarians are disinclined to oppress
+				limit = { culture = { has_cultural_pillar = ethos_egalitarian } }
+				add = -50
+			}
+			if = { #Stoic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Bureaucratic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_bureaucratic } }
+				add = 25
+			}
+			#Bonuses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = 100
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = 50
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				add = 50
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = 50
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = 50
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 50
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = 50
+			}
+			#Maluses
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = -25
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = -25
+			}
+		}
 	}
 	non_roman_minority_rule_law_2 = { #Moderate; Ostrogoths, &c. Romans have certain protections
 		can_keep = {
@@ -85,13 +457,200 @@ non_roman_minority_rule_law = {
 		flag = imperial_church_defended
 		flag = unlikely_to_convert_to_local_culture
 		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			OR = {
+				has_realm_law = non_roman_minority_rule_law_1
+				has_realm_law = non_roman_minority_rule_law_3
+			}
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
 		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		pass_cost = {}
-		on_pass = {}
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_3
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_1
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							culture = { has_cultural_parameter = greco_roman_social_tradition }
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		}
 		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		revoke_cost = {}
-		on_revoke = {}
-		ai_will_do = {}
+		ai_will_do = {
+			value = 2 #Default
+			#Ethos
+			if = { #Communal Ethos like themselves
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Stoic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Bureaucratic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_bureaucratic } }
+				add = 25
+			}
+			#Bonuses/Maluses kinda meet here in case of very weird cosmopolitan/isolationist cultures
+			if = { #Franks are totes Romans, honest!
+				limit = { culture = { has_cultural_tradition = tradition_frankish_traditions } }
+				add = 25
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				value = 25
+			}
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = 25
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = 25
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 25
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = 25
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 25
+			}
+		}
 	}
 	non_roman_minority_rule_law_3 = { #Semi-Alignment; see Skirians
 		can_keep = {
@@ -114,21 +673,276 @@ non_roman_minority_rule_law = {
 		flag = imperial_church_defended
 		flag = unlikely_to_convert_to_local_culture
 		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			OR = {
+				has_realm_law = non_roman_minority_rule_law_2
+				has_realm_law = non_roman_minority_rule_law_4
+			}
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
 		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		pass_cost = {}
-		on_pass = {}
-		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		revoke_cost = {}
-		on_revoke = {}
-		ai_will_do = {}
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_4
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_2
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			value = 1
+			#Ethos
+			if = { #Stoic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Bureaucratic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_bureaucratic } }
+				add = 25
+			}
+			if = { #Sharing an Ethos with a Roman culture in your capital really makes things more likely
+				limit = {
+					
+					root.capital_county.culture = { has_cultural_parameter = greco_roman_social_tradition }
+					culture != root.capital_county.culture
+					culture = { has_same_culture_ethos = root.capital_county.culture }
+				}
+				add = 50
+			}
+			#Bonuses
+			if = { #Visigoths tend to be conciliatory towards Romans
+				limit = { culture = { has_cultural_tradition = tradition_visigothic_codes } }
+				add = 100
+			}
+			if = { #Franks are totes Romans, honest!
+				limit = { culture = { has_cultural_tradition = tradition_frankish_traditions } }
+				add = 50
+			}
+			if = { #Loyal Soldiers tend to want to get along
+				limit = { culture = { has_cultural_parameter = doesnt_care_about_culture_faith_in_factions } }
+				add = 50
+			}
+			if = { #Xenophiles will align with wherever they are
+				limit = { culture = { has_cultural_tradition = tradition_xenophilic } }
+				add = 25
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = 25
+			}
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = 25
+			}
+			#Maluses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = -100
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				add = -50
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = -50
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = -50
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = -50
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = -50
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = -25
+			}
+			if = { #Ruling caste is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_ruling_caste } }
+				value = -25
+			}
+			if = { #Tribal hierarchy is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_tribal_hierarchy } }
+				value = -25
+			}
+		}
 	}
-	non_roman_minority_rule_law_4 = { #Alignment; see Visigoths (eventually), Isaurians at start
+	non_roman_minority_rule_law_4 = { #Alignment; see late Visigoths (eventually)
 		can_keep = {
 			bp_can_have_roman_minority_law_trigger = yes
 			#Lock into top liege's law
 			trigger_if = {
 				limit = { top_liege != this }
 				liege = { has_realm_law = non_roman_minority_rule_law_4 }
+			}
+		}
+		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			has_realm_law = non_roman_minority_rule_law_3
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
 			}
 		}
 		
@@ -139,12 +953,172 @@ non_roman_minority_rule_law = {
 		flag = reduced_chance_to_convert_to_local_culture
 		
 		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		pass_cost = {}
-		on_pass = {}
-		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
-		revoke_cost = {}
-		on_revoke = {}
-		ai_will_do = {}
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_3
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			value = 0
+			#Sharing an Ethos with a Roman culture in your capital really makes things more likely
+			if = {
+				limit = {
+					
+					root.capital_county.culture = { has_cultural_parameter = greco_roman_social_tradition }
+					culture != root.capital_county.culture
+					culture = { has_same_culture_ethos = root.capital_county.culture }
+				}
+				add = 50
+			}
+			#Bonuses
+			if = { #Franks are totes Romans, honest!
+				limit = { culture = { has_cultural_tradition = tradition_frankish_traditions } }
+				add = 75
+			}
+			if = { #Xenophiles will align with wherever they are
+				limit = { culture = { has_cultural_tradition = tradition_xenophilic } }
+				add = 50
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = 50
+			}
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = 50
+			}
+			if = { #Loyal Soldiers tend to want to get along
+				limit = { culture = { has_cultural_parameter = doesnt_care_about_culture_faith_in_factions } }
+				add = 25
+			}
+			#Maluses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = -200
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				add = -75
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = -75
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = -75
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = -75
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = -75
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = -50
+			}
+			if = { #Ruling caste is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_ruling_caste } }
+				value = -50
+			}
+			if = { #Tribal hierarchy is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_tribal_hierarchy } }
+				value = -50
+			}
+		}
 	}
 }
 
