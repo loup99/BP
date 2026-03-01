@@ -26,27 +26,7 @@
 on_title_destroyed = {
 	events = {}
 	on_actions = {
-		BP_handle_independent_roman_polities
-	}
-}
-
-BP_handle_independent_roman_polities = {
-	trigger = { is_independent_ruler = yes }
-	effect = {
-		# If the title of an independent Roman Dynastic ruler is destroyed,
-		# let's make sure we handle any stray Roman Dynastic vassals
-		if = {
-			limit = {
-				government_has_flag = government_only_valid_for_empires_hegemonies
-				has_main_roman_government_trigger = yes
-				primary_title.tier < tier_empire
-			}
-			root = { convert_to_subroman_government_effect = yes }
-			every_vassal_or_below = {
-				limit = { has_main_roman_government_trigger = yes }
-				convert_to_subroman_government_effect = yes
-			}
-		}
+		BP_check_independent_roman_polities
 	}
 }
 
@@ -62,6 +42,35 @@ on_title_gain = {
 		BP_add_theocratic_traits
 		BP_fall_of_rome
 		BP_hegemonic_collapse
+		BP_check_independent_roman_polities
+	}
+}
+
+BP_check_independent_roman_polities = {
+	effect = {
+		#Fails the check properly if not delayed, so we have to fire via event
+		trigger_event = { on_action = BP_handle_independent_roman_polities delayed = yes }
+	}
+}
+
+BP_handle_independent_roman_polities = {
+	trigger = {
+		is_independent_ruler = yes
+		government_has_flag = government_only_valid_for_empires_hegemonies
+		has_main_roman_government_trigger = yes
+		
+	}
+	effect = {
+		# If the title of an independent Roman Dynastic/Admin ruler is destroyed,
+		# let's make sure we handle any stray Roman Dynastic/Admin vassals
+		if = {
+			limit = { primary_title.tier < tier_empire }
+			root = { convert_to_subroman_government_effect = yes }
+			every_vassal_or_below = {
+				limit = { has_main_roman_government_trigger = yes }
+				convert_to_subroman_government_effect = yes
+			}
+		}
 	}
 }
 
@@ -128,6 +137,9 @@ BP_hegemonic_collapse = {
 		scope:title.tier = tier_hegemony
 		#Your territory has to be too small for hegemonic pretensions
 		realm_size < 50
+		NOT = { scope:transfer_type = flag:created }
+		NOT = { scope:transfer_type = flag:granted }
+		NOT = { scope:transfer_type = flag:abdication }
 	}
 	effect = {
 		if = { #Roman Empires are special

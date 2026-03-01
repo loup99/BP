@@ -68,6 +68,7 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 					limit = { this.tier > tier_county }
 					this = { add_to_temporary_list = titles_destroyed }
 				}
+				#NB: The actual destruction must happen after vassal transfer because of title destruction on actions
 				else_if = {
 					limit = { this.tier = tier_county }
 					this = { add_to_temporary_list = titles_taken }
@@ -95,13 +96,6 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				add_to_list = new_vassals
 			}
 		}
-		#Destroy invalid titles
-		hidden_effect = {
-			every_in_list = {
-				list = titles_destroyed
-				scope:defender = { destroy_title = prev }
-			}
-		}
 		#Odoacer gets everything else
 		every_in_list = {
 			list = titles_taken
@@ -127,12 +121,14 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		}
 		resolve_title_and_vassal_change = scope:title_change
 		
+		scope:attacker = { convert_to_subroman_government_effect = yes }
+		
+		#Step 3: Transfer vassals
 		create_title_and_vassal_change = {
-			type = conquest
+			type = swear_fealty
 			save_scope_as = change_vassals
 			add_claim_on_loss = yes
 		}
-		#Step 3: Transfer vassals
 		every_in_list = {
 			list = vassals_taken
 			if = {
@@ -181,6 +177,14 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		# Truce
 		add_truce_attacker_victory_effect = yes
 		
+		#Destroy invalid titles
+		hidden_effect = {
+			every_in_list = {
+				list = titles_destroyed
+				scope:defender = { destroy_title = prev }
+			}
+		}
+		
 		scope:attacker.culture = {
 			change_cultural_acceptance = {
 				target = culture:roman
@@ -189,14 +193,17 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			}
 		}
 		scope:attacker = { set_realm_capital = title:c_ravenna }
-		scope:attacker = { change_government = subroman_dynastic_government }
 		scope:attacker = { add_legitimacy = 500 }
+		scope:attacker = { add_realm_law = non_roman_minority_rule_law_3 }
 		hidden_effect = { #Fix government flipping issues
 			scope:attacker = {
-				add_realm_law_skip_effects = single_heir_succession_law
 				every_vassal_or_below = {
-					limit = { has_government = roman_dynastic_government }
-					change_government = subroman_dynastic_government
+					limit = { has_main_roman_government_trigger = yes }
+					convert_to_subroman_government_effect = yes
+					if = {
+						limit = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
+						add_realm_law_skip_effects = single_heir_succession_law
+					}
 				}
 			}
 		}
