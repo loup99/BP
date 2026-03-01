@@ -57,6 +57,57 @@ create_theodoric_army_effect = {
 	}
 }
 
+land_odoacers_forces_effect = {
+	if = {
+		limit = {
+			$CHAR$ = { exists = yes }
+			$LANDED_TITLE$.holder = { is_ai = yes }
+		}
+		$CHAR$ = {
+			change_liege = {
+				liege = scope:attacker
+				change = $CHANGE$
+			}
+		}
+		$LANDED_TITLE$ = {
+			change_title_holder = {
+				holder = $CHAR$
+				change = $CHANGE$
+			}
+		}
+		every_county = {
+			limit = { this.duchy = $LANDED_TITLE$ }
+			change_title_holder = {
+				holder = $CHAR$
+				change = $CHANGE$
+			}
+		}
+	}
+}
+land_odoacers_forces_government_effect = {
+	#Depending on game state, handle landless chars gracefully
+	$CHAR$ ?= {
+		if = {
+			limit = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+			#Either make them a Roman Federate or make them sub-roman
+			if = {
+				limit = { $CHAR$ = { is_landed = yes } }
+				convert_to_roman_federate_government_effect = yes
+				debug_log = "MAKE FEDERATE?"
+			}
+			else = { convert_to_subroman_government_effect = yes }
+		}
+		else = {
+			if = {
+				limit = { $CHAR$ = { is_landed = yes } }
+				convert_to_roman_federate_government_effect = yes
+			}
+			#Landless and can't play landless; game over
+		}
+		#$CHAR$ = { destroy_title = $LANDLESS_TITLE$ }
+	}
+}
+
 ### Unification CB Code
 unification_cb_title_management_effect = {
 	create_title_and_vassal_change = {
