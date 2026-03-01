@@ -1,4 +1,441 @@
-﻿##### Removed Decisions vvvvv
+﻿##### Changed from Vanilla: Made unavailable to federates
+foster_integration_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_legitimacy.dds"
+	}
+	cooldown = { years = 20 }
+	sort_order = 120
+
+	desc = foster_integration_decision_desc
+	selection_tooltip = foster_integration_decision_tooltip
+	decision_group_type = admin
+	
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		has_dlc_feature = roads_to_power
+		is_adult = yes
+		this = house.house_head
+		government_allows = administrative
+		domicile ?= {
+			is_domicile_type = estate
+		}
+		exists = top_liege
+		root.top_liege != root
+		OR = {
+			top_liege.primary_title = {
+				NOT = { is_de_jure_liege_or_above_target = root.domicile.domicile_location.county }
+			}
+			domicile.domicile_location.county.culture != root.top_liege.culture
+		}
+		##### Changed from Vanilla vvvvv
+		NOT = { government_has_flag = government_is_quasi_feudal }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid = {
+		OR = {
+			domicile.domicile_location.county = { de_jure_drifting_towards = root.top_liege.primary_title }
+			domicile.domicile_location.county.culture = {
+				cultural_acceptance = {
+					target = root.top_liege.culture
+					value <= 75
+				}
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		NOT = { exists = involved_activity }
+		is_imprisoned = no
+		is_available = yes
+		is_at_war = no
+	}
+
+	cost = {
+		influence = {
+			value = {
+				add = major_influence_value
+				multiply = 2
+			}
+		}
+	}
+
+	effect = {
+		domicile.domicile_location.county = { save_scope_as = target_county }
+		add_character_modifier = {
+			modifier = ep3_integration_promoter_modifier
+			years = 15
+		}
+		set_variable = {
+			name = integration_promoted_in
+			value = scope:target_county
+			years = 15
+		}
+		if = {
+			limit = {
+				scope:target_county = { de_jure_drifting_towards = root.top_liege.primary_title }
+			}
+			scope:target_county = {
+				add_county_modifier = {
+					modifier = improve_de_jure_integration_modifier
+					years = 10
+				}
+			}
+		}
+		if = {
+			limit = {
+				scope:target_county.culture != root.top_liege.culture
+				scope:target_county.culture = {
+					cultural_acceptance = {
+						target = root.top_liege.culture
+						value <= 75
+					}
+				}
+			}
+			scope:target_county = {
+				add_county_modifier = {
+					modifier = improve_promote_culture_modifier
+					years = 10
+				}
+			}
+		}
+		if = {
+			limit = {
+				top_liege = { is_ai = yes }
+			}
+			top_liege = {
+				add_opinion = {
+					target = root
+					modifier = grateful_opinion
+					opinion = 25
+				}
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					scope:target_county = { has_county_modifier = improve_promote_culture_modifier }
+				}
+				top_liege = {
+					send_interface_message = {
+						type = msg_vassal_decision_good
+						title = improve_promote_culture_modifier
+						desc = improve_promote_culture_modifier_tt
+						left_icon = root
+						right_icon = scope:target_county
+					}
+				}
+			}
+			else = {
+				top_liege = {
+					send_interface_message = {
+						type = msg_vassal_decision_good
+						title = improve_de_jure_integration_modifier
+						desc = improve_de_jure_integration_modifier_tt
+						left_icon = root
+						right_icon = scope:target_county
+					}
+				}
+			}
+		}
+	}
+
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 36
+		duchy = 36
+		kingdom = 36
+		empire = 36
+		hegemony = 0
+	}
+	
+	ai_potential = {
+		government_allows = administrative
+		exists = top_liege
+		root.top_liege != root
+	}
+
+	ai_will_do = {
+		base = 75
+		modifier = {
+			culture = top_liege.culture
+			add = 25
+		}
+		modifier = {
+			has_trait = loyal
+			add = 20
+		}
+		modifier = {
+			has_trait = disloyal
+			add = -20
+		}
+	}
+}
+
+##### Changed from Vanilla: Tweaked the AI/Valid Logic in this case
+adopt_state_faith = {
+	picture = {
+		trigger = {
+			NOR = {
+				government_has_flag = government_is_tribal
+				government_has_flag = government_is_theocracy
+				top_liege ?= { government_has_flag = government_is_tribal }
+				top_liege ?= { government_has_flag = government_is_theocracy }
+			}
+			OR = {
+				culture = { has_cultural_pillar = heritage_byzantine }
+				top_liege ?= {
+					OR = {
+						culture = { has_cultural_pillar = heritage_byzantine }
+						capital_barony ?= title:b_constantinople
+						is_roman_emperor_primary_title_trigger = yes
+					}
+				}
+			}
+		}
+		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+	}
+	picture = {
+		trigger = {
+			top_liege.primary_title.state_faith.religion = religion:islam_religion 
+		}
+		reference = "gfx/interface/illustrations/activity_header_backgrounds/activity_pilgrimage.dds"
+	}
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
+	}
+
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 60
+		duchy = 60
+		kingdom = 60
+		empire = 60
+		hegemony = 0
+	}
+	sort_order = 110
+	decision_group_type = admin
+
+	desc = adopt_state_faith_decision_desc
+	selection_tooltip = adopt_state_faith_decision_selection_tooltip
+
+	is_shown = {
+		has_ep3_dlc_trigger = yes
+		top_liege = { government_allows = state_faith }
+		exists = top_liege.primary_title.state_faith
+		NOT = { faith ?= top_liege.primary_title.state_faith }
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_valid = {
+		top_liege = { government_allows = state_faith }
+		NOT = { faith ?= top_liege.primary_title.state_faith }
+		##### Changed from Vanilla vvvvv
+		trigger_if = {
+			limit = {
+				government_has_flag = government_is_subroman_administrative
+				NOT = { top_liege = this }
+				culture = { has_cultural_parameter = greco_roman_social_tradition }
+			}
+			custom_tooltip = {
+				text = the_imperial_church_is_protected
+				NOT = { top_liege = { has_realm_law_flag = imperial_church_defended } }
+				NOT = { top_liege = { has_realm_law_flag = imperial_church_protected } }
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		trigger_if = {
+			limit = { exists = top_liege.primary_title.state_faith }
+			root.top_liege.primary_title.state_faith = { save_scope_as = the_state_faith }
+			custom_description = {
+				text = must_consider_state_astray_or_worse
+				subject = root.faith
+				root.faith = { faith_hostility_level = { target = root.top_liege.primary_title.state_faith value > 0 } }
+			}
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		NOT = {
+			custom_description = {
+				text = "is_in_an_activity"
+				exists = involved_activity
+			}
+		}
+		is_imprisoned = no
+		NOT = { faith.religious_head ?= root }
+	}
+
+	cost = {}
+
+	effect = {
+		hidden_effect = {
+			faith = { save_scope_as = old_faith }
+			top_liege.faith = { save_scope_as = new_faith }
+			create_character_memory = { type = adopted_state_faith_memory }
+			scope:new_memory = {
+				set_variable = {
+					name = old_faith
+					value = scope:old_faith
+				}
+				set_variable = {
+					name = new_faith
+					value = scope:new_faith
+				}
+				set_variable = {
+					name = title
+					value = root.top_liege.primary_title
+				}
+			}
+		}
+
+		set_character_faith = top_liege.primary_title.state_faith
+
+		if = {
+			limit = { NOT = { has_character_flag = adopted_state_faith } }
+			if = {
+				limit = { government_allows = administrative }
+				change_influence = monumental_influence_gain
+			}
+			add_piety = massive_piety_gain
+			top_liege = {
+				if = {
+					limit = { faith = primary_title.state_faith }
+					add_opinion = {
+						target = root
+						modifier = converted_to_state_faith_opinion
+						opinion = 30
+					}
+				}
+				every_vassal = {
+					custom = every_governor_of_state_faith
+					limit = {
+						faith = top_liege.primary_title.state_faith
+						this != root
+					}
+					add_opinion = {
+						target = root
+						modifier = converted_to_state_faith_opinion
+						opinion = 30
+					}
+				}
+			}
+			add_character_flag = adopted_state_faith
+		}
+	}
+
+	ai_potential = {
+		government_has_flag = government_is_administrative
+		NOT = { has_trait = zealous } # A zealous vassal would presumably not want to change their faith
+		exists = top_liege.primary_title.state_faith
+		faith != top_liege.primary_title.state_faith
+	}
+
+	ai_will_do = {
+		base = 20
+		modifier = {
+			is_governor = yes
+			add = 40
+		}
+		
+		# Personality
+		modifier = {
+			is_governor = yes
+			has_trait = ambitious
+			add = 20
+		}
+		modifier = {
+			has_trait = fickle
+			add = 30
+		}
+		modifier = {
+			has_trait = arbitrary
+			add = 10
+		}
+		modifier = {
+			has_trait = ambitious
+			add = -15
+		}
+		modifier = {
+			has_trait = arrogant
+			add = -15
+		}
+		modifier = {
+			has_trait = content
+			add = -20
+		}
+		modifier = {
+			has_trait = cynical
+			add = -30
+		}
+		modifier = {
+			has_trait = stubborn
+			add = -50
+		}
+		
+		# Faith
+		modifier = { # More likely to switch away from an unreformed faith
+			faith ?= { has_doctrine_parameter = unreformed }
+			add = 20
+		}
+		modifier = { # Communal Identity make it more likely to adopt faith if they share same culture with the top liege
+			faith ?= { has_doctrine_parameter = same_culture_conversion_bonus_active }
+			culture ?= top_liege.culture
+			add = 10
+		}
+		modifier = { # Some faith are more likely to be abandoned
+			faith ?= { has_doctrine_parameter = unattractive_for_character_conversions }
+			add = 10
+		}
+		modifier = { # Don't adopt the state faith if you have the same faith as the top liege (if the emperor can have this faith, so can we!)
+			faith = top_liege.faith
+			top_liege != this
+			factor = 0
+		}
+		
+		# Other
+		modifier = {
+			has_vassal_stance = zealot
+			factor = 0.3
+		}
+		
+		# Non-admin vassals only consider converting if their faith hostility is low enough
+		modifier = {
+			NOT = { government_has_flag = government_is_administrative }
+			faith ?= {
+				faith_hostility_level = {
+					target = root.top_liege.primary_title.state_faith
+					value >= faith_hostile_level
+				}
+			}
+			factor = 0
+		}
+	}
+}
+
+##### Removed Decisions vvvvv
+embrace_heresy_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/ep3_decision_estate.dds"
+	}
+	decision_group_type = major
+	ai_check_interval = 120
+
+	sort_order = 70
+
+	desc = restore_backwater_counties_decision_desc
+	selection_tooltip = restore_backwater_counties_decision_tooltip
+	decision_group_type = roman
+
+	is_shown = { always = no }
+
+	is_valid = { always = no }
+
+	effect = {}
+}
+
 restore_backwater_counties_decision = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/ep3_decision_estate.dds"
