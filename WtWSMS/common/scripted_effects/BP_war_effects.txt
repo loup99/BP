@@ -86,25 +86,27 @@ land_odoacers_forces_effect = {
 }
 land_odoacers_forces_government_effect = {
 	#Depending on game state, handle landless chars gracefully
-	$CHAR$ ?= {
-		if = {
-			limit = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
-			#Either make them a Roman Federate or make them sub-roman
+	$CHAR$ = {
+		custom_tooltip = {
+			text = becomes_a_federate
 			if = {
-				limit = { $CHAR$ = { is_landed = yes } }
-				convert_to_roman_federate_government_effect = yes
-				debug_log = "MAKE FEDERATE?"
+				limit = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+				#Either make them a Roman Federate or make them sub-roman
+				if = {
+					limit = { $CHAR$ = { is_landed = yes } }
+					convert_to_roman_federate_government_effect = yes
+					debug_log = "MAKE FEDERATE?"
+				}
+				else = { convert_to_subroman_government_effect = yes }
 			}
-			else = { convert_to_subroman_government_effect = yes }
-		}
-		else = {
-			if = {
-				limit = { $CHAR$ = { is_landed = yes } }
-				convert_to_roman_federate_government_effect = yes
+			else = {
+				if = {
+					limit = { $CHAR$ = { is_landed = yes } }
+					convert_to_roman_federate_government_effect = yes
+				}
+				#Landless and can't play landless; game over
 			}
-			#Landless and can't play landless; game over
 		}
-		#$CHAR$ = { destroy_title = $LANDLESS_TITLE$ }
 	}
 }
 
