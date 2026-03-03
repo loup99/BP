@@ -1,0 +1,328 @@
+﻿@imperial_bureaucracy_cooldown_years_1 = 10
+@imperial_bureaucracy_cooldown_years_2 = 20
+@imperial_bureaucracy_cooldown_years_3 = 30
+
+##### Changed from Vanilla: Added some appropriate hidden flags for CBs
+imperial_bureaucracy = {
+	default = imperial_bureaucracy_1
+	cumulative = yes
+	flag = realm_law
+	
+	imperial_bureaucracy_0 = {
+		modifier = {
+			belligerent_opinion = -10
+			barons_and_minor_landholders_opinion = 20
+			glory_hound_opinion = 10
+			parochial_opinion = 10
+			courtly_opinion = 5
+		}
+		flag = uses_imperial_bureaucracy
+		flag = can_have_tributaries
+		flag = titles_cannot_leave_realm_on_succession # Hardcoded flag
+		##### Changed from Vanilla vvvvv
+		flag = enables_successor_roman_county_wars
+		##### Changed from Vanilla ^^^^^
+
+		can_keep = {
+			realm_law_use_imperial_bureaucracy = yes
+			trigger_if = {
+				limit = {
+					top_liege != this
+				}
+				liege = { has_realm_law = imperial_bureaucracy_0 }
+			}
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = {
+					top_liege != this
+					liege = { has_realm_law = imperial_bureaucracy_0 }
+				}
+				custom_tooltip = {
+					text = imperial_bureaucracy_pending_law_change
+					always = no
+				}
+			}
+		}
+
+		on_pass = {
+			# Remove modifiers.
+			remove_law_related_modifiers_effect = yes
+		}
+	}
+	
+	imperial_bureaucracy_1 = {
+		modifier = {
+			belligerent_opinion = 5
+			barons_and_minor_landholders_opinion = -30
+			glory_hound_opinion = -15
+			parochial_opinion = -15
+			courtly_opinion = -5
+			minority_opinion = -10
+			vassal_limit = 100
+		}
+		flag = can_have_tributaries
+		flag = title_revocation_allowed
+		flag = vassal_retraction_allowed
+		flag = can_change_partition_succession_laws
+		flag = vassal_internal_wars_banned
+		flag = diarchs_want_to_subsidise_without_this_flag
+		##### Changed from Vanilla vvvvv
+		flag = enables_imperial_roman_county_wars
+		flag = enables_successor_roman_duchy_county_wars
+		##### Changed from Vanilla ^^^^^
+
+		can_keep = {
+			realm_law_use_imperial_bureaucracy = yes
+			trigger_if = {
+				limit = {
+					top_liege != this
+				}
+				liege = { has_realm_law = imperial_bureaucracy_1 }
+			}
+		}
+
+		can_pass = {
+			trigger_if = {
+				limit = {
+					has_realm_law = imperial_bureaucracy_0
+					top_liege = this
+				}
+				custom_description = {
+					subject = root
+					text = "has_imperial_bureaucracy_cooldown"
+					NAND = {
+						has_variable = imperial_bureaucracy_cooldown
+						NOT = {
+							culture = { has_innovation = innovation_all_things }
+						}
+					}
+				}
+			}
+			trigger_if = {
+				limit = {
+					top_liege != this
+					liege = { has_realm_law = imperial_bureaucracy_1 }
+				}
+				custom_tooltip = {
+					text = imperial_bureaucracy_pending_law_change
+					always = no
+				}
+			}
+			can_pass_law_ca1_trigger = yes
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOR = {
+							has_realm_law = imperial_bureaucracy_2
+							has_realm_law = imperial_bureaucracy_3
+						}
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = imperial_bureaucracy_cooldown
+				years = @imperial_bureaucracy_cooldown_years_1
+			}
+			# Remove modifiers.
+			remove_law_related_modifiers_effect = yes
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = imperial_bureaucracy_0 }
+				value = 1
+			}
+		}
+	}
+	
+	imperial_bureaucracy_2 = {
+		modifier = {
+			belligerent_opinion = 10
+			barons_and_minor_landholders_opinion = -10
+			glory_hound_opinion = -10
+			parochial_opinion = -10
+			courtly_opinion = -5
+			zealot_opinion = -10
+			minority_opinion = -10
+			republic_government_tax_contribution_add = 0.05
+			vassal_limit = 100
+		}
+		flag = vassal_refusal_is_treason
+		flag = can_change_succession_laws
+		flag = vassal_all_wars_banned
+		flag = admin_change_vassal_gov_cheaper
+		flag = admin_title_troop_cost_reduction
+		##### Changed from Vanilla vvvvv
+		flag = enables_imperial_roman_duchy_county_wars
+		flag = enables_successor_roman_kingdom_duchy_county_wars
+		##### Changed from Vanilla ^^^^^
+		
+		can_keep = {
+			realm_law_use_imperial_bureaucracy = yes
+			trigger_if = {
+				limit = {
+					top_liege != this
+				}
+				liege = { has_realm_law = imperial_bureaucracy_2 }
+			}
+		}
+
+		can_pass = {
+			trigger_if = {
+				limit = {
+					NOT = { has_realm_law = imperial_bureaucracy_3 }
+					top_liege = this
+				}
+				has_realm_law = imperial_bureaucracy_1
+				custom_description = {
+					subject = root
+					text = "has_imperial_bureaucracy_cooldown"
+					NAND = {
+						has_variable = imperial_bureaucracy_cooldown
+						NOT = {
+							culture = { has_innovation = innovation_all_things }
+						}
+					}
+				}
+			}
+			trigger_if = {
+				limit = {
+					top_liege != this
+					liege = { has_realm_law = imperial_bureaucracy_2 }
+				}
+				custom_tooltip = {
+					text = imperial_bureaucracy_pending_law_change
+					always = no
+				}
+			}
+			can_pass_law_ca2_trigger = yes
+		}
+
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOT = { has_realm_law = imperial_bureaucracy_3 }
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = imperial_bureaucracy_cooldown
+				years = @imperial_bureaucracy_cooldown_years_2
+			}
+			# Remove modifiers.
+			remove_law_related_modifiers_effect = yes
+		}
+
+		ai_will_do = {
+			if = {
+				limit = { has_realm_law = imperial_bureaucracy_1 }
+				value = 1
+			}
+		}
+	}
+	
+	imperial_bureaucracy_3 = {
+		modifier = {
+			belligerent_opinion = 15
+			barons_and_minor_landholders_opinion = -20
+			glory_hound_opinion = -25
+			parochial_opinion = -25
+			courtly_opinion = -10
+			zealot_opinion = -20
+			minority_opinion = -30
+			republic_government_tax_contribution_add = 0.05
+			vassal_limit = 200
+		}
+		flag = vassal_all_wars_banned_permanent
+		flag = max_authority_level
+		flag = admin_title_troop_cost_reduction_high
+		##### Changed from Vanilla vvvvv
+		flag = enables_imperial_roman_kingdom_duchy_county_wars
+		flag = enables_successor_roman_kingdom_duchy_county_wars
+		flag = enables_successor_states_to_attack_rome
+		##### Changed from Vanilla ^^^^^
+		
+		can_keep = {
+			realm_law_use_imperial_bureaucracy = yes
+			trigger_if = {
+				limit = {
+					top_liege != this
+				}
+				liege = { has_realm_law = imperial_bureaucracy_3 }
+			}
+		}
+
+		can_pass = {
+			trigger_if = {
+				limit = {
+					top_liege = this
+				}
+				has_realm_law = imperial_bureaucracy_2
+				custom_description = {
+					subject = root
+					text = "has_imperial_bureaucracy_cooldown"
+					NAND = {
+						has_variable = imperial_bureaucracy_cooldown
+						NOT = {
+							culture = { has_innovation = innovation_all_things }
+						}
+					}
+				}
+			}
+			trigger_if = {
+				limit = {
+					top_liege != this
+					liege = { has_realm_law = imperial_bureaucracy_3 }
+				}
+				custom_tooltip = {
+					text = imperial_bureaucracy_pending_law_change
+					always = no
+				}
+			}
+			can_pass_law_ca3_trigger = yes
+		}
+		
+		pass_cost = {
+			prestige = {
+				if = {
+					limit = {
+						NOT = { has_realm_law = imperial_bureaucracy_3 }
+					}
+					add = increase_crown_authority_prestige_cost
+				}
+			}
+		}
+		
+		on_pass = {
+			# Increment cooldown breaker tally, if appropriate.
+			calculate_authority_cooldown_break_effect = yes
+			# Set regular cooldown.
+			set_variable = {
+				name = imperial_bureaucracy_cooldown
+				years = @imperial_bureaucracy_cooldown_years_3
+			}
+			# Remove modifiers.
+			remove_law_related_modifiers_effect = yes
+		}
+	}
+}
