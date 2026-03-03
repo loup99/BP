@@ -6,6 +6,7 @@
 		BP_keep_roman_federate_government
 		BP_flip_federate_when_not_below_roman
 		BP_flip_federate_to_subroman
+		BP_grants_to_tribals_become_federate
 	}
 }
 
@@ -79,24 +80,52 @@ BP_flip_federate_to_subroman = {
 		has_government = roman_federate_government
 		root = liege
 	}
-	#If the previous holder was sub-roman government, flip to sub-roman government
-	if = {
-		limit = {
-			OR = {
-				scope:previous_holder ?= { government_has_flag = government_is_subroman_administrative }
-				#Shouldn't happen, but let's be safe!
-				scope:previous_holder ?= { government_has_flag = government_is_roman_administrative }
+	effect = {
+		#If the previous holder was sub-roman government, flip to sub-roman government
+		if = {
+			limit = {
+				OR = {
+					scope:previous_holder ?= { government_has_flag = government_is_subroman_administrative }
+					#Shouldn't happen, but let's be safe!
+					scope:previous_holder ?= { government_has_flag = government_is_roman_administrative }
+				}
 			}
+			change_government_subroman_administrative_effect = yes
 		}
-		change_government_subroman_administrative_effect = yes
+		#If you're a king-level federate, congrats you're now sub-roman ruling over the federates
+		else_if = {
+			limit = { primary_title.tier >= tier_kingdom }
+			change_government_subroman_administrative_effect = yes
+		}
+		#Otherwise, devolved the government
+		else = { bp_devolve_roman_federate_effect = yes }
 	}
-	#If you're a king-level federate, congrats you're now sub-roman ruling over the federates
-	else_if = {
-		limit = { primary_title.tier >= tier_kingdom }
-		change_government_subroman_administrative_effect = yes
+}
+BP_grants_to_tribals_become_federate = {
+	#Tribals and Migratory cultures become federates
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		liege_or_court_owner.top_liege = { government_has_flag = is_a_roman_government }
+		NOT = { root = liege }
+		OR = {
+			scope:transfer_type = flag:granted
+			scope:transfer_type = flag:appointment
+		}
 	}
-	#Otherwise, devolved the government
-	else = { bp_devolve_roman_federate_effect = yes }
+	effect = {
+		if = {
+			limit = {
+				OR = {
+					valid_for_federate_to_be_high_tribal_trigger = yes
+					AND = {
+						culture = { has_cultural_parameter = becomes_roman_federates_in_most_cases }
+						NOT = { dynasty ?= top_liege.dynasty }
+					}
+				}
+			}
+			change_government_roman_federate_effect = yes
+		}
+	}
 }
 
 on_vassal_change = {
