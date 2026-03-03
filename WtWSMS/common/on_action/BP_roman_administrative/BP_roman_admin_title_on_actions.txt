@@ -4,7 +4,8 @@
 		BP_got_a_roman_ministry
 		BP_got_a_roman_province
 		BP_keep_roman_federate_government
-		BP_flip_federate_when_not_roman
+		BP_flip_federate_when_not_below_roman
+		BP_flip_federate_to_subroman
 	}
 }
 
@@ -43,7 +44,7 @@ BP_got_a_roman_province = {
 	effect = {
 		if = {
 			limit = {
-				is_landless_ruler = yes
+				NOT = { any_held_title = { has_variable = is_a_roman_ministry_title } }
 				vassal_contract_has_flag = roman_ministry_contact
 			}
 			vassal_contract_set_obligation_level = { type = roman_administrative_themes level = roman_admin_theme_civilian_value }
@@ -62,21 +63,40 @@ BP_keep_roman_federate_government = {
 		}
 	}
 }
-BP_flip_federate_when_not_roman = {
+BP_flip_federate_when_not_below_roman = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_governments_trigger = yes
 		has_government = roman_federate_government
+		NOT = { top_liege = { government_has_flag = is_a_roman_government } }
 	}
 	effect = {
-		if = {
-			limit = { NOT = { top_liege = { government_has_flag = is_a_roman_government } } }
-			if = {
-				limit = { root.culture = { has_cultural_era_or_later = culture_era_classical_antiquity } }
-				change_government = high_tribal_government
-			}
-			else = { change_government = tribal_government }
-		}
+		bp_devolve_roman_federate_effect = yes
 	}
+}
+BP_flip_federate_to_subroman = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		has_government = roman_federate_government
+		root = liege
+	}
+	#If the previous holder was sub-roman government, flip to sub-roman government
+	if = {
+		limit = {
+			OR = {
+				scope:previous_holder ?= { government_has_flag = government_is_subroman_administrative }
+				#Shouldn't happen, but let's be safe!
+				scope:previous_holder ?= { government_has_flag = government_is_roman_administrative }
+			}
+		}
+		change_government_subroman_administrative_effect = yes
+	}
+	#If you're a king-level federate, congrats you're now sub-roman ruling over the federates
+	else_if = {
+		limit = { primary_title.tier >= tier_kingdom }
+		change_government_subroman_administrative_effect = yes
+	}
+	#Otherwise, devolved the government
+	else = { bp_devolve_roman_federate_effect = yes }
 }
 
 on_vassal_change = {
@@ -120,7 +140,7 @@ BP_independent_ministry_cleanup = {
 BP_independent_roman_government_checks = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_governments_trigger = yes
-		is_independent_ruler = yes
+		root = liege
 	}
 	effect = {
 		if = { #Independent Roman Admin governments must be at least empires, or they become subroman
@@ -135,11 +155,7 @@ BP_independent_roman_government_checks = {
 			limit = {
 				government_has_flag = government_becomes_tribal_high_tribal_if_independent_or_not_under_roman
 			}
-			if = {
-				limit = { root.culture = { has_cultural_era_or_later = culture_era_classical_antiquity } }
-				change_government = high_tribal_government
-			}
-			else = { change_government = tribal_government }
+			bp_devolve_roman_federate_effect = yes
 		}
 		#Independent SubRoman Admins swap their existing laws for liege laws
 		#NB: Aristocracy laws are independent of each other so not needed to manipulate
