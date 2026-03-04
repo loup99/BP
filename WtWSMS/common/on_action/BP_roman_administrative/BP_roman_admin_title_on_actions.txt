@@ -113,17 +113,40 @@ BP_grants_to_tribals_become_federate = {
 		}
 	}
 	effect = {
+		#Sub-Roman Realms...
 		if = {
 			limit = {
-				OR = {
-					valid_for_federate_to_be_high_tribal_trigger = yes
-					AND = {
-						culture = { has_cultural_parameter = becomes_roman_federates_in_most_cases }
-						NOT = { dynasty ?= top_liege.dynasty }
-					}
+				liege_or_court_owner.top_liege = {
+					government_has_flag = government_is_subroman_administrative
 				}
 			}
-			change_government_roman_federate_effect = yes
+			#If you're a Migratory tribe and not of the ruler's dynasty and they're below the limit
+			#Yer a Federate 'arry.
+			if = {
+				limit = {
+					culture = { has_cultural_parameter = becomes_roman_federates_in_most_cases }
+					NOT = { dynasty ?= top_liege.dynasty }
+					liege_or_court_owner.top_liege.number_of_federates < liege_or_court_owner.number_of_federates_allowed
+				}
+				change_government_roman_federate_effect = yes
+			}
+			#If you're a tribal, we just ignore all that jazz.
+			else_if = {
+				limit = { culture = { no_longer_in_tribal_era_trigger = no } }
+				change_government_roman_federate_effect = yes
+			}
+		}
+		#Roman Admin Realms; either is good (we've got an actual military)
+		else_if = {
+			limit = {
+				liege_or_court_owner.top_liege = {
+					government_has_flag = government_is_roman_administrative
+				}
+			}
+			if = {
+				limit = { culture = { no_longer_in_tribal_era_trigger = no } }
+				change_government_roman_federate_effect = yes
+			}
 		}
 	}
 }
