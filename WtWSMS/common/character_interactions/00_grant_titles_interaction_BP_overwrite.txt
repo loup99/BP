@@ -1,7 +1,6 @@
 ﻿##### Changed from Vanilla: Modified is_valid_showing_failures_only, can_be_picked_title
 ##### Changed from Vanilla: Applied Wuzurgan opinion modifiers
 ##### Changed from Vanilla: Applied Aneran/Eran connotations to title grants
-##### Changed form Vanilla: Allowed for government_is_quasi_feudal in admin governments
 
 #be aware that the actual granting of the title happens in code!
 grant_titles_interaction = {
@@ -37,17 +36,12 @@ grant_titles_interaction = {
 				}
 			}
 		}
-		##### Changed from Vanilla vvvvv
 		trigger_if = {
-			limit = { scope:actor = { government_allows = administrative } }
-			trigger_if = {
-				limit = { scope:actor = { government_has_flag = government_is_valid_for_roman_administrative_governments } }
-				scope:recipient = { government_has_flag = government_is_quasi_feudal }
+			limit = {
+				scope:actor = { government_allows = administrative }
 			}
-			trigger_else = { scope:recipient = { NOT = { government_allows = administrative } } }
+			scope:recipient = { NOT = { government_allows = administrative } }
 		}
-		##### Changed from Vanilla ^^^^^
-		trigger_else = {}
 		trigger_if = {
 			limit = {
 				scope:actor = { government_has_flag = government_is_nomadic }
@@ -184,7 +178,6 @@ grant_titles_interaction = {
 		}
 	}
 
-	##### Changed from Vanilla vvvvv
 	can_be_picked_title = {
 		scope:target = {
 			is_leased_out = no
@@ -260,26 +253,7 @@ grant_titles_interaction = {
 			}
 			##### Changed from Vanilla vvvvv
 			
-			#government_is_quasi_feudal is only up to duchies
-			trigger_if = {
-				limit = { scope:recipient = { government_has_flag = government_is_quasi_feudal } }
-				custom_tooltip = {
-					text = cannot_give_more_than_duchies_to_quasi_feudals
-					scope:target.tier <= tier_duchy
-				}
-			}
-			trigger_if = {
-				limit = {
-					scope:recipient = { government_has_flag = government_is_quasi_feudal }
-					scope:recipient = { is_landed = yes }
-				}
-				custom_tooltip = {
-					text = can_only_grant_titles_in_same_duchy
-					scope:target.duchy ?= scope:recipient.capital_county.duchy
-				}
-			}
-			
-			#Rajamandala must give to family members if possible
+			#Rajamandala must give to family memebers if possible
 			trigger_if = {
 				limit = {
 					scope:actor = {
@@ -290,7 +264,7 @@ grant_titles_interaction = {
 							any_dynasty_member = {
 								count > 0
 								NOT = { is_heir_of = scope:actor } #Can't be your heir
-								NOT = { is_child_of = scope:actor } #Or your direct descendants
+								NOT = { is_child_of = scope:actor } #Or your direct descendents
 								#Has to be your courtier or vassal already
 								OR = {
 									is_courtier_of = scope:actor
@@ -313,7 +287,6 @@ grant_titles_interaction = {
 			}
 			##### Changed from Vanilla ^^^^^
 		}
-		##### Changed from Vanilla ^^^^^
 
 		custom_description = {
 			text = grant_titles_interaction_can_only_give_diarch_de_jure_liege_to_diarch
@@ -1454,7 +1427,7 @@ grant_titles_interaction = {
 		#Wuzurgan expect counties on up in Iranian Feudal Governments
 		if = {
 			limit = {
-				scope:actor = { government_has_flag = government_is_iranian_dynastic }
+				scope:actor = { government_has_flag = government_uses_iranian_dynastic_authority }
 				scope:target.tier >= tier_county #No one cares about baronies
 				#Is not an existing Wuzurgan, a dynasty member of an existing Wuzurgan, royal family, or a great dynasty
 				NOR = {
@@ -1509,7 +1482,7 @@ grant_title_to_new_random_character_interaction = {
 		if = {
 			limit = {
 				exists = scope:target
-				scope:actor = { government_has_flag = government_is_iranian_dynastic }
+				scope:actor = { government_has_flag = government_uses_iranian_dynastic_authority }
 				scope:target.tier >= tier_county #No one cares about baronies
 				#Is not an existing Wuzurgan, a dynasty member of an existing Wuzurgan, royal family, or a great dynasty
 				NOR = {
@@ -1543,7 +1516,7 @@ grant_title_to_new_random_character_interaction = {
 	##### Changed from Vanilla ^^^^^
 }
 
-##### Changed from Vanilla: Blocked for government_is_quasi_feudal
+##### Changed from Vanilla: Added notes about roman federate government, block higher held titles for Roman Federates
 
 #be aware that the actual granting of the title happens in code!
 grant_governorship_interaction = {
@@ -1562,7 +1535,6 @@ grant_governorship_interaction = {
 	# actor character giving the titles
 	# recipient character receiving the titles
 
-	##### Changed from Vanilla vvvvv
 	is_shown = {
 		scope:actor != scope:recipient
 		scope:recipient = {
@@ -1584,11 +1556,7 @@ grant_governorship_interaction = {
 				NOT = { any_parent = { is_ai = no } }
 			}
 		}
-		##### Changed from Vanilla vvvvv
-		scope:recipient = { NOT = { government_has_flag = government_is_quasi_feudal } }
-		##### Changed from Vanilla ^^^^^
 	}
-	##### Changed from Vanilla ^^^^^
 
 	is_valid_showing_failures_only = {
 		scope:actor = {
@@ -1842,6 +1810,15 @@ grant_governorship_interaction = {
 					}
 				}
 				tgp_is_ceremonial_liege_trigger = no
+				##### Changed from Vanilla vvvvv
+				trigger_if = {
+					limit = { scope:recipient = { government_has_flag = government_is_roman_federate } }
+					custom_tooltip = {
+						text = cannot_grant_federates_kingdoms_or_up
+						scope:target.tier <= tier_duchy
+					}
+				}
+				##### Changed from Vanilla ^^^^^
 			}
 
 			custom_tooltip = {
@@ -2531,5 +2508,26 @@ grant_governorship_interaction = {
 				}
 			}
 		}
+		
+		##### Changed from Vanilla vvvvv
+		if = {
+			limit = {
+				BP_has_dlc_necessary_for_roman_governments_trigger = yes
+				scope:actor = { government_has_flag = is_a_roman_government }
+				scope:recipient = {
+					OR = {
+						culture = { no_longer_in_tribal_era_trigger = no }
+						AND = {
+							culture = { has_cultural_parameter = becomes_roman_federates_in_most_cases }
+							NOT = { dynasty ?= top_liege.dynasty }
+							liege_or_court_owner.top_liege.number_of_federates < liege_or_court_owner.number_of_federates_allowed
+						}
+					}
+				}
+			}
+			custom_tooltip = will_convert_to_a_federate
+		}
+		##### Changed from Vanilla ^^^^^
 	}
 }
+
