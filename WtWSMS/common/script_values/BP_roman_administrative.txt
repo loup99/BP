@@ -1,28 +1,47 @@
-﻿number_of_federates_allowed = {
-	#NET:
-	#unlanded: -3
-	#barony: -2
-	#county: -1
-	#duchy: 0
-	#kingdom: 3
-	#empire: 4
+﻿number_of_military_provinces_allowed = {
+	#kingdom: 4
+	#empire: 5
 	#hegemony: 6
 	value = this.primary_title.tier
-	subtract = tier_duchy
-	if = {
-		limit = { this.primary_title.tier > tier_duchy }
-		add = 2
+	subtract = tier_kingdom
+	#kingdom: 0
+	#empire: 1
+	#hegemony: 2
+	
+	#Add one for every 4 provinces in the Empire, direct or not.
+	every_vassal_or_below = {
+		limit = { any_held_title = { this.tier = tier_duchy } }
+		add = 0.25
 	}
+	floor = yes
+	# 5/10/15/20/25 provinces
+	#kingdom: 0/1/2/3/4
+	#empire: 1/2/3/4/5
+	#hegemony: 2/3/4/5/6
+	
+	#Only for Kingdoms on up
 	if = {
+		limit = { this.primary_title.tier <= tier_duchy }
+		max = 0
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_kingdom }
+		min = 2
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_empire }
+		min = 4
+	}
+	else_if = {
 		limit = { this.primary_title.tier > tier_empire }
-		add = 1
+		min = 6
 	}
 }
 
-number_of_federates = {
+number_of_military_provinces = {
 	value = 0
 	every_vassal = {
-		limit = { government_has_flag = government_is_roman_federate }
+		limit = { vassal_contract_has_flag = roman_landed_military_contract }
 		add = 1
 	}
 }
@@ -166,8 +185,9 @@ change_non_roman_minority_rule_law_basic_cost = {
 roman_admin_theme_civilian_value = 0
 roman_admin_theme_limitanei_value = 1
 roman_admin_theme_naval_value = 2
-roman_admin_theme_ministry_civilian_value = 3
-roman_admin_theme_ministry_military_value = 4
+roman_admin_theme_military_value = 3
+roman_admin_theme_ministry_civilian_value = 4
+roman_admin_theme_ministry_military_value = 5
 
 #Imperial Guard director
 imperial_guard_task_side_effect_cooldown = 365

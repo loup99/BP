@@ -32,7 +32,7 @@ roman_administrative_treasury = {
 			ai_liege_desire = 4
 			ai_subject_desire = 2
 
-			subject_opinion = -40
+			subject_opinion = -15
 
 			score = -1
 		}
@@ -48,7 +48,7 @@ roman_administrative_treasury = {
 			ai_liege_desire = 3
 			ai_subject_desire = 3
 			
-			subject_opinion = -15
+			subject_opinion = -5
 
 			score = 0
 		}
@@ -64,7 +64,7 @@ roman_administrative_treasury = {
 			ai_liege_desire = 2
 			ai_subject_desire = 4
 
-			subject_opinion = 5
+			subject_opinion = 0
 
 			score = 1
 		}
@@ -80,7 +80,7 @@ roman_administrative_treasury = {
 			ai_liege_desire = 1
 			ai_subject_desire = 5
 
-			subject_opinion = 15
+			subject_opinion = 5
 
 			score = 2
 		}
@@ -158,7 +158,7 @@ roman_administrative_themes = {
 		}
 		roman_admin_theme_limitanei = {
 			is_shown = { scope:subject = { is_landed = yes } }
-			position = { 0 1 }
+			position = { 1 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_frontier_administration.dds"
 			gui_tags = { byzantine_purple }
 			
@@ -217,7 +217,7 @@ roman_administrative_themes = {
 		}
 		roman_admin_theme_naval = {
 			is_shown = { scope:subject = { is_landed = yes } }
-			position = { 0 2 }
+			position = { 2 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_naval_administration.dds"
 			gui_tags = { byzantine_purple }
 			
@@ -327,11 +327,63 @@ roman_administrative_themes = {
 			flag = admin_tradeport_obligation_bonus
 			flag = admin_theme_naval
 		}
+		##### Sub-Roman Themes
+		roman_admin_theme_military = {
+			#This is for land 
+			is_shown = {
+				scope:liege = { government_has_flag = government_is_subroman_administrative }
+				scope:subject = { government_has_flag = government_is_subroman_administrative }
+				scope:subject = { is_landed = yes }
+			}
+			is_valid = {
+				scope:liege = { government_has_flag = government_is_subroman_administrative }
+				scope:subject = { government_has_flag = government_is_subroman_administrative }
+				NOT = { scope:subject.dynasty ?= scope:liege.top_liege.dynasty } #Let's not make your family business too strong
+				trigger_if = {
+					limit = { NOT = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } } }
+					custom_description = {
+						text = has_not_reached_military_province_limits
+						subject = scope:subject.top_liege
+						scope:subject.top_liege.number_of_military_provinces < scope:subject.top_liege.number_of_military_provinces_allowed
+					}
+				}
+				trigger_if = {
+					limit = { NOT = { scope:subject.top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition } } }
+					custom_description = {
+						text = non_roman_cultures_may_make_only_certain_holders_military_provinces
+						OR = {
+							scope:subject.culture = scope:subject.top_liege.culture
+							scope:subject.culture = { has_cultural_parameter = becomes_roman_federates_in_most_cases }
+						}
+					}
+				}
+			}
+			position = { 3 0 }
+			icon = "gfx/interface/icons/theme_administration_types/icon_military_administration.dds"
+			gui_tags = { byzantine_purple }
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			tax_factor = -0.5
+			levies_factor = 0.75
+			
+			subject_modifier = {
+				monthly_treasury_from_military_budget_base = 4.0
+			}
+			
+			liege_modifier = {}
+			
+			enable_title_maa = yes
+			
+			flag = roman_admin_military_contract
+			flag = roman_landed_military_contract
+		}
 		##### Hidden ministry level-theme to avoid title MAA issues
 		roman_admin_theme_ministry = {
 			is_shown = { scope:subject = { is_landless_ruler = yes } }
 			is_valid = { scope:subject = { any_held_title = { has_variable = is_supreme_roman_ministry_title } } }
-			position = { 1 0 }
+			position = { 4 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_civilian_administration.dds"
 			gui_tags = { byzantine_purple }
 			
@@ -352,7 +404,7 @@ roman_administrative_themes = {
 		roman_admin_theme_ministry_military = {
 			is_shown = { scope:subject = { is_landless_ruler = yes } }
 			is_valid = { scope:subject = { any_held_title = { has_variable = is_supreme_roman_military_title } } }
-			position = { 1 0 }
+			position = { 5 0 }
 			icon = "gfx/interface/icons/theme_administration_types/icon_military_administration.dds"
 			gui_tags = { byzantine_purple }
 			
@@ -373,6 +425,262 @@ roman_administrative_themes = {
 		}
 	}
 }
+
+roman_administrative_military_landed = {
+	#General idea is that as army becomes landed, it makes it cheaper for the Roman Admin government
+	#But turns the army more into becoming personal holdings and levies
+	#Making the sort of alliance building in feudalism necessary
+	
+	#Only shown if it's actually a military province
+	is_shown = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+	
+	display_mode = tree
+	icon = soldier_icon
+	defaults_to_highest_valid_level = yes
+	
+	obligation_levels = {
+		roman_administrative_military_landed_0 = { #Fully standing army
+			is_shown = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+			is_valid = {
+				scope:subject = { vassal_contract_has_flag = roman_landed_military_contract }
+				scope:subject = { has_realm_law = subroman_admin_military_centralization_vassal_law_0 }
+			}
+			parent = roman_administrative_military_landed_0
+			position = { 0 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 2
+				men_at_arms_title_cap = 2
+				
+				#Personal Troops
+				men_at_arms_cap = 0
+				men_at_arms_limit = 1
+				
+				levy_size = 0.0
+				
+				men_at_arms_maintenance = -0.50
+				
+				domain_tax_mult = -0.25
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = 0.00
+				army_maintenance_mult = 0.00
+				mercenary_hire_cost_mult = 0.00
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			score = 0
+			
+			flag = roman_admin_military_contract
+			flag = roman_administrative_military_landed_0
+		}
+		roman_administrative_military_landed_1 = {
+			is_shown = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+			is_valid = {
+				scope:subject = { vassal_contract_has_flag = roman_landed_military_contract }
+				scope:subject = { has_realm_law = subroman_admin_military_centralization_vassal_law_1 }
+			}
+			parent = roman_administrative_military_landed_1
+			position = { 1 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 1
+				men_at_arms_title_cap = 1
+				#Personal Troops
+				men_at_arms_cap = 1
+				men_at_arms_limit = 1
+				
+				levy_size = 0.1
+				
+				men_at_arms_maintenance = -0.40
+				
+				domain_tax_mult = -0.20
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.01
+				army_maintenance_mult = -0.01
+				mercenary_hire_cost_mult = -0.01
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			score = 1
+			
+			flag = roman_admin_military_contract
+			flag = roman_administrative_military_landed_1
+		}
+		
+		roman_administrative_military_landed_2 = {
+			is_shown = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+			is_valid = {
+				scope:subject = { vassal_contract_has_flag = roman_landed_military_contract }
+				scope:subject = { has_realm_law = subroman_admin_military_centralization_vassal_law_2 }
+			}
+			parent = roman_administrative_military_landed_2
+			position = { 2 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 0
+				men_at_arms_title_cap = 0
+				#Personal Troops
+				men_at_arms_cap = 1
+				men_at_arms_limit = 2
+				
+				levy_size = 0.2
+				
+				men_at_arms_maintenance = -0.30
+				
+				domain_tax_mult = -0.15
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.02
+				army_maintenance_mult = -0.02
+				mercenary_hire_cost_mult = -0.02
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			score = 2
+			
+			flag = roman_admin_military_contract
+			flag = roman_administrative_military_landed_2
+		}
+		
+		roman_administrative_military_landed_3 = {
+			is_shown = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+			is_valid = {
+				scope:subject = { vassal_contract_has_flag = roman_landed_military_contract }
+				scope:subject = { has_realm_law = subroman_admin_military_centralization_vassal_law_3 }
+			}
+			parent = roman_administrative_military_landed_3
+			position = { 3 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = -1
+				men_at_arms_title_cap = -1
+				#Personal Troops
+				men_at_arms_cap = 2
+				men_at_arms_limit = 2
+				
+				levy_size = 0.3
+				
+				men_at_arms_maintenance = -0.20
+				
+				domain_tax_mult = -0.10
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.03
+				army_maintenance_mult = -0.03
+				mercenary_hire_cost_mult = -0.03
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			score = 3
+			
+			flag = roman_admin_military_contract
+			flag = roman_administrative_military_landed_3
+		}
+		
+		roman_administrative_military_landed_4 = {
+			is_shown = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+			is_valid = {
+				scope:subject = { vassal_contract_has_flag = roman_landed_military_contract }
+				scope:subject = { has_realm_law = subroman_admin_military_centralization_vassal_law_4 }
+			}
+			parent = roman_administrative_military_landed_4
+			position = { 4 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = -2
+				men_at_arms_title_cap = -2
+				#Personal Troops
+				men_at_arms_cap = 2
+				men_at_arms_limit = 3
+				
+				levy_size = 0.4
+				
+				men_at_arms_maintenance = -0.10
+				
+				domain_tax_mult = -0.05
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.04
+				army_maintenance_mult = -0.04
+				mercenary_hire_cost_mult = -0.04
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			score = 4
+			
+			flag = roman_admin_military_contract
+			flag = roman_administrative_military_landed_4
+		}
+		
+		#Fully landed; no more title MAA, can't go back from this state.
+		#On track for Feudalism/Clan government
+		roman_administrative_military_landed_5 = {
+			is_shown = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+			is_valid = {
+				scope:subject = { vassal_contract_has_flag = roman_landed_military_contract }
+				scope:subject = { has_realm_law = subroman_admin_military_centralization_vassal_law_5 }
+			}
+			parent = roman_administrative_military_landed_5
+			position = { 5 0 }
+			
+			subject_modifier = {
+				#Personal Troops
+				men_at_arms_cap = 3
+				men_at_arms_limit = 3
+				
+				levy_size = 0.5
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.05
+				army_maintenance_mult = -0.05
+				mercenary_hire_cost_mult = -0.05
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			score = 5
+			
+			flag = roman_administrative_military_landed_permanent
+		}
+		
+		#Fallback for everyone
+		roman_administrative_military_landed_not_available = {
+			parent = roman_administrative_military_landed_not_available
+			is_shown = { always = no }
+			is_valid = {
+				NOT = { scope:subject = { vassal_contract_has_flag = roman_landed_military_contract } }
+			}
+			position = { 1 1 }
+			
+			subject_modifier = {}
+			
+			liege_modifier = {}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			score = 6
+		}
+	}
+}
+
 
 #Hidden; salary scaling by rank
 roman_administrative_salary_rank = {
