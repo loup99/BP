@@ -1,4 +1,4 @@
-﻿number_of_military_provinces_allowed = {
+﻿number_of_military_provinces__tier_value = {
 	#kingdom: 4
 	#empire: 5
 	#hegemony: 6
@@ -7,22 +7,63 @@
 	#kingdom: 0
 	#empire: 1
 	#hegemony: 2
-	
-	#Add one for every 4 provinces in the Empire, direct or not.
+}
+number_of_military_provinces__province_count = {
+	value = 0
 	every_vassal_or_below = {
 		limit = { any_held_title = { this.tier = tier_duchy } }
-		add = 0.25
+		add = 1
 	}
-	floor = yes
+	every_held_title = {
+		limit = {
+			this.tier = tier_duchy
+			is_titular = no
+		}
+		add = 1
+	}
+}
+number_of_military_provinces__province_count_net = {
+	value = number_of_military_provinces__province_count
+	#Add one for every 4 provinces in the Empire, direct or not.
+	divide = 4
 	# 5/10/15/20/25 provinces
 	#kingdom: 0/1/2/3/4
 	#empire: 1/2/3/4/5
 	#hegemony: 2/3/4/5/6
+}
+number_of_military_provinces__province_count_net_round_down = {
+	value = number_of_military_provinces__province_count_net
+	round = yes
+}
+number_of_military_provinces__min_value_by_tier = {
+	#Only for Kingdoms on up
+	if = {
+		limit = { this.primary_title.tier <= tier_duchy }
+		max = 0
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_kingdom }
+		min = 2
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_empire }
+		min = 4
+	}
+	else_if = {
+		limit = { this.primary_title.tier > tier_empire }
+		min = 6
+	}
+}
+
+number_of_military_provinces_allowed = {
+	value = number_of_military_provinces__tier_value
+	add = number_of_military_provinces__province_count_net_round_down
 	
 	#Only for Kingdoms on up
 	if = {
 		limit = { this.primary_title.tier <= tier_duchy }
 		max = 0
+		min = 0
 	}
 	else_if = {
 		limit = { this.primary_title.tier = tier_kingdom }
