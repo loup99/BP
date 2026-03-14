@@ -1,0 +1,361 @@
+﻿##### Changed from Vanilla: extended hostile_scheme_success_chance_vs_spouse_penalty to faiths as well
+hostile_scheme_base_odds_prediction_guts_value = {
+	if = {
+		limit = {
+			exists = scope:temp_target.primary_title
+			scope:temp_target.primary_title.tier = tier_empire
+		}
+		add = {
+			value = -40
+			desc = scheme_odds.target.tier
+		}
+	}
+	else_if = {
+		limit = {
+			exists = scope:temp_target.primary_title
+			scope:temp_target.primary_title.tier = tier_kingdom
+		}
+		add = {
+			value = -30
+			desc = scheme_odds.target.tier
+		}
+	}
+	else_if = {
+		limit = {
+			exists = scope:temp_target.primary_title
+			scope:temp_target.primary_title.tier = tier_duchy
+		}
+		add = {
+			value = -20
+			desc = scheme_odds.target.tier
+		}
+	}
+
+	if = { # Minor Lifestyle Perk protection for Courtiers
+		limit = {
+			scope:temp_target = {
+				is_alive = yes
+				is_ruler = no
+				court_owner ?= {
+					has_perk = prepared_for_anything_perk
+				}
+				court_owner != scope:owner
+				NOT = { has_perk = prepared_for_anything_perk }
+			}
+		}
+		add = {
+			value = 0
+			desc = scheme_odds.target.court_owner_has_prepared_for_anything_perk
+			subtract = prepared_for_anything_perk_secondary_percentage
+		}
+	}
+	if = {
+		limit = { # Bonus for murdering Pool characters, as you can't have agents against them
+			scope:temp_target = {
+				is_pool_character = yes
+				NOT = { intrigue >= very_high_skill_rating }
+			}
+		}
+		add = {
+			value = 25
+			desc = scheme_odds.target.is_pool_char
+		}
+	}
+
+	if = { # FP3 legacy track bonus for murdering dynasty members
+		limit = {
+			scope:temp_target = {
+				exists = dynasty
+				exists = scope:owner.dynasty
+				dynasty = scope:owner.dynasty
+				dynasty = { has_dynasty_perk = fp3_khvarenah_legacy_2 }
+			}
+		}
+		add = {
+			value = 10
+			desc = scheme_odds.owner.dynasty_legacy_kinslaying_bonus_from_fp3_khvarenah_legacy_2
+		}
+	}
+	
+	if = { # Essentially the Base
+		limit = {
+			scope:owner = {
+				exists = scope:temp_target.cp:councillor_spymaster
+				scope:temp_target.cp:councillor_spymaster = this
+			}
+		}
+		add = {
+			value = 75
+			desc = scheme_odds.owner.is_target_spymaster
+		}
+	}
+	if = {
+		limit = {
+			scope:temp_target = {
+				is_landed_or_landless_administrative = no
+			}
+			scope:owner = {
+				exists = scope:temp_target.liege.cp:councillor_spymaster
+				scope:temp_target.liege.cp:councillor_spymaster = this
+			}
+		}
+		add = {
+			value = 75
+			desc = scheme_odds.owner.is_target_liege_spymaster
+		}
+	}
+	if = {
+		limit = {
+			scope:temp_target = {
+				is_landed_or_landless_administrative = no
+			}
+			scope:owner = {
+				exists = scope:temp_target.host.cp:councillor_spymaster
+				scope:temp_target.host.cp:councillor_spymaster = this
+			}
+		}
+		add = {
+			value = 75
+			desc = scheme_odds.owner.is_target_host_spymaster
+		}
+	}
+	if = {
+		limit = {
+			scope:owner = {
+				has_relation_guardian = scope:temp_target
+			}
+		}
+		add = {
+			value = 75
+			desc = scheme_odds.owner.relation.owner_is_guardian_of_target
+		}
+	}
+	if = {
+		limit = {
+			scope:owner = { is_diarch_of_target = scope:temp_target }
+		}
+		add = {
+			value = 50
+			desc = scheme_odds.owner.relation.owner_is_diarch_of_target
+		}
+	}
+	if = {
+		limit = {
+			scope:temp_target = {
+				is_ruler = no
+			}
+			exists = scope:temp_target.liege
+			scope:temp_target.liege = scope:owner
+		}
+		add = {
+			value = 25
+			desc = scheme_odds.owner.relation.owner_is_liege_of_target
+		}
+	}
+	if = {
+		limit = {
+			scope:owner = {
+				is_councillor_of = scope:temp_target
+			}
+		}
+		add = {
+			value = 15
+			desc = scheme_odds.owner.relation.owner_is_councillor_of_target
+		}
+	}
+	if = {
+		limit = {
+			scope:owner = {
+				has_relation_lover = scope:temp_target
+			}
+		}
+		add = {
+			value = 15
+			desc = scheme_odds.owner.relation.owner_is_lover_of_target
+		}
+	}
+	if = {
+		limit = {
+			scope:owner = {
+				is_spouse_of = scope:temp_target
+			}
+		}
+		add = {
+			value = 10
+			desc = scheme_odds.owner.relation.owner_is_spouse_of_target
+		}
+	}
+	if = {
+		limit = {
+			scope:owner = {
+				is_consort_of = scope:temp_target
+			}
+		}
+		add = {
+			value = 5
+			desc = scheme_odds.owner.relation.owner_is_consort_of_target
+		}
+	}
+	if = {
+		limit = {
+			scope:owner = {
+				is_close_family_of = scope:temp_target
+			}
+		}
+		add = {
+			value = 5
+			desc = scheme_odds.owner.relation.owner_is_close_family_of_target
+		}
+	}
+
+	# Vengeful Bonus
+	if = {
+		limit = {
+			scope:owner = {
+				has_trait = vengeful
+				OR = {
+					has_relation_rival = scope:temp_target	
+					has_relation_nemesis = scope:temp_target
+				}
+			}
+		}
+		add = {
+			value = vengeful_scheme_success_chance_modifier
+			desc = scheme_odds.trait.owner.vengeful
+		}
+	}
+	# Paranoid Malus
+	if = {
+		limit = {
+			scope:temp_target ?= {
+				has_trait = paranoid
+				OR = {
+					has_relation_rival = scope:temp_target	
+					has_relation_nemesis = scope:temp_target
+				}
+			}
+		}
+		add = {
+			value = -20
+			desc = scheme_odds.trait.target.paranoid
+		}
+	}
+
+	if = {
+		limit = {
+			scope:owner = {
+				culture = {
+					has_cultural_parameter = hostile_action_vs_rival_bonuses
+				}
+				OR = {
+					has_relation_rival = scope:temp_target	
+					has_relation_nemesis = scope:temp_target
+				}
+			}
+		}
+		add = {
+			value = 15
+			desc = scheme_odds.culture.owner.hostile_scheme_bonuses_vs_rivals
+		}
+	}
+
+	if = {
+		limit = {# Culture Bonus
+			scope:owner = {
+				##### Changed from Vanilla vvvvv
+				OR = {
+					culture = { has_cultural_parameter = hostile_scheme_success_chance_vs_spouse_penalty }
+					faith = { has_doctrine_parameter = hostile_scheme_success_chance_vs_spouse_penalty }
+				}
+				##### Changed from Vanilla ^^^^^
+				is_spouse_of = scope:temp_target	
+			}
+		}
+		add = {
+			value = -50
+			desc = scheme_odds.culture.owner.hostile_scheme_maluses_vs_spouse
+		}
+	}
+	
+	# Difficulty
+	if = {
+		limit = {
+			has_game_rule = easy_difficulty
+			scope:owner = {
+				is_ai = yes
+			}
+			scope:temp_target = {
+				is_ai = no
+			}
+		}
+		add = {
+			value = -25
+			desc = scheme_odds.game_difficulty.easy
+		}
+	}
+
+	if = {
+		limit = {
+			has_game_rule = very_easy_difficulty
+			scope:owner = {
+				is_ai = yes
+			}
+			scope:temp_target = {
+				is_ai = no
+			}
+		}
+		add = {
+			value = -75
+			desc = scheme_odds.game_difficult.very_easy
+		}
+	}
+
+	# Struggle
+	if = {
+		limit = {
+			scope:owner = {
+				any_character_struggle = {
+					involvement = involved
+					has_struggle_phase_parameter = struggle_agents_less_likely_to_join_schemes
+					is_secondary_character_involvement_involved_trigger = {
+						CHAR = scope:temp_target
+					}
+				}
+			}
+		}
+		add = {
+			value = -25
+			desc = scheme_odds.struggle.owner.agents_less_likely_to_join_due_to_struggle_phase
+		}
+	}
+	## court_events.3060
+	if = {
+		limit = {
+			scope:owner = { has_character_modifier = spies_behind_every_corner_modifier }
+		}
+		add = {
+			value = 25
+			desc = scheme_odds.owner.spies_behind_every_corner_modifier
+		}
+	}
+	if = {
+		limit = {
+			scope:temp_target = { has_character_modifier = spies_behind_every_corner_modifier }
+		}
+		if = {
+			limit = {
+				exists = scope:target.holder
+			}
+			add = {
+				value = 25
+				desc = scheme_odds.target.holder.spies_behind_every_corner_modifier
+			}
+		}
+		else = {
+			add = {
+				value = 25
+				desc = scheme_odds.target.spies_behind_every_corner_modifier
+			}
+		}
+	}
+}
