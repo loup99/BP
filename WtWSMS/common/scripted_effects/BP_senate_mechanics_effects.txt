@@ -579,7 +579,13 @@ make_senate_noble_families_effect = {
 				any_held_title = { count < 1 is_noble_family_title = yes }
 				this.primary_title.tier < tier_duchy
 			}
-			make_senate_noble_family_effect = yes
+			#This catches a special case where Bishop Lupus is landed
+			if = {
+				limit = { this = character:1007011 }
+				character:1007019 = { save_scope_as = the_house_head }
+			}
+			else = { save_scope_as = the_house_head }
+			scope:the_house_head = { make_senate_noble_family_effect = yes }
 		}
 	}
 }
@@ -620,12 +626,47 @@ make_senate_noble_family_effect = {
 	}
 	
 	# Create title
-	give_noble_family_title = {
-		name = noble_family_name
-		tier = county
-		article = DEFAULT_TITLE_NAME_ARTICLE
-		government = roman_administrative_government
-		save_scope_as = new_title
+	if = {
+		limit = { is_landed = yes }
+		switch = {
+			trigger = government_has_flag
+			government_is_roman_administrative = { add_character_flag = roman_admin }
+			government_is_subroman_administrative = { add_character_flag = subroman_admin }
+			fallback = { add_character_flag = roman_admin }
+		}
+	}
+	else = {
+		this.liege_or_court_owner = {
+		switch = {
+				trigger = government_has_flag
+				government_is_roman_administrative = { add_character_flag = roman_admin }
+				government_is_subroman_administrative = { add_character_flag = subroman_admin }
+				fallback = { add_character_flag = roman_admin }
+			}
+		}
+	}
+	switch = {
+		trigger = has_character_flag
+		roman_admin = {
+			give_noble_family_title = {
+				name = noble_family_name
+				tier = county
+				article = DEFAULT_TITLE_NAME_ARTICLE
+				government = roman_administrative_government
+				save_scope_as = new_title
+			}
+			remove_character_flag = roman_admin
+		}
+		subroman_admin = {
+			give_noble_family_title = {
+				name = noble_family_name
+				tier = county
+				article = DEFAULT_TITLE_NAME_ARTICLE
+				government = subroman_administrative_government
+				save_scope_as = new_title
+			}
+			remove_character_flag = subroman_admin
+		}
 	}
 	
 	# Set liege
@@ -648,10 +689,10 @@ make_senate_noble_family_effect = {
 		# Prefer Rome over Ravenna
 		if = {
 			limit = { top_liege.capital_county = title:c_ravenna }
-			domicile = { move_domicile = title:c_roma.title_province }
+			domicile ?= { move_domicile = title:c_roma.title_province }
 		}
 		else = {
-			domicile = { move_domicile = prev.top_liege.capital_province }
+			domicile ?= { move_domicile = prev.top_liege.capital_province }
 		}
-	}	
+	}
 }
