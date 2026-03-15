@@ -67,7 +67,19 @@ BP_character_events_476_oct = {
 		}
 		
 		#Arbogast and Soissons should start allied
-		title:k_soissons.holder = { create_alliance = title:d_triveria.holder }
+		title:k_soissons.holder = {
+			create_alliance = {
+				target = title:d_triveria.holder
+				allied_through_owner = title:k_soissons.holder
+				allied_through_target = title:d_triveria.holder
+			}
+		}
+		title:d_triveria.holder = {
+			add_opinion = {
+				modifier = perk_negotiated_alliance_opinion
+				target = title:k_soissons.holder
+			}
+		}
 		
 		#Nepos should have his capital in Splatum
 		character:175110 = { set_realm_capital = title:c_cetina }
@@ -87,16 +99,6 @@ BP_character_events_476_oct = {
 ## Legal Stuff
 BP_setup_realm_laws_476_oct = {
 	effect = {
-		#Barbarian State Roman Orientations
-		title:h_italy.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 } }
-		title:k_visigoths.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_2 } }
-		title:k_suebia.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_2 } }
-		title:k_burgundians.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 } }
-		title:k_vandalica.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_0 } }
-		title:k_altava.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 } }
-		title:d_auresia.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 } }
-		title:d_triveria.holder = { add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_4 } }
-		
 		#Setup h_persia's clerical/shah authority
 		#Initally strong Clerical Influence and somewhat decent Secular Authority
 		title:h_persia.holder = {
@@ -1015,9 +1017,14 @@ BP_setup_roman_council_476_oct = {
 				TARGET_CHAR = title:e_magister_military_ere.holder
 				POSITION = councillor_marshal_roman
 			}
-			make_councilor_of_type_if_not_already_effect = {
-				TARGET_CHAR = title:e_magister_offices_ere.holder
-				POSITION = councillor_chancellor_roman
+			#make_councilor_of_type_if_not_already_effect = {
+			#	TARGET_CHAR = title:e_magister_offices_ere.holder
+			#	POSITION = councillor_chancellor_roman
+			#}
+			assign_councillor_type = {
+				type = councillor_chancellor_roman
+				target = character:PLRE2_Felix_17
+				remove_existing_councillor = yes
 			}
 		}
 		title:e_magister_offices_ere.holder ?= {
@@ -1158,7 +1165,7 @@ BP_set_armies_476_oct_DLC = {
 			}
 		}
 		title:k_soissons.holder = {
-			prev = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			title:k_soissons = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
 			create_maa_regiment = {
 				type = praetorian
 				check_can_recruit = no
