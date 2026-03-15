@@ -1,0 +1,1254 @@
+﻿##### Changed from Vanilla: Made unavailable to Federates
+
+# Slander
+start_slander_interaction = {
+	icon = icon_scheme_slander
+	interface_priority = 95
+	common_interaction = yes
+	category = interaction_category_succession
+	filter_tags = { admin_house_head dynastic_cycle ceremonial_liege }
+
+	send_name = START_SCHEME
+
+	scheme = slander
+	ignores_pending_interaction_block = yes
+
+	ai_targets = {
+		ai_recipients = peer_vassals
+		max = 10
+	}
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 92
+		duchy = 48
+		kingdom = 24
+		empire = 12
+		hegemony = 0
+	}
+	
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		scope:actor = {
+			is_adult = yes
+			is_imprisoned = no
+			government_allows = administrative
+		}
+		scope:recipient = {
+			this != scope:actor
+			government_allows = administrative
+			top_liege = scope:actor.top_liege
+
+			# don't show on the huangdi
+			OR = {
+				NOT = { government_allows = merit }
+				is_independent_ruler = no
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		NOT = { scope:recipient = { government_has_flag = government_is_quasi_feudal } }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			can_start_scheme = {
+				type = slander
+				target_character = scope:recipient
+			}
+		}
+		scope:recipient = {
+			NOT = { has_strong_hook = scope:actor }
+			top_liege != this
+		}
+		trigger_if = {
+			limit = { scope:actor = { has_variable = no_scheming_allowed_var } }
+			custom_tooltip = {
+				text = no_scheming_allowed_var_tt
+				scope:actor.var:no_scheming_allowed_var != scope:recipient
+			}
+		}
+	}
+
+	desc = {
+		triggered_desc = {
+			trigger = {
+				scope:actor = {
+					can_start_scheme = {
+						type = slander
+						target_character = scope:recipient
+					}
+				}
+			}
+			desc = scheme_interaction_tt_slander_approved
+		}
+	}
+
+	# Scheme Starter Packages
+	options_heading = schemes.t.agent_packages
+	send_options_exclusive = yes
+	## Balanced agents.
+	send_option = {
+		flag = agent_focus_balance
+		current_description = start_slander_interaction.tt.agent_focus_balance
+	}
+	## Focused on Success Chance.
+	send_option = {
+		flag = agent_focus_success
+		current_description = start_slander_interaction.tt.agent_focus_success
+	}
+	## Focused on Speed.
+	send_option = {
+		flag = agent_focus_speed
+		current_description = start_slander_interaction.tt.agent_focus_speed
+	}
+	## Focused on Secrecy.
+	send_option = {
+		flag = agent_focus_secrecy
+		current_description = start_slander_interaction.tt.agent_focus_secrecy
+	}
+
+	on_accept = {
+		scope:actor = {
+			send_interface_toast = {
+				type = event_toast_effect_neutral
+				title = start_slander_notification
+
+				left_icon = scope:actor					
+				right_icon = scope:recipient
+
+				# Success.
+				if = {
+					limit = { scope:agent_focus_success ?= yes }
+					begin_scheme_with_agents_effect = {
+						SCHEME_TYPE = slander
+						TARGET_TYPE = target_character
+						TARGET_SCOPE = scope:recipient
+						# Success.
+						AGENT_1 = agent_intermediary
+						AGENT_2 = agent_sycophant
+						AGENT_3 = agent_sycophant
+						# Speed.
+						AGENT_4 = agent_political_socialite
+						# Secrecy.
+						AGENT_5 = agent_courtesan
+					}
+				}
+				# Speed.
+				else_if = {
+					limit = { scope:agent_focus_speed ?= yes }
+					begin_scheme_with_agents_effect = {
+						SCHEME_TYPE = slander
+						TARGET_TYPE = target_character
+						TARGET_SCOPE = scope:recipient
+						# Speed.
+						AGENT_1 = agent_political_socialite
+						AGENT_2 = agent_political_socialite
+						AGENT_3 = agent_bureaucrat
+						# Success.
+						AGENT_4 = agent_sycophant
+						# Secrecy.
+						AGENT_5 = agent_courtesan
+					}
+				}
+				# Secrecy.
+				else_if = {
+					limit = { scope:agent_focus_secrecy ?= yes }
+					begin_scheme_with_agents_effect = {
+						SCHEME_TYPE = slander
+						TARGET_TYPE = target_character
+						TARGET_SCOPE = scope:recipient
+						# Secrecy.
+						AGENT_1 = agent_courtesan
+						AGENT_2 = agent_amanuensis
+						AGENT_3 = agent_eunuch
+						# Success.
+						AGENT_4 = agent_sycophant
+						# Speed.
+						AGENT_5 = agent_political_socialite
+					}
+				}
+				# Balanced.
+				else = {
+					begin_scheme_with_agents_effect = {
+						SCHEME_TYPE = slander
+						TARGET_TYPE = target_character
+						TARGET_SCOPE = scope:recipient
+						# Success.
+						AGENT_1 = agent_sycophant
+						AGENT_2 = agent_intermediary
+						# Speed.
+						AGENT_3 = agent_political_socialite
+						AGENT_4 = agent_bureaucrat
+						# Secrecy.
+						AGENT_5 = agent_courtesan
+					}
+				}
+			}
+			# Scheme bonuses from being the emperor/dominant family/powerful family
+			ep3_actor_scheme_modifier_effect = yes
+			# Trigger a catalyst if target has a lot of power
+			show_as_tooltip = {
+				if = {
+					limit = {
+						exists = scope:recipient.var:movement_power
+						scope:recipient.var:movement_power >= medium_movement_power_value
+					}
+					tgp_activate_catalyst_against_hegemon_effect = {
+						HEGEMON = scope:recipient.top_liege
+						CATALYST = catalyst_governor_slander
+					}
+				}
+			}
+			stress_impact = {
+				compassionate = minor_stress_impact_gain
+				honest = minor_stress_impact_gain
+				just = minor_stress_impact_gain
+			}
+		}
+		scope:recipient = { custom_tooltip = slander_modifier_tt }
+	}
+
+	ai_potential = {
+		ai_honor <= 20
+		OR = {
+			primary_title.tier >= tier_duchy
+			AND = {
+				this = house.house_head
+				is_landless_administrative = yes
+			}
+		}
+		NOR = {
+			has_trait = honest
+			any_scheme = {
+				is_scheme_category = hostile
+			}
+		}
+		OR = { # So that the cycle doesn't get nuked by having too many landless families
+			NOT = { government_allows = merit }
+			is_landed = yes
+		}
+	}
+	
+	auto_accept = yes
+
+	ai_will_do = {
+		base = 0
+
+		#Competing candidate
+		modifier = {
+			NOT = { government_allows = merit }
+			scope:recipient = { is_competing_for_same_title_as = { CHARACTER = scope:actor } }
+			add = 30
+		}
+		modifier = {
+			NOT = { government_allows = merit }
+			scope:recipient = { is_winning_competing_for_same_title_as = { CHARACTER = scope:actor } }
+			add = 50
+		}
+		modifier = {
+			government_allows = merit
+			NOT = {
+				is_in_same_movement_as = { TARGET = scope:recipient }
+			}
+			add = 30
+		}
+
+		# House & Family
+		modifier = {
+			is_close_family_of = scope:recipient
+			add = -20
+		}
+		modifier = {
+			house = scope:recipient.house
+			add = -50
+		}
+		modifier = {
+			house.house_head = scope:recipient
+			add = -50
+		}
+
+		#Feuds
+		modifier = {
+			house_has_feud_relation_with_trigger = { TARGET = scope:recipient }
+			add = 150
+		}
+
+		# Relationships
+		modifier = {
+			add = 25
+			has_any_mild_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 150
+			has_any_moderate_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 1000
+			has_any_worst_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = -25
+			has_any_mild_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		
+		#Personality
+		modifier = {
+			has_trait = compassionate
+			add = -75
+		}
+		modifier = {
+			has_trait = content
+			add = -75
+		}
+		modifier = {
+			has_trait = ambitious
+			factor = 2
+		}
+		modifier = {
+			has_trait = deceitful
+			factor = 2
+		}
+		
+		modifier = {
+			factor = 0
+			OR = {
+				has_any_moderate_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+				has_any_best_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+			}
+		}
+
+		# More likely against powerful or dominant families
+		modifier = {
+			scope:recipient.house ?= {
+				OR = {
+					is_powerful_family = yes
+					is_dominant_family = yes
+				}
+			}
+			factor = 2
+		}
+		
+		# Avoid fellow movement members if possible
+		modifier = {
+			factor = {
+				value = 0.25
+				if = {
+					limit = {
+						is_in_pro_hegemon_or_hegemon_movement = yes
+					}
+					multiply = 0.5
+				}
+			}
+			is_in_same_movement_as = { TARGET = scope:recipient }
+		}
+	}
+}
+
+# Promote
+start_promote_interaction = {
+	icon = icon_scheme_promote
+	interface_priority = 230
+	common_interaction = no
+	category = interaction_category_succession
+
+	send_name = START_SCHEME
+
+	filter_tags = { admin_house_head dynastic_cycle ceremonial_liege }
+
+	scheme = promote
+	ignores_pending_interaction_block = yes
+
+	ai_targets = {
+		ai_recipients = self
+ 	}
+	ai_targets = {
+		ai_recipients = spouses
+	}
+	ai_targets = {
+		ai_recipients = children
+		max = 10
+	}
+	ai_targets = {
+		ai_recipients = family
+		max = 10
+	}
+	ai_targets = {
+		ai_recipients = dynasty
+		max = 10
+	}
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 180
+		duchy = 60
+		kingdom = 60
+		empire = 60
+		hegemony = 60
+	}
+	
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		scope:actor = {
+			is_adult = yes
+			is_imprisoned = no
+			government_allows = administrative
+		}
+		scope:recipient = {
+			government_allows = administrative
+			top_liege = scope:actor.top_liege
+
+			# don't show on the huangdi
+			OR = {
+				NOT = { government_allows = merit }
+				is_independent_ruler = no
+			}
+		}
+		##### Changed from Vanilla vvvvv
+		NOT = { scope:recipient = { government_has_flag = government_is_quasi_feudal } }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			can_start_scheme = {
+				type = promote
+				target_character = scope:recipient
+			}
+		}
+		scope:recipient = {
+			is_adult = yes
+		}
+	}
+
+	desc = {
+		triggered_desc = {
+			trigger = {
+				scope:actor = {
+					can_start_scheme = {
+						type = promote
+						target_character = scope:recipient
+					}
+				}
+			}
+			desc = scheme_interaction_tt_promote_approved
+		}
+	}
+
+	# Scheme Starter Packages
+	options_heading = schemes.t.agent_packages
+	send_options_exclusive = yes
+	## Balanced agents.
+	send_option = {
+		flag = agent_focus_balance
+		current_description = start_promote_interaction.tt.agent_focus_balance
+	}
+	## Focused on Success Chance.
+	send_option = {
+		flag = agent_focus_success
+		current_description = start_promote_interaction.tt.agent_focus_success
+	}
+	## Focused on Speed.
+	send_option = {
+		flag = agent_focus_speed
+		current_description = start_promote_interaction.tt.agent_focus_speed
+	}
+
+	on_accept = {
+		scope:actor = {
+			send_interface_toast = {
+				type = event_toast_effect_neutral
+				title = start_promote_notification
+
+				left_icon = scope:actor					
+				right_icon = scope:recipient
+
+				# Success.
+				if = {
+					limit = { scope:agent_focus_success ?= yes }
+					begin_scheme_with_agents_effect = {
+						SCHEME_TYPE = promote
+						TARGET_TYPE = target_character
+						TARGET_SCOPE = scope:recipient
+						# Success.
+						AGENT_1 = agent_intermediary
+						AGENT_2 = agent_proponent
+						AGENT_3 = agent_proponent
+						AGENT_4 = agent_sycophant
+						# Speed.
+						AGENT_5 = agent_political_socialite
+					}
+				}
+				# Speed.
+				else_if = {
+					limit = { scope:agent_focus_speed ?= yes }
+					begin_scheme_with_agents_effect = {
+						SCHEME_TYPE = promote
+						TARGET_TYPE = target_character
+						TARGET_SCOPE = scope:recipient
+						# Speed.
+						AGENT_1 = agent_political_socialite
+						AGENT_2 = agent_political_socialite
+						AGENT_3 = agent_bureaucrat
+						AGENT_4 = agent_bureaucrat
+						# Success.
+						AGENT_5 = agent_proponent
+					}
+				}
+				# Balanced.
+				else = {
+					begin_scheme_with_agents_effect = {
+						SCHEME_TYPE = promote
+						TARGET_TYPE = target_character
+						TARGET_SCOPE = scope:recipient
+						# Success.
+						AGENT_1 = agent_proponent
+						AGENT_2 = agent_intermediary
+						AGENT_3 = agent_sycophant
+						# Speed.
+						AGENT_4 = agent_political_socialite
+						AGENT_5 = agent_bureaucrat
+					}
+				}
+			}
+			# Scheme bonuses from being the emperor/dominant family/powerful family
+			ep3_actor_scheme_modifier_effect = yes
+		}
+		scope:recipient = {
+			if = {
+				limit = {
+					this != scope:actor
+				}
+				custom_tooltip = promote_scheme_success_tt
+			}
+			else = {
+				custom_tooltip = promote_scheme_success_self_tt
+			}
+		}
+	}
+
+	ai_potential = {
+		OR = {
+			primary_title.tier >= tier_duchy
+			AND = {
+				this = house.house_head
+				is_landless_administrative = yes
+			}
+		}
+		NOT = {
+			any_scheme = {
+				is_scheme_category = hostile
+			}
+		}
+	}
+	
+	auto_accept = yes
+
+	ai_will_do = {
+		base = 0
+
+		#Competing candidate
+		modifier = {
+			scope:recipient = { is_competing_for_same_title_as = { CHARACTER = scope:actor } }
+			add = -50
+		}
+
+		modifier = {
+			scope:recipient = { is_winning_competing_for_same_title_as = { CHARACTER = scope:actor } }
+			add = -75
+		}
+
+		#Personality
+		modifier = {
+			has_trait = gregarious
+			add = 15
+		}
+
+		modifier = {
+			has_trait = honest
+			add = -10
+		}
+
+		modifier = {
+			has_trait = shy
+			add = -10
+		}
+
+		modifier = {
+			has_trait = ambitious
+			add = 20
+		}
+
+		# House & Family
+		modifier = {
+			is_close_family_of = scope:recipient
+			add = 30
+		}
+
+		modifier = {
+			is_parent_of = scope:recipient
+			add = 50
+		}
+
+		modifier = {
+			house = scope:recipient.house
+			add = 50
+		}
+
+		modifier = {
+			house.house_head = scope:recipient
+			add = 50
+		}
+
+		#Feuds
+		modifier = {
+			house_has_feud_relation_with_trigger = { TARGET = scope:recipient }
+			add = -100
+		}
+
+		# Relationships
+		modifier = {
+			add = -25
+			has_any_mild_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+
+		modifier = {
+			add = -50
+			has_any_moderate_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+
+		modifier = {
+			add = -100
+			has_any_worst_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+
+		modifier = {
+			add = 25
+			has_any_mild_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+
+		modifier = {
+			add = 50
+			has_any_moderate_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+
+		modifier = {
+			add = 100
+			has_any_best_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+	}
+}
+
+##### Changed from Vanilla: Made unavailable against Federates
+
+# Dispute Border - AKA Boundary Dispute
+start_dispute_border_interaction = {
+	icon = icon_dispute_border
+	interface_priority = 75
+	category = interaction_category_vassal 
+	send_name = START_SCHEME 
+	scheme = dispute_border
+	ignores_pending_interaction_block = yes 
+	ai_targets = { ai_recipients = peer_vassals }
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 120
+		duchy = 60
+		kingdom = 0
+		empire = 0
+		hegemony = 0
+	}
+	common_interaction = yes
+
+	filter_tags = { admin_governor }
+
+	cooldown_against_recipient = { years = 5 }
+
+	target_type = title
+	target_filter = recipient_realm_titles
+
+	can_be_picked_title = {
+		scope:target = {
+			ep3_boundary_dispute_county_trigger = {
+				OWNER = scope:actor
+				TARGET = scope:recipient
+			}
+		}
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		scope:actor = {
+			is_governor = yes
+			NOR = {
+				government_has_flag = government_is_celestial # Celestial governors do not have access to this
+				government_has_flag = government_is_japan_administrative # Celestial governors do not have access to this
+				main_administrative_tier = tier_county
+			}
+		}
+		scope:recipient = {
+			this != scope:actor
+			is_alive = yes
+			top_liege = scope:actor.top_liege
+			is_governor_or_admin_count = yes
+			in_diplomatic_range = scope:actor
+		}
+		##### Changed from Vanilla vvvvv
+		NOT = { scope:recipient = { government_has_flag = government_is_quasi_feudal } }
+		NOT = { scope:actor = { government_has_flag = government_is_quasi_feudal } }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			is_available_adult = yes
+			trigger_if = {
+				limit = { exists = scope:target }
+				can_start_scheme = {
+					type = dispute_border
+					target_title = scope:target
+				}
+			}
+			trigger_if = {
+				limit = {
+					scope:recipient = {
+						sub_realm_size > 1
+					}
+				}
+				custom_tooltip = {
+					text = dispute_border_county_neighbour_tt
+					character_is_realm_neighbor = scope:recipient
+				}
+			}
+			trigger_else = {
+				custom_tooltip = {
+					text = dispute_border_county_neighbour_tt
+					scope:recipient.capital_county = {
+						holder = scope:recipient
+						any_neighboring_county = {
+							OR = {
+								holder = scope:actor
+								holder.liege ?= scope:actor
+							}
+						}
+					}
+				}
+			}
+			is_in_civil_war = no
+			custom_tooltip = {
+				text = admin_vassal_border_limit_desc
+				top_liege ?= {
+					NOT = { has_realm_law_flag = admin_vassal_border_limit }
+				}
+			}
+			trigger_if = {
+				limit = {
+					top_liege ?= {
+						NOT = { has_realm_law_flag = admin_vassal_border_limit }
+						has_realm_law_flag = admin_vassal_border_restricted
+					}
+				}
+				custom_tooltip = {
+					text = interaction_must_be_powerful_or_dominant_family_tt
+					house = {
+						OR = {
+							is_powerful_family = yes
+							is_dominant_family = yes
+						}
+					}
+				}
+			}
+		}
+		scope:recipient = {
+			is_in_civil_war = no
+		}
+	}
+
+	desc = start_dispute_border_interaction_desc
+
+	cost = {
+		influence = {
+			add = scope:actor.massive_influence_gain
+		}
+	}
+
+	# Scheme Starter Packages
+	options_heading = schemes.t.agent_packages
+	send_options_exclusive = yes
+	## Focused on Success Chance.
+	send_option = {
+		flag = agent_focus_success
+		current_description = start_dispute_border_interaction.tt.agent_focus_success
+	}
+	## Focused on Speed.
+	send_option = {
+		flag = agent_focus_speed
+		current_description = start_dispute_border_interaction.tt.agent_focus_speed
+	}
+
+	on_accept = {
+		scope:actor = {
+			send_interface_toast = {
+				type = event_toast_effect_neutral
+				title = start_dispute_border_notification
+				left_icon = scope:recipient					
+				right_icon = scope:target
+				scope:recipient = {
+					send_interface_toast = {
+						type = event_toast_effect_bad
+						title = start_dispute_border_notification
+						left_icon = scope:actor					
+						right_icon = scope:target
+						scope:actor = {
+							# Success.
+							if = {
+								limit = { scope:agent_focus_success ?= yes }
+								begin_scheme_with_agents_effect = {
+									SCHEME_TYPE = dispute_border
+									TARGET_TYPE = target_title
+									TARGET_SCOPE = scope:target
+									# Success.
+									AGENT_1 = agent_intermediary
+									AGENT_2 = agent_proponent
+									AGENT_3 = agent_sycophant
+									# Speed.
+									AGENT_4 = agent_political_socialite
+									AGENT_5 = agent_bureaucrat
+								}
+							}
+							# Speed.
+							else = {
+								begin_scheme_with_agents_effect = {
+									SCHEME_TYPE = dispute_border
+									TARGET_TYPE = target_title
+									TARGET_SCOPE = scope:target
+									# Success.
+									AGENT_1 = agent_intermediary
+									AGENT_2 = agent_proponent
+									# Speed.
+									AGENT_3 = agent_political_socialite
+									AGENT_4 = agent_bureaucrat
+									AGENT_5 = agent_bureaucrat
+								}
+							}
+						}
+					}
+				}
+			}
+			random_scheme = {
+				type = dispute_border
+				limit = {
+					scheme_target_title = scope:target
+				}
+				set_variable = {
+					name = target_character
+					value = scope:recipient
+				}
+			}
+			# Scheme progress bonus from education
+			education_5_scheme_progress_effect = { SKILL = diplomacy }
+			# Scheme bonuses from being the emperor/dominant family/powerful family
+			ep3_actor_scheme_modifier_effect = yes
+			if = {
+				limit = {
+					scope:recipient = {
+						highest_held_title_tier >= tier_duchy
+					}
+				}
+				custom_tooltip = boundary_dispute_outcome_tt
+			}
+			else = {
+				custom_tooltip = boundary_dispute_outcome_vassal_tt
+			}
+
+			stress_impact = {
+				content = medium_stress_impact_gain
+			}
+		}
+		scope:recipient = {
+			if = {
+				limit = {
+					is_ai = yes
+					highest_held_title_tier >= tier_duchy
+				}
+				add_opinion = {
+					target = scope:actor
+					modifier = attempted_dispute_border_opinion
+				}
+			}
+			else_if = {
+				limit = {
+					is_ai = yes
+				}
+				add_opinion = {
+					target = scope:actor
+					modifier = attempted_dispute_border_opinion
+					opinion = -40
+				}
+			}
+		}
+	}
+
+	ai_potential = {
+		NOT = {
+			any_scheme = { is_scheme_category = political }
+		}
+		is_governor = yes
+	}
+	
+	auto_accept = yes
+
+	ai_will_do = {
+		base = 0
+		#Personality
+		modifier = {
+			has_trait = ambitious
+			add = 15
+		}
+		modifier = {
+			has_trait = content
+			add = -15
+		}
+		# Land
+		modifier = {
+			scope:recipient = {
+				any_sub_realm_county = {
+					OR = {
+						duchy.holder = scope:actor
+						kingdom.holder = scope:actor
+					}
+				}
+			}
+			add = 50
+		}
+		# Relationships
+		modifier = {
+			add = -25
+			has_any_moderate_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = -50
+			has_any_best_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 15
+			has_any_mild_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 25
+			has_any_moderate_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 50
+			has_any_worst_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		# House
+		modifier = {
+			add = -50
+			scope:recipient.house ?= scope:actor.house
+		}
+	}
+}
+
+# Subsume Province
+start_subsume_province_interaction = {
+	icon = icon_subsume_province
+	common_interaction = yes
+	interface_priority = 50
+	category = interaction_category_vassal
+	send_name = START_SCHEME 
+	scheme = subsume_province
+	ignores_pending_interaction_block = yes 
+	ai_targets = { ai_recipients = peer_vassals }
+	ai_frequency_by_tier = {
+		barony = 0
+		county = 60
+		duchy = 60
+		kingdom = 60
+		empire = 0
+		hegemony = 0
+	}
+
+	filter_tags = { admin_governor }
+
+
+	cooldown = { years = 5 }
+
+	target_type = title
+	target_filter = recipient_de_jure_titles
+
+	can_be_picked_title = {
+		scope:actor = {
+			can_start_scheme = {
+				type = subsume_province
+				target_title = scope:target
+			}
+		}
+	}
+
+	has_valid_target_showing_failures_only = {
+		scope:target ?= {
+			tier = tier_duchy
+			holder ?= scope:recipient
+		}
+	}
+
+	desc = start_subsume_province_interaction_desc
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		scope:actor = { is_governor = yes }
+		scope:recipient = {
+			is_alive = yes
+			top_liege = scope:actor.top_liege
+			is_governor = yes
+			NOR = { 
+				this = scope:actor 
+				scope:actor.house = scope:recipient.house
+				government_has_flag = government_is_celestial # Celestial governors do not have access to this
+				government_has_flag = government_is_meritocratic
+				government_has_flag = government_is_japan_administrative
+			}
+			in_diplomatic_range = scope:actor
+		}
+		##### Changed from Vanilla vvvvv
+		NOT = { scope:recipient = { government_has_flag = government_is_quasi_feudal } }
+		NOT = { scope:actor = { government_has_flag = government_is_quasi_feudal } }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		scope:actor = {
+			is_available_adult = yes
+			trigger_if = {
+				limit = { exists = scope:target }
+				can_start_scheme = {
+					type = subsume_province
+					target_title = scope:target
+				}
+			}
+			trigger_if = {
+				limit = {
+					top_liege ?= {
+						NOT = { has_realm_law_flag = admin_vassal_border_limit }
+					}
+				}
+				custom_tooltip = {
+					text = interaction_must_be_powerful_or_dominant_family_tt
+					house = {
+						OR = {
+							is_powerful_family = yes
+							is_dominant_family = yes
+						}
+					}
+				}
+			}
+			is_in_civil_war = no
+			custom_tooltip = {
+				text = admin_vassal_border_limit_desc
+				top_liege ?= {
+					NOT = { has_realm_law_flag = admin_vassal_border_limit }
+				}
+			}
+		}
+		scope:recipient = {
+			custom_tooltip = {
+				text = subsume_province_neighboring_duchy_tt
+				any_sub_realm_county = {
+					any_neighboring_county = {
+						county_held_or_vassal_to_target_trigger = { TARGET = scope:actor }
+					}
+				}
+			}
+			custom_tooltip = {
+				text = subsume_province_recipient_scheming_against_you_tt
+				NOT = {
+					is_scheming_against = {
+						type = subsume_province
+						target = scope:actor
+					}
+				}
+			}
+			custom_tooltip = {
+				text = subsume_province_recipient_house_power_or_gov_efficiency_tt
+				OR = {
+					governor_efficiency_presented <= -25
+					AND = {
+						trigger_if = {
+							limit = { house = { is_powerful_family = yes } }
+							scope:actor.house = { is_dominant_family = yes }
+						}
+						house = { is_dominant_family = no }
+					}
+				}
+			}
+			is_in_civil_war = no
+			NOT = { is_diarch_of_target = liege }
+		}
+	}
+
+	cost = {
+		influence = {
+			add = {
+				value = scope:actor.massive_influence_gain
+				multiply = 4
+			}
+		}
+	}
+
+	# Scheme Starter Packages
+	options_heading = schemes.t.agent_packages
+	send_options_exclusive = yes
+	## Focused on Success Chance.
+	send_option = {
+		flag = agent_focus_success
+		current_description = start_subsume_province_interaction.tt.agent_focus_success
+	}
+	## Focused on Speed.
+	send_option = {
+		flag = agent_focus_speed
+		current_description = start_subsume_province_interaction.tt.agent_focus_speed
+	}
+
+	on_accept = {
+		scope:actor = {
+			send_interface_toast = {
+				type = event_toast_effect_neutral
+				title = start_subsume_province_notification
+				left_icon = scope:recipient					
+				right_icon = scope:target
+				scope:recipient = {
+					send_interface_toast = {
+						type = event_toast_effect_bad
+						title = start_subsume_province_notification
+						left_icon = scope:actor					
+						right_icon = scope:target
+						scope:actor = {
+							# Success.
+							if = {
+								limit = { scope:agent_focus_success ?= yes }
+								begin_scheme_with_agents_effect = {
+									SCHEME_TYPE = subsume_province
+									TARGET_TYPE = target_title
+									TARGET_SCOPE = scope:target
+									# Success.
+									AGENT_1 = agent_intermediary
+									AGENT_2 = agent_proponent
+									AGENT_3 = agent_proponent
+									# Speed.
+									AGENT_4 = agent_political_socialite
+									AGENT_5 = agent_political_socialite
+								}
+							}
+							# Speed.
+							else = {
+								begin_scheme_with_agents_effect = {
+									SCHEME_TYPE = subsume_province
+									TARGET_TYPE = target_title
+									TARGET_SCOPE = scope:target
+									# Success.
+									AGENT_1 = agent_intermediary
+									AGENT_2 = agent_proponent
+									# Speed.
+									AGENT_3 = agent_political_socialite
+									AGENT_4 = agent_political_socialite
+									AGENT_5 = agent_political_socialite
+								}
+							}
+						}
+					}
+				}
+			}
+			random_scheme = {
+				type = subsume_province
+				limit = {
+					scheme_target_title = scope:target
+				}
+				set_variable = {
+					name = target_character
+					value = scope:recipient
+				}
+			}
+			# Scheme progress bonus from education
+			education_5_scheme_progress_effect = { SKILL = diplomacy }
+			# Scheme bonuses from being the emperor/dominant family/powerful family
+			ep3_actor_scheme_modifier_effect = yes
+			custom_tooltip = subsume_province_scheme_success_outcome_tt
+			stress_impact = {
+				content = medium_stress_impact_gain
+			}
+		}
+		scope:recipient = {
+			if = {
+				limit = { is_ai = yes }
+				add_opinion = {
+					target = scope:actor
+					modifier = attempted_subsume_province_opinion
+				}
+			}
+		}
+	}
+
+	ai_potential = {
+		NOT = {
+			any_scheme = { is_scheme_category = political }
+		}
+		is_governor = yes
+	}
+	
+	auto_accept = yes
+
+	ai_will_do = {
+		base = 0
+
+		#Personality
+		modifier = {
+			has_trait = ambitious
+			add = 15
+		}
+		modifier = {
+			has_trait = content
+			add = -15
+		}
+		# Land
+		modifier = {
+			scope:recipient = {
+				any_sub_realm_county = {
+					OR = {
+						duchy.holder = scope:actor
+						kingdom.holder = scope:actor
+					}
+				}
+			}
+			add = 50
+		}
+		# Relationships
+		modifier = {
+			add = -25
+			has_any_moderate_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = -50
+			has_any_best_good_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 15
+			has_any_mild_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 25
+			has_any_moderate_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		modifier = {
+			add = 50
+			has_any_worst_bad_relationship_with_character_trigger = { CHARACTER = scope:recipient }
+		}
+		# House
+		modifier = {
+			add = -50
+			scope:recipient.house ?= scope:actor.house
+		}
+	}
+}
