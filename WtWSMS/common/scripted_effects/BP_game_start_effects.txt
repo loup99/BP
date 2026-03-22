@@ -11,6 +11,142 @@ swap_doctrine_if_it_has_it_effect = {
 		add_doctrine = $NEW_DOCTRINE$
 	}
 }
+destroy_PP_title_if_ai_effect = {
+	if = {
+		limit = { $TITLE$.holder ?= { is_ai = yes } }
+		$TITLE$.holder ?= { destroy_title = $TITLE$ }
+	}
+}
+destroy_title_if_landless_effect = {
+	if = {
+		limit = {
+			exists = $TITLE$.holder
+			$TITLE$ = { is_landless_type_title = yes }
+		}
+		$TITLE$.holder = { destroy_title = $TITLE$ }
+	}
+}
+make_councilor_of_type_if_not_already_effect = { #Scope is council owner
+	if = {
+		limit = { NOT = { $TARGET_CHAR$ = { has_council_position = $POSITION$ } } }
+		assign_councillor_type = {
+			type = $POSITION$
+			target = $TARGET_CHAR$
+			remove_existing_councillor = yes
+		}
+	}
+}
+add_knight_effect = {
+	create_character = {
+		age = { 18 32 }
+		random_traits = no
+		culture = $CHAR$.culture
+		faith = $CHAR$.faith
+		employer = $CHAR$
+		random_traits_list = {
+			count = 1
+			education_martial_2 = {}
+			education_martial_3 = {}
+			education_martial_4 = {}
+		}
+		random_traits_list = {
+			count = 1
+			brave = {}
+			just = {}
+			gallant = {}
+		}
+		random_traits_list = {
+			count = 1
+			lustful = {}
+			chaste = {}
+			wrathful = {}
+			arrogant = {}
+			impatient = {}
+			ambitious = {}
+			stubborn = {}
+			beauty_good_1 = {}
+		}
+		martial = {
+			min_template_high_skill
+			max_template_high_skill
+		}
+		prowess = { 8 12 }
+		gender_female_chance = 0
+		after_creation = {
+			if = {
+				limit = { has_dlc_feature = tours_and_tournaments }
+				add_trait = tourney_participant
+				add_random_tourney_participant_level_effect = yes
+			}
+		}
+	}
+}
+add_more_knight_courtiers_effect = {
+	add_knight_effect = { CHAR = $EMPLOYER$ }
+	add_knight_effect = { CHAR = $EMPLOYER$ }
+	add_knight_effect = { CHAR = $EMPLOYER$ }
+	add_knight_effect = { CHAR = $EMPLOYER$ }
+	add_knight_effect = { CHAR = $EMPLOYER$ }
+}
+
+add_more_wre_courtiers_effect = {
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+	create_character = {
+		gender = male
+		culture = title:h_western_roman_empire.holder.culture
+		faith = title:h_western_roman_empire.holder.faith
+		age = { 25 45 }
+		employer = title:h_western_roman_empire.holder
+	}
+}
 
 #Changes the rite of old_fath characters at game start
 change_ruler_and_court_rite_by_county_faith_effect = {
@@ -66,83 +202,9 @@ change_ruler_and_court_rite_by_kingdom_effect = {
 	}
 }
 
-#Establishes a specific type of tributary & it's obligations based on character flags
-BP_break_subject_contract_and_establish_tributary_effect = {
-	#Break Vassalage if it exists
-	if = {
-		limit = { liege != this }
-		create_title_and_vassal_change = {
-			type = independency
-			save_scope_as = change
-			add_claim_on_loss = no
-		}
-		becomes_independent = { change = scope:change }
-		resolve_title_and_vassal_change = scope:change
-	}
-
-	switch = {
-		trigger = has_character_flag
-		
-		default_federate = {
-			$TRIBUTARY$ = {
-				set_default_federate_effect = { SUZERAIN = $SUZERAIN$ }
-				remove_character_flag = default_federate
-			}
-		}
-		default_fixed_tributary = {
-			$TRIBUTARY$ = {
-				start_tributary = {
-					contract_group = BP_fixed_tributary
-					suzerain = $SUZERAIN$
-				}
-				tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 1 }
-				tributary_contract_set_obligation_level = { type = default_tributary_levies level = 1 }
-				tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 1 }
-				tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
-				remove_character_flag = default_fixed_tributary
-			}
-		}
-		default_fixed_tribal_tributary = {
-			$TRIBUTARY$ = {
-				start_tributary = {
-					contract_group = BP_tribal_fixed_tributary
-					suzerain = $SUZERAIN$
-				}
-				tributary_contract_set_obligation_level = { type = default_tributary_levies level = 1 }
-				tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 1 }
-				tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
-				remove_character_flag = default_fixed_tribal_tributary
-			}
-		}
-		default_subjugated_tributary = {
-			$TRIBUTARY$ = {
-				start_tributary = {
-					contract_group = tributary_subjugated
-					suzerain = $SUZERAIN$
-				}
-				tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 1 }
-				tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
-				tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 0 }
-				remove_character_flag = default_subjugated_tributary
-			}
-		}
-	}
-}
-
 #Specific Tributary Date Effects
 BP_476_tributary_setup_effect = {
-	#Orleans Alans
-	title:k_soissons.holder = {
-		save_scope_as = suzerain
-		title:d_orleans_alans.holder = {
-			add_character_flag = default_federate
-			BP_break_subject_contract_and_establish_tributary_effect = {
-				TRIBUTARY = this
-				SUZERAIN = scope:suzerain
-			}
-		}
-	}
-	#Byzanties
+	#Byzantines
 	title:h_eastern_roman_empire.holder = {
 		save_scope_as = suzerain
 		#Basic Tributaries
@@ -155,35 +217,6 @@ BP_476_tributary_setup_effect = {
 		}
 		title:c_zichia.holder = { #NB: Tribal
 			add_character_flag = default_subjugated_tributary
-			BP_break_subject_contract_and_establish_tributary_effect = {
-				TRIBUTARY = this
-				SUZERAIN = scope:suzerain
-			}
-		}
-		#Federates
-		title:k_salihid.holder = {
-			add_character_flag = default_federate
-			BP_break_subject_contract_and_establish_tributary_effect = {
-				TRIBUTARY = this
-				SUZERAIN = scope:suzerain
-			}
-		}
-		title:k_arabia_petraea.holder = {
-			add_character_flag = default_federate
-			BP_break_subject_contract_and_establish_tributary_effect = {
-				TRIBUTARY = this
-				SUZERAIN = scope:suzerain
-			}
-		}
-		title:d_thracian_goths.holder = {
-			add_character_flag = default_federate
-			BP_break_subject_contract_and_establish_tributary_effect = {
-				TRIBUTARY = this
-				SUZERAIN = scope:suzerain
-			}
-		}
-		title:k_ostrogoths.holder = {
-			add_character_flag = default_federate
 			BP_break_subject_contract_and_establish_tributary_effect = {
 				TRIBUTARY = this
 				SUZERAIN = scope:suzerain
@@ -473,5 +506,60 @@ create_starting_confederation_476_effect = {
 			add_confederation_member = title:d_nordalbingia.holder
 			add_confederation_member = title:d_albis.holder
 		}
+	}
+}
+
+create_bagudae_holder_game_start_effect = {
+	$HOLDER$ ?= {
+		add_realm_law_skip_effects = camp_purpose_brigands
+		add_gold = 50
+		this.domicile = {
+			change_provisions = starting_provisions_value
+			add_domicile_building = camp_main_02
+			add_domicile_building = camp_main_03
+			add_domicile_building = proving_grounds_01
+			add_domicile_building = proving_grounds_02
+			add_domicile_building = baggage_train_01
+			add_domicile_building = baggage_train_02
+		}
+		create_maa_regiment = {
+			type = armored_footmen
+			check_can_recruit = yes
+			size = 3
+		}
+		create_maa_regiment = {
+			type = light_footmen
+			check_can_recruit = yes
+			size = 3
+		}
+		create_maa_regiment = {
+			type = light_footmen
+			check_can_recruit = yes
+			size = 3
+		}
+		create_maa_regiment = {
+			type = bowmen
+			check_can_recruit = yes
+			size = 3
+		}
+		#They are free-booters, raiders, lower class revolting peasants
+		add_trait_xp = {
+			trait = gallowsbait
+			track = bandit
+			value = 100
+		}
+		add_trait_xp = {
+			trait = gallowsbait
+			track = poacher
+			value = 50
+		}
+		add_trait_xp = {
+			trait = gallowsbait
+			track = marauder
+			value = 25
+		}
+		create_character = { gender = male employer = $HOLDER$ }
+		create_character = { gender = male employer = $HOLDER$ }
+		create_character = { gender = male employer = $HOLDER$ }
 	}
 }

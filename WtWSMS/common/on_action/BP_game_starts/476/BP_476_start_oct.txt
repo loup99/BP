@@ -6,7 +6,9 @@ bp_game_start_476_oct = {
 		#Characters
 		BP_character_events_476_oct
 		BP_setup_realm_laws_476_oct
+		BP_setup_realm_laws_476_oct_DLC
 		BP_setup_vassal_contracts_476_oct
+		BP_setup_vassal_contracts_476_oct_DLC
 		BP_setup_landless_chars_476_oct
 		BP_set_lieges_476_oct
 		BP_remove_claims_476_oct
@@ -64,6 +66,21 @@ BP_character_events_476_oct = {
 			}
 		}
 		
+		#Arbogast and Soissons should start allied
+		title:k_soissons.holder = {
+			create_alliance = {
+				target = title:d_triveria.holder
+				allied_through_owner = title:k_soissons.holder
+				allied_through_target = title:d_triveria.holder
+			}
+		}
+		title:d_triveria.holder = {
+			add_opinion = {
+				modifier = perk_negotiated_alliance_opinion
+				target = title:k_soissons.holder
+			}
+		}
+		
 		#Nepos should have his capital in Splatum
 		character:175110 = { set_realm_capital = title:c_cetina }
 		
@@ -82,11 +99,6 @@ BP_character_events_476_oct = {
 ## Legal Stuff
 BP_setup_realm_laws_476_oct = {
 	effect = {
-		#Set-up Subroman Taxation
-		every_ruler = {
-			limit = { government_has_flag = is_a_transitory_roman_government }
-			add_realm_law_skip_effects = subroman_taxation_3
-		}
 		#Setup h_persia's clerical/shah authority
 		#Initally strong Clerical Influence and somewhat decent Secular Authority
 		title:h_persia.holder = {
@@ -103,6 +115,60 @@ BP_setup_realm_laws_476_oct = {
 		}
 		#To give the danes proper Tributaries
 		title:d_danes.holder = { add_realm_law_skip_effects = tribal_authority_1 }
+	}
+}
+BP_setup_realm_laws_476_oct_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#Roman Diarchy/Minority Laws
+		title:h_eastern_roman_empire.holder = { add_realm_law_skip_effects = roman_chancellor_law }
+		#Barbarian State Roman Orientations
+		title:h_italy.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_visigoths.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_2 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_suebia.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_2 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_burgundians.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_vandalica.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_0 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_altava.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:d_auresia.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:d_triveria.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_4 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
 	}
 }
 BP_setup_vassal_contracts_476_oct = {
@@ -155,7 +221,7 @@ BP_setup_vassal_contracts_476_oct = {
 					liege.primary_title = title:e_rajastan
 					primary_title.tier >= tier_duchy
 					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
-					government_has_flag = government_uses_rajamandala_authority
+					government_has_flag = government_is_rajamandala
 				}
 				debug_log_scopes = no
 				vassal_contract_set_obligation_level = {
@@ -191,6 +257,148 @@ BP_setup_vassal_contracts_476_oct = {
 					type = religious_rights
 					level = 1
 				}
+			}
+		}
+	}
+}
+BP_setup_vassal_contracts_476_oct_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#Remnant Limitanei
+		title:d_noricum_ripense.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		title:d_moesia_prima.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		title:d_verodunum.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		title:d_noviodunum.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		
+		##### Sub-Roman Military Titles
+		
+		#Vandalica
+		title:d_numidia.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_caesariensis.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		
+		#Visigothica
+		title:d_catalonia.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_upper_durius.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_toletum.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_novempopulana.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_aquitanica_secunda.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		
+		#Suebia
+		title:d_suebi_hermengegarius.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		
+		#Burgundia
+		title:d_alpes_poeninae.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		
+		#Italia
+		title:d_venetia.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
 			}
 		}
 	}
@@ -421,7 +629,7 @@ BP_senate_476_oct = {
 
 #Warfare
 
-on_game_start_after_lobby = { on_actions = { bp_game_start_after_lobby_476 } }
+on_game_start_after_lobby = { on_actions = { bp_game_start_after_lobby_476_oct } }
 
 bp_game_start_after_lobby_476_oct = {
 	trigger = { current_date = 476.10.15 }
@@ -430,6 +638,14 @@ bp_game_start_after_lobby_476_oct = {
 		BP_starting_culture_acceptance_476_oct
 		BP_update_specific_title_courtiers_476_oct
 		BP_reduce_hunnic_herd_476_oct
+		#Laws & Obligations
+		BP_setup_roman_border_troops_476_oct_DLC
+		BP_setup_roman_council_476_oct
+		BP_setup_other_councils_476_oct
+		#Other details
+		BP_set_armies_476_oct_DLC
+		BP_place_specific_domiciles_476_oct
+		BP_set_employers_476_oct_no_DLC
 	}
 	effect = {
 		trigger_event = { on_action = BP_update_specific_title_courtiers_476_oct delayed = yes }
@@ -669,5 +885,382 @@ BP_setup_capitals_476_oct = {
 		title:d_werle = {
 			set_capital_county = title:c_mecklenburg
 		}
+	}
+}
+
+BP_setup_roman_border_troops_476_oct_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:d_noricum_ripense.holder = {
+			title:d_noricum_ripense = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_noricum_ripense
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_noricum_ripense
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_noricum_ripense
+			}
+		}
+		title:d_moesia_prima.holder = {
+			title:d_moesia_prima = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_moesia_prima
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_moesia_prima
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_moesia_prima
+			}
+		}
+		title:d_celtica.holder = {
+			title:d_celtica = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_celtica
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_celtica
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_celtica
+			}
+		}
+		title:d_verodunum.holder = {
+			title:d_verodunum = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_verodunum
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_verodunum
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_verodunum
+			}
+		}
+	}
+}
+
+BP_setup_federate_troops_476_oct_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:d_orleans.holder = {
+			title:d_orleans = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans
+			}
+			create_maa_regiment = {
+				type = horse_archers
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans
+			}
+		}
+	}
+}
+
+BP_setup_roman_council_476_oct = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#Set Various Roman Offices
+		title:h_western_roman_empire.holder ?= {
+			#Populate Nepos' realm with a few characters so he can fill his council
+			add_more_wre_courtiers_effect = yes
+		}
+		title:e_magister_offices_wre.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
+			}
+		}
+		title:e_magister_military_wre.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_military_value
+			}
+		}
+		
+		title:h_eastern_roman_empire.holder ?= {
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_military_ere.holder
+				POSITION = councillor_marshal_roman
+			}
+			#make_councilor_of_type_if_not_already_effect = {
+			#	TARGET_CHAR = title:e_magister_offices_ere.holder
+			#	POSITION = councillor_chancellor_roman
+			#}
+			assign_councillor_type = {
+				type = councillor_chancellor_roman
+				target = character:PLRE2_Felix_17
+				remove_existing_councillor = yes
+			}
+		}
+		title:e_magister_offices_ere.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
+			}
+		}
+		title:e_magister_military_ere.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_military_value
+			}
+		}
+		
+		#Italia
+		title:h_italy.holder = {
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_offices_italy.holder
+				POSITION = councillor_chancellor_roman
+			}
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_military_italy.holder
+				POSITION = councillor_marshal_roman
+			}
+		}
+		title:e_magister_offices_italy.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
+			}
+		}
+		title:e_magister_military_italy.holder ?= {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_military_value
+			}
+		}
+	}
+}
+
+BP_setup_other_councils_476_oct = {
+	effect = {
+		#PLRE2 Gamuth was a steward-type role under Gaiseric
+		title:k_vandalica.holder = {
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = character:36066
+				POSITION = councillor_steward
+			}
+		}
+	}
+}
+
+BP_set_armies_476_oct_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:h_western_roman_empire.holder = {
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 3
+				title = title:h_western_roman_empire
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 3
+				title = title:h_western_roman_empire
+			}
+			create_maa_regiment = {
+				type = armored_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:h_western_roman_empire
+			}
+			create_maa_regiment = {
+				type = ballista
+				check_can_recruit = no
+				size = 1
+				title = title:h_western_roman_empire
+			}
+		}
+		title:e_magister_military_ere.holder = {
+			#Create the WRE MM Army
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = armored_horsemen
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = ballista
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+		}
+		title:k_soissons.holder = {
+			title:k_soissons = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 3
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 2
+				title = title:k_soissons
+			}
+		}
+		title:e_magister_military_italy.holder = {
+			create_maa_regiment = {
+				type = armored_footmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_italy
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_italy
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_italy
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_italy
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 3
+				title = title:e_magister_military_italy
+			}
+			create_maa_regiment = {
+				type = onager
+				check_can_recruit = no
+				size = 2
+				title = title:e_magister_military_italy
+			}
+		}
+	}
+}
+
+BP_place_specific_domiciles_476_oct = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#Romulus Augustulus' retires to Naples
+		title:c_nf_roman_dynn_Caecina = {
+			set_capital_county = title:c_napoli
+			this.holder.domicile ?= { move_domicile = title:b_napoli.title_province }
+		}
+	}
+}
+
+BP_set_employers_476_oct_no_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
+	#Otherwise landed chars should be sent to employers
+	effect = {
+		character:1100013 = { set_employer = character:70515 } #Basilicus
 	}
 }

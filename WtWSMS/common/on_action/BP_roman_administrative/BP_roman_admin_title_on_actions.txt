@@ -1,0 +1,255 @@
+﻿on_title_gain = {
+	events = {}
+	on_actions = {
+		BP_got_a_roman_ministry
+		BP_got_a_roman_province
+		BP_keep_roman_federate_government
+		BP_flip_federate_when_not_below_roman
+		BP_flip_federate_on_circumstance
+		BP_grants_to_tribals_become_federate
+	}
+}
+
+BP_got_a_roman_ministry = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		if = {
+			limit = {
+				scope:title.tier = tier_empire
+				scope:title = { has_variable = is_a_roman_ministry_title }
+			}
+			scope:title.de_jure_liege.holder = { save_scope_as = councillor_liege }
+			scope:title = { save_scope_as = the_ministry_title }
+			switch = {
+				trigger = has_variable
+				is_supreme_roman_military_title = {
+					got_roman_administrative_minister_position_effect = {
+						MINISTER_TITLE = scope:the_ministry_title
+						MINISTER_POSITION = councillor_marshal_roman
+					}
+				}
+				is_supreme_roman_ministry_title = {
+					got_roman_administrative_minister_position_effect = {
+						MINISTER_TITLE = scope:the_ministry_title
+						MINISTER_POSITION = councillor_chancellor_roman
+					}
+				}
+			}
+		}
+		#Set Up Roman Premiership if possible
+		this.liege_or_court_owner ?= { establish_premiership_if_necessary_effect = yes }
+	}
+}
+BP_got_a_roman_province = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		if = {
+			limit = {
+				NOT = { any_held_title = { has_variable = is_a_roman_ministry_title } }
+				vassal_contract_has_flag = roman_ministry_contact
+			}
+			vassal_contract_set_obligation_level = { type = roman_administrative_themes level = roman_admin_theme_civilian_value }
+		}
+	}
+}
+BP_keep_roman_federate_government = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		is_independent_ruler = no
+	}
+	effect = {
+		if = {
+			limit = { scope:previous_holder ?= { has_government = roman_federate_government } }
+			change_government_roman_federate_effect = yes
+		}
+	}
+}
+BP_flip_federate_when_not_below_roman = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		has_government = roman_federate_government
+		NOT = { top_liege = { government_has_flag = is_a_roman_government } }
+	}
+	effect = {
+		bp_devolve_roman_federate_effect = yes
+	}
+}
+BP_flip_federate_on_circumstance = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		has_government = roman_federate_government
+		root = liege
+	}
+	effect = {
+		#If the previous holder was sub-roman government, flip to sub-roman government
+		if = {
+			limit = {
+				OR = {
+					scope:previous_holder ?= { government_has_flag = government_is_subroman_administrative }
+					#Shouldn't happen, but let's be safe!
+					scope:previous_holder ?= { government_has_flag = government_is_roman_administrative }
+				}
+			}
+			change_government_subroman_administrative_effect = yes
+		}
+		#If you're a king-level federate, congrats you're now sub-roman ruling over the federates
+		else_if = {
+			limit = { primary_title.tier >= tier_kingdom }
+			change_government_subroman_administrative_effect = yes
+		}
+		#Otherwise, devolved the government
+		else = { bp_devolve_roman_federate_effect = yes }
+	}
+}
+BP_grants_to_tribals_become_federate = {
+	#Tribals and Migratory cultures become federates
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		liege_or_court_owner.top_liege = { government_has_flag = is_a_roman_government }
+		NOT = { root = liege }
+		OR = {
+			scope:transfer_type = flag:granted
+			scope:transfer_type = flag:appointment
+		}
+	}
+	effect = {
+		if = {
+			limit = { bp_can_become_federate_trigger = yes }
+			change_government_roman_federate_effect = yes
+		}
+	}
+}
+
+on_vassal_change = {
+	events = {}
+	on_actions = {
+		BP_independent_ministry_cleanup
+		BP_independent_roman_government_checks
+	}
+}
+BP_independent_ministry_cleanup = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		if = { # Destroy independent ministry empire titles
+			limit = {
+				OR = {
+					liege ?= { bp_has_access_to_roman_ministry_trigger = no }
+					this = top_liege
+				}
+				any_held_title = {
+					this.tier = tier_empire
+					OR = {
+						this = { has_variable = is_supreme_roman_military_title }
+						this = { has_variable = is_supreme_roman_ministry_title }
+					}
+				}
+			}
+			#Destroy Ministries
+			every_held_title = {
+				if = {
+					limit = { this = { has_variable = is_supreme_roman_military_title } }
+					root = { destroy_title = prev }
+				}
+				if = {
+					limit = { this = { has_variable = is_supreme_roman_ministry_title } }
+					root = { destroy_title = prev }
+				}
+			}
+		}
+	}
+}
+BP_independent_roman_government_checks = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_governments_trigger = yes
+		root = liege
+	}
+	effect = {
+		if = { #Independent Roman Admin governments must be at least empires, or they become subroman
+			limit = {
+				government_has_flag = government_only_valid_for_empires_hegemonies
+				primary_title.tier < tier_empire
+			}
+			change_government_subroman_administrative_effect = yes
+		}
+		#Independent Federates go tribal/high tribal
+		if = {
+			limit = {
+				government_has_flag = government_becomes_tribal_high_tribal_if_independent_or_not_under_roman
+			}
+			bp_devolve_roman_federate_effect = yes
+		}
+		#Independent SubRoman Admins swap their existing laws for liege laws
+		#NB: Aristocracy laws are independent of each other so not needed to manipulate
+		if = {
+			limit = { government_has_flag = subroman_administrative_government }
+			switch = {
+				trigger = has_realm_law
+				subroman_admin_taxation_vassal_law_0 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_0
+				}
+				subroman_admin_taxation_vassal_law_1 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_1
+				}
+				subroman_admin_taxation_vassal_law_2 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_2
+				}
+				subroman_admin_taxation_vassal_law_3 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_3
+				}
+				subroman_admin_taxation_vassal_law_4 = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_4
+				}
+				fallback = {
+					add_realm_law = subroman_admin_taxation_top_liege_law_0
+				}
+			}
+			switch = {
+				trigger = has_realm_law
+				subroman_admin_military_centralization_vassal_law_0 = {
+					add_realm_law = subroman_admin_military_centralization_top_liege_law_0
+				}
+				subroman_admin_military_centralization_vassal_law_1 = {
+					add_realm_law = subroman_admin_military_centralization_top_liege_law_1
+				}
+				subroman_admin_military_centralization_vassal_law_2 = {
+					add_realm_law = subroman_admin_military_centralization_top_liege_law_2
+				}
+				subroman_admin_military_centralization_vassal_law_3 = {
+					add_realm_law = subroman_admin_military_centralization_top_liege_law_3
+				}
+				subroman_admin_military_centralization_vassal_law_4 = {
+					add_realm_law = subroman_admin_military_centralization_top_liege_law_4
+				}
+				subroman_admin_military_centralization_vassal_law_5 = {
+					add_realm_law = subroman_admin_military_centralization_top_liege_law_5
+				}
+				fallback = {
+					add_realm_law = subroman_admin_military_centralization_top_liege_law_0
+				}
+			}
+		}
+	}
+}
+
+on_title_lost = {
+	events = {}
+	on_actions = {
+		BP_flip_federate_to_admin_when_landless
+	}
+}
+BP_flip_federate_to_admin_when_landless = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		if = {
+			limit = { is_landless_ruler = yes }
+			if = {
+				limit = { root.top_liege = { has_government = roman_administrative_government } }
+				change_government = roman_administrative_government
+			}
+			else_if = {
+				limit = { root.top_liege = { has_government = subroman_administrative_government } }
+				change_government = subroman_administrative_government
+			}
+		}
+	}
+}

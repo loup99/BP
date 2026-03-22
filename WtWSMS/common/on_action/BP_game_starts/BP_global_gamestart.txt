@@ -1,6 +1,12 @@
 ﻿#Everything in this file should eventually by moved into individual bookmarks when we've populated
 #395 to 476
 
+#Also a centralized depository for certain notes:
+# MamertusOfVienne (MamertusOfVienne) should be bishop of Vienne from 462-475
+# Aspasius (1001111) should be bishop of Auch/Eauze from 530-560
+# Avitus (190011) should be bishop of Vienne from 494-519
+# Eucherius (1001106) should be bishop of Lyon from 434-449
+
 on_game_start = {
 	on_actions = { bp_global_setup }
 }
@@ -12,6 +18,7 @@ bp_global_setup = {
 		BP_setup_realm_and_title_succession_laws_by_date
 		BP_set_religion_effects_by_date
 		BP_realm_capitals_by_date
+		BP_land_titles_by_date
 		BP_learn_capital_languages
 	}
 }
@@ -193,6 +200,19 @@ BP_realm_capitals_by_date = {
 	}
 }
 
+BP_land_titles_by_date = {
+	effect = {
+		if = { #Aetius lands the Alans of Orleans; basically proto-Orelans duchy
+			limit = { current_date >= 442.1.1 }
+			title:d_orleans = { set_de_jure_liege_title = title:k_lugdunensis }
+			title:c_chartres = { set_de_jure_liege_title = title:d_orleans }
+			title:c_vendome = { set_de_jure_liege_title = title:d_orleans }
+			title:c_blois = { set_de_jure_liege_title = title:d_orleans }
+			title:c_orleans = { set_de_jure_liege_title = title:d_orleans }
+		}
+	}
+}
+
 BP_learn_capital_languages = {
 	effect = {
 		every_ruler = {
@@ -210,7 +230,8 @@ BP_learn_capital_languages = {
 on_game_start_after_lobby = {
 	on_actions = {
 		give_persian_hegemon_its_kingdoms
-		give_roman_praetorian_titles_to_hegemon_if_dynastic
+		set_extant_nf_coas
+		BP_set_specific_churches_to_bishops
 	}
 	events = {
 		bp_historical_artifacts.0023 # Historical Artifacts Generator
@@ -233,42 +254,184 @@ give_persian_hegemon_its_kingdoms = {
 	}
 }
 
-give_roman_praetorian_titles_to_hegemon_if_dynastic = {
+set_extant_nf_coas = {
 	effect = {
-		if = {
-			limit = {
-				title:e_praetorian_prefecture_east.holder ?= { has_government = roman_dynastic_government }
-				title:e_praetorian_prefecture_east.holder ?= { is_ai = yes }
-			}
-			title:e_praetorian_prefecture_east.holder ?= { destroy_title = title:e_praetorian_prefecture_east }
+		every_county = {
+			limit = { is_noble_family_title = yes }
+			set_coa = this.holder.house
 		}
-		if = {
-			limit = {
-				title:e_praetorian_prefecture_illyria.holder ?= { has_government = roman_dynastic_government }
-				title:e_praetorian_prefecture_illyria.holder ?= { is_ai = yes }
-			}
-			title:e_praetorian_prefecture_illyria.holder ?= { destroy_title = title:e_praetorian_prefecture_illyria }
+		every_duchy = {
+			limit = { is_noble_family_title = yes }
+			set_coa = this.holder.house
 		}
-		if = {
-			limit = {
-				title:e_praetorian_prefecture_gaul.holder ?= { has_government = roman_dynastic_government }
-				title:e_praetorian_prefecture_gaul.holder ?= { is_ai = yes }
-			}
-			title:e_praetorian_prefecture_gaul.holder ?= { destroy_title = title:e_praetorian_prefecture_gaul }
+	}
+}
+
+BP_set_specific_churches_to_bishops = {
+	effect = {
+		create_title_and_vassal_change = {
+			type = granted
+			save_scope_as = give_bishops_their_titles
 		}
-		if = {
-			limit = {
-				title:e_praetorian_prefecture_italy.holder ?= { has_government = roman_dynastic_government }
-				title:e_praetorian_prefecture_italy.holder ?= { is_ai = yes }
+		#Bishops of Vienne
+		title:b_vienne = {
+			if = {
+				limit = {
+					current_date >= 475.1.1
+					current_date <  494.1.1
+				}
+				change_title_holder = {
+					holder = character:1007001 # Hesychius
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
 			}
-			title:e_praetorian_prefecture_italy.holder ?= { destroy_title = title:e_praetorian_prefecture_italy }
-		}
-		if = {
-			limit = {
-				title:e_praetorian_prefecture_africa.holder ?= { has_government = roman_dynastic_government }
-				title:e_praetorian_prefecture_africa.holder ?= { is_ai = yes }
+			else_if = {
+				limit = {
+					current_date >= 494.1.1
+					current_date <  519.1.1
+				}
+				change_title_holder = {
+					holder = character:190011 # Avitus
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
 			}
-			title:e_praetorian_prefecture_africa.holder ?= { destroy_title = title:e_praetorian_prefecture_africa }
 		}
+		#Bishops of Lyon
+		title:b_villars = {
+			if = {
+				limit = {
+					current_date >= 434.1.1
+					current_date <  449.1.1
+				}
+				change_title_holder = {
+					holder = character:1001106 # Eucherius
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+			else_if = {
+				limit = {
+					current_date >= 456.1.1
+					current_date <  494.1.1
+				}
+				change_title_holder = {
+					holder = character:1001105 # Patiens
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+			else_if = {
+				limit = {
+					current_date >= 494.1.1
+					current_date <  501.1.1
+				}
+				change_title_holder = {
+					holder = character:RusticusOfLyon # Rusticus
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+			else_if = {
+				limit = {
+					current_date >= 514.1.1
+					current_date <  524.1.1
+				}
+				change_title_holder = {
+					holder = character:Viventiolus # Viventiolus
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+			else_if = {
+				limit = {
+					current_date >= 542.1.1
+					current_date <  549.1.1
+				}
+				change_title_holder = {
+					holder = character:LeontiusOfLyon # Leontius of Lyon
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+			else_if = {
+				limit = {
+					current_date >= 549.1.1
+					current_date <  552.1.1
+				}
+				change_title_holder = {
+					holder = character:SacerdosOfLyon # Sacerdos
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+			else_if = {
+				limit = {
+					current_date >= 552.1.1
+					current_date <  573.1.1
+				}
+				change_title_holder = {
+					holder = character:NicetiusOfLyon # Nicetius
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+		}
+		#Bishop of Besacon
+		title:b_ornans = {
+			if = {
+				limit = {
+					current_date >= 445.1.1
+					current_date <  480.1.1
+				}
+				change_title_holder = {
+					holder = character:1001107 # Antidius
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+		}
+		#Bishop of Bordeaux
+		title:b_fronsac = {
+			if = {
+				limit = {
+					current_date >= 475.1.1
+					current_date <  485.1.1
+				}
+				change_title_holder = {
+					holder = character:1001109 # Amelius
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+		}
+		#Bishop of Valence
+		title:b_valence = {
+			if = {
+				limit = {
+					current_date >= 442.1.1
+					current_date <  486.1.1
+				}
+				change_title_holder = {
+					holder = character:CariathoOfValence # CariathoOfValence
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+			else_if = {
+				limit = {
+					current_date >= 486.1.1
+					current_date <  520.1.1
+				}
+				change_title_holder = {
+					holder = character:ApollinarisOfValence # ApollinarisOfValence
+					change = scope:give_bishops_their_titles
+					government_base = character:1900009
+				}
+			}
+		}
+		
+		resolve_title_and_vassal_change = scope:give_bishops_their_titles
 	}
 }

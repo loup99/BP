@@ -1,0 +1,525 @@
+﻿roman_subordinate_federate_obligations = {
+	obligation_levels = {
+		default = {
+			levies = 0.75
+			tax = 0.15
+		}
+	}
+}
+
+#This is separate from the professionalization and represents tax abatements
+#that could be relatively removed at will
+roman_federate_liege_taxes = {
+	display_mode = tree
+	icon = gold_icon
+	obligation_levels = {
+		roman_federate_liege_taxes_exempt = {
+			parent = roman_federate_liege_taxes_moderate
+			position = { 0 0 }
+
+			tax_factor = -1.0
+
+			ai_liege_desire = 1
+			ai_subject_desire = 5
+			score = 2
+		}
+		roman_federate_liege_taxes_low = {
+			parent = roman_federate_liege_taxes_moderate
+			position = { 1 0 }
+
+			tax_factor = -0.75
+			subject_opinion = -5
+
+			ai_liege_desire = {
+				value = 2
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_roman_federate
+								vassal_contract_obligation_level:feudal_government_taxes <= 0
+							}
+						}
+					}
+					add = 8
+				}
+			}
+			ai_subject_desire = 4
+			score = 1
+		}
+		roman_federate_liege_taxes_moderate = {
+			default = yes
+			parent = roman_federate_liege_taxes_moderate
+			position = { 2 0 }
+
+			tax_factor = -0.5
+			subject_opinion = -10
+
+			ai_liege_desire = {
+				value = 3
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_feudal
+								vassal_contract_obligation_level:feudal_government_taxes <= feudal_tax_low_level
+							}
+						}
+					}
+					add = 7
+				}
+			}
+			ai_subject_desire = 3
+			score = 0
+		}
+		roman_federate_liege_taxes_high = {
+			parent = roman_federate_liege_taxes_moderate
+			position = { 3 0 }
+			
+			tax_factor = -0.25
+			subject_opinion = -20
+
+			ai_liege_desire = {
+				value = 5
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_roman_federate
+								vassal_contract_obligation_level:feudal_government_taxes <= 1
+							}
+						}
+					}
+					add = 6
+				}
+			}
+			ai_subject_desire = 2
+			score = -2
+			flag = obligation_high_taxes
+		}
+		roman_federate_liege_taxes_extortionate = {
+			parent = roman_federate_liege_taxes_moderate
+			position = { 4 0 }
+			
+			tax_factor = 0.0
+			subject_opinion = -30
+
+			ai_liege_desire = {
+				value = 5
+				if = {
+					limit = {
+						scope:liege = {
+							ai_should_focus_on_building_in_their_capital = yes
+						}
+						scope:subject = {
+							AND = {
+								government_has_flag = government_is_roman_federate
+								vassal_contract_obligation_level:feudal_government_taxes <= 1
+							}
+						}
+					}
+					add = 6
+				}
+			}
+			ai_subject_desire = 2
+			score = -2
+			flag = obligation_high_taxes
+		}
+	}
+}
+
+#Measures the professionalization of the region's troops
+#More professional => more title troops, more expensive
+roman_federate_military_landed = {
+	#General idea is that as army becomes landed, it makes it cheaper for the Roman Admin government
+	#But turns the army more into becoming personal holdings and levies
+	#Making the sort of alliance building in feudalism necessary
+	
+	display_mode = tree
+	icon = soldier_icon
+	obligation_levels = {
+		roman_federate_military_landed_0 = { #Fully standing army
+			parent = roman_federate_military_landed_0
+			default = yes
+			position = { 0 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 2
+				men_at_arms_title_cap = 2
+				
+				#Personal Troops
+				men_at_arms_cap = 0
+				men_at_arms_limit = 1
+				
+				levy_size = 0.0
+				
+				men_at_arms_maintenance = -0.25
+				men_at_arms_recruitment_cost = -0.50
+				
+				domain_tax_mult = -0.25
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = 0.00
+				army_maintenance_mult = 0.00
+				mercenary_hire_cost_mult = 0.00
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+			flag = roman_federate_military_landed_0
+		}
+		roman_federate_military_landed_1 = {
+			parent = roman_federate_military_landed_1
+			position = { 1 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 1
+				men_at_arms_title_cap = 1
+				#Personal Troops
+				men_at_arms_cap = 1
+				men_at_arms_limit = 1
+				
+				levy_size = 0.1
+				
+				men_at_arms_maintenance = -0.20
+				men_at_arms_maintenance = -0.40
+				
+				domain_tax_mult = -0.20
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.01
+				army_maintenance_mult = -0.01
+				mercenary_hire_cost_mult = -0.01
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+			flag = roman_federate_military_landed_1
+		}
+		
+		roman_federate_military_landed_2 = {
+			parent = roman_federate_military_landed_2
+			position = { 2 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = 0
+				men_at_arms_title_cap = 0
+				#Personal Troops
+				men_at_arms_cap = 1
+				men_at_arms_limit = 2
+				
+				levy_size = 0.2
+				
+				men_at_arms_maintenance = -0.15
+				men_at_arms_maintenance = -0.30
+				
+				domain_tax_mult = -0.15
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.02
+				army_maintenance_mult = -0.02
+				mercenary_hire_cost_mult = -0.02
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+			flag = roman_federate_military_landed_2
+		}
+		
+		roman_federate_military_landed_3 = {
+			parent = roman_federate_military_landed_3
+			position = { 3 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = -1
+				men_at_arms_title_cap = -1
+				#Personal Troops
+				men_at_arms_cap = 2
+				men_at_arms_limit = 2
+				
+				levy_size = 0.3
+				
+				men_at_arms_maintenance = -0.10
+				men_at_arms_maintenance = -0.20
+				
+				domain_tax_mult = -0.10
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.03
+				army_maintenance_mult = -0.03
+				mercenary_hire_cost_mult = -0.03
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+			flag = roman_federate_military_landed_3
+		}
+		
+		roman_federate_military_landed_4 = {
+			parent = roman_federate_military_landed_4
+			position = { 4 0 }
+			
+			subject_modifier = {
+				#Imperial Troops
+				men_at_arms_title_limit = -2
+				men_at_arms_title_cap = -2
+				#Personal Troops
+				men_at_arms_cap = 2
+				men_at_arms_limit = 3
+				
+				levy_size = 0.4
+				
+				men_at_arms_maintenance = -0.05
+				men_at_arms_maintenance = -0.10
+				
+				domain_tax_mult = -0.05
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.04
+				army_maintenance_mult = -0.04
+				mercenary_hire_cost_mult = -0.04
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = yes
+			flag = roman_admin_military_contract
+			flag = roman_federate_military_landed_4
+		}
+		
+		#Fully landed; no more title MAA, can't go back from this state.
+		#On track for Feudalism/Clan government
+		roman_federate_military_landed_5 = {
+			parent = roman_federate_military_landed_5
+			position = { 5 0 }
+			
+			subject_modifier = {
+				#Personal Troops
+				men_at_arms_cap = 3
+				men_at_arms_limit = 3
+				
+				levy_size = 0.5
+			}
+			
+			liege_modifier = {
+				men_at_arms_maintenance = -0.05
+				army_maintenance_mult = -0.05
+				mercenary_hire_cost_mult = -0.05
+			}
+			
+			ai_liege_desire = 0
+			ai_subject_desire = 0
+			
+			enable_title_maa = no
+			
+			flag = roman_federate_military_landed_permanent
+		}
+	}
+}
+
+#Represents the entrenchment and transition from tenancy to landholding to hereditary rights
+#Basic idea is that the aristocracy become entrenched within their own lands, moving away from an
+#influence-based system to one with more crystalized succession and negotiations
+roman_federate_aristocracy = {
+	display_mode = tree
+	icon = legitimacy_icon
+	
+	#TODO: Title Revocation Rights (in this sense, prohibiting governorship removal)
+	
+	obligation_levels = {
+		#Basic tenancy; free hand for the liege
+		roman_federate_aristocracy_0 = {
+			position = { 0 0 }
+			parent = roman_federate_aristocracy_0
+			
+			flag = succession_weight_dynastic_1
+			flag = governor_efficency_weight_1
+			
+			subject_modifier = {}
+			liege_modifier = {
+				monthly_influence_mult = -0.02
+			}
+		}
+		#Times gone on long enough that the land is associated with a family
+		#Revocation costs more influence
+		roman_federate_aristocracy_1 = {
+			position = { 1 0 }
+			parent = roman_federate_aristocracy_1
+			
+			subject_modifier = {
+				monthly_influence_mult = -0.10
+			}
+			liege_modifier = {
+				monthly_influence_mult = -0.04
+			}
+			
+			flag = revoke_depose_governors_costs_more_influence_1
+			flag = succession_weight_dynastic_2
+			flag = governor_efficency_weight_2
+		}
+		#Tenancy becomes landholding
+		roman_federate_aristocracy_2 = {
+			position = { 2 0 }
+			parent = roman_federate_aristocracy_2
+			
+			subject_modifier = {
+				monthly_influence_mult = -0.20
+			}
+			liege_modifier = {
+				monthly_influence_mult = -0.06
+			}
+			
+			flag = revoke_depose_governors_costs_more_influence_2
+			flag = succession_weight_dynastic_3
+			flag = governor_efficency_weight_3
+		}
+		#Tenancy becomes extremely sticky
+		roman_federate_aristocracy_3 = {
+			position = { 3 0 }
+			parent = roman_federate_aristocracy_3
+			
+			subject_modifier = {
+				monthly_influence_mult = -0.30
+			}
+			liege_modifier = {
+				monthly_influence_mult = -0.08
+			}
+			
+			flag = revoke_depose_governors_costs_more_influence_3
+			flag = succession_weight_dynastic_4
+			flag = governor_efficency_weight_4
+			flag = cannot_depose_holders
+		}
+		#Tenancy becomes purely hereditary
+		roman_federate_aristocracy_4 = {
+			position = { 4 0 }
+			parent = roman_federate_aristocracy_4
+			
+			subject_modifier = {
+				monthly_influence_mult = -0.40
+			}
+			liege_modifier = {
+				monthly_influence_mult = -0.10
+			}
+			
+			flag = governorship_cannot_be_revoked_freely
+			flag = succession_is_purely_dynastic
+			flag = cannot_depose_holders
+			
+			flag = roman_federate_aristocracy_permanent
+		}
+	}
+}
+
+#The general trade off is that keeping the Roman taxation infrastructure nets you
+#domain taxes and domain limit, it also costs you county opinion and most of that money
+#gets hoovered up to the liege. So, despite it leading to your domain having to be subdivided,
+#it's much better for the vassal to pull apart the Roman taxation infrastructure and keep more of
+#their own cash
+roman_federate_domestic_taxation = {
+	display_mode = tree
+	icon = treasury_icon
+	obligation_levels = {
+		roman_federate_domestic_taxation_0 = {
+			parent = roman_federate_domestic_taxation_0
+			position = { 0 0 }
+			
+			tax = 0.70
+			subject_modifier = {
+				domain_limit = 4
+				domain_tax_mult = 0.20
+				domicile_monthly_gold_mult = 0.0
+			}
+			liege_modifier = {}
+			
+			flag = roman_federate_domestic_taxation_0
+		}
+		roman_federate_domestic_taxation_1 = {
+			position = { 1 0 }
+			parent = roman_federate_domestic_taxation_1
+			
+			tax = 0.55
+			subject_modifier = {
+				domain_limit = 3
+				domain_tax_mult = 0.15
+				domicile_monthly_gold_mult = -0.20
+			}
+			liege_modifier = {}
+			
+			flag = roman_federate_domestic_taxation_1
+		}
+		roman_federate_domestic_taxation_2 = {
+			position = { 2 0 }
+			parent = roman_federate_domestic_taxation_2
+			
+			tax = 0.40
+			subject_modifier = {
+				domain_limit = 2
+				domain_tax_mult = 0.10
+				domicile_monthly_gold_mult = -0.40
+			}
+			liege_modifier = {
+				monthly_influence_mult = -0.06
+			}
+			
+			flag = roman_federate_domestic_taxation_2
+		}
+		roman_federate_domestic_taxation_3 = {
+			position = { 3 0 }
+			parent = roman_federate_domestic_taxation_3
+			
+			tax = 0.25
+			subject_modifier = {
+				domain_limit = 1
+				domain_tax_mult = 0.05
+				domicile_monthly_gold_mult = -0.60
+			}
+			liege_modifier = {}
+			
+			flag = roman_federate_domestic_taxation_3
+		}
+		roman_federate_domestic_taxation_4 = {
+			position = { 4 0 }
+			parent = roman_federate_domestic_taxation_4
+			
+			tax = 0.1 #Net Feudal Massive Taxes
+			subject_modifier = {
+				domicile_monthly_gold_mult = -0.80
+			}
+			liege_modifier = {}
+			
+			flag = roman_federate_domestic_taxation_permanent
+		}
+	}
+}

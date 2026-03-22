@@ -20,6 +20,7 @@ bp_game_start = {
 		create_BP_artifacts
 		#Legal Stuff
 		setup_realm_and_title_succession_laws
+		setup_realm_and_title_succession_laws_DLC
 		game_start_fix_barony_government
 		setup_initial_variable_lists
 		#Religious Stuff
@@ -37,11 +38,14 @@ bp_game_start = {
 		block_specific_chars_from_having_families
 		#Other Actions
 		update_development_by_terrain_and_circumstances
+		#Things that have to be done last
+		setup_governments_based_on_dlc
 	}
 }
 
 bp_game_start_after_lobby = {
 	on_actions = {
+		give_chavez_to_the_buri
 		#Other Events
 		trigger_needed_events
 		delay = { days = 1 }
@@ -251,7 +255,7 @@ setup_realm_and_title_succession_laws = {
 			}
 		}
 		every_ruler = { #Eranshar
-			limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+			limit = { government_has_flag = government_is_iranian_dynastic }
 			if = {
 				limit = { NOT = { has_realm_law = single_heir_dynasty_house } }
 				add_realm_law_skip_effects = single_heir_dynasty_house
@@ -338,21 +342,6 @@ setup_realm_and_title_succession_laws = {
 				add_title_law = mahestan_elective_succession_law
 			}
 		}
-		#Imperial Elective
-		every_ruler = {
-			every_held_title = {
-				limit = {
-					OR = {
-						this = title:e_byzantium
-						this = title:e_wre
-						this = title:h_roman_empire
-						this = title:h_eastern_roman_empire
-						this = title:h_western_roman_empire
-					}
-				}
-				add_title_law = imperial_elective_succession_law
-			}
-		}
 		#Feudal Elective
 		every_ruler = {
 			every_held_title = {
@@ -412,7 +401,6 @@ setup_realm_and_title_succession_laws = {
 					OR = {
 						#Turkic Succession
 						this = title:k_al_hirah ##### TODO (Beta): Implement succ_turkish_succession law
-						this = title:k_arabia_petraea ##### TODO (Beta): Implement succ_turkish_succession law
 						this = title:k_qaryat_dhat_kahil ##### TODO (Beta): Implement succ_turkish_succession law
 					}
 				}
@@ -552,6 +540,29 @@ setup_realm_and_title_succession_laws = {
 		}
 	}
 }
+setup_realm_and_title_succession_laws_DLC = {
+	effect = {
+		if = {
+			limit = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
+			#Imperial Elective
+			every_ruler = {
+				every_held_title = {
+					limit = {
+						OR = {
+							this = title:e_byzantium
+							this = title:e_wre
+							this = title:h_roman_empire
+							this = title:h_eastern_roman_empire
+							this = title:h_western_roman_empire
+						}
+					}
+					add_title_law = imperial_elective_succession_law
+				}
+			}
+		}
+	}
+}
+
 #Ensure all baronies have appropriate governments for game start; prevents clan/feudalism sneaking
 #in through the back door
 game_start_fix_barony_government = {
@@ -1125,6 +1136,13 @@ trigger_needed_events = {
 		every_ruler = {
 			limit = { exists = cp:councillor_court_chaplain }
 			cp:councillor_court_chaplain = {
+				if = { #Sacred Eunuchs
+					limit = {
+						faith = { has_doctrine_parameter = clergy_are_always_eunuchs }
+						NOT = { has_trait = eunuch }
+					}
+					add_trait = eunuch_1 #Probably *not* castrated as children from what I can tell...
+				}
 				bp_setup_priest_traits_effect = yes
 			}
 		}
@@ -1149,7 +1167,8 @@ update_development_by_terrain_and_circumstances = {
 	## drylands = 0.95
 	effect = {
 		every_county = {
-			#Specific title effeacts
+			limit = { is_noble_family_title = no }
+			#Specific title effects
 			if = { #Dacia should only have development in non-tribal counties
 				limit = { this.kingdom = title:k_dacia }
 				if = {
@@ -1322,6 +1341,207 @@ cull_maa_from_single_county_tribals = {
 				}
 			}
 			every_maa_regiment = { destroy_maa_regiment = yes }
+		}
+	}
+}
+
+give_chavez_to_the_buri = {
+	effect = {
+		if = {
+			limit = { title:c_porto.holder.top_liege.culture = culture:suebi }
+			create_character = {
+				gender = male
+				age = 30
+				location = title:b_chavez.title_province
+				faith = faith:irimonic_pagan
+				culture = culture:buri
+				after_creation = { save_scope_as = buri_holder }
+			}
+			create_title_and_vassal_change = {
+				type = granted
+				save_scope_as = title_change
+			}
+			title:b_chavez = {
+				change_title_holder = {
+					holder = scope:buri_holder
+					change = scope:title_change
+				}
+			}
+			resolve_title_and_vassal_change = scope:title_change
+		}
+	}
+}
+
+## Government Stuff ##
+setup_governments_based_on_dlc = {
+	effect = {
+		#Flip Roman governments from administrative to Dynastic if DLC is not available
+		if = {
+			limit = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
+			#Roman Admin
+			every_ruler = {
+				limit = { has_government = roman_administrative_government }
+				change_government = roman_dynastic_government
+				
+				#Fixup Laws
+				remove_realm_law_if_has_it_effect = { LAW = roman_appointment_succession_law }
+				remove_realm_law_if_has_it_effect = { LAW = roman_acclamation_succession_law }
+				add_law_if_not_has_it_effect = { LAW = roman_dynastic_authority_1 }
+			}
+			#Sub-Roman Admin
+			every_ruler = {
+				limit = { has_government = subroman_administrative_government }
+				change_government = subroman_dynastic_government
+				
+				#Fixup Laws
+				remove_realm_law_if_has_it_effect = { LAW = roman_appointment_succession_law }
+				remove_realm_law_if_has_it_effect = { LAW = roman_acclamation_succession_law }
+				add_law_if_not_has_it_effect = { LAW = roman_dynastic_authority_1 }
+			}
+			#Federates
+			every_ruler = {
+				limit = { has_government = roman_federate_government }
+				
+				if = {
+					limit = { this.culture = { no_longer_in_tribal_era_trigger = yes } }
+					change_government = high_tribal_government
+					add_law_if_not_has_it_effect = { LAW = high_tribal_organization_0 }
+				}
+				else = {
+					change_government = tribal_government
+					add_law_if_not_has_it_effect = { LAW = tribal_authority_0 }
+				}
+				
+				#Fixup Laws
+				remove_realm_law_if_has_it_effect = { LAW = roman_appointment_succession_law }
+				remove_realm_law_if_has_it_effect = { LAW = roman_acclamation_succession_law }
+			}
+			#Catch edge case failures
+			every_ruler = {
+				limit = {
+					is_independent_ruler = no
+					has_government = feudal_government
+					this.liege = { has_government = roman_dynastic_government }
+				}
+				change_government = roman_dynastic_government
+			}
+			
+			#Cleanup landless titles
+			
+			#Destroy PP titles
+			destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_east }
+			destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_illyria }
+			destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_gaul }
+			destroy_PP_title_if_ai_effect = { TITLE = title:e_praetorian_prefecture_italy }
+			#Destroy Roman Offices
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_offices_roman_empire }
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_offices_wre }
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_offices_ere }
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_offices_italy }
+			
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_military_roman_empire }
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_military_wre }
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_military_ere }
+			destroy_title_if_landless_effect = { TITLE = title:e_magister_military_italy }
+		}
+		else = {
+			every_ruler = {
+				limit = { government_has_flag = government_is_roman_federate }
+				if = {
+					limit = { government_has_flag = government_is_roman_federate }
+					add_law_if_not_has_it_effect = { LAW = roman_federate_appointment_succession_law }
+					add_more_knight_courtiers_effect = { EMPLOYER = this }
+				}
+			}
+			every_ruler = {
+				limit = {
+					OR = {
+						government_has_flag = government_is_roman_administrative
+						government_has_flag = government_is_subroman_administrative
+					}
+				}
+				
+				#Set Up Realm Laws
+				if = {
+					limit = { top_liege = this }
+					add_law_if_not_has_it_effect = { LAW = roman_acclamation_succession_law }
+				}
+				else = { add_law_if_not_has_it_effect = { LAW = roman_appointment_succession_law } }
+				
+				#Setup missing NF titles
+				if = {
+					limit = {
+						this = this.house.house_head
+						OR = {
+							this.primary_title.tier >= tier_duchy #Don't want nf running counties...
+							dynasty = { has_dynasty_modifier = roman_senate_family_east }
+							dynasty = { has_dynasty_modifier = roman_senate_family_west }
+						}
+						any_held_title = { count < 1 is_noble_family_title = yes }
+					}
+					if = {
+						limit = { government_has_flag = government_is_roman_administrative }
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = roman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+					else_if = {
+						limit = { government_has_flag = government_is_subroman_administrative }
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = subroman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+					scope:new_title.holder ?= {
+						save_scope_as = noble_family_head
+						scope:new_title = { set_coa = scope:noble_family_head.house }
+					}
+				}
+				#Move Estate to actual capital location
+				this.domicile ?= { move_domicile = prev.capital_county.title_province }
+			}
+			
+			#Roman Offices need the appropriate flags at start
+			title:e_magister_military_roman_empire = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_military_ere = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_military_wre = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_military_italy = {
+				set_variable = is_supreme_roman_military_title
+				set_variable = is_a_roman_ministry_title
+			}
+			
+			title:e_magister_offices_roman_empire = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_offices_ere = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_offices_wre = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
+			title:e_magister_offices_italy = {
+				set_variable = is_supreme_roman_ministry_title
+				set_variable = is_a_roman_ministry_title
+			}
 		}
 	}
 }

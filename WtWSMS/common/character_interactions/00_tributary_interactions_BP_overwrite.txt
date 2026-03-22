@@ -48,10 +48,6 @@ cease_paying_tribute_interaction = {
 			text = involved_in_the_same_war
 			NOT = { scope:recipient = { any_character_war = { is_participant = scope:actor } } }
 		}
-		trigger_if = {
-			limit = { scope:actor = { has_subject_contract_group = BP_federate_tributary } }
-			NOT = { scope:actor = { is_at_war_with = scope:recipient } }
-		}
 		##### Changed from Vanilla ^^^^^
 	}
 
@@ -138,12 +134,6 @@ cease_paying_tribute_interaction = {
 				target = scope:actor
 			}
 		}
-		##### Changed from Vanilla vvvvv
-		update_federate_modifiers_effect = {
-			TRIBUTARY = scope:actor
-			SUZERAIN = scope:recipient
-		}
-		##### Changed from Vanilla ^^^^^
 	}
 
 	ai_potential = {
@@ -562,97 +552,6 @@ cease_paying_tribute_interaction = {
 			opinion_target = scope:recipient
 			multiplier = -1
 		}	
-	}
-}
-
-### Release Tributary - unilateral
-# actor = suzerain
-# recipient = tributary
-
-release_tributary_interaction = {
-	category = interaction_category_vassal
-	common_interaction = no
-	icon = release_tributary_interaction
-
-	desc = release_tributary_interaction_desc
-
-	is_shown = {
-		scope:recipient = {
-			this != scope:actor
-			suzerain = scope:actor
-			OR = { # AI should only ever consider releasing unruly subjects
-				scope:actor = { is_ai = no }
-				NOT = { is_obedient_to = scope:actor }
-			}
-		}
-	}
-
-	is_valid_showing_failures_only = {
-		scope:recipient = {
-			trigger_if = {
-				limit = { subject_standing >= 0	}
-				subject_standing = 0
-			}
-		}
-	}
-
-	cost = {
-		prestige = {
-			value = minor_prestige_value
-			if = {
-				limit = { 
-					scope:actor = { government_has_flag = government_is_mandala }
-				}
-				multiply = 0
-			}
-		}
-		piety = {
-			value = medium_piety_value
-			if = {
-				limit = {
-					scope:actor = { 
-						NOT = { government_has_flag = government_is_mandala }
-					}
-				}
-				multiply = 0
-			}
-		}
-	}
-
-	auto_accept = yes
-	on_accept = {
-		scope:recipient = {
-			end_tributary = yes
-			save_scope_as = tributary_loc
-			scope:actor = { save_scope_as = suzerain_loc }
-			add_truce_both_ways = {
-				character = scope:actor
-				years = 5
-				name = TRUCE_TRIBUTARY_STOPPED
-			}
-			add_opinion = {
-                target = scope:actor
-                modifier = tributary_released_opinion
-                opinion = 25
-            }
-            if = {
-            	limit = { 
-            		scope:actor = { government_has_flag = government_is_mandala }
-            	}
-            	set_variable = {
-            		name = recent_mandala_suzerain
-            		value = scope:actor
-            		years = 5
-            	}
-            }
-			trigger_event = char_interaction.0380
-		}
-		##### Changed from Vanilla vvvvv
-		update_federate_modifiers_effect = {
-			TRIBUTARY = scope:recipient
-			SUZERAIN = scope:actor
-		}
-		##### Changed from Vanilla ^^^^^
 	}
 }
 
@@ -1253,7 +1152,3 @@ demand_tributary_interaction = {
 		}
 	}
 }
-
-### Become Tributary - bilateral
-# actor = offerer / potential tributary
-# recipient = receiver / potential suzerain

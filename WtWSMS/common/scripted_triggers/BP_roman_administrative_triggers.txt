@@ -1,0 +1,198 @@
+﻿bp_has_access_to_roman_ministry_trigger = {
+	OR = {
+		government_has_flag = government_is_roman_administrative
+		government_has_flag = government_is_subroman_administrative
+	}
+	highest_held_title_tier >= tier_hegemony
+}
+bp_can_be_roman_minister_trigger = {
+	can_be_councillor_basics_trigger = yes
+	# Has to be roman administrative or a non-ruler
+	OR = {
+		is_ruler = no
+		AND = {
+			is_landless_ruler = yes
+			government_has_flag = government_is_roman_administrative
+		}
+		AND = {
+			is_landless_ruler = yes
+			government_has_flag = government_is_subroman_administrative
+		}
+	}
+	# Gender is based on laws of the liege
+	OR = {
+		AND = {
+			is_female = yes
+			$COURT_OWNER$ = {
+				NOR = {
+					has_realm_law = male_only_law
+					has_realm_law = male_preference_law
+				}
+			}
+		}
+		AND = {
+			is_male = yes
+			$COURT_OWNER$ = {
+				NOR = {
+					has_realm_law = female_only_law
+					has_realm_law = female_preference_law
+				}
+			}
+		}
+	}
+}
+bp_can_be_bureau_member_trigger = {
+	exists = root.liege_or_court_owner.cp:councillor_chancellor_roman
+	root.liege_or_court_owner.cp:councillor_chancellor_roman = { save_temporary_scope_as = councillor_mo }
+	scope:councillor_mo ?= {
+		OR = {
+			#Can't be to unhappy with them
+			opinion = { target = root value > -25 }
+			#MO must not have an active reason to dislike the character, even if the opinion is high enough
+			NOT = { has_relation_grudge = root }
+			NOT = { has_relation_rival = root }
+			NOT = { has_relation_nemesis = root }
+			NOT = { has_secret_relation_nemesis = root }
+		}
+	}
+}
+
+bp_county_has_roman_faith_trigger = {
+	scope:county.culture = { has_cultural_parameter = greco_roman_social_tradition }
+	trigger_if = { #Roman Empire Faith; this is a universal check
+		limit = { exists = title:h_roman_empire.holder }
+		title:h_roman_empire.state_faith ?= scope:county.faith
+	}
+	trigger_else_if = { #Western Roman Empire Faith
+		limit = { exists = title:h_western_roman_empire.holder }
+		scope:county.hegemony = title:h_western_roman_empire
+		title:h_western_roman_empire.state_faith ?= scope:county.faith
+	}
+	trigger_else_if = { #Eastern Roman Empire Faith
+		limit = { exists = title:h_eastern_roman_empire.holder }
+		scope:county.hegemony = title:h_eastern_roman_empire
+		title:h_eastern_roman_empire.state_faith ?= scope:county.faith
+	}
+	trigger_else = { bp_protect_religion_specific_trigger = yes } #Fallback
+}
+bp_protect_religion_specific_trigger = {
+	#NB: If we need special religion checks, this is where we'd do it
+	scope:county.faith.religion = scope:councillor_liege.faith.religion
+}
+
+bp_can_have_roman_minority_law_trigger = {
+	OR = {
+		government_has_flag = government_is_subroman_dynastic
+		government_has_flag = government_is_subroman_administrative
+		government_has_flag = government_is_roman_federate
+	}
+	#Only valid if your top liege is not a Roman
+	NOT = { top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition } }
+	#Only valid if you match your top liege or are a migratory culture
+	OR = {
+		this.culture = top_liege.culture
+		this.culture = { has_cultural_parameter = is_changed_if_enough_counties }
+	}
+	#Only for landed
+	is_landed = yes
+	this.primary_title.tier >= tier_county
+}
+
+bp_can_become_federate_trigger = { #Root is char under consideration
+	#Roman Realms...
+	liege_or_court_owner.top_liege = { government_has_flag = is_a_roman_government }
+	#NOT of the liege's culture
+	NOT = { culture = liege_or_court_owner.top_liege.culture }
+	#Either tribal or migratory Tribe
+	OR = {
+		culture = { no_longer_in_tribal_era_trigger = no }
+		AND = {
+			culture = { has_cultural_parameter = becomes_roman_federates_in_most_cases }
+			NOT = { dynasty ?= top_liege.dynasty }
+		}
+	}
+}
+
+#Control if certain roman succession stuff happens or not depending on law/contract
+bp_succession_weight_dynastic_general_trigger = {
+OR = {
+		has_realm_law_flag = $WEIGHT$
+		vassal_contract_has_flag = $WEIGHT$
+	}
+}
+bp_succession_weight_dynastic_1_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_1 }
+}
+bp_succession_weight_dynastic_2_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_2 }
+}
+bp_succession_weight_dynastic_3_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_3 }
+}
+bp_succession_weight_dynastic_4_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_weight_dynastic_41 }
+}
+bp_succession_weight_purely_dynastic_trigger = {
+	bp_succession_weight_dynastic_general_trigger = { WEIGHT = succession_is_purely_dynastic_value }
+}
+
+#Sub-Roman Law Stuff
+bp_realm_law_use_subroman_administrative_laws_trigger = {
+	is_landed = yes
+	primary_title.tier > tier_barony
+}
+bp_realm_law_use_subroman_administrative_military_centralization_top_liege_law_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_administrative
+	is_independent_ruler = yes
+}
+bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_administrative
+	is_independent_ruler = no
+}
+bp_realm_law_use_subroman_administrative_taxation_top_liege_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_administrative
+	is_independent_ruler = yes
+}
+bp_realm_law_use_subroman_administrative_taxation_vassal_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_administrative
+	is_independent_ruler = no
+}
+bp_realm_law_use_subroman_administrative_aristocracy_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_administrative
+}
+
+has_roman_government_admin_trigger = {
+	OR = {
+		government_has_flag = government_is_roman_administrative
+		government_has_flag = government_is_subroman_administrative
+	}
+}
+bp_realm_law_use_subroman_dynastic_military_centralization_top_liege_law_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_dynastic
+	is_independent_ruler = yes
+}
+bp_realm_law_use_subroman_dynastic_military_centralization_vassal_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_dynastic
+	is_independent_ruler = no
+}
+bp_realm_law_use_subroman_dynastic_taxation_top_liege_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_dynastic
+	is_independent_ruler = yes
+}
+bp_realm_law_use_subroman_dynastic_taxation_vassal_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_dynastic
+	is_independent_ruler = no
+}
+bp_realm_law_use_subroman_dynastic_aristocracy_trigger = {
+	bp_realm_law_use_subroman_administrative_laws_trigger = yes
+	government_has_flag = government_is_subroman_dynastic
+}

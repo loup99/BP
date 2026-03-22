@@ -1,11 +1,67 @@
 ﻿should_have_same_religion_succession_trigger = {
 	OR = {
-		government_has_flag = government_uses_iranian_dynastic_authority
+		government_has_flag = government_is_iranian_dynastic
 		culture = { has_cultural_parameter = same_religion_inheritance_only }
 	}
 }
 
 can_have_tribal_elective_succession_title_law_trigger = {}
+
+can_keep_roman_federate_appointment_succession_law_trigger = {
+	has_ep3_dlc_trigger = yes
+	trigger_if = {
+		limit = { has_realm_law = roman_federate_appointment_succession_law }
+		can_have_roman_federate_appointment_succession_law_trigger = yes
+	}
+}
+
+can_have_roman_federate_appointment_succession_law_trigger = {
+	government_has_flag = government_is_roman_federate
+	is_independent_ruler = no
+	trigger_if = {
+		limit = { NOT = { has_realm_law = roman_federate_appointment_succession_law } }
+		custom_tooltip = {
+			text = vassal_contract_blocks_roman_federate_succession
+			NOT = { vassal_contract_has_flag = succession_is_purely_dynastic }
+		}
+	}
+}
+
+can_have_roman_acclamation_succession_law_trigger = {
+	has_ep3_dlc_trigger = yes
+	top_liege = this
+	government_allows = administrative
+	OR = {
+		government_has_flag = government_is_subroman_administrative
+		government_has_flag = government_is_roman_administrative
+	}
+}
+
+can_keep_roamn_acclamation_succession_law_trigger = {
+	has_ep3_dlc_trigger = yes
+	trigger_if = {
+		limit = { has_realm_law = roman_acclamation_succession_law }
+		can_have_roman_acclamation_succession_law_trigger = yes
+	}
+}
+
+can_have_roman_appointment_succession_law_trigger = {
+	has_ep3_dlc_trigger = yes
+	is_independent_ruler = no
+	government_allows = administrative
+	OR = {
+		government_has_flag = government_is_subroman_administrative
+		government_has_flag = government_is_roman_administrative
+	}
+}
+
+can_keep_roman_appointment_succession_law_trigger = {
+	has_ep3_dlc_trigger = yes
+	trigger_if = {
+		limit = { has_realm_law = roman_appointment_succession_law }
+		can_have_roman_appointment_succession_law_trigger = yes
+	}
+}
 
 ################## ========================= 
 
@@ -33,7 +89,7 @@ realm_law_match_liege_law_level_subroman_dynastic_trigger = {
 	trigger_if = { #So Sub-Roman Vassals match the top liege's law
 		limit = {
 			is_independent_ruler = no
-			liege = { government_has_flag = is_a_transitory_roman_government }
+			liege = { government_has_flag = government_is_subroman_dynastic }
 		}
 		liege = { has_realm_law = $LAW$ }
 	}
@@ -43,7 +99,7 @@ realm_law_vassal_has_liege_law_level_subroman_dynastic_trigger = { #can_pass
 	trigger_if = { #So transition happens down the tree
 		limit = {
 			is_independent_ruler = no
-			liege = { government_has_flag = is_a_transitory_roman_government }
+			liege = { government_has_flag = government_is_subroman_dynastic }
 		}
 		liege = { has_realm_law = $LAW$ }
 	}
@@ -55,27 +111,64 @@ realm_law_vassal_has_liege_law_level_subroman_dynastic_trigger = { #can_pass
 	}
 }
 
-#Else
+#Others
 realm_law_use_high_tribal_organization_trigger = {
-	government_has_flag = government_uses_high_tribal_organization
+	government_has_flag = government_is_high_tribal
+}
+realm_law_can_keep_high_tribal_organization_1_trigger = {
+	#Cultural Requirements
+	culture = { has_innovation = innovation_leges_barbarorum }
+	culture = { has_innovation = innovation_writing }
+	culture = { has_innovation = innovation_social_stratification }
+	culture = {
+		num_discovered_innovations_in_era = {
+			target = culture_era_classical_antiquity
+			value > 0
+		}
+	}
+}
+realm_law_can_keep_high_tribal_organization_2_trigger = {
+	#Cultural Requirements
+	OR = {
+		AND = {
+			culture = { has_innovation = innovation_mundium }
+			culture = { has_innovation = innovation_state_religion }
+		}
+		culture = {
+			num_discovered_innovations_in_era = {
+				target = culture_era_late_antiquity
+				value > 0
+			}
+		}
+	}
+}
+realm_law_can_keep_high_tribal_organization_3_trigger = {
+	#Cultural Requirements
+	OR = {
+		culture = { has_innovation = innovation_hereditary_rule }
+		culture = { has_innovation = innovation_aristocracy }
+	}
 }
 
 realm_law_use_prefeudal_authority_trigger = {
-	government_has_flag = government_uses_prefeudal_authority
+	government_has_flag = government_is_prefeudal
 }
 
 realm_law_use_rajamandala_authority_trigger = {
-	government_has_flag = government_uses_rajamandala_authority
+	government_has_flag = government_is_rajamandala
 }
 
 realm_law_use_iranian_dynastic_authority_trigger = {
-	government_has_flag = government_uses_iranian_dynastic_authority
+	government_has_flag = government_is_iranian_dynastic
 }
 realm_law_use_clerical_influence_trigger = {
-	government_has_flag = government_uses_iranian_dynastic_authority
+	government_has_flag = government_is_iranian_dynastic
 }
 realm_law_use_roman_dynastic_authority_trigger = {
-	government_has_flag = government_uses_roman_dynastic_authority
+	OR = {
+		government_has_flag = government_is_roman_dynastic
+		government_has_flag = government_is_subroman_dynastic
+	}
 }
 
 other_law_have_minority_law_trigger = {

@@ -33,8 +33,10 @@
 			limit = { culture = { has_cultural_parameter = can_restore_roman_empire } }
 			NOT = { root.capital_county.title_province = { geographical_region = historic_roman_empire } }
 			#Can't be a different universality if we're Roman...
-			NOT = { government_has_flag = government_uses_rajamandala_authority }
-			NOT = { government_has_flag = government_uses_iranian_dynastic_authority }
+			NOR = {
+				has_main_roman_government_trigger = yes
+				has_subroman_government_trigger = yes
+			}
 		}
 	}
 
@@ -99,43 +101,46 @@
 		}
 		#Governmental Requirements
 		trigger_if = {
-			limit = { government_has_flag = government_is_tribal }
+			limit = {
+				OR = {
+					AND = {
+						government_has_flag = government_is_tribal
+						NOT = { government_has_flag = government_is_high_tribal }
+					}
+					government_has_flag = government_is_nomadic
+				}
+			}
 			custom_description = {
 				text = primitives_cannot_make_titles_de_jure
 				always = no
 			}
 		}
-		trigger_if = { #If Sub-Roman, must be sufficiently degraded if on Roman Territory
+		trigger_if = { #Sub-Roman Administrative; you're tilting towards Feudalism
 			limit = {
-				government_has_flag = is_a_transitory_roman_government
-				root.capital_county.title_province = { geographical_region = historic_roman_empire }
-			}
-			custom_description = {
-				text = feudalization_is_at_least_level_4_on_roman_territory
 				OR = {
-					has_realm_law = subroman_feudal_transition_4
-					has_realm_law = subroman_feudal_transition_5
-					has_realm_law = subroman_feudal_transition_6
-					has_realm_law = subroman_feudal_transition_7
-					has_realm_law = subroman_feudal_transition_8
-					has_realm_law = subroman_feudal_transition_9
+					government_has_flag = government_is_subroman_administrative
+					government_has_flag = government_is_subroman_dynastic
 				}
+			}
+			custom_tooltip = {
+				text = aristocracy_realm_law_enables_de_jure_establishment_kingdom
+				has_realm_law_flag = subroman_can_establish_de_jure_kingdom
 			}
 		}
 		trigger_if = { #If High Tribal, Max Organization
-			limit = { government_has_flag = government_uses_high_tribal_organization }
+			limit = { government_has_flag = government_is_high_tribal }
 			has_realm_law = high_tribal_organization_3
 		}
 		trigger_if = { #If Pre-Feudal, Max Authorithty
-			limit = { government_has_flag = government_uses_prefeudal_authority }
+			limit = { government_has_flag = government_is_prefeudal }
 			has_realm_law = prefeudal_authority_3
 		}
 		trigger_if = { #If Rajamandala, Max Centralization
-			limit = { government_has_flag = government_uses_rajamandala_authority }
+			limit = { government_has_flag = government_is_rajamandala }
 			has_realm_law = rajamandala_authority_3
 		}
 		trigger_if = { #If Iranian_Dynastic, max authority
-			limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+			limit = { government_has_flag = government_is_iranian_dynastic }
 			has_realm_law = iranian_dynastic_authority_3
 		}
 		trigger_if = { #If Feudal or Clan, Max crown authority
@@ -181,14 +186,6 @@
 	ai_potential = {
 		prestige > 7500
 		gold > 500
-		trigger_if = { #If Sub-Roman, must be fairly degraded
-			limit = { government_has_flag = is_a_transitory_roman_government }
-			OR = {
-				has_realm_law = subroman_feudal_transition_7
-				has_realm_law = subroman_feudal_transition_8
-				has_realm_law = subroman_feudal_transition_9
-			}
-		}
 	}
 
 	ai_will_do = {
@@ -220,8 +217,10 @@ swap_roman_province_decision = {
 			root.capital_county.hegemony = title:h_eastern_roman_empire
 		}
 		#Can't be a different universality if we're Roman...
-		NOT = { government_has_flag = government_uses_rajamandala_authority }
-		NOT = { government_has_flag = government_uses_iranian_dynastic_authority }
+		OR = {
+			has_main_roman_government_trigger = yes
+			has_subroman_government_trigger = yes
+		}
 	}
 
 	is_valid = {
@@ -285,8 +284,16 @@ swap_roman_province_decision = {
 			}
 		}
 		#Governmental Requirements
-		trigger_if = { #There are some Roman Tribes...
-			limit = { government_has_flag = government_is_tribal }
+		trigger_if = {
+			limit = {
+				OR = {
+					AND = {
+						government_has_flag = government_is_tribal
+						NOT = { government_has_flag = government_is_high_tribal }
+					}
+					government_has_flag = government_is_nomadic
+				}
+			}
 			custom_description = {
 				text = primitives_cannot_make_titles_de_jure
 				always = no
@@ -294,11 +301,11 @@ swap_roman_province_decision = {
 		}
 		#Sub-Romans can do it anytime *but* the cost keeps rising
 		trigger_if = { #If High Tribal, Max Organization
-			limit = { government_has_flag = government_uses_high_tribal_organization }
+			limit = { government_has_flag = government_is_high_tribal }
 			has_realm_law = high_tribal_organization_3
 		}
 		trigger_if = { #If Pre-Feudal, Max Authorithty
-			limit = { government_has_flag = government_uses_prefeudal_authority }
+			limit = { government_has_flag = government_is_prefeudal }
 			has_realm_law = prefeudal_authority_3
 		}
 		trigger_if = { #If Feudal or Clan, Max crown authority
@@ -325,24 +332,21 @@ swap_roman_province_decision = {
 			add = {
 				value = 0
 				if = {
-					limit = { government_has_flag = is_a_transitory_roman_government }
-					if = { limit = { has_realm_law = subroman_feudal_transition_0 } add = subroman_swap_title_cost_0 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_1 } add = subroman_swap_title_cost_1 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_2 } add = subroman_swap_title_cost_2 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_3 } add = subroman_swap_title_cost_3 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_4 } add = subroman_swap_title_cost_4 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_5 } add = subroman_swap_title_cost_5 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_6 } add = subroman_swap_title_cost_6 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_7 } add = subroman_swap_title_cost_7 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_8 } add = subroman_swap_title_cost_8 }
-					else_if = { limit = { has_realm_law = subroman_feudal_transition_9 } add = subroman_swap_title_cost_9 }
-					else = { add = subroman_swap_title_cost_9 }
-				}
-				else_if = { #Default cost for Roman Dynastics
 					limit = {
-						government_has_flag = government_uses_roman_dynastic_authority
-						government_has_flag = government_is_centralized
+						OR = {
+							government_has_flag = government_is_subroman_administrative
+							government_has_flag = government_is_subroman_dynastic
+						}
 					}
+					value = 0
+					if = { limit = { has_realm_law = subroman_admin_aristocracy_law_0 } add = subroman_administrative_title_cost_0 }
+					else_if = { limit = { has_realm_law = subroman_admin_aristocracy_law_0 } add = subroman_administrative_title_cost_1 }
+					else_if = { limit = { has_realm_law = subroman_admin_aristocracy_law_0 } add = subroman_administrative_title_cost_2 }
+					else_if = { limit = { has_realm_law = subroman_admin_aristocracy_law_0 } add = subroman_administrative_title_cost_3 }
+					else = { add = subroman_administrative_title_cost_4 }
+				}
+				else_if = { #Default cost for Roman Governments
+					limit = { has_main_roman_government_trigger = yes }
 					add = subroman_swap_title_cost_0
 				}
 				else_if = { #For feudal, clan, and high tribal, it's pretty bad but not as bad as Sub-Roman could be
@@ -350,7 +354,7 @@ swap_roman_province_decision = {
 						OR = {
 							government_has_flag = government_is_feudal
 							government_has_flag = government_is_clan
-							government_has_flag = government_uses_high_tribal_organization
+							government_has_flag = government_is_high_tribal
 						}
 					}
 					add = subroman_swap_title_cost_7
@@ -427,9 +431,11 @@ establish_de_jure_empire_decision = {
 		trigger_if = {
 			limit = { culture = { has_cultural_parameter = can_restore_roman_empire } }
 			NOT = { root.capital_county.title_province = { geographical_region = historic_roman_empire } }
-			#Can't be a different universality if we're Roman...
-			NOT = { government_has_flag = government_uses_rajamandala_authority }
-			NOT = { government_has_flag = government_uses_iranian_dynastic_authority }
+		}
+		#Can't be a different universality if we're Roman...
+		NOR = {
+			has_main_roman_government_trigger = yes
+			has_subroman_government_trigger = yes
 		}
 	}
 
@@ -494,43 +500,46 @@ establish_de_jure_empire_decision = {
 		}
 		#Governmental Requirements
 		trigger_if = {
-			limit = { government_has_flag = government_is_tribal }
+			limit = {
+				OR = {
+					AND = {
+						government_has_flag = government_is_tribal
+						NOT = { government_has_flag = government_is_high_tribal }
+					}
+					government_has_flag = government_is_nomadic
+				}
+			}
 			custom_description = {
 				text = primitives_cannot_make_titles_de_jure
 				always = no
 			}
 		}
-		trigger_if = { #If Sub-Roman, must be sufficiently degraded if on Roman Territory
+		trigger_if = { #Sub-Roman Administrative; you're tilting towards Feudalism
 			limit = {
-				government_has_flag = is_a_transitory_roman_government
-				root.capital_county.title_province = { geographical_region = historic_roman_empire }
-			}
-			custom_description = {
-				text = feudalization_is_at_least_level_4_on_roman_territory
 				OR = {
-					has_realm_law = subroman_feudal_transition_4
-					has_realm_law = subroman_feudal_transition_5
-					has_realm_law = subroman_feudal_transition_6
-					has_realm_law = subroman_feudal_transition_7
-					has_realm_law = subroman_feudal_transition_8
-					has_realm_law = subroman_feudal_transition_9
+					government_has_flag = government_is_subroman_administrative
+					government_has_flag = government_is_subroman_dynastic
 				}
+			}
+			custom_tooltip = {
+				text = aristocracy_realm_law_enables_de_jure_establishment_empire
+				has_realm_law_flag = subroman_can_establish_de_jure_empire
 			}
 		}
 		trigger_if = { #If High Tribal, Max Organization
-			limit = { government_has_flag = government_uses_high_tribal_organization }
+			limit = { government_has_flag = government_is_high_tribal }
 			has_realm_law = high_tribal_organization_3
 		}
-		trigger_if = { #If Pre-Feudal, Max Authorithty
-			limit = { government_has_flag = government_uses_prefeudal_authority }
+		trigger_if = { #If Pre-Feudal, Max Authority
+			limit = { government_has_flag = government_is_prefeudal }
 			has_realm_law = prefeudal_authority_3
 		}
 		trigger_if = { #If Rajamandala, Max Centralization
-			limit = { government_has_flag = government_uses_rajamandala_authority }
+			limit = { government_has_flag = government_is_rajamandala }
 			has_realm_law = rajamandala_authority_3
 		}
 		trigger_if = { #If Iranian_Dynastic, max authority
-			limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+			limit = { government_has_flag = government_is_iranian_dynastic }
 			has_realm_law = iranian_dynastic_authority_3
 		}
 		trigger_if = { #If Feudal or Clan, Max crown authority
@@ -576,14 +585,6 @@ establish_de_jure_empire_decision = {
 	ai_potential = {
 		prestige > 10000
 		gold > 500
-		trigger_if = { #If Sub-Roman, must be fairly degraded
-			limit = { government_has_flag = is_a_transitory_roman_government }
-			OR = {
-				has_realm_law = subroman_feudal_transition_7
-				has_realm_law = subroman_feudal_transition_8
-				has_realm_law = subroman_feudal_transition_9
-			}
-		}
 	}
 
 	ai_will_do = {
@@ -691,43 +692,46 @@ establish_de_jure_hegemony_decision = {
 		}
 		#Governmental Requirements
 		trigger_if = {
-			limit = { government_has_flag = government_is_tribal }
+			limit = {
+				OR = {
+					AND = {
+						government_has_flag = government_is_tribal
+						NOT = { government_has_flag = government_is_high_tribal }
+					}
+					government_has_flag = government_is_nomadic
+				}
+			}
 			custom_description = {
 				text = primitives_cannot_make_titles_de_jure
 				always = no
 			}
 		}
-		trigger_if = { #If Sub-Roman, must be sufficiently degraded if on Roman Territory
+		trigger_if = { #Sub-Roman Administrative; you're tilting towards Feudalism
 			limit = {
-				government_has_flag = is_a_transitory_roman_government
-				root.capital_county.title_province = { geographical_region = historic_roman_empire }
-			}
-			custom_description = {
-				text = feudalization_is_at_least_level_4_on_roman_territory
 				OR = {
-					has_realm_law = subroman_feudal_transition_4
-					has_realm_law = subroman_feudal_transition_5
-					has_realm_law = subroman_feudal_transition_6
-					has_realm_law = subroman_feudal_transition_7
-					has_realm_law = subroman_feudal_transition_8
-					has_realm_law = subroman_feudal_transition_9
+					government_has_flag = government_is_subroman_administrative
+					government_has_flag = government_is_subroman_dynastic
 				}
+			}
+			custom_tooltip = {
+				text = aristocracy_realm_law_enables_de_jure_establishment_hegemony
+				has_realm_law_flag = subroman_can_establish_de_jure_hegemony
 			}
 		}
 		trigger_if = { #If High Tribal, Max Organization
-			limit = { government_has_flag = government_uses_high_tribal_organization }
+			limit = { government_has_flag = government_is_high_tribal }
 			has_realm_law = high_tribal_organization_3
 		}
 		trigger_if = { #If Pre-Feudal, Max Authorithty
-			limit = { government_has_flag = government_uses_prefeudal_authority }
+			limit = { government_has_flag = government_is_prefeudal }
 			has_realm_law = prefeudal_authority_3
 		}
 		trigger_if = { #If Rajamandala, Max Centralization
-			limit = { government_has_flag = government_uses_rajamandala_authority }
+			limit = { government_has_flag = government_is_rajamandala }
 			has_realm_law = rajamandala_authority_3
 		}
 		trigger_if = { #If Iranian_Dynastic, max authority
-			limit = { government_has_flag = government_uses_iranian_dynastic_authority }
+			limit = { government_has_flag = government_is_iranian_dynastic }
 			has_realm_law = iranian_dynastic_authority_3
 		}
 		trigger_if = { #If Feudal or Clan, Max crown authority
@@ -773,14 +777,6 @@ establish_de_jure_hegemony_decision = {
 	ai_potential = {
 		prestige > 10000
 		gold > 500
-		trigger_if = { #If Sub-Roman, must be fairly degraded
-			limit = { government_has_flag = is_a_transitory_roman_government }
-			OR = {
-				has_realm_law = subroman_feudal_transition_7
-				has_realm_law = subroman_feudal_transition_8
-				has_realm_law = subroman_feudal_transition_9
-			}
-		}
 	}
 
 	ai_will_do = {

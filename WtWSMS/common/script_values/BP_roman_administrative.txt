@@ -1,0 +1,523 @@
+﻿number_of_military_provinces__tier_value = {
+	#kingdom: 4
+	#empire: 5
+	#hegemony: 6
+	value = this.primary_title.tier
+	subtract = tier_kingdom
+	#kingdom: 0
+	#empire: 1
+	#hegemony: 2
+}
+number_of_military_provinces__province_count = {
+	value = 0
+	every_vassal_or_below = {
+		limit = { any_held_title = { this.tier = tier_duchy } }
+		add = 1
+	}
+	every_held_title = {
+		limit = {
+			this.tier = tier_duchy
+			is_titular = no
+		}
+		add = 1
+	}
+}
+number_of_military_provinces__province_count_net = {
+	value = number_of_military_provinces__province_count
+	#Add one for every 4 provinces in the Empire, direct or not.
+	divide = 4
+	# 5/10/15/20/25 provinces
+	#kingdom: 0/1/2/3/4
+	#empire: 1/2/3/4/5
+	#hegemony: 2/3/4/5/6
+}
+number_of_military_provinces__province_count_net_round_down = {
+	value = number_of_military_provinces__province_count_net
+	round = yes
+}
+number_of_military_provinces__min_value_by_tier = {
+	#Only for Kingdoms on up
+	if = {
+		limit = { this.primary_title.tier <= tier_duchy }
+		max = 0
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_kingdom }
+		min = 2
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_empire }
+		min = 4
+	}
+	else_if = {
+		limit = { this.primary_title.tier > tier_empire }
+		min = 6
+	}
+}
+
+number_of_military_provinces_allowed = {
+	value = number_of_military_provinces__tier_value
+	add = number_of_military_provinces__province_count_net_round_down
+	
+	#Only for Kingdoms on up
+	if = {
+		limit = { this.primary_title.tier <= tier_duchy }
+		max = 0
+		min = 0
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_kingdom }
+		min = 2
+	}
+	else_if = {
+		limit = { this.primary_title.tier = tier_empire }
+		min = 4
+	}
+	else_if = {
+		limit = { this.primary_title.tier > tier_empire }
+		min = 6
+	}
+}
+
+number_of_military_provinces = {
+	value = 0
+	every_vassal = {
+		limit = { vassal_contract_has_flag = roman_landed_military_contract }
+		add = 1
+	}
+}
+
+#Succession Weights
+succession_weight_dynastic_1_value = 1.00
+succession_weight_dynastic_2_value = 0.70
+succession_weight_dynastic_3_value = 0.50
+succession_weight_dynastic_4_value = 0.25
+succession_is_purely_dynastic_value = 0.00
+
+succession_weight_dynastic_1_positive_value = 2.00
+succession_weight_dynastic_2_positive_value = 1.50
+succession_weight_dynastic_3_positive_value = 1.00
+succession_weight_dynastic_4_positive_value = 0.70
+succession_is_purely_dynastic_positive_value = 0.50
+
+succession_weight_dynastic_1_value_loc = {
+	value = 1.00
+	subtract = succession_weight_dynastic_1_value
+}
+succession_weight_dynastic_2_value_loc = {
+	value = 1.00
+	subtract = succession_weight_dynastic_2_value
+}
+succession_weight_dynastic_3_value_loc = {
+	value = 1.00
+	subtract = succession_weight_dynastic_3_value
+}
+succession_weight_dynastic_4_value_loc = {
+	value = 1.00
+	subtract = succession_weight_dynastic_4_value
+}
+succession_is_purely_dynastic_value_loc = {
+	value = 1.00
+	subtract = succession_is_purely_dynastic_value
+}
+
+#Minority laws
+change_non_roman_minority_rule_law_opinion_value = 30
+change_non_roman_minority_rule_law_opinion_value_negative = -30
+
+change_non_roman_minority_rule_law_basic_base = 100
+
+change_non_roman_minority_rule_law_basic_cost = {
+	add = {
+		desc = "BASE_VALUE"
+		value = change_non_roman_minority_rule_law_basic_base
+		format = "BASE_VALUE_FORMAT"
+	}
+
+	# Realm Size Penalty: +10 Prestige cost per county controlled by you(r vassals)
+	if = {
+		limit = { NOT = { culture = { has_cultural_parameter = cheaper_to_change_laws } } }
+		add = {
+			desc = "realm_size"
+			format = "BREAKDOWN_FORMAT_REALM_SIZE_PRESTIGE_COST"
+			value = subrealm_size_modifier
+		}
+	}
+	if = { #Reduced penalty from Tradition (for tooltip)
+		limit = { culture = { has_cultural_parameter = cheaper_to_change_laws } }
+		add = {
+			desc = "realm_size"
+			format = "TRADITION_BREAKDOWN_LAW_REALM_SIZE_COST"
+			value = subrealm_size_modifier
+		}
+	}
+
+	# Learning Modifier (2% more expensive for each skill point below 8 Learning)
+	if = {
+		limit = { learning < 8 }
+		add = {
+			desc = "poor_learning_law_cost_tooltip"
+			value = {
+				add = change_non_roman_minority_rule_law_basic_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+	else_if = { # (2% less expensive for each skill point below 8 Learning)
+		limit = { learning > 8 }
+		add = {
+			desc = "learning_law_cost_tooltip"
+			value = {
+				add = change_non_roman_minority_rule_law_basic_base
+				add = subrealm_size_modifier
+			}
+			multiply = learning_law_cost_modifier
+		}
+	}
+
+	# Tenet Modifiers
+	if = {
+		limit = { faith = { has_doctrine_parameter = legalism_modified_law_costs } }
+		add = {
+			desc = "rite_legalism_law_cost_tooltip"
+			value = {
+				add = increase_crown_authority_prestige_base
+				add = subrealm_size_modifier
+			}
+			multiply = legalism_law_cost_modifier
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = natural_primitivism_law_cost_increase } }
+		multiply = {
+			desc = "rite_primitivism_law_cost_tooltip"
+			value = natural_primitivism_modifier
+		}
+	}
+	if = {
+		limit = { faith = { has_doctrine_parameter = religious_legal_pronouncements_law_cost_reduction } }
+		multiply = {
+			desc = "rite_pronouncements_law_cost_tooltip"
+			value = 0.9 # religious_legal_pronouncements_modifier = -0.1
+		}
+	}
+
+	# Character Modifier Bonuses
+	if = {
+		limit = { has_character_modifier = yearly_benevolent_forgiveness_modifier }
+		multiply = {
+			desc = "character_modifiers_law_cost_tooltip"
+			value = 0.9 # yearly_benevolent_forgiveness_modifier = -10%
+		}
+	}
+
+	# Character Modifier Maluses
+	if = {
+		limit = { has_character_modifier = vassal_distrust_modifier }
+		multiply = {
+			desc = "character_modifiers_law_cost_tooltip"
+			value = 1.1 # vassal_distrust_modifier = +10%
+		}
+	}
+}
+
+#Theme values:  so we don't have to redefine these every time
+roman_admin_theme_civilian_value = 0
+roman_admin_theme_limitanei_value = 1
+roman_admin_theme_naval_value = 2
+roman_admin_theme_military_value = 3
+roman_admin_theme_ministry_civilian_value = 4
+roman_admin_theme_ministry_military_value = 5
+
+#Imperial Guard director
+imperial_guard_task_side_effect_cooldown = 365
+imperial_guard_task_modifier_duration = 1825
+
+#Clerical Bureau Promulgate Laws Effects
+
+#Timers
+clerical_bureau_director_side_effect_cooldown = 365
+clerical_bureau_director_modifier_duration = 1825
+
+#Influence gain/loss
+clerical_bureau_minor_influence_gain = {
+	value = 50
+}
+clerical_bureau_minor_influence_loss = {
+	value = clerical_bureau_minor_influence_gain
+	multiply = -1
+}
+
+clerical_bureau_director_influence_base = { #1.5% per skill level; it's a multiplier, not an addition
+	add = stewardship
+	multiply = 1.5
+}
+
+clerical_bureau_director_influence_max = {
+	add = clerical_bureau_director_influence_base
+	if = {
+		limit = { councillor_liege_has_erudition_legacy_5_perk = yes }
+		add = clerical_bureau_director_influence_erudition_bonus
+	}
+	if = {
+		limit = { councillor_liege_has_family_business_bonus = yes }
+		add = clerical_bureau_director_influence_family_business_bonus
+	}
+	if = {
+		limit = { councillor_liege_has_consulted_house_bonus = yes }
+		add = clerical_bureau_director_influence_consulted_house_bonus
+	}
+	if = {
+		limit = {
+			scope:councillor_liege = {
+				has_title = title:c_byzantion
+				title:c_byzantion = { has_county_modifier = pandidakterion_university_modifier }
+			}
+		}
+		add = clerical_bureau_director_influence_pandidakterion_bonus
+	}
+}
+
+clerical_bureau_director_influence_monthly_increase = {
+	add = chancellor_domestic_affairs_opinion_max
+	divide = 24
+}
+
+clerical_bureau_director_influence_scale = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor_liege = {
+				is_ai = yes
+				top_liege = this
+			}
+		}
+		add = clerical_bureau_director_influence_max
+	}
+	else_if = {
+		limit = {
+			scope:councillor_liege = { has_variable = clerical_bureau_director_influence_value }
+		}
+		add = scope:councillor_liege.var:clerical_bureau_director_influence_value
+	}
+}
+
+clerical_bureau_director_influence_erudition_bonus = {
+	add = clerical_bureau_director_influence_base
+	multiply = {
+		add = erudition_legacy_5_percentage
+		divide = 100
+	}
+}
+
+clerical_bureau_director_influence_family_business_bonus = {
+	add = clerical_bureau_director_influence_base
+	multiply = {
+		add = family_business_councillors_percentage
+		divide = 100
+	}
+}
+
+clerical_bureau_director_influence_consulted_house_bonus = {
+	add = clerical_bureau_director_influence_base
+	multiply = {
+		add = consulted_house_councillors_percentage
+		divide = 100
+	}
+}
+
+clerical_bureau_director_influence_pandidakterion_bonus = {
+	add = clerical_bureau_director_influence_base
+	multiply = {
+		add = 20
+		divide = 100
+	} 
+}
+
+#Fabricate Claim
+clerical_bureau_director_fabricate_claim_monthly_increase_base = {
+	add = stewardship
+	divide = 5
+}
+
+clerical_bureau_director_fabricate_claim_base = {
+	add = 3
+}
+
+clerical_bureau_director_fabricate_claim_monthly_increase_base = {
+	add = learning
+	divide = 5
+}
+
+clerical_bureau_director_fabricate_claim_base_total = {
+	add = clerical_bureau_director_fabricate_claim_base
+	add = clerical_bureau_director_fabricate_claim_monthly_increase_base
+}
+
+# Bonus from Accomplished Forger Perk
+clerical_bureau_director_fabricate_claim_perk_bonus_monthly_increase = {
+	add = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = accomplished_forger_percentage
+		divide = 100
+	}
+}
+
+# Bonus from Bureaucrats
+clerical_bureau_director_fabricate_claim_dynasty_perk_bonus = {
+	add = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = erudition_legacy_5_percentage
+		divide = 100
+	}
+}
+
+# From Family Business
+clerical_bureau_director_fabricate_claim_family_business_bonus = {
+	add = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = family_business_councillors_percentage
+		divide = 100
+	}
+}
+
+# FP3 Consulted House
+clerical_bureau_director_fabricate_claim_consulted_house_bonus = {
+	add = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = consulted_house_councillors_percentage
+		divide = 100
+	}
+}
+
+# Bonus from Land Grants innovation
+clerical_bureau_director_fabricate_claim_innovation_bonus_land_grants = {
+	value = 0
+	add = clerical_bureau_director_fabricate_claim_base_total
+	multiply = 0.50
+}
+
+# Bonus from tradition_language_scholars
+clerical_bureau_director_fabricate_claim_tradition_language_scholars_bonus = {
+	value = 0
+	add = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = {
+			value = scope:councillor.liege.num_of_known_languages
+			multiply = 10
+		}
+		divide = 100
+	}
+}
+
+clerical_bureau_director_fabricate_claim_inspection_reward_bonus = {
+	value = 0
+	add = clerical_bureau_director_fabricate_claim_base_total
+	multiply = 0.25
+}
+
+# Relation impact
+clerical_bureau_director_fabricate_claim_monthly_increase_friend_bonus = {
+	value = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = council_friend_impact_percentage
+		divide = 100
+	}
+}
+clerical_bureau_director_fabricate_claim_monthly_increase_best_friend_bonus = {
+	value = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = council_best_friend_impact_percentage
+		divide = 100
+	}
+}
+clerical_bureau_director_fabricate_claim_monthly_increase_rival_bonus = {
+	value = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = council_rival_impact_percentage
+		divide = 100
+	}
+}
+clerical_bureau_director_fabricate_claim_monthly_increase_nemesis_bonus = {
+	value = clerical_bureau_director_fabricate_claim_base_total
+	multiply = {
+		add = council_nemesis_impact_percentage
+		divide = 100
+	}
+}
+
+clerical_bureau_director_fabricate_claim_county_base = 3
+clerical_bureau_director_fabricate_claim_county_min_cost = {
+	value = { 40 60 }
+}
+
+clerical_bureau_director_fabricate_claim_duchy_base = 7
+clerical_bureau_director_fabricate_claim_duchy_min_cost = {
+	value = { 80 100 }
+}
+
+clerical_bureau_director_fabricate_claim_factor = 1
+
+clerical_bureau_director_fabricate_claim_struggle_penalty_multiplier_value = {
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county = {
+				any_county_struggle = {
+					is_struggle_parameter_active_secondary_character_involvement_neither_trigger = {
+						PARAMETER = claims_in_region_more_expensive_to_press_for_uninvolved
+						CHAR = root
+					}
+				}
+			}
+		}
+		value = 2
+	}
+	else = { value = 1 }
+}
+
+clerical_bureau_director_fabricate_claim_county_cost = {
+	# Base cost
+	add = 40
+	subtract = learning
+	# Standard Factors
+	multiply = clerical_bureau_director_fabricate_claim_factor
+	multiply = clerical_bureau_director_fabricate_claim_county_base
+	# Struggle Factors
+	multiply = clerical_bureau_director_fabricate_claim_struggle_penalty_multiplier_value
+
+	min = clerical_bureau_director_fabricate_claim_county_min_cost
+}
+
+clerical_bureau_director_fabricate_claim_duchy_cost = {
+	# Base cost
+	add = 40
+	subtract = learning
+	# Standard Factors
+	multiply = clerical_bureau_director_fabricate_claim_factor
+	multiply = clerical_bureau_director_fabricate_claim_duchy_base
+	# Struggle Factors
+	multiply = clerical_bureau_director_fabricate_claim_struggle_penalty_multiplier_value
+
+	min = clerical_bureau_director_fabricate_claim_duchy_min_cost
+}
+
+clerical_bureau_director_fabricate_claim_not_adjacent_penalty = {
+	value = 0.5
+}
+
+clerical_bureau_director_fabricate_claim_vassal_penalty = {
+	value = 0.3
+}
+
+clerical_bureau_director_heretic_bonus = {
+	value = 1.3
+}
+
+#Sub-Roman Title Swap Costs
+subroman_administrative_title_cost_0 = 500
+subroman_administrative_title_cost_1 = 1000
+subroman_administrative_title_cost_2 = 2000
+subroman_administrative_title_cost_3 = 4000
+subroman_administrative_title_cost_4 = 8000

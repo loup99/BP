@@ -18,7 +18,7 @@
 		top_liege = this
 		government_has_flag = government_is_tribal
 		NOT = { government_has_flag = government_is_nomadic }
-		NOT = { government_has_flag = government_uses_high_tribal_organization }
+		NOT = { government_has_flag = government_is_high_tribal }
 	}
 	
 	is_valid = {
@@ -61,14 +61,14 @@ convert_to_high_tribal_as_vassal_decision = {
 	is_shown = {
 		government_has_flag = government_is_tribal
 		NOT = { government_has_flag = government_is_nomadic }
-		NOT = { government_has_flag = government_uses_high_tribal_organization }
+		NOT = { government_has_flag = government_is_high_tribal }
 		top_liege != this
 		liege = {
 			OR = {
 				government_has_flag = government_is_centralized
 				AND = {
 					has_a_feudal_type_of_government_trigger = yes
-					NOT = { government_has_flag = government_uses_prefeudal_authority }
+					NOT = { government_has_flag = government_is_prefeudal }
 				}
 			}
 		}
@@ -125,7 +125,7 @@ convert_to_roman_government_decision = {
 			faith = { NOT = { has_doctrine_parameter = unreformed } }
 		}
 		top_liege = this #Must be independent
-		highest_held_title_tier >= tier_kingdom #Must be a kingdom or empire
+		highest_held_title_tier >= tier_kingdom #Must be a kingdom or empire or hegemony
 		prestige_level >= 4
 		capital_province.county = { development_level >= convert_to_roman_government_development_requirement }
 		
@@ -154,7 +154,7 @@ convert_to_roman_government_decision = {
 	effect = {
 		trigger_event = BP_government_conversion.0021
 		save_scope_as = actor
-		show_as_tooltip = { change_government = roman_dynastic_government }
+		show_as_tooltip = { convert_to_roman_government_effect = yes }
 	}
 	
 	ai_potential = { always = yes }
@@ -180,8 +180,9 @@ convert_to_feudalism_decision = {
 	
 	is_shown = {
 		OR = {
-			government_has_flag = government_uses_prefeudal_authority
-			government_has_flag = government_uses_high_tribal_organization
+			government_has_flag = government_is_prefeudal
+			government_has_flag = government_is_high_tribal
+			government_has_flag = government_is_subroman_administrative
 		}
 		#TODO: Fix to match the other govs Gov't decisions so we don't get a case where a player has no conversion decision
 		#OR = {
@@ -191,9 +192,27 @@ convert_to_feudalism_decision = {
 	}
 	
 	is_valid = {
-		OR = {
-			has_realm_law = prefeudal_authority_3
-			has_realm_law = high_tribal_organization_3
+		trigger_if = {
+			limit = { government_has_flag = government_is_subroman_administrative }
+			top_liege = root
+			OR = {
+				has_realm_law = subroman_admin_military_centralization_top_liege_law_4
+				has_realm_law = subroman_admin_military_centralization_top_liege_law_5
+			}
+			OR = {
+				has_realm_law = subroman_admin_taxation_top_liege_law_3
+				has_realm_law = subroman_admin_taxation_top_liege_law_4
+			}
+			OR = {
+				has_realm_law = subroman_admin_aristocracy_law_3
+				has_realm_law = subroman_admin_aristocracy_law_4
+			}
+		}
+		trigger_else = {
+			OR = {
+				has_realm_law = prefeudal_authority_3
+				has_realm_law = high_tribal_organization_3
+			}
 		}
 		custom_description = {
 			text = faith_is_reformed
@@ -239,7 +258,27 @@ convert_to_feudalism_decision = {
 	
 	ai_potential = { always = yes }
 	
-	ai_will_do = { base = 100 }
+	ai_will_do = {
+		base = 0
+		#High Tribal/Prefeudal will always do this
+		modifier = {
+			add = 100
+			OR = {
+				government_has_flag = government_is_prefeudal
+				government_has_flag = government_is_high_tribal
+			}
+		}
+		#Sub-Roman AI will only do it when their government has degraded enough
+		modifier = {
+			government_has_flag = government_is_subroman_administrative
+			has_realm_law = subroman_admin_military_centralization_top_liege_law_5
+			has_realm_law = subroman_admin_taxation_top_liege_law_4
+			OR = {
+				has_realm_law = subroman_admin_aristocracy_law_3
+				has_realm_law = subroman_admin_aristocracy_law_4
+			}
+		}
+	}
 }
 
 convert_to_clan_decision = {
@@ -260,8 +299,9 @@ convert_to_clan_decision = {
 	
 	is_shown = {
 		OR = {
-			government_has_flag = government_uses_prefeudal_authority
-			government_has_flag = government_uses_high_tribal_organization
+			government_has_flag = government_is_prefeudal
+			government_has_flag = government_is_high_tribal
+			government_has_flag = government_is_subroman_administrative
 		}
 		OR = {
 			culture = { has_cultural_parameter = right_to_rule_clan }
@@ -270,9 +310,27 @@ convert_to_clan_decision = {
 	}
 	
 	is_valid = {
-		OR = {
-			has_realm_law = prefeudal_authority_3
-			has_realm_law = high_tribal_organization_3
+		trigger_if = {
+			limit = { government_has_flag = government_is_subroman_administrative }
+			top_liege = root
+			OR = {
+				has_realm_law = subroman_admin_military_centralization_top_liege_law_4
+				has_realm_law = subroman_admin_military_centralization_top_liege_law_5
+			}
+			OR = {
+				has_realm_law = subroman_admin_taxation_top_liege_law_3
+				has_realm_law = subroman_admin_taxation_top_liege_law_4
+			}
+			OR = {
+				has_realm_law = subroman_admin_aristocracy_law_3
+				has_realm_law = subroman_admin_aristocracy_law_4
+			}
+		}
+		trigger_else = {
+			OR = {
+				has_realm_law = prefeudal_authority_3
+				has_realm_law = high_tribal_organization_3
+			}
 		}
 		custom_description = {
 			text = faith_is_reformed
@@ -318,5 +376,25 @@ convert_to_clan_decision = {
 	
 	ai_potential = { always = yes }
 	
-	ai_will_do = { base = 100 }
+	ai_will_do = {
+		base = 0
+		#High Tribal/Prefeudal will always do this
+		modifier = {
+			add = 100
+			OR = {
+				government_has_flag = government_is_prefeudal
+				government_has_flag = government_is_high_tribal
+			}
+		}
+		#Sub-Roman AI will only do it when their government has degraded enough
+		modifier = {
+			government_has_flag = government_is_subroman_administrative
+			has_realm_law = subroman_admin_military_centralization_top_liege_law_5
+			has_realm_law = subroman_admin_taxation_top_liege_law_4
+			OR = {
+				has_realm_law = subroman_admin_aristocracy_law_3
+				has_realm_law = subroman_admin_aristocracy_law_4
+			}
+		}
+	}
 }

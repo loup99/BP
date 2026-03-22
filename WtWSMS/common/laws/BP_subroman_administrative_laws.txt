@@ -1,0 +1,2593 @@
+﻿@subroman_admin_aristocracy_law_cooldown = 10
+@non_roman_minority_rule_law_cooldown = 30
+
+#Covers Non-Romans ruling a Roman Realm; Visigothica, Ostrogothica, Vandalica, Italia, &c. ...
+#Also used by Dynastic without changes
+non_roman_minority_rule_law = {
+	default = non_roman_minority_rule_law_2
+	cumulative = no
+	flag = succession_gender_laws #For UI positioning
+	
+	non_roman_minority_rule_law_0 = { #Oppression; see Vandals
+		can_keep = {
+			bp_can_have_roman_minority_law_trigger = yes
+			#Lock into top liege's law
+			trigger_if = {
+				limit = { top_liege != this }
+				liege = { has_realm_law = non_roman_minority_rule_law_0 }
+			}
+		}
+		
+		modifier = {
+			cultural_head_acceptance_gain_mult = -1.00
+			same_culture_opinion = 20
+			different_culture_opinion = -20
+		}
+		flag = close_family_gets_appointment_exception
+		flag = only_same_culture_acclamation_succession
+		flag = only_same_culture_appointment_succession
+		flag = will_not_convert_to_local_culture
+		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			has_realm_law = non_roman_minority_rule_law_1
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
+		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = {
+						top_liege = this
+						government_has_flag = government_has_influence
+					}
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_1
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+			#Keep the laws united
+			hidden_effect = {
+				every_vassal_or_below = { add_realm_law_skip_effects = non_roman_minority_rule_law_0 }
+			}
+		}
+		ai_will_do = {
+			if = { #Vandals *want* to oppress Romans
+				limit = { culture = culture:vandalic }
+				value = 1000
+			}
+			#Ethos
+			if = { #Communal Ethos like themselves
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 50
+			}
+			if = { #Egalitarians are disinclined to oppress
+				limit = { culture = { has_cultural_pillar = ethos_egalitarian } }
+				add = -50
+			}
+			#Bonuses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = 200
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = 75
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 75
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = 75
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				value = 50
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = 50
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = 50
+			}
+			#Maluses
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = -50
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = -25
+			}
+		}
+	}
+	non_roman_minority_rule_law_1 = { #Minor Oppression
+		can_keep = {
+			bp_can_have_roman_minority_law_trigger = yes
+			#Lock into top liege's law
+			trigger_if = {
+				limit = { top_liege != this }
+				liege = { has_realm_law = non_roman_minority_rule_law_1 }
+			}
+		}
+		
+		modifier = {
+			cultural_head_acceptance_gain_mult = -0.75
+			same_culture_opinion = 15
+			different_culture_opinion = -15
+		}
+		flag = close_family_gets_appointment_exception
+		flag = only_same_culture_acclamation_succession
+		flag = only_same_culture_appointment_succession
+		flag = will_not_convert_to_local_culture
+		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			OR = {
+				has_realm_law = non_roman_minority_rule_law_0
+				has_realm_law = non_roman_minority_rule_law_2
+			}
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
+		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = {
+						top_liege = this
+						government_has_flag = government_has_influence
+					}
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_2
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_0
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		
+			#Keep the laws united
+			hidden_effect = {
+				every_vassal_or_below = { add_realm_law_skip_effects = non_roman_minority_rule_law_1 }
+			}
+		}
+		ai_will_do = {
+			value = 1
+			#Ethos
+			if = { #Communal Ethos like themselves
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 50
+			}
+			if = { #Egalitarians are disinclined to oppress
+				limit = { culture = { has_cultural_pillar = ethos_egalitarian } }
+				add = -50
+			}
+			if = { #Stoic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Bureaucratic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_bureaucratic } }
+				add = 25
+			}
+			#Bonuses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = 100
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = 50
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				add = 50
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = 50
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = 50
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 50
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = 50
+			}
+			#Maluses
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = -25
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = -25
+			}
+		}
+	}
+	non_roman_minority_rule_law_2 = { #Moderate; Ostrogoths, &c. Romans have certain protections
+		can_keep = {
+			bp_can_have_roman_minority_law_trigger = yes
+			#Lock into top liege's law
+			trigger_if = {
+				limit = { top_liege != this }
+				liege = { has_realm_law = non_roman_minority_rule_law_2 }
+			}
+		}
+		
+		modifier = {
+			cultural_head_acceptance_gain_mult = -0.50
+			same_culture_opinion = 10
+			different_culture_opinion = -10
+		}
+		flag = cannot_demand_romans_change_religion
+		flag = close_family_gets_appointment_exception
+		flag = only_same_culture_acclamation_succession
+		flag = only_same_culture_appointment_succession
+		flag = imperial_church_defended
+		flag = unlikely_to_convert_to_local_culture
+		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			OR = {
+				has_realm_law = non_roman_minority_rule_law_1
+				has_realm_law = non_roman_minority_rule_law_3
+			}
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
+		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = {
+						top_liege = this
+						government_has_flag = government_has_influence
+					}
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_3
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_1
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							culture = { has_cultural_parameter = greco_roman_social_tradition }
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		
+			#Keep the laws united
+			hidden_effect = {
+				every_vassal_or_below = { add_realm_law_skip_effects = non_roman_minority_rule_law_2 }
+			}
+		}
+		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
+		ai_will_do = {
+			value = 2 #Default
+			#Ethos
+			if = { #Communal Ethos like themselves
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Stoic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Bureaucratic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_bureaucratic } }
+				add = 25
+			}
+			#Bonuses/Maluses kinda meet here in case of very weird cosmopolitan/isolationist cultures
+			if = { #Franks are totes Romans, honest!
+				limit = { culture = { has_cultural_tradition = tradition_frankish_traditions } }
+				add = 25
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				value = 25
+			}
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = 25
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = 25
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 25
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = 25
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = 25
+			}
+		}
+	}
+	non_roman_minority_rule_law_3 = { #Semi-Alignment; see Skirians
+		can_keep = {
+			bp_can_have_roman_minority_law_trigger = yes
+			#Lock into top liege's law
+			trigger_if = {
+				limit = { top_liege != this }
+				liege = { has_realm_law = non_roman_minority_rule_law_3 }
+			}
+		}
+		
+		modifier = {
+			cultural_head_acceptance_gain_mult = -0.25
+			same_culture_opinion = 5
+			different_culture_opinion = -5
+		}
+		flag = cannot_demand_romans_change_religion
+		flag = close_family_gets_appointment_exception
+		flag = only_same_culture_acclamation_succession
+		flag = imperial_church_defended
+		flag = unlikely_to_convert_to_local_culture
+		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			OR = {
+				has_realm_law = non_roman_minority_rule_law_2
+				has_realm_law = non_roman_minority_rule_law_4
+			}
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
+		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = {
+						top_liege = this
+						government_has_flag = government_has_influence
+					}
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_4
+				}
+				custom_description = {
+					text = all_roman_vassal_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = reduced_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = reduced_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_2
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		
+			#Keep the laws united
+			hidden_effect = {
+				every_vassal_or_below = { add_realm_law_skip_effects = non_roman_minority_rule_law_3 }
+			}
+		}
+		ai_will_do = {
+			value = 1
+			#Ethos
+			if = { #Stoic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_communal } }
+				add = 25
+			}
+			if = { #Bureaucratic avoid extremes
+				limit = { culture = { has_cultural_pillar = ethos_bureaucratic } }
+				add = 25
+			}
+			if = { #Sharing an Ethos with a Roman culture in your capital really makes things more likely
+				limit = {
+					
+					root.capital_county.culture = { has_cultural_parameter = greco_roman_social_tradition }
+					culture != root.capital_county.culture
+					culture = { has_same_culture_ethos = root.capital_county.culture }
+				}
+				add = 50
+			}
+			#Bonuses
+			if = { #Visigoths tend to be conciliatory towards Romans
+				limit = { culture = { has_cultural_tradition = tradition_visigothic_codes } }
+				add = 100
+			}
+			if = { #Franks are totes Romans, honest!
+				limit = { culture = { has_cultural_tradition = tradition_frankish_traditions } }
+				add = 50
+			}
+			if = { #Loyal Soldiers tend to want to get along
+				limit = { culture = { has_cultural_parameter = doesnt_care_about_culture_faith_in_factions } }
+				add = 50
+			}
+			if = { #Xenophiles will align with wherever they are
+				limit = { culture = { has_cultural_tradition = tradition_xenophilic } }
+				add = 25
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = 25
+			}
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = 25
+			}
+			#Maluses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = -100
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				add = -50
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = -50
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = -50
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = -50
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = -50
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = -25
+			}
+			if = { #Ruling caste is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_ruling_caste } }
+				value = -25
+			}
+			if = { #Tribal hierarchy is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_tribal_hierarchy } }
+				value = -25
+			}
+		}
+	}
+	non_roman_minority_rule_law_4 = { #Alignment; see late Visigoths (eventually)
+		can_keep = {
+			bp_can_have_roman_minority_law_trigger = yes
+			#Lock into top liege's law
+			trigger_if = {
+				limit = { top_liege != this }
+				liege = { has_realm_law = non_roman_minority_rule_law_4 }
+			}
+		}
+		
+		can_pass = {
+			#Only Top liege
+			top_liege = this
+			#Only adjacent
+			has_realm_law = non_roman_minority_rule_law_3
+			#Not on cooldown
+			custom_description = {
+				subject = root
+				text = "has_non_roman_minority_rule_law_cooldown"
+				NOT = { has_variable = non_roman_minority_rule_law_cooldown }
+			}
+		}
+		
+		modifier = {}
+		flag = cannot_demand_romans_change_religion
+		flag = close_family_gets_appointment_exception
+		flag = imperial_church_protected
+		flag = reduced_chance_to_convert_to_local_culture
+		
+		#Shifting laws should please Romans/anger minorities unless fickle/eccentric (opposite of stubborn)
+		pass_cost = {
+			prestige = {
+				if = { #Only the top liege pays for this
+					limit = { top_liege = this }
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+			influence = {
+				if = { #Only the top liege pays for this
+					limit = {
+						top_liege = this
+						government_has_flag = government_has_influence
+					}
+					add = change_non_roman_minority_rule_law_basic_cost
+				}
+			}
+		}
+		on_pass = {
+			set_variable = {
+				name = non_roman_minority_rule_law_cooldown
+				years = @non_roman_minority_rule_law_cooldown
+			}
+			#Apply opinions kingdom-wide when the ruler applies a new law
+			if = {
+				limit = {
+					top_liege = this
+					has_realm_law = non_roman_minority_rule_law_3
+				}
+				custom_description = {
+					text = all_roman_vassal_approve
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value
+					every_vassal_or_below = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = { culture = { has_cultural_parameter = greco_roman_social_tradition } }
+						add_opinion = {
+							modifier = improved_roman_priveleges_roman
+							target = root
+						}
+					}
+				}
+				custom_description = {
+					text = all_vassals_your_culture_or_migratory_disapprove
+					subject = root
+					value = change_non_roman_minority_rule_law_opinion_value_negative
+					every_vassal_or_below = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+					every_courtier = {
+						limit = {
+							OR = {
+								culture = root.culture
+								culture = { has_cultural_tradition = tradition_migratory_culture }
+							}
+						}
+						add_opinion = {
+							modifier = improved_roman_priveleges_minority
+							target = root
+						}
+					}
+				}
+			}
+		
+			#Keep the laws united
+			hidden_effect = {
+				every_vassal_or_below = { add_realm_law_skip_effects = non_roman_minority_rule_law_4 }
+			}
+		}
+		ai_will_do = {
+			value = 0
+			#Sharing an Ethos with a Roman culture in your capital really makes things more likely
+			if = {
+				limit = {
+					
+					root.capital_county.culture = { has_cultural_parameter = greco_roman_social_tradition }
+					culture != root.capital_county.culture
+					culture = { has_same_culture_ethos = root.capital_county.culture }
+				}
+				add = 50
+			}
+			#Bonuses
+			if = { #Franks are totes Romans, honest!
+				limit = { culture = { has_cultural_tradition = tradition_frankish_traditions } }
+				add = 75
+			}
+			if = { #Xenophiles will align with wherever they are
+				limit = { culture = { has_cultural_tradition = tradition_xenophilic } }
+				add = 50
+			}
+			if = { #Religion Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = more_easily_converted } }
+				value = 50
+			}
+			if = { #Culture Blending sort of stuff
+				limit = { culture = { has_cultural_parameter = cheaper_to_hybridize } }
+				value = 50
+			}
+			if = { #Loyal Soldiers tend to want to get along
+				limit = { culture = { has_cultural_parameter = doesnt_care_about_culture_faith_in_factions } }
+				add = 25
+			}
+			#Maluses
+			if = { #WtWSMS: For the Love of the Game
+				limit = {
+					culture = { has_cultural_tradition = tradition_punic_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions }
+					culture = { has_cultural_tradition = tradition_persian_traditions_non_dlc }
+				}
+				value = -200
+			}
+			if = { #Isolationists want nothing to do with Romans
+				limit = { culture = { has_cultural_parameter = ai_doesnt_marry_outside_culture } }
+				add = -75
+			}
+			if = { #Jew's don't care to be Roman
+				limit = { culture = { has_cultural_tradition = tradition_diasporic } }
+				value = -75
+			}
+			if = { #Staunch Traditionalists don't like Romans
+				limit = { culture = { has_cultural_parameter = harder_to_hybridize } }
+				value = -75
+			}
+			if = { #Strong believers keep to themselves (can't use the calc_faith trigger?)
+				limit = { culture = { has_cultural_parameter = harder_to_convert_character_faith } }
+				value = -75
+			}
+			if = { #WtWSMS Traditionalists/Anti-Romans
+				limit = {
+					culture = { has_cultural_tradition = tradition_marauders }
+					culture = { has_cultural_tradition = tradition_marauders_non_dlc }
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_autochthon_identity }
+					culture = { has_cultural_tradition = tradition_armenian_traditions }
+					culture = { has_cultural_tradition = tradition_armenian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions }
+					culture = { has_cultural_tradition = tradition_hebrew_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions }
+					culture = { has_cultural_tradition = tradition_egyptian_traditions_non_dlc }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes }
+					culture = { has_cultural_tradition = tradition_caucasian_mountain_homes_non_dlc }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions }
+					culture = { has_cultural_tradition = tradition_early_slavic_traditions_non_dlc }
+				}
+				value = -75
+			}
+			if = { #Tribal Unity makes us want to avoid the Romans
+				limit = { culture = { has_cultural_parameter = landing_house_members_give_prestige } }
+				value = -50
+			}
+			if = { #Ruling caste is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_ruling_caste } }
+				value = -50
+			}
+			if = { #Tribal hierarchy is disinclined to get along
+				limit = { culture = { has_cultural_tradition = tradition_tribal_hierarchy } }
+				value = -50
+			}
+		}
+	}
+}
+
+#The overall military landing mechanic; focused on centralization
+#  We don't have many examples of Non-Roman Sub-Roman states, so this is a little odd
+subroman_admin_military_centralization_top_liege_law = {
+	default = subroman_admin_military_centralization_top_liege_law_0
+	cumulative = no
+	
+	flag = subroman_admin_military_centralization_law
+	
+	subroman_admin_military_centralization_top_liege_law_0 = {
+		modifier = {
+			#Imperial Troops
+			men_at_arms_title_limit = 3
+			men_at_arms_title_cap = 3
+			
+			#Personal Troops
+			men_at_arms_limit = 0
+			men_at_arms_cap = 0
+			knight_limit = 0
+			
+			levy_size = 0.0
+			men_at_arms_maintenance = 0.0
+			mercenary_hire_cost_mult = 0.0
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_top_liege_law_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_centralization_0
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_military_centralization_vassal_law_0
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_top_liege_law_1 = {
+		modifier = {
+			#Imperial Troops
+			men_at_arms_title_limit = 2
+			men_at_arms_title_cap = 2
+			#Personal Troops
+			men_at_arms_limit = 1
+			men_at_arms_cap = 0
+			knight_limit = 1
+			
+			levy_size = 0.1
+			men_at_arms_maintenance = -0.10
+			mercenary_hire_cost_mult = -0.4
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_top_liege_law_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_centralization_1
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_military_centralization_vassal_law_1
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_top_liege_law_2 = {
+		modifier = {
+			#Imperial Troops
+			men_at_arms_title_limit = 1
+			men_at_arms_title_cap = 1
+			#Personal Troops
+			men_at_arms_limit = 1
+			men_at_arms_cap = 1
+			knight_limit = 2
+			
+			levy_size = 0.2
+			
+			men_at_arms_maintenance = -0.20
+			mercenary_hire_cost_mult = -0.8
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_top_liege_law_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_centralization_2
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_military_centralization_vassal_law_2
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_top_liege_law_3 = {
+		modifier = {
+			#Imperial Troops
+			men_at_arms_title_limit = -1
+			men_at_arms_title_cap = -1
+			#Personal Troops
+			men_at_arms_limit = 2
+			men_at_arms_cap = 1
+			knight_limit = 3
+			
+			levy_size = 0.3
+			
+			men_at_arms_maintenance = -0.30
+			mercenary_hire_cost_mult = -1.2
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_top_liege_law_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_centralization_3
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_military_centralization_vassal_law_3
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_top_liege_law_4 = {
+		modifier = {
+			#Imperial Troops
+			men_at_arms_title_limit = -3
+			men_at_arms_title_cap = -3
+			#Personal Troops
+			men_at_arms_limit = 2
+			men_at_arms_cap = 2
+			knight_limit = 4
+			
+			levy_size = 0.4
+			
+			men_at_arms_maintenance = -0.40
+			mercenary_hire_cost_mult = -1.6
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_top_liege_law_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_centralization_4
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_military_centralization_vassal_law_4
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_top_liege_law_5 = {
+		modifier = {
+			#Imperial Troops
+			men_at_arms_title_limit = -6
+			men_at_arms_title_cap = -6
+			#Personal Troops
+			men_at_arms_limit = 3
+			men_at_arms_cap = 3
+			knight_limit = 5
+			active_accolades = 1
+			
+			levy_size = 0.5
+			
+			men_at_arms_maintenance = -0.50
+			mercenary_hire_cost_mult = -2.0
+		}
+		flag = subroman_final_military_phase
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_top_liege_law_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_centralization_5
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_military_centralization_vassal_law_5
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+}
+
+subroman_admin_military_centralization_vassal_law = {
+	default = subroman_admin_military_centralization_vassal_law_0
+	cumulative = no
+	
+	flag = subroman_admin_military_centralization_law
+	
+	subroman_admin_military_centralization_vassal_law_0 = {
+		modifier = {
+			#Personal Troops
+			men_at_arms_limit = 0
+			men_at_arms_cap = 0
+			knight_limit = 0
+			
+			levy_size = 0.0
+			men_at_arms_maintenance = 0.00
+			mercenary_hire_cost_mult = 0.0
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { vassal_contract_has_flag = roman_landed_military_contract }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_military_landed
+					level = roman_administrative_military_landed_0
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_vassal_law_1 = {
+		modifier = {
+			#Personal Troops
+			men_at_arms_limit = 1
+			men_at_arms_cap = 0
+			knight_limit = 1
+			
+			levy_size = 0.1
+			men_at_arms_maintenance = -0.10
+			mercenary_hire_cost_mult = -0.4
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { vassal_contract_has_flag = roman_landed_military_contract }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_military_landed
+					level = roman_administrative_military_landed_1
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_vassal_law_2 = {
+		modifier = {
+			#Personal Troops
+			men_at_arms_limit = 1
+			men_at_arms_cap = 1
+			knight_limit = 2
+			
+			levy_size = 0.2
+			
+			men_at_arms_maintenance = -0.20
+			mercenary_hire_cost_mult = -0.8
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { vassal_contract_has_flag = roman_landed_military_contract }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_military_landed
+					level = roman_administrative_military_landed_2
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_vassal_law_3 = {
+		modifier = {
+			#Personal Troops
+			men_at_arms_limit = 2
+			men_at_arms_cap = 1
+			knight_limit = 3
+			
+			levy_size = 0.3
+			
+			men_at_arms_maintenance = -0.30
+			mercenary_hire_cost_mult = -1.2
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { vassal_contract_has_flag = roman_landed_military_contract }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_military_landed
+					level = roman_administrative_military_landed_3
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_vassal_law_4 = {
+		modifier = {
+			#Personal Troops
+			men_at_arms_limit = 2
+			men_at_arms_cap = 2
+			knight_limit = 4
+			active_accolades = 1 #Available one step earlier for vassals
+			
+			levy_size = 0.4
+			
+			men_at_arms_maintenance = -0.40
+			mercenary_hire_cost_mult = -1.6
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { vassal_contract_has_flag = roman_landed_military_contract }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_military_landed
+					level = roman_administrative_military_landed_4
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_military_centralization_vassal_law_5 = {
+		modifier = {
+			#Personal Troops
+			men_at_arms_limit = 3
+			men_at_arms_cap = 3
+			knight_limit = 5
+			active_accolades = 1
+			
+			levy_size = 0.5
+			
+			men_at_arms_maintenance = -0.50
+			mercenary_hire_cost_mult = -2.0
+		}
+		flag = subroman_final_military_phase
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { vassal_contract_has_flag = roman_landed_military_contract }
+				vassal_contract_set_obligation_level = {
+					type = roman_administrative_military_landed
+					level = roman_administrative_military_landed_5
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+}
+
+subroman_admin_taxation_top_liege_law = {
+	default = subroman_admin_taxation_top_liege_law_0
+	cumulative = no
+	
+	flag = subroman_admin_taxation_law
+	
+	subroman_admin_taxation_top_liege_law_0 = {
+		modifier = {
+			domain_limit = 4
+			domain_tax_mult = 0.20
+			domicile_monthly_gold_mult = 0.0
+			
+			monthly_treasury_from_vassals = 0.85
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_top_liege_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_taxation_0
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_taxation_vassal_law_0
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_top_liege_law_1 = {
+		modifier = {
+			domain_limit = 3
+			domain_tax_mult = 0.15
+			domicile_monthly_gold_mult = -0.20
+			
+			monthly_treasury_from_vassals = 0.70
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_top_liege_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_taxation_1
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_taxation_vassal_law_1
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_top_liege_law_2 = {
+		modifier = {
+			domain_limit = 2
+			domain_tax_mult = 0.10
+			domicile_monthly_gold_mult = -0.40
+			
+			monthly_treasury_from_vassals = 0.55
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_top_liege_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_taxation_2
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_taxation_vassal_law_2
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_top_liege_law_3 = {
+		modifier = {
+			domain_limit = 1
+			domain_tax_mult = 0.05
+			domicile_monthly_gold_mult = -0.60
+			
+			monthly_treasury_from_vassals = 0.40
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_top_liege_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_taxation_3
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_taxation_vassal_law_3
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_top_liege_law_4 = {
+		modifier = {
+			domicile_monthly_gold_mult = -0.80
+			
+			monthly_treasury_from_vassals = 0.25
+		}
+		flag = subroman_final_taxation_phase
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_top_liege_trigger = yes
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {
+			custom_tooltip = {
+				text = every_subroman_vassal_adopts_taxation_4
+				every_vassal_or_below = {
+					limit = { bp_realm_law_use_subroman_administrative_military_centralization_vassal_trigger = yes }
+					add_realm_law_skip_effects = subroman_admin_taxation_vassal_law_4
+				}
+			}
+		}
+		
+		ai_will_do = {}
+	}
+}
+
+subroman_admin_taxation_vassal_law = {
+	default = subroman_admin_taxation_vassal_law_0
+	cumulative = no
+	
+	flag = subroman_admin_taxation_law
+	
+	subroman_admin_taxation_vassal_law_0 = {
+		modifier = {
+			domain_limit = 4
+			domain_tax_mult = 0.20
+			domicile_monthly_gold_mult = 0.0
+			
+			monthly_treasury_from_salary_budget_mult = -0.1
+			monthly_treasury_from_ministry_budget_mult = -0.1
+			monthly_treasury_from_military_budget_mult = -0.1
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_vassal_trigger = yes
+			OR = {
+				liege = { has_realm_law = subroman_admin_taxation_vassal_law_0 }
+				liege = { has_realm_law = subroman_admin_taxation_top_liege_law_0 }
+			}
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_vassal_law_1 = {
+		modifier = {
+			domain_limit = 3
+			domain_tax_mult = 0.15
+			domicile_monthly_gold_mult = -0.20
+			
+			monthly_treasury_from_salary_budget_mult = -0.3
+			monthly_treasury_from_ministry_budget_mult = -0.3
+			monthly_treasury_from_military_budget_mult = -0.3
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_vassal_trigger = yes
+			OR = {
+				liege = { has_realm_law = subroman_admin_taxation_vassal_law_1 }
+				liege = { has_realm_law = subroman_admin_taxation_top_liege_law_1 }
+			}
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_vassal_law_2 = {
+		modifier = {
+			domain_limit = 2
+			domain_tax_mult = 0.10
+			domicile_monthly_gold_mult = -0.40
+			
+			monthly_treasury_from_salary_budget_mult = -0.5
+			monthly_treasury_from_ministry_budget_mult = -0.5
+			monthly_treasury_from_military_budget_mult = -0.5
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_vassal_trigger = yes
+			OR = {
+				liege = { has_realm_law = subroman_admin_taxation_vassal_law_2 }
+				liege = { has_realm_law = subroman_admin_taxation_top_liege_law_2 }
+			}
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_vassal_law_3 = {
+		modifier = {
+			domain_limit = 1
+			domain_tax_mult = 0.05
+			domicile_monthly_gold_mult = -0.60
+			
+			monthly_treasury_from_salary_budget_mult = -0.7
+			monthly_treasury_from_ministry_budget_mult = -0.7
+			monthly_treasury_from_military_budget_mult = -0.7
+		}
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_vassal_trigger = yes
+			OR = {
+				liege = { has_realm_law = subroman_admin_taxation_vassal_law_3 }
+				liege = { has_realm_law = subroman_admin_taxation_top_liege_law_3 }
+			}
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {}
+		
+		ai_will_do = {}
+	}
+	
+	subroman_admin_taxation_vassal_law_4 = {
+		modifier = {
+			domicile_monthly_gold_mult = -0.80
+			
+			monthly_treasury_from_salary_budget_base = -0.9
+			monthly_treasury_from_ministry_budget_base = -0.9
+			monthly_treasury_from_military_budget_base = -0.9
+		}
+		flag = subroman_final_taxation_phase
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_taxation_vassal_trigger = yes
+			OR = {
+				liege = { has_realm_law = subroman_admin_taxation_vassal_law_4 }
+				liege = { has_realm_law = subroman_admin_taxation_top_liege_law_4 }
+			}
+		}
+		
+		can_pass = {
+			custom_tooltip = {
+				text = mechanically_driven_law
+				always = no
+			}
+		}
+		
+		on_pass = {}
+		
+		ai_will_do = {}
+	}
+}
+
+#Somewhat unique:  you can't have better than your liege, but it's not locked to the liege's
+subroman_admin_aristocracy_law = {
+	default = subroman_admin_aristocracy_law_0
+	cumulative = no
+	
+	flag = subroman_admin_aristocracy_law
+	
+	subroman_admin_aristocracy_law_0 = {
+		modifier = {
+			monthly_influence_mult = 0.0
+			title_creation_cost_mult = 0.0
+			monthly_prestige_gain_mult = 0.0
+		}
+		flag = succession_weight_dynastic_1
+		flag = governor_efficency_weight_1
+		flag = subroman_admin_aristocracy_law_0
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { top_liege != this }
+				custom_tooltip = {
+					text = mechanically_driven_law
+					always = no
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					subject = root
+					text = "has_subroman_admin_aristocracy_law_cooldown"
+					NAND = {
+						has_variable = subroman_admin_aristocracy_law_cooldown
+						NOT = { culture = { has_innovation = innovation_all_things } }
+					}
+				}
+				#Adjacency
+				has_realm_law = subroman_admin_aristocracy_law_1
+				#At least 50 percent plus one of your vassals are at this law or better
+				custom_tooltip = {
+					text = half_of_subroman_duke_vassals_has_law_0_or_better
+					root.percent_of_subroman_administrative_dukes_with_subroman_admin_aristocracy_law_level_0 > root.subroman_vassal_with_law_cutoff_percent
+				}
+				#Trying to improve the law means you'll need some prestige and influence
+				trigger_if = {
+					limit = {
+						has_realm_law = subroman_admin_aristocracy_law_1
+						is_ai = no
+					}
+					prestige_level >= 3
+					influence_level >= 3
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { top_liege != this }
+				
+			}
+			else = {
+				set_variable = {
+					name = subroman_admin_aristocracy_law_cooldown
+					years = @subroman_admin_aristocracy_law_cooldown
+				}
+				if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_1 }
+					custom_tooltip = {
+						text = every_vassal_may_decline_their_aristocracy_one_level
+						every_vassal = { #Decline Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_0 }
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
+								decline_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_less_powerful_tt
+									desc = top_liege_makes_aristocracy_less_powerful_desc
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		ai_will_do = {
+			#AI will improve to this law if they're running short on prestige or influence
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_1 }
+				if = {
+					limit = { this.prestige < 0 }
+					value = 100
+				}
+				else_if = {
+					limit = { this.influence < 50 }
+					value = 50
+				}
+				else = { value = 0 }
+			}
+		}
+	}
+	
+	subroman_admin_aristocracy_law_1 = {
+		modifier = {
+			monthly_influence_mult = 0.10
+			title_creation_cost_mult = 0.10
+			monthly_prestige_gain_mult = 0.10
+		}
+		flag = revoke_depose_governors_costs_more_influence_1
+		flag = succession_weight_dynastic_2
+		flag = governor_efficency_weight_2
+		flag = subroman_admin_aristocracy_law_1
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { top_liege != this }
+				custom_tooltip = {
+					text = mechanically_driven_law
+					always = no
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					subject = root
+					text = "has_subroman_admin_aristocracy_law_cooldown"
+					NAND = {
+						has_variable = subroman_admin_aristocracy_law_cooldown
+						NOT = { culture = { has_innovation = innovation_all_things } }
+					}
+				}
+				#Adjacency
+				OR = {
+					has_realm_law = subroman_admin_aristocracy_law_0
+					has_realm_law = subroman_admin_aristocracy_law_2
+				}
+				#At least 50 percent plus one of your vassals are at this law or better
+				custom_tooltip = {
+					text = half_of_subroman_duke_vassals_has_law_1_or_better
+					root.percent_of_subroman_administrative_dukes_with_subroman_admin_aristocracy_law_level_1 > root.subroman_vassal_with_law_cutoff_percent
+				}
+				#Trying to improve the law means you'll need some prestige and influence
+				trigger_if = {
+					limit = {
+						has_realm_law = subroman_admin_aristocracy_law_2
+						is_ai = no
+					}
+					prestige_level >= 3
+					influence_level >= 3
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { top_liege != this }
+				
+			}
+			else = {
+				set_variable = {
+					name = subroman_admin_aristocracy_law_cooldown
+					years = @subroman_admin_aristocracy_law_cooldown
+				}
+				if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_0 }
+					add_prestige = 150
+					change_influence = 150
+					custom_tooltip = {
+						text = every_vassal_may_improve_their_aristocracy_one_level
+						every_vassal = { #Improve Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
+								improve_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_more_powerful_tt
+									desc = top_liege_makes_aristocracy_more_powerful_desc
+								}
+							}
+						}
+					}
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_2 }
+					custom_tooltip = {
+						text = every_vassal_may_decline_their_aristocracy_one_level
+						every_vassal = { #Decline Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_0 }
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
+								decline_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_less_powerful_tt
+									desc = top_liege_makes_aristocracy_less_powerful_desc
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		#AI tries to improve to this law when it's influence is too low
+		ai_will_do = {
+			#AI will improve to this law if they're running short on prestige or influence
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_2 }
+				if = {
+					limit = { this.prestige < 0 }
+					value = 100
+				}
+				else_if = {
+					limit = { this.influence < 50 }
+					value = 50
+				}
+				else = { value = 0 }
+			}
+			#AI will decline to this the law when their children are not in succession
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_0 }
+				if = {
+					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
+					value = 100
+				}
+				else = { value = 0 }
+			}
+		}
+	}
+	
+	subroman_admin_aristocracy_law_2 = {
+		modifier = {
+			monthly_influence_mult = 0.20
+			title_creation_cost_mult = 0.20
+			monthly_prestige_gain_mult = 0.20
+		}
+		flag = revoke_depose_governors_costs_more_influence_2
+		flag = succession_weight_dynastic_3
+		flag = governor_efficency_weight_3
+		flag = subroman_can_establish_de_jure_kingdom
+		flag = subroman_admin_aristocracy_law_2
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { top_liege != this }
+				custom_tooltip = {
+					text = mechanically_driven_law
+					always = no
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					subject = root
+					text = "has_subroman_admin_aristocracy_law_cooldown"
+					NAND = {
+						has_variable = subroman_admin_aristocracy_law_cooldown
+						NOT = { culture = { has_innovation = innovation_all_things } }
+					}
+				}
+				#Adjacency
+				OR = {
+					has_realm_law = subroman_admin_aristocracy_law_1
+					has_realm_law = subroman_admin_aristocracy_law_3
+				}
+				#At least 50 percent plus one of your vassals are at this law or better
+				custom_tooltip = {
+					text = half_of_subroman_duke_vassals_has_law_2_or_better
+					root.percent_of_subroman_administrative_dukes_with_subroman_admin_aristocracy_law_level_2 > root.subroman_vassal_with_law_cutoff_percent
+				}
+				#Trying to improve the law means you'll need some prestige and influence
+				trigger_if = {
+					limit = {
+						has_realm_law = subroman_admin_aristocracy_law_3
+						is_ai = no
+					}
+					prestige_level >= 3
+					influence_level >= 3
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { top_liege != this }
+				
+			}
+			else = {
+				set_variable = {
+					name = subroman_admin_aristocracy_law_cooldown
+					years = @subroman_admin_aristocracy_law_cooldown
+				}
+				if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_1 }
+					add_prestige = 150
+					change_influence = 150
+					custom_tooltip = {
+						text = every_vassal_may_improve_their_aristocracy_one_level
+						every_vassal = { #Improve Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
+								improve_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_more_powerful_tt
+									desc = top_liege_makes_aristocracy_more_powerful_desc
+								}
+							}
+						}
+					}
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_3 }
+					custom_tooltip = {
+						text = every_vassal_may_decline_their_aristocracy_one_level
+						every_vassal = { #Decline Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_0 }
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
+								decline_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_less_powerful_tt
+									desc = top_liege_makes_aristocracy_less_powerful_desc
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		#AI tries to improve to this law when it's influence is too low
+		ai_will_do = {
+			#AI will improve to this law if they're running short on prestige or influence
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_3 }
+				if = {
+					limit = { this.prestige < 0 }
+					value = 100
+				}
+				else_if = {
+					limit = { this.influence < 50 }
+					value = 50
+				}
+				else = { value = 0 }
+			}
+			#AI will decline to this the law when their children are not in succession
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_1 }
+				if = {
+					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
+					value = 100
+				}
+				else = { value = 0 }
+			}
+		}
+	}
+	
+	subroman_admin_aristocracy_law_3 = {
+		modifier = {
+			monthly_influence_mult = 0.30
+			title_creation_cost_mult = 0.30
+			monthly_prestige_gain_mult = 0.30
+		}
+		flag = revoke_depose_governors_costs_more_influence_3
+		flag = succession_weight_dynastic_4
+		flag = governor_efficency_weight_4
+		flag = subroman_can_establish_de_jure_kingdom
+		flag = subroman_can_establish_de_jure_empire
+		flag = cannot_depose_holders
+		flag = subroman_admin_aristocracy_law_3
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { top_liege != this }
+				custom_tooltip = {
+					text = mechanically_driven_law
+					always = no
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					subject = root
+					text = "has_subroman_admin_aristocracy_law_cooldown"
+					NAND = {
+						has_variable = subroman_admin_aristocracy_law_cooldown
+						NOT = { culture = { has_innovation = innovation_all_things } }
+					}
+				}
+				#Adjacency
+				OR = {
+					has_realm_law = subroman_admin_aristocracy_law_2
+					has_realm_law = subroman_admin_aristocracy_law_4
+				}
+				#At least 50 percent plus one of your vassals are at this law or better
+				custom_tooltip = {
+					text = half_of_subroman_duke_vassals_has_law_3_or_better
+					root.percent_of_subroman_administrative_dukes_with_subroman_admin_aristocracy_law_level_3 > root.subroman_vassal_with_law_cutoff_percent
+				}
+				#Trying to improve the law means you'll need some prestige and influence
+				trigger_if = {
+					limit = {
+						has_realm_law = subroman_admin_aristocracy_law_4
+						is_ai = no
+					}
+					prestige_level >= 3
+					influence_level >= 3
+				}
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { top_liege != this }
+				
+			}
+			else = {
+				set_variable = {
+					name = subroman_admin_aristocracy_law_cooldown
+					years = @subroman_admin_aristocracy_law_cooldown
+				}
+				if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_2 }
+					add_prestige = 150
+					change_influence = 150
+					custom_tooltip = {
+						text = every_vassal_may_improve_their_aristocracy_one_level
+						every_vassal = { #Improve Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
+								improve_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_more_powerful_tt
+									desc = top_liege_makes_aristocracy_more_powerful_desc
+								}
+							}
+						}
+					}
+				}
+				else_if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_4 }
+					custom_tooltip = {
+						text = every_vassal_may_decline_their_aristocracy_one_level
+						every_vassal = { #Decline Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_0 }
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
+								decline_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_less_powerful_tt
+									desc = top_liege_makes_aristocracy_less_powerful_desc
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		ai_will_do = {
+			#AI will improve to this law if they're running short on prestige or influence
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_4 }
+				if = {
+					limit = { this.prestige < 0 }
+					value = 100
+				}
+				else_if = {
+					limit = { this.influence < 50 }
+					value = 50
+				}
+				else = { value = 0 }
+			}
+			#AI will decline to this the law when their children are not in succession
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_2 }
+				if = {
+					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
+					value = 100
+				}
+				else = { value = 0 }
+			}
+		}
+	}
+	
+	subroman_admin_aristocracy_law_4 = {
+		modifier = {
+			monthly_influence_mult = 0.40
+			title_creation_cost_mult = 0.40
+			monthly_prestige_gain_mult = 0.40
+		}
+		flag = governorship_cannot_be_revoked_freely
+		flag = succession_is_purely_dynastic
+		flag = subroman_can_establish_de_jure_kingdom
+		flag = subroman_can_establish_de_jure_empire
+		flag = cannot_depose_holders
+		flag = subroman_admin_aristocracy_law_4
+		
+		can_keep = {
+			bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+		}
+		
+		can_pass = {
+			trigger_if = {
+				limit = { top_liege != this }
+				custom_tooltip = {
+					text = mechanically_driven_law
+					always = no
+				}
+			}
+			trigger_else = {
+				custom_description = {
+					subject = root
+					text = "has_subroman_admin_aristocracy_law_cooldown"
+					NAND = {
+						has_variable = subroman_admin_aristocracy_law_cooldown
+						NOT = { culture = { has_innovation = innovation_all_things } }
+					}
+				}
+				has_realm_law = subroman_admin_aristocracy_law_3
+			}
+		}
+		
+		on_pass = {
+			if = {
+				limit = { top_liege != this }
+				
+			}
+			else = {
+				set_variable = {
+					name = subroman_admin_aristocracy_law_cooldown
+					years = @subroman_admin_aristocracy_law_cooldown
+				}
+				if = {
+					limit = { has_realm_law = subroman_admin_aristocracy_law_3 }
+					add_prestige = 150
+					change_influence = 150
+					custom_tooltip = {
+						text = every_vassal_may_improve_their_aristocracy_one_level
+						every_vassal = { #Improve Law One Level
+							limit = {
+								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_0 }
+								NOT = { has_realm_law = subroman_admin_aristocracy_law_4 }
+							}
+							random = {
+								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
+								improve_aristocracy_law_one_level_effect = yes
+								send_interface_message = {
+									type = event_generic_neutral
+									title = top_liege_makes_aristocracy_more_powerful_tt
+									desc = top_liege_makes_aristocracy_more_powerful_desc
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		ai_will_do = {
+			#AI will decline to this the law when their children are not in succession
+			if = {
+				limit = { has_realm_law = subroman_admin_aristocracy_law_3 }
+				if = {
+					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
+					value = 100
+				}
+				else = { value = 0 }
+			}
+		}
+	}
+}

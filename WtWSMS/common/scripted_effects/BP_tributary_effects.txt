@@ -1,0 +1,56 @@
+﻿#Establishes a specific type of tributary & it's obligations based on character flags
+BP_break_subject_contract_and_establish_tributary_effect = {
+	#Break Vassalage if it exists
+	if = {
+		limit = { liege != this }
+		create_title_and_vassal_change = {
+			type = independency
+			save_scope_as = change
+			add_claim_on_loss = no
+		}
+		becomes_independent = { change = scope:change }
+		resolve_title_and_vassal_change = scope:change
+	}
+
+	switch = {
+		trigger = has_character_flag
+		
+		default_fixed_tributary = {
+			$TRIBUTARY$ = {
+				start_tributary = {
+					contract_group = BP_fixed_tributary
+					suzerain = $SUZERAIN$
+				}
+				tributary_contract_set_obligation_level = { type = default_tributary_taxes level = 1 }
+				tributary_contract_set_obligation_level = { type = default_tributary_levies level = 1 }
+				tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 1 }
+				tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
+				remove_character_flag = default_fixed_tributary
+			}
+		}
+		default_fixed_tribal_tributary = {
+			$TRIBUTARY$ = {
+				start_tributary = {
+					contract_group = BP_tribal_fixed_tributary
+					suzerain = $SUZERAIN$
+				}
+				tributary_contract_set_obligation_level = { type = default_tributary_levies level = 1 }
+				tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 1 }
+				tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
+				remove_character_flag = default_fixed_tribal_tributary
+			}
+		}
+		default_subjugated_tributary = {
+			$TRIBUTARY$ = {
+				start_tributary = {
+					contract_group = tributary_subjugated
+					suzerain = $SUZERAIN$
+				}
+				tributary_contract_set_obligation_level = { type = default_tributary_prestige level = 1 }
+				tributary_contract_set_obligation_level = { type = suzerain_war_participation_guarantee level = 1 }
+				tributary_contract_set_obligation_level = { type = tributary_war_participation_obligation level = 0 }
+				remove_character_flag = default_subjugated_tributary
+			}
+		}
+	}
+}

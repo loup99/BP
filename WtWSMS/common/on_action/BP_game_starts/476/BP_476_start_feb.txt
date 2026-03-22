@@ -5,14 +5,15 @@ bp_game_start_476 = {
 	on_actions = {
 		#Characters
 		BP_character_events_476
-		BP_setup_realm_laws_476
-		BP_setup_vassal_contracts_476
+		BP_setup_realm_laws_476_feb
+		BP_setup_realm_laws_476_feb_DLC
+		BP_setup_vassal_contracts_476_feb
+		BP_setup_vassal_contracts_476_feb_DLC
+		BP_starting_state_faiths_476_feb_DLC
 		BP_setup_landless_chars_476
 		BP_set_lieges_476
 		BP_remove_claims_476
 		BP_senate_476_feb
-		#culture
-		BP_starting_culture_acceptance_476
 		#Warfare
 		BP_create_theodoric_armies_476
 		#Tributaries
@@ -58,6 +59,21 @@ BP_character_events_476 = {
 			}
 		}
 		
+		#Arbogast and Soissons should start allied
+		title:k_soissons.holder = {
+			create_alliance = {
+				target = title:d_triveria.holder
+				allied_through_owner = title:k_soissons.holder
+				allied_through_target = title:d_triveria.holder
+			}
+		}
+		title:d_triveria.holder = {
+			add_opinion = {
+				modifier = perk_negotiated_alliance_opinion
+				target = title:k_soissons.holder
+			}
+		}
+		
 		#Diarchies
 		
 		#David of Rheged has Saint Patrick as a Regent; we can't make him a court chaplain anymore, so this is the second-best thing
@@ -68,6 +84,11 @@ BP_character_events_476 = {
 			NEW_DIARCH = character:96055
 			LIEGE = character:96054
 		}
+		#Romulus is not crowned at his age
+		if = {
+			limit = { has_dlc_feature = coronations }
+			character:96054 = { add_realm_law_skip_effects = uncrowned }
+		}
 		
 		#Fix Persian legitimacy
 		character:180624 = { add_legitimacy = 850 }
@@ -77,13 +98,8 @@ BP_character_events_476 = {
 	}
 }
 ## Legal Stuff
-BP_setup_realm_laws_476 = {
+BP_setup_realm_laws_476_feb = {
 	effect = {
-		#Set-up Subroman Taxation
-		every_ruler = {
-			limit = { government_has_flag = is_a_transitory_roman_government }
-			add_realm_law_skip_effects = subroman_taxation_3
-		}
 		#Setup h_persia's clerical/shah authority
 		#Initally strong Clerical Influence and somewhat decent Secular Authority
 		title:h_persia.holder = {
@@ -102,7 +118,58 @@ BP_setup_realm_laws_476 = {
 		title:d_danes.holder = { add_realm_law_skip_effects = tribal_authority_1 }
 	}
 }
-BP_setup_vassal_contracts_476 = {
+BP_setup_realm_laws_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#Roman Diarchy Laws
+		title:h_eastern_roman_empire.holder = { add_realm_law_skip_effects = roman_chancellor_law }
+		title:h_western_roman_empire.holder = { add_realm_law_skip_effects = roman_marshal_law }
+		#Barbarian State Roman Orientations
+		title:k_visigoths.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_2 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_suebia.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_2 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_burgundians.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_vandalica.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_0 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:k_altava.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:d_auresia.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_3 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+		title:d_triveria.holder = {
+			add_law_if_not_has_it_dont_skip_effect = { LAW = non_roman_minority_rule_law_4 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_salary_40 }
+			add_law_if_not_has_it_dont_skip_effect = { LAW = budget_allocation_military_40 }
+			remove_variable = non_roman_minority_rule_law_cooldown
+		}
+	}
+}
+BP_setup_vassal_contracts_476_feb = {
 	effect = {
 		every_ruler = {
 			if = { #k_mazandaran always has great rights
@@ -152,7 +219,7 @@ BP_setup_vassal_contracts_476 = {
 					liege.primary_title = title:e_rajastan
 					primary_title.tier >= tier_duchy
 					NOT = { this.primary_title = title:e_rajastan } #Excluded the holder of rajasthan (not a vassal)
-					government_has_flag = government_uses_rajamandala_authority
+					government_has_flag = government_is_rajamandala
 				}
 				debug_log_scopes = no
 				vassal_contract_set_obligation_level = {
@@ -192,6 +259,144 @@ BP_setup_vassal_contracts_476 = {
 		}
 	}
 }
+BP_setup_vassal_contracts_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#Remnant Limitanei
+		title:d_noricum_ripense.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		title:d_moesia_prima.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		title:d_verodunum.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		title:d_noviodunum.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_limitanei_value
+			}
+		}
+		
+		##### Sub-Roman Military Titles
+		
+		#Vandalica
+		title:d_numidia.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_caesariensis.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		
+		#Visigothica
+		title:d_catalonia.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_upper_durius.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_toletum.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_novempopulana.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		title:d_aquitanica_secunda.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		
+		#Suebia
+		title:d_suebi_hermengegarius.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+		
+		#Burgundia
+		title:d_alpes_poeninae.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_military_landed
+				level = roman_administrative_military_landed_0
+			}
+		}
+	}
+}
+
+BP_starting_state_faiths_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:h_eastern_roman_empire = { set_state_faith = faith:nicene }
+	}
+}
+
 BP_setup_landless_chars_476 = {
 	effect = {
 		#Hormidak's camp gets some oomph
@@ -693,7 +898,6 @@ BP_remove_claims_476 = {
 		}
 	}
 }
-
 BP_senate_476_feb = {
 	effect = {
 		#Western Emperor and Consuls
@@ -727,31 +931,6 @@ BP_create_theodoric_armies_476 = {
 	}
 }
 
-BP_cull_MAA_476 = {
-	effect = {
-		title:h_western_roman_empire.holder = {
-			#Remove the existing MAA
-			every_maa_regiment = { destroy_maa_regiment = yes }
-			#Add an honor guard, some conscripts, and a seige weapon
-			create_maa_regiment = {
-				type = praetorian
-				check_can_recruit = yes
-				size = 3
-			}
-			create_maa_regiment = {
-				type = light_footmen
-				check_can_recruit = yes
-				size = 2
-			}
-			create_maa_regiment = {
-				type = ballista
-				check_can_recruit = yes
-				size = 1
-			}
-		}
-	}
-}
-
 BP_setup_tributaries_476_feb = {
 	effect = {
 		if = {
@@ -761,238 +940,358 @@ BP_setup_tributaries_476_feb = {
 	}
 }
 
-on_game_start_after_lobby = { on_actions = { bp_game_start_after_lobby_476 } }
-
-bp_game_start_after_lobby_476 = {
-	trigger = { current_date = 476.2.2 }
-	on_actions = {
-		# Culture stuff
-		BP_starting_culture_acceptance_476
-		BP_update_specific_title_courtiers_476
-		BP_cull_MAA_476
-		BP_reduce_hunnic_herd_476
-	}
-	effect = {
-		trigger_event = { on_action = BP_update_specific_title_courtiers_476 delayed = yes }
-	}
-}
-
-BP_starting_culture_acceptance_476 = {
-	effect = {
-		#Persian Empire
-		culture:persian = {
-			set_cultural_acceptance = {
-				target = culture:parthian
-				value = 100
-			}
-			set_cultural_acceptance = {
-				target = culture:bactrian
-				value = 100
-			}
-			set_cultural_acceptance = {
-				target = culture:mazanderani
-				value = 83
-			}
-			set_cultural_acceptance = {
-				target = culture:median
-				value = 72
-			}
-			set_cultural_acceptance = {
-				target = culture:cyrtian
-				value = 60
-			}
-			set_cultural_acceptance = {
-				target = culture:caucasian_albanian
-				value = 60
-			}
-			set_cultural_acceptance = {
-				target = culture:daylamite
-				value = 57
-			}
-			set_cultural_acceptance = {
-				target = culture:adnanite
-				value = 48
-			}
-			set_cultural_acceptance = {
-				target = culture:aramean
-				value = 20
-			}
-			set_cultural_acceptance = {
-				target = culture:corduenian
-				value = 42
-			}
-			set_cultural_acceptance = {
-				target = culture:georgian
-				value = 42
-			}
-			set_cultural_acceptance = {
-				target = culture:armenian
-				value = 35
-			}
-			set_cultural_acceptance = {
-				target = culture:adhari
-				value = 35
-			}
-			set_cultural_acceptance = {
-				target = culture:afghan
-				value = 31
-			}
-			set_cultural_acceptance = {
-				target = culture:khalan
-				value = 29
-			}
-			set_cultural_acceptance = {
-				target = culture:romano_aramean
-				value = 24
-			}
-			set_cultural_acceptance = {
-				target = culture:assyrian
-				value = 6
-			}
-		}
-		#ERE
-		culture:greek = {
-			set_cultural_acceptance = {
-				target = culture:helleno_thracian
-				value = 100
-			}
-			set_cultural_acceptance = {
-				target = culture:phrygian
-				value = 92
-			}
-			set_cultural_acceptance = {
-				target = culture:pontic
-				value = 90
-			}
-			set_cultural_acceptance = {
-				target = culture:illyrian
-				value = 88
-			}
-			set_cultural_acceptance = {
-				target = culture:lazic
-				value = 84
-			}
-			set_cultural_acceptance = {
-				target = culture:cappadocian
-				value = 80
-			}
-			set_cultural_acceptance = {
-				target = culture:armenian
-				value = 77
-			}
-			set_cultural_acceptance = {
-				target = culture:thracian
-				value = 73
-			}
-			set_cultural_acceptance = {
-				target = culture:helleno_coptic
-				value = 72
-			}
-			set_cultural_acceptance = {
-				target = culture:tsakonian
-				value = 71
-			}
-			set_cultural_acceptance = {
-				target = culture:galatian
-				value = 73
-			}
-			set_cultural_acceptance = {
-				target = culture:romano_thracian
-				value = 70
-			}
-			set_cultural_acceptance = {
-				target = culture:helleno_libyan
-				value = 64
-			}
-			set_cultural_acceptance = {
-				target = culture:khalan
-				value = 62
-			}
-			set_cultural_acceptance = {
-				target = culture:nabatean
-				value = 60
-			}
-			set_cultural_acceptance = {
-				target = culture:isaurian
-				value = 40
-			}
-			set_cultural_acceptance = {
-				target = culture:romano_illyrian
-				value = 40
-			}
-			set_cultural_acceptance = {
-				target = culture:adnanite
-				value = 36
-			}
-			set_cultural_acceptance = {
-				target = culture:romano_aramean
-				value = 23
-			}
-			set_cultural_acceptance = {
-				target = culture:aramean
-				value = 23
-			}
-			set_cultural_acceptance = {
-				target = culture:persian
-				value = 23
-			}
-			set_cultural_acceptance = {
-				target = culture:copt
-				value = 15
-			}
-		}
-		#OTHERS
-		culture:parthian = {
-			set_cultural_acceptance = {
-				target = culture:caucasian_albanian
-				value = 16
-			}
-		}
-	}
-}
-
-BP_update_specific_title_courtiers_476 = {
-	effect = {
-		title:d_laamp_severinus_of_noricum.holder ?= {
-			every_courtier_or_guest = { #Make the rest of the camp followers of his faith
-				if = {
-					limit = { NOT = { this.faith = prev.faith } }
-					set_character_faith = prev.faith
-				}
-			}
-		}
-		title:d_laamp_ajax_of_suebia.holder ?= {
-			every_courtier_or_guest = { #Make the rest of the camp followers of his faith
-				if = {
-					limit = { NOT = { this.faith = prev.faith } }
-					set_character_faith = prev.faith
-				}
-			}
-		}
-	}
-}
-
-BP_setup_confederations_476_feb = {
-	effect = {
-		create_starting_confederation_476_effect = yes
-	}
-}
-
-BP_reduce_hunnic_herd_476 = {
-	effect = {
-		#The Huns are on the downward slope, so cut their herd tremendously
-		title:e_hunnic_empire.holder.domicile ?= {
-			change_herd = {
-				value = this.herd
-				multiply = -0.50
-			}
-		}
-	}
-}
 BP_setup_capitals_476_feb = {
 	effect = {
 		title:d_werle = {
 			set_capital_county = title:c_mecklenburg
+		}
+	}
+}
+
+on_game_start_after_lobby = { on_actions = { bp_game_start_after_lobby_476_feb } }
+
+bp_game_start_after_lobby_476_feb = {
+	trigger = { current_date = 476.2.2 }
+	on_actions = {
+		#Laws & Obligations
+		BP_setup_roman_border_troops_476_feb_DLC
+		BP_setup_federate_troops_476_feb_DLC
+		BP_setup_roman_council_476_feb
+		BP_setup_other_councils_476_feb
+		BP_set_employers_476_feb_no_DLC
+		BP_set_armies_476_feb_DLC
+		BP_cull_MAA_476_feb
+	}
+}
+
+BP_setup_roman_border_troops_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:d_noricum_ripense.holder = {
+			title:d_noricum_ripense = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_noricum_ripense
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_noricum_ripense
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_noricum_ripense
+			}
+		}
+		title:d_moesia_prima.holder = {
+			title:d_moesia_prima = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_moesia_prima
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_moesia_prima
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_moesia_prima
+			}
+		}
+		title:d_celtica.holder = {
+			title:d_celtica = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_celtica
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_celtica
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_celtica
+			}
+		}
+		title:d_verodunum.holder = {
+			title:d_verodunum = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_verodunum
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_verodunum
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 1
+				title = title:d_verodunum
+			}
+		}
+	}
+}
+
+BP_setup_federate_troops_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:d_orleans.holder = {
+			title:d_orleans = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans
+			}
+			create_maa_regiment = {
+				type = horse_archers
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+				title = title:d_orleans
+			}
+		}
+	}
+}
+
+
+BP_setup_roman_council_476_feb = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		#WRE
+		title:h_western_roman_empire.holder = {
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_military_wre.holder
+				POSITION = councillor_marshal_roman
+			}
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_offices_wre.holder
+				POSITION = councillor_chancellor_roman
+			}
+		}
+		title:e_magister_offices_wre.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
+			}
+		}
+		title:e_magister_military_wre.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_military_value
+			}
+		}
+		
+		#ERE
+		title:h_eastern_roman_empire.holder = {
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_military_ere.holder
+				POSITION = councillor_marshal_roman
+			}
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = title:e_magister_offices_ere.holder
+				POSITION = councillor_chancellor_roman
+			}
+		}
+		title:e_magister_offices_ere.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_civilian_value
+			}
+		}
+		title:e_magister_military_ere.holder = {
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_ministry_military_value
+			}
+		}
+	}
+}
+
+BP_setup_other_councils_476_feb = {
+	effect = {
+		#PLRE2 Gamuth was a steward-type role under Gaiseric
+		title:k_vandalica.holder = {
+			make_councilor_of_type_if_not_already_effect = {
+				TARGET_CHAR = character:36066
+				POSITION = councillor_steward
+			}
+		}
+	}
+}
+
+BP_set_armies_476_feb_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+	effect = {
+		title:e_magister_military_wre.holder = {
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 4
+				title = title:e_magister_military_wre
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 4
+				title = title:e_magister_military_wre
+			}
+			create_maa_regiment = {
+				type = armored_horsemen
+				check_can_recruit = no
+				size = 2
+				title = title:e_magister_military_wre
+			}
+			create_maa_regiment = {
+				type = ballista
+				check_can_recruit = no
+				size = 1
+				title = title:e_magister_military_wre
+			}
+		}
+		title:e_magister_military_ere.holder = {
+			#Create the WRE MM Army
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 8
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 6
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = light_horsemen
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = armored_horsemen
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+			create_maa_regiment = {
+				type = ballista
+				check_can_recruit = no
+				size = 5
+				title = title:e_magister_military_ere
+			}
+		}
+		title:k_soissons.holder = {
+			title:k_soissons = { every_title_maa_regiment = { destroy_maa_regiment = yes } }
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = bowmen
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+			create_maa_regiment = {
+				type = pikemen_unit
+				check_can_recruit = no
+				size = 5
+				title = title:k_soissons
+			}
+		}
+	}
+}
+
+BP_set_employers_476_feb_no_DLC = {
+	trigger = { BP_has_dlc_necessary_for_roman_governments_trigger = no }
+	#Otherwise landed chars should be sent to employers
+	effect = {
+		character:1100013 = { set_employer = character:145226 } #Basilicus
+	}
+}
+
+BP_cull_MAA_476_feb = {
+	effect = {
+		title:h_western_roman_empire.holder = {
+			#Remove the existing MAA
+			every_maa_regiment = { destroy_maa_regiment = yes }
+			#Add an honor guard, some conscripts, and a siege weapon
+			create_maa_regiment = {
+				type = praetorian
+				check_can_recruit = no
+				size = 3
+			}
+			create_maa_regiment = {
+				type = light_footmen
+				check_can_recruit = no
+				size = 2
+			}
+			create_maa_regiment = {
+				type = ballista
+				check_can_recruit = no
+				size = 1
+			}
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿##### Changed from Vanilla: Blocked Centralized Governments from taking this decision
+﻿##### Changed from Vanilla: Blocked Centralized Governments, Roman Federates from taking this decision
 convert_to_administrative_decision = {
 	picture = {
 		trigger = {
@@ -71,6 +71,7 @@ convert_to_administrative_decision = {
 		}
 		##### Changed from Vanilla vvvvv
 		NOT = { government_has_flag = government_is_centralized }
+		NOT = { government_has_flag = government_is_quasi_feudal }
 		##### Changed from Vanilla ^^^^^
 	}
 	##### Changed from Vanilla ^^^^^
@@ -600,5 +601,506 @@ convert_to_administrative_decision = {
 			}
 			add = 100
 		}
+	}
+}
+
+##### Changed from Vanilla: Blocked Quasi-Feudal governments from taking this decision
+renounce_governorship_decision = {
+	picture = {
+		trigger = {
+			government_allows = merit
+		}
+		reference = "gfx/interface/illustrations/decisions/tgp_retire.dds"
+	}
+	picture = {
+		trigger = {
+			government_is_japanese_trigger = yes
+		}
+		reference = "gfx/interface/illustrations/decisions/tgp_house_fief.dds"
+	}
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	sort_order = 85
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 120
+		duchy = 120
+		kingdom = 120
+		empire = 120
+		hegemony = 0
+	}
+
+	desc = {
+		first_valid = {
+			triggered_desc = {	
+				trigger = {
+					government_allows = merit
+				}
+				desc = renounce_governorship_decision_desc_merit
+			}
+			triggered_desc = {	
+				trigger = {
+					government_is_japanese_trigger = yes
+				}
+				desc = renounce_governorship_decision_desc_japan
+			}
+			desc = renounce_governorship_decision_desc
+		}
+	}
+	selection_tooltip = renounce_governorship_decision_tooltip
+	decision_group_type = admin
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		is_playable_character = yes
+		OR = {
+			is_governor_or_admin_count = yes
+			tgp_is_any_minister = yes
+		}
+		##### Changed from Vanilla vvvvv
+		NOT = { government_has_flag = government_is_quasi_feudal }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid_showing_failures_only = {
+		is_available_adult = yes
+		is_at_war_with_liege = no
+		custom_tooltip = {
+			text = renounce_governorship_family_title_tt
+			any_held_title = { # To avoid accidentally game-overing yourself
+				is_noble_family_title = yes
+			}
+		}
+	}
+
+	effect = {
+		custom_tooltip = renounce_governorship_decision_effect_tt
+		show_as_tooltip = {
+			tgp_step_down_title_recipient_tooltip_effect = yes
+			if = {
+				limit = {
+					government_allows = merit 
+				}
+				add_character_modifier = {
+					modifier = ep3_renounced_governorship_merit
+					years = 15
+				}
+				set_appointment_timeout = {
+					years = 3
+					desc = appointment_timeout_desc_retired_governor
+				}
+			}
+			else_if = {
+				limit = {
+					government_is_japanese_trigger = yes
+				}
+				add_gold = major_gold_value
+				change_influence = major_influence_value
+				add_character_modifier = {
+					modifier = renounced_governorship_japan
+					years = 15
+				}
+			}
+			else = { 
+				add_gold = massive_gold_value
+				add_character_modifier = {
+					modifier = ep3_renounced_governorship
+					years = 15
+				}
+			}
+			if = {
+				limit = {
+					tgp_is_any_minister = yes
+				}
+				liege = { save_scope_as = councillor_liege } # Needed for the effect
+				fired_minister_position_effect = yes
+			}
+		}
+		trigger_event = ep3_decisions_event.4090
+		close_view = {
+			view = decisions
+			player = root
+		}
+	}
+	
+	cost = {
+		influence = minor_influence_value
+	}
+
+	ai_potential = {
+		is_at_war = no
+		highest_held_title_tier >= main_administrative_tier
+		# Don't step down freely if you don't have any other house members holding a governorship or inherit any held governorship
+		OR = {
+			house ?= {
+				any_house_member = {
+					is_governor = yes
+					top_liege = root.top_liege
+				}
+			}
+			any_held_title = {
+				title_tier >= duchy
+				is_noble_family_title = no
+				current_heir.house = root.house
+			}
+		}
+	}
+
+	ai_will_do = {
+		base = 0
+		modifier = {
+			add = 5
+			has_trait = lazy
+			NOT = {
+				any_character_situation = {
+					situation_type = dynastic_cycle
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			has_trait = humble
+			NOT = {
+				any_character_situation = {
+					situation_type = dynastic_cycle
+				}
+			}
+		}
+		modifier = {
+			add = 15
+			has_trait = content
+			NOT = {
+				any_character_situation = {
+					situation_type = dynastic_cycle
+				}
+			}
+		}
+		modifier = {
+			add = 50
+			OR = {
+				debt_level > 1
+				treasury_debt_level > 1
+			}
+		}
+		modifier = {
+			add = 5
+			OR = {
+				has_trait = ambitious
+				has_trait = greedy
+				has_trait = arrogant
+			}
+			any_character_situation = {
+				situation_type = dynastic_cycle
+			}
+		}
+		modifier = {
+			factor = 0
+			OR = {
+				has_trait = ambitious
+				has_trait = greedy
+				has_trait = arrogant
+			}
+			NOT = {
+				any_character_situation = {
+					situation_type = dynastic_cycle
+				}
+			}
+		}
+		modifier = {
+			factor = 0 #In China you should step down only if you can pass more exams
+			has_character_flag = passed_metropolitan_exam
+		}
+	}
+}
+
+##### Changed from Vanilla: Roman Governments, Centralized Governments from taking this decision
+convert_to_feudalism_from_administrative_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_realm.dds"
+	}
+	decision_group_type = major
+	desc = convert_to_feudalism_from_administrative_decision_desc
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		trigger_if = {
+			limit = { has_title = title:h_china }
+			NOT = { government_has_flag = government_is_celestial }
+		}
+		government_allows = administrative
+		tgp_is_ceremonial_liege_trigger = no
+		tgp_is_ceremonial_regent_trigger = no
+		tgp_is_any_minister = no
+		# Ritsuryo gov has its own decisions
+		NOT = { government_has_flag = government_is_japan_administrative }
+		##### Changed from Vanilla vvvvv
+		NOT = { government_has_flag = government_is_roman_federate }
+		NOT = { government_has_flag = government_is_centralized }
+		##### Changed from Vanilla ^^^^^
+	}
+	##### Changed from Vanilla ^^^^^
+
+	is_valid = {
+		is_landed = yes
+		trigger_if = {
+			limit = {
+				is_independent_ruler = no
+			}
+			top_liege ?= {
+				trigger_if = {
+					limit = {
+						has_realm_law_in_group = imperial_bureaucracy
+					}
+					has_realm_law = imperial_bureaucracy_0 
+				}
+				trigger_if = {
+					limit = {
+						has_realm_law_in_group = celestial_bureaucracy
+					}
+					has_realm_law = celestial_bureaucracy_0 
+				}
+				trigger_if = {
+					limit = {
+						has_realm_law_in_group = meritocratic_bureaucracy
+					}
+					has_realm_law = meritocratic_bureaucracy_0 
+				}
+				trigger_if = {
+					limit = {
+						has_realm_law_in_group = japanese_bureaucracy
+					}
+					has_realm_law = japanese_bureaucracy_0 
+				}
+			}
+			custom_tooltip = {
+				text = governorship_is_on_the_border_tt
+				any_sub_realm_county = {
+					any_neighboring_county = {
+						holder.top_liege != root.top_liege
+					}
+				}
+			}
+			custom_tooltip = {
+				text = you_have_governorship_rights_tt
+				primary_title.var:petition_house_rights ?= house
+			}
+			prestige_level >= 3
+			influence_level >= 3
+		}
+		trigger_else = {
+			prestige_level >= { # Depends on tier
+				value = 2
+				if = {
+					limit = {
+						primary_title.tier >= tier_empire
+					}
+					add = 1
+				}
+			}
+			trigger_if = {
+				limit = {
+					has_realm_law_in_group = imperial_bureaucracy
+				}
+				has_realm_law = imperial_bureaucracy_3
+			}
+			trigger_if = {
+				limit = {
+					has_realm_law_in_group = celestial_bureaucracy
+				}
+				has_realm_law = celestial_bureaucracy_3
+			}
+			trigger_if = {
+				limit = {
+					has_realm_law_in_group = meritocratic_bureaucracy
+				}
+				has_realm_law = meritocratic_bureaucracy_3 
+			}
+			trigger_if = {
+				limit = {
+					has_realm_law_in_group = japanese_bureaucracy
+				}
+				has_realm_law = japanese_bureaucracy_3
+			}
+		}
+	}
+
+	cost = {
+		prestige = 1000
+		gold = {
+			value = 0
+			if = {
+				limit = {
+					has_treasury = no
+				}
+				add = 1000 #Them pens be expensive
+				#Realm size
+				if = {
+					limit = { root.realm_size >= 300 }
+					multiply = 3.5
+				}
+				else_if = {
+					limit = { root.realm_size >= 250 }
+					multiply = 3
+				}
+				else_if = {
+					limit = { root.realm_size >= 200 }
+					multiply = 2.5
+				}
+				else_if = {
+					limit = { root.realm_size >= 150 }
+					multiply = 2
+				}
+				else_if = {
+					limit = { root.realm_size >= 100 }
+					multiply = 1.5
+				}
+				#Era
+				culture = {
+					if = {
+						limit = { has_cultural_era_or_later = culture_era_late_medieval }
+						multiply = 1.75
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_high_medieval }
+						multiply = 1.25
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_early_medieval }
+						multiply = 1
+					}
+					else = {
+						multiply = 0.75
+					}
+				}
+				#Income
+				if = {
+					limit = { root.monthly_character_income >= 100 }
+					multiply = 3
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 80 }
+					multiply = 2.5
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 60 }
+					multiply = 2
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 40 }
+					multiply = 1.5
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 20 }
+					multiply = 1.1
+				}
+				
+				# Vassals has a slightly reduced cost
+				if = {
+					limit = {
+						is_independent_ruler = no
+					}
+					multiply = 0.7
+				}
+			}
+		}
+		treasury = {
+			value = 0
+			if = {
+				limit = {
+					has_treasury = yes
+				}
+				add = 1000  #Them pens be expensive
+				#Realm size
+				if = {
+					limit = { root.realm_size >= 300 }
+					multiply = 3.5
+				}
+				else_if = {
+					limit = { root.realm_size >= 250 }
+					multiply = 3
+				}
+				else_if = {
+					limit = { root.realm_size >= 200 }
+					multiply = 2.5
+				}
+				else_if = {
+					limit = { root.realm_size >= 150 }
+					multiply = 2
+				}
+				else_if = {
+					limit = { root.realm_size >= 100 }
+					multiply = 1.5
+				}
+				#Era
+				culture = {
+					if = {
+						limit = { has_cultural_era_or_later = culture_era_late_medieval }
+						multiply = 1.75
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_high_medieval }
+						multiply = 1.25
+					}
+					else_if = {
+						limit = { has_cultural_era_or_later = culture_era_early_medieval }
+						multiply = 1
+					}
+					else = {
+						multiply = 0.75
+					}
+				}
+				#Income
+				if = {
+					limit = { root.monthly_character_income >= 100 }
+					multiply = 3
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 80 }
+					multiply = 2.5
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 60 }
+					multiply = 2
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 40 }
+					multiply = 1.5
+				}
+				else_if = {
+					limit = { root.monthly_character_income >= 20 }
+					multiply = 1.1
+				}
+				
+				# Vassals has a slightly reduced cost
+				if = {
+					limit = {
+						is_independent_ruler = no
+					}
+					multiply = 0.7
+				}
+			}
+		}
+	}
+
+	effect = {
+		convert_to_feudalism_from_administrative_effect = yes
+		save_scope_as = actor
+		trigger_event = ep3_decisions_event.4070
+		hidden_effect = {
+			every_vassal = {
+				trigger_event = {
+					id = ep3_decisions_event.4075
+					days = 3
+				}
+			}
+		}
+	}
+
+	ai_check_interval = 0
+
+	ai_potential = {
+		always = no
 	}
 }

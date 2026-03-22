@@ -97,9 +97,21 @@ BP_maintenance_events.0002 = {
 		#Make Romulus Augustulus' Diarchy entrenched and give him senatorial approval
 		if = {
 			limit = { is_landed_alive_ruler = { CHAR = character:96054 } }
-			character:96054 = {
-				try_start_diarchy = regency
-				set_diarchy_swing = 50
+			if = {
+				limit = {
+					has_dlc_feature = all_under_heaven
+					has_dlc_feature = roads_to_power
+				}
+				character:96054 = {
+					try_start_diarchy = roman_admin_premier
+					set_diarchy_swing = 50
+				}
+			}
+			else = {
+				character:96054 = {
+					try_start_diarchy = regency
+					set_diarchy_swing = 50
+				}
 			}
 			character:96054 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:96054 } }
 		}
@@ -119,52 +131,4 @@ BP_maintenance_events.0002 = {
 			character:70515 = { update_all_senate_opinion_about_character_effect = { ACTOR = character:70515 } }
 		}
 	}
-}
-
-scripted_effect update_federate_modifiers_specific_effect = {
-	#Tributary
-	if = {
-		limit = { has_character_modifier = federate_federate_subsidy_modifier }
-		remove_character_modifier = federate_federate_subsidy_modifier
-	}
-	if = {
-		limit = { has_character_modifier = federate_federate_military_modifier }
-		remove_character_modifier = federate_federate_military_modifier
-	}
-	if = {
-		limit = {
-			is_tributary = yes
-			has_subject_contract_group = BP_federate_tributary
-		}
-		add_character_modifier = federate_federate_subsidy_modifier
-		add_character_modifier = federate_federate_military_modifier
-	}
-	
-	#Suzerain removal
-	if = {
-		limit = { has_character_modifier = suzerain_federate_subsidy_modifier }
-		remove_character_modifier = suzerain_federate_subsidy_modifier
-	}
-	if = {
-		limit = { has_character_modifier = suzerain_federate_military_multiplier }
-		remove_character_modifier = suzerain_federate_military_multiplier
-	}
-	if = {
-		limit = {
-			any_tributary = {
-				count >= 1
-				has_subject_contract_group = BP_federate_tributary
-			}
-		}
-		add_character_modifier = suzerain_federate_subsidy_modifier
-		add_character_modifier = suzerain_federate_military_multiplier
-	}
-}
-
-#Applies the tributary modifers
-BP_maintenance_events.1000 = {
-	hidden = yes
-	content_source = dlc_WtWSMS
-	
-	immediate = { update_federate_modifiers_specific_effect = yes }
 }

@@ -50,22 +50,31 @@ ep3_become_landed_transfer_effect = {
 		switch = {
 			trigger = government_has_flag
 			##### Changed from Vanilla vvvvv
-			government_uses_high_tribal_organization = {
+			government_is_roman_administrative = {
+				save_scope_value_as = { name = old_government value = flag:roman_administrative }
+			}
+			government_is_roman_federate = {
+				save_scope_value_as = { name = old_government value = flag:roman_federate }
+			}
+			government_is_subroman_administrative = {
+				save_scope_value_as = { name = old_government value = flag:subroman_administrative }
+			}
+			government_is_high_tribal = {
 				save_scope_value_as = { name = old_government value = flag:high_tribal }
 			}
-			government_uses_prefeudal_authority = {
+			government_is_prefeudal = {
 				save_scope_value_as = { name = old_government value = flag:prefeudal }
 			}
-			government_uses_rajamandala_authority = {
+			government_is_rajamandala = {
 				save_scope_value_as = { name = old_government value = flag:rajamandala }
 			}
-			government_uses_iranian_dynastic_authority = {
+			government_is_iranian_dynastic = {
 				save_scope_value_as = { name = old_government value = flag:iranian_dynastic }
 			}
-			is_a_transitory_roman_government = {
+			government_is_subroman_dynastic = {
 				save_scope_value_as = { name = old_government value = flag:subroman_dynastic }
 			}
-			government_uses_roman_dynastic_authority = {
+			government_is_roman_dynastic = {
 				save_scope_value_as = { name = old_government value = flag:roman_dynastic }
 			}
 			##### Changed from Vanilla ^^^^^
@@ -258,6 +267,15 @@ ep3_become_landed_transfer_effect = {
 		switch = {
 			trigger = scope:old_government
 			##### Changed from Vanilla vvvvv
+			flag:roman_administrative = {
+				change_government = roman_administrative_government
+			}
+			flag:roman_federate = {
+				change_government = roman_federate_government
+			}
+			flag:subroman_administrative = {
+				change_government = subroman_administrative_government
+			}
 			flag:high_tribal = {
 				change_government = high_tribal_government
 			}
@@ -375,7 +393,7 @@ ep3_become_landed_transfer_effect = {
 			if = { #Pre-Feudal
 				limit = {
 					OR = {
-						government_has_flag = government_uses_prefeudal_authority
+						government_has_flag = government_is_prefeudal
 						scope:old_government ?= flag:prefeudal
 					}
 				}
@@ -385,7 +403,7 @@ ep3_become_landed_transfer_effect = {
 			else_if = { #Rajamandala
 				limit = {
 					OR = {
-						government_has_flag = government_uses_rajamandala_authority
+						government_has_flag = government_is_rajamandala
 						scope:old_government ?= flag:rajamandala
 					}
 				}
@@ -395,7 +413,7 @@ ep3_become_landed_transfer_effect = {
 			else_if = { #Iran-Dynastic
 				limit = {
 					OR = {
-						government_has_flag = government_uses_iranian_dynastic_authority
+						government_has_flag = government_is_iranian_dynastic
 						scope:old_government ?= flag:iranian_dynastic
 					}
 				}
@@ -405,7 +423,7 @@ ep3_become_landed_transfer_effect = {
 			else_if = { #Sub-Roman Dynastic
 				limit = {
 					OR = {
-						government_has_flag = is_a_transitory_roman_government
+						government_has_flag = government_is_subroman_dynastic
 						scope:old_government ?= flag:sub_roman_dynastic
 					}
 				}
@@ -415,7 +433,7 @@ ep3_become_landed_transfer_effect = {
 			else_if = { #Sub-Roman Dynastic
 				limit = {
 					OR = {
-						government_has_flag = government_uses_roman_dynastic_authority
+						government_has_flag = government_is_roman_dynastic
 						scope:old_government ?= flag:roman_dynastic
 					}
 				}
@@ -425,12 +443,42 @@ ep3_become_landed_transfer_effect = {
 			else_if = { #High-Tribal
 				limit = {
 					OR = {
-						government_has_flag = government_uses_high_tribal_organization
+						government_has_flag = government_is_high_tribal
 						scope:old_government ?= flag:high_tribal
 					}
 				}
 				change_government = high_tribal_government
 				add_realm_law = high_tribal_organization_0
+			}
+			else_if = { #Roman Administrative
+				limit = {
+					OR = {
+						government_has_flag = government_is_roman_administrative
+						scope:old_government ?= flag:roman_administrative
+					}
+				}
+				change_government_roman_administrative_effect = yes
+				add_realm_law = imperial_bureaucracy_0
+			}
+			else_if = { #Roman Federate
+				limit = {
+					OR = {
+						government_has_flag = government_is_roman_federate
+						scope:old_government ?= flag:roman_federate
+					}
+				}
+				change_government_roman_federate_effect = yes
+				add_realm_law = imperial_bureaucracy_0
+			}
+			else_if = { #SubRoman Administrative
+				limit = {
+					OR = {
+						government_has_flag = government_is_subroman_administrative
+						scope:old_government ?= flag:subroman_administrative
+					}
+				}
+				change_government_subroman_administrative_effect = yes
+				add_realm_law = imperial_bureaucracy_0
 			}
 			##### Changed from Vanilla ^^^^^
 			
@@ -637,3 +685,170 @@ ep3_become_landed_transfer_effect = {
 }
 
 admin_government_reset_effect = {}
+
+##### Changed from Vanilla: Catch some additional new admin governments!
+create_noble_family_effect = {
+	debug_log = create_noble_family_title
+	save_scope_as = new_noble_family_holder
+	$GOVERNMENT_GIVER$ = { save_scope_as = government_giver }
+	hidden_effect = { # NF can only be held by house heads
+		if = { # Start by checking that we are not the house head already
+			limit = {
+				exists = house.house_head
+				NOT = { house.house_head = scope:new_noble_family_holder }
+			}
+			if = { # If not, let's see if it would be reasonable to become house head...
+				limit = {
+					house.house_head ?= {
+						is_ai = yes # Don't steal house head from a player
+						OR = {
+							# Within same realm but less important
+							AND = {
+								top_liege = scope:new_noble_family_holder.top_liege
+								OR = {
+									is_ruler = no
+									highest_held_title_tier < scope:new_noble_family_holder.highest_held_title_tier
+								}
+							}
+							# Wanderer
+							NOT = { exists = liege }
+						}
+					}
+				}
+				house = { set_house_head = scope:new_noble_family_holder }
+			}
+			else = { # ... Otherwise, we create a cadet branch
+				create_cadet_branch = {}
+			}
+		}
+	}
+	scope:government_giver = {
+		if = {
+			limit = {
+				scope:new_noble_family_holder = {
+					NOT = {
+						any_held_title = { is_noble_family_title = yes }
+					}
+				}
+			}
+			switch = {
+				trigger = has_government
+				japan_administrative_government = { # Japan has count level NFs
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = japan_administrative_government
+							save_scope_as = new_title
+						}
+					}
+				}
+				japan_feudal_government = { # Japan has count level NFs
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = japan_feudal_government
+							save_scope_as = new_title
+						}
+					}
+				}
+				celestial_government = { # China has different government
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = celestial_government
+							save_scope_as = new_title
+						}
+						trigger_event = {
+							id = tgp_china_career.0001
+							days = { 2 5 }
+						}
+					}
+				}
+				meritocratic_government = { # Meritocratic has different government
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = meritocratic_government
+							save_scope_as = new_title
+						}
+					}
+				}
+				steppe_admin_government = { # Steppe Admin has different government
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = steppe_admin_government
+							save_scope_as = new_title
+						}
+					}
+				}
+				##### Changed from Vanilla vvvvv
+				roman_administrative_government = {
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = roman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+				}
+				subroman_administrative_government = {
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = subroman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+				}
+				##### Changed from Vanilla ^^^^^
+				fallback = {
+					scope:new_noble_family_holder = {
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = duchy
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = administrative_government
+							save_scope_as = new_title
+						}
+					}
+				}
+			}
+		}
+		scope:new_title.holder ?= {
+			save_scope_as = noble_family_head
+			scope:new_title = { set_coa = scope:noble_family_head.house }
+		}
+		custom_description = { text = create_noble_family_tt }
+
+		#Notifications
+		every_player = {
+			limit = {
+				top_liege = scope:new_noble_family_holder.top_liege
+				this != scope:new_noble_family_holder
+				# China has hundreds of Noble Families, it gets spammy
+				NOT = { government_allows = merit }
+			}
+			trigger_event = {
+				id = ep3_emperor_yearly.2410
+				days = 1
+			}
+		}
+	}
+
+	debug_log_scopes = yes
+}

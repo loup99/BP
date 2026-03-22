@@ -24,7 +24,7 @@
 		# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
 		government_is_feudal
 		government_is_settled
-		government_uses_prefeudal_authority
+		government_is_prefeudal
 		can_hold_castles_and_tribes #Just informative
 		cannot_advance_beyond_late_antiquity_era #Just informative
 		
@@ -63,11 +63,11 @@ rajamandala_government = {
 	}
 
 	flags = {
+		government_is_rajamandala
 		may_elevate_co_monarch
 		government_is_centralized
 		government_is_settled
 		# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
-		government_uses_rajamandala_authority
 		vassals_must_give_titles_to_dynasty_members
 		
 		rajamandala_government_character_modifier
@@ -117,12 +117,12 @@ iranian_dynastic_government = {
 		can_hold_castles_and_cities
 		government_is_centralized
 		government_is_settled
-		government_uses_iranian_dynastic_authority
 		only_wuzurgan_can_be_councillors
 		righteous_counties_to_rightous_characters
 		titles_revert_to_top_liege_on_death
 		may_appoint_viziers #aka the Framadar
 		empires_use_mahestan_succession
+		government_is_iranian_dynastic
 		
 		iranian_dynastic_government_character_modifier
 	}
@@ -168,10 +168,10 @@ roman_dynastic_government = {
 		can_hold_castles_and_cities
 		titles_revert_to_top_liege_on_death
 		title_revocation_could_be_tyranny_free
-		government_uses_roman_dynastic_authority
-		government_only_valid_for_kingdoms_empires
+		government_only_valid_for_empires_hegemonies
 		empires_use_imperial_elective_succession
 		is_a_roman_government
+		government_is_roman_dynastic
 		
 		roman_dynastic_goverment_character_modifier
 	}
@@ -202,7 +202,19 @@ subroman_dynastic_government = {
 		use_legends = yes
 	}
 
-	character_modifier = {}
+	character_modifier = {
+		#Admin-style modifiers
+		levy_size = -0.5
+		men_at_arms_cap = -3
+		men_at_arms_limit = -3
+		knight_limit = -5
+		active_accolades = -1
+		title_creation_cost_mult = -0.5
+		mercenary_hire_cost_mult = 2
+		men_at_arms_maintenance = 0.5
+		
+		monthly_prestige_gain_mult = -0.40 #You're not actually a true roman government
+	}
 
 	flags = {
 		may_elevate_co_monarch
@@ -210,13 +222,322 @@ subroman_dynastic_government = {
 		government_is_settled
 		# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
 		can_hold_castles_and_cities
-		government_uses_roman_dynastic_authority
 		is_a_roman_government
 		empires_use_imperial_elective_succession
+		government_is_subroman_dynastic
+		government_is_subroman_administrative_or_dynastic
 		is_a_transitory_roman_government
 	}
 	
 	mechanic_type = feudal
 	
 	color = hsv{0.000 1.000 0.630 } #Roman culture color
+}
+
+#Administrative Roman Governments
+roman_administrative_government = {
+	government_rules = {
+		create_cadet_branches = yes
+		rulers_should_have_dynasty = yes
+		dynasty_named_realms = no
+		legitimacy = yes
+		
+		administrative = yes
+		admin_allows_holding_multiple_primary_tier_titles = yes #Allows NF titles
+		landless_playable = yes
+		
+		use_as_base_on_landed = yes
+		use_as_base_on_rank_up = yes
+		
+		state_faith = yes
+		treasury = yes
+		sticky_government = yes
+		
+		#subject_men_at_arms = no #Maybe we want this for auxiliaries?
+		inherit_from_dynastic_government = no
+		#deny_powerful_vassal = no #Maybe this is wanted?
+		
+		noble_families = yes
+		house_aspirations = yes
+		
+		replace_gold_cost_by_treasury = yes
+	}
+
+	royal_court = top_liege #Only the top liege's court actually matters
+	blocked_subject_courts = { meritocratic_government celestial_government japan_administrative_government administrative_government steppe_admin_government }
+
+	domicile_type = estate
+	main_administrative_tier = duchy
+	min_appointment_tier = duchy
+	minimum_provincial_maa_tier = duchy
+	administrative_title_maa_setup = vassals_and_top_liege
+
+	primary_holding = castle_holding
+	valid_holdings = { city_holding temple_citadel_holding }
+	required_county_holdings = { castle_holding city_holding church_holding }
+
+	vassal_contract_group = roman_administrative_vassal
+
+	can_get_government = {
+		#The LAAMP Construct Holding decision
+		trigger_if = {
+			limit = {
+				OR = {
+					has_variable = city_construction_is_temple_citadel
+					has_variable = city_construction_is_castle
+				}
+			}
+			always = no
+		}
+	}
+
+	character_modifier = {
+		domain_tax_mult = 0.25
+		domain_limit = 4
+		levy_size = -0.5
+		men_at_arms_cap = -4
+		men_at_arms_limit = -4
+		knight_limit = -5
+		vassal_limit = 100
+		active_accolades = -1
+		title_creation_cost_mult = -0.5
+		mercenary_hire_cost_mult = 2
+		men_at_arms_maintenance = 0.5
+	}
+
+	top_liege_character_modifier = {
+		# 85% of vassal income goes to the treasury
+		monthly_treasury_from_vassals = 0.85
+		men_at_arms_maintenance = 1.5
+		men_at_arms_recruitment_cost = 1
+	}
+
+	compatible_government_type_succession = { roman_federate_government }
+
+	# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
+	flags = {
+		government_only_valid_for_empires_hegemonies
+		
+		government_is_centralized
+		government_is_settled
+		government_is_roman_administrative
+		is_a_roman_government
+		
+		#government_is_administrative
+		government_has_county_tier_noble_families
+
+		# These flags only exist for loc and in-game descriptions
+		government_has_influence
+		government_has_treasury
+		government_has_title_men_at_arms
+		government_has_powerful_families
+		government_is_settled
+		government_uses_domicile_but_not_adventurer
+		government_uses_domain_limit
+		government_uses_admin_province_obligations
+	}
+
+	mechanic_type = administrative
+	is_mechanic_type_default = no
+
+	color = hsv{ 0.902 0.980 0.400 } #Tyrian Purple
+	realm_mask_offset = { 0.0 0.01 }
+	realm_mask_scale = { 1 1 }
+}
+
+#Basically, Laeti, Visigoths, Vandals
+#Territories that were basically tax-farmed out under Roman Admin Government
+#So Laeti and the various portions of Italy that were settled by Germanics
+roman_federate_government = {
+	government_rules = {
+		rulers_should_have_dynasty = yes
+		dynasty_named_realms = no
+		legitimacy = yes
+		
+		administrative = yes
+		landless_playable = yes
+		
+		use_as_base_on_landed = yes
+		use_as_base_on_rank_up = yes
+		
+		sticky_government = no
+		
+		inherit_from_dynastic_government = no
+		uses_culture_and_house_head_named_realms = yes
+		
+		noble_families = no
+	}
+
+	royal_court = top_liege #Only the top liege's court actually matters
+	blocked_subject_courts = { meritocratic_government celestial_government japan_administrative_government administrative_government steppe_admin_government }
+
+	main_administrative_tier = duchy
+	min_appointment_tier = duchy
+	minimum_provincial_maa_tier = duchy
+	administrative_title_maa_setup = vassals_and_top_liege
+
+	primary_holding = castle_holding
+	valid_holdings = { tribal_holding city_holding temple_citadel_holding }
+	required_county_holdings = { castle_holding city_holding church_holding }
+
+	compatible_government_type_succession = { subroman_administrative_government roman_administrative_government }
+
+	vassal_contract_group = roman_federate
+
+	can_get_government = {
+		top_liege = { government_has_flag = is_a_roman_government }
+		#The LAAMP Construct Holding decision
+		trigger_if = {
+			limit = {
+				OR = {
+					has_variable = city_construction_is_temple_citadel
+					has_variable = city_construction_is_castle
+				}
+			}
+			always = no
+		}
+	}
+
+	character_modifier = {
+		monthly_influence_mult = -0.5 #Much less politically invested
+		levy_size = -0.5
+		#The MAA caps get scaled based on landedness of the army, as are levies
+		men_at_arms_cap = -3
+		men_at_arms_limit = -3
+	}
+
+	top_liege_character_modifier = {}
+
+	# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
+	flags = {
+		government_is_roman_federate
+		is_a_roman_government
+
+		#Blocks grant governorships, succession nerf in Roman government, blocks withdrawing from governorship
+		government_is_quasi_feudal
+		#Flips to Tribal/High Tribal if independent
+		government_becomes_tribal_high_tribal_if_independent_or_not_under_roman
+
+		# These flags only exist for loc and in-game descriptions
+		government_is_settled
+		government_uses_domicile_but_not_adventurer
+		government_uses_domain_limit
+		government_uses_admin_province_obligations
+		government_has_county_tier_noble_families
+	}
+
+	mechanic_type = administrative
+	is_mechanic_type_default = no
+
+	color = hsv{ 0.100 0.900 0.500 } #Reddish
+	realm_mask_offset = { 0.0 0.01 }
+	realm_mask_scale = { 1 1 }
+}
+
+subroman_administrative_government = {
+	government_rules = {
+		create_cadet_branches = yes
+		rulers_should_have_dynasty = yes
+		dynasty_named_realms = no
+		legitimacy = yes
+		
+		administrative = yes
+		admin_allows_holding_multiple_primary_tier_titles = yes #Allows NF titles
+		landless_playable = yes
+		
+		use_as_base_on_landed = yes
+		use_as_base_on_rank_up = yes
+		
+		state_faith = yes
+		treasury = yes
+		sticky_government = yes
+		
+		inherit_from_dynastic_government = no
+		
+		noble_families = yes
+		house_aspirations = yes
+		
+		replace_gold_cost_by_treasury = yes
+	}
+
+	royal_court = top_liege #Only the top liege's court actually matters
+	blocked_subject_courts = { meritocratic_government celestial_government japan_administrative_government administrative_government steppe_admin_government }
+
+	domicile_type = estate
+	main_administrative_tier = duchy
+	min_appointment_tier = duchy
+	minimum_provincial_maa_tier = duchy
+	administrative_title_maa_setup = vassals_and_top_liege
+
+	primary_holding = castle_holding
+	valid_holdings = { city_holding temple_citadel_holding }
+	required_county_holdings = { castle_holding city_holding church_holding }
+
+	compatible_government_type_succession = { subroman_administrative_government }
+
+	vassal_contract_group = roman_administrative_vassal
+
+	can_get_government = {
+		#The LAAMP Construct Holding decision
+		trigger_if = {
+			limit = {
+				OR = {
+					has_variable = city_construction_is_temple_citadel
+					has_variable = city_construction_is_castle
+				}
+			}
+			always = no
+		}
+	}
+
+	character_modifier = {
+		levy_size = -0.5
+		men_at_arms_cap = -3
+		men_at_arms_limit = -3
+		knight_limit = -5
+		active_accolades = -1
+		title_creation_cost_mult = -0.5
+		mercenary_hire_cost_mult = 2
+		men_at_arms_maintenance = 0.5
+		
+		monthly_prestige_gain_mult = -0.40 #You're not actually a true roman government
+	}
+
+	top_liege_character_modifier = {
+		#monthly_treasury_from_vassals is handled via laws
+		men_at_arms_recruitment_cost = 1
+	}
+
+	compatible_government_type_succession = { roman_federate_government }
+
+	# Use flags instead of has_government for moddability if possible (i.e., wherever not visible to the player).
+	flags = {
+		government_is_centralized
+		government_is_settled
+		government_is_subroman_administrative
+		government_is_subroman_administrative_or_dynastic
+		is_a_roman_government
+		
+		#government_is_administrative
+		
+		is_a_transitory_roman_government
+
+		# These flags only exist for loc and in-game descriptions
+		government_has_influence
+		government_has_treasury
+		government_has_title_men_at_arms
+		government_has_powerful_families
+		government_is_settled
+		government_uses_domicile_but_not_adventurer
+		government_uses_domain_limit
+		government_uses_admin_province_obligations
+		government_has_county_tier_noble_families
+	}
+
+	mechanic_type = administrative
+	is_mechanic_type_default = no
+
+	color = hsv{0.000 1.000 0.630 } #Roman culture color
+	realm_mask_offset = { 0.0 0.01 }
+	realm_mask_scale = { 1 1 }
 }

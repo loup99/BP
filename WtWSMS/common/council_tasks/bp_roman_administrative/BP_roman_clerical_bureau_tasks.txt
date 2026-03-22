@@ -1,0 +1,693 @@
+﻿#councillor_clerical_bureau_director
+task_fabricate_claim_roman = { #Near-clone of task_conversion but made for stewardship
+	position = councillor_clerical_bureau_director
+
+	task_type = task_type_county
+	county_target = all
+	ai_county_target = neighbor_land
+	task_progress = task_progress_percentage
+	restart_on_finish = yes
+
+	asset = {
+		icon = "gfx/interface/icons/council_task_types/task_fabricate_claim.dds"
+		background = "gfx/interface/buttons/button_round_bg.dds"
+		frame = "gfx/interface/buttons/button_round_frame.dds"
+		glow = "gfx/particles/halo.dds"
+	}
+
+	effect_desc = {
+		desc = task_fabricate_claim_effect_desc
+
+		desc = {
+			desc = council_task_possible_side_effects
+			triggered_desc = {
+				trigger = {
+					stewardship > mediocre_skill_rating
+				}
+				desc = task_fabricate_claim_duchy_claim
+			}
+			triggered_desc = {
+				trigger = {
+					stewardship < high_skill_rating
+				}
+				desc = task_fabricate_claim_vassal_opinion_loss
+			}
+			triggered_desc = {
+				trigger = {
+					stewardship < high_skill_rating
+				}
+				desc = task_fabricate_claim_piety_loss
+			}
+			triggered_desc = {
+				trigger = {
+					stewardship < high_skill_rating
+				}
+				desc = task_fabricate_claim_upset_target
+			}
+		}
+	}
+
+	progress = {
+		value = 0
+		add = {
+			value = clerical_bureau_director_fabricate_claim_base
+			desc = clerical_bureau_director_PROGRESS_BASE
+		}
+		add = {
+			value = scope:councillor.clerical_bureau_director_fabricate_claim_monthly_increase_base
+			desc = SCALED_COUNCILLOR_STEWARDSHIP_VALUE
+		}
+		# Relation Bonuses/Penalties
+		if = { # Friend
+			limit = {
+				scope:councillor_liege = {
+					has_relation_friend = scope:councillor
+					NOT = { has_relation_best_friend = scope:councillor }
+				}
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_monthly_increase_friend_bonus
+				desc = COUNCILLOR_IS_YOUR_FRIEND
+			}
+		}
+		if = { # Best Friend
+			limit = {
+				scope:councillor_liege = {
+					has_relation_best_friend = scope:councillor
+				}
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_monthly_increase_best_friend_bonus
+				desc = COUNCILLOR_IS_YOUR_BEST_FRIEND
+			}
+		}
+		if = { # Rival
+			limit = {
+				scope:councillor_liege = {
+					has_relation_rival = scope:councillor
+					NOT = { has_relation_nemesis = scope:councillor }
+				}
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_monthly_increase_rival_bonus
+				desc = COUNCILLOR_IS_YOUR_RIVAL
+			}
+		}
+		if = { # Nemesis
+			limit = {
+				scope:councillor_liege = {
+					has_relation_nemesis = scope:councillor
+				}
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_monthly_increase_nemesis_bonus
+				desc = COUNCILLOR_IS_YOUR_NEMESIS
+			}
+		}
+
+		# Perk Bonuses
+		if = {
+			limit = {
+				scope:councillor_liege = { has_perk = accomplished_forger_perk }
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_perk_bonus_monthly_increase
+				desc = FABRICATE_CLAIM_PERK_BONUS_VALUE
+			}
+		}
+		if = {
+			limit = {
+				councillor_liege_has_erudition_legacy_5_perk = yes
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_dynasty_perk_bonus
+				desc = FABRICATE_CLAIM_DYNASTY_PERK_BONUS_VALUE
+			}
+		}
+		if = {
+			limit = {
+				councillor_liege_has_family_business_bonus = yes
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_family_business_bonus
+				desc = FAMILY_BUSINESS_BONUS_VALUE
+			}
+		}
+		if = {
+			limit = {
+				councillor_liege_has_consulted_house_bonus = yes
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_consulted_house_bonus
+				desc = FAMILY_BUSINESS_BONUS_VALUE
+			}
+		}
+
+		# Tradition Bonuses
+		if = {
+			limit = {
+				scope:councillor.liege = {
+					culture = {
+						has_cultural_parameter = languages_speed_up_claims
+					}
+				}
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_tradition_language_scholars_bonus
+				desc = FABRICATE_CLAIM_LANGUAGE_SCHOLARS_BONUS
+			}
+		}
+
+		if = { # Inspection Reward
+			limit = {
+				scope:councillor_liege = {
+					has_character_modifier = inspection_reward_focused_claims_modifier
+				}
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_inspection_reward_bonus
+				desc = FABRICATE_CLAIM_INSPECTION_BONUS
+			}
+		}
+
+		# Innovation Bonuses
+		if = {
+			limit = {
+				scope:councillor.liege = {
+					culture = {
+						has_innovation = innovation_land_grants
+					}
+				}
+			}
+			add = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_innovation_bonus_land_grants
+				desc = clerical_bureau_director_FABRICATE_CLAIM_INNOVATION_BONUS_LAND_GRANTS
+			}
+		}
+		if = {
+			limit = {
+				exists = scope:county
+				scope:county.holder.faith != scope:councillor.liege.faith
+			}
+			multiply = {
+				value = scope:councillor.clerical_bureau_director_heretic_bonus
+				desc = "clerical_bureau_director_FABRICATE_CLAIM_HERETIC_BONUS"
+			}
+		}
+		if = {
+			limit = {
+				exists = scope:county
+				NOT = {
+					scope:county = {
+						is_neighbor_to_realm = scope:councillor_liege
+					}
+				}
+			}
+			multiply = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_not_adjacent_penalty
+				desc = "clerical_bureau_director_FABRICATE_CLAIM_NOT_ADJACENT"
+			}
+		}
+		if = { #Progress penalty when fabricating on vassals
+			limit = {
+					exists = scope:county
+					scope:county.holder = {
+						target_is_liege_or_above = scope:councillor.liege 
+				}
+			}
+			multiply = {
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_vassal_penalty
+				desc = "clerical_bureau_director_FABRICATE_CLAIM_VASSAL_COUNTY"
+			}
+		}
+		# Misc Bonuses
+		if = { # FP3
+			limit = {
+				scope:councillor_liege = {
+					any_character_struggle = {
+						is_struggle_type = persian_struggle
+						is_struggle_phase = struggle_persia_phase_unrest
+					}
+				}
+			}
+			add = { # +25% of total
+				value = scope:councillor.clerical_bureau_director_fabricate_claim_base_total
+				divide = 4
+				desc = FABRICATE_CLAIM_ANY_STRUGGLE_BONUS
+			}
+		}
+		if = {
+			limit = {
+				scope:councillor_liege = {
+					has_title = title:c_byzantion
+					title:c_byzantion = { has_county_modifier = pandidakterion_university_modifier }
+				}
+			}
+			multiply = {
+				value = 1.3
+				desc = pandidakterion_university_modifier
+			}
+		}
+	}
+
+	potential_county = {
+		scope:county.holder.top_liege = {
+			in_diplomatic_range = scope:councillor_liege
+		}
+		scope:county = {
+			is_landless_type_title = no
+			NOR = {
+				holder = scope:councillor_liege
+				scope:councillor_liege = {
+					has_claim_on = scope:county
+				}
+			}
+		}
+	}
+
+	on_start_task_county = {
+		#spawn a task contract to counter the missionary, if a nearby adventurer has the same faith as the county
+		if = {
+			limit = {
+				any_task_contract = {
+					task_contract_type = laamp_help_fabricate_claim_contract
+					NOT = {	task_contract_location = scope:county.title_province }
+				}
+				any_player = {
+					has_government = landless_adventurer_government
+					is_within_diplo_range = { CHARACTER = scope:councillor }
+					any_character_task_contract = {
+						task_contract_type = laamp_help_fabricate_claim_contract
+						count <= council_task_contracts_limit_value
+					}
+					can_create_task_contract = {
+						type_name = laamp_help_fabricate_claim_contract
+						employer = scope:councillor
+					}
+					save_temporary_scope_as = player_laamp
+				}
+			}
+			scope:player_laamp = {
+				create_task_contract = {
+					task_contract_type = laamp_help_fabricate_claim_contract
+					task_contract_tier = scope:councillor.task_contract_tier_value
+					location = scope:county.title_province
+					task_contract_employer = scope:councillor
+					target = scope:county.holder
+					destination = scope:county.title_province
+				}
+			}
+		}
+	}
+
+	on_finish_task_county = {
+		scope:county = {
+			holder = {
+				save_scope_as = county_holder
+			}
+		}
+		scope:councillor_liege = {
+			trigger_event = {
+				on_action = task_fabricate_claim_roman_success_effect
+			}
+		}
+	}
+
+	monthly_on_action = task_fabricate_roman_claim_side_effects
+
+	ai_target_score = {
+		value = 1000
+		
+		if = {
+			limit = { # Vassals in the same realm
+				scope:councillor_liege = {
+					top_liege != this
+				}
+				scope:county.holder = {
+					top_liege != this
+				}
+				scope:county.holder.top_liege = scope:councillor_liege.top_liege
+			}
+			
+			if = {
+				limit = {
+					exists = scope:county.holder.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege
+						}
+					}
+					scope:county.holder.max_military_strength > scope:councillor_liege.council_task_fabricate_claim_relative_strength
+				}
+				subtract = 10000
+			}
+			else_if = {
+				limit = {
+					exists = scope:county.holder.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege
+						}
+					}
+				}
+				multiply = {
+					value = scope:councillor_liege.max_military_strength
+					divide = { value = scope:county.holder.max_military_strength min = 1 }
+				}
+			}
+			
+			else_if = {
+				limit = {
+					exists = scope:county.holder.liege.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege.liege
+						}
+					}
+					scope:county.holder.liege.max_military_strength > scope:councillor_liege.council_task_fabricate_claim_relative_strength
+				}
+				subtract = 10000
+			}
+			else_if = {
+				limit = {
+					exists = scope:county.holder.liege.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege.liege
+						}
+					}
+				}
+				multiply = {
+					value = scope:councillor_liege.max_military_strength
+					divide = { value = scope:county.holder.liege.max_military_strength min = 1 }
+				}
+			}
+			
+			else_if = {
+				limit = {
+					exists = scope:county.holder.liege.liege.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege.liege.liege
+						}
+					}
+					scope:county.holder.liege.liege.max_military_strength > scope:councillor_liege.council_task_fabricate_claim_relative_strength
+				}
+				subtract = 10000
+			}
+			else_if = {
+				limit = {
+					exists = scope:county.holder.liege.liege.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege.liege.liege
+						}
+					}
+				}
+				multiply = {
+					value = scope:councillor_liege.max_military_strength
+					divide = { value = scope:county.holder.liege.liege.max_military_strength min = 1 }
+				}
+			}
+			
+			else_if = {
+				limit = {
+					exists = scope:county.holder.liege.liege.liege.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege.liege.liege.liege
+						}
+					}
+					scope:county.holder.liege.liege.liege.max_military_strength > scope:councillor_liege.council_task_fabricate_claim_relative_strength
+				}
+				subtract = 10000
+			}
+			else_if = {
+				limit = {
+					exists = scope:county.holder.liege.liege.liege.liege
+					scope:councillor_liege = {
+						any_liege_or_above = {
+							this = scope:county.holder.liege.liege.liege.liege
+						}
+					}
+				}
+				multiply = {
+					value = scope:councillor_liege.max_military_strength
+					divide = { value = scope:county.holder.liege.liege.liege.max_military_strength min = 1 }
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				scope:county.holder.top_liege.max_military_strength > scope:councillor_liege.council_task_fabricate_claim_relative_strength
+			}
+			subtract = 10000
+		}
+		else = {	
+			multiply = {
+				value = scope:councillor_liege.max_military_strength
+				divide = { value = scope:county.holder.top_liege.max_military_strength min = 1 }
+			}
+		}
+	}
+
+	ai_will_do = {
+		value = 0
+		if = {
+			limit = {
+				scope:councillor = {
+					is_performing_council_task = task_fabricate_claim
+				}
+			}
+			add = 10000 # Always keep going if this is already chosen
+		}
+		else_if = {
+			limit = {
+				OR = {
+					ai_greed <= ai_honor
+					ai_greed <= 0
+					is_at_war = yes
+					gold < 100
+				}
+			}
+			subtract = 1000
+		}
+		else_if = { # If AI has good war, don't fabricate
+			limit = {
+				any_neighboring_and_across_water_top_liege_realm_owner = {
+					scope:councillor_liege = {
+						tier_difference = {
+							target = prev
+							value >= -1
+						}
+						NOR = {
+							is_allied_to = prev
+							has_truce = prev
+							has_relation_friend = prev
+							has_relation_lover = prev
+						}
+						current_military_strength > prev.current_military_strength
+						has_any_cb_on = prev
+					}			
+				}
+			}
+			subtract = 1000
+		}
+		else = {
+			add = 100
+		}
+
+		# Agenda impact
+		if = {
+			limit = {
+				any_character_struggle = {
+					involvement = involved
+					is_struggle_type = iberian_struggle
+				}
+			}
+			add = {
+				value = 0
+				if = {
+					limit = {
+						any_character_struggle = {
+							phase_has_catalyst = catalyst_gain_claim_on_title_fp2
+						}
+						has_character_flag = agenda_towards_escalation
+					}
+					add = 200
+				}
+				else_if = {
+					limit = {
+						any_character_struggle = {
+							phase_has_catalyst = catalyst_gain_claim_on_title_fp2
+						}
+					}
+					add = -100
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				any_character_struggle = {
+					involvement = involved
+					is_struggle_type = persian_struggle
+				}
+			}
+			add = {
+				value = 0
+				if = {
+					limit = {
+						any_character_struggle = {
+							phase_has_catalyst = catalyst_gain_claim_on_title_fp3
+						}
+						has_trait = fp3_struggle_detractor
+					}
+					add = 200
+				}
+				else_if = {
+					limit = {
+						any_character_struggle = {
+							phase_has_catalyst = catalyst_gain_claim_on_title_fp3
+						}
+					}
+					add = -100
+				}
+			}
+		}
+	}
+}
+task_convince_dejure_roman = {
+	position = councillor_clerical_bureau_director
+	clone = task_convince_dejure
+}
+task_accept_culture_roman = {
+	position = councillor_clerical_bureau_director
+	clone = task_accept_culture
+}
+task_promulgate_laws = { #Provides a multiplier to influence
+	default_task = yes
+	position = councillor_clerical_bureau_director
+	task_type = task_type_general
+	task_progress = task_progress_infinite
+
+	asset = {
+		icon = "gfx/interface/icons/council_task_types/task_domestic_affairs.dds"
+		background = "gfx/interface/buttons/button_round_bg.dds"
+		frame = "gfx/interface/buttons/button_round_frame.dds"
+		glow = "gfx/particles/halo.dds"
+	}
+
+	effect_desc = { #TODO: Complete
+		desc = task_promulgate_laws_effect_desc
+		# Bureaucrats tooltip
+		triggered_desc = {
+			trigger = { councillor_liege_has_erudition_legacy_5_perk = yes }
+			desc = task_promulgate_laws_desc_bureaucrats_bonus_influence
+		}
+		# Family Business tooltip
+		triggered_desc = {
+			trigger = { councillor_liege_has_family_business_bonus = yes }
+			desc = task_promulgate_laws_desc_family_business_bonus_influence
+		}
+		# Fp3 Consulted House Member tooltip
+		triggered_desc = {
+			trigger = { councillor_liege_has_consulted_house_bonus = yes }
+			desc = task_promulgate_laws_desc_consulted_house_bonus_influence
+		}
+		desc = {
+			desc = council_task_possible_side_effects
+			
+			triggered_desc = {
+				trigger = {
+					diplomacy > mediocre_skill_rating
+				}
+				desc = task_promulgate_laws_gain_influence
+			}
+			triggered_desc = {
+				trigger = {
+					diplomacy < high_skill_rating
+				}
+				desc = task_promulgate_laws_loose_influence
+			}
+		}
+	}
+
+	on_start_task = {
+		liege = {
+			set_variable = {
+				name = clerical_bureau_director_influence_value
+				value = 0
+			}
+		}
+	}
+
+	on_cancel_task = {
+		if = {
+			limit = {
+				is_alive = yes
+				has_variable = clerical_bureau_director_influence_value
+			}
+			remove_variable = clerical_bureau_director_influence_value
+		}
+	}
+
+	council_owner_modifier = {
+		name = task_promulgate_laws_influence_multiplier
+		monthly_influence_mult = 0.1
+		scale = clerical_bureau_director_influence_scale
+	}
+
+	monthly_on_action = task_promulgate_laws_side_effects
+
+	on_monthly = {
+		if = {
+			limit = {
+				liege = { is_ai = no }
+			}
+			if = {
+				limit = { liege = { has_variable = clerical_bureau_director_influence_value } }
+				liege = {
+					if = {
+						limit = {
+							var:clerical_bureau_director_influence_value < root.clerical_bureau_director_influence_max
+						}
+						change_variable = {
+							name = clerical_bureau_director_influence_value
+							add = root.chancellor_domestic_affairs_monthly_increase
+						}
+					}
+					if = {
+						limit = {
+							var:clerical_bureau_director_influence_value > root.clerical_bureau_director_influence_max
+						}
+						set_variable = {
+							name = clerical_bureau_director_influence_value
+							value = root.clerical_bureau_director_influence_max
+						}
+					}
+				}
+			}
+			else = {
+				liege = {
+					set_variable = {
+						name = clerical_bureau_director_influence_value
+						value = 0
+					}
+				}
+			}
+		}
+	}
+
+	ai_will_do = {
+		value = 1 #Always a good backup
+		if = { #If you're running low on influence, this is much higher priority
+			limit = { root.influence < 200 }
+			add = 1000
+		}
+	}
+}
+task_promote_minority_roman = {
+	position = councillor_clerical_bureau_director
+	clone = task_promote_minority
+}

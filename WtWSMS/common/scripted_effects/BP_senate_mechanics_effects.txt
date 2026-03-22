@@ -50,15 +50,15 @@
 	}
 	#Non-Senatorial Families are annoyed at their loss of prestige
 	#custom_tooltip = {
-		#text = senatorial_families_hate_you
-		every_living_character = {
-			limit = {
-				exists = dynasty
-				this.dynasty = { has_dynasty_modifier = roman_senate_family_$REGION$ }
-				this = this.dynasty.dynast
-			}
-			this.dynasty = { remove_dynasty_modifier = roman_senate_family_$REGION$ }
+	#text = senatorial_families_hate_you
+	every_living_character = {
+		limit = {
+			exists = dynasty
+			this.dynasty = { has_dynasty_modifier = roman_senate_family_$REGION$ }
+			this = this.dynasty.dynast
 		}
+		this.dynasty = { remove_dynasty_modifier = roman_senate_family_$REGION$ }
+	}
 	#}
 	
 	remove_global_variable = $REGION$_senate_is_established
@@ -142,7 +142,7 @@ senate_election_effect = {
 				title:$BARONY$.holder.top_liege = { has_character_modifier = rejected_by_the_senate }
 				title:$BARONY$.holder.top_liege = { has_character_modifier = ignored_the_senate }
 			}
-		
+			
 		}
 		every_living_character = { limit = { has_character_modifier = roman_consul_$REGION$ } save_scope_as = the_consul_$REGION$ }
 		if = {
@@ -502,8 +502,9 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 			geographical_region = custom_$REGION$ern_senate
 			has_holding_type = city_holding
 			this.barony = { is_capital_barony = no }
-			#So that holdings in (merchant) republics aren't seized
+			#So that holdings in (merchant) republics and federates aren't seized
 			NOT = { this.county.holder = { government_has_flag = government_is_republic } }
+			NOT = { this.county.holder = { government_has_flag = government_is_roman_federate } }
 		}
 		add_to_temporary_list = provinces_with_city_holdings_in_$REGION$
 	}
@@ -517,14 +518,29 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 			is_male = yes
 			is_adult = yes
 			is_landed = no
+			is_landless_ruler = no
 			has_trait = senator_$REGION$
+			#Exclude specific characters (bishops who are senators)
+			NOT = { this = character:1007001 }
+			NOT = { this = character:190011 }
+			NOT = { this = character:1001106 }
+			NOT = { this = character:1001105 }
+			NOT = { this = character:RusticusOfLyon }
+			NOT = { this = character:Viventiolus }
+			NOT = { this = character:LeontiusOfLyon }
+			NOT = { this = character:SacerdosOfLyon }
+			NOT = { this = character:NicetiusOfLyon }
+			NOT = { this = character:1001107 }
+			NOT = { this = character:1001109 }
+			NOT = { this = character:CariathoOfValence }
+			NOT = { this = character:ApollinarisOfValence }
 		}
 		add_to_temporary_list = senators_without_land_$REGION$
 	}
 	every_in_list = {
 		list = senators_without_land_$REGION$
 		this = { save_temporary_scope_as = the_landless_senator }
-		random_in_list = {
+		random_in_list = { #Pick stuff that isn't in Federate land
 			list = provinces_with_city_holdings_in_$REGION$
 			save_scope_as = the_province_with_available_city_holdings
 		}
@@ -537,19 +553,20 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 				get_title = scope:the_province_with_available_city_holdings.barony
 				#Match up governments
 				if = {
-					limit = {
-						this.liege = {
-							government_has_flag = government_uses_roman_dynastic_authority
-							NOT = { government_has_flag = is_a_transitory_roman_government }
-						}
-					}
+					limit = { this.liege = { government_has_flag = government_is_roman_dynastic } }
 					this = { change_government = roman_dynastic_government }
 				}
 				else_if = {
-					limit = {
-						this.liege = { government_has_flag = is_a_transitory_roman_government }
-					}
+					limit = { this.liege = { government_has_flag = government_is_subroman_dynastic } }
 					this = { change_government = subroman_dynastic_government }
+				}
+				else_if = {
+					limit = { this.liege.top_liege = { government_has_flag = roman_administrative_government } }
+					change_government_roman_administrative_effect = yes
+				}
+				else_if = {
+					limit = { this.liege = { government_has_flag = government_is_subroman_administrative } }
+					change_government_subroman_administrative_effect = yes
 				}
 			}
 		}
@@ -559,7 +576,137 @@ give_roman_senators_land_in_appropriate_regions_effect = {
 
 make_east_senate_family_effect = {
 	add_dynasty_modifier = { modifier = roman_senate_family_east }
+	make_senate_noble_families_effect = yes
+	
 }
 make_west_senate_family_effect = {
 	add_dynasty_modifier = { modifier = roman_senate_family_west }
+	make_senate_noble_families_effect = yes
+}
+
+make_senate_noble_families_effect = {
+	if = {
+		limit = { BP_has_dlc_necessary_for_roman_governments_trigger = yes }
+		every_dynasty_member = {
+			limit = {
+				is_house_head = yes
+				any_held_title = { count < 1 is_noble_family_title = yes }
+				this.primary_title.tier < tier_duchy
+			}
+			#This catches a special case where Bishop Lupus is landed
+			if = {
+				limit = { this = character:1007011 }
+				character:1007019 = { save_scope_as = the_house_head }
+			}
+			else = { save_scope_as = the_house_head }
+			scope:the_house_head = { make_senate_noble_family_effect = yes }
+		}
+	}
+}
+
+make_senate_noble_family_effect = {
+	# Byzantine senate
+	if = {
+		limit = { this.dynasty = { has_dynasty_modifier = roman_senate_family_east } }
+		if = {
+			limit = { exists = title:h_eastern_roman_empire.holder }
+			title:h_eastern_roman_empire.holder = { save_temporary_scope_as = new_liege }
+		}
+		else_if = {
+			limit = { exists = title:e_byzantium.holder }
+			title:e_byzantium.holder = { save_temporary_scope_as = new_liege }
+		}
+	}
+	# Roman senate
+	else = {
+		if = {
+			limit = { exists = title:h_western_roman_empire.holder }
+			title:h_western_roman_empire.holder = { save_temporary_scope_as = new_liege }
+		}
+		else_if = {
+			limit = { exists = title:e_wre.holder }
+			title:e_wre.holder = { save_temporary_scope_as = new_liege }
+		}
+	}
+	
+	# Specific character overrides
+	if = {
+		limit = { this = character:AquilinusOfLyon }
+		title:k_burgundians.holder = { save_temporary_scope_as = new_liege }
+	}
+	else_if = {
+		limit = { this = character:PlaceholderFatherOfImpetratusAndLeocadia }
+		title:k_soissons.holder = { save_temporary_scope_as = new_liege }
+	}
+	
+	# Create title
+	if = {
+		limit = { is_landed = yes }
+		switch = {
+			trigger = government_has_flag
+			government_is_roman_administrative = { add_character_flag = roman_admin }
+			government_is_subroman_administrative = { add_character_flag = subroman_admin }
+			fallback = { add_character_flag = roman_admin }
+		}
+	}
+	else = {
+		this.liege_or_court_owner = {
+		switch = {
+				trigger = government_has_flag
+				government_is_roman_administrative = { add_character_flag = roman_admin }
+				government_is_subroman_administrative = { add_character_flag = subroman_admin }
+				fallback = { add_character_flag = roman_admin }
+			}
+		}
+	}
+	switch = {
+		trigger = has_character_flag
+		roman_admin = {
+			give_noble_family_title = {
+				name = noble_family_name
+				tier = county
+				article = DEFAULT_TITLE_NAME_ARTICLE
+				government = roman_administrative_government
+				save_scope_as = new_title
+			}
+			remove_character_flag = roman_admin
+		}
+		subroman_admin = {
+			give_noble_family_title = {
+				name = noble_family_name
+				tier = county
+				article = DEFAULT_TITLE_NAME_ARTICLE
+				government = subroman_administrative_government
+				save_scope_as = new_title
+			}
+			remove_character_flag = subroman_admin
+		}
+	}
+	
+	# Set liege
+	if = {
+		limit = { is_landed = no }
+		create_title_and_vassal_change = {
+			type = granted
+			save_scope_as = change
+		}
+		change_liege = {
+			liege = scope:new_liege
+			change = scope:change
+		}
+		resolve_title_and_vassal_change = scope:change
+	}
+	# Move to capital if outside of realm
+	if = {
+		limit = { NOT = { default_location.barony_controller.top_liege = this.top_liege } }
+		
+		# Prefer Rome over Ravenna
+		if = {
+			limit = { top_liege.capital_county = title:c_ravenna }
+			domicile ?= { move_domicile = title:c_roma.title_province }
+		}
+		else = {
+			domicile ?= { move_domicile = prev.top_liege.capital_province }
+		}
+	}
 }

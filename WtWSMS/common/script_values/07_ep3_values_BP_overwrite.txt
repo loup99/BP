@@ -1,0 +1,1069 @@
+﻿##### Changed from Vanilla: Roman Admin _really_ spikes the cost down
+admin_title_troop_command_cost_value = {
+	save_temporary_scope_as = recipient_title
+
+	# Base cost - Set in 00_defines.txt
+	value = {
+		value = define:NAdministrative|BASE_REASSIGN_COST
+		format = "BASE_VALUE_FORMAT"
+		desc = "BASE_VALUE"
+	}
+
+	if = { # Increase cost based on the total number of regiments - The first three regiments are not accounted for, we consider them a part of the base cost
+		limit = {
+			scope:recipient_title = {
+				OR = {
+					any_owned_title_maa_regiment = {
+						count > 3
+					}
+					any_owned_title_maa_regiment = {
+						maa_size > 3
+					}
+					AND = {
+						any_owned_title_maa_regiment = {
+							count > 2
+						}
+						any_owned_title_maa_regiment = {
+							maa_size > 1
+						}
+					}
+					AND = {
+						any_owned_title_maa_regiment = {
+							count > 1
+						}
+						any_owned_title_maa_regiment = {
+							maa_size > 2
+						}
+					}
+				}
+			}
+		}
+		add = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = {
+				value = {
+					scope:recipient_title = {
+						every_title_maa_regiment = {
+							add = maa_size
+						}
+					}
+					subtract = 3
+					divide = 20
+				}
+			}
+			desc = ADMIN_TITLE_TROOP_COST_ARMY_SIZE_DESC
+		}
+	}
+
+	# You are fighting a defensive war
+	if = {
+		limit = {
+			scope:actor = {
+				any_character_war = {
+					is_war_leader = scope:actor
+					is_defender = scope:actor
+				}
+			}
+		}
+		subtract = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 0.25
+			desc = ADMIN_TITLE_TROOP_COST_DEFENDER_DESC
+		}
+	}
+	# You are fighting an offensive war, and the troop owner is far away
+	else_if = {
+		limit = {
+			scope:recipient_title.holder = { top_liege != this }
+			scope:actor = {
+				any_war_enemy = {
+					realm_to_title_distance_squared = {
+						target = scope:recipient_title
+						value > 100000
+					}
+				}
+			}
+		}
+		add = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 0.25
+			desc = ADMIN_TITLE_TROOP_COST_ATTACKER_DESC
+		}
+	}
+
+	# The Troop owner is inside the war goal
+	if = {
+		limit = {
+			holder = {
+				target_is_liege_or_above = scope:actor
+				OR = {
+					any_held_title = { is_contested = yes }
+					any_vassal = {
+						any_held_title = { is_contested = yes }
+					}
+				}
+			}
+		}
+		subtract = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 0.25
+			desc = ADMIN_TITLE_TROOP_COST_OWNER_IN_WAR_GOAL_DESC
+		}
+	}
+
+	##### Changed from Vanillla vvvvv
+	if = { # Roman Admin
+		limit = {
+			scope:actor = {
+				top_liege = this
+				OR = {
+					government_has_flag = government_is_roman_administrative
+					government_has_flag = government_is_subroman_administrative
+				}
+			}
+			root.holder = { vassal_contract_has_flag = roman_admin_military_contract }
+		}
+		subtract = {
+			value = define:NAdministrative|BASE_REASSIGN_COST
+			multiply = 1.50
+			desc = ROMAN_ADMIN_TROOP_COST_REDUCTION
+		}
+	}
+	# If you are independent - The cost is reduced with your laws
+	# Imperial Bureaucracy for admin, and Army Command Structure for celestial
+	else_if = { # Admin
+	##### Changed from Vanillla ^^^^^
+		limit = {
+			scope:actor = {
+				top_liege = this
+				realm_law_use_imperial_bureaucracy = yes
+			}
+		}
+		if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction_high
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_high_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_2_DESC
+			}
+		}
+		else_if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_1_DESC
+			}
+		}
+	}
+	else_if = { # Celestial
+		limit = {
+			scope:actor = {
+				top_liege = this
+				realm_law_use_celestial_bureaucracy = yes
+			}
+		}
+		if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction_very_high
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_very_high_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_3_CELESTIAL_DESC
+			}
+		}
+		else_if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction_high
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_high_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_2_CELESTIAL_DESC
+			}
+		}
+		else_if = {
+			limit = {
+				scope:actor = {
+					has_realm_law_flag = admin_title_troop_cost_reduction
+				}
+			}
+			subtract = {
+				value = define:NAdministrative|BASE_REASSIGN_COST
+				multiply = admin_law_cost_reduction_value
+				desc = ADMIN_TITLE_TROOP_COST_LAW_1_CELESTIAL_DESC
+			}
+		}
+	}
+
+	# In Meritocratic governments, we prefer to not let the AI borrow from players, since they can be
+	# called in via 'request_military_aid_interaction' / 'send_military_aid_interaction'
+	if = {
+		limit = {
+			scope:actor = {
+				government_has_flag = government_has_merit
+				is_ai = yes
+			}
+			scope:recipient_title = {
+				holder = {
+					is_ai = no
+				}
+			}
+		}
+		multiply = 100000
+	}
+}
+
+##### Changed from Vanilla: Linked in Roman Federate contract effects
+
+# Governor efficiency used in code
+# root - charater that is evaluated for the governorship
+# End result should be a multiplier, but we add larger values to present it better in the breakdown. E.g. we add 10, but divide it with 100 to make it 0.1.
+governor_efficiency = {
+	value = {
+		# Everyone will calculate their Efficiency according to the following:
+		# Skills
+		add = {
+			add = {
+				desc = diplomacy_concept
+				add = {
+					value = diplomacy
+					multiply = 1.7
+				}
+				round = yes
+			}
+			add = {
+				desc = martial_concept
+				add = {
+					value = martial
+					multiply = 1.7
+				}
+				round = yes
+			}
+			add = {
+				desc = stewardship_concept
+				add = {
+					value = stewardship
+					multiply = 1.7
+				}
+				round = yes
+			}
+			add = {
+				desc = intrigue_concept
+				add = {
+					value = intrigue
+					multiply = 1.7
+				}
+				round = yes
+			}
+			add = {
+				desc = learning_concept
+				add = {
+					value = learning
+					multiply = 1.7
+				}
+				round = yes
+			}
+			divide = 100
+		}
+
+		# Rank 4 or 5 education trait
+		if = {
+			limit = {
+				has_trait_with_flag = level_5_education
+			}
+			add = {
+				add = {
+					value = 4
+					desc = has_rank_5_education_desc
+				}
+				divide = 100
+			}
+		}
+		else_if = {
+			limit = {
+				has_trait_with_flag = level_4_education
+			}
+			add = {
+				add = {
+					value = 2
+					desc = has_rank_4_education_desc
+				}
+				divide = 100
+			}
+		}
+
+		# Governor trait
+		if = { # You only get a small bonus since the trait also provides skills that will increase Efficiency further
+			limit = {
+				has_trait = governor
+				has_trait_xp = {
+					trait = governor
+					value >= 25
+				}
+			}
+			add = {
+				add = {
+					value = 0
+					if = {
+						limit = {
+							has_trait_xp = {
+								trait = governor
+								value >= 100
+							}
+						}
+						add = 12
+					}
+					else_if = {
+						limit = {
+							has_trait_xp = {
+								trait = governor
+								value >= 75
+							}
+						}
+						add = 9
+					}
+					else_if = {
+						limit = {
+							has_trait_xp = {
+								trait = governor
+								value >= 50
+							}
+						}
+						add = 6
+					}
+					else_if = {
+						limit = {
+							has_trait_xp = {
+								trait = governor
+								value >= 25
+							}
+						}
+						add = 3
+					}
+					desc = governor_trait_short_desc
+				}
+				divide = 100
+			}
+		}
+
+		# Estate
+		if = {
+			limit = { domicile ?= { has_domicile_parameter = estate_governor_efficiency_bonus } }
+			add = {
+				add = {
+					value = estate_governor_efficiency_bonus_value
+					multiply = 100
+					desc = "[estate_buildings|E]"
+				}
+				divide = 100
+			}
+		}
+		else_if = {
+			limit = {
+				house ?= {
+					house_head ?= {
+						domicile ?= { has_domicile_parameter = estate_governor_efficiency_bonus_for_house_members }
+					}
+				}
+			}
+			add = {
+				add = {
+					value = estate_governor_efficiency_house_bonus_value
+					multiply = 100
+					desc = "[domicile_buildings|E]"
+				}
+				divide = 100
+			}
+		}
+		
+		# Aspirations
+		if = {
+			limit = { # Service
+				house ?= { has_house_power_parameter = service_house_governor_efficiency_bonus }
+			}
+			add = {
+				add = {
+					value = service_house_governor_efficiency_bonus_value
+					multiply = 100
+					desc = service_house_power
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = { # Governance
+				house ?= { has_house_power_parameter = governance_improved_governor_efficiency_bonus }
+			}
+			add = {
+				add = {
+					value = governance_improved_governor_efficiency_bonus_value
+					multiply = 100
+					desc = celestial_governor_name_desc
+				}
+				divide = 100
+			}
+		}
+
+		# Bonuses from active Governorship Obligation/Administration
+		if = {
+			limit = { vassal_contract_has_flag = admin_martial_obligation_bonus }
+			add = {
+				add = {
+					value = martial
+					multiply = efficiency_skill_increase_value
+					desc = admin_martial_obligation_bonus_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = { vassal_contract_has_flag = admin_stewardship_obligation_bonus }
+			add = {
+				add = {
+					value = stewardship
+					multiply = efficiency_skill_increase_value
+					desc = admin_stewardship_obligation_bonus_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = { vassal_contract_has_flag = admin_prowess_obligation_bonus }
+			add = {
+				add = {
+					value = prowess
+					multiply = efficiency_skill_increase_value
+					desc = admin_prowess_obligation_bonus_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = { vassal_contract_has_flag = admin_prestige_obligation_bonus }
+			add = {
+				add = {
+					value = prestige_level
+					multiply = efficiency_currency_level_increase_value
+					desc = admin_prestige_obligation_bonus_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = { vassal_contract_has_flag = admin_tradeport_obligation_bonus }
+			add = {
+				add = {
+					every_sub_realm_barony = {
+						limit = {
+							title_province = { has_building_or_higher = common_tradeport_01 }
+						}
+						add = efficiency_building_increase_value
+					}
+					desc = admin_tradeport_obligation_bonus_desc
+				}
+				divide = 100
+			}
+		}
+		# Celestial Obligation/Administration (we split these out to have separate loc)
+		if = {
+			limit = { vassal_contract_has_flag = celestial_province_protectorate }
+			add = {
+				add = {
+					value = martial
+					multiply = efficiency_skill_increase_value
+					desc = celestial_province_protectorate_name_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = { vassal_contract_has_flag = celestial_province_metropolitan }
+			add = {
+				add = {
+					value = diplomacy
+					multiply = efficiency_skill_increase_value
+					desc = celestial_province_metropolitan_name_desc
+				}
+				divide = 100
+			}
+		}
+
+		# Dynasty Legacy Perk
+		if = {
+			limit = {
+				dynasty ?= { ep3_administrative_legacy_track_perks >= 1 }
+			}
+			add = {
+				add = {
+					value = 5
+					desc = "[GetDynastyPerk('ep3_administrative_legacy_1').GetName]"
+				}
+				divide = 100
+			}
+		}
+
+		if = {
+			limit = {
+				dynasty ?= { has_dynasty_perk = tgp_chinese_legacy_3 }
+			}
+			add = {
+				add = {
+					value = 5
+					desc = "[GetDynastyPerk('tgp_chinese_legacy_3').GetName]"
+				}
+				divide = 100
+			}
+		}
+
+		# Lifestyle Perks
+		# Positions of Power Stewardship Perk
+		if = {
+			limit = { has_perk = positions_of_power_perk }
+			add = {
+				add = {
+					value = 5
+					desc = "[GetPerk('positions_of_power_perk').GetName(GetPlayer)]"
+				}
+				divide = 100
+			}
+		}
+		# Strict Organization Martial Perk
+		if = {
+			limit = { has_perk = strict_organization_perk }
+			add = {
+				add = {
+					value = 5
+					desc = "[GetPerk('strict_organization_perk').GetName(GetPlayer)]"
+				}
+				divide = 100
+			}
+		}
+		
+		# Eparch court position
+		if = {
+			limit = {
+				employs_court_position = eparch_court_position
+			}
+			add = {
+				add = {
+					value = 1
+					court_position:eparch_court_position ?= {
+						add = aptitude:eparch_court_position
+					}
+					multiply = 2
+					desc = eparch_increase_efficiency_desc
+				}
+				divide = 100
+			}
+		}
+		else_if = {
+			limit = {
+				top_liege ?= {
+					employs_court_position = eparch_court_position
+				}
+				NOT = { has_court_position = eparch_court_position }
+				domicile ?= {
+					domicile_location = {
+						this = county.holder.top_liege.capital_province
+					}
+				}
+			}
+			add = {
+				add = {
+					value = 1
+					top_liege ?= {
+						court_position:eparch_court_position ?= {
+							add = aptitude:eparch_court_position
+						}
+					}
+					desc = eparch_increase_efficiency_vassal_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = {
+				employs_court_position = grand_mentor_court_position
+			}
+			add = {
+				add = {
+					value = 1
+					court_position:grand_mentor_court_position ?= {
+						add = aptitude:grand_mentor_court_position
+					}
+					multiply = 2
+					desc = grand_mentor_powerfuL_family_score_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = {
+				employs_court_position = grand_guardian_court_position
+			}
+			add = {
+				add = {
+					value = 1
+					court_position:grand_guardian_court_position ?= {
+						add = aptitude:grand_guardian_court_position
+					}
+					multiply = 2
+					desc = grand_guardian_powerfuL_family_score_desc
+				}
+				divide = 100
+			}
+		}
+		if = {
+			limit = {
+				employs_court_position = grand_preceptor_court_position
+			}
+			add = {
+				add = {
+					value = 1
+					court_position:grand_preceptor_court_position ?= {
+						add = aptitude:grand_preceptor_court_position
+					}
+					multiply = 2
+					desc = grand_preceptor_powerfuL_family_score_desc
+				}
+				divide = 100
+			}
+		}
+
+		# Events
+		add = {
+			add = {
+				desc = gov_efficiency_events_desc
+				if = {	#ep3_emperor_yearly.2150
+					limit = { has_character_flag = ep3_2150_found_truth }
+					add = 10
+				}
+				if = {	#ep3_governor_yearly.3070
+					limit = {
+						has_character_modifier = contented_governing_countrymen_modifier
+						exists = capital_county
+						culture = capital_county.culture
+					}
+					add = 10
+				}
+				if = {	#ep3_emperor_yearly.2160
+					limit = { has_character_flag = ep3_2160_success }
+					add = 5
+				}
+				if = {	#ep3_emperor_yearly.2160
+					limit = { has_character_flag = ep3_2160_failure }
+					add = -5
+				}
+				if = {	#ep3_governor_yearly.3100
+					limit = { has_character_modifier = ep3_ignoring_realm_decline_modifier }
+					add = -5
+				}
+				if = {	#ep3_governor_yearly.3080
+					limit = { has_character_flag = ep3_governor_ignored_isolation }
+					add = -5
+				}
+				if = {	#ep3_governor_yearly.3080
+					limit = { has_character_modifier = ep3_anxious_for_new_assignment_modifier }
+					add = -5
+				}
+				if = {	#ep3_emperor_yearly.2170
+					limit = { has_character_flag = ep3_2170_success }
+					add = 5
+				}
+				if = {
+					limit = { has_character_modifier = restored_greek_theme_modifier }
+					add = 10
+				}
+				if = {	#ep3_emperor_yearly.2190
+					limit = { has_character_flag = ep3_2190_honest }
+					add = 10
+				}
+				if = {	#ep3_emperor_yearly.2200
+					limit = { has_character_flag = ep3_embezzling_governor }
+					add = -5
+				}
+				if = {
+					limit = { has_character_modifier = ep3_bolstered_governor_treasury_modifier }
+					add = 5
+				}
+				if = {
+					limit = { has_character_modifier = ep3_governor_yearly_8050_imperial_recruiter_modifier }
+					add = 5
+				}
+				if = {
+					limit = { has_character_flag = ep3_8060_efficiency_drop }
+					add = -5
+				}
+				if = {
+					limit = { has_character_modifier = ep3_governor_yearly_8050_imperial_resources_modifier }
+					add = -5
+				}
+				if = {
+					limit = { has_character_modifier = ep3_governor_yearly_8120_relief_rejected_modifier }
+					add = -5
+				}
+				if = {
+					limit = { has_character_modifier = ep3_governor_yearly_8130_raised_taxes_modifier }
+					add = -5
+				}
+				if = {
+					limit = { has_character_modifier = ep3_governor_yearly_8130_raised_almonage_modifier }
+					add = 5
+				}
+				if = {
+					limit = { has_character_modifier = noble_administrators_modifier }
+					add = 5
+				}
+				if = {
+					limit = { has_character_flag = ep3_governor_yearly_3050_neglect_duties }
+					add = -5
+				}
+				if = {
+					limit = { has_character_flag = ep3_governor_yearly_3002_landlord_fight }
+					add = -5
+				}
+				if = {
+					limit = { has_character_flag = ep3_governor_yearly_3002_landlord_wins }
+					add = -10
+				}
+				if = {
+					limit = { has_character_flag = ep3_governor_yearly_3002_landlord_dominates }
+					add = -15
+				}
+				if = {
+					limit = { has_character_modifier = ep3_governor_yearly_8040_domicile_development_modifier }
+					add = -10
+				}
+			}
+			divide = 100
+		}
+
+		# Interactions
+		add = {
+			add = {
+				desc = gov_efficiency_interactions_desc
+				if = {
+					limit = { has_character_modifier = ep3_boost_efficiency_modifier }
+					add = {
+						value = {
+							value = efficiency_interaction_change_value
+							if = {
+								limit = { exists = var:ep3_governor_efficiency_stack }
+								multiply = var:ep3_governor_efficiency_stack
+							}
+						}
+					}
+				}
+				if = {
+					limit = { has_character_modifier = ep3_damage_efficiency_modifier }
+					add = {
+						value = {
+							value = efficiency_interaction_change_value
+							multiply = -1 # Negativise
+							if = {
+								limit = { exists = var:ep3_governor_efficiency_stack }
+								multiply = var:ep3_governor_efficiency_stack
+							}
+						}
+					}
+				}
+			}
+			divide = 100
+		}
+
+		# Schemes
+		add = {
+			add = {
+				desc = "[GetModifier('scheme_slandered_modifier').GetNameWithTooltip]"
+				if = {
+					limit = { has_character_modifier = scheme_slandered_modifier }
+					add = efficiency_slandered_value
+				}
+			}
+			divide = 100
+		}
+
+		# Eunuch
+		if = {
+			limit = {
+				exists = liege
+				liege.culture ?= {
+					OR = {
+						has_cultural_parameter = eunuch_trait_bonuses
+						has_cultural_parameter = court_machinations_eunuch_trait_bonuses
+					}
+				}
+				has_trait = eunuch_1
+			}
+			add = {
+				add = {
+					value = 10
+					desc = court_position_eunuch_trait
+				}
+				divide = 100
+			}
+		}
+		else_if = {
+			limit = {
+				exists = liege
+				liege.culture ?= {
+					OR = {
+						has_cultural_parameter = eunuch_trait_bonuses
+						has_cultural_parameter = court_machinations_eunuch_trait_bonuses
+					}
+				}
+				has_trait = beardless_eunuch
+			}
+			add = {
+				add = {
+					value = 10
+					desc = court_position_beardless_eunuch_trait
+				}
+				divide = 100
+			}
+		}
+
+		##### Changed from Vanilla vvvvv
+
+		# Non-de jure governors get a penalty
+		if = {
+			limit = {
+				##### Changed from Vanilla vvvvv
+				NOT = { government_has_flag = government_is_roman_federate } #Not impacted by de jure determination
+				##### Changed from Vanilla ^^^^^
+				top_liege ?= { save_temporary_scope_as = top_liege_temp }
+				is_governor = yes
+				any_sub_realm_county = {
+					NOT = {
+						trigger_if = {
+							limit = { scope:top_liege_temp.highest_held_title_tier > tier_empire }
+							target_is_de_jure_liege_or_above = scope:top_liege_temp.primary_title
+						}
+						trigger_else_if = {
+							limit = { scope:top_liege_temp.highest_held_title_tier = tier_empire }
+							empire ?= scope:top_liege_temp.primary_title
+						}
+						trigger_else = { kingdom ?= scope:top_liege_temp.primary_title }
+					}
+				}
+			}
+			add = {
+				add = {
+					value = de_jure_governor_bonus
+					desc = de_jure_governor_desc
+				}
+				divide = 100
+			}
+		}
+		##### Changed from Vanilla ^^^^6
+
+		# TGP DYNASTIC CYCLE
+		if = {
+			limit = {
+				top_liege ?= {
+					has_title = title:h_china
+					top_participant_group:dynastic_cycle ?= {
+						has_participant_group_parameter = dynastic_cycle_governor_efficiency_penalty
+					}
+				}
+			}
+			add = {
+				add = {
+					value = {
+						add = corruption_phase_governor_efficiency_penalty_value
+						multiply = {
+							value = top_liege.legitimacy_level
+							subtract = 5
+						}
+					}
+					desc = corruption_phase_governor_efficiency_penalty_desc
+				}
+				divide = 100
+			}
+		}
+		if = { # The Forbidden City special building bonus
+			limit = {
+				top_liege ?= {
+					capital_province = {
+						has_building_or_higher = forbidden_city_01
+					}
+				}
+			}
+			add = {
+				add = {
+					value = forbidden_city_bonus_value
+					desc = "[GetBuilding('forbidden_city_01').GetName]"
+				}
+				divide = 100
+			}
+		}
+		if = { # The Great Barracks duchy building bonus (great project)
+			limit = {
+				OR = {
+					vassal_contract_has_flag = celestial_military_appointment # Only for celestial military governors
+					government_has_flag = government_is_administrative # All regular admin types are eligible
+					is_independent_ruler = yes # The top liege can always use it
+				}
+				any_directly_owned_province ?= {
+					has_building_or_higher = celestial_great_barracks_01
+				}
+			}
+			add = {
+				add = {
+					value = great_barracks_bonus_value
+					desc = "[GetBuilding('celestial_great_barracks_01').GetName]"
+				}
+				divide = 100
+			}
+		}
+		
+		# TGP TREASURY BUDGET
+		if = {
+			limit = {
+				top_liege ?= {
+					OR = {
+						has_realm_law = budget_allocation_salary_0
+						has_realm_law = budget_allocation_salary_5
+						AND = {
+							has_realm_law = budget_allocation_salary_10
+							situation:dynastic_cycle ?= { situation_current_phase = situation_dynastic_cycle_phase_stability_advancement }
+						}
+						AND = {
+							has_realm_law = budget_allocation_salary_15
+							situation:dynastic_cycle ?= { situation_current_phase = situation_dynastic_cycle_phase_stability_advancement }
+						}
+					}
+				}
+			}
+			add = {
+				add = {
+					value = -5
+					if = {
+						limit = {
+							OR = {
+								has_realm_law = budget_allocation_salary_0
+								has_realm_law = budget_allocation_salary_5
+							}
+							situation:dynastic_cycle ?= { situation_current_phase = situation_dynastic_cycle_phase_stability_advancement }
+						}
+						add = -5
+					}
+					desc = low_salary_desc
+				}
+				divide = 100
+			}
+		}
+
+		# TGP JAPAN DOMICILE
+		if = {
+			limit = {
+				domicile ?= { has_domicile_parameter = japanese_archives_governor_efficiency_boost }
+			}
+			add = {
+				value = 2.5
+				domicile ?= {
+					if = {
+						limit = { has_domicile_building_or_higher = japanese_archive_02 }
+						add = 2.5
+					}
+					if = {
+						limit = { has_domicile_building_or_higher = japanese_archive_03 }
+						add = 2.5
+					}
+					if = {
+						limit = { has_domicile_building_or_higher = japanese_archive_04 }
+						add = 2.5
+					}
+					if = {
+						limit = { has_domicile_building_or_higher = japanese_archive_05 }
+						add = 2.5
+					}
+				}
+				desc = japanese_archives_governor_efficiency_boost_desc
+			}
+		}
+		#HOUSE BLOC
+		if = {
+			limit = {
+				confederation ?= { has_cohesion_level_parameter = any_member_house_governor_efficiency_boost }
+			}
+			multiply = {
+				value = 1.1
+				desc = SERVICE_BLOC_COHESION_DESC
+			}
+		}
+
+		##### Changed from Vanilla vvvvv
+		if = {
+			limit = {
+				OR = {
+					government_has_flag = government_is_roman_federate
+					government_has_flag = government_is_subroman_administrative
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						vassal_contract_has_flag = governor_efficency_weight_1
+						has_realm_law_flag = governor_efficency_weight_1
+					}
+				}
+				min = 0.6
+				max = 1.4
+			}
+			else_if = {
+				limit = {
+					OR = {
+						vassal_contract_has_flag = governor_efficency_weight_2
+						has_realm_law_flag = governor_efficency_weight_2
+					}
+				}
+				min = 0.7
+				max = 1.3
+			}
+			else_if = {
+				limit = {
+					OR = {
+						vassal_contract_has_flag = governor_efficency_weight_3
+						has_realm_law_flag = governor_efficency_weight_3
+					}
+				}
+				min = 0.8
+				max = 1.2
+			}
+			else_if = {
+				limit = {
+					OR = {
+						vassal_contract_has_flag = governor_efficency_weight_4
+						has_realm_law_flag = governor_efficency_weight_4
+					}
+				}
+				min = 0.9
+				max = 1.1
+			}
+			else = {
+				min = 1.0
+				max = 1.0
+			}
+		}
+		else = {
+			min = 0.5 # Can't go lower than -50%
+			max = 1.5 # Can't go higher than +50%
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+}
