@@ -1,0 +1,561 @@
+﻿paganify_easter_egg_effect = {
+	#Adjust ethnic religions split across heritages
+	religion:proto_carpathian_religion = {
+		every_faith = {
+			swap_doctrine_if_it_has_it_effect = {
+				OLD_DOCTRINE = tenet_ethnic_religion
+				NEW_DOCTRINE = tenet_communal_identity
+			}
+		}
+	}
+	
+	#Convert counties and characters
+	every_county = {
+		paganify_county_effect = yes
+	}
+	every_ruler = {
+		limit = { is_from_ruler_designer = no }
+		paganify_ruler_effect = yes
+	}
+}
+
+paganify_county_effect = {
+	get_paganify_faith_effect = yes
+	if = {
+		limit = { exists = this.var:paganify_faith }
+		
+		# Add minority on holy site
+		if = {
+			limit = { NOT = { any_county_province = { is_holy_site_of = prev.faith } } }
+			remove_list_variable = {
+				name = faith_minorities_small
+				target = faith
+			}
+			remove_list_variable = {
+				name = faith_minorities_large
+				target = faith
+			}
+		}
+		
+		set_county_faith = this.var:paganify_faith
+		remove_list_variable = {
+			name = faith_minorities_small
+			target = this.var:paganify_faith
+		}
+		remove_list_variable = {
+			name = faith_minorities_large
+			target = this.var:paganify_faith
+		}
+	}
+}
+
+paganify_ruler_effect = {
+	get_paganify_faith_effect = yes
+		
+	every_courtier_or_guest = {
+		if = {
+			limit = {
+				exists = prev.var:paganify_faith
+				OR = {
+					this.faith = prev.faith
+					this.culture = { has_same_culture_heritage = prev.culture }
+					has_council_position = councillor_court_chaplain
+				}
+			}
+			set_character_faith = prev.var:paganify_faith
+		}
+		else = {
+			get_paganify_faith_effect = yes
+			if = {
+				limit = { exists = this.var:paganify_faith }
+				set_character_faith = this.var:paganify_faith
+			}
+		}
+	}
+	# Set own faith
+	if = {
+		limit = { exists = this.var:paganify_faith }
+		set_character_faith = this.var:paganify_faith
+	}
+}
+
+# Turn a culture into an older faith
+get_paganify_faith_effect = {
+	if = {
+		limit = {
+			NOR = {
+				# Exclude RFs
+				faith.religion = { is_in_family = rf_pagan }
+				faith.religion = { is_in_family = rf_bosporan }
+				faith.religion = { is_in_family = rf_mazdan }
+				faith.religion = { is_in_family = rf_sinitic }
+				
+				# Exclude historical minorities, gnostics
+				faith = faith:conversos
+				faith = faith:ebionite
+				faith = faith:kitebacilweism
+				faith = faith:ari
+				faith.religion = religion:nastika_religion
+				faith.religion = religion:dualism_religion
+				faith = { has_doctrine = tenet_ethnic_religion }
+				faith = { has_doctrine = tenet_gnosticism }
+				faith = { has_doctrine = doctrine_christian_soteriology_gnosis }
+				
+				# Israelites can be Jewish
+				AND = {
+					culture = { has_cultural_pillar = heritage_israelite }
+					faith.religion = religion:judaism_religion
+				}
+				# Indo-Aryans and Dravidians can be Dharmic
+				AND = {
+					OR = {
+						culture = { has_cultural_pillar = heritage_indo_aryan }
+						culture = { has_cultural_pillar = heritage_dravidian }
+					}
+					faith.religion = { is_in_family = rf_eastern }
+				}
+			}
+		}
+		
+		# African faiths
+		if = {
+			limit = { culture = { has_cultural_pillar = heritage_akan } }
+			set_variable = { value = faith:akom_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_bantu } }
+			set_variable = { value = faith:ngaiism_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_central_african } }
+			set_variable = { value = faith:west_african_bori_pagan name = paganify_faith days = 1 }
+		}
+		else_if = { # Ethiopian override
+			limit = { culture = culture:ethiopian }
+			set_variable = { value = faith:somali_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_east_african } }
+			set_variable = { value = faith:kushitism_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_senegambian } }
+			set_variable = { value = faith:west_african_roog_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_somalian } }
+			set_variable = { value = faith:waaqism_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_west_african }
+					culture = { has_cultural_pillar = heritage_sahelian }
+				}
+			}
+			set_variable = { value = faith:west_african_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_yoruba } }
+			set_variable = { value = faith:west_african_orisha_pagan name = paganify_faith days = 1 }
+		}
+		
+		# Levantine faiths
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_arabic } }
+			set_variable = { value = faith:semitic_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_egyptian } }
+			set_variable = { value = faith:egyptian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = { # Only if not Judaism
+			limit = { culture = { has_cultural_pillar = heritage_israelite } }
+			set_variable = { value = faith:ebionite name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:mauritanian
+					culture = culture:romano_african
+					culture = culture:romano_punic
+					culture = { has_cultural_pillar = heritage_phoenician }
+				}
+			}
+			set_variable = { value = faith:mastimani name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:libyan }
+			set_variable = { value = faith:gurzil name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_berber } }
+			set_variable = { value = faith:berber_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:assyrian }
+			set_variable = { value = faith:assyrian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_syriac } }
+			set_variable = { value = faith:mesopotamian_pagan name = paganify_faith days = 1 }
+		}
+		
+		# Iranian faiths
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_peristani } }
+			set_variable = { value = faith:nuristani_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_parameter = heritage_kulturbund_scythian } }
+			set_variable = { value = faith:scythian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:cyrtian
+					culture = culture:kurdish
+				}
+			}
+			set_variable = { value = faith:kitebacilweism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_tocharian }
+					AND = {
+						culture = { has_cultural_parameter = heritage_group_greater_iranian }
+						faith.religion = { is_in_family = rf_eastern }
+					}
+				}
+			}
+			set_variable = { value = faith:khurmazta name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_parameter = heritage_group_greater_iranian } }
+			set_variable = { value = faith:afridunism name = paganify_faith days = 1 }
+		}
+		
+		# European faiths
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_baltic } }
+			set_variable = { value = faith:baltic_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_vasconic } }
+			set_variable = { value = faith:basque_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:armenian
+					culture = culture:corduenian
+				}
+			}
+			set_variable = { value = faith:urartuism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_caucasian } }
+			set_variable = { value = faith:georgian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_magyar }
+					culture = { has_cultural_pillar = heritage_mogyer }
+				}
+			}
+			set_variable = { value = faith:magyar_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_common_slavic }
+					culture = { has_cultural_pillar = heritage_east_slavic }
+					culture = { has_cultural_pillar = heritage_west_slavic }
+					culture = { has_cultural_pillar = heritage_south_slavic }
+				}
+			}
+			set_variable = { value = faith:slavic_pagan name = paganify_faith days = 1 }
+		}
+		
+		# Celtic faiths
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:romano_gallic
+					culture = culture:romano_noric
+					culture = culture:romano_raetian
+					culture = culture:galatian
+					culture = { has_cultural_pillar = heritage_continental_celtic }
+				}
+			}
+			set_variable = { value = faith:romano_celtic_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:romano_british
+					culture = { has_cultural_parameter = heritage_group_celtic }
+				}
+			}
+			set_variable = { value = faith:celtic_pagan name = paganify_faith days = 1 }
+		}
+		
+		# Carpathian faiths
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:dacian
+					culture = culture:carpodaci
+					culture = culture:romano_dacian
+					culture = { has_cultural_pillar = heritage_vlach }
+				}
+			}
+			set_variable = { value = faith:dacian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:thracian
+					culture = culture:romano_thracian
+				}
+			}
+			set_variable = { value = faith:thracian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				culture = { has_cultural_pillar = heritage_albanian }
+				NOT = { culture = culture:macedonian }
+			}
+			set_variable = { value = faith:illyrian_pagan name = paganify_faith days = 1 }
+		}
+		
+		# Hellenic faiths
+		else_if = {
+			limit = { culture = culture:bosporan }
+			set_variable = { value = faith:bosporan_faith name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:phrygian }
+			set_variable = { value = faith:mithraic_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = culture:macedonian
+					culture = { has_cultural_pillar = heritage_byzantine }
+					culture = { has_cultural_pillar = heritage_ancient_greek }
+					culture = { has_cultural_parameter = heritage_group_romance }
+				}
+			}
+			set_variable = { value = faith:hellenic_pagan name = paganify_faith days = 1 }
+		}
+		
+		# Germanic faiths
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_scandzan }
+					culture = { has_cultural_pillar = heritage_north_germanic }
+				}
+			}
+			set_variable = { value = faith:norse_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_nordwestblock }
+					culture = { has_cultural_pillar = heritage_frankish }
+				}
+			}
+			set_variable = { value = faith:frankish_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_jutlandic }
+					culture = { has_cultural_pillar = heritage_west_germanic }
+				}
+			}
+			set_variable = { value = faith:anglo_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_saxon } }
+			set_variable = { value = faith:saxon_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_suebic } }
+			set_variable = { value = faith:irimonic_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_przeworsk } }
+			set_variable = { value = faith:przeworsk_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_gothic }
+					culture = { has_cultural_pillar = heritage_east_germanic }
+				}
+			}
+			set_variable = { value = faith:gothic_pagan name = paganify_faith days = 1 }
+		}
+		
+		# North Asian faiths
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_balto_finnic }
+					culture = { has_cultural_pillar = heritage_volga_finnic }
+					culture = { has_cultural_pillar = heritage_sami }
+				}
+			}
+			set_variable = { value = faith:finnish_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_ugro_permian } }
+			set_variable = { value = faith:siberian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_parameter = heritage_kulturbund_turco_mongol } }
+			set_variable = { value = faith:tengri_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_tungusic }
+					culture = { has_cultural_pillar = heritage_nivkh }
+				}
+			}
+			set_variable = { value = faith:shamanism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_ainuic } }
+			set_variable = { value = faith:kamuyism_pagan name = paganify_faith days = 1 }
+		}
+		
+		# East Asian faiths
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_chinese } }
+			set_variable = { value = faith:jingxue name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_korean }
+					culture = { has_cultural_pillar = heritage_buyeo }
+				}
+			}
+			set_variable = { value = faith:mu name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_hmongic } }
+			set_variable = { value = faith:dab_qhuas name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_japonic } }
+			set_variable = { value = faith:shinto name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:tangut }
+			set_variable = { value = faith:melieism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_qiangic } }
+			set_variable = { value = faith:rrmeaism name = paganify_faith days = 1 }
+		}
+		
+		# South Asian ethnic religions
+		else_if = {
+			limit = { culture = culture:kirati }
+			set_variable = { value = faith:kiratism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:kachari }
+			set_variable = { value = faith:bathouism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:munda }
+			set_variable = { value = faith:munda_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:gond }
+			set_variable = { value = faith:gondi_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:khasi }
+			set_variable = { value = faith:khasi_animism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = culture:tani }
+			set_variable = { value = faith:donyipoloism name = paganify_faith days = 1 }
+		}
+		
+		# South Asian faiths
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_indo_aryan } }
+			set_variable = { value = faith:smartism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				culture = { has_cultural_pillar = heritage_dravidian }
+				NOR = {
+					faith = faith:srikula_shaktism
+					faith = faith:kalikula_shaktism
+				}
+			}
+			set_variable = { value = faith:dravidian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				culture = { has_cultural_pillar = heritage_tibetan }
+				faith.religion = { is_in_family = rf_eastern }
+			}
+			set_variable = { value = faith:bon name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_tibetan } }
+			set_variable = { value = faith:old_bon name = paganify_faith days = 1 }
+		}
+		
+		# Southeast Asian faiths
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_burman }
+					culture = { has_cultural_pillar = heritage_mon_khmer }
+				}
+			}
+			set_variable = { value = faith:ari name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_tai } }
+			set_variable = { value = faith:satsana_phi name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = { culture = { has_cultural_pillar = heritage_austronesian } }
+			set_variable = { value = faith:hantuism name = paganify_faith days = 1 }
+		}
+	}
+	# Override faiths that don't normally get converted
+	else_if = {
+		limit = {
+			NOT = { exists = this.var:paganify_faith }
+		}
+		if = {
+			limit = {
+				faith.religion = religion:zoroastrianism_religion
+				culture = { has_cultural_pillar = heritage_caucasian }
+			}
+			set_variable = { value = faith:urartuism name = paganify_faith days = 1 }
+		}
+		else_if = {
+			limit = {
+				faith = faith:mesopotamian_pagan
+				culture = culture:assyrian
+			}
+			set_variable = { value = faith:assyrian_pagan name = paganify_faith days = 1 }
+		}
+	}
+}

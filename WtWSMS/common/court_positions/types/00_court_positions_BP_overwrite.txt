@@ -597,3 +597,488 @@ court_tutor_court_position = {
 		}
 	}
 }
+
+##### Changed from Vanilla: Must match the liege's team support trait
+charioteer_court_position = {
+	sort_order = 284
+	max_available_positions = 1
+	skill = prowess
+
+	court_position_asset = {
+		animation = wrestling_victory
+		background = "gfx/interface/illustrations/event_scenes/ep3_hippodrome_chariot_race.dds"
+	}
+
+	is_shown = {
+		is_landed_or_landless_administrative = yes
+		has_ep3_dlc_trigger = yes
+		highest_held_title_tier > tier_county
+	}
+
+	opinion = {
+		value = regular_court_position_opinion
+	}
+
+	# How high the aptitude has to be to reach the 5 different modifier levels
+	aptitude_level_breakpoints = { 20 40 60 80 }
+
+	# How good is this character in this position? root scope is the holder of the court position
+	aptitude = {
+		value = 10
+		add = {
+			value = prowess
+			multiply = 2.5
+			max = 50
+			desc = court_position_skill_prowess
+		}
+		# Charioteer Blue Trait
+		if = {
+			limit = { has_trait = charioteer_blue }
+			if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_blue
+						value >= 90
+					}
+				}
+				add = {
+					value = 40
+					desc = court_position_charioteer_blue_trait
+				}
+			}
+			else_if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_blue
+						value >= 40
+					}
+				}
+				add = {
+					value = 20
+					desc = court_position_charioteer_blue_trait
+				}
+			}
+		}
+		# Charioteer Green Trait
+		if = {
+			limit = { has_trait = charioteer_green }
+			if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_green
+						value >= 90
+					}
+				}
+				add = {
+					value = 40
+					desc = court_position_charioteer_green_trait
+				}
+			}
+			else_if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_green
+						value >= 40
+					}
+				}
+				add = {
+					value = 20
+					desc = court_position_charioteer_green_trait
+				}
+			}
+		}
+		# Charioteer White Trait
+		if = {
+			limit = { has_trait = charioteer_white }
+			if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_white
+						value >= 90
+					}
+				}
+				add = {
+					value = 40
+					desc = court_position_charioteer_white_trait
+				}
+			}
+			else_if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_white
+						value >= 40
+					}
+				}
+				add = {
+					value = 20
+					desc = court_position_charioteer_white_trait
+				}
+			}
+		}
+		# Charioteer Red Trait
+		if = {
+			limit = { has_trait = charioteer_red }
+			if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_red
+						value >= 90
+					}
+				}
+				add = {
+					value = 40
+					desc = court_position_charioteer_red_trait
+				}
+			}
+			else_if = {
+				limit = {
+					has_trait_xp = {
+						trait = charioteer_red
+						value >= 40
+					}
+				}
+				add = {
+					value = 20
+					desc = court_position_charioteer_red_trait
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				has_trait = education_martial
+			}
+			add = {
+				if = {
+					limit = { has_trait = education_martial_2 }
+					add = 15
+				}
+				else_if = {
+					limit = { has_trait = education_martial_3 }
+					add = 20
+				}
+				else_if = {
+					limit = { has_trait = education_martial_4 }
+					add = 25
+				}
+				else_if = {
+					limit = { has_trait = education_martial_5 }
+					add = 30
+				}
+				else = {
+					add = 5
+				}
+				desc = trait_education_martial_prowess
+			}
+		}
+
+		# Estate - Owner bonus from stables
+		if = {
+			limit = {
+				liege ?= {
+					domicile ?= { has_domicile_parameter = estate_increase_charioteer_aptitude }
+				}
+			}
+			add = {
+				value = estate_increase_charioteer_aptitude_value
+				desc = estate_increase_charioteer_aptitude_desc
+			}
+		}
+		##### Changed from Vanilla: Replaced with agile trait
+		if = {
+			limit = {
+				has_trait = agile # confucian_education
+			}
+			add = {
+				value = 20
+			}
+		}
+
+		# Bonus from court.8311
+		if = {
+			limit = { var:bonus_aptitude_role ?= flag:charioteer }
+			add = {
+				value = cp_bonus_aptitude_value
+				desc = cp_bonus_aptitude
+			}
+		}
+
+		add = court_position_aptitude_low_penalty_value
+		add = general_aptitude_bonus
+	}
+
+	# Is this an available position for this court? (root is court owner)
+	##### Changed from Vanilla: Allowed if you have a team support trait
+	valid_position = {
+		is_landed_or_landless_administrative = yes
+		OR = {
+			culture = { has_cultural_parameter = hosts_chariot_races }
+			has_trait = greens_supporter
+			has_trait = blues_supporter
+			has_trait = whites_supporter
+			has_trait = reds_supporter
+		}
+	}
+
+	is_shown_character = {
+		scope:employee = {
+			is_ai = yes
+			is_landed = no
+			has_no_particular_noble_roots_trigger = yes
+			age >= 16
+			court_position_employee_shown_trigger = yes
+		}
+	}
+
+	valid_character = {
+		scope:employee = {
+			charioteer_validity_trigger = { EMPLOYER = scope:liege }
+			##### Changed from Vanilla vvvvv
+			trigger_if = {
+				limit = { scope:liege = { has_trait = greens_supporter } }
+				OR = {
+					has_any_charioteer_trait = no
+					has_trait = charioteer_green
+				}
+			}
+			trigger_else_if = {
+				limit = { scope:liege = { has_trait = blues_supporter } }
+				OR = {
+					has_any_charioteer_trait = no
+					has_trait = charioteer_blue
+				}
+			}
+			trigger_else_if = {
+				limit = { scope:liege = { has_trait = whites_supporter } }
+				OR = {
+					has_any_charioteer_trait = no
+					has_trait = charioteer_white
+				}
+			}
+			trigger_else_if = {
+				limit = { scope:liege = { has_trait = reds_supporter } }
+				OR = {
+					has_any_charioteer_trait = no
+					has_trait = charioteer_red
+				}
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+	}
+
+	revoke_cost = { # root is the liege, no other scopes are passed here!
+		prestige =  {
+			value = major_court_position_prestige_revoke_cost
+			# Set to 0 via obligation hook
+			if = {
+				limit = {
+					court_position_obligation_hook_salary_trigger = {
+						POS = charioteer
+						LIEGE = root
+					}
+				}
+				multiply = 0
+			}
+			# Avoid AI prestige issues
+			if = {
+				limit = {
+					exists = this
+					is_ai = yes
+				}
+				multiply = 0
+			}
+			# Special case for events
+			if = {
+				limit = {
+					exists = this
+					has_character_flag = free_revoke_cost
+				}
+				multiply = 0
+			}
+			#Lowering for LAAMPS, to match Camp Officer revoke cost
+			if = {
+				limit = { 
+					exists = this
+					government_has_flag = government_is_landless_adventurer
+				}
+				value = minor_court_position_prestige_revoke_cost
+			}
+		}
+	}
+
+	custom_employer_modifier_description = charioteer_employer_custom_effect_description
+
+	salary = {
+		gold = {
+			value = 0
+			if = {
+				limit = {
+					scope:liege = {
+						has_treasury = no
+					}
+				}
+				add = charioteer_total_salary_value
+			}
+		}
+		treasury = {
+			value = 0
+			if = {
+				limit = {
+					scope:liege = {
+						has_treasury = yes
+					}
+				}
+				add = charioteer_total_salary_value
+			}
+		}
+		prestige = charioteer_prestige_salary_value
+		round = no
+	}
+
+	received_salary = {
+		gold = {
+			value = charioteer_total_salary_value
+		}
+		prestige = {
+			value = charioteer_prestige_salary_value
+		}
+		round = no
+	}
+
+	# These modifiers are employed based on what level the aptitude reaches (levels are defined as breakpoints)
+	scaling_employer_modifiers = {
+		terrible = {
+			monthly_influence_mult = 0.04
+		}
+		poor = {
+			monthly_influence_mult = 0.08
+		}
+		average = {
+			monthly_influence_mult = 0.12
+		}
+		good = {
+			monthly_influence_mult = 0.16
+		}
+		excellent = {
+			monthly_influence_mult = 0.2
+		}
+	}
+
+	modifier = {
+		attraction_opinion = 10
+		charioteer_blue_xp_gain_mult = 0.25
+		charioteer_green_xp_gain_mult = 0.25
+		charioteer_white_xp_gain_mult = 0.25
+		charioteer_red_xp_gain_mult = 0.25
+	}
+
+	on_court_position_received = {
+		basic_gained_court_position_effect = yes
+		# Assign them to a team
+		##### Changed from Vanilla vvvvv
+		scope:employee = {
+			if = {
+				limit = { has_any_charioteer_trait = no }
+				# Match the liege's team if possible
+				if = {
+					limit = { scope:liege = { has_trait = greens_supporter } }
+					add_trait = charioteer_green
+				}
+				else_if = {
+					limit = { scope:liege = { has_trait = blues_supporter } }
+					add_trait = charioteer_blue
+				}
+				else_if = {
+					limit = { scope:liege = { has_trait = whites_supporter } }
+					add_trait = charioteer_white
+				}
+				else_if = {
+					limit = { scope:liege = { has_trait = reds_supporter } }
+					add_trait = charioteer_red
+				}
+				else = {
+					random_list = {
+						2 = {
+							add_trait = charioteer_green
+						}
+						2 = {
+							add_trait = charioteer_blue
+						}
+						1 = {
+							add_trait = charioteer_white
+						}
+						1 = {
+							add_trait = charioteer_red
+						}
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+	on_court_position_revoked = {
+		basic_revoked_court_position_effect = yes
+	}
+	on_court_position_invalidated = {
+		basic_invalidated_court_position_effect = yes
+	}
+	on_court_position_vacated = {
+		court_position_vacated_event_effect = {
+			COURT_POSITION_TYPE = charioteer_court_position
+		}
+	}
+	# Scripted value to determine whether an AI will hire/fire a position or not. Hires over 0, fires under -50. Look in _court_positions.info for more extensive documentation!
+	ai_position_score = {
+		value = 100
+		scope:liege = {
+			# More likely for very generous characters
+			if = {
+				limit = {
+					ai_greed <= -75
+				}
+				add = 25
+			}
+			# Lots of gold to spend on inspirations!
+			if = {
+				limit = {
+					gold >= 500
+					monthly_character_income > monthly_character_expenses_plus_fourty_percent
+				}
+				add = 50
+			}
+			if = { # Emperor should always have one
+				limit = {
+					has_title = title:e_byzantium
+				}
+				add = 100
+			}
+			if = { # Most governors should have them
+				limit = {
+					has_trait = governor
+				}
+				add = 50
+			}
+		}
+		add = court_position_debt_considerations_value
+	}
+	ai_candidate_score = {
+		value = 100
+		scope:employee = {
+			# Does the liege have a better candidate that they should be hiring instead?
+			if = {
+				limit = {
+					scope:highest_available_aptitude > scope:employee_aptitude
+				}
+				add = -125
+			}
+			# More likely to pick a courtier with a high aptitude, less likely to pick one with low
+			add = {
+				value = scope:employee_aptitude
+				multiply = 4
+			}
+		}
+
+		add = scope:base_value
+		add = court_position_candidate_score_base_value
+	}
+}
