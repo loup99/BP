@@ -56,11 +56,7 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		# Legitimacy
 		add_legitimacy_attacker_victory_effect = yes
 		
-		create_title_and_vassal_change = {
-			type = conquest
-			save_scope_as = change_counties
-			add_claim_on_loss = yes
-		}
+		#Step 0: Determine what to do with WRE titles
 		scope:defender = {
 			#Parse out what to do with Romulus' titles
 			every_held_title = {
@@ -80,7 +76,20 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			}
 		}
 		
+		#Destroy invalid titles
+		hidden_effect = {
+			every_in_list = {
+				list = titles_destroyed
+				scope:defender = { destroy_title = prev }
+			}
+		}
+		
 		#Step 1: Transfer Counties
+		create_title_and_vassal_change = {
+			type = conquest
+			save_scope_as = change_counties
+			add_claim_on_loss = yes
+		}
 		scope:attacker = {
 			every_war_ally = { #Award Odoacer's compatriots with roof trees...
 				limit = { is_landless_adventurer = yes }
@@ -321,14 +330,6 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		
 		# Truce
 		add_truce_attacker_victory_effect = yes
-		
-		#Destroy invalid titles
-		hidden_effect = {
-			every_in_list = {
-				list = titles_destroyed
-				scope:defender = { destroy_title = prev }
-			}
-		}
 		
 		#Give Odoacer some cash to start
 		scope:attacker = { add_treasury = 1000 }
