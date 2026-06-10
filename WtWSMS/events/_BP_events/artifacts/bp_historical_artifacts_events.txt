@@ -1,6 +1,4 @@
-﻿##### Cribbed from events/artifacts/historical_artifacts_events. Essentially, a very
-##### down-selected version. Still makes dynasty banners and such, but will remain much easier
-##### to maintain than trying to overwrite Vanilla's
+﻿##### Copied from events/artifacts/historical_artifacts_events
 
 namespace = bp_historical_artifacts
 # Generation of historical artifacts #
@@ -139,5 +137,458 @@ bp_historical_artifacts.0023 = {
 				}
 			}
 		}
+		# Historical Artifacts
+		## We do these per-artefact rather than per-title so that they can be easily reshuffled if desired.
+		## Crowns
+		
+		##### Changed from Vanilla: Removed unavailable artifacts
+		
+		##### Changed from Vanilla: Atilla's Sword is Hunnic
+		##### Changed from Vanilla vvvvv
+		
+		### Sword of Atilla 
+		#### Associated with the Arpads, but "discovered"/passed out of their possession around or after 1063. They maintain a house claim on it.
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
+				current_date < 1064.1.1
+				exists = title:e_hunnic_empire.holder
+			}
+			title:e_hunnic_empire.holder = {
+				create_artifact_wall_sword_attila_effect = { OWNER = this }
+			}
+		}
+		##### Changed from Vanilla ^^^^^
+		
+		##### Changed from Vanilla: Removed unavailable artifacts
+		
+		## Banners
+		
+		##### Changed from Vanilla: Removed unavailable artifacts
+		
+		### Banner of Edessa
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
+				OR = {
+					exists = title:e_byzantium.holder
+					exists = title:h_eastern_roman_empire.holder
+				}
+			}
+			if = {
+				limit = { exists = title:h_eastern_roman_empire }
+				title:e_byzantium.holder = {
+					create_artifact_wall_banner_edessa_effect = { OWNER = this }
+				}
+			}
+			else = {
+				title:h_eastern_roman_empire.holder = {
+					create_artifact_wall_banner_edessa_effect = { OWNER = this }
+				}
+			}
+		}
+		## Misc
+		
+		##### Changed from Vanilla: Removed unavailable artifacts
+		
+		# Crowns
+		##### Changed from Vanilla: Removed Iron Crown of Lombardy
+		##### Changed from Vanilla: Removed Reichskrone
+		##### Changed from Vanilla: Removed Essen Crown
+		##### Changed from Vanilla: Removed Nikephoros' Crown
+		##### Changed from Vanilla: Removed Monomachus Crown
+		##### Changed from Vanilla: Removed Crown of Justinian (Pedestal)
+		##### Changed from Vanilla: Removed al-Taj
+		### Papal Tiara
+		if = {
+			limit = { exists = title:d_papal_state.holder }	##### Changed from Vanilla: Title tier
+			title:d_papal_state.holder = {
+				create_artifact_papal_tiara_effect = { OWNER = this }
+			}
+		}
+		### Visigothic Votive Crowns
+		##### Changed from Vanilla: Given to k_visigoths if they exist
+		if = {
+			limit = {
+				has_fp2_dlc_trigger = yes
+				exists = title:k_visigoths.holder
+			}
+			title:k_visigoths.holder = { create_artifact_fp2_votive_crowns_effect = { OWNER = this } }
+			every_ruler = {
+				limit = {
+					culture = culture:visigothic
+					is_landed = yes
+					highest_held_title_tier = tier_duchy
+				}
+				add_to_list = potential_votive_crown_holders_list
+			}
+			while = {
+				count = 4
+				random_in_list = {
+					list = potential_votive_crown_holders_list
+					limit = {
+						NOT = { has_character_flag = seeded_relic }
+					}
+					create_artifact_fp2_votive_crowns_effect = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = { has_fp2_dlc_trigger = yes }
+			every_county_in_region = {
+				region = world_europe_west_iberia
+				holder = { add_to_list = potential_votive_crown_holders_list }
+			}
+			while = {
+				count = 5
+				random_in_list = {
+					list = potential_votive_crown_holders_list
+					limit = {
+						NOT = { has_character_flag = seeded_relic }
+					}
+					create_artifact_fp2_votive_crowns_effect = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+		}
+		
+		# Clothes
+		##### Changed from Vanilla: Removed Robe of Kassapa
+		##### Changed from Vanilla: Removed Mantle of the Prophet
+		
+		# Regalia
+		##### Changed from Vanilla: Removed Qadib al-Mulk
+		##### Changed from Vanilla: Removed Chalice of Dona Urraca
+		
+		# Thrones
+		##### Changed from Vanilla: Removed Throne of Charlemagne
+		##### Changed from Vanilla: Removed Throne of Scone (featuring Stone)
+		
+		# Furniture
+		##### Changed from Vanilla: Removed Pentapyrgion (ca. 830s)
+		##### Changed from Vanilla: Removed Bells of Santiago
+		##### Changed from Vanilla: Removed (Former) Bells of Santiago
+		
+		# Weapons
+		##### Changed from Vanilla: Removed Curtana
+		##### Changed from Vanilla: Removed al-Sayf al-Khass
+		##### Changed from Vanilla: Removed Staff of Kakusandha
+		### "Excalibur"
+		every_county_in_region = {
+			region = world_europe_west_britannia
+			holder = {
+				# We exclude kings'n'emperors so the Excaliburs scatter a little better.
+				if = {
+					limit = {
+						faith.religion = religion:christianity_religion
+						highest_held_title_tier <= tier_duchy
+					}
+					add_to_list = potential_excalibur_holders_list
+				}
+			}
+		}
+		every_county_in_region = {
+			region = world_europe_west_francia
+			holder = {
+				# We exclude kings'n'emperors so the Excaliburs scatter a little better.
+				if = {
+					limit = {
+						faith.religion = religion:christianity_religion
+						highest_held_title_tier <= tier_duchy
+					}
+					add_to_list = potential_excalibur_holders_list
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_in_list = { list = potential_excalibur_holders_list }
+			}
+			while = {
+				count = 6
+				random_in_list = {
+					list = potential_excalibur_holders_list
+					limit = {
+						NOT = { has_character_flag = seeded_relic }
+					}
+					weight = {
+						# Weight up Arthurian heartlands.
+						## We don't weigh 'em up _too_ much, because there's quite a few rulers in this region.
+						modifier = {
+							add = 10
+							capital_province = { geographical_region = dlc_ep1_arthurian_heartlands_region }
+						}
+					}
+					create_artifact_excalibur_effect = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+		}
+		##### Changed from Vanilla: Removed Spear of the Prophet
+		
+		
+		## Books, Scrolls, & Other Recorded Nerdery
+		###  Changed from Vanilla: Removed Konagamana
+		### Vinaya Pitaka
+		random_character_with_royal_court = {
+			limit = { faith = faith:theravada }
+			create_artifact_vinaya_pitaka_effect = { OWNER = this }
+		}
+		### Sutta Pitaka
+		random_character_with_royal_court = {
+			limit = { faith = faith:theravada }
+			create_artifact_sutta_pitaka_effect = { OWNER = this }
+		}
+		### Abhidhamma Pitaka
+		random_character_with_royal_court = {
+			limit = { faith = faith:theravada }
+			create_artifact_abhidhamma_pitaka_effect = { OWNER = this }
+		}
+		
+		# Banners
+		### Banner of Kaviani
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
+				# Only generated in the earlier bookmarks.
+				current_date < 1000.1.1
+				exists = title:h_persia.holder	##### Changed from vanilla: Title ID
+			}
+			title:h_persia.holder = {	##### Changed from vanilla: Title ID
+				create_artifact_wall_banner_kaviani_effect = { OWNER = this }
+			}
+		}
+		### Banner of Edessa
+		##### Changed from Vanilla: Given to h_eastern_roman_empire if they exist
+		if = {
+			limit = {
+				has_dlc_feature = royal_court
+				exists = title:h_eastern_roman_empire.holder
+			}
+			title:h_eastern_roman_empire.holder = {
+				create_artifact_wall_banner_edessa_effect = { OWNER = this }
+			}
+		}
+		else_if = {
+			limit = {
+				has_dlc_feature = royal_court
+				exists = title:e_byzantium.holder
+			}
+			title:e_byzantium.holder = {
+				create_artifact_wall_banner_edessa_effect = { OWNER = this }
+			}
+		}
+		##### Changed from Vanilla: Removed Banner of Thankfulness
+		
+		# Misc
+		##### Changed from Vanilla: Removed Head of St. Edmund
+		##### Changed from Vanilla: Removed al-Dawat
+		##### Changed from Vanilla: Removed al-Hafir
+		##### Changed from Vanilla: Skull Cap of Charlemagne
+		### Sassanian Sword
+		if = {
+			limit = {
+				# Only generated in the earlier bookmarks.
+				current_date < 900.1.1
+				has_dlc_feature = legacy_of_persia
+				exists = title:c_mazandaran
+			}
+			title:c_mazandaran.holder = {
+				create_artifact_illustrious_sassanian_sword_effect = { OWNER = this }
+			}
+		}
+		### Incense Burner Sculpture
+		if = {
+			limit = {
+				# Only generated in the earlier bookmarks.
+				current_date < 900.1.1
+				has_dlc_feature = legacy_of_persia
+				exists = title:k_kabulistan	##### Changed from Vanilla: Title ID
+			}
+			title:k_kabulistan.holder = {	##### Changed from Vanilla: Title ID
+				create_artifact = {
+					name = fp3_incense_burner_sculpture
+					description = fp3_incense_burner_sculpture_desc
+					visuals = fp3_incense_burner_sculpture
+					type = sculpture
+					wealth = 80
+					quality = 80
+					modifier = artifact_negate_health_penalty_add_2_modifier
+					modifier = artifact_stress_gain_3_modifier
+					modifier = artifact_attraction_opinion_2_modifier
+					modifier = artifact_court_grandeur_baseline_add_3_modifier
+					history = { type = created_before_history }
+				}
+			}
+		}
+		### Oxus Bracelet
+		if = {
+			limit = {
+				# Only generated in the earlier bookmarks.
+				current_date < 900.1.1
+				has_dlc_feature = legacy_of_persia
+				exists = title:c_balkh	##### Changed from Vanilla: Title ID so e_xiongnu gets it
+			}
+			title:c_balkh.holder = {	##### Changed from Vanilla: Title ID
+				create_artifact_oxus_bracelet_effect = { 
+					OWNER = this
+				}
+			}
+		}
+		### Persian Drinking Vessel
+		if = {
+			limit = {
+				# Only generated in the earlier bookmarks.
+				current_date < 900.1.1
+				has_dlc_feature = legacy_of_persia
+				exists = title:d_makran	##### Changed from Vanilla: Title ID
+			}
+			title:d_makran.holder = {	##### Changed from Vanilla: Title ID
+				create_artifact = {
+					name = fp3_ancient_drinking_vessel
+					description = fp3_ancient_drinking_vessel_desc
+					visuals = persian_drinking_vessel
+					type = goblet
+					wealth = 80
+					quality = 80
+					modifier = artifact_negate_health_penalty_add_2_modifier
+					modifier = artifact_stress_gain_3_modifier
+					modifier = artifact_monthly_prestige_5_modifier
+					modifier = artifact_court_grandeur_baseline_add_3_modifier
+				}
+			}
+		}
+
+		### Statue of Constantine the Great
+		### Statue of Roman Woman
+		### Four Tetrarchs Statue
+		### Hydraulic Organ
+		if = {
+			limit = {
+				has_ep3_dlc_trigger = yes
+				OR = {
+					exists = title:e_byzantium.holder
+					exists = title:h_eastern_roman_empire.holder
+				}
+			}
+			if = {
+				limit = { exists = title:e_byzantium.holder }
+				title:e_byzantium.holder = {
+					create_artifact_statue_constantine_effect = { OWNER = this }
+					create_artifact_statue_roman_woman_effect = { OWNER = this }
+					create_artifact_statue_four_tetrarchs_effect = { OWNER = this }
+					create_artifact_hydraulic_organ_effect = { OWNER = this }
+				}
+			}
+			else = {
+				title:h_eastern_roman_empire.holder = {
+					create_artifact_statue_constantine_effect = { OWNER = this }
+					create_artifact_statue_roman_woman_effect = { OWNER = this }
+					create_artifact_statue_four_tetrarchs_effect = { OWNER = this }
+					create_artifact_hydraulic_organ_effect = { OWNER = this }
+				}
+			}
+		}
+		### Tree automa
+		if = {
+			limit = {
+				has_ep3_dlc_trigger = yes
+				exists = title:e_byzantium.holder
+				current_date >= 940.1.1
+			}
+			title:e_byzantium.holder = {
+				create_artifact_tree_automa_effect = { OWNER = this }
+			}
+		}
+		### Spread some Orthodox icons
+		##### Changed from Vanilla: Allowed for nicenes
+		every_county_in_region = {
+			region = world_europe_east
+			holder = {
+				if = {
+					limit = {
+						OR = {
+							faith = faith:nicene
+							faith = faith:orthodox
+						}
+					}
+					add_to_list = potential_icons_holders_list
+				}
+			}
+		}
+		every_county_in_region = {
+			region = world_asia_minor
+			holder = {
+				if = {
+					limit = {
+						OR = {
+							faith = faith:nicene
+							faith = faith:orthodox
+						}
+					}
+					add_to_list = potential_icons_holders_list
+				}
+			}
+		}
+		every_county_in_region = {
+			region = world_europe_south_east
+			holder = {
+				if = {
+					limit = {
+						OR = {
+							faith = faith:nicene
+							faith = faith:orthodox
+						}
+					}
+					add_to_list = potential_icons_holders_list
+				}
+			}
+		}
+		every_county_in_region = {
+			region = world_europe_south_italy
+			holder = {
+				if = {
+					limit = {
+						OR = {
+							faith = faith:nicene
+							faith = faith:orthodox
+						}
+					}
+					add_to_list = potential_icons_holders_list
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_in_list = { list = potential_icons_holders_list }
+			}
+			while = {
+				count = 4
+				random_in_list = {
+					list = potential_icons_holders_list
+					limit = {
+						NOT = { has_character_flag = seeded_relic }
+					}
+					create_artifact_trinket_icon_ancient_effect = { OWNER = this }
+					add_character_flag = {
+						flag = seeded_relic
+						days = 1
+					}
+				}
+			}
+		}
+		
+		##### Changed from Vanilla: Custom crowns (Roman, etc)
+		bp_create_crowns_regalia_effect = yes
 	}
 }

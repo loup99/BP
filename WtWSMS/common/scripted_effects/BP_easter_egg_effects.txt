@@ -11,10 +11,14 @@
 	
 	#Convert counties and characters
 	every_county = {
+		limit = { exists = county }
 		paganify_county_effect = yes
 	}
 	every_ruler = {
-		limit = { is_from_ruler_designer = no }
+		limit = {
+			is_from_ruler_designer = no
+			NOT = { faith.religious_head = this }
+		}
 		paganify_ruler_effect = yes
 	}
 }
@@ -26,7 +30,7 @@ paganify_county_effect = {
 		
 		# Add minority on holy site
 		if = {
-			limit = { NOT = { any_county_province = { is_holy_site_of = prev.faith } } }
+			limit = { NOT = { any_county_province = { barony = { is_holy_site_of = prev.faith } } } }
 			remove_list_variable = {
 				name = faith_minorities_small
 				target = faith
@@ -98,7 +102,6 @@ get_paganify_faith_effect = {
 				faith.religion = religion:nastika_religion
 				faith.religion = religion:dualism_religion
 				faith = { has_doctrine = tenet_ethnic_religion }
-				faith = { has_doctrine = tenet_gnosticism }
 				faith = { has_doctrine = doctrine_christian_soteriology_gnosis }
 				
 				# Israelites can be Jewish
@@ -197,7 +200,12 @@ get_paganify_faith_effect = {
 			set_variable = { value = faith:assyrian_pagan name = paganify_faith days = 1 }
 		}
 		else_if = {
-			limit = { culture = { has_cultural_pillar = heritage_syriac } }
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_syriac }
+					culture = { has_cultural_pillar = heritage_elamite }
+				}
+			}
 			set_variable = { value = faith:mesopotamian_pagan name = paganify_faith days = 1 }
 		}
 		
@@ -314,6 +322,13 @@ get_paganify_faith_effect = {
 			}
 			set_variable = { value = faith:dacian_pagan name = paganify_faith days = 1 }
 		}
+		else_if = { # Basilicus and miaphysites
+			limit = {
+				culture = { has_cultural_pillar = heritage_latin }
+				faith = faith:coptic
+			}
+			set_variable = { value = faith:sol_invictus name = paganify_faith days = 1 }
+		}
 		else_if = {
 			limit = {
 				OR = {
@@ -338,7 +353,7 @@ get_paganify_faith_effect = {
 		}
 		else_if = {
 			limit = { culture = culture:phrygian }
-			set_variable = { value = faith:mithraic_pagan name = paganify_faith days = 1 }
+			set_variable = { value = faith:cybelian name = paganify_faith days = 1 }
 		}
 		else_if = {
 			limit = {
@@ -542,6 +557,8 @@ get_paganify_faith_effect = {
 	else_if = {
 		limit = {
 			NOT = { exists = this.var:paganify_faith }
+			NOT = { faith = faith:manichean }
+			NOT = { faith = faith:mingism }
 		}
 		if = {
 			limit = {
@@ -556,6 +573,27 @@ get_paganify_faith_effect = {
 				culture = culture:assyrian
 			}
 			set_variable = { value = faith:assyrian_pagan name = paganify_faith days = 1 }
+		}
+		else_if = { # Western gnostics
+			limit = {
+				OR = {
+					culture = { has_cultural_pillar = heritage_latin }
+					culture = { has_cultural_pillar = heritage_berber }
+					culture = { has_cultural_pillar = heritage_continental_celtic }
+				}
+				OR = {
+					faith.religion = religion:dualism_religion
+					faith = { has_doctrine = doctrine_christian_soteriology_gnosis }
+				}
+			}
+			set_variable = { value = faith:mithraic_pagan name = paganify_faith days = 1 }
+		}
+		else_if = { # Eastern gnostics
+			limit = {
+				culture = { has_cultural_parameter = heritage_group_balko_anatolian }
+				faith = { has_doctrine = doctrine_christian_soteriology_gnosis }
+			}
+			set_variable = { value = faith:orphism name = paganify_faith days = 1 }
 		}
 	}
 }

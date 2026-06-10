@@ -13,16 +13,15 @@
 		}
 	}
 	#The Senators Hates You
-	custom_tooltip = {
-		text = senators_hate_you
-		every_living_character = {
-			limit = { has_trait = senator_$REGION$ }
-			remove_trait = senator_$REGION$
-			add_opinion = {
-				target = root
-				modifier = hate_opinion
-				opinion = -100
-			}
+	
+	every_living_character = {
+		limit = { has_trait = senator_$REGION$ }
+		custom = every_$REGION$_senator
+		remove_trait = senator_$REGION$
+		add_opinion = {
+			target = root
+			modifier = hate_opinion
+			opinion = -100
 		}
 	}
 	#If he's alive, the Emperor hates you
@@ -62,6 +61,13 @@
 	#}
 	
 	remove_global_variable = $REGION$_senate_is_established
+	remove_global_variable = $REGION$_consul
+	remove_global_variable = $REGION$_consul_nominee
+	situation:BP_senate = {
+		situation_sub_region:$REGION$ = {
+			change_phase = senate_disbanded
+		}
+	}
 }
 destroy_senate_effect = {
 	every_living_character = {
@@ -71,9 +77,17 @@ destroy_senate_effect = {
 	}
 	every_living_character = {
 		limit = { has_trait = senator_$REGION$ }
+		custom = every_$REGION$_senator
 		remove_trait = senator_$REGION$
 	}
 	remove_global_variable = $REGION$_senate_is_established
+	remove_global_variable = $REGION$_consul
+	remove_global_variable = $REGION$_consul_nominee
+	situation:BP_senate = {
+		situation_sub_region:$REGION$ = {
+			change_phase = senate_disbanded
+		}
+	}
 }
 
 senate_election_effect = {
@@ -112,6 +126,12 @@ senate_election_effect = {
 			save_scope_as = new_consul_$REGION$
 		}
 	}
+	# Save the variables
+	remove_global_variable = $REGION$_consul_nominee
+	set_global_variable = {
+		name = $REGION$_consul
+		value = scope:new_consul_$REGION$
+	}
 	
 	every_ruler = {
 		limit = {
@@ -124,26 +144,23 @@ senate_election_effect = {
 			fire_senate_interface_toast_to_human_senators_effect = {
 				IS_WEST = yes
 				EVENT_TYPE = elected_new_consul
+				CHARACTER = scope:new_consul_$REGION$
 			}
 		}
 		else = {
 			fire_senate_interface_toast_to_human_senators_effect = {
 				IS_WEST = no
 				EVENT_TYPE = elected_new_consul
+				CHARACTER = scope:new_consul_$REGION$
 			}
 		}
 	}
 	
 	#If the city holder is stalling the Senate, remind him again...
 	if = {
-		limit = {
-			NOR = { #You haven't made a definite determination yet...
-				title:$BARONY$.holder.top_liege = { has_character_modifier = approved_by_the_senate }
-				title:$BARONY$.holder.top_liege = { has_character_modifier = rejected_by_the_senate }
-				title:$BARONY$.holder.top_liege = { has_character_modifier = ignored_the_senate }
-			}
-			
-		}
+		#You haven't made a definite determination yet...
+		limit = { situation:BP_senate = { situation_sub_region:$REGION$ = { sub_region_current_phase = senate_deliberation } } }
+		
 		every_living_character = { limit = { has_character_modifier = roman_consul_$REGION$ } save_scope_as = the_consul_$REGION$ }
 		if = {
 			limit = { title:$BARONY$ = title:b_roma }
@@ -155,8 +172,16 @@ senate_election_effect = {
 	}
 }
 
+add_senator_trait_and_participant_effect = {
+	if = {
+		limit = { NOT = { has_trait = senator_$REGION$ } }
+		add_trait = senator_$REGION$
+	}
+	situation:BP_senate = { add_manual_participant = prev }
+}
+
 made_a_senator_effect = { #recipient scope
-	add_trait = senator_$REGION$
+	add_senator_trait_and_participant_effect = { REGION = $REGION$ }
 	add_opinion = {
 		modifier = made_me_a_senator
 		target = $ACTOR$
@@ -183,33 +208,46 @@ update_senator_opinion_about_character_effect = { #Senator scope
 		limit = { has_opinion_modifier = { target = $ACTOR$ modifier = senate_general_opinion_stalled_the_senate } }
 		remove_opinion = { target = $ACTOR$ modifier = senate_general_opinion_stalled_the_senate }
 	}
-	#Update Opinion
+	#Update Opinion of City Holder
 	if = {
-		limit = { $ACTOR$ = { has_character_modifier = approved_by_the_senate } }
-		add_opinion = {
-			modifier = senate_general_opinion_approved_by_the_senate
-			target = $ACTOR$
+		limit = {
+			situation:BP_senate = {
+				any_situation_sub_region = {
+					any_situation_sub_region_participant_group = {
+						participant_group_type = city_holder
+						participant_group_has_character = $ACTOR$
+					}
+				}
+			}
 		}
-	}
-	else_if = {
-		limit = { $ACTOR$ = { has_character_modifier = rejected_by_the_senate } }
-		add_opinion = {
-			modifier = senate_general_opinion_rejected_by_the_senate
-			target = $ACTOR$
+		
+		if = {
+			limit = { has_senate_phase_trigger = { ACTOR = $ACTOR$ PHASE = senate_approval } }
+			add_opinion = {
+				modifier = senate_general_opinion_approved_by_the_senate
+				target = $ACTOR$
+			}
 		}
-	}
-	else_if = {
-		limit = { $ACTOR$ = { has_character_modifier = ignored_the_senate } }
-		add_opinion = {
-			modifier = senate_general_opinion_ignored_the_senate
-			target = $ACTOR$
+		else_if = {
+			limit = { has_senate_phase_trigger = { ACTOR = $ACTOR$ PHASE = senate_rejection } }
+			add_opinion = {
+				modifier = senate_general_opinion_rejected_by_the_senate
+				target = $ACTOR$
+			}
 		}
-	}
-	else_if = {
-		limit = { $ACTOR$ = { has_character_modifier = stalled_the_senate } }
-		add_opinion = {
-			modifier = senate_general_opinion_stalled_the_senate
-			target = $ACTOR$
+		else_if = {
+			limit = { has_senate_phase_trigger = { ACTOR = $ACTOR$ PHASE = senate_ignored } }
+			add_opinion = {
+				modifier = senate_general_opinion_ignored_the_senate
+				target = $ACTOR$
+			}
+		}
+		else_if = {
+			limit = { $ACTOR$ = { has_character_modifier = stalled_the_senate } }
+			add_opinion = {
+				modifier = senate_general_opinion_stalled_the_senate
+				target = $ACTOR$
+			}
 		}
 	}
 }
@@ -232,10 +270,7 @@ update_all_senate_opinion_about_character_effect = {
 elevated_a_dynasty_effect = {
 	$RECIPIENT$ = {
 		dynasty = { add_dynasty_modifier = roman_senate_family_$REGION$ }
-		if = {
-			limit = { NOT = { has_trait = senator_$REGION$ } }
-			add_trait = senator_$REGION$
-		}
+		add_senator_trait_and_participant_effect = { REGION = $REGION$ }
 		if = {
 			limit = { NOT = { $ACTOR$ = $RECIPIENT$ } }
 			add_opinion = {
@@ -255,10 +290,7 @@ elevated_a_dynasty_effect = {
 				THE_CITY = $THE_CITY$
 			}
 		}
-		if = {
-			limit = { NOT = { has_trait = senator_$REGION$ } }
-			add_trait = senator_$REGION$
-		}
+		add_senator_trait_and_participant_effect = { REGION = $REGION$ }
 		
 		add_opinion = {
 			modifier = elevated_my_dynasty
@@ -270,9 +302,10 @@ elevated_a_dynasty_effect = {
 
 nominated_consul_effect = { #recipient scope
 	add_character_modifier = roman_consul_nominee_$REGION$
-	if = {
-		limit = { NOT = { has_trait = senator_$REGION$ } }
-		add_trait = senator_$REGION$
+	add_senator_trait_and_participant_effect = { REGION = $REGION$ }
+	set_global_variable = {
+		name = $REGION$_consul_nominee
+		value = this
 	}
 	if = {
 		limit = { NOT = { this = $ACTOR$ } }
@@ -287,36 +320,38 @@ nominated_consul_effect = { #recipient scope
 fire_senate_interface_toast_to_human_senators_effect = {
 	if = {
 		limit = { always = $IS_WEST$ }
-		fire_senate_interface_toast_to_human_senators_west_effect = { EVENT_TYPE = $EVENT_TYPE$ }
+		fire_senate_interface_toast_to_human_senators_west_effect = { EVENT_TYPE = $EVENT_TYPE$ CHARACTER = $CHARACTER$ }
 	}
-	else = { fire_senate_interface_toast_to_human_senators_east_effect = { EVENT_TYPE = $EVENT_TYPE$ } }
+	else = { fire_senate_interface_toast_to_human_senators_east_effect = { EVENT_TYPE = $EVENT_TYPE$ CHARACTER = $CHARACTER$ } }
 }
 
 fire_senate_interface_toast_to_human_senators_west_effect = {
-	every_ruler = {
-		limit = {
-			is_ai = no
-			has_trait = senator_west
-		}
-		send_interface_toast = {
-			type = event_generic_neutral
-			title = senate_west_$EVENT_TYPE$_title
-			custom_tooltip = senate_west_$EVENT_TYPE$_tt
-			right_icon = title:d_senate
+	situation:BP_senate.situation_sub_region:west = {
+		every_situation_sub_region_participant = {
+			limit = { is_ai = no }
+			
+			send_interface_toast = {
+				type = event_generic_neutral
+				title = senate_west_$EVENT_TYPE$_title
+				custom_tooltip = senate_west_$EVENT_TYPE$_tt
+				left_icon = $CHARACTER$
+				right_icon = title:d_senate
+			}
 		}
 	}
 }
 fire_senate_interface_toast_to_human_senators_east_effect = {
-	every_ruler = {
-		limit = {
-			is_ai = no
-			has_trait = senator_east
-		}
-		send_interface_toast = {
-			type = event_generic_neutral
-			title = senate_east_$EVENT_TYPE$_title
-			custom_tooltip = senate_east_$EVENT_TYPE$_tt
-			right_icon = title:d_senate_east
+	situation:BP_senate.situation_sub_region:east = {
+		every_situation_sub_region_participant = {
+			limit = { is_ai = no }
+			
+			send_interface_toast = {
+				type = event_generic_neutral
+				title = senate_east_$EVENT_TYPE$_title
+				custom_tooltip = senate_east_$EVENT_TYPE$_tt
+				left_icon = $CHARACTER$
+				right_icon = title:d_senate_east
+			}
 		}
 	}
 }
@@ -375,6 +410,7 @@ senate_interaction_opinion_effect = {
 			NOT = { this = scope:recipient } #Oh, thank you!
 			NOT = { this = scope:actor }
 		}
+		custom = every_$REGION$_senator
 		this = { save_scope_as = senator_in_question }
 		add_opinion = {
 			modifier = interfered_with_the_senate
@@ -492,10 +528,7 @@ give_roman_senatorial_families_traits_effect = {
 			valid_to_be_senator_trigger_age_trigger = { CHAR = this }
 			valid_to_be_senator_trigger_sex_trigger = { CHAR = this }
 		}
-		if = {
-			limit = { NOT = { has_trait = senator_$REGION$ } }
-			add_trait = senator_$REGION$
-		}
+		add_senator_trait_and_participant_effect = { REGION = $REGION$ }
 	}
 }
 give_roman_senators_land_in_appropriate_regions_effect = {

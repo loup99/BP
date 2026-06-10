@@ -474,7 +474,36 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			}
 		}
 		
-		#Imprison Orestes and Romulus Augustulus (done before vassal transfer so that top liege stuff resolves correctly)
+		#Imprison Orestes and Romulus Augustulus
+		scope:defender = {
+			add_trait = deposed
+			
+			# Set up artifact transfers
+			hidden_effect = {
+				# Diadem is special, should be handled with the WRE transfer event
+				every_character_artifact = {
+					limit = { has_variable = western_roman_imperial_diadem }
+					save_scope_as = diadem_artifact
+				}
+				# Steal all court artifacts
+				every_character_artifact = {
+					limit = {
+						NOT = { has_variable = western_roman_imperial_diadem }
+						NOT = { has_variable = banner_house } # Don't steal house banners
+						ep1_artifact_is_court_artifact_trigger = yes
+					}
+					set_owner = {
+						target = scope:attacker
+						history = {
+							type = conquest
+							actor = scope:defender
+							recipient = scope:attacker
+						}
+					}
+				}
+			}
+		}
+		scope:attacker = { imprison = { target = scope:defender type = house_arrest } }
 		if = {
 			limit = { scope:defender = character:96054 }
 			character:96054 = { add_trait = deposed }

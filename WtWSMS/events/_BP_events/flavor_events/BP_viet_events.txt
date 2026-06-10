@@ -1,0 +1,2523 @@
+﻿# VIET style flavor events, originally written by cybrxkhan
+# 4000-4003 Noric
+# 4004-4010 Bosporan
+# 4011-4015 Corduenian
+# 260-265 Ancient Cultures
+
+namespace = bp_viet
+
+###########################################################
+# NORIC
+###########################################################
+
+# Noric smiths on the rise
+bp_viet.4000 = { #WTWSMS id: VIETmisc.4000
+	type = character_event
+	title = bp_viet.4000.title
+	desc = bp_viet.4000.desc
+	
+	theme = martial
+	content_source = dlc_WtWSMS
+	
+	trigger = { is_landed = yes }
+	
+	weight_multiplier = {
+        base = 0
+		modifier = {
+			add = {
+				every_held_title = {
+					limit = {
+						tier = tier_county
+						is_landless_type_title = no
+						culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+						NOT = { has_county_modifier = VIET_noric_smiths }
+					}
+					add = 0.5
+					# Makes more sense in historical Noricum
+					if = {
+						limit = { title_province = { geographical_region = custom_bavaria } }
+						add = 0.5
+					}
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		random_held_title = {
+			limit = {
+				tier = tier_county
+				is_landless_type_title = no
+				culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+				NOT = { has_county_modifier = VIET_noric_smiths }
+			}
+			save_scope_as = noric_county
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = inspect_weapon
+	}
+	
+	option = { # Good
+		name = bp_viet.4000.a
+		send_interface_toast = {
+			type = event_stewardship_good
+			title = VIET_noric_smiths
+			left_icon = scope:noric_county
+			scope:noric_county = {
+				random_list = {
+					40 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 1000
+						}
+					}
+					30 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 2000
+						}
+					}
+					20 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 3000
+						}
+					}
+					10 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 4000
+						}
+					}
+				}
+			}
+		}
+	}
+	option = { # Why didn't you invest in eastern Noricum?
+		name = bp_viet.4000.b
+		flavor = VIET_invest_in_eastern_noricum
+		skill = stewardship
+		trigger = {
+			OR = {
+				is_ai = no
+				short_term_gold >= medium_gold_value
+			}
+			stewardship >= 10
+		}
+		show_as_unavailable = {
+			stewardship < 10
+		}
+		remove_short_term_gold = medium_gold_value
+		
+		scope:noric_county = {
+			change_development_level = 1
+		}
+		
+		send_interface_toast ={
+			type = event_stewardship_good
+			title = VIET_noric_smiths
+			left_icon = scope:noric_county
+			scope:noric_county = {
+				random_list = {
+					40 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 3000
+						}
+					}
+					30 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 4000
+						}
+					}
+					20 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 5000
+						}
+					}
+					10 = {
+						add_county_modifier = {
+							modifier = VIET_noric_smiths
+							days = 6000
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Legends of Noreia
+bp_viet.4001 = { #WTWSMS id: VIETmisc.4001
+	type = character_event
+	title = bp_viet.4001.title
+	desc = bp_viet.4001.desc
+	
+	theme = realm
+	content_source = dlc_WtWSMS
+	
+	trigger = { is_landed = yes }
+	
+	weight_multiplier = {
+        base = 0
+		modifier = {
+			add = {
+				every_held_title = {
+					limit = {
+						tier = tier_county
+						is_landless_type_title = no
+						culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+						NOT = { has_county_modifier = VIET_noric_legendary_capital }
+					}
+					add = 0.2
+					# Makes much more sense in historical Noricum
+					if = {
+						limit = { title_province = { geographical_region = custom_bavaria } }
+						add = 0.8
+					}
+				}
+				#Don't make it happen too much
+				if = {
+					limit = { has_global_variable = VIET_noreia_found }
+					multiply = 0.5
+				}
+				#Make it less likely for AI
+				if = {
+					limit = { is_ai = yes }
+					multiply = 0.5
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		set_global_variable = VIET_noreia_found
+		add_prestige = medium_prestige_gain
+		random_held_title = {
+			limit = {
+				tier = tier_county
+				is_landless_type_title = no
+				culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+				NOT = { has_county_modifier = VIET_noric_legendary_capital }
+			}
+			save_scope_as = noric_county
+			
+			add_county_modifier = {
+				modifier = VIET_noric_legendary_capital
+				years = 50
+			}
+		}
+		random_courtier_or_guest = {
+			weight = {
+				base = 0
+				modifier = { add = diplomacy }
+				modifier = { add = { value = learning multiply = 2 } }
+			}
+			limit = { is_available_ai_adult = yes }
+			save_scope_as = scholar
+		}
+	}
+	
+	left_portrait = {
+		character = scope:scholar
+		animation = reading
+	}
+	right_portrait = {
+		character = root
+		animation = personality_forgiving
+	}
+	option = { # Good
+		name = bp_viet.4001.a
+		stress_impact = {
+			arrogant = minor_stress_impact_loss
+			trusting = miniscule_stress_impact_loss
+		}
+	}
+	option = { # Disbelief
+		name = bp_viet.4001.b
+		stress_impact = {
+			paranoid = minor_stress_impact_loss
+			cynical = minor_stress_impact_loss
+			arrogant = minor_stress_impact_gain
+		}
+	}
+	option = { # Scholarly disbelief
+		name = bp_viet.4001.c
+		trigger = {
+			learning >= 13
+		}
+		show_as_unavailable = {
+			learning < 13
+		}
+		add_prestige = miniscule_prestige_gain
+		stress_impact = {
+			honest = minor_stress_impact_loss
+			cynical = minor_stress_impact_loss
+			arrogant = minor_stress_impact_gain
+		}
+	}
+}
+
+scripted_effect bp_viet.4002.noric_herbalist_gifter = {
+	# Find a noble Noric guest
+	random_courtier_or_guest = {
+		limit = {
+			culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+			has_dynasty = yes
+			is_courtier = no
+		}
+		save_scope_as = gifter
+	}
+	# If not, search for a wandering character
+	if = {
+		limit = { NOT = { exists = scope:gifter } }
+		find_pool_characters_effect = yes
+		random_in_list = {
+			list = potential_pool_characters
+			limit = {
+				culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+				has_dynasty = yes
+			}
+			save_scope_as = gifter
+		}
+		add_visiting_courtier = scope:gifter
+	}
+	# If still not, make one
+	if = {
+		limit = { NOT = { exists = scope:gifter } }
+		
+		root.culture = { save_scope_as = faith }
+		root.faith = { save_scope_as = faith }
+		
+		#Use realm if possible
+		random_realm_county = {
+			limit = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } } }
+			culture = { save_scope_as = culture }
+			faith = { save_scope_as = faith }
+		}
+		create_character = {
+			location = root.capital_province
+			faith = scope:faith
+			culture = scope:culture
+			dynasty = generate
+			template = pool_repopulate_learning
+			save_scope_as = gifter
+		}
+		add_visiting_courtier = scope:gifter
+	}
+}
+
+# Saliunca herb perfume
+bp_viet.4002 = { #WTWSMS id: VIETmisc.4002
+	type = character_event
+	title = bp_viet.4002.title
+	desc = bp_viet.4002.desc
+	
+	theme = romance_scheme
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		is_landed_or_landless_administrative = yes
+		NOT = { has_character_modifier = VIET_saliunca_perfume }
+		OR = {
+			culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+			any_realm_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } } }
+			capital_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } } }
+		}
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = trusting
+		}
+		modifier = {
+			add = -0.2
+			has_trait = paranoid
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = just
+		}
+		modifier = {
+			add = -0.2
+			has_trait = arbitrary
+		}
+		modifier = {
+			add = 0.2
+			has_trait = diligent
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = arrogant
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}
+		modifier = {
+			add = -0.5
+			NOT = { capital_province = { geographical_region = custom_bavaria } }
+		}
+	}
+	
+	immediate = { bp_viet.4002.noric_herbalist_gifter = yes }
+	
+	left_portrait = {
+		character = scope:gifter
+		animation = admiration
+	}
+	right_portrait = {
+		character = root
+		animation = thinking
+	}
+	
+	option = { # good!
+		name = bp_viet.4002.a
+		add_character_modifier = {
+			modifier = VIET_saliunca_perfume
+			years = 2
+		}
+		every_courtier = {
+			add_character_modifier = {
+				modifier = VIET_saliunca_perfume
+				years = 2
+			}
+		}
+		
+		stress_impact = {
+			generous = miniscule_stress_impact_loss
+			humble = miniscule_stress_impact_gain
+			shy = miniscule_stress_impact_gain
+		}
+	}
+	
+	option = { # no!
+		name = bp_viet.4002.b
+		
+		add_piety = miniscule_piety_gain
+		scope:gifter = {
+			add_opinion = {
+				target = root
+				modifier = rejected_gift_opinion
+			}
+		}
+	}
+}
+
+# Gentian plant
+bp_viet.4003 = { #WTWSMS id: VIETmisc.4003
+	type = character_event
+	title = bp_viet.4003.title
+	desc = bp_viet.4003.desc
+	
+	theme = medicine
+	override_background = { reference = garden }
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		is_landed_or_landless_administrative = yes
+		NOT = { has_character_modifier = VIET_gentian_herb }
+		OR = {
+			culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } }
+			any_realm_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:romano_noric } } }
+		}
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = trusting
+		}
+		modifier = {
+			add = -0.2
+			has_trait = paranoid
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = just
+		}
+		modifier = {
+			add = -0.2
+			has_trait = arbitrary
+		}
+		modifier = {
+			add = 0.2
+			has_trait = compassionate
+		}
+		modifier = {
+			add = -0.2
+			has_trait = callous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = sadistic
+		}
+		modifier = {
+			add = 0.2
+			has_trait = humble
+		}
+		modifier = {
+			add = -0.2
+			has_trait = arrogant
+		}
+		modifier = {
+			add = -0.5
+			NOT = { capital_province = { geographical_region = custom_bavaria } }
+		}
+	}
+	
+	immediate = { bp_viet.4002.noric_herbalist_gifter = yes }
+	
+	left_portrait = {
+		character = scope:gifter
+		animation = admiration
+	}
+	right_portrait = {
+		character = root
+		animation = personality_compassionate
+	}
+	
+	option = { # Good
+		name = bp_viet.4003.a
+		add_character_modifier = {
+			modifier = VIET_gentian_herb
+			years = 1
+		}
+	}
+}
+#######################################################
+# BOSPORAN
+#######################################################
+
+# Handle divergent cultures getting treated like Bosporans
+scripted_trigger bp_viet.4004.bosporan_culture_trigger = {
+	# Greek group
+	has_cultural_pillar = heritage_byzantine
+	OR = {
+		this = culture:bosporan
+		# Bosporan or steppe-descended
+		any_parent_culture_or_above = {
+			OR = {
+				this = culture:bosporan
+				has_cultural_parameter = heritage_group_eurasian_steppe
+			}
+		}
+	}
+}
+
+scripted_effect bp_viet.4004.greek_traveler = {
+	# Find a Greek guest
+	random_courtier_or_guest = {
+		limit = {
+			culture = {
+				has_cultural_pillar = heritage_byzantine
+				bp_viet.4004.bosporan_culture_trigger = no
+			}
+			is_courtier = no
+		}
+		save_scope_as = traveler
+	}
+	# If not, search for a wandering character
+	if = {
+		limit = { NOT = { exists = scope:traveler } }
+		find_pool_characters_effect = yes
+		random_in_list = {
+			list = potential_pool_characters
+			limit = {
+				culture = {
+					has_cultural_pillar = heritage_byzantine
+					bp_viet.4004.bosporan_culture_trigger = no
+				}
+			}
+			save_scope_as = traveler
+			add_visiting_courtier = scope:traveler
+		}
+	}
+	# If still not, make one
+	if = {
+		limit = { NOT = { exists = scope:traveler } }
+		
+		create_character = {
+			location = root.capital_province
+			culture = culture:greek
+			template = traveler_character
+			save_scope_as = traveler
+		}
+		add_visiting_courtier = scope:traveler
+	}
+}
+
+# Greek insults the Bosporan level of Greek-ness
+bp_viet.4004 = { #WTWSMS id: VIETmisc.4004
+	type = character_event
+	title = bp_viet.4004.title
+	desc = bp_viet.4004.desc
+	
+	theme = unfriendly
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		NOT = { has_character_modifier = VIET_learn_from_steppe_nomads }
+		NOT = { has_character_modifier = VIET_proud_mixed_greek }
+		culture = { bp_viet.4004.bosporan_culture_trigger = yes }
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = wrathful
+		}
+		modifier = {
+			add = -0.2
+			has_trait = patient
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = compassionate
+		}
+		modifier = {
+			add = 0.2
+			has_trait = arrogant
+		}
+		modifier = {
+			add = -0.2
+			has_trait = humble
+		}
+	}
+	
+	immediate = { bp_viet.4004.greek_traveler = yes }
+	
+	left_portrait = {
+		character = scope:traveler
+		animation = debating
+	}
+	right_portrait = {
+		character = root
+		animation = map_dismissal
+	}
+	
+	option = { # We can learn from barbarians
+		name = bp_viet.4004.a
+		add_character_modifier = {
+			modifier = VIET_learn_from_steppe_nomads
+			years = 1
+		}
+		reverse_add_opinion = {
+			target = scope:traveler
+			modifier = insulted_opinion
+		}
+		stress_impact = {
+			nomadic_philosophy = medium_stress_impact_loss
+		}
+	}
+	option = { # We are Greeks
+		name = bp_viet.4004.b
+		add_character_modifier = {
+			modifier = VIET_proud_mixed_greek
+			years = 1
+		}
+	}
+	option = { # Corrupted
+		name = bp_viet.4004.c
+		add_prestige = miniscule_prestige_loss
+		reverse_add_opinion = {
+			target = scope:traveler
+			modifier = friendliness_opinion
+			opinion = 15
+		}
+		stress_impact = {
+			humble = minor_stress_impact_loss
+			content = minor_stress_impact_gain
+			wrathful = medium_stress_impact_gain
+			vengeful = medium_stress_impact_gain
+		}
+	}
+	option = { # Pointless squabbles
+		name = bp_viet.4004.d
+		add_piety = miniscule_piety_gain
+		reverse_add_opinion = {
+			target = scope:traveler
+			modifier = ignored_concerns
+		}
+		stress_impact = {
+			cynical = minor_stress_impact_loss
+			humble = minor_stress_impact_loss
+		}
+	}
+}
+
+# What sort of pottery?
+bp_viet.4005 = { #WTWSMS id: VIETmisc.4005
+	type = character_event
+	title = bp_viet.4005.title
+	desc = bp_viet.4005.desc
+	
+	theme = party
+	override_background = { reference = market }
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bosporan } }
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = arrogant
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}
+		modifier = {
+			add = 0.2
+			has_trait = greedy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = humble
+		}
+		modifier = {
+			add = -0.2
+			has_trait = arrogant
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+	
+	option = { # Greek style
+		name = bp_viet.4005.a.non_greek
+		name = {
+			trigger = { culture = { has_cultural_pillar = heritage_byzantine } }
+			text = bp_viet.4005.a
+		}
+		
+		remove_short_term_gold = tiny_gold_value
+		add_prestige = miniscule_prestige_gain
+	}
+	option = { # Bosporan style
+		name = bp_viet.4005.b
+		remove_short_term_gold = tiny_gold_value
+		add_piety = miniscule_piety_gain
+	}
+	option = { # Why not both?
+		name = bp_viet.4005.c
+		remove_short_term_gold = minor_gold_value
+		send_interface_toast = {
+			type = event_generic_good
+			title = bp_viet.4005.c.outcome
+			random_list = {
+				60 = { add_prestige = miniscule_prestige_gain }
+				60 = { add_piety = miniscule_piety_gain }
+				30 = {
+					add_prestige = miniscule_prestige_gain
+					add_piety = miniscule_piety_gain
+				}
+			}
+		}
+		stress_impact = {
+			generous = minor_stress_impact_loss
+			greedy = minor_stress_impact_gain
+		}
+	}
+}
+
+# Loot the burial mound or not?
+bp_viet.4006 = { #WTWSMS id: VIETmisc.4006 / VIETmisc.4007
+	type = character_event
+	title = bp_viet.4006.title
+	desc = bp_viet.4006.desc
+	
+	theme = nomads
+	override_background = { reference = ep2_hunt_forest_cave }
+	content_source = dlc_WtWSMS
+	
+	weight_multiplier = {
+        base = 0
+		modifier = {
+			add = {
+				every_held_title = {
+					limit = {
+						tier = tier_county
+						is_landless_type_title = no
+						title_province = { geographical_region = custom_bosporus }
+					}
+					add = 1
+				}
+			}
+		}
+		# Adventurers can dungeon-crawl too
+		modifier = {
+			add = 1
+			is_landless_adventurer = yes
+			capital_province = { geographical_region = custom_bosporus }
+		}
+	}
+	
+	right_portrait = {
+		character = root
+		animation = personality_callous
+	}
+	
+	immediate = {
+		capital_county = { save_scope_as = tomb_county }
+		random_held_title = {
+			limit = {
+				tier = tier_county
+				is_landless_type_title = no
+				title_province = { geographical_region = custom_bosporus }
+			}
+			save_scope_as = tomb_county
+		}
+	}
+	
+	option = { # Don't loot
+		name = bp_viet.4006.a
+		add_piety = minor_piety_gain
+		stress_impact = {
+			humble = minor_stress_impact_loss
+			greedy = minor_stress_impact_gain
+			brave = minor_stress_impact_gain
+		}
+	}
+	option = { # Loot it
+		name = bp_viet.4006.b
+		remove_short_term_gold = minor_gold_value
+		add_piety = minor_piety_loss
+		
+		random_list = {
+			25 = {
+				send_interface_toast = {
+					type = event_generic_bad_with_text
+					title = bp_viet.4007.title
+					desc = bp_viet.4007.a
+					add_gold = tiny_gold_value
+					add_prestige = miniscule_prestige_loss
+				}
+			}
+			25 = {
+				send_interface_toast = {
+					type = event_generic_neutral_with_text
+					title = bp_viet.4007.title
+					desc = bp_viet.4007.b
+					add_gold = minor_gold_value
+					add_prestige = miniscule_prestige_gain
+				}
+			}
+			25 = {
+				send_interface_toast = {
+					type = event_generic_good_with_text
+					title = bp_viet.4007.title
+					desc = bp_viet.4007.c
+					add_gold = { value = minor_gold_value multiply = 2 }
+					add_prestige = miniscule_prestige_gain
+				}
+			}
+			25 = {
+				send_interface_toast = {
+					type = event_generic_good_with_text
+					title = bp_viet.4007.title
+					desc = bp_viet.4007.d
+					add_gold = medium_gold_value
+					add_prestige = miniscule_prestige_gain
+				}
+			}
+		}
+		stress_impact = {
+			greedy = minor_stress_impact_loss
+			cynical = minor_stress_impact_loss
+			content = minor_stress_impact_gain
+			craven = minor_stress_impact_gain
+		}
+	}
+}
+
+# Bosporan shipowner guild
+bp_viet.4008 = { #WTWSMS id: VIETmisc.4008
+	type = character_event
+	title = bp_viet.4008.title
+	desc = bp_viet.4008.desc
+	
+	hidden = yes
+	content_source = dlc_WtWSMS
+	
+	trigger = { is_landed = yes }
+	
+	weight_multiplier = {
+        base = 0
+		modifier = {
+			add = {
+				every_held_title = {
+					limit = {
+						tier = tier_county
+						is_landless_type_title = no
+						NOT = { has_county_modifier = VIET_bosporan_shipowner_cool }
+						is_coastal_county = yes
+						any_county_province = {
+							geographical_region = heritage_area_pontic_steppe
+							has_holding_type = city_holding
+						}
+					}
+					add = 1
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		random_held_title = {
+			limit = {
+				tier = tier_county
+				is_landless_type_title = no
+				NOT = { has_county_modifier = VIET_bosporan_shipowner_cool }
+				is_coastal_county = yes
+				any_county_province = {
+					geographical_region = heritage_area_pontic_steppe
+					has_holding_type = city_holding
+				}
+			}
+			save_scope_as = ship_county
+		}
+		
+		send_interface_toast = {
+			type = msg_governor_duties
+			title = bp_viet.4008.title
+			desc = bp_viet.4008.desc
+			right_icon = scope:ship_county
+			scope:ship_county = {
+				add_county_modifier = {
+					modifier = VIET_bosporan_shipowner_cool
+					years = 3
+				}
+			}
+		}
+	}
+	
+	option = {}
+}
+
+# Legends of the Tauri
+bp_viet.4009 = { #WTWSMS id: VIETmisc.4009
+	type = character_event
+	title = bp_viet.4009.title
+	desc = bp_viet.4009.desc
+	
+	theme = nomads
+	override_background = { reference = study }
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		NOT = { has_character_modifier = VIET_thankful_legends }
+		culture = { has_innovation = innovation_writing }
+		OR = {
+			capital_province = { geographical_region = heritage_area_pontic_steppe }
+			any_realm_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bosporan } } }
+		}
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = scholar
+		}
+		modifier = {
+			add = 0.2
+			has_trait = content
+		}
+		modifier = {
+			add = -0.2
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = 0.2
+			has_trait = cynical
+		}
+		modifier = {
+			add = -0.2
+			has_trait = zealous
+		}
+		modifier = {
+			add = 0.2
+			learning > 13
+		}
+		modifier = {
+			add = -0.2
+			learning < 8
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = reading
+	}
+	
+	option = { # More civilized times
+		name = bp_viet.4009.a
+		add_character_modifier = {
+			modifier = VIET_thankful_legends
+			years = 1
+		}
+		# As Scythians, we are the reasonable ones
+		if = {
+			limit = { faith = { has_doctrine = special_doctrine_is_scythian_faith } }
+			add_piety = minor_piety_gain
+		}
+	}
+	option = { # Made up stories?
+		name = bp_viet.4009.b
+		stress_impact = {
+			cynical = minor_stress_impact_loss
+			trusting = minor_stress_impact_gain
+		}
+	}
+}
+
+# Bosporans love Greek wine
+bp_viet.4010 = { #WTWSMS id: VIETmisc.4010
+	type = character_event
+	title = bp_viet.4010.title
+	desc = bp_viet.4010.desc
+	
+	theme = party
+	override_background = { reference = bp1_wine_cellar }
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		is_landed_or_landless_administrative = yes
+		OR = {
+			AND = {
+				culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bosporan } }
+				drinks_alcohol_trigger = yes
+			}
+			any_sub_realm_county = {
+				culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bosporan } }
+				faith_only_forbids_alcohol_trigger = no
+			}
+		}
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = generous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = greedy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gluttonous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = compassionate
+		}
+		modifier = {
+			add = -0.2
+			has_trait = callous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = sadistic
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = personality_content
+	}
+	
+	right_portrait = {
+		character = scope:thirsty_bosporan
+		animation = toast_goblet
+	}
+	
+	immediate = {
+		culture = { save_scope_as = culture }
+		capital_county = { save_scope_as = county }
+		
+		random_sub_realm_county = {
+			limit = {
+				culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bosporan } }
+				faith_only_forbids_alcohol_trigger = no
+			}
+			save_scope_as = county
+			culture = { save_scope_as = culture }
+		}
+		
+		random_vassal_or_below = {
+			limit = {
+				culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bosporan } }
+				drinks_alcohol_trigger = yes
+				capital_county = scope:county
+				highest_held_title_tier = tier_barony
+			}
+			save_scope_as = thirsty_bosporan
+			culture = { save_scope_as = culture }
+		}
+		if = {
+			limit = { NOT = { exists = scope:thirsty_bosporan } }
+			random_courtier = {
+				limit = {
+					culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:bosporan } }
+					drinks_alcohol_trigger = yes
+				}
+				save_scope_as = thirsty_bosporan
+			}
+		}
+	}
+	
+	option = { # Sure
+		name = bp_viet.4010.a
+		remove_short_term_gold = minor_gold_value
+		# This can be a sin
+		if = {
+			limit = { faith_only_forbids_alcohol_trigger = yes }
+			add_piety = medium_piety_loss
+		}
+		scope:county = {
+			add_county_modifier = {
+				modifier = VIET_greek_wine_imports
+				days = 888
+			}
+		}
+		stress_impact = {
+			drunkard = minor_stress_impact_loss
+		}
+	}
+	option = { # No
+		name = bp_viet.4010.b
+		stress_impact = {
+			greedy = minor_stress_impact_loss
+			diligent = minor_stress_impact_loss
+			content = minor_stress_impact_loss
+			temperate = minor_stress_impact_loss
+		}
+	}
+}
+
+###########################################################
+# CORDUENIAN
+###########################################################
+
+scripted_effect bp_viet.4011.semitic_traveler = {
+	# Find a Semitic guest
+	random_courtier_or_guest = {
+		limit = {
+			culture = { has_cultural_parameter = language_branch_semitic }
+			is_courtier = no
+		}
+		save_scope_as = traveler
+	}
+	# If not, search for a wandering character
+	if = {
+		limit = { NOT = { exists = scope:traveler } }
+		find_pool_characters_effect = yes
+		random_in_list = {
+			list = potential_pool_characters
+			limit = {
+				culture = { has_cultural_parameter = language_branch_semitic }
+			}
+			save_scope_as = traveler
+			add_visiting_courtier = scope:traveler
+		}
+	}
+	# If still not, make one - the event conveniently refers to Jewish legend
+	if = {
+		limit = { NOT = { exists = scope:traveler } }
+		
+		create_character = {
+			location = root.capital_province
+			culture = culture:bavlim
+			faith = faith:rabbinism
+			template = traveler_character
+			save_scope_as = traveler
+		}
+		add_visiting_courtier = scope:traveler
+	}
+}
+
+# Semitic travelers praise Corduenian beauty
+bp_viet.4011 = { #WTWSMS id: VIETmisc.4011
+	type = character_event
+	title = bp_viet.4011.title
+	desc = bp_viet.4011.desc
+	
+	theme = romance_scheme
+	override_background = { reference = bp1_bonfire }
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } }
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = arrogant
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gluttonous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = compassionate
+		}
+		modifier = {
+			add = -0.2
+			has_trait = callous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = sadistic
+		}
+		modifier = {
+			add = 0.2
+			has_trait = trusting
+		}
+		modifier = {
+			add = -0.2
+			has_trait = paranoid
+		}
+	}
+	
+	left_portrait = root
+	
+	right_portrait = {
+		character = scope:traveler
+		animation = love
+	}
+	
+	immediate = { bp_viet.4011.semitic_traveler = yes }
+	
+	option = { # We are hot
+		name = bp_viet.4011.a
+		add_prestige = miniscule_prestige_gain
+		stress_impact = {
+			lustful = minor_stress_impact_loss
+			arrogant = minor_stress_impact_loss
+			humble = minor_stress_impact_gain
+		}
+	}
+	option = { # We are as hot as anyone else
+		name = bp_viet.4011.b
+		add_piety = miniscule_piety_gain
+		stress_impact = {
+			humble = minor_stress_impact_loss
+			arrogant = minor_stress_impact_gain
+		}
+	}
+	option = { # Exaggerated stories
+		name = bp_viet.4011.c
+		add_character_modifier = {
+			modifier = more_vigilant_recistance_modifier
+			days = 444
+		}
+	}
+	option = { # Trying to flatter me, are you?
+		name = bp_viet.4011.d
+		add_diplomacy_lifestyle_xp = medium_lifestyle_xp
+		stress_impact = {
+			cynical = minor_stress_impact_loss
+			paranoid = minor_stress_impact_loss
+		}
+	}
+}
+
+# Hire a Corduenian siege expert
+bp_viet.4012 = { #WTWSMS id: VIETmisc.4012
+	type = character_event
+	title = bp_viet.4012.title
+	desc = bp_viet.4012.desc
+	
+	theme = martial
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		is_landed = yes
+		OR = {
+			culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } }
+			any_sub_realm_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } }
+		}
+		short_term_gold > minor_gold_value
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = ambitious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gluttonous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = compassionate
+		}
+		modifier = {
+			add = -0.2
+			has_trait = callous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = sadistic
+		}
+		modifier = {
+			add = 0.2
+			has_trait = trusting
+		}
+		modifier = {
+			add = -0.2
+			has_trait = paranoid
+		}
+		modifier = {
+			add = -0.5
+			NOT = { capital_province = { geographical_region = world_asia_minor } }
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = personality_content
+	}
+	right_portrait = {
+		character = scope:engineer
+		animation = personality_honorable
+		outfit_tags = { no_headgear }
+	}
+	
+	immediate = {
+		culture = { save_scope_as = culture }
+		
+		random_sub_realm_county = {
+			limit = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } }
+			culture = { save_scope_as = culture }
+		}
+		
+		create_character = {
+			location = root.capital_province
+			faith = root.faith
+			culture = scope:culture
+			dynasty = none
+			gender_female_chance = root_soldier_female_chance
+			template = new_siege_engineer
+			dynasty = none
+			save_scope_as = engineer
+		}
+		scope:engineer = { add_character_flag = wear_armor }
+	}
+	
+	option = { # Hire one
+		name = bp_viet.4012.a
+		pay_short_term_gold = {
+			target = scope:engineer
+			gold = minor_gold_value
+		}
+		add_courtier = scope:engineer
+		scope:engineer = { remove_character_flag = wear_armor }
+		stress_impact = {
+			trusting = minor_stress_impact_loss
+			paranoid = minor_stress_impact_gain
+		}
+	}
+	option = { # No need
+		name = bp_viet.4012.b
+		scope:engineer = { silent_disappear_ai_if_not_hired = yes }
+	}
+}
+
+# Look for a Corduenian mistress
+bp_viet.4013 = { #WTWSMS id: VIETmisc.4013
+	type = character_event
+	title = bp_viet.4013.title
+	desc = bp_viet.4013.desc
+	
+	theme = seduction
+	override_background = { reference = alley_day }
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		OR = {
+			culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } }
+			any_sub_realm_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } }
+			capital_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } }
+		}
+		NOT = { has_sexuality = asexual }
+		OR = {
+			might_cheat_on_every_partner_trigger = yes
+			allowed_more_concubines = yes
+		}
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = lustful
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}			
+		modifier = {
+			add = 0.2
+			has_trait = gluttonous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}			
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}			
+		modifier = {
+			add = 0.2
+			has_trait = greedy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}		
+		modifier = {
+			add = 0.2
+			has_trait = arbitrary
+		}
+		modifier = {
+			add = -0.2
+			has_trait = just
+		}		
+		modifier = {
+			add = 0.2
+			has_trait = rakish
+		}
+		modifier = {
+			add = -0.5
+			NOT = { capital_province = { geographical_region = world_asia_minor } }
+		}
+		#modifier = {
+		#	add = -0.2
+		#	any_relation = { has_relation_lover = { PARTNER = root } }
+		#}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = map_love
+	}
+	right_portrait = {
+		character = scope:maid
+		animation = shame
+	}
+	
+	immediate = {
+		culture = { save_scope_as = culture }
+		
+		random_sub_realm_county = {
+			limit = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } }
+			culture = { save_scope_as = culture }
+		}
+		
+		romance_target_gender_effect = { SCOPE_NAME = dummy_gender }
+		
+		create_character = {
+			location = root.capital_province
+			faith = root.faith
+			culture = scope:culture
+			gender = scope:dummy_gender
+			template = beautiful_peasant_character
+			random_traits_list = {
+				count = 1
+				education_learning_1 = {}
+				education_intrigue_1 = {}
+				education_diplomacy_1 = {}
+				education_stewardship_1 = {}
+			}
+			martial = {
+				min_template_low_skill
+				max_template_low_skill
+			}
+			stewardship = {
+				min_template_low_skill
+				max_template_low_skill
+			}
+			intrigue = {
+				min_template_low_skill
+				max_template_low_skill
+			}
+			learning = {
+				min_template_low_skill
+				max_template_low_skill
+			}
+			save_scope_as = maid
+		}
+		# Make sure you can seduce them
+		scope:maid = {
+			if = {
+				limit = { NOT = { is_attracted_to_gender_of = root } }
+				set_sexuality = bisexual
+			}
+		}
+	}
+	
+	option = { # Find one
+		name = {
+			trigger = {
+				scope:maid = { is_female = yes }
+			}
+			text = bp_viet.4013.a.female
+		}
+		name = {
+			trigger = {
+				scope:maid = { is_male = yes }
+			}
+			text = bp_viet.4013.a.male
+		}
+		add_prestige = miniscule_prestige_loss
+		
+		if = {
+			limit = {
+				allowed_concubines = yes
+				allowed_more_concubines = yes
+			}
+			make_concubine = scope:maid
+		}
+		else = {
+			add_courtier = scope:maid
+			had_sex_with_effect = { 
+				CHARACTER = scope:maid 
+				PREGNANCY_CHANCE = pregnancy_chance 
+			}
+			casual_sex_or_lover_event_effect = {
+				CHARACTER_1 = root
+				CHARACTER_2 = scope:maid
+				DAYS = 1
+			}
+		}
+		progress_towards_lover_effect = {
+			CHARACTER = scope:maid
+			REASON = lover_coronation_courtesan
+			OPINION = default_lover_opinion
+		}
+	}	
+	option = { # Waste of time
+		name = bp_viet.4013.b
+		name = { # Study the stories and legends
+			trigger = {
+				learning >= 13
+			}
+			text = bp_viet.4013.c
+		}
+		add_piety = miniscule_piety_gain
+		
+		stress_impact = {
+			chaste = minor_stress_impact_loss
+			lustful = medium_stress_impact_gain
+			rakish = medium_stress_impact_gain
+		}
+	}
+	#option = { # Study the stories and legends
+	#	name = bp_viet.4013.c
+	#	add_prestige = miniscule_prestige_gain
+	#	random_list = {
+	#		10 = { add_trait = erudite }
+	#		10 = { add_learning_skill = 1 }
+	#		70 = { }
+	#	}
+	#	stress_impact = {
+	#		lustful = medium_stress_impact_gain
+	#		impatient = minor_stress_impact_gain
+	#	}
+	#}
+	option = { # What's so special?
+		name = bp_viet.4013.d
+		trigger = { NOT = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } } }
+		add_character_modifier = {
+			modifier = more_vigilant_recistance_modifier
+			years = 1
+		}
+		stress_impact = {
+			lustful = medium_stress_impact_gain
+			arrogant = minor_stress_impact_gain
+		}
+	}
+	after = { scope:maid = { silent_disappear_ai_if_not_hired = yes } }
+}
+
+# Come across a Corduenian ruin (travel event)
+bp_viet.4014 = { #WTWSMS id: VIETmisc.4014
+	type = character_event
+	title = bp_viet.4014.title
+	desc = bp_viet.4014.desc
+	
+	theme = travel_martial
+	override_background = ep2_travel_settlement_ruin_desert
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		is_location_valid_for_travel_event_on_land = yes
+		location = { geographical_region = custom_corduene }
+	}
+	
+	weight_multiplier = {
+		days = 1	
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}			
+		modifier = {
+			add = 0.2
+			has_trait = ambitious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}			
+		modifier = {
+			add = 0.2
+			has_trait = greedy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}		
+		modifier = {
+			add = 0.2
+			has_trait = paranoid
+		}
+		modifier = {
+			add = -0.2
+			has_trait = trusting
+		}
+	}
+	
+	right_portrait = {
+		character = root
+		animation = survey_staff
+	}
+	
+	option = { # Amazing
+		name = bp_viet.4014.a
+		add_prestige = miniscule_prestige_gain
+		stress_impact = {
+			ambitious = minor_stress_impact_loss
+			paranoid = minor_stress_impact_loss
+		}
+	}	
+	option = { # No longer in use
+		name = bp_viet.4014.b
+		add_martial_lifestyle_xp = travel_miniscule_lifestyle_xp
+		stress_impact = {
+			content = minor_stress_impact_loss
+			humble = minor_stress_impact_loss
+			wrathful = minor_stress_impact_gain
+		}
+	}
+}
+
+# Corduenian builders can build a lot
+bp_viet.4015 = { #WTWSMS id: VIETmisc.4015
+	type = character_event
+	title = bp_viet.4015.title
+	desc = bp_viet.4015.desc
+	
+	theme = realm
+	override_background = ep3_city_gate
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		NOT = { has_character_modifier = VIET_hiring_corduenian_builders }
+		is_landed_or_landless_administrative = yes
+		OR = {
+			culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } }
+			any_realm_county = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } }
+		}
+		short_term_gold > medium_gold_value
+	}
+	
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = diligent
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}			
+		modifier = {
+			add = 0.2
+			has_trait = ambitious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}			
+		modifier = {
+			add = 0.2
+			has_trait = greedy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = temperate
+		}		
+		modifier = {
+			add = 0.2
+			has_trait = arrogant
+		}
+		modifier = {
+			add = -0.2
+			has_trait = humble
+		}
+	}
+	
+	left_portrait = {
+		character = scope:engineer
+		animation = pondering
+	}
+	right_portrait = {
+		character = root
+		animation = personality_greedy
+	}
+	
+	immediate = {
+		culture = { save_scope_as = culture }
+		
+		random_realm_county = {
+			limit = { culture = { the_culture_or_parent_or_above_is_trigger = { CULTURE = culture:corduenian } } }
+			culture = { save_scope_as = culture }
+		}
+		
+		create_character = {
+			location = root.capital_province
+			faith = root.faith
+			culture = scope:culture
+			dynasty = none
+			template = stewardship_domain_focus_friend_template
+			dynasty = none
+			save_scope_as = engineer
+		}
+	}
+	
+	option = { # Hire one
+		name = bp_viet.4015.a
+		pay_short_term_gold = {
+			target = scope:engineer
+			gold = medium_gold_value
+		}
+		add_courtier = scope:engineer
+		
+		add_character_modifier = {
+			modifier = VIET_hiring_corduenian_builders
+			days = 1825
+		}
+		
+		hidden_effect = {
+			scope:engineer = {
+				remove_short_term_gold = medium_gold_value
+				add_character_modifier = {
+					modifier = VIET_hiring_corduenian_builders
+					days = 1825
+				}
+			}
+		}
+		stress_impact = {
+			diligent = minor_stress_impact_loss
+			lazy = minor_stress_impact_gain
+		}
+	}
+	option = { # No need
+		name = bp_viet.4015.b
+		hidden_effect = { scope:engineer = { death = { death_reason = death_disappearance } } }
+	}
+}
+
+###########################################################
+# ANCIENT CULTURES
+###########################################################
+
+# Roman Flora Statue
+# bp_viet.260
+
+bp_viet.260 = { #WTWSMS id: VIETnam.260
+	type = character_event
+	title = bp_viet.260.title
+	desc = bp_viet.260.desc
+
+	theme = love
+	content_source = dlc_WtWSMS
+
+	trigger = {
+		is_landed = yes
+		truly_hellenic_faith_plus_mithraism_trigger = no
+		capital_province = { geographical_region = historic_roman_empire }
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = diligent
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = greedy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = generous
+		}
+		modifier = {
+			add = 0.2
+			has_trait = impatient
+		}
+		modifier = {
+			add = -0.2
+			has_trait = compassionate
+		}
+		modifier = {
+			add = 0.2
+			has_trait = scholar
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = personality_cynical
+	}
+	
+	option = { # Decorate
+		name = bp_viet.260.a
+		trigger = {
+			faith_is_aniconic_trigger = no
+			OR = {
+				is_ai = no
+				short_term_gold > minor_gold_value
+			}
+		}
+		remove_short_term_gold = minor_gold_value
+		add_piety = minor_piety_loss
+		add_character_modifier = {
+			modifier = VIET_flora_statue
+			years = 4
+		}
+		stress_impact = {
+			greedy = miniscule_stress_impact_loss
+			gregarious = minor_stress_impact_loss
+			content = minor_stress_impact_gain
+			zealous = medium_stress_impact_gain
+		}
+	}
+
+	option = { # imagination
+		name = bp_viet.260.a
+		trigger = {
+			faith_is_aniconic_trigger = no
+			is_attracted_to_women = yes
+			has_trait = lustful
+			OR = {
+				is_ai = no
+				short_term_gold > minor_gold_value
+			}
+		}
+		remove_short_term_gold = minor_gold_value
+		add_piety = medium_piety_loss
+		add_character_modifier = {
+			modifier = VIET_flora_statue_lustful
+			years = 4
+		}
+		stress_impact = {
+			cynical = miniscule_stress_impact_loss
+			lustful = minor_stress_impact_loss
+			humble = minor_stress_impact_gain
+			content = minor_stress_impact_gain
+			zealous = medium_stress_impact_gain
+		}
+	}
+	option = {
+		name = bp_viet.260.d  #DESTROY
+		trigger = {
+			OR = {
+				faith_is_aniconic_trigger = yes
+				faith = {
+					faith_hostility_level = {
+						target = faith:hellenic_pagan
+						value >= faith_hostile_level
+					}
+				}
+			}
+		}
+		add_piety = minor_piety_gain
+		stress_impact = {
+			humble = minor_stress_impact_loss
+			zealous = medium_stress_impact_loss
+			arrogant = minor_stress_impact_gain
+		}
+	}
+	option = {  # Study
+		name = "bp_viet.260.c"
+		add_stewardship_lifestyle_xp = medium_lifestyle_xp
+		stress_impact = {
+			cynical = miniscule_stress_impact_loss
+			zealous = minor_stress_impact_gain
+		}
+	}
+}
+
+# Achaemenid Monument (travel event)
+bp_viet.261 = { #WTWSMS id: VIETnam.261
+	type = character_event
+	title = bp_viet.261.title
+	desc = bp_viet.261.desc
+
+	theme = travel_diplomacy
+	override_background = ep2_travel_settlement_ruin_desert
+	content_source = dlc_WtWSMS
+
+	trigger = {
+		is_location_valid_for_travel_event_on_land = yes
+		location = { geographical_region = ghw_region_persia }
+		current_travel_plan = {
+			any_entourage_character = {
+				this != root
+				is_adult = yes
+			}
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = diligent
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = ambitious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}
+		modifier = {
+			add = 0.2
+			has_trait = just
+		}
+		modifier = {
+			add = -0.2
+			has_trait = arbitrary
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = survey
+	}
+	right_portrait = {
+		character = scope:entourage_helper
+		animation = personality_rational
+	}
+	
+	immediate = {
+		current_travel_plan = {
+			ordered_entourage_character = {
+				order_by = {
+					value = diplomacy
+					if = { # Iranians more likely to comment on this
+						limit = { culture = { has_cultural_pillar = heritage_iranian } }
+						add = learning
+					}
+				}
+				limit = {
+					this != root
+					is_adult = yes
+				}
+				save_scope_as = entourage_helper
+			}
+		}
+	}
+
+	option = { #Sassanid forebears
+		name = bp_viet.261.a
+		trigger = {
+			OR = {
+				culture = { has_cultural_pillar = heritage_iranian }
+				faith.religion = religion:zoroastrianism_religion
+			}
+		}
+		add_piety = minor_piety_gain
+		stress_impact = {
+			humble = miniscule_stress_impact_loss
+			arrogant = minor_stress_impact_loss
+		}
+	}
+	option = { #Heroic age
+		name = bp_viet.261.b
+		add_diplomacy_lifestyle_xp = travel_minor_lifestyle_xp
+		stress_impact = {
+			humble = minor_stress_impact_loss
+			arrogant = minor_stress_impact_gain
+		}
+	}
+}
+
+# Scythian Gold (travel event)
+bp_viet.262 = { #WTWSMS id: VIETnam.262
+	type = character_event
+	title = bp_viet.262.title
+	desc = bp_viet.262.desc
+
+	theme = travel
+	content_source = dlc_WtWSMS
+
+	trigger = {
+		is_location_valid_for_travel_event_on_land = yes
+		location = { geographical_region = world_steppe }
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lustful
+		}
+		modifier = {
+			add = 0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}
+		modifier = {
+			add = 0.2
+			has_trait = diligent
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = lifestyle_hunter
+		}
+		modifier = {
+			add = 0.2
+			has_trait = generous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = greedy
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = personality_greedy
+	}
+	
+	option = {
+		name = bp_viet.262.a
+		send_interface_toast ={
+			type = event_stewardship_good
+			title = bp_viet.262.title
+			
+			random_list = {
+				30 = { add_gold = 1 }
+				25 = { add_gold = 2 }
+				20 = { add_gold = 4 }
+				15 = { add_gold = 8 }
+				10 = { add_gold = 16 }
+			}
+		}
+	}
+}
+
+scripted_trigger bp_viet_263_identify_buddhas_trigger = {
+	this != root
+	is_adult = yes
+	knows_language_of_culture = root.culture
+	OR = {
+		has_trait = theologian
+		knows_language_of_culture = root.location.county.culture
+		eastern_or_syncretic_with_eastern_trigger = { CHARACTER = this }
+	}
+}
+
+# Bamiyan Buddhas (travel event)
+bp_viet.263 = { #WTWSMS id: VIETnam.263
+	type = character_event
+	title = bp_viet.263.title
+	desc = bp_viet.263.desc
+
+	theme = travel_learning
+	override_background = cliff_temple
+	content_source = dlc_WtWSMS
+
+	trigger = {
+		is_location_valid_for_travel_event_on_land = yes
+		location = { geographical_region = world_kabulistan }
+		province:4343 = { has_building_or_higher = buddhas_of_bamian_01 }
+		current_travel_plan = { any_entourage_character = { bp_viet_263_identify_buddhas_trigger = yes } }
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = diligent
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = ambitious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = content
+		}
+		modifier = {
+			add = 0.2
+			has_trait = cynical
+		}
+		modifier = {
+			add = -0.2
+			has_trait = zealous
+		}
+		modifier = {
+			add = 0.2
+			has_trait = generous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = greedy
+		}
+	}
+	
+	left_portrait = {
+		character = root
+		animation = survey_staff
+	}
+	right_portrait = {
+		character = scope:entourage_helper
+		animation = personality_rational
+	}
+	
+	immediate = {
+		current_travel_plan = {
+			ordered_entourage_character = {
+				order_by = learning
+				limit = { bp_viet_263_identify_buddhas_trigger = yes }
+				save_scope_as = entourage_helper
+			}
+		}
+	}
+
+	option = {  #Impressive sight
+		name = bp_viet.263.a
+		add_learning_lifestyle_xp = travel_minor_lifestyle_xp
+		stress_impact = {
+			calm = minor_stress_impact_loss
+			wrathful = minor_stress_impact_gain
+			arrogant = minor_stress_impact_gain
+		}
+	}
+	option = { #HEATHENS
+		name = bp_viet.263.b
+		trigger = {
+			faith = {
+				faith_hostility_level = {
+					target = faith:theravada
+					value >= faith_hostile_level
+				}
+			}
+		}
+		add_piety = minor_piety_gain
+		stress_impact = {
+			zealous = minor_stress_impact_loss
+			arrogant = minor_stress_impact_loss
+			calm = minor_stress_impact_gain
+			cynical = minor_stress_impact_gain
+		}
+	}
+}
+
+# Henges
+bp_viet.264 = { #WTWSMS id: VIETnam.264
+	type = character_event
+	title = bp_viet.264.title
+	desc = bp_viet.264.desc
+
+	theme = learning
+	override_background = fp1_runestone_circle
+	content_source = dlc_WtWSMS
+
+	trigger = {
+		is_landed = yes
+		highest_held_title_tier >= tier_duchy
+		capital_province = {
+			OR = {
+				geographical_region = world_europe_west_britannia
+				geographical_region = ghw_region_celtic # Brittany
+			}
+		}
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 0.2
+			has_trait = gregarious
+		}
+		modifier = {
+			add = -0.2
+			has_trait = shy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = diligent
+		}
+		modifier = {
+			add = -0.2
+			has_trait = lazy
+		}
+		modifier = {
+			add = 0.2
+			has_trait = zealous
+		}
+		modifier = {
+			add = -0.2
+			has_trait = cynical
+		}
+		modifier = {
+			add = 0.2
+			has_trait = scholar
+		}
+		modifier = {
+			add = -0.2
+			has_trait = impatient
+		}
+		modifier = {
+			add = 0.2
+			has_trait = just
+		}
+		modifier = {
+			add = -0.2
+			has_trait = arbitrary
+		}
+	}
+
+	left_portrait = {
+		character = scope:scholar
+		animation = happy_teacher
+	}
+	right_portrait = {
+		character = root
+		animation = interested
+	}
+	
+	immediate = {
+		# Find a learned guest
+		random_courtier_or_guest = {
+			limit = { has_trait = scholar }
+			save_scope_as = scholar
+		}
+		# If not, search for a wandering character
+		if = {
+			limit = { NOT = { exists = scope:scholar } }
+			find_pool_characters_effect = yes
+			random_in_list = {
+				list = potential_pool_characters
+				limit = { has_trait = scholar }
+				save_scope_as = scholar
+			}
+			add_visiting_courtier = scope:scholar
+		}
+		# If still not, make one
+		if = {
+			limit = { NOT = { exists = scope:scholar } }
+			create_character = {
+				location = root.capital_province
+				faith = root.capital_county.faith
+				culture = root.capital_county.culture
+				template = learning_scholarship_focus_friend_template
+				save_scope_as = scholar
+			}
+			add_visiting_courtier = scope:scholar
+		}
+	}
+
+	option = { #Interesting
+		name = bp_viet.264.a
+		add_learning_lifestyle_xp = medium_lifestyle_xp
+		stress_impact = {
+			patient = minor_stress_impact_loss
+			impatient = minor_stress_impact_gain
+		}
+	}
+	option = { #I notice
+		name = bp_viet.264.b
+		trigger = { learning >= 13 }
+		add_prestige = miniscule_prestige_gain
+		add_character_modifier = {
+			modifier = scholarship_astrological_insights_modifier
+			years = 5
+		}
+		stress_impact = {
+			zealous = minor_stress_impact_loss
+			cynical = minor_stress_impact_gain
+		}
+	}
+}
+
+# Axumite Stelae
+bp_viet.265 = {
+	type = character_event
+	title = bp_viet.265.title
+	desc = bp_viet.265.desc
+	
+	theme = disaster
+	override_background = ep2_travel_settlement_desert
+	content_source = dlc_WtWSMS
+
+	trigger = {
+		is_landed = yes
+		capital_province = { geographical_region = ghw_region_ethiopia }
+	}
+
+	weight_multiplier = {
+        base = 0
+		modifier = {
+			add = {
+				every_held_title = {
+					limit = {
+						tier = tier_county
+						is_landless_type_title = no
+						title_province = { geographical_region = ghw_region_ethiopia }
+						NOT = { has_county_modifier = VIET_destroyed_axum_stele }
+					}
+					add = 1
+				}
+			}
+		}
+	}
+	
+	right_portrait = {
+		character = root
+		animation = personality_cynical
+	}
+	
+	immediate = {
+		random_held_title = {
+			limit = {
+				tier = tier_county
+				is_landless_type_title = no
+				title_province = { geographical_region = ghw_region_ethiopia }
+				NOT = { has_county_modifier = VIET_destroyed_axum_stele }
+			}
+			save_scope_as = county
+			add_county_modifier = {
+				modifier = VIET_destroyed_axum_stele
+				years = 5
+			}
+		}
+	}
+
+	option = { #fix the town
+		name = bp_viet.265.c
+		trigger = {
+			OR = {
+				is_ai = no
+				short_term_gold > minor_gold_value
+			}
+		}
+		remove_short_term_gold = minor_gold_value
+		add_piety = minor_piety_loss
+		scope:county = {
+			add_county_modifier = {
+				modifier = reinvested_in_province_modifier
+				years = 5
+			}
+		}
+		stress_impact = {
+			just = miniscule_stress_impact_loss
+			generous = minor_stress_impact_loss
+			greedy = medium_stress_impact_gain
+		}
+	}
+	option = { #ok
+		name = bp_viet.265.a
+		add_prestige = miniscule_prestige_loss
+		stress_impact = {
+			cynical = miniscule_stress_impact_loss
+			callous = minor_stress_impact_loss
+			sadistic = minor_stress_impact_loss
+			generous = medium_stress_impact_gain
+		}
+	}
+	option = { #boo
+		name = bp_viet.265.b
+		trigger = { has_strong_religious_conviction_trigger = yes }
+		add_piety = minor_piety_gain
+		add_prestige = minor_prestige_loss
+		stress_impact = {
+			zealous = minor_stress_impact_loss
+			generous = medium_stress_impact_gain
+		}
+	}
+}

@@ -4,9 +4,9 @@
 #Your family does not have enough non-capital baronies; demand more!
 demand_land_for_family_west = {
 	picture = {
-		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+		reference = "gfx/interface/illustrations/decisions/ep3_decision_city.dds"
 	}
-	decision_group_type = major
+	decision_group_type = roman
 
 	ai_check_interval = 60
 	desc = demand_land_for_family_west_desc
@@ -16,17 +16,11 @@ demand_land_for_family_west = {
 		root = root.dynasty.dynast
 		root.dynasty = { has_dynasty_modifier = roman_senate_family_west }
 		#Has to be under the Rome holder
-		trigger_if = {
-			limit = { is_landed = yes }
-			root.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
-		}
-		trigger_else = { root.employer.top_liege = { any_sub_realm_barony = { this = title:b_roma } } }
+		root.top_liege = { any_sub_realm_barony = { this = title:b_roma } }
 	}
 	
 	is_valid = {
 		valid_characteristics_to_interact_with_senate_trigger = yes
-		is_incapable = no
-		is_imprisoned = no
 		#Have an unlanded member of your family who is not your child-heir in some capacity...
 		custom_description = {
 			text = your_family_has_an_unlanded_non_descendent_west
@@ -78,6 +72,8 @@ demand_land_for_family_west = {
 	}
 	
 	is_valid_showing_failures_only = {
+		is_incapable = no
+		is_imprisoned = no
 		custom_description = {
 			text = recently_requested_land_transfer
 			NOT = { has_variable = requested_land_transfer_recently }
@@ -123,9 +119,9 @@ demand_land_for_family_west = {
 }
 demand_land_for_family_east = {
 	picture = {
-		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+		reference = "gfx/interface/illustrations/decisions/ep3_decision_city.dds"
 	}
-	decision_group_type = major
+	decision_group_type = roman
 
 	ai_check_interval = 60
 	desc = demand_land_for_family_east_desc
@@ -143,8 +139,6 @@ demand_land_for_family_east = {
 	}
 	
 	is_valid = {
-		is_incapable = no
-		is_imprisoned = no
 		#Have an unlanded member of your family who is not your child-heir in some capacity...
 		custom_description = {
 			text = your_family_has_an_unlanded_non_descendent_east
@@ -196,6 +190,8 @@ demand_land_for_family_east = {
 	}
 	
 	is_valid_showing_failures_only = {
+		is_incapable = no
+		is_imprisoned = no
 		custom_description = {
 			text = recently_requested_land_transfer
 			NOT = { has_variable = requested_land_transfer_recently }
@@ -240,12 +236,12 @@ demand_land_for_family_east = {
 	ai_will_do = { base = 100 }
 }
 
-### AI-Only Major Decisions
-disestablish_west_senate = { #AI-only decision; implemented in GUI for players
+### Major Decisions
+disestablish_west_senate = {
 	picture = {
-		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+		reference = "gfx/interface/illustrations/event_story/sack_of_city.dds"
 	}
-	decision_group_type = major
+	decision_group_type = roman
 
 	ai_check_interval_by_tier = {
 		barony = 0
@@ -272,12 +268,16 @@ disestablish_west_senate = { #AI-only decision; implemented in GUI for players
 			has_title = title:h_western_roman_empire
 		}
 		has_global_variable = west_senate_is_established
-		is_ai = yes #Players should use the GUI instead
+		#Can't be Romanesque or governments or cultures or titles
+		NOT = { government_has_flag = is_a_roman_government }
+		NOT = { culture = { has_ability_to_reform_rome_directly_trigger = yes } }
 	}
 	
 	is_valid = {
-		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
-		#Can't be Romanesque or governments or cultures or titles
+		custom_description = { #You can't disestablish_senate if they've approved you
+			text = not_has_senate_phase_approval_trigger
+			NOT = { has_senate_phase_trigger = { ACTOR = root PHASE = senate_approval } }
+		}
 		NOT = { government_has_flag = is_a_roman_government }
 	}
 	
@@ -289,13 +289,26 @@ disestablish_west_senate = { #AI-only decision; implemented in GUI for players
 	cost = {}
 	
 	effect = {
-		disestablished_senate_effect = {
-			REGION = west
-			MAIN_EMPIRE = h_western_roman_empire
-			OPPOSITE_EMPIRE = h_eastern_roman_empire
+		if = {
+			limit = { is_ai = no }
+			show_as_tooltip = {
+				disestablished_senate_effect = {
+					REGION = west
+					MAIN_EMPIRE = h_western_roman_empire
+					OPPOSITE_EMPIRE = h_eastern_roman_empire
+				}
+			}
+			trigger_event = { id = BP_roman_senate_events.0001 }
 		}
-		root = { save_scope_as = the_destroyer }
-		every_player = { trigger_event = { id = BP_roman_senate_events.0002 } }
+		else = {
+			disestablished_senate_effect = {
+				REGION = west
+				MAIN_EMPIRE = h_western_roman_empire
+				OPPOSITE_EMPIRE = h_eastern_roman_empire
+			}
+			root = { save_scope_as = the_destroyer }
+			every_player = { trigger_event = { id = BP_roman_senate_events.0002 } }
+		}
 	}
 	
 	ai_potential = { always = yes }
@@ -303,14 +316,7 @@ disestablish_west_senate = { #AI-only decision; implemented in GUI for players
 	ai_will_do = {
 		#%25 chance every 5 years => 43% in 10, 58% in 15, 68% in 20 years of doing so
 		base = 25
-		
-		modifier = { #AI will always do if they have a different universality than Roman
-			add = 1000
-			NOR = { #Not Roman government, so *ick*
-				has_main_roman_government_trigger = yes
-				has_subroman_government_trigger = yes
-			}
-		}
+
 		modifier = { #AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
 			factor = 0
 			government_has_flag = is_a_roman_government
@@ -325,11 +331,11 @@ disestablish_west_senate = { #AI-only decision; implemented in GUI for players
 		}
 	}
 }
-disestablish_east_senate = { #AI-only decision; implemented in GUI for players
+disestablish_east_senate = {
 	picture = {
-		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+		reference = "gfx/interface/illustrations/event_story/sack_of_city.dds"
 	}
-	decision_group_type = major
+	decision_group_type = roman
 
 	ai_check_interval_by_tier = {
 		barony = 0
@@ -356,14 +362,17 @@ disestablish_east_senate = { #AI-only decision; implemented in GUI for players
 			has_title = title:h_western_roman_empire
 		}
 		has_global_variable = senate_is_established
-		is_ai = yes #Players should use the GUI instead
-	}
-	
-	is_valid = {
-		NOT = { has_character_modifier = approved_by_the_senate } #You can't disestablish_senate if they've approved you
 		#Can't be Romanesque or governments or cultures or titles
 		NOT = { government_has_flag = is_a_roman_government }
 		NOT = { culture = { has_ability_to_reform_rome_directly_trigger = yes } }
+	}
+	
+	is_valid = {
+		custom_description = { #You can't disestablish_senate if they've approved you
+			text = not_has_senate_phase_approval_trigger
+			NOT = { has_senate_phase_trigger = { ACTOR = root PHASE = senate_approval } }
+		}
+		NOT = { government_has_flag = is_a_roman_government }
 	}
 	
 	is_valid_showing_failures_only = {
@@ -374,13 +383,26 @@ disestablish_east_senate = { #AI-only decision; implemented in GUI for players
 	cost = {}
 	
 	effect = {
-		disestablished_senate_effect = {
-			REGION = east
-			MAIN_EMPIRE = h_eastern_roman_empire
-			OPPOSITE_EMPIRE = h_western_roman_empire
+		if = {
+			limit = { is_ai = no }
+			show_as_tooltip = {
+				disestablished_senate_effect = {
+					REGION = east
+					MAIN_EMPIRE = h_eastern_roman_empire
+					OPPOSITE_EMPIRE = h_western_roman_empire
+				}
+			}
+			trigger_event = { id = BP_roman_senate_events.1001 }
 		}
-		root = { save_scope_as = the_destroyer }
-		every_player = { trigger_event = { id = BP_roman_senate_events.1002 } }
+		else = {
+			disestablished_senate_effect = {
+				REGION = east
+				MAIN_EMPIRE = h_eastern_roman_empire
+				OPPOSITE_EMPIRE = h_western_roman_empire
+			}
+			root = { save_scope_as = the_destroyer }
+			every_player = { trigger_event = { id = BP_roman_senate_events.1002 } }
+		}
 	}
 	
 	ai_potential = { always = yes }
@@ -389,13 +411,6 @@ disestablish_east_senate = { #AI-only decision; implemented in GUI for players
 		#%25 chance every 5 years => 43% in 10, 58% in 15, 68% in 20 years of doing so
 		base = 25
 		
-		modifier = { #AI will always do if they have a different universality than Roman
-			add = 1000
-			NOR = { #Not Roman government, so *ick*
-				has_main_roman_government_trigger = yes
-				has_subroman_government_trigger = yes
-			}
-		}
 		modifier = { #AI won't do this if they are Sub-Roman, even if they don't have a Romance culture
 			factor = 0
 			government_has_flag = is_a_roman_government
@@ -410,11 +425,11 @@ disestablish_east_senate = { #AI-only decision; implemented in GUI for players
 		}
 	}
 }
-request_west_senate_recognition = { #AI-only decision; implemented in GUI for players
+request_west_senate_recognition = {
 	picture = {
-		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+		reference = "gfx/interface/illustrations/event_story/senate_background.dds"
 	}
-	decision_group_type = major
+	decision_group_type = roman
 	
 	ai_check_interval_by_tier = {
 		barony = 0
@@ -434,16 +449,15 @@ request_west_senate_recognition = { #AI-only decision; implemented in GUI for pl
 		this = title:c_roma.holder.top_liege
 		#Has to actually be available
 		has_global_variable = west_senate_is_established
-		
-		is_ai = yes #Players should use the GUI instead
+		has_senate_phase_trigger = { ACTOR = root PHASE = senate_deliberation }
+		OR = {
+			government_has_flag = is_a_roman_government
+			culture = { has_ability_to_reform_rome_directly_trigger = yes }
+		}
 	}
 	
 	is_valid = { #Can't have a different model of universality than the Romans did
 		NOT = { has_variable = already_asked_the_senate } #Can't have already asked
-		NOR = { #Not Roman government, so ok
-			has_main_roman_government_trigger = yes
-			has_subroman_government_trigger = yes
-		}
 	}
 	
 	is_valid_showing_failures_only = {
@@ -454,6 +468,23 @@ request_west_senate_recognition = { #AI-only decision; implemented in GUI for pl
 	cost = {}
 	
 	effect = {
+		show_as_tooltip = {
+			random_list = {
+				100 = {
+					show_chance = no
+					desc = request_senate_recognition_tooltip.seek_approval
+					custom_tooltip = BP_roman_senate_events.0011.seek_approval.flavor
+					custom_tooltip = BP_roman_senate_events.0011.seek_approval.tooltip
+				}
+				100 = {
+					show_chance = no
+					desc = request_senate_recognition_tooltip.dismiss
+					custom_tooltip = BP_roman_senate_events.0011.dismiss_the_senate.flavor
+					add_character_modifier = ignored_the_senate
+				}
+			}
+		}
+			
 		root = {
 			set_variable = already_asked_the_senate
 			trigger_event = BP_roman_senate_events.0011
@@ -464,22 +495,13 @@ request_west_senate_recognition = { #AI-only decision; implemented in GUI for pl
 	
 	ai_will_do = {
 		base = 100 #%100 chance
-		
-		#AI won't do this if they have a different theory of Government than Roman
-		modifier = {
-			factor = 0
-			NOR = {
-				has_main_roman_government_trigger = yes
-				has_subroman_government_trigger = yes
-			}
-		}
 	}
 }
-request_east_senate_recognition = { #AI-only decision; implemented in GUI for players
+request_east_senate_recognition = {
 	picture = {
-		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+		reference = "gfx/interface/illustrations/event_story/senate_background.dds"
 	}
-	decision_group_type = major
+	decision_group_type = roman
 	
 	ai_check_interval_by_tier = {
 		barony = 0
@@ -499,16 +521,15 @@ request_east_senate_recognition = { #AI-only decision; implemented in GUI for pl
 		this = title:c_byzantion.holder.top_liege
 		#Has to actually be available
 		has_global_variable = east_senate_is_established
-		
-		is_ai = yes #Players should use the GUI instead
+		has_senate_phase_trigger = { ACTOR = root PHASE = senate_deliberation }
+		OR = {
+			government_has_flag = is_a_roman_government
+			culture = { has_ability_to_reform_rome_directly_trigger = yes }
+		}
 	}
 	
 	is_valid = {
 		NOT = { has_variable = already_asked_the_senate } #Can't have already asked
-		NOR = { #Not Roman government, so ok
-			has_main_roman_government_trigger = yes
-			has_subroman_government_trigger = yes
-		}
 	}
 	
 	is_valid_showing_failures_only = {
@@ -519,6 +540,23 @@ request_east_senate_recognition = { #AI-only decision; implemented in GUI for pl
 	cost = {}
 	
 	effect = {
+		show_as_tooltip = {
+			random_list = {
+				100 = {
+					show_chance = no
+					desc = request_senate_recognition_tooltip.seek_approval
+					custom_tooltip = BP_roman_senate_events.1011.seek_approval.flavor
+					custom_tooltip = BP_roman_senate_events.1011.seek_approval.tooltip
+				}
+				100 = {
+					show_chance = no
+					desc = request_senate_recognition_tooltip.dismiss
+					custom_tooltip = BP_roman_senate_events.1011.dismiss_the_senate.flavor
+					add_character_modifier = ignored_the_senate
+				}
+			}
+		}
+		
 		root = {
 			set_variable = already_asked_the_senate
 			trigger_event = BP_roman_senate_events.1011
@@ -529,14 +567,5 @@ request_east_senate_recognition = { #AI-only decision; implemented in GUI for pl
 	
 	ai_will_do = {
 		base = 100 #%100 chance
-		
-		#AI won't do this if they have a different theory of Government than Roman
-		modifier = {
-			factor = 0
-			NOR = {
-				has_main_roman_government_trigger = yes
-				has_subroman_government_trigger = yes
-			}
-		}
 	}
 }

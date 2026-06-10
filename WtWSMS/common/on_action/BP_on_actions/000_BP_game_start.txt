@@ -18,7 +18,6 @@ bp_game_start = {
 		#Needs to be done first to avoid some errors
 		ccu_startup_debug
 		bp_set_global_variables
-		create_BP_artifacts
 		#Legal Stuff
 		setup_realm_and_title_succession_laws
 		setup_realm_and_title_succession_laws_DLC
@@ -46,6 +45,7 @@ bp_game_start = {
 
 bp_game_start_after_lobby = {
 	on_actions = {
+		create_BP_artifacts
 		give_chavez_to_the_buri
 		alt_history_effects
 		#Other Events
@@ -133,7 +133,7 @@ create_BP_artifacts = {
 		if = {
 			limit = { has_dlc_feature = royal_court }
 			#Tooth of the Buddha
-			title:k_lanka.holder = {
+			title:k_lanka.holder ?= {
 				save_scope_as = the_holder
 				create_artifact = {
 					name = tooth_of_the_buddha
@@ -154,7 +154,7 @@ create_BP_artifacts = {
 					}
 				}
 			}
-			title:h_eastern_roman_empire.holder = {
+			title:h_eastern_roman_empire.holder ?= {
 				create_artifact = {
 					name = nail_of_the_true_cross
 					description = nail_of_the_true_cross_desc
@@ -167,7 +167,7 @@ create_BP_artifacts = {
 					visuals = reliquary
 				}
 			}
-			title:h_persia.holder = {
+			title:h_persia.holder ?= {
 				create_artifact = {
 					name = branch_of_the_keshmar_cypress
 					description = branch_of_the_keshmar_cypress_desc
@@ -177,8 +177,32 @@ create_BP_artifacts = {
 					quality = 999
 					decaying = no
 					modifier = branch_of_the_keshmar_cypress_modifier
-					visuals = flowers
+					visuals = pedestal_branch_relic_zoroastr
 				}
+				create_artifact_pedestal_al_jabal_effect = { OWNER = this }
+			}
+		}
+		# Available without Royal Court
+		# Give Gurzils to the Laguntans
+		every_ruler = {
+			limit = {
+				is_independent_ruler = yes
+				faith = faith:gurzil
+				highest_held_title_tier >= tier_duchy
+				OR = {
+					government_has_flag = government_is_tribal
+					government_has_flag = government_is_nomadic
+				}
+			}
+			create_artifact = {
+				name = gurzil_image
+				description = gurzil_image_desc
+				history = { type = created_before_history }
+				type = animal_trinket
+				template = gurzil_template
+				quality = 40
+				modifier = gurzil_image_modifier
+				visuals = animal_figurine
 			}
 		}
 	}

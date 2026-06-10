@@ -1,7 +1,8 @@
 ﻿namespace = bp_narrative_events
 
-#bp_narrative_events.0001 - Fall of Rome to Barbarians
-#bp_narrative_events.0002 - Julius Nepos becomes WRE
+#0001 - Fall of Rome to Barbarians
+#0002 - Julius Nepos becomes WRE
+#0003 - Regalia transfer
 
 #Fall of Rome
 bp_narrative_events.0001 = { #WTWSMS id: zusk_event.30
@@ -143,6 +144,10 @@ bp_narrative_events.0002 = { #WTWSMS id: zusk_event.26
 		character = root
 		animation = personality_honorable
 	}
+	artifact = {
+		target = scope:diadem_artifact
+		position = lower_center_portrait
+	}
 	
 	option = {
 		trigger = { root = scope:the_last_wre_holder }
@@ -158,16 +163,13 @@ bp_narrative_events.0002 = { #WTWSMS id: zusk_event.26
 			}
 			convert_to_roman_government_effect = yes
 		}
+		scope:diadem_artifact = { set_owner = { target = root } }
 		if = {
 			limit = { root ?= scope:the_last_wre_holder }
 			every_player = {
 				limit = {
 					NOT = { root = scope:the_last_wre_holder }
 					is_ai = no
-					OR = {
-						is_landed = yes
-						is_landless_ruler = yes
-					}
 				}
 				trigger_event = { id = bp_narrative_events.0002 }
 			}
@@ -183,5 +185,177 @@ bp_narrative_events.0002 = { #WTWSMS id: zusk_event.26
 		name = bp_narrative_events.0002.b
 		fallback = yes
 		show_as_tooltip = { scope:the_last_wre_holder = { get_title = title:h_western_roman_empire } }
+	}
+}
+
+# Handling the Western Imperial Regalia after the Fall of Rome
+bp_narrative_events.0003 = { #WTWSMS id: imperial_legacy.42
+	title = bp_narrative_events.0003.name
+	desc = bp_narrative_events.0003.desc
+	type = character_event
+	
+	theme = coronation
+	content_source = dlc_WtWSMS
+	
+	trigger = {
+		any_artifact = {
+			has_variable = western_roman_regalia
+			artifact_owner = {
+				OR = {
+					this = root
+					top_liege = root
+					is_imprisoned_by = root
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		# Find the Regalia
+		random_artifact = {
+			limit = {
+				has_variable = western_roman_regalia
+				artifact_owner = {
+					OR = {
+						this = root
+						top_liege = root
+						is_imprisoned_by = root
+					}
+				}
+			}
+			save_scope_as = regalia_artifact
+			if = {
+				limit = { artifact_owner != root }
+				artifact_owner = { save_scope_as = regalia_owner }
+			}
+		}
+		
+		title:e_wre.holder = { save_scope_as = wre_holder }
+		title:h_western_roman_empire.holder = { save_scope_as = wre_holder }
+		
+		title:e_byzantium.holder = { save_scope_as = ere_holder }
+		title:h_eastern_roman_empire.holder = { save_scope_as = ere_holder }
+		
+		hidden_effect = {
+			# Add claims
+			scope:regalia_owner = { add_personal_artifact_claim = scope:regalia_artifact }
+			scope:wre_holder = { add_personal_artifact_claim = scope:regalia_artifact }
+			scope:ere_holder = { add_personal_artifact_claim = scope:regalia_artifact }
+		}
+	}
+	
+	left_portrait = {
+		character = scope:regalia_owner
+		animation = obsequious_bow
+		camera = camera_event_very_left_further_back
+	}
+	artifact = {
+		target = scope:regalia_artifact
+		position = lower_center_portrait
+	}
+	right_portrait = {
+		character = root
+		animation = personality_bold
+	}
+	lower_left_portrait = scope:wre_holder
+	lower_right_portrait = scope:ere_holder
+	
+	# Keep it
+	option = {
+		name = bp_narrative_events.0003.a
+		add_legitimacy = medium_legitimacy_gain
+		add_prestige = major_prestige_gain
+		scope:regalia_artifact = {
+			set_owner = {
+				target = root
+				history = {
+					type = conquest
+					actor = scope:regalia_owner
+					recipient = root
+				}
+			}
+		}
+		
+		# Odoacer didn't do this
+		ai_chance = {
+			base = 100 
+			modifier = {
+				factor = 0
+				root = character:55
+			}
+		}
+	}
+	
+	# Send to ERE
+	option = {
+		name = bp_narrative_events.0003.b
+		trigger = { exists = scope:ere_holder }
+		
+		add_trait = roman_nostalgia
+		add_legitimacy = major_legitimacy_gain
+		
+		scope:regalia_artifact = {
+			add_artifact_history = {
+				type = conquest
+				actor = scope:regalia_owner
+				recipient = root
+			}
+			set_owner = {
+				target = scope:ere_holder
+				history = {
+					type = given
+					actor = root
+					recipient = scope:ere_holder
+				}
+			}
+		}
+		reverse_add_opinion = {
+			target = scope:ere_holder
+			modifier = gift_artifact_opinion
+			opinion = 100
+		}
+		
+		# This is what Odoacer did historically
+		ai_chance = {
+			base = 300
+		}
+	}
+	
+	# Send to WRE
+	option = {
+		name = bp_narrative_events.0003.c
+		trigger = { exists = scope:wre_holder }
+		
+		add_trait = roman_nostalgia
+		add_legitimacy = medium_legitimacy_gain
+		
+		scope:regalia_artifact = {
+			add_artifact_history = {
+				type = conquest
+				actor = scope:regalia_owner
+				recipient = root
+			}
+			set_owner = {
+				target = scope:wre_holder
+				history = {
+					type = given
+					actor = root
+					recipient = scope:wre_holder
+				}
+			}
+		}
+		reverse_add_opinion = {
+			target = scope:wre_holder
+			modifier = gift_artifact_opinion
+			opinion = 100
+		}
+		
+		ai_chance = {
+			base = 200
+			modifier = {
+				factor = 0
+				root = character:55
+			}
+		}
 	}
 }

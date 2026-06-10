@@ -1,0 +1,255 @@
+﻿# This is added to bp_historical_artifacts.0023 so that custom crowns overwrite the default Coronations artifacts
+bp_create_crowns_regalia_effect = {
+	#Byzantine crowns
+	if = {
+		limit = { current_date < 527.4.1 }
+		title:h_eastern_roman_empire.holder ?= { create_artifact_crown_constantine_effect = { OWNER = this } }
+	}
+	else = {
+		title:h_eastern_roman_empire.holder ?= { create_artifact_crown_justinian_effect = { OWNER = this } }
+	}
+	#Byzantine regalia
+	title:h_eastern_roman_empire.holder ?= { create_artifact_regalia_ere_effect = { OWNER = this } }
+	
+	#Roman crown
+	title:h_western_roman_empire.holder ?= { create_artifact_crown_wre_effect = { OWNER = this } }
+	
+	#Western regalia - this changes hands a lot
+	if = {
+		limit = {
+			current_date >= 493.3.5
+			exists = title:h_italy.holder
+		}
+		title:h_italy.holder = { create_artifact_regalia_wre_effect = { OWNER = this } }
+	}
+	# sent by Odoacer to Zeno
+	else_if = {
+		limit = {
+			current_date >= 476.9.8
+			current_date < 487.1.1
+		} 
+		title:h_eastern_roman_empire.holder ?= { create_artifact_regalia_wre_effect = { OWNER = this } }
+	}
+	# sent by Zeno to Theoderic
+	else_if = {
+		limit = { current_date >= 487.1.1 }
+		title:k_ostrogoths.holder ?= { create_artifact_regalia_wre_effect = { OWNER = this } }
+	}
+	# Starts in WRE
+	else = {
+		title:h_western_roman_empire.holder ?= { create_artifact_regalia_wre_effect = { OWNER = this } }
+	}
+}
+
+create_artifact_regalia_wre_effect = {
+	# Get the character the artifact is being made for.
+	$OWNER$ = { save_scope_as = owner }
+	# Not really used, but if we don't set the scopes we get errors in the feature selection
+	set_artifact_rarity_illustrious = yes
+
+	# Create the artifact
+	create_artifact = {	
+		name = western_roman_regalia
+		description = roman_regalia_desc
+		type = regalia
+		template = roman_regalia_template
+		visuals = spear_court
+		wealth = scope:wealth
+		quality = scope:quality
+		history = {
+			type = created_before_history
+		}
+		modifier = nikephoros_crown_modifier
+		save_scope_as = newly_created_artifact
+		decaying = no
+	}
+
+	scope:newly_created_artifact = {
+		set_variable = { name = historical_unique_artifact value = yes }
+		set_variable = roman_regalia
+		set_variable = western_roman_regalia
+		# Lots of history here
+		if = {
+			limit = { current_date >= 476.9.4 }
+			# Odoacer receives Regalia from Romulus Augustulus
+			add_artifact_history = {
+				type = conquest
+				actor = character:96054
+				recipient = character:55
+				date = 476.9.4
+			}
+		}
+		if = {
+			limit = { current_date >= 476.9.8 }
+			# sent by Odoacer to Zeno
+			add_artifact_history = {
+				type = given
+				actor = character:55
+				recipient = character:70515
+				date = 476.9.8
+			}
+		}
+		if = {
+			limit = { current_date >= 487.1.1 }
+			# sent by Zeno to Theoderic who was on his way to Italy
+			add_artifact_history = {
+				type = given
+				actor = character:55
+				recipient = character:63
+				date = 487.1.1
+			}
+		}
+		if = {
+			limit = { current_date >= 526.1.1 }
+			# further history unknown, probably lost
+			add_artifact_title_history = {
+				target = title:h_italy
+				date = 526.1.1
+			}
+		}
+		save_scope_as = epic
+	}
+}
+
+create_artifact_regalia_ere_effect = {
+	# Get the character the artifact is being made for.
+	$OWNER$ = { save_scope_as = owner }
+	# Not really used, but if we don't set the scopes we get errors in the feature selection
+	set_artifact_rarity_illustrious = yes
+
+	# Create the artifact
+	create_artifact = {	
+		name = eastern_roman_regalia
+		description = roman_regalia_desc
+		type = regalia
+		template = roman_regalia_template
+		visuals = spear_court
+		wealth = scope:wealth
+		quality = scope:quality
+		history = {
+			type = created
+			date = 527.4.1
+			recipient = character:70523 #Constantine the Great
+			location = province:496 #Constantinople
+		}
+		modifier = nikephoros_crown_modifier
+		save_scope_as = newly_created_artifact
+		decaying = no
+	}
+
+	scope:newly_created_artifact = {
+		set_variable = { name = historical_unique_artifact value = yes }
+		set_variable = roman_regalia
+		set_variable = eastern_roman_regalia
+		add_artifact_title_history = {
+			target = title:h_eastern_roman_empire
+			date = 337.5.22
+		}
+		save_scope_as = epic
+	}
+}
+
+create_artifact_crown_wre_effect = {
+	# Get the character the artifact is being made for.
+	$OWNER$ = { save_scope_as = owner }
+	# Not really used, but if we don't set the scopes we get errors in the feature selection
+	set_artifact_rarity_illustrious = yes
+
+	# Create the artifact
+	create_artifact = {	
+		name = western_roman_imperial_diadem
+		description = roman_imperial_diadem_desc
+		type = helmet
+		template = roman_crown_template
+		visuals = pedestal_justinian
+		wealth = scope:wealth
+		quality = scope:quality
+		history = {
+			type = created_before_history
+		}
+		modifier = justinian_crown_modifier
+		save_scope_as = newly_created_artifact
+		decaying = no
+	}
+
+	scope:newly_created_artifact = {
+		set_variable = { name = historical_unique_artifact value = yes }
+		set_variable = western_roman_imperial_diadem
+		save_scope_as = epic
+	}	
+}
+
+create_artifact_crown_constantine_effect = {
+	# Get the character the artifact is being made for.
+	$OWNER$ = { save_scope_as = owner }
+	# Not really used, but if we don't set the scopes we get errors in the feature selection
+	set_artifact_rarity_illustrious = yes
+
+	# Create the artifact
+	create_artifact = {	
+		name = eastern_roman_imperial_diadem
+		description = roman_imperial_diadem_desc
+		type = helmet
+		template = roman_crown_template
+		visuals = pedestal_justinian
+		wealth = scope:wealth
+		quality = scope:quality
+		history = {
+			type = created
+			date = 527.4.1
+			recipient = character:70523 #Constantine the Great
+			location = province:496 #Constantinople
+		}
+		modifier = justinian_crown_modifier
+		save_scope_as = newly_created_artifact
+		decaying = no
+	}
+
+	scope:newly_created_artifact = {
+		set_variable = { name = historical_unique_artifact value = yes }
+		set_variable = eastern_roman_imperial_diadem
+		set_variable = crown_of_justinian # To prevent spawns
+		add_artifact_title_history = {
+			target = title:h_eastern_roman_empire
+			date = 337.5.22
+		}
+		save_scope_as = epic
+	}	
+}
+
+create_artifact_crown_justinian_effect = {
+	# Get the character the artifact is being made for.
+	$OWNER$ = { save_scope_as = owner }
+	# Not really used, but if we don't set the scopes we get errors in the feature selection
+	set_artifact_rarity_illustrious = yes
+
+	# Create the artifact
+	create_artifact = {	
+		name = artifact_pedestal_crown_justinian_name
+		description = artifact_pedestal_crown_justinian
+		type = helmet
+		template = justinian_template
+		visuals = pedestal_justinian
+		wealth = scope:wealth
+		quality = scope:quality
+		history = {
+			type = created
+			date = 527.4.1
+			recipient = character:70512 #Justinian the Great
+			location = province:496 #Constantinople
+		}
+		modifier = justinian_crown_modifier
+		save_scope_as = newly_created_artifact
+		decaying = no
+	}
+
+	scope:newly_created_artifact = {
+		set_variable = { name = historical_unique_artifact value = yes }
+		set_variable = crown_of_justinian
+		add_artifact_title_history = {
+			target = title:e_byzantium
+			date = 565.11.14
+		}
+		save_scope_as = epic
+	}	
+}

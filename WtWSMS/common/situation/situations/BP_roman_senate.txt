@@ -1,0 +1,254 @@
+﻿BP_senate = {
+	
+	is_unique = yes # It can only exist once in the world
+
+	gui_window_name = "BP_window_roman_senate_situation"
+	illustration = "gfx/interface/illustrations/event_story/senate_background.dds"
+	situation_group_type = major
+
+	##################################################
+	# Regions
+	##################################################
+	sub_regions = {
+		west = {
+			icon = "gfx/interface/icons/situations/debug_situation/steppe_west.dds"
+			geographical_regions = { custom_western_senate }
+		}
+		east = {
+			icon = "gfx/interface/icons/situations/debug_situation/steppe_east.dds"
+			geographical_regions = { custom_eastern_senate }
+		}
+	}
+	
+	##################################################
+	# On Actions
+	##################################################
+	# on_monthly = {
+	# }
+
+	##################################################
+	# Groups
+	##################################################
+	participant_groups = {
+		city_holder = {
+			icon = "gfx/interface/icons/building_types/icon_structure_colosseum.dds"
+
+			is_character_valid = {
+				is_independent_ruler = yes
+				OR = {
+					AND = {
+						root = title:b_roma.holder.top_liege
+						scope:situation_sub_region = situation:BP_senate.situation_sub_region:west
+					}
+					AND = {
+						root = title:b_constantinople.holder.top_liege
+						scope:situation_sub_region = situation:BP_senate.situation_sub_region:east
+					}
+				}
+			}
+			require_realm_in_sub_region = no
+
+			on_join = {}
+			on_leave = {
+				remove_character_modifier = stalled_the_senate
+				# no_longer_above_the_senate
+				if = {
+					limit = { is_independent_ruler = no }
+					trigger_event = { id = BP_roman_senate_events.2001 days = { 1 3 } }
+				}
+				else = {
+					trigger_event = { id = BP_roman_senate_events.2002 days = { 1 3 } }
+				}
+			}
+
+			map_color = roman
+		}
+		senator = {
+			icon = "gfx/interface/icons/dynastic_cycle/dynastic_cycle_group_unaligned.dds"
+
+			is_character_valid = {
+				NOT = { scope:situation_sub_region = { sub_region_current_phase = senate_disbanded } }
+				scope:situation = { is_manual_participant = root }
+				OR = {
+					AND = {
+						has_trait = senator_west
+						scope:situation_sub_region = situation:BP_senate.situation_sub_region:west
+					}
+					AND = {
+						has_trait = senator_east
+						scope:situation_sub_region = situation:BP_senate.situation_sub_region:east
+					}
+				}
+			}
+			
+			on_join = {}
+			on_leave = {}
+
+			map_color = greek
+		}
+
+		senator_away = {
+			icon = "gfx/interface/icons/faith_doctrines/doctrine_pilgrimage_encouraged.dds"
+
+			is_character_valid = {
+				NOT = { scope:situation_sub_region = { sub_region_current_phase = senate_disbanded } }
+				scope:situation = { is_manual_participant = root }
+				OR = {
+					AND = {
+						has_trait = senator_west
+						scope:situation_sub_region = situation:BP_senate.situation_sub_region:west
+					}
+					AND = {
+						has_trait = senator_east
+						scope:situation_sub_region = situation:BP_senate.situation_sub_region:east
+					}
+				}
+			}
+			require_realm_in_sub_region = no
+			
+			on_join = {}
+			on_leave = {}
+
+			map_color = romano_dacian
+		}
+	}
+	
+	##################################################
+	# Phases
+	##################################################
+	start_phase = senate_approval
+
+	phases = {
+		#Liege sought approval, receives it
+		senate_approval = {
+			icon = "gfx/interface/icons/character_interactions/support_candidacy.dds"
+
+			on_start = {}
+			on_end = {}
+			
+			future_phases = {
+				senate_approval = {}
+				senate_rejection = {}
+			}
+
+			modifier_sets = {
+				senate_effects = {
+					icon = "gfx/interface/icons/modifiers/byzantine_crown_positive.dds"
+
+					city_holder = {
+						character_modifier = {
+							monthly_prestige_gain_mult = 0.01 #Like in CK2, barely worth anything...
+							short_reign_duration_mult = -10.00 #Senate approval should eliminate short reign effects; should help Odoacer a lot
+						}
+					}
+				}
+			}
+		}
+		
+		#Liege sought approval, denied it
+		senate_rejection = {
+			icon = "gfx/interface/icons/character_interactions/harm_candidacy.dds"
+			
+			on_start = {}
+			on_end = {}
+			
+			future_phases = {
+				senate_approval = {}
+				senate_rejection = {}
+			}
+
+			modifier_sets = {
+				senate_effects = {
+					icon = "gfx/interface/icons/modifiers/byzantine_crown_negative.dds"
+
+					city_holder = {
+						character_modifier = {
+							monthly_prestige_gain_mult = -0.10 #All that effort, and you still get sneered at...
+						}
+					}
+				}
+			}
+		}
+		
+		#Liege refuses to interact with the senate
+		senate_ignored = {
+			icon = "gfx/interface/icons/scheme_types/icon_scheme_slander.dds"
+			
+			on_start = {}
+			on_end = {}
+			
+			future_phases = {
+				senate_approval = {}
+				senate_rejection = {}
+			}
+
+			modifier_sets = {
+				senate_effects = {
+					icon = "gfx/interface/icons/modifiers/byzantine_crown_mixed.dds"
+
+					city_holder = {
+						character_modifier = {
+							monthly_prestige = 1.00
+							monthly_prestige_gain_mult = 0.10
+						}
+					}
+				}
+			}
+		}
+		
+		# New top liege must decide on their outlook towards the senate, includes if they stall the senate
+		senate_deliberation = {
+			icon = "gfx/interface/icons/scheme_types/icon_scheme_promote.dds"
+			
+			on_start = {}
+			on_end = {
+				scope:situation_sub_region = {
+					every_situation_sub_region_participant = {
+						remove_character_modifier = stalled_the_senate
+					}
+				}
+			}
+			
+			future_phases = {
+				senate_approval = {}
+				senate_rejection = {}
+				senate_ignored = {}
+				senate_deliberation = {}
+			}
+
+			modifier_sets = {
+				senate_effects = {
+					icon = "gfx/interface/icons/modifiers/byzantine_crown_mixed.dds"
+				}
+			}
+		}
+		
+		senate_disbanded = {
+			icon = "gfx/interface/icons/vassal_directives/refusal.dds"
+			
+			parameters = {
+				senate_disbanded = yes
+			}
+			
+			future_phases = {
+				senate_disbanded = {}
+			}
+
+			on_start = {
+				scope:situation_sub_region = {
+					every_situation_sub_region_participant = {
+						recalculate_participant_group = scope:situation
+					}
+				}
+			}
+			on_end = {}
+			
+			modifier_sets = {
+				senate_effects = {
+					icon = "gfx/interface/icons/struggle_effects/other_disable.dds"
+				}
+			}
+		}
+
+	}
+}

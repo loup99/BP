@@ -1,0 +1,1164 @@
+﻿######################################################
+##################### SITUATION ######################
+######################################################
+window = {
+	name = "BP_window_roman_senate_situation"
+	widgetid = "BP_window_roman_senate_situation"
+	datacontext = "[SituationWindow.GetSituation]"
+	datacontext = "[GetVariableSystem]"
+	datacontext = "[GetPlayer]"
+	parentanchor = top|right
+	layer = windows_layer
+	movable = no
+	allow_outside = yes
+	
+	using = Window_Size_MainTab
+	
+	state = {
+		name = _show
+		using = Animation_FadeIn_Quick
+		using = Sound_WindowShow_Standard
+		using = Window_Position_MainTab
+	}
+	
+	state = {
+		name = _hide
+		using = Animation_FadeOut_Quick
+		using = Sound_WindowHide_Standard
+		using = Window_Position_MainTab_Hide
+	}
+	
+	margin_widget = {
+		size = { 100% 100% }
+		margin = { 0 26 }
+		margin_right = 13
+		
+		widget = {
+			size = { 100% 100% }
+			
+			vbox = {
+				using = Window_Margins
+				
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+				
+				vbox = {
+					layoutpolicy_horizontal = expanding
+					spacing = 6
+					
+					header_pattern = {
+						layoutpolicy_horizontal = expanding
+						
+						blockoverride "header_text"
+						{
+							text = "[Situation.GetNameNoTooltip]"
+						}
+						
+						blockoverride "button_back"
+						{
+							onclick = "[OpenGameView( 'situations' )]"
+						}
+						
+						blockoverride "button_close"
+						{
+							onclick = "[SituationWindow.Close]"
+						}
+					}
+				}
+				
+				hbox = {
+					layoutpolicy_horizontal = expanding
+					
+					margin = { 5 5 }
+					
+					background = {
+						using = Background_Area_Dark
+					}
+					
+					### SUB_REGION CARDS ###
+					datamodel = [Situation.GetSubRegions]
+					
+					item = {
+						BP_vbox_senateregion_tab = {}
+					}
+				}
+				
+				
+				vbox = {
+					name = "current_sub_region"
+					margin_top = 2
+					layoutpolicy_horizontal = expanding
+					
+					datacontext = "[SituationWindow.GetSelectedSubRegion]"
+					datacontext = "[SituationSubRegion.GetCurrentPhase]"
+					
+					visible = "[SituationSubRegion.IsValid]"
+					
+					
+					
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						margin = { 15 15 }
+						
+						background = {
+							using = Background_Area_Dark
+						}
+						
+						background = {
+							using = GenericObjectCardHeaderBackground
+							using = Color_Purple
+						}
+						
+						text_single = {
+							text = "senators_header"
+							align = nobaseline
+							default_format = "#high"
+							using = Font_Size_Medium
+						}
+						
+						expand = {}
+					}
+					vbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						
+						min_height = 75
+						
+						margin = { 15 15 }
+						
+						datacontext = "[SituationSubRegion.GetCharacterParticipantGroup( GetPlayer )]"
+						
+						background = {
+							using = Background_Area
+						}						
+						hbox = {
+							layoutpolicy_horizontal = expanding
+							background = {
+								texture = "gfx/interface/illustrations/event_story/senate_background.dds"
+								fittype = centercrop
+								using = Mask_Rough_Edges
+								alpha = 0.7
+								margin_top = 12
+								margin_bottom = -35
+								margin_left = 12
+								#TODO: Hide background when disestablished
+							}
+							#Consul
+							BP_hbox_consul = {}
+							BP_hbox_consul_nominee = {}
+							
+						}
+						hbox = {
+							layoutpolicy_horizontal = expanding
+							min_height = 42
+							text_single = {
+								visible = "[Not( SituationParticipantGroup.IsValid )]"
+								layoutpolicy_horizontal = expanding
+								
+								text = "SITUATION_WINDOW_NO_REGION_PARTICIPANT_GROUP"
+								default_format = "#low"
+								align = nobaseline
+							}
+							
+							icon = {
+								visible = "[SituationParticipantGroup.IsValid]"
+								
+								size = { 40 40 }
+								texture = "[SituationParticipantGroup.GetType.GetIcon]"
+								
+								background = {
+									texture = "gfx/interface/buttons/button_lifestyles_base.dds"
+									margin = { 5 5 }
+								}
+							}
+							
+							vbox = {
+								visible = "[SituationParticipantGroup.IsValid]"
+								
+								margin_left = 10
+								text_single = {
+									layoutpolicy_horizontal = expanding
+									text = "[SituationParticipantGroup.GetName]"
+									align = nobaseline
+								}
+								
+								text_single = {
+									layoutpolicy_horizontal = expanding
+									
+									text = "[SelectLocalization( Situation.HasMultipleSubRegions, 'SITUATION_WINDOW_YOUR_PARTICIPANT_GROUP_MULTI_SUBREGION', 'SITUATION_WINDOW_YOUR_PARTICIPANT_GROUP' ) ]"
+									
+									align = nobaseline
+									default_format = "#Weak"
+								}
+							}
+							
+							expand = {}
+							
+							button_standard_small = {
+								onclick = "[SituationWindow.AccessParticipantCharacterList.Toggle]"
+								text = "SITUATION_WINDOW_VIEW_PARTICIPANT_GROUPS"
+							}
+						}
+					}
+					
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						margin = { 15 15 }
+						
+						background = {
+							using = Background_Area_Dark
+						}
+						
+						background = {
+							using = GenericObjectCardHeaderBackground
+							using = Color_Purple
+						}
+						
+						text_single = {
+							text = "senate_phase_header"
+							align = nobaseline
+							default_format = "#high"
+							using = Font_Size_Medium
+						}
+						
+						expand = {}
+					}
+					
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						
+						background = {
+							using = Background_Area
+						}
+						vbox = {
+							width = 120
+							
+							margin = { 15 15 }
+							hbox = {
+								margin_top = -15
+								layoutpolicy_horizontal = expanding
+								spacing = 10
+								
+								text_label_center = {
+									min_width = 90
+									text = "SITUATION_WINDOW_CURRENT_HEADER"
+								}
+								
+								text_label_center = {
+									min_width = 90
+									visible = "[Not( SituationWindow.GetSelectedFuturePhaseType.IsValid )]"
+									
+									text = "SITUATION_WINDOW_FUTURE_HEADER"
+								}
+								
+								text_label_center = {
+									min_width = 90
+									visible = "[SituationWindow.GetSelectedFuturePhaseType.IsValid]"
+									
+									text = "SITUATION_WINDOW_SELECTED_HEADER"
+								}
+							}
+							
+							### LOCATION CURRENT PHASE & END ###
+							hbox = {
+								margin_top = 5
+								layoutpolicy_horizontal = expanding
+								
+								vbox = {
+									layoutpolicy_horizontal = expanding
+									
+									text_single = {
+										layoutpolicy_horizontal = expanding
+										
+										text = "SITUATION_CURRENT_PHASE_NAME"
+										align = nobaseline
+									}
+								}
+								
+								vbox = {
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = expanding
+									
+									datacontext = "[SituationWindow.GetSelectedOrLeadingFuturePhaseType]"
+									
+									text_single = {
+										layoutpolicy_horizontal = expanding
+										
+										text = "[SituationPhaseType.GetName]"
+										align = nobaseline|right
+									}
+									
+								}
+							}
+							### CURRENT PHASE PROGRESS BAR ###
+							vbox  = {
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
+								margin_top = 15
+								
+								widget = {
+									allow_outside = yes
+									layoutpolicy_horizontal = expanding
+									size = { 225 40 }
+									
+									
+									widget = {
+										datacontext = "[SituationWindow.GetPhaseProgressComplexBar( SituationSubRegion.Self )]"
+										parentanchor = left|vcenter
+										position = { 17 0 }
+										size = { 200 16 }
+										
+										icon = {
+											parentanchor = center
+											size = { 200 26 }
+											texture = "gfx/interface/window_scheme/scheme_success_progressbar_bg.dds"
+										}
+										
+										hbox_complex_bar_progress_next = {
+											blockoverride "texture_decrease" {
+												texture = "gfx/interface/progressbars/progress_standard.dds"
+											}
+											
+											blockoverride "texture_filled" {
+												texture = "gfx/interface/progressbars/progress_grandeur_increase.dds"
+											}
+										}
+										
+										hbox_complex_bar_levels = {
+											layoutpolicy_horizontal = expanding
+											
+											blockoverride "marker" {
+												widget_level_marker = {
+													allow_outside = yes
+													
+													visible = "[Or( NotEqualTo_int32( ComplexBarItem.GetIndex, '(int32)1' ), NotEqualTo_CFixedPoint( ComplexBarItem.GetValue, '(CFixedPoint)0' ) )]"
+													
+													icon = {
+														name = "current_phase_icon"
+														visible = "[EqualTo_int32( ComplexBarItem.GetIndex, '(int32)0' )]"
+														size = { 40 40 }
+														texture = "[SituationSubRegion.GetCurrentPhase.GetType.GetIcon]"
+														parentanchor = center
+													}
+													
+													blockoverride "visible_active" {
+														visible = "[NotEqualTo_int32( ComplexBarItem.GetIndex, '(int32)1' )]"
+													}
+													
+													blockoverride "highlight_addon" {
+														visible = "[EqualTo_int32( ComplexBarItem.GetIndex, '(int32)0' )]"
+													}
+													
+													icon = {
+														name = "selected_or_leading_phase_icon"
+														visible = "[EqualTo_int32( ComplexBarItem.GetIndex, '(int32)2' )]"
+														size = { 40 40 }
+														texture = "[SituationWindow.GetSelectedOrLeadingFuturePhaseType.GetIcon]"
+														parentanchor = center
+													}
+													
+													
+													text_single = {
+														parentanchor = center
+														visible = "[EqualTo_int32( ComplexBarItem.GetIndex, '(int32)1' )]"
+														
+														text = "[ComplexBarItem.GetValue|0%/]"
+														tooltip = "[SchemeItem.GetProgressLevelTooltips( PdxGuiWidget.GetIndexInDataModel )]"
+														align = nobaseline
+													}
+												}
+											}
+										}
+									}
+								}
+								
+								expand = {}
+							}
+							
+							### LOCATION EFFECTS & PREDICITON ###
+							text_single = {
+								margin_top = 10
+								layoutpolicy_horizontal = expanding
+								
+								text = "SITUATION_WINDOW_PHASE_EFFECTS"
+								align = nobaseline
+							}
+							
+							hbox = {
+								layoutpolicy_horizontal = expanding
+								
+								fixedgridbox = {
+									name = "named_effect_sets"
+									layoutpolicy_horizontal = expanding
+									
+									addcolumn = 48
+									addrow = 48
+									setitemsizefromcell = yes
+									datamodel_wrap = 6
+									maxhorizontalslots = 6
+									maxverticalslots = 2
+									flipdirection = yes
+									layoutanchor = topleft
+									
+									datamodel = "[SituationSubRegion.GetCurrentPhase.GetType.GetModifierNamedSets]"
+									item = {
+										button_phase_named_set_item = {}
+									}
+								}
+								
+								expand = {}
+								
+								fixedgridbox = {
+									name = "leading_named_effect_sets"
+									
+									addcolumn = 48
+									addrow = 48
+									setitemsizefromcell = yes
+									datamodel_wrap = 6
+									maxhorizontalslots = 6
+									maxverticalslots = 1
+									flipdirection = yes
+									layoutanchor = topleft
+									
+									datamodel = "[SituationWindow.GetSelectedOrLeadingFuturePhaseType.GetModifierNamedSets]"
+									item = {
+										button_phase_named_set_item = {
+											enabled = yes
+										}
+									}
+								}
+							}
+						}
+						
+						### POSSIBLE NEXT PHASES ###
+						#TODO: Use this column for senators to choose to approve or reject
+						vbox = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+							
+							margin = { 10 10 }
+							
+							background = {
+								using = Background_Area
+							}
+							
+							vbox = {
+								name = "current_phase_widget"
+								datacontext = "[SituationSubRegion.GetCurrentPhase]"
+								datacontext = "[GetPlayer]"
+								layoutpolicy_horizontal = expanding
+								
+								vbox = {
+									layoutpolicy_horizontal = expanding
+									
+									vbox = {
+										layoutpolicy_horizontal = expanding
+										datamodel = "[SituationPhase.GetFuturePhases]"
+										
+										item = {
+											button_standard_small = {
+												layoutpolicy_horizontal = expanding
+												size = { 45 45 }
+												
+												down = "[ObjectsEqual( SituationWindow.GetSelectedFuturePhaseType().Self, FutureSituationPhase.GetType.Self )]"
+												onclick = "[SituationWindow.ToggleSelectedFuturePhaseType( FutureSituationPhase.GetType.Self )]"
+												tooltip = "senate_preview_phase_tooltip"
+												
+												hbox = {
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													
+													icon = {
+														size = { 30 30 }
+														texture = "[FutureSituationPhase.GetType.GetIcon]"
+														background = {
+															texture = "gfx/interface/window_regency/regency_level_bg.dds"
+															margin = { 5 5 }
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						
+						vbox = {
+							width = 120
+							
+							margin_right = 15
+							margin_left = 10
+							margin_top = 10
+							margin_bottom = -9
+							
+							vbox = {
+								layoutpolicy_horizontal = expanding
+								background = {
+									texture = "gfx/interface/illustrations/event_story/ep3_roman_restoration.dds"
+									fittype = centercrop
+									using = Mask_Rough_Edges
+									alpha = 0.3
+									margin_top = 12
+									margin_bottom = -35
+									margin_left = 12
+									margin_right = 12
+								}
+								#Rome holder
+								BP_hbox_city_holder = {
+									
+									allow_outside = yes
+								}
+								
+							}
+						}
+					}
+					
+				}
+				
+				#TODO: No catalysts exist yet
+				vbox = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					
+					datacontext = "[SituationWindow.GetSelectedOrLeadingFuturePhaseType]"
+					
+					visible = "[Not( IsDataModelEmpty( SituationWindow.GetCatalystsForSelectedPhase ) )]"
+					
+					vbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						
+						margin = { 15 15 }
+						margin_top = 10
+						
+						background = {
+							using = Background_Area
+						}
+						
+						vbox = {
+							name = "catalyst_information_area"
+							
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+							
+							text_label_center = {
+								layoutpolicy_horizontal = expanding
+								text = "SITUATION_WINDOW_FUTURE_CATALYSTS_HEADER"
+							}
+							
+							scrollbox = {
+								layoutpolicy_vertical = expanding
+								layoutpolicy_horizontal = expanding
+								
+								blockoverride "scrollbox_background" {}
+								blockoverride "scrollbox_background_fade" {}
+								blockoverride "scrollbox_margins" {}
+								
+								blockoverride "scrollbox_content"
+								{
+									vbox = {
+										name = "catalyst_entries"
+										datamodel = "[SituationWindow.GetCatalystsForSelectedPhase]"
+										
+										datacontext = "[SituationWindow.GetSelectedSubRegion.GetCurrentPhase]"
+										
+										layoutpolicy_vertical = expanding
+										layoutpolicy_horizontal = expanding
+										
+										maximumsize = { 1000 50 }
+										
+										item = {
+											hbox = {
+												layoutpolicy_vertical = expanding
+												layoutpolicy_horizontal = expanding
+												
+												hbox = {
+													layoutpolicy_vertical = expanding
+													
+													background = {
+														using = Background_Area_Dark
+														using = Color_Green
+														alpha = 0.1
+														margin_left = 4
+														margin_right = 6
+														
+													}
+													
+													background = {
+														using = Background_Frame
+														using = Color_Green
+														alpha = 0.3
+														margin_left = 4
+														margin_right = 6
+														
+													}
+													
+													hbox = {
+														layoutpolicy_horizontal = expanding
+														icon = {
+															size = { 25 25 }
+															texture = "[SituationWindow.GetSelectedOrLeadingFuturePhaseType.GetIcon]"
+														}
+														text_single = {
+															text = "[SituationCatalystEntry.GetPoints|+=]"
+															align = nobaseline
+														}
+													}
+												}
+												
+												text_multi = {
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = expanding
+													text = "[SituationCatalystEntry.GetCatalystDescription]"
+													autoresize = no
+													align = left|nobaseline
+													max_width = 400
+													margin = { 10 5 }
+												}
+												
+												background = {
+													using = Background_Area_Dark
+												}
+												
+												hbox = {
+													layoutpolicy_vertical = expanding
+													min_width = 70
+													
+													background = {
+														visible = "[GreaterThan_int32( SituationPhase.GetNumCompletionsOfCatalystForPhase( SituationWindow.GetSelectedOrLeadingFuturePhaseType, SituationCatalystEntry.GetCatalyst ), '(int32)0' )]"
+														using = Background_Frame
+														color = { 0.4 0.603 0.298 1 }
+														alpha = 0.6
+													}
+													
+													background = {
+														visible = "[GreaterThan_int32( SituationPhase.GetNumCompletionsOfCatalystForPhase( SituationWindow.GetSelectedOrLeadingFuturePhaseType, SituationCatalystEntry.GetCatalyst ), '(int32)0' )]"
+														using = Background_Area
+														color = { 0.4 0.603 0.298 1 }
+														alpha = 0.1
+													}
+													
+													background = {
+														visible = "[EqualTo_int32( SituationPhase.GetNumCompletionsOfCatalystForPhase( SituationWindow.GetSelectedOrLeadingFuturePhaseType, SituationCatalystEntry.GetCatalyst ), '(int32)0' )]"
+														using = Background_Frame
+														using = Color_Grey
+														alpha = 0.4
+													}
+													
+													background = {
+														visible = "[EqualTo_int32( SituationPhase.GetNumCompletionsOfCatalystForPhase( SituationWindow.GetSelectedFuturePhaseType, SituationCatalystEntry.GetCatalyst ), '(int32)0' )]"
+														using = Background_Area
+														using = Color_Grey
+														alpha = 0.1
+													}
+													
+													text_single = {
+														min_width = 70
+														layoutpolicy_vertical = expanding
+														
+														align = nobaseline|center
+														raw_text = "[Select_CString(GreaterThan_int32( SituationPhase.GetNumCompletionsOfCatalystForPhase( SituationWindow.GetSelectedOrLeadingFuturePhaseType, SituationCatalystEntry.GetCatalyst ), '(int32)0'), '#COLOR_GREEN ', '#COLOR_GRAY ')]x[SituationPhase.GetNumCompletionsOfCatalystForPhase(SituationWindow.GetSelectedOrLeadingFuturePhaseType, SituationCatalystEntry.GetCatalyst)]#!"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						
+
+					}
+					
+					
+				}
+				
+				text_label_center = {
+					layoutpolicy_horizontal = expanding
+					text = "senate_decision_header"
+				}
+				
+				vbox = {
+					visible = "[ObjectsEqual( Situation.GetSubRegionByKey('west').Self, SituationWindow.GetSelectedSubRegion.Self )]"
+					hbox = {
+						hbox = {
+							margin = { 3 5 }
+							button_decision_entry = {
+								size = { 250 30 }
+								datacontext = "[GetDecisionWithKey( 'demand_land_for_family_west' )]"
+
+								onclick = "[OpenGameViewData( 'decision_detail', Decision.Self)]"
+
+								using = tooltip_se
+							}
+						}
+						hbox = {
+							margin = { 3 5 }
+							button_decision_entry = {
+								size = { 250 30 }
+								datacontext = "[GetDecisionWithKey( 'disestablish_west_senate' )]"
+
+								onclick = "[OpenGameViewData( 'decision_detail', Decision.Self)]"
+
+								using = tooltip_se
+							}
+						}
+					}
+					button_decision_entry = {
+						size = { 360 30 }
+						datacontext = "[GetDecisionWithKey( 'request_west_senate_recognition' )]"
+
+						onclick = "[OpenGameViewData( 'decision_detail', Decision.Self)]"
+
+						using = tooltip_se
+					}
+				}
+				
+				vbox = {
+					visible = "[ObjectsEqual( Situation.GetSubRegionByKey('east').Self, SituationWindow.GetSelectedSubRegion.Self )]"
+					hbox = {
+						hbox = {
+							margin = { 3 5 }
+							button_decision_entry = {
+								size = { 250 30 }
+								datacontext = "[GetDecisionWithKey( 'demand_land_for_family_east' )]"
+
+								onclick = "[OpenGameViewData( 'decision_detail', Decision.Self)]"
+
+								using = tooltip_se
+							}
+						}
+						hbox = {
+							margin = { 3 5 }
+							button_decision_entry = {
+								size = { 250 30 }
+								datacontext = "[GetDecisionWithKey( 'disestablish_east_senate' )]"
+
+								onclick = "[OpenGameViewData( 'decision_detail', Decision.Self)]"
+
+								using = tooltip_se
+							}
+						}
+					}
+					button_decision_entry = {
+						size = { 360 30 }
+						datacontext = "[GetDecisionWithKey( 'request_east_senate_recognition' )]"
+
+						onclick = "[OpenGameViewData( 'decision_detail', Decision.Self)]"
+
+						using = tooltip_se
+					}
+				}
+				
+				expand = {}
+			}
+		}
+	}
+	
+	window_situation_participant_groups = {
+		datacontext = "[SituationWindow.AccessParticipantCharacterList]"
+		datacontext = "[SituationParticipantCharacterList.AccessCharacterList]"
+		visible = "[SituationParticipantCharacterList.IsVisible]"
+		
+		datacontext = "[SituationWindow.GetSelectedSubRegion]"
+		blockoverride "header_text"
+		{
+			text = "[SituationWindow.GetParticipationWindowHeader]"
+		}
+	}
+}
+
+types BPSenateSituationTypes
+{
+	type BP_vbox_senateregion_tab = vbox {
+		datacontext = "[SituationSubRegion.GetCharacterParticipantGroup( GetPlayer )]"
+		#TODO: Default to the subregion you are in
+		layoutpolicy_horizontal = expanding
+		
+		spacer = {
+			visible = "[ObjectsEqual( SituationWindow.GetSelectedSubRegion.Self, SituationSubRegion.Self )]"
+			size = { 90 0 }
+			
+			state = {
+				name = _show
+				size = { 90 0 }
+				duration = 0.3
+			}
+			
+			state = {
+				name = _hide
+				size = { 0 0 }
+				duration = 0.3
+			}
+		}
+		
+		### Note: To change height just replace all 228 below
+		button = {
+			layoutpolicy_horizontal = expanding
+			size = { 0 220 }
+			onclick = "[PdxGuiTriggerAllAnimations( 'subregion_refresh' )]"
+			scissor = yes
+			
+			
+			highlight_icon = {
+				size = { 248 228 }
+				parentanchor = center
+				coat_of_arms_icon = {
+					parentanchor = center
+					position = { 0 52 }
+					visible = "[ObjectsEqual( Situation.GetSubRegionByKey('west').Self, SituationSubRegion.Self )]"
+					size = { 340 340 }
+					datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege.GetPrimaryTitle]"
+					coat_of_arms = "[Title.GetTitleCoA.GetTexture('(int32)256','(int32)256')]"
+					coat_of_arms_slot = "[Title.GetTitleCoA.GetSlot('(int32)256','(int32)256')]"
+					coat_of_arms_mask = "gfx/interface/frontend/mask_coa_flag.dds"
+				}
+				coat_of_arms_icon = {
+					parentanchor = center
+					position = { 0 52 }
+					visible = "[ObjectsEqual( Situation.GetSubRegionByKey('east').Self, SituationSubRegion.Self )]"
+					size = { 340 340 }
+					datacontext = "[GetTitleByKey('c_byzantion').GetHolder.GetTopLiege.GetPrimaryTitle]"
+					coat_of_arms = "[Title.GetTitleCoA.GetTexture('(int32)256','(int32)256')]"
+					coat_of_arms_slot = "[Title.GetTitleCoA.GetSlot('(int32)256','(int32)256')]"
+					coat_of_arms_mask = "gfx/interface/frontend/mask_coa_flag.dds"
+				}
+				
+				modify_texture = {
+					texture = "gfx/interface/component_masks/mask_rough_edges.dds"
+					blend_mode = alphamultiply
+					alpha = 0.9
+				}
+			}
+			
+			state = {
+				name = _mouse_click
+				on_finish = "[SituationWindow.SetSelectedSubRegion( SituationSubRegion.Self )]"
+			}
+			
+			highlight_icon = {
+				visible = "[Not(ObjectsEqual( SituationWindow.GetSelectedSubRegion.Self, SituationSubRegion.Self ))]"
+				parentanchor = center
+				size = { 400 228 }
+				texture = "gfx/interface/component_masks/event_effect_mask.dds"
+				using = Background_Area_Dark
+				alpha = 1
+				tintcolor = { 0 0 0 1 }
+			}
+			
+			### FRAYED EDGES ###
+			widget = {
+				parentanchor = left
+				size = { 6 228 }
+				
+				background = {
+					using = Background_Area_Solid
+					spriteType = Corneredtiled
+					spriteborder = { 20 20 }
+					spriteborder_right = 11
+					margin = { 0 20 }
+					margin_left = 10
+				}
+			}
+			
+			widget = {
+				parentanchor = right
+				size = { 6 228 }
+				
+				background = {
+					using = Background_Area_Solid
+					mirror = horizontal
+					spriteType = Corneredtiled
+					spriteborder = { 20 20 }
+					spriteborder_right = 11
+					margin = { 0 20 }
+					margin_right = 10
+				}
+			}
+			
+			### Name of SubRegion ###
+			text_label_center = {
+				parentanchor = top|hcenter
+				visible = "[ObjectsEqual( SituationWindow.GetSelectedSubRegion.Self, SituationSubRegion.Self )]"
+				
+				state = {
+					name = _show
+					using = Animation_FadeIn_Standard
+				}
+				
+				state = {
+					name = _hide
+					using = Animation_FadeOut_Standard
+				}
+				using = Font_Size_Medium
+				
+				text = "THE_GREAT_STEPPE_WINDOW_SUB_REGION_NAME"
+			}
+			
+			text_label_center = {
+				visible = "[SituationParticipantGroup.IsValid]"
+				parentanchor = bottom|hcenter
+				position = { 0 -8 }
+				
+				text = "THE_GREAT_STEPPE_WINDOW_SEASON_REGION_HOME"
+				default_format = "#low"
+			}
+			
+			text_label_center = {
+				visible = "[SituationParticipantGroup.IsValid]"
+				parentanchor = bottom|hcenter
+				position = { 0 -8 }
+				
+				text = "THE_GREAT_STEPPE_WINDOW_SEASON_REGION_HOME"
+				default_format = "#high"
+			}
+		}
+	}
+	type BP_hbox_consul = vbox {
+		layoutpolicy_horizontal = expanding
+		
+		BP_senate_widget_character = {
+			datacontext = "[GetGlobalVariable('west_consul').GetCharacter]"
+			visible = "[ObjectsEqual( Situation.GetSubRegionByKey('west').Self, SituationSubRegion.Self )]"
+			
+			blockoverride "portrait_texture"
+			{
+				portrait_texture = "[Character.GetAnimatedPortrait( 'environment_hud', 'camera_torso', 'chancellor', PdxGetWidgetScreenSize( PdxGuiWidget.Self ) )]"
+			}
+			blockoverride "icon_texture"
+			{
+				texture = "gfx/interface/icons/traits/senator_west.dds"
+			}
+			blockoverride "portrait_title"
+			{
+				text = "WESTERN_SENATE_CONSULS"
+				tooltip = "roman_consul_west_desc"
+			}
+		}
+		BP_senate_widget_character = {
+			datacontext = "[GetGlobalVariable('east_consul').GetCharacter]"
+			visible = "[ObjectsEqual( Situation.GetSubRegionByKey('east').Self, SituationSubRegion.Self )]"
+			
+			blockoverride "portrait_texture"
+			{
+				portrait_texture = "[Character.GetAnimatedPortrait( 'environment_hud', 'camera_torso', 'chancellor', PdxGetWidgetScreenSize( PdxGuiWidget.Self ) )]"
+			}
+			blockoverride "icon_texture"
+			{
+				texture = "gfx/interface/icons/traits/senator_east.dds"
+			}
+			blockoverride "portrait_title"
+			{
+				text = "EASTERN_SENATE_CONSULS"
+				tooltip = "roman_consul_east_desc"
+			}
+		}
+	}
+	type BP_hbox_consul_nominee = vbox {
+		layoutpolicy_horizontal = expanding
+		BP_senate_widget_character = {
+			datacontext = "[GetGlobalVariable('west_consul_nominee').GetCharacter]"
+			visible = "[ObjectsEqual( Situation.GetSubRegionByKey('west').Self, SituationSubRegion.Self )]"
+			
+			blockoverride "portrait_texture"
+			{
+				portrait_texture = "[Character.GetAnimatedPortrait( 'environment_hud', 'camera_torso', 'idle', PdxGetWidgetScreenSize( PdxGuiWidget.Self ) )]"
+			}
+			blockoverride "icon_texture"
+			{
+				texture = "gfx/interface/icons/traits/senator_west.dds"
+			}
+			blockoverride "portrait_title"
+			{
+				text = "WESTERN_SENATE_CONSUL_DESIGNATE"
+				tooltip = "WESTERN_SENATE_CONSUL_DESIGNATE_NONE_TOOLTIP"
+			}
+		}
+		BP_senate_widget_character = {
+			datacontext = "[GetGlobalVariable('east_consul_nominee').GetCharacter]"
+			visible = "[ObjectsEqual( Situation.GetSubRegionByKey('east').Self, SituationSubRegion.Self )]"
+			
+			blockoverride "portrait_texture"
+			{
+				portrait_texture = "[Character.GetAnimatedPortrait( 'environment_hud', 'camera_torso', 'idle', PdxGetWidgetScreenSize( PdxGuiWidget.Self ) )]"
+			}
+			blockoverride "icon_texture"
+			{
+				texture = "gfx/interface/icons/traits/senator_east.dds"
+			}
+			blockoverride "portrait_title"
+			{
+				text = "EASTERN_SENATE_CONSUL_DESIGNATE"
+				tooltip = "EASTERN_SENATE_CONSUL_DESIGNATE_NONE_TOOLTIP"
+			}
+		}
+	}
+	
+	type BP_hbox_city_holder = vbox {
+		BP_senate_widget_character = {
+			datacontext = "[GetTitleByKey('c_roma').GetHolder.GetTopLiege]"
+			visible = "[ObjectsEqual( Situation.GetSubRegionByKey('west').Self, SituationSubRegion.Self )]"
+			
+			blockoverride "portrait_texture"
+			{
+				portrait_texture = "[Character.GetAnimatedPortrait( 'environment_hud', 'camera_torso', 'war_over_win', PdxGetWidgetScreenSize( PdxGuiWidget.Self ) )]"
+			}
+			blockoverride "portrait_title"
+			{
+				text = "SENATE_TOP_LIEGE_OF_ROME"
+			}
+		}
+		BP_senate_widget_character = {
+			datacontext = "[GetTitleByKey('c_byzantion').GetHolder.GetTopLiege]"
+			visible = "[ObjectsEqual( Situation.GetSubRegionByKey('east').Self, SituationSubRegion.Self )]"
+			
+			blockoverride "portrait_texture"
+			{
+				portrait_texture = "[Character.GetAnimatedPortrait( 'environment_hud', 'camera_torso', 'war_over_win', PdxGetWidgetScreenSize( PdxGuiWidget.Self ) )]"
+			}
+			blockoverride "portrait_title"
+			{
+				text = "SENATE_TOP_LIEGE_OF_CONSTANINOPLE"
+			}
+		}
+	}
+	
+	type BP_senate_widget_character = widget {
+		size = { 220 210 }
+		
+		tooltipwidget = {
+			container_character_tooltip = {}
+		}
+		
+		blockoverride "portrait_button"
+		{
+			using = tooltip_ne
+		}
+		
+		blockoverride "glow_visible"
+		{
+			visible = no
+		}
+		
+		using = Character_Background
+		
+		portrait_button = {
+			visible = "[Character.IsValid]"
+			parentanchor = hcenter
+			name = portrait
+			position = { 0 -25 }
+			size = { 200 210 }
+			
+			using = portrait_base
+			
+			block "portrait_texture"
+			{
+				portrait_texture = "[Character.GetAnimatedPortrait( 'environment_hud', 'camera_torso', 'idle', PdxGetWidgetScreenSize( PdxGuiWidget.Self ) )]"
+			}
+			background_texture = "gfx/portraits/portrait_transparent.dds"
+			effectname = "NoHighlight"
+			texture = "gfx/portraits/portrait_transparent.dds"
+			mask = "gfx/portraits/portrait_mask_torso.dds"
+		}
+		empty_char = {
+			visible = "[Not(Character.IsValid)]"
+			position = { 55 10 }
+			block "tooltip"
+			{ tooltip = "SENATE_SINE_COLLEGA" }
+		}
+		
+		portrait_status_icons = {
+			parentanchor = bottom|right
+			position = { -5 -60 }
+		}
+		
+		coa_realm_small_crown = {
+			visible = "[Character.HasLandedTitles]"
+			parentanchor = bottom|left
+			position = { -5 -60 }
+		}
+		
+		portrait_opinion = {
+			parentanchor = bottom|hcenter
+			position = { 0 -60 }
+		}
+		
+		widget = {
+			parentanchor = bottom|hcenter
+			size = { 220 70 }
+			
+			vbox = {
+				layoutpolicy_horizontal = expanding
+				parentanchor = center
+				
+				hbox = {
+					layoutpolicy_horizontal = expanding
+					min_height = 52
+					margin = { 5 5 }
+					
+					background = {
+						using = Background_Area_Solid
+						margin = { 10 0 }
+					}
+					
+					background = {
+						using = GenericObjectCardHeaderBackground
+						using = Color_Red
+						margin = { 10 0 }
+					}
+					
+					icon = {
+						size = { 40 40 }
+						block "icon_texture"
+						{
+							texture = "[Character.GetGovernment.GetIcon]"
+						}
+					}
+					
+					### TITLE & NAME ###
+					vbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						
+						margin = { 10 0 }
+						
+						expand = {}
+						
+						text_single = {
+							visible = "[Character.IsValid]"
+							layoutpolicy_horizontal = expanding
+							
+							text = "[Character.GetShortUINameNotMeNoTooltip|U]"
+							align = nobaseline
+							max_width = 150
+						}
+						text_single = {
+							visible = "[Not(Character.IsValid)]"
+							layoutpolicy_horizontal = expanding
+							
+							
+							text = "WESTERN_SENATE_CONSUL_DESIGNATE_NONE_NAME"
+							align = nobaseline
+							max_width = 150
+						}
+						
+						text_single = {
+							layoutpolicy_horizontal = expanding
+							
+							block "portrait_title"
+							{
+								text = "WESTERN_SENATE_CONSULS"
+								tooltip = "roman_consul_west_desc"
+							}
+							align = nobaseline
+							max_width = 150
+						}
+						
+						expand = {}
+					}
+				}
+			}
+		}
+	}
+}

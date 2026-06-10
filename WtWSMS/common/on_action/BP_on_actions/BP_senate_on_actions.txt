@@ -133,14 +133,14 @@ BP_emperors_get_early_senate_hood = {
 				any_sub_realm_barony = { this = title:b_roma }
 				NOT = { has_trait = senator_west }
 			}
-			add_trait = senator_west
+			add_senator_trait_and_participant_effect = { REGION = west }
 		}
 		if = {
 			limit = {
 				any_sub_realm_barony = { this = title:b_constantinople }
 				NOT = { has_trait = senator_east }
 			}
-			add_trait = senator_east
+			add_senator_trait_and_participant_effect = { REGION = east }
 		}
 	}
 }
@@ -150,9 +150,10 @@ BP_emperors_get_early_senate_hood = {
 # scope:title = the title that changes hands
 # scope:new_holder = new holder.
 on_title_lost = {
-	on_actions = { BP_no_longer_above_the_senate }
+	on_actions = { }
 }
 
+# Deprecated - handled by Senate situation
 BP_no_longer_above_the_senate = {
 	trigger = {
 		root = {
@@ -209,19 +210,24 @@ BP_new_top_liege_of_city = {
 	trigger = {
 		scope:title ?= { is_noble_family_title = no }
 		OR = {
-			root = title:b_roma.holder.top_liege
-			root = title:b_constantinople.holder.top_liege
+			AND = {
+				root = title:b_roma.holder.top_liege
+				has_global_variable = west_senate_is_established
+			}
+			AND = {
+				root = title:b_constantinople.holder.top_liege
+				has_global_variable = east_senate_is_established
+			}
 		}
 		NOR = {
-			has_character_modifier = approved_by_the_senate
-			has_character_modifier = rejected_by_the_senate
-			has_character_modifier = ignored_the_senate
-			has_character_modifier = stalled_the_senate
+			has_variable = already_asked_the_senate
+			has_variable = new_top_liege_of_a_city
 		}
-		NOT = { has_variable = new_top_liege_of_a_city }
 	}
 	effect = {
 		set_variable = new_top_liege_of_a_city
+		situation:BP_senate = { add_manual_participant = root }
+		
 		#Prefer the West over the East
 		if = {
 			limit = { root = title:b_roma.holder.top_liege }
@@ -229,7 +235,12 @@ BP_new_top_liege_of_city = {
 				limit = { has_character_modifier = roman_consul_west }
 				save_scope_as = the_consul_west
 			}
-			trigger_event = { id = BP_roman_senate_events.0020 days = { 3 7 } }
+			situation:BP_senate = {
+				situation_sub_region:west = {
+					change_phase = senate_deliberation
+				}
+			}
+			trigger_event = { id = BP_roman_senate_events.0020 days = { 14 30 } }
 		}
 		else_if = {
 			limit = { root = title:b_constantinople.holder.top_liege }
@@ -237,7 +248,12 @@ BP_new_top_liege_of_city = {
 				limit = { has_character_modifier = roman_consul_east }
 				save_scope_as = the_consul_east
 			}
-			trigger_event = { id = BP_roman_senate_events.1020 days = { 3 7 } }
+			situation:BP_senate = {
+				situation_sub_region:east = {
+					change_phase = senate_deliberation
+				}
+			}
+			trigger_event = { id = BP_roman_senate_events.1020 days = { 14 30 } }
 		}
 	}
 }
@@ -340,7 +356,7 @@ add_random_roman_senators = {
 			}
 			random = {
 				chance = 5
-				add_trait = senator_west
+				add_senator_trait_and_participant_effect = { REGION = west }
 			}
 		}
 		#Populate the Western Senate
@@ -360,7 +376,7 @@ add_random_roman_senators = {
 			}
 			random = {
 				chance = 10
-				add_trait = senator_east
+				add_senator_trait_and_participant_effect = { REGION = east }
 			}
 		}
 	}
