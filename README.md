@@ -1,5 +1,5 @@
 # BP
-WtWSMS for CK3 for Vanilla 1.14.*
+WtWSMS for CK3 for Vanilla 1.19.*
 
 Note: Only push error fixes to master/main. All other features should be on their own branch prior to merge.
 
