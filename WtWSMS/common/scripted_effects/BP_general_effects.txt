@@ -24,3 +24,40 @@ add_law_if_not_has_it_effect = {
 		add_realm_law_skip_effects = $LAW$
 	}
 }
+
+# Find wandering characters in your realm, for events involving generic characters that could potentially exist
+find_pool_characters_effect = {
+	#Add the capital province for landless adventurers
+	capital_province = {
+		add_to_temporary_list = pool_provinces
+	}
+	
+	#Set up a list of provinces, one per duchy in the realm, find all relevant pool characters there
+	every_realm_province = {
+		if = {
+			limit = {
+				save_temporary_scope_as = potential_province
+				NOT = {
+					any_in_list = {
+						list = pool_provinces
+						county.duchy = scope:potential_province.county.duchy
+					}
+				}
+			}
+			add_to_temporary_list = pool_provinces
+		}
+	}
+	# Add all available adults
+	every_in_list = {
+		list = pool_provinces
+		save_temporary_scope_as = pool_province
+		
+		every_pool_character = {
+			province = scope:pool_province
+			limit = {
+				is_available_ai_adult = yes
+			}
+			add_to_temporary_list = potential_pool_characters
+		}
+	}
+}
