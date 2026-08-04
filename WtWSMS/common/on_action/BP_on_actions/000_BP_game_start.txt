@@ -1470,7 +1470,7 @@ setup_roman_governments_based_on_dlc = {
 				#Fixup Laws
 				remove_realm_law_if_has_it_effect = { LAW = roman_appointment_succession_law }
 				remove_realm_law_if_has_it_effect = { LAW = roman_acclamation_succession_law }
-				add_law_if_not_has_it_effect = { LAW = roman_dynastic_authority_1 }
+				add_law_if_not_has_it_skip_effects_effect = { LAW = roman_dynastic_authority_1 }
 			}
 			#Sub-Roman Admin
 			every_ruler = {
@@ -1480,7 +1480,7 @@ setup_roman_governments_based_on_dlc = {
 				#Fixup Laws
 				remove_realm_law_if_has_it_effect = { LAW = roman_appointment_succession_law }
 				remove_realm_law_if_has_it_effect = { LAW = roman_acclamation_succession_law }
-				add_law_if_not_has_it_effect = { LAW = roman_dynastic_authority_1 }
+				add_law_if_not_has_it_skip_effects_effect = { LAW = roman_dynastic_authority_1 }
 			}
 			#Federates
 			every_ruler = {
@@ -1489,11 +1489,11 @@ setup_roman_governments_based_on_dlc = {
 				if = {
 					limit = { this.culture = { no_longer_in_tribal_era_trigger = yes } }
 					change_government = high_tribal_government
-					add_law_if_not_has_it_effect = { LAW = high_tribal_organization_0 }
+					add_law_if_not_has_it_skip_effects_effect = { LAW = high_tribal_organization_0 }
 				}
 				else = {
 					change_government = tribal_government
-					add_law_if_not_has_it_effect = { LAW = tribal_authority_0 }
+					add_law_if_not_has_it_skip_effects_effect = { LAW = tribal_authority_0 }
 				}
 				
 				#Fixup Laws
@@ -1515,13 +1515,26 @@ setup_roman_governments_based_on_dlc = {
 				limit = { government_has_flag = government_is_roman_federate }
 				if = {
 					limit = { government_has_flag = government_is_roman_federate }
-					add_law_if_not_has_it_effect = { LAW = roman_federate_appointment_succession_law }
+					add_law_if_not_has_it_skip_effects_effect = { LAW = roman_federate_appointment_succession_law }
 					add_more_knight_courtiers_effect = { EMPLOYER = this }
 				}
 			}
+			#Sub-Roman Admin Duchies and Counts become Sub-Roman Dynastic
 			every_ruler = {
 				limit = {
-					#Only applies to Kings and up...
+					is_independent_ruler = yes
+					primary_title.tier < tier_kingdom
+					government_has_flag = government_is_subroman_administrative
+				}
+				change_government = subroman_dynastic_government
+				every_vassal_or_below = {
+					limit = { government_has_flag = government_is_subroman_administrative }
+					change_government = subroman_dynastic_government
+				}
+			}
+			#(Sub-)Roman Admin requires Kingdoms on up
+			every_ruler = {
+				limit = {
 					is_independent_ruler = yes
 					primary_title.tier >= tier_kingdom
 					OR = {
@@ -1533,42 +1546,20 @@ setup_roman_governments_based_on_dlc = {
 				#Set Up Realm Laws
 				if = {
 					limit = { top_liege = this }
-					add_law_if_not_has_it_effect = { LAW = roman_acclamation_succession_law }
+					add_law_if_not_has_it_skip_effects_effect = { LAW = roman_acclamation_succession_law }
 				}
-				else = { add_law_if_not_has_it_effect = { LAW = roman_appointment_succession_law } }
+				else = { add_law_if_not_has_it_skip_effects_effect = { LAW = roman_appointment_succession_law } }
 				
 				#Setup missing NF titles
-				if = {
-					limit = { this = this.house.house_head }
+				every_vassal_or_below = {
+					limit = {
+						this.primary_title.tier >= tier_county
+						any_held_title = { count > 0 is_titular = no }
+					}
 					if = {
-						limit = { government_has_flag = government_is_roman_administrative }
-						give_noble_family_title = {
-							name = noble_family_name
-							tier = county
-							article = DEFAULT_TITLE_NAME_ARTICLE
-							government = roman_administrative_government
-							save_scope_as = new_title
-						}
-					}
-					else_if = {
-						limit = { government_has_flag = government_is_subroman_administrative }
-						give_noble_family_title = {
-							name = noble_family_name
-							tier = county
-							article = DEFAULT_TITLE_NAME_ARTICLE
-							government = subroman_administrative_government
-							save_scope_as = new_title
-						}
-					}
-					scope:new_title.holder ?= {
-						save_scope_as = noble_family_head
-						scope:new_title = { set_coa = scope:noble_family_head.house }
-					}
-				}
-				else = {
-					this.house.house_head = {
-					if = {
-						limit = { prev = { government_has_flag = government_is_roman_administrative } }
+						limit = { this = this.house.house_head }
+						if = {
+							limit = { government_has_flag = government_is_roman_administrative }
 							give_noble_family_title = {
 								name = noble_family_name
 								tier = county
@@ -1578,7 +1569,7 @@ setup_roman_governments_based_on_dlc = {
 							}
 						}
 						else_if = {
-							limit = { prev = { government_has_flag = government_is_subroman_administrative } }
+							limit = { government_has_flag = government_is_subroman_administrative }
 							give_noble_family_title = {
 								name = noble_family_name
 								tier = county
@@ -1592,9 +1583,37 @@ setup_roman_governments_based_on_dlc = {
 							scope:new_title = { set_coa = scope:noble_family_head.house }
 						}
 					}
+					else = {
+						this.house.house_head = {
+						if = {
+							limit = { prev = { government_has_flag = government_is_roman_administrative } }
+								give_noble_family_title = {
+									name = noble_family_name
+									tier = county
+									article = DEFAULT_TITLE_NAME_ARTICLE
+									government = roman_administrative_government
+									save_scope_as = new_title
+								}
+							}
+							else_if = {
+								limit = { prev = { government_has_flag = government_is_subroman_administrative } }
+								give_noble_family_title = {
+									name = noble_family_name
+									tier = county
+									article = DEFAULT_TITLE_NAME_ARTICLE
+									government = subroman_administrative_government
+									save_scope_as = new_title
+								}
+							}
+							scope:new_title.holder ?= {
+								save_scope_as = noble_family_head
+								scope:new_title = { set_coa = scope:noble_family_head.house }
+							}
+						}
+					}
+					#Move Estate to actual capital location
+					this.domicile ?= { move_domicile = prev.capital_county.title_province }
 				}
-				#Move Estate to actual capital location
-				this.domicile ?= { move_domicile = prev.capital_county.title_province }
 			}
 		}
 		#Roman Offices need the appropriate flags at start
