@@ -1543,6 +1543,40 @@ setup_roman_governments_based_on_dlc = {
 					}
 				}
 				
+				if = {
+					limit = {
+						this.primary_title.tier >= tier_county
+						is_landed = yes
+						any_held_title = { count < 1 is_noble_family_title = yes }
+					}
+					if = {
+						limit = { government_has_flag = government_is_roman_administrative }
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = roman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+					else_if = {
+						limit = { government_has_flag = government_is_subroman_administrative }
+						give_noble_family_title = {
+							name = noble_family_name
+							tier = county
+							article = DEFAULT_TITLE_NAME_ARTICLE
+							government = subroman_administrative_government
+							save_scope_as = new_title
+						}
+					}
+					scope:new_title.holder ?= {
+						save_scope_as = noble_family_head
+						scope:new_title = { set_coa = scope:noble_family_head.house }
+					}
+					#Move Estate to actual capital location
+					this.domicile ?= { move_domicile = prev.capital_county.title_province }
+				}
+				
 				#Set Up Realm Laws
 				if = {
 					limit = { top_liege = this }
@@ -1554,8 +1588,10 @@ setup_roman_governments_based_on_dlc = {
 				every_vassal_or_below = {
 					limit = {
 						this.primary_title.tier >= tier_county
-						any_held_title = { count > 0 is_titular = no }
+						is_landed = yes
+						any_held_title = { count < 1 is_noble_family_title = yes }
 					}
+					save_temporary_scope_as = the_ruler
 					if = {
 						limit = { this = this.house.house_head }
 						if = {
@@ -1583,7 +1619,10 @@ setup_roman_governments_based_on_dlc = {
 							scope:new_title = { set_coa = scope:noble_family_head.house }
 						}
 					}
-					else = {
+					else_if = {
+						limit = {
+							this.house_head = { any_held_title = { count < 1 is_noble_family_title = yes } }
+						}
 						this.house.house_head = {
 						if = {
 							limit = { prev = { government_has_flag = government_is_roman_administrative } }
@@ -1609,10 +1648,24 @@ setup_roman_governments_based_on_dlc = {
 								save_scope_as = noble_family_head
 								scope:new_title = { set_coa = scope:noble_family_head.house }
 							}
+							if = {
+								limit = { scope:new_title.holder = { is_independent_ruler = yes } }
+								create_title_and_vassal_change = {
+									type = swear_fealty
+									save_scope_as = make_vassal
+								}
+								change_liege = {
+									liege = scope:the_ruler.top_liege
+									change = scope:make_vassal
+								}
+								resolve_title_and_vassal_change = scope:make_vassal
+							}
 						}
 					}
 					#Move Estate to actual capital location
-					this.domicile ?= { move_domicile = prev.capital_county.title_province }
+					scope:noble_family_head ?= {
+						this.domicile ?= { move_domicile = scope:the_ruler.capital_county.title_province }
+					}
 				}
 			}
 		}
