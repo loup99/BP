@@ -1,0 +1,40 @@
+﻿##### Changed from Vanilla: Removed the temporary variable overwrite with a permanent one
+migration_settle_down_obedient_vassal_effect = {
+	scope:actor = {
+		ordered_in_list = {
+			variable = obedient_vassals
+			order_by = { 
+				value = 1 
+				domicile ?= {
+					add = herd
+				}
+			}
+			limit = {
+				is_landed = no
+			}
+			save_scope_as = current_vassal
+			add_to_list = settled_vassal
+		}
+		remove_list_variable = {
+			name = obedient_vassals
+			target = scope:current_vassal
+		}
+	}
+	change_title_holder = {
+		holder = scope:current_vassal
+		change = scope:change4
+	}
+	set_variable = {
+		name = migration_previous_culture
+		#years = 5
+		value = culture
+	}
+	set_county_culture = scope:current_vassal.domicile.domicile_culture
+	set_county_faith = scope:current_vassal.domicile.domicile_faith
+	scope:current_vassal = {
+		change_liege = {
+			liege = scope:actor
+			change = scope:change4
+		}
+	}
+}

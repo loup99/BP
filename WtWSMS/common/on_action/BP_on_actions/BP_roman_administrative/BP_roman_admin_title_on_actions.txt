@@ -3,10 +3,10 @@ BP_flip_federate_when_not_below_roman = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
 		has_government = roman_federate_government
-		OR = {
-			root = this.top_liege
-			NOT = { this.top_liege = { government_has_flag = government_is_roman_administrative } }
-			NOT = { this.top_liege = { government_has_flag = government_is_subroman_administrative } }
+		NOR = {
+			is_independent_ruler = yes
+			this.top_liege = { government_has_flag = government_is_roman_administrative }
+			this.top_liege = { government_has_flag = government_is_subroman_administrative }
 		}
 	}
 	effect = {
@@ -78,6 +78,7 @@ BP_subroman_dynastic_under_subroman_admin = {
 		has_government = subroman_dynastic_government
 		is_independent_ruler = no
 		this.liege = { has_government = subroman_administrative_government }
+		government_has_flag = government_is_subroman_administrative_or_dynastic
 	}
 	effect = {
 		flip_subroman_government_types_effect = {
@@ -94,7 +95,6 @@ BP_subroman_under_roman_admin = {
 		is_ruler = yes
 		is_independent_ruler = no
 		this.liege ?= { has_government = roman_administrative_government }
-		government_has_flag = government_is_subroman_administrative_or_dynastic
 	}
 	effect = { change_government_roman_administrative_effect = yes }
 }
@@ -111,7 +111,6 @@ on_title_gain = {
 		BP_got_a_roman_province
 		BP_keep_roman_federate_government
 		BP_flip_federate_when_not_below_roman
-		BP_flip_federate_on_circumstance
 		BP_grants_to_tribals_become_federate
 		#Possibly during execution; the triggers do not overlap, so it *should* be safe
 		BP_convert_sub_roman_dynastic_to_admin
@@ -161,8 +160,12 @@ BP_minister_gets_land = {
 		any_held_title = { is_titular = no }
 	}
 	effect = {
-		fired_roman_minister_position_effect = yes
-		this.top_liege = { fire_councillor = root }
+		if = {
+			limit = { is_councillor = yes }
+			fired_roman_minister_position_effect = yes
+			#Actually fire the char
+			root.top_liege ?= { fire_councillor = root }
+		}
 	}
 }
 BP_got_a_roman_province = {
@@ -190,38 +193,12 @@ BP_keep_roman_federate_government = {
 		}
 	}
 }
-BP_flip_federate_on_circumstance = {
-	trigger = {
-		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
-		has_government = roman_federate_government
-		root = liege
-	}
-	effect = {
-		#If the previous holder was sub-roman government, flip to sub-roman government
-		if = {
-			limit = {
-				OR = {
-					scope:previous_holder ?= { government_has_flag = government_is_subroman_administrative }
-					#Shouldn't happen, but let's be safe!
-					scope:previous_holder ?= { government_has_flag = government_is_roman_administrative }
-				}
-			}
-			change_government_subroman_administrative_effect = yes
-		}
-		#If you're a king-level federate, congrats you're now sub-roman ruling over the federates
-		else_if = {
-			limit = { primary_title.tier >= tier_kingdom }
-			change_government_subroman_administrative_effect = yes
-		}
-		#Otherwise, devolved the government
-		else = { bp_devolve_roman_federate_effect = yes }
-	}
-}
 BP_grants_to_tribals_become_federate = {
 	#Tribals and Migratory cultures become federates
 	trigger = {
 		liege_or_court_owner.top_liege = { government_has_flag = is_a_roman_government }
-		NOT = { root = liege }
+		is_independent_ruler = no
+		NOT = { has_government = roman_federate_government }
 		OR = {
 			scope:transfer_type = flag:granted
 			scope:transfer_type = flag:appointment
@@ -396,24 +373,7 @@ BP_roman_admin_govs_under_nonroman_government_checks = {
 on_title_lost = {
 	events = {}
 	on_actions = {
-		BP_flip_federate_to_admin_when_landless
 		BP_convert_sub_roman_admin_to_dynastic
-	}
-}
-BP_flip_federate_to_admin_when_landless = {
-	trigger = { BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes }
-	effect = {
-		if = {
-			limit = { is_landless_ruler = yes }
-			if = {
-				limit = { root.top_liege = { has_government = roman_administrative_government } }
-				change_government_roman_administrative_effect = yes
-			}
-			else_if = {
-				limit = { root.top_liege = { has_government = subroman_administrative_government } }
-				change_government_subroman_administrative_effect = yes
-			}
-		}
 	}
 }
 
