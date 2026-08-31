@@ -2808,7 +2808,16 @@ character_view_bg = {
 				NOT = { location = involved_activity.activity_location }
 			}
 			location.county ?= title:c_byzantion
-			NOT = { primary_title = title:e_byzantium }
+			NOR = { ##### Changed from Vanilla: Account for hegemonies
+				is_roman_emperor_primary_title_trigger = yes
+				AND = {
+					exists = primary_spouse
+					primary_spouse = {
+						is_roman_emperor_primary_title_trigger = yes
+						default_location.county ?= title:c_byzantion
+					}
+				}
+			}
 			is_imprisoned = no
 		}
 	}
@@ -9345,29 +9354,18 @@ character_view_bg = {
 		reference = "event_scenes/ep3_byzantine_throne_room.dds"
 
 		trigger = {
+			##### Changed from Vanilla: Cares about location rather than heritage
 			OR = {
 				AND = { # Emperor
 					is_roman_emperor_primary_title_trigger = yes
-					culture = {
-						OR = {
-							has_cultural_pillar = heritage_byzantine
-							has_cultural_pillar = heritage_caucasian
-						}
-					}
-					primary_title.tier >= tier_empire
+					default_location.county ?= title:c_byzantion
 				}
 				AND = { # Primary Spouse
 					primary_spouse ?= {
 						is_landed = yes
 						exists = top_liege
 						is_roman_emperor_primary_title_trigger = yes
-						culture = {
-							OR = {
-								has_cultural_pillar = heritage_byzantine
-								has_cultural_pillar = heritage_caucasian
-							}
-						}
-						primary_title.tier >= tier_empire
+						prev.default_location.county ?= title:c_byzantion
 					}
 				}
 				AND = { # Close family in the same location
@@ -9376,13 +9374,7 @@ character_view_bg = {
 						is_landed = yes
 						exists = top_liege
 						is_roman_emperor_primary_title_trigger = yes
-						culture = {
-							OR = {
-								has_cultural_pillar = heritage_byzantine
-								has_cultural_pillar = heritage_caucasian
-							}
-						}
-						primary_title.tier >= tier_empire
+						prev.default_location.county ?= title:c_byzantion
 					}
 				}
 			}
@@ -9393,17 +9385,10 @@ character_view_bg = {
 		reference = "environment_ep3_byzantine_throne_room"
 
 		trigger = {
+			##### Changed from Vanilla
 			OR = {
 				is_roman_emperor_primary_title_trigger = yes
-				AND = {
-					culture = {
-						OR = {
-							has_cultural_pillar = heritage_byzantine
-							has_cultural_pillar = heritage_caucasian
-						}
-					}
-					primary_title.tier >= tier_empire
-				}
+				default_location.county ?= title:c_byzantion
 			}
 			is_character_window_main_character = yes
 		}
@@ -9413,56 +9398,27 @@ character_view_bg = {
 		reference = "environment_ep3_byzantine_throne_room_spouse"
 
 		trigger = {
+			##### Changed from Vanilla
 			OR = {
 				AND = {
 					exists = primary_spouse
 					primary_spouse = {
-						OR = {
-							is_roman_emperor_primary_title_trigger = yes
-							AND = {
-								culture = {
-									OR = {
-										has_cultural_pillar = heritage_byzantine
-										has_cultural_pillar = heritage_caucasian
-									}
-								}
-								primary_title.tier >= tier_empire
-							}
-						}
+						is_roman_emperor_primary_title_trigger = yes
+						default_location.county ?= title:c_byzantion
 					}
 				}
 				AND = {
 					exists = betrothed
 					betrothed = {
-						OR = {
-							is_roman_emperor_primary_title_trigger = yes
-							AND = {
-								culture = {
-									OR = {
-										has_cultural_pillar = heritage_byzantine
-										has_cultural_pillar = heritage_caucasian
-									}
-								}
-								primary_title.tier >= tier_empire
-							}
-						}
+						is_roman_emperor_primary_title_trigger = yes
+						default_location.county ?= title:c_byzantion
 					}
 				}
 				AND = {
 					liege.diarch ?= this
 					liege ?= {
-						OR = {
-							is_roman_emperor_primary_title_trigger = yes
-							AND = {
-								culture = {
-									OR = {
-										has_cultural_pillar = heritage_byzantine
-										has_cultural_pillar = heritage_caucasian
-									}
-								}
-								primary_title.tier >= tier_empire
-							}
-						}
+						is_roman_emperor_primary_title_trigger = yes
+						default_location.county ?= title:c_byzantion
 					}
 				}
 			}
@@ -10633,7 +10589,8 @@ character_view_bg = {
 
 		trigger = {
 			high_tier_throne_room_trigger = { REGION = east_asia }
-			culture = { has_graphical_east_asia_culture_group_trigger = yes }
+			##### Changed from Vanilla: Based on county culture for Tarim
+			capital_county.culture ?= { has_graphical_east_asia_culture_group_trigger = yes }
 		}
 	}
 
@@ -10642,7 +10599,8 @@ character_view_bg = {
 
 		trigger = {
 			high_tier_throne_room_trigger = { REGION = east_asia }
-			culture = { has_graphical_east_asia_culture_group_trigger = yes }
+			##### Changed from Vanilla: Based on county culture
+			capital_county.culture ?= { has_graphical_east_asia_culture_group_trigger = yes }
 		}
 	}
 
@@ -10656,7 +10614,7 @@ character_view_bg = {
 			OR = {
 				east_asian_governor_trigger = yes # Governor
 				primary_spouse ?= { east_asian_governor_trigger = yes } # Spouse
-				any_close_family_member = { byzantine_governor_close_family_trigger = yes } # Close family in the same location
+				any_close_family_member = { east_asian_governor_close_family_trigger = yes } # Close family in the same location ##### Fixed from vanilla
 			}
 		}
 	}
