@@ -3,11 +3,12 @@ BP_flip_federate_when_not_below_roman = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
 		has_government = roman_federate_government
-		NOR = {
-			is_independent_ruler = yes
-			this.top_liege = { government_has_flag = government_is_roman_administrative }
-			this.top_liege = { government_has_flag = government_is_subroman_administrative }
+		trigger_if = {
+			limit = { is_independent_ruler = no }
+			NOT = { this.top_liege = { government_has_flag = government_is_roman_administrative } }
+			NOT = { this.top_liege = { government_has_flag = government_is_subroman_administrative } }
 		}
+		#Else, always true
 	}
 	effect = {
 		#If you're a king-level federate, congrats you're now sub-roman ruling over the federates
@@ -78,7 +79,6 @@ BP_subroman_dynastic_under_subroman_admin = {
 		has_government = subroman_dynastic_government
 		is_independent_ruler = no
 		this.liege = { has_government = subroman_administrative_government }
-		government_has_flag = government_is_subroman_administrative_or_dynastic
 	}
 	effect = {
 		flip_subroman_government_types_effect = {
@@ -94,7 +94,8 @@ BP_subroman_under_roman_admin = {
 		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
 		is_ruler = yes
 		is_independent_ruler = no
-		this.liege ?= { has_government = roman_administrative_government }
+		government_has_flag = government_is_subroman_administrative_or_dynastic
+		this.top_liege ?= { has_government = roman_administrative_government }
 	}
 	effect = { change_government_roman_administrative_effect = yes }
 }
@@ -168,7 +169,7 @@ BP_minister_gets_land = {
 		}
 	}
 }
-BP_got_a_roman_province = {
+BP_got_a_roman_province = { #FIXME?
 	trigger = { BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes }
 	effect = {
 		if = {
@@ -261,7 +262,7 @@ BP_independent_ministry_cleanup = {
 BP_independent_roman_government_checks = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
-		root = liege
+		is_independent_ruler = yes
 	}
 	effect = {
 		if = { #Independent Roman Admin governments must be at least empires, or they become subroman
