@@ -3,9 +3,32 @@
 # scope:founder = The founder of the new culture
 on_culture_created = {
 	on_actions = {
+		bp_setup_necessary_divergence_name_tracking
 		bp_apply_special_hybrid_cases
 		bp_remove_certain_innovations
 		bp_inherit_certain_variables
+	}
+}
+
+bp_setup_necessary_divergence_name_tracking = {
+	#Only divergent cultures have roots; hybrids are their own roots when diverging away from
+	trigger = { is_divergent_culture = yes }
+	effect = {
+		#If a root already exists, track it.
+		if = {
+			limit = { any_parent_culture = { has_variable = root_culture } }
+			random_parent_culture = {
+				limit = { has_variable = root_culture }
+				save_scope_as = the_parent_culture
+			}
+			#Track the root culture
+			set_variable = { name = root_culture value = scope:the_parent_culture.var:root_culture }
+		}
+		#Otherwise, our parent is a root culture
+		else = {
+			random_parent_culture = { save_scope_as = the_parent_culture }
+			set_variable = { name = root_culture value = scope:the_parent_culture }
+		}
 	}
 }
 
