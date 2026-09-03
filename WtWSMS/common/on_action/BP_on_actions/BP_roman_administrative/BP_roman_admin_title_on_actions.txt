@@ -107,8 +107,6 @@ BP_subroman_under_roman_admin = {
 on_title_gain = {
 	events = {}
 	on_actions = {
-		BP_got_a_roman_ministry
-		BP_minister_gets_land
 		BP_got_a_roman_province
 		BP_keep_roman_federate_government
 		BP_flip_federate_when_not_below_roman
@@ -119,57 +117,8 @@ on_title_gain = {
 	}
 }
 
-BP_got_a_roman_ministry = {
-	trigger = {
-		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
-		scope:title.tier = tier_empire
-		scope:title = { has_variable = is_a_roman_ministry_title }
-	}
-	effect = {
-		if = { #If Hegemons get a ministry title, destroy it.
-			limit = { root.primary_title.tier >= tier_hegemony }
-			root = { destroy_title = scope:title }
-		}
-		else = {
-			scope:title.de_jure_liege.holder = { save_scope_as = councillor_liege }
-			scope:title = { save_scope_as = the_ministry_title }
-			switch = {
-				trigger = has_variable
-				is_supreme_roman_military_title = {
-					got_roman_administrative_minister_position_effect = {
-						MINISTER_TITLE = scope:the_ministry_title
-						#MINISTER_POSITION = councillor_marshal_roman
-					}
-				}
-				is_supreme_roman_ministry_title = {
-					got_roman_administrative_minister_position_effect = {
-						MINISTER_TITLE = scope:the_ministry_title
-						#MINISTER_POSITION = councillor_chancellor_roman
-					}
-				}
-			}
-		}
-		#Set Up Roman Premiership if possible
-		this.liege_or_court_owner ?= { establish_premiership_if_necessary_effect = yes }
-	}
-}
-BP_minister_gets_land = {
-	trigger = {
-		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
-		#Have a ministry and am landed
-		any_held_title = { has_variable = is_a_roman_ministry_title }
-		any_held_title = { is_titular = no }
-	}
-	effect = {
-		if = {
-			limit = { is_councillor = yes }
-			fired_roman_minister_position_effect = yes
-			#Actually fire the char
-			root.top_liege ?= { fire_councillor = root }
-		}
-	}
-}
-BP_got_a_roman_province = { #FIXME?
+
+BP_got_a_roman_province = {
 	trigger = { BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes }
 	effect = {
 		if = {
@@ -219,44 +168,12 @@ BP_grants_to_tribals_become_federate = {
 # It is also fired for rulers gaining independence, those can be identified by checking current liege
 on_vassal_change = {
 	on_actions = {
-		BP_independent_ministry_cleanup
 		BP_independent_roman_government_checks
 		BP_flip_federate_when_not_below_roman
 		BP_subroman_dynastic_under_subroman_admin
 		BP_convert_sub_roman_admin_to_dynastic
 		BP_subroman_under_roman_admin
 		BP_roman_admin_govs_under_nonroman_government_checks
-	}
-}
-BP_independent_ministry_cleanup = {
-	trigger = { BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes }
-	effect = {
-		if = { # Destroy independent ministry empire titles
-			limit = {
-				OR = {
-					liege ?= { bp_has_access_to_roman_ministry_trigger = no }
-					this = top_liege
-				}
-				any_held_title = {
-					this.tier = tier_empire
-					OR = {
-						this = { has_variable = is_supreme_roman_military_title }
-						this = { has_variable = is_supreme_roman_ministry_title }
-					}
-				}
-			}
-			#Destroy Ministries
-			every_held_title = {
-				if = {
-					limit = { this = { has_variable = is_supreme_roman_military_title } }
-					root = { destroy_title = prev }
-				}
-				if = {
-					limit = { this = { has_variable = is_supreme_roman_ministry_title } }
-					root = { destroy_title = prev }
-				}
-			}
-		}
 	}
 }
 BP_independent_roman_government_checks = {

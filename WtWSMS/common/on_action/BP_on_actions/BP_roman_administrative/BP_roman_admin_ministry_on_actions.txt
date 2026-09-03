@@ -1,0 +1,236 @@
+﻿# A title is transferred to a new character
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	on_actions = {
+		BP_roman_admin_ministry_set_up_diarchy_if_needed
+		BP_roman_admin_ministry_set_up_council_position
+		BP_roman_admin_ministry_handle_landed_ministers
+	}
+}
+
+BP_roman_admin_ministry_set_up_diarchy_if_needed = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
+		bp_has_access_to_roman_ministry_trigger = yes
+	}
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_diarchy_type = roman_admin_premier }
+				OR = {
+					has_realm_law = roman_chancellor_law
+					has_realm_law = roman_marshal_law
+				}
+			}
+			if = {
+				limit = { has_active_diarchy = yes }
+				end_diarchy = yes
+			}
+			if = {
+				limit = {
+					has_realm_law = roman_chancellor_law
+					exists = root.cp:councillor_chancellor_roman
+				}
+				try_start_diarchy = roman_admin_premier
+				set_diarch = root.cp:councillor_chancellor_roman
+			}
+			if = {
+				limit = {
+					has_realm_law = roman_marshal_law
+					exists = root.cp:councillor_marshal_roman
+				}
+				try_start_diarchy = roman_admin_premier
+				set_diarch = root.cp:councillor_marshal_roman
+			}
+		}
+	}
+}
+
+BP_roman_admin_ministry_set_up_council_position = {
+	trigger = { BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes }
+	effect = {
+		if = {
+			limit = {
+				OR = {
+					scope:title = { bp_title_is_supreme_roman_military_title_trigger = yes }
+					scope:title = { bp_title_is_supreme_roman_ministry_title_trigger = yes }
+				}
+			}
+			root.top_liege = { save_scope_as = the_liege }
+			scope:title = {
+				save_scope_as = the_ministry_title
+				switch = {
+					trigger = has_variable
+					is_supreme_roman_military_title = {
+						this.holder = {
+							got_roman_minister_position_effect = {
+								MINISTER_TITLE = scope:the_ministry_title
+								MINISTER_POSITION = councillor_marshal_roman
+								COUNCILLOR_LIEGE = scope:the_liege
+							}
+						}
+					}
+					is_supreme_roman_ministry_title = {
+						this.holder = {
+							got_roman_minister_position_effect = {
+								MINISTER_TITLE = scope:the_ministry_title
+								MINISTER_POSITION = councillor_chancellor_roman
+								COUNCILLOR_LIEGE = scope:the_liege
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+BP_roman_admin_ministry_handle_landed_ministers = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
+		bp_has_roman_ministry_title_trigger = yes
+		is_landed = yes
+		is_independent_ruler = no
+	}
+	effect = {
+		#If there is an heir to the specific ministry title, give it to the heir;
+		#Otherwise, return all landed titles to the top liege to prevent troop weirdness
+		if = {
+			limit = {
+				any_held_title = {
+					bp_title_is_supreme_roman_military_title_trigger = yes
+					exists = this.current_heir
+				}
+			}
+			add_character_flag = has_military_title
+		}
+		else_if = {
+			limit = {
+				any_held_title = {
+					bp_title_is_supreme_roman_military_title_trigger = yes
+					NOT = { exists = this.current_heir }
+				}
+			}
+			add_character_flag = return_titles_to_liege
+		}
+		if = {
+			limit = {
+				any_held_title = {
+					bp_title_is_supreme_roman_ministry_title_trigger = yes
+					exists = this.current_heir
+				}
+			}
+			add_character_flag = has_ministry_title
+		}
+		else_if = {
+			limit = {
+				any_held_title = {
+					bp_title_is_supreme_roman_ministry_title_trigger = yes
+					NOT = { exists = this.current_heir }
+				}
+			}
+			add_character_flag = return_titles_to_liege
+		}
+		
+		#If return flag tripped, return landed titles
+		if = {
+			limit = { has_character_flag = return_titles_to_liege }
+			create_title_and_vassal_change = {
+				type = granted
+				save_scope_as = change
+			}
+			every_held_title = {
+				limit = { is_titular = no }
+				change_title_holder = {
+					holder = root.top_liege
+					change = scope:change
+				}
+			}
+			resolve_title_and_vassal_change = scope:change
+		}
+		#Otherwise, give to current heir(s)
+		else = {
+			root.top_liege = { save_scope_as = the_liege }
+			if = {
+				limit = { has_character_flag = has_military_title }
+				random_held_title = {
+					limit = { bp_title_is_supreme_roman_military_title_trigger = yes }
+					root.top_liege = { save_scope_as = councillor_liege }
+					save_scope_as = the_title
+					this.current_heir = {
+						got_roman_minister_position_effect = {
+							MINISTER_TITLE = scope:the_title
+							MINISTER_POSITION = councillor_marshal_roman
+							COUNCILLOR_LIEGE = scope:the_liege
+						}
+					}
+				}
+			}
+			if = {
+				limit = { has_character_flag = has_ministry_title }
+				random_held_title = {
+					limit = { bp_title_is_supreme_roman_ministry_title_trigger = yes }
+					save_scope_as = the_title
+					root.top_liege = { save_scope_as = councillor_liege }
+					this.current_heir = { save_scope_as = the_char }
+					scope:the_char = {
+						got_roman_minister_position_effect = {
+							MINISTER_TITLE = scope:the_title
+							MINISTER_POSITION = councillor_chancellor_roman
+							COUNCILLOR_LIEGE = scope:the_liege
+						}
+					}
+				}
+			}
+		}
+		#Garbage Collection
+		if = {
+			limit = { has_character_flag = has_military_title }
+			remove_character_flag = has_military_title
+		}
+		if = {
+			limit = { has_character_flag = has_ministry_title }
+			remove_character_flag = has_ministry_title
+		}
+		if = {
+			limit = { has_character_flag = return_titles_to_liege }
+			remove_character_flag = return_titles_to_liege
+		}
+	}
+}
+
+# A title change makes the character rank up in the landed tiers (eg Duke -> King)
+# root = character ranking up
+# scope:title = old primary title
+on_rank_up = { # Will not fire during history execution or for dying characters
+	on_actions = {}
+}
+
+# A vassal changes their liege
+# root = vassal changing their status
+# scope:old_liege = the previous liege of the vassal
+# It is also fired for rulers gaining independence, those can be identified by checking current liege
+on_vassal_change = {
+	on_actions = {
+		BP_roman_admin_ministry_destroy_independent_ministries
+	}
+}
+
+BP_roman_admin_ministry_destroy_independent_ministries = {
+	trigger = {
+		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
+		OR = {
+			liege ?= { bp_has_access_to_roman_ministry_trigger = no }
+			this = top_liege
+		}
+		bp_has_roman_ministry_title_trigger = yes
+	}
+	effect = {
+		every_held_title = {
+			limit = { bp_title_is_a_roman_ministry_title_trigger = yes }
+			root = { destroy_title = prev }
+		}
+	}
+}
