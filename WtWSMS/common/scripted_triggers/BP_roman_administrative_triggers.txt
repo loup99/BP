@@ -116,7 +116,34 @@ bp_can_become_federate_trigger = { #Root is char under consideration
 		#Either liege_or_court_owner is federate or title size is duchy
 		OR = {
 			liege_or_court_owner = { government_has_flag = government_is_roman_federate }
-			this.primary_title.tier = tier_duchy #Duchy Appointment
+			this.primary_title.tier ?= tier_duchy #Duchy Appointment
+		}
+	}
+	trigger_else = { always = no }
+}
+bp_can_become_federate_grant_trigger = {
+	#Roman Realms...
+	trigger_if = {
+		limit = { exists = liege_or_court_owner }
+		#Under a Roman Government
+		liege_or_court_owner.top_liege = { government_has_flag = is_a_roman_government }
+		#NOT of the liege's culture
+		NOT = { culture = this.liege_or_court_owner.top_liege.culture }
+		#Either tribal or migratory Tribe
+		OR = {
+			culture = { no_longer_in_tribal_era_trigger = no }
+			AND = {
+				culture = { has_cultural_parameter = becomes_roman_federates_in_most_cases }
+				NOT = { dynasty ?= liege_or_court_owner.top_liege.dynasty }
+			}
+		}
+		#Either liege_or_court_owner is federate or title size is duchy
+		OR = {
+			liege_or_court_owner = { government_has_flag = government_is_roman_federate }
+			any_in_list = {
+				list = target_titles
+				this.tier = tier_duchy
+			}
 		}
 	}
 	trigger_else = { always = no }
