@@ -39,7 +39,7 @@ bp_game_start = {
 		block_specific_chars_from_having_families
 		#Other Actions
 		update_development_by_terrain_and_circumstances
-		fix_fictional_tribal_dynasty_names
+		fix_fictional_char_dynasty_names
 		#Things that have to be done last
 		setup_roman_governments_based_on_dlc
 		setup_other_governments_based_on_dlc
@@ -1461,11 +1461,23 @@ give_chavez_to_the_buri = {
 	}
 }
 
-fix_fictional_tribal_dynasty_names = {
+fictional_holder = {
 	effect = {
 		every_ruler = {
-			limit = { has_character_flag = fictional_tribal }
-			remove_character_flag = fictional_tribal
+			limit = {
+				OR = {
+					has_character_flag = fictional_tribal
+					has_character_flag = fictional_holder
+				}
+			}
+			if = {
+				limit = { has_character_flag = fictional_tribal }
+				remove_character_flag = fictional_tribal
+			}
+			if = {
+				limit = { has_character_flag = fictional_holder }
+				remove_character_flag = fictional_holder
+			}
 			this = { pick_a_random_dynasty_name_effect = yes }
 		}
 	}
