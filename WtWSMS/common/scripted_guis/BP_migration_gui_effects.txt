@@ -1,6 +1,6 @@
 ﻿migration_in_range_effect = {
 	effect = {
-		root = { save_temporary_scope_as = the_character }
+		root = { save_temporary_scope_as = the_player }
 		set_global_variable = { name = custom_map_mode_changing value = 1 }
 		set_global_variable = { name = custom_map_mode value = flag:migration_in_range_map }
 		
@@ -9,7 +9,21 @@
 			save_temporary_scope_as = target
 			if = {
 				limit = {
-					scope:the_character ?= { bp_migration_war_distace_tier_logic_gui_trigger = yes }
+					OR = {
+						this.holder = scope:the_player
+						this.holder = { target_is_liege_or_above = scope:the_player }
+					}
+				}
+				every_county_province = { barony = { set_title_color = { 50 249 50 } } }
+			}
+			else_if = {
+				limit = {
+					bp_migration_war_general_distance_logic_gui_trigger = {
+						MIGRATING_CHAR = scope:the_player
+						TITLE = scope:target
+						HIERARCHY_TYPE_CHECK = any_in_de_jure_hierarchy
+						TARGET_OR_RANGE = target
+					}
 				}
 				every_county_province = { barony = { set_title_color = { 50 50 249 } } }
 			}
@@ -27,9 +41,9 @@
 		NOT = { exists = global_var:custom_map_mode_changing }
 		trigger_if = {
 			limit = { exists = root }
-			root = { save_temporary_scope_as = the_character }
+			root = { save_temporary_scope_as = the_player }
 			general_situation_regional_parameter_trigger = {
-				CHARACTER = scope:the_character
+				CHARACTER = scope:the_player
 				PARAMETER = migration_cbs_enabled
 			}
 		}
@@ -42,12 +56,32 @@ migration_in_range_to_be_migrated_effect = {
 		set_global_variable = { name = custom_map_mode value = flag:migration_in_range_map }
 		
 		every_county = {
-			limit = { is_landless_type_title = no }
-			this.holder = { save_temporary_scope_as = the_holder }
-			
+			limit = {
+				is_landless_type_title = no
+			}
+			holder = { save_temporary_scope_as = the_county_holder }
+			save_temporary_scope_as = target
 			if = {
 				limit = {
-					scope:the_holder ?= { bp_migration_war_can_be_targeted_logic_gui_trigger = yes }
+					OR = {
+						this.holder = scope:the_player
+						this.holder = { target_is_liege_or_above = scope:the_player }
+					}
+				}
+				every_county_province = { barony = { set_title_color = { 50 249 50 } } }
+			}
+			else_if = {
+				limit = {
+					OR = {
+						this.holder.top_liege.primary_title.tier >= tier_duchy
+						this.holder.top_liege.primary_title.tier >= tier_kingdom
+					}
+					bp_migration_war_general_distance_logic_gui_trigger = {
+						MIGRATING_CHAR = scope:the_county_holder
+						TITLE = scope:target.holder.top_liege.primary_title
+						HIERARCHY_TYPE_CHECK = any_in_de_facto_hierarchy
+						TARGET_OR_RANGE = range
+					}
 				}
 				every_county_province = { barony = { set_title_color = { 249 50 50 } } }
 			}
