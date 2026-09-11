@@ -60,7 +60,6 @@ migration_in_range_to_be_migrated_effect = {
 			limit = {
 				is_landless_type_title = no
 			}
-			holder = { save_temporary_scope_as = the_county_holder }
 			save_temporary_scope_as = target
 			if = {
 				limit = {
@@ -74,14 +73,24 @@ migration_in_range_to_be_migrated_effect = {
 			else_if = {
 				limit = {
 					OR = {
-						this.holder.top_liege.primary_title.tier >= tier_duchy
-						this.holder.top_liege.primary_title.tier >= tier_kingdom
+						this.holder.primary_title.tier = tier_duchy
+						this.holder.primary_title.tier = tier_kingdom
+						this.holder.top_liege.primary_title.tier = tier_duchy
+						this.holder.top_liege.primary_title.tier = tier_kingdom
 					}
-					bp_migration_war_general_distance_logic_gui_trigger = {
-						MIGRATING_CHAR = scope:the_county_holder
-						TITLE = scope:target.holder.top_liege.primary_title
-						HIERARCHY_TYPE_CHECK = any_in_de_facto_hierarchy
-						TARGET_OR_RANGE = range
+					OR = {
+						bp_migration_war_general_distance_logic_gui_trigger = {
+							MIGRATING_CHAR = scope:target.holder.top_liege
+							TITLE = scope:target.holder.top_liege.primary_title
+							HIERARCHY_TYPE_CHECK = any_in_de_facto_hierarchy
+							TARGET_OR_RANGE = range
+						}
+						bp_migration_war_general_distance_logic_gui_trigger = {
+							MIGRATING_CHAR = scope:target.holder
+							TITLE = scope:target.holder.primary_title
+							HIERARCHY_TYPE_CHECK = any_in_de_facto_hierarchy
+							TARGET_OR_RANGE = range
+						}
 					}
 				}
 				every_county_province = { barony = { set_title_color = { 249 50 50 } } }

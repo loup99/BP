@@ -2,7 +2,7 @@
 holder_or_above_is_migration_target_trigger = {
 	holder = { save_temporary_scope_as = the_holder }
 	OR = {
-		holder = {
+		scope:the_holder = {
 			general_situation_regional_parameter_trigger = {
 				CHARACTER = scope:the_holder
 				PARAMETER = targetable_by_migration_cbs
@@ -22,7 +22,7 @@ holder_or_above_is_migration_target_trigger = {
 holder_or_above_is_migration_range_trigger = {
 	holder = { save_temporary_scope_as = the_holder }
 	OR = {
-		holder = {
+		scope:the_holder = {
 			general_situation_regional_parameter_trigger = {
 				CHARACTER = scope:the_holder
 				PARAMETER = migration_cbs_enabled
@@ -39,37 +39,13 @@ holder_or_above_is_migration_range_trigger = {
 		}
 	}
 }
-character_or_top_liege_migrator_trigger = {
-	OR = {
-		general_situation_regional_parameter_trigger = {
-			CHARACTER = $CHAR$
-			PARAMETER = migration_cbs_enabled
-		}
-		general_situation_regional_parameter_trigger = {
-			CHARACTER = $CHAR$.top_liege
-			PARAMETER = migration_cbs_enabled
-		}
-	}
-}
-character_is_migrator_and_has_fame_level_trigger = {
+character_migrator_and_has_fame_level_trigger = {
 	AND = {
 		general_situation_regional_parameter_trigger = {
 			CHARACTER = $CHAR$
 			PARAMETER = migration_cbs_enabled
 		}
 		$CHAR$.migration_war_effective_fame_level > $VALUE$
-	}
-}
-character_or_top_liege_migrator_and_has_fame_level_trigger = {
-	OR = {
-		character_is_migrator_and_has_fame_level_trigger = {
-			CHAR = $CHAR$
-			VALUE = $VALUE$
-		}
-		character_is_migrator_and_has_fame_level_trigger = {
-			CHAR = $CHAR$.top_liege
-			VALUE = $VALUE$
-		}
 	}
 }
 #Make sure this stays linked well to bp_migration_war_distace_tier_logic_trigger
@@ -80,7 +56,7 @@ bp_migration_war_general_distance_logic_gui_trigger = {
 		# Of this value (i.e., 10k = 100)
 		trigger_if = {
 			limit = {
-				character_or_top_liege_migrator_and_has_fame_level_trigger = {
+				character_migrator_and_has_fame_level_trigger = {
 					CHAR = $MIGRATING_CHAR$
 					VALUE = 4
 				}
@@ -95,7 +71,7 @@ bp_migration_war_general_distance_logic_gui_trigger = {
 		}
 		trigger_if = {
 			limit = {
-				character_or_top_liege_migrator_and_has_fame_level_trigger = {
+				character_migrator_and_has_fame_level_trigger = {
 					CHAR = $MIGRATING_CHAR$
 					VALUE = 3
 				}
@@ -103,14 +79,19 @@ bp_migration_war_general_distance_logic_gui_trigger = {
 			$TITLE$ ?= {
 				$HIERARCHY_TYPE_CHECK$ = {
 					tier = tier_county
-					squared_distance = { target = scope:the_player.capital_county value < 640000 } #800
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = { target = scope:the_county value < 640000 } #800
+						}
+					}
 				}
 				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
 			}
 		}
 		trigger_if = {
 			limit = {
-				character_or_top_liege_migrator_and_has_fame_level_trigger = {
+				character_migrator_and_has_fame_level_trigger = {
 					CHAR = $MIGRATING_CHAR$
 					VALUE = 2
 				}
@@ -118,14 +99,19 @@ bp_migration_war_general_distance_logic_gui_trigger = {
 			$TITLE$ ?= {
 				$HIERARCHY_TYPE_CHECK$ = {
 					tier = tier_county
-					squared_distance = { target = scope:the_player.capital_county value < 160000 } #400
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = { target = scope:the_county value < 160000 } #400
+						}
+					}
 				}
 				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
 			}
 		}
 		trigger_if = {
 			limit = {
-				character_or_top_liege_migrator_and_has_fame_level_trigger = {
+				character_migrator_and_has_fame_level_trigger = {
 					CHAR = $MIGRATING_CHAR$
 					VALUE = 1
 				}
@@ -133,14 +119,19 @@ bp_migration_war_general_distance_logic_gui_trigger = {
 			$TITLE$ ?= {
 				$HIERARCHY_TYPE_CHECK$ = {
 					tier = tier_county
-					squared_distance = { target = scope:the_player.capital_county value < 40000 } #200
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = { target = scope:the_county value < 40000 } #200
+						}
+					}
 				}
 				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
 			}
 		}
 		trigger_if = {
 			limit = {
-				character_or_top_liege_migrator_and_has_fame_level_trigger = {
+				character_migrator_and_has_fame_level_trigger = {
 					CHAR = $MIGRATING_CHAR$
 					VALUE = 0
 				}
@@ -148,7 +139,12 @@ bp_migration_war_general_distance_logic_gui_trigger = {
 			$TITLE$ ?= {
 				$HIERARCHY_TYPE_CHECK$ = {
 					tier = tier_county
-					squared_distance = { target = scope:the_player.capital_county value < 10000 } #100
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = { target = scope:the_county value < 10000 } #100
+						}
+					}
 				}
 				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
 			}
@@ -156,9 +152,9 @@ bp_migration_war_general_distance_logic_gui_trigger = {
 		#Neighboring Kingdom is always valid
 		trigger_if = { #Needed to prevent self-referencing
 			limit = {
-				character_or_top_liege_migrator_and_has_fame_level_trigger = {
+				character_migrator_and_has_fame_level_trigger = {
 					CHAR = $MIGRATING_CHAR$
-					VALUE = 0
+					VALUE = -1
 				}
 			}
 			$TITLE$ ?= {
