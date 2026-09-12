@@ -65,7 +65,6 @@ on_title_gain = {
 		BP_apply_title_laws
 		#Specific other on-actions
 		BP_add_theocratic_traits
-		BP_fall_of_rome
 		BP_hegemonic_collapse
 		BP_check_independent_roman_polities
 		BP_fix_tribal_government_grants
@@ -228,7 +227,6 @@ BP_fix_tribal_government_grants = {
 on_vassal_change = {
 	on_actions = {
 		BP_degrade_roman_government
-		BP_fall_of_rome
 		BP_cleanup_landless_chars_under_non_admin
 	}
 }
@@ -309,7 +307,6 @@ BP_subroman_to_roman = {
 # scope:new_holder = new holder.
 on_title_lost = {
 	on_actions = {
-		BP_fall_of_rome
 		BP_completely_landless_realm
 	}
 }
@@ -332,31 +329,5 @@ BP_completely_landless_realm = {
 			every_vassal_or_below = { every_held_title = { prev = { destroy_title = prev } } }
 		}
 		every_held_title = { prev = { destroy_title = prev } }
-	}
-}
-
-#Fires when Rome falls
-BP_fall_of_rome = {
-	effect = {
-		if = {
-			limit = {
-				#Only shocking the first time...
-				NOT = { has_global_variable = fall_of_rome }
-				#Da Pope shouldn't trigger it ever; Translatio Imperii
-				NOT = { title:c_roma.holder.top_liege = { government_has_flag = government_is_theocracy } }
-				NOR = { #If any of the following is true, we would *not* be checking this
-					title:c_roma.holder.top_liege = { has_primary_title = title:e_wre }
-					title:c_roma.holder.top_liege = { has_primary_title = title:e_byzantium }
-					title:c_roma.holder.top_liege = { has_primary_title = title:h_roman_empire }
-					title:c_roma.holder.top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition }
-				}
-			}
-			#Prevent from firing twice
-			set_global_variable = {
-				name = fall_of_rome
-				value = title:c_roma.holder.top_liege
-			}
-			title:c_roma.holder.top_liege = { trigger_event = bp_narrative_events.0001 }
-		}
 	}
 }
