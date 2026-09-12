@@ -44,6 +44,7 @@ bp_game_start = {
 		setup_roman_governments_based_on_dlc
 		setup_other_governments_based_on_dlc
 		end_situations_that_are_not_valid
+		make_negative_influence_positive
 	}
 }
 
@@ -1760,5 +1761,30 @@ end_situations_that_are_not_valid = {
 	effect = {
 		situation:silk_road_situation ?= { end_situation = yes }
 		situation:dynastic_cycle ?= { end_situation = yes }
+	}
+}
+
+make_negative_influence_positive = {
+	effect = {
+		every_ruler = {
+			limit = {
+				OR = {
+					government_has_flag = government_is_roman_administrative
+					government_has_flag = government_is_subroman_administrative
+				}
+			}
+			if = {
+				limit = { this.influence < 0 }
+				change_influence = {
+					value = this.influence
+					multiply = -1.00
+					add = 50 #At least 50
+					add = {
+						value = 250
+						multiply = this.primary_title.tier
+					}
+				}
+			}
+		}
 	}
 }
