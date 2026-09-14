@@ -217,15 +217,52 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			trigger_event = { on_action = BP_create_federate_commander }
 		}
 		
-		
-		
 		#Step 5: Clean up extraneous claims of unlanded defenders
 		if = {
 			limit = { scope:defender = { is_landed = no } }
 			scope:defender = { every_claim = { prev = { remove_claim = prev } } }
 		}
 		
-		#Step 6: Handle the offices if playing with the DLC
+		#Step 6: If the defender is _still_ landed, that goes to either the duchy holder or Odoacer
+		if = {
+			limit = { scope:defender = { is_landed = yes } }
+			create_title_and_vassal_change = {
+				type = granted
+				save_scope_as = extra_county_delanding
+				add_claim_on_loss = no
+			}
+			scope:defender = {
+				every_held_title = {
+					limit = {
+						is_noble_family_title = no
+						tier = tier_county
+					}
+					add_to_list = counties_to_take_again
+				}
+			}
+			every_in_list = {
+				list = counties_to_take_again
+				if = {
+					limit = {
+						exists = this.duchy.holder
+						NOT = { this.duchy.holder = scope:defender }
+					}
+					change_title_holder = {
+						holder = this.duchy.holder
+						change = scope:extra_county_delanding
+					}
+				}
+				else = {
+					change_title_holder = {
+						holder = scope:attacker
+						change = scope:extra_county_delanding
+					}
+				}
+			}
+			resolve_title_and_vassal_change = scope:extra_county_delanding
+		}
+		
+		#Step 7: Handle the offices if playing with the DLC
 		if = {
 			limit = { BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes }
 			#Setup Italian Magister Officiorum
