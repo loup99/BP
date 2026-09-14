@@ -228,8 +228,33 @@ on_vassal_change = {
 	on_actions = {
 		BP_degrade_roman_government
 		BP_cleanup_landless_chars_under_non_admin
+		BP_completely_landless_realm_vassal_change
 	}
 }
+
+BP_completely_landless_realm_vassal_change = {
+	trigger = {
+		scope:old_liege ?= {
+			is_independent_ruler = yes
+			government_allows = administrative
+			is_landed = no
+			trigger_if = {
+				limit = { any_vassal = { count > 0 } }
+				any_vassal_or_below = { count < 1 is_landed = yes primary_title.tier >= tier_county }
+			}
+		}
+	}
+	effect = {
+		scope:old_liege ?= {
+			if = {
+				limit = { any_vassal = { count > 0 } }
+				every_vassal_or_below = { every_held_title = { prev = { destroy_title = prev } } }
+			}
+			every_held_title = { prev = { destroy_title = prev } }
+		}
+	}
+}
+
 
 BP_degrade_roman_government = {
 	effect = {
