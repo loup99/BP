@@ -615,15 +615,39 @@ BP_roman_decisions.0010 = { #WTWSMS id: imperial_legacy.10
 		animation = personality_honorable
 	}
 	
-	immediate = { add_pressed_claim = title:h_roman_empire }
+	immediate = {
+		add_pressed_claim = title:h_roman_empire
+		# For loc
+		title:h_western_roman_empire = { save_scope_as = other_title }
+		if = {
+			limit = {
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
+			title:h_eastern_roman_empire = { save_scope_as = other_title }
+		}
+	}
 	
 	option = {
 		name = BP_roman_decisions.0010.a
 		custom_tooltip = BP_roman_decisions.0010.a.tooltip
 		show_as_tooltip = { add_pressed_claim = title:h_roman_empire }
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_sole_roman_empire_entry
+				phase = major_roman
+				variables = {
+					char = root
+					title = root.primary_title
+					other_title = scope:other_title
+				}
+			}
+		}
 	}
 }
-#Sole Roman Empire
+#Unite the Roman Empire
 BP_roman_decisions.0011 = { #Cribbed from Vanilla roman_restoration.0001
 	type = character_event
 	title = roman_restoration.0001.t
