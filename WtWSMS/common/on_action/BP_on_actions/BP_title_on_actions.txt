@@ -65,7 +65,6 @@ on_title_gain = {
 		BP_apply_title_laws
 		#Specific other on-actions
 		BP_add_theocratic_traits
-		BP_fall_of_rome
 		BP_hegemonic_collapse
 		BP_check_independent_roman_polities
 		BP_fix_tribal_government_grants
@@ -228,10 +227,34 @@ BP_fix_tribal_government_grants = {
 on_vassal_change = {
 	on_actions = {
 		BP_degrade_roman_government
-		BP_fall_of_rome
 		BP_cleanup_landless_chars_under_non_admin
+		BP_completely_landless_realm_vassal_change
 	}
 }
+
+BP_completely_landless_realm_vassal_change = {
+	trigger = {
+		scope:old_liege ?= {
+			is_independent_ruler = yes
+			government_allows = administrative
+			is_landed = no
+			trigger_if = {
+				limit = { any_vassal = { count > 0 } }
+				any_vassal_or_below = { count < 1 is_landed = yes primary_title.tier >= tier_county }
+			}
+		}
+	}
+	effect = {
+		scope:old_liege ?= {
+			if = {
+				limit = { any_vassal = { count > 0 } }
+				every_vassal_or_below = { every_held_title = { prev = { destroy_title = prev } } }
+			}
+			every_held_title = { prev = { destroy_title = prev } }
+		}
+	}
+}
+
 
 BP_degrade_roman_government = {
 	effect = {
@@ -303,36 +326,53 @@ BP_subroman_to_roman = {
 	}
 }
 
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
 on_title_lost = {
 	on_actions = {
-		BP_fall_of_rome
+		BP_completely_landless_realm
 	}
 }
 
-##### Generic Modifiers
+##### Generic On Actions
 
-#Fires when Rome falls
-BP_fall_of_rome = {
+BP_completely_landless_realm = {
+	trigger = {
+		is_independent_ruler = yes
+		government_allows = administrative
+		is_landed = no
+		trigger_if = {
+			limit = { any_vassal = { count > 0 } }
+			any_vassal_or_below = { count < 1 is_landed = yes primary_title.tier >= tier_county }
+		}
+	}
+	effect = {
+		if = {
+			limit = { any_vassal = { count > 0 } }
+			every_vassal_or_below = { every_held_title = { prev = { destroy_title = prev } } }
+		}
+		every_held_title = { prev = { destroy_title = prev } }
+	}
+}
+
+on_realm_capital_change = {
+	on_actions = { bp_consume_capital_movement_variables }
+}
+
+# Called when realm capital changes. It can be manual move, loss in conquest, move after inheritance,
+# move when granted a better title, becoming landed for the first time
+# root: New realm capital barony
+# scope:old_capital - previous capital barony. Can be empty, can be owned by someone else
+bp_consume_capital_movement_variables = {
 	effect = {
 		if = {
 			limit = {
-				#Only shocking the first time...
-				NOT = { has_global_variable = fall_of_rome }
-				#Da Pope shouldn't trigger it ever; Translatio Imperii
-				NOT = { title:c_roma.holder.top_liege = { government_has_flag = government_is_theocracy } }
-				NOR = { #If any of the following is true, we would *not* be checking this
-					title:c_roma.holder.top_liege = { has_primary_title = title:e_wre }
-					title:c_roma.holder.top_liege = { has_primary_title = title:e_byzantium }
-					title:c_roma.holder.top_liege = { has_primary_title = title:h_roman_empire }
-					title:c_roma.holder.top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition }
-				}
+				holder = { has_variable = migration_can_move_capital }
+				NOT = { holder = { has_variable = block_immediate_variable_removal } }
 			}
-			#Prevent from firing twice
-			set_global_variable = {
-				name = fall_of_rome
-				value = title:c_roma.holder.top_liege
-			}
-			title:c_roma.holder.top_liege = { trigger_event = bp_narrative_events.0001 }
+			holder = { remove_variable = migration_can_move_capital }
 		}
 	}
 }

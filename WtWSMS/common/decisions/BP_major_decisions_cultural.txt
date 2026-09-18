@@ -111,7 +111,10 @@ adopt_bolghar_identity_decision = {
 		OR = {
 			AND = {
 				prestige_level >= 3
-				legitimacy_level >=3
+				trigger_if = {
+					limit = { has_legitimacy = yes }
+					legitimacy_level >=3
+				}
 			}
 			has_trait = legendary_leader
 		}
@@ -150,6 +153,112 @@ adopt_bolghar_identity_decision = {
 		save_scope_as = culture_former
 		show_as_tooltip = { create_bolghar_culture_effect = { THE_CULTURE = root.culture } }
 		hidden_effect = { trigger_event = BP_major_culture_decisions.0002 }
+	}
+	
+	#AI will always do this if possible
+	ai_potential = { always = yes }
+	
+	ai_will_do = {
+		base = 100
+	}
+}
+
+2000th_anniversery_of_gothic_kingdom_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/kubrat_and_his_sons.dds"
+	}
+	decision_group_type = major
+
+	desc = 2000th_anniversery_of_gothic_kingdom_decision_desc
+	selection_tooltip = 2000th_anniversery_of_gothic_kingdom_decision_tooltip
+
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 0
+		kingdom = 0
+		empire = 120
+		hegemony = 60
+	}
+
+	is_shown = {
+		culture = { any_parent_culture_or_above = { this = culture:gothic } }
+		culture = { has_cultural_pillar = heritage_gothic }
+		NOT = { has_global_variable = 2000th_anniversery_of_gothic_kingdom }
+	}
+
+	is_valid = {
+		#Have to be the dynast
+		this = this.dynasty.dynast
+		#Have Oral Law, Social Stratification, and Formalized Rituals
+		culture = { has_innovation = innovation_leges_barbarorum }
+		culture = { has_innovation = innovation_social_stratification }
+		culture = { has_innovation = innovation_formalized_rituals }
+		#Must be an Emperor or Hegemon
+		primary_title.tier >= tier_empire
+		#Have to have an impressive Realm
+		realm_size >= 150
+		OR = {
+			AND = {
+				prestige_level >= 3
+				has_trait = legendary_leader
+			}
+			AND = {
+				prestige_level >= 4
+				trigger_if = {
+					limit = { has_legitimacy = yes }
+					legitimacy_level >= 5
+				}
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		is_at_war = no
+		is_available_adult = yes
+	}
+
+	cost = {
+		prestige = 1000
+		piety = 100
+		
+		treasury = {
+			value = 0
+			if = {
+				limit = { has_treasury = yes }
+				add = {
+					value = 50
+					every_realm_county = { add = 5 }
+				}
+				multiply = {
+					value = 10
+					subtract = this.dynasty_prestige_level
+					max = 5
+				}
+			}
+		}
+		gold = {
+			value = 0
+			if = {
+				limit = { has_treasury = no }
+				add = {
+					value = 50
+					every_realm_county = { add = 5 }
+				}
+				multiply = {
+					value = 10
+					subtract = dynasty_prestige_level
+					max = 5
+				}
+			}
+		}
+	}
+
+	effect = {
+		set_global_variable = 2000th_anniversery_of_gothic_kingdom
+		save_scope_as = the_celebrant
+		show_as_tooltip = { celebrate_2000_year_anniversery_of_goths_effect = yes }
+		hidden_effect = { trigger_event = { id = BP_major_culture_decisions.0100 } }
 	}
 	
 	#AI will always do this if possible

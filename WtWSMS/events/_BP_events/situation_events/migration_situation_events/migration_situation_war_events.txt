@@ -30,7 +30,7 @@ scripted_effect jumpstart_culture_progress_effect = {
 	}
 	$TARGET_CULTURE$ = {
 		if = {
-			limit = { NOT = { has_cultural_era_or_later = culture_era_classical_antiquity } }
+			limit = { no_longer_in_tribal_era_trigger = yes }
 			join_era = culture_era_classical_antiquity
 		}
 	}
@@ -158,6 +158,14 @@ migration_situation_war.0100 = {
 			this.culture = { has_innovation = innovation_social_stratification }
 			this.culture = { has_innovation = innovation_leges_barbarorum }
 		}
+		show_as_unavailable = {
+			has_character_flag = roman_government_bootstrap_available
+			NAND = {
+				this.culture = { has_innovation = innovation_writing }
+				this.culture = { has_innovation = innovation_social_stratification }
+				this.culture = { has_innovation = innovation_leges_barbarorum }
+			}
+		}
 		name = migration_situation_war.0100.adopt_subroman_government
 		
 		convert_to_subroman_government_effect = yes
@@ -173,6 +181,7 @@ migration_situation_war.0100 = {
 					limit = { bp_can_become_federate_trigger = yes }
 					convert_to_roman_federate_government_effect = yes
 				}
+				else = { convert_to_subroman_government_effect = yes }
 			}
 		}
 		#Should propagate down the whole tree
@@ -237,6 +246,25 @@ migration_situation_war.0100 = {
 			custom_tooltip = {
 				text = recieve_just_cash
 				give_cash_effect = yes
+			}
+		}
+		
+		#Remove various blocking variables
+		hidden_effect = {
+			if = {
+				limit = { has_variable = subroman_administrative_aristocracy_law_cooldown }
+				remove_variable = subroman_administrative_aristocracy_law_cooldown
+			}
+			if = {
+				limit = { has_variable = subroman_dynastic_aristocracy_law_cooldown }
+				remove_variable = subroman_dynastic_aristocracy_law_cooldown
+			}
+			if = {
+				limit = {
+					bp_can_have_roman_minority_law_trigger = yes
+					NOT = { has_realm_law = non_roman_minority_rule_law_2 }
+				}
+				add_realm_law_skip_effects = non_roman_minority_rule_law_2
 			}
 		}
 		
@@ -641,16 +669,33 @@ scripted_effect change_original_culture_traditions_effect = {
 	}
 }
 
+#Culture Event dispatch
 migration_situation_war.0200 = {
+	hidden = yes
+	type = character_event
+	theme = culture_change
+	content_source = dlc_WtWSMS
+	
+	immediate = {
+		#We have to have 
+		if = {
+			limit = { NOT = { government_has_flag = government_is_tribal } }
+			trigger_event = { id = migration_situation_war.0201 }
+		}
+		else = { remove_character_flag_if_has_it_effect = { FLAG = was_culture_head } }
+	}
+}
+
+migration_situation_war.0201 = {
 	type = character_event
 	theme = culture_change
 	content_source = dlc_WtWSMS
 	override_background = { reference = throne_room_scope }
 	
 	
-	title = migration_situation_war.0200.t
+	title = migration_situation_war.0201.t
 	
-	desc = migration_situation_war.0200.desc
+	desc = migration_situation_war.0201.desc
 	
 	trigger = {
 		has_dlc_feature = diverge_culture #Safety
@@ -704,7 +749,7 @@ migration_situation_war.0200 = {
 	}
 	
 	option = {
-		name = migration_situation_war.become_migratory_culture
+		name = migration_situation_war.0201.become_migratory_culture
 		
 		#Summarize Changes
 		if = {
@@ -820,7 +865,7 @@ migration_situation_war.0200 = {
 		}
 	}
 	option = {
-		name = migration_situation_war.do_not_become_migratory_culture
+		name = migration_situation_war.0201.do_not_become_migratory_culture
 		
 		add_prestige = 500
 		add_prestige_level = 1

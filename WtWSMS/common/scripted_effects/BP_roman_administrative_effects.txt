@@ -253,7 +253,7 @@ change_government_subroman_administrative_effect = {
 		limit = {
 			this = this.house.house_head
 			OR = {
-				this.primary_title.tier >= tier_duchy #Don't want nf running counties...
+				this.primary_title.tier >= tier_county #Don't want nf running baronies...
 				#Senators are always noble
 				has_trait = senator_west
 				has_trait = senator_east
@@ -279,14 +279,15 @@ change_government_subroman_administrative_effect = {
 			else = { this.domicile = { move_domicile = prev.top_liege.capital_county.title_province } }
 		}
 		hidden_effect = {
-			add_treasury = {
+			add_treasury = { #Give starting treasury
 				value = 100
 				multiply = {
 					value = primary_title.tier
-					subtract = 2
 					min = 1
 				}
 			}
+			# Give admins a modicum of influence to start
+			change_influence = 250
 		}
 	}
 }
@@ -295,7 +296,7 @@ change_government_roman_administrative_effect = {
 	if = {
 		limit = {
 			this = this.house.house_head
-			this.primary_title.tier >= tier_duchy #Don't want nf running counties...
+			this.primary_title.tier >= tier_county #Don't want nf running baronies...
 			any_held_title = { count < 1 is_noble_family_title = yes }
 		}
 		create_noble_family_effect = { GOVERNMENT_GIVER = this }
@@ -304,7 +305,6 @@ change_government_roman_administrative_effect = {
 				value = 100
 				multiply = {
 					value = primary_title.tier
-					subtract = 2
 					min = 1
 				}
 			}
@@ -598,6 +598,17 @@ flip_subroman_government_types_effect = { #Root Char
 		}
 	}
 	if = {
+		limit = { always = $DESTROY_NON_PRIMARY_TITULARS$ }
+		every_held_title = {
+			limit = {
+				NOT = { prev.primary_title = this }
+				is_titular = yes
+				is_noble_family_title = no
+			}
+			this.holder = { destroy_title = prev }
+		}
+	}
+	if = {
 		limit = { always = $TITLE_TROOPS$ }
 		convert_personal_troops_to_title_troops_effect = yes
 	}
@@ -622,6 +633,17 @@ flip_subroman_government_types_effect = { #Root Char
 						TYPE = $TARGET_TYPE$
 					}
 				}
+			}
+		}
+		if = {
+			limit = { always = $DESTROY_NON_PRIMARY_TITULARS$ }
+			every_held_title = {
+				limit = {
+					NOT = { prev.primary_title = this }
+					is_titular = yes
+					is_noble_family_title = no
+				}
+				this.holder = { destroy_title = prev }
 			}
 		}
 	}

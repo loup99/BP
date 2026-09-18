@@ -5,8 +5,11 @@ bp_faith_conversion.0001 = { #Culture head converts from an unreformed to reform
 	#old faith, and there's doctrinal disagreements about marriage
 	trigger = {
 		root = root.culture.culture_head
-		root.culture = { any_culture_county = { percent >= 0.50 this.holder = root } }
-		root.culture = { any_culture_county = { percent >= 0.50 this.faith = scope:old_faith } }
+		trigger_if = {
+			limit = { root.culture = { any_culture_county = { count > 0 } } }
+			root.culture = { any_culture_county = { percent >= 0.50 this.holder = root } }
+			root.culture = { any_culture_county = { percent >= 0.50 this.faith = scope:old_faith } }
+		}
 		scope:old_faith = { has_doctrine_parameter = unreformed }
 		OR = {
 			NAND = {
@@ -145,5 +148,29 @@ bp_faith_conversion.0002 = { #All other rulers of the culture learn of the stick
 	option = { #Blasphemers
 		trigger = { root.faith = scope:old_faith }
 		name = bp_faith_conversion.0002.b
+	}
+}
+
+#TODO: BGA? Replace with proper event injection
+bp_faith_conversion.0011 = { #Cleanup mod religion traits
+	hidden = yes
+
+	immediate = {
+		if = {
+			limit = { faith.religion != religion:judaism_religion }
+			remove_trait = house_of_david
+		}
+		if = {
+			limit = { faith.religion != religion:hinduism_religion }
+			remove_trait = hindu_philosophy_vedanta
+		}
+		if = {
+			limit = { NOT = { faith = { has_doctrine_parameter = utilizes_enarei } } }
+			remove_trait = enarei
+		}
+		if = {
+			limit = { faith != faith:assyrian_pagan }
+			remove_trait = servant_of_assur
+		}
 	}
 }
