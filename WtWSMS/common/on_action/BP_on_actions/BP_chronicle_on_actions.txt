@@ -1,4 +1,8 @@
-﻿on_title_gain = { on_actions = { bp_chronicle_title_gain } }
+﻿# A title is transferred to a new character
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = { on_actions = { bp_chronicle_title_gain } }
 
 bp_chronicle_title_gain = {
 	effect = {
@@ -201,19 +205,23 @@ bp_chronicle_title_gain = {
 	}
 }
 
+# A title is destroyed
+# root = the holder before destruction
+# scope:landed_title = the title that is being destroyed
+# Does *not* provide scope:transfer_type
 on_title_destroyed = { on_actions = { bp_chronicle_title_loss } }
 
 bp_chronicle_title_loss = {
 	effect = {
 		### China
 		if = {
-			limit = { scope:title = title:h_china }
+			limit = { scope:landed_title = title:h_china }
 			situation:BP_chronicle = {
 				record_situation_special_event = {
 					key = situation_chronicle_title_destroyed_china_entry
 					phase = major_title_destroyed
 					variables = {
-						title = scope:title
+						title = scope:landed_title
 						char = root
 					}
 				}
@@ -221,13 +229,13 @@ bp_chronicle_title_loss = {
 		}
 		### Head of faith destroyed
 		else_if = {
-			limit = { scope:title = { is_head_of_faith = yes } }
+			limit = { scope:landed_title = { is_head_of_faith = yes } }
 			situation:BP_chronicle = {
 				record_situation_special_event = {
 					key = situation_chronicle_title_destroyed_entry
 					phase = religion
 					variables = {
-						title = scope:title
+						title = scope:landed_title
 						char = root
 						#faith = root.faith
 					}
@@ -238,12 +246,12 @@ bp_chronicle_title_loss = {
 		else_if = {
 			limit = {
 				is_independent_ruler = yes
-				scope:title.tier >= tier_kingdom
-				scope:title.tier < tier_hegemony
+				scope:landed_title.tier >= tier_kingdom
+				scope:landed_title.tier < tier_hegemony
 				# Must rank down from this
 				NOT = {
 					any_held_title = {
-						tier >= scope:title.tier
+						tier >= scope:landed_title.tier
 					}
 				}
 			}
@@ -252,7 +260,7 @@ bp_chronicle_title_loss = {
 					key = situation_chronicle_title_destroyed_entry
 					phase = title_destroyed
 					variables = {
-						title = scope:title
+						title = scope:landed_title
 						char = root
 					}
 				}
