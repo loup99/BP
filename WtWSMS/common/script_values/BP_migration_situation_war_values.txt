@@ -18,16 +18,41 @@ migration_war_prestige_cost_kingdom = 500
 #Creation of Armies Values
 bp_migration_levies = {
 	value = county.development_level
-	multiply = 100
+	multiply = 250
 	#Sensible max-mins.
-	min = 100
-	max = 1000
+	min = 250
+	max = 1500
 	#Give a whole number.
 	floor = yes
 }
-bp_migration_depopulation = {
+bp_migration_stack_size = {
 	value = county.development_level
-	multiply = -0.33
+	if = {
+		limit = { county.holder.capital_county = county }
+		add = 1
+	}
+	min = 1
+	max = 5
+}
+bp_migration_depopulation_culture = {
+	value = county.development_level
+	multiply = -0.25
+}
+bp_migration_depopulation_faith = {
+	value = 0
+	value = county.development_level
+	multiply = -0.25
+}
+bp_migration_depopulation = {
+	value = 0
+	if = {
+		limit = { scope:the_attacker.culture ?= county.culture }
+		add = bp_migration_depopulation_culture
+	}
+	if = {
+		limit = { scope:the_attacker.faith ?= county.faith }
+		add = bp_migration_depopulation_faith
+	}
 	#Give a whole number.
 	floor = yes
 }
@@ -158,7 +183,10 @@ migration_war_wait_years = 10
 duchy_value_as_capital = {
 	value = 0
 	every_county = {
-		limit = { this.duchy = prev }
+		limit = {
+			this.duchy = prev
+			this.holder.top_liege = scope:attacker
+		}
 		add = {
 			value = this.development_level
 			add = 1 #So duchy size matters

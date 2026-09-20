@@ -673,54 +673,44 @@ scripted_trigger realm_to_rest_of_culture_distance_is_big_trigger = {
 	#Any culture county that is _not_ owned by us is well separated
 	custom_tooltip = {
 		text = your_realm_is_well_separated_from_your_kin
-		any_realm_county = {
-			save_temporary_scope_as = the_realm_county
-			root.culture ?= {
-				any_culture_county = {
-					NOT = { this.holder = root }
-					NOT = { this.holder = { any_liege_or_above = { this = root } } }
-					squared_distance = {
-						target = root.capital_county
-						value > migration_war_well_separated_culture_distance
-					}
+		#No county of your culture that is not in your realm is "too close" to your capital
+		root.culture = {
+			any_culture_county = {
+				count < 1
+				NOT = { this.holder = root }
+				NOT = { this.holder = { any_liege_or_above = { this = root } } }
+				squared_distance = {
+					target = root.capital_county
+					value < migration_war_well_separated_culture_distance
 				}
 			}
 		}
 	}
 }
 
-#Culture Event dispatch
 migration_situation_war.0200 = {
-	hidden = yes
-	type = character_event
-	theme = culture_change
-	content_source = dlc_WtWSMS
-	
-	immediate = {
-		#We have to have a dispatch to handle the various edge cases that block actual firing
-		if = {
-			limit = {
-				OR = {
-					NOT = { government_has_flag = government_is_tribal }
-					realm_to_rest_of_culture_distance_is_big_trigger = yes
-				}
-			}
-			trigger_event = { id = migration_situation_war.0201 }
-		}
-		else = { remove_character_flag_if_has_it_effect = { FLAG = was_culture_head } }
-	}
-}
-
-migration_situation_war.0201 = {
 	type = character_event
 	theme = culture_change
 	content_source = dlc_WtWSMS
 	override_background = { reference = throne_room_scope }
 	
 	
-	title = migration_situation_war.0201.t
+	title = migration_situation_war.0200.t
 	
-	desc = migration_situation_war.0201.desc
+	desc = {
+		desc = migration_situation_war.0200.desc.opening
+		first_valid = {
+			triggered_desc = {
+				trigger = { government_has_flag = is_a_roman_government }
+				desc = migration_situation_war.0200.desc.roman
+			}
+			triggered_desc = {
+				trigger = { government_has_flag = government_is_high_tribal }
+				desc = migration_situation_war.0200.desc.high_tribal_government
+			}
+		}
+		desc = migration_situation_war.0200.desc.closing
+	}
 	
 	trigger = {
 		has_dlc_feature = diverge_culture #Safety
@@ -776,7 +766,7 @@ migration_situation_war.0201 = {
 	option = { #Migratory Culture Variant; only if you have an advanced government of some type
 		trigger = { NOT = { government_has_flag = government_is_tribal } }
 		
-		name = migration_situation_war.0201.become_migratory_culture
+		name = migration_situation_war.0200.become_migratory_culture
 		
 		#Summarize Changes
 		if = {
@@ -900,7 +890,7 @@ migration_situation_war.0201 = {
 			government_has_flag = government_is_tribal
 		}
 		
-		name = migration_situation_war.0201.culture_diverges_anyway
+		name = migration_situation_war.0200.culture_diverges_anyway
 		
 		#Summarize Changes
 		if = {
@@ -1007,13 +997,13 @@ migration_situation_war.0201 = {
 				first_valid = {
 					triggered_desc = {
 						trigger = { realm_to_rest_of_culture_distance_is_big_trigger = yes }
-						desc = migration_situation_war.0201.flavor.too_far_away
+						desc = migration_situation_war.0200.flavor.too_far_away
 					}
 					desc = BLANK
 				}
 		}
 		fallback = yes
-		name = migration_situation_war.0201.do_not_become_migratory_culture
+		name = migration_situation_war.0200.do_not_become_migratory_culture
 		
 		add_prestige = 500
 		add_prestige_level = 1
