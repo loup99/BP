@@ -59,6 +59,14 @@ BP_roman_admin_ministry_set_up_council_position = {
 				}
 			}
 			root.top_liege = { save_scope_as = the_liege }
+			if = {
+				limit = { top_liege = { government_has_flag = government_is_roman_administrative } }
+				change_government_roman_administrative_effect = yes
+			}
+			else_if = {
+				limit = { top_liege = { government_has_flag = government_is_subroman_administrative } }
+				change_government_subroman_administrative_effect = yes
+			}
 			scope:title = {
 				save_scope_as = the_ministry_title
 				switch = {
@@ -155,7 +163,7 @@ BP_roman_admin_ministry_handle_landed_ministers = {
 		}
 		#Otherwise, give to current heir(s)
 		else = {
-			root.top_liege = { save_scope_as = the_liege }
+			top_liege = { save_scope_as = the_liege }
 			if = {
 				limit = { has_character_flag = has_military_title }
 				random_held_title = {
@@ -188,6 +196,22 @@ BP_roman_admin_ministry_handle_landed_ministers = {
 				}
 			}
 		}
+		#Set up Government if it is not right
+		if = {
+			limit = {
+				top_liege = { government_has_flag = government_is_roman_administrative }
+				NOT = { scope:the_title.holder = { government_has_flag = government_is_roman_administrative } }
+			}
+			scope:the_title.holder = { change_government_roman_administrative_effect = yes }
+		}
+		else_if = {
+			limit = {
+				top_liege = { government_has_flag = government_is_subroman_administrative }
+				NOT = { scope:the_title.holder = { government_has_flag = government_is_subroman_administrative } }
+			}
+			scope:title.holder = { change_government_subroman_administrative_effect = yes }
+		}
+		
 		#Garbage Collection
 		if = {
 			limit = { has_character_flag = has_military_title }

@@ -43,13 +43,15 @@ pick_a_regional_name_if_possible_effect = {
 	#otherwise it won't be picked up.
 	
 	#Calculate Main region
-	$OLD_CULTURE$ = { save_temporary_scope_as = culture_in_question }
+	$NEW_CULTURE$ = { save_temporary_scope_as = culture_in_question }
+	$CULTURE_FORMER$ = { save_temporary_scope_as = the_culture_former }
 	ordered_geographical_region = {
 		#Limit's needed otherwise it'll pick any old region
 		limit = { geo_region_is_valid_migration_name_trigger = yes }
 		order_by = number_of_counties_in_region
 		save_scope_as = the_geo_region
 	}
+	
 	#Roman Imperial Regions
 	if = { #Gaul
 		limit = {
@@ -422,7 +424,10 @@ pick_a_new_culture_name_effect = {
 		if = { #Pick a regional name if possible; variable existence is checked on a per-variable level
 			limit = { has_variable = no_custom_name_picked }
 			remove_variable = no_custom_name_picked
-			pick_a_regional_name_if_possible_effect = { OLD_CULTURE = scope:old_culture }
+			pick_a_regional_name_if_possible_effect = {
+				NEW_CULTURE = $NEW_CULTURE$
+				CULTURE_FORMER = $CULTURE_FORMER$
+			}
 		}
 		if = { #Pick a title name if possible
 			limit = {

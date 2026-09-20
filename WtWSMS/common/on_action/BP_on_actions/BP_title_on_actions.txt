@@ -100,26 +100,25 @@ BP_handle_independent_roman_polities = {
 }
 
 BP_handle_centralized_realm_stuff = {
+	trigger = {
+		government_has_flag = government_is_centralized
+		is_independent_ruler = yes
+		highest_held_title_tier >= tier_empire
+		scope:title.tier > primary_title.tier
+	}
 	effect = {
 		# Ensure Emperor keeps old realm capital in admin realms & apply unique domicile
 		# building bonus if appropriate
-		if = {
+		if = { # Ensure we keep the old realm capital
 			limit = {
-				government_has_flag = government_is_centralized
-				is_independent_ruler = yes
-				highest_held_title_tier >= tier_empire
-			}
-			if = { # Ensure we keep the old realm capital
-				limit = {
-					scope:title = {
-						tier = tier_empire
-						NOT = { title_capital_county = root.capital_county }
-						# Constantinople must have been inherited
-						title_capital_county.holder = root
-					}
+				scope:title = {
+					tier >= tier_empire
+					NOT = { title_capital_county = root.capital_county }
+					# Constantinople must have been inherited
+					title_capital_county.holder = root
 				}
-				set_realm_capital = scope:title.title_capital_county
 			}
+			set_realm_capital = scope:title.title_capital_county
 		}
 	}
 }
@@ -287,6 +286,7 @@ BP_cleanup_landless_chars_under_non_admin = {
 		root.top_liege != root
 		NOT = { root.top_liege ?= { government_allows = administrative } }
 		NOT = { any_held_title = { count > 0 is_landless_type_title = no } }
+		NOT = { any_held_title = { count > 0 is_head_of_faith = yes } }
 	}
 	effect = {
 		if = {
@@ -316,22 +316,18 @@ on_vassal_gained = {
 }
 
 BP_subroman_to_roman = {
+	trigger = {
+		government_has_flag = is_a_roman_government
+		NOT = { government_has_flag = is_a_transitory_roman_government }
+		scope:vassal = { government_has_flag = is_a_transitory_roman_government }
+	}
 	effect = {
 		#Sub-Romans change government to roman if they get vassalized
-		if = {
-			limit = {
-				root = {
-					government_has_flag = is_a_roman_government
-					NOT = { government_has_flag = is_a_transitory_roman_government }
-					scope:vassal = { government_has_flag = is_a_transitory_roman_government }
-				}
-			}
-			scope:vassal = {
+		scope:vassal = {
+			convert_to_roman_government_effect = yes
+			every_vassal_or_below = {
+				limit = { government_has_flag = is_a_transitory_roman_government }
 				convert_to_roman_government_effect = yes
-				every_vassal_or_below = {
-					limit = { government_has_flag = is_a_transitory_roman_government }
-					convert_to_roman_government_effect = yes
-				}
 			}
 		}
 	}
@@ -354,6 +350,7 @@ BP_completely_landless_realm = {
 		is_independent_ruler = yes
 		government_allows = administrative
 		is_landed = no
+		scope:title = { is_head_of_faith = no }
 		trigger_if = {
 			limit = { any_vassal = { count > 0 } }
 			any_vassal_or_below = { count < 1 is_landed = yes primary_title.tier >= tier_county }
