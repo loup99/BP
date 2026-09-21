@@ -173,6 +173,288 @@ foster_integration_decision = {
 	}
 }
 
+##### Changed from Vanilla: Cost reduced by 95% if state faith is unreformed and your faith is reformed
+change_state_faith = {
+	picture = {
+		trigger = {
+			NOR = {
+				government_has_flag = government_is_tribal
+				government_has_flag = government_is_theocracy
+				top_liege ?= { government_has_flag = government_is_tribal }
+				top_liege ?= { government_has_flag = government_is_theocracy }
+			}
+			OR = {
+				culture = { has_cultural_pillar = heritage_byzantine }
+				top_liege ?= {
+					OR = {
+						culture = { has_cultural_pillar = heritage_byzantine }
+						capital_barony ?= title:b_constantinople
+						is_roman_emperor_primary_title_trigger = yes
+					}
+				}
+			}
+		}
+		reference = "gfx/interface/illustrations/decisions/ep3_cerimonial_decision.dds"
+	}
+	picture = {
+		trigger = {
+			faith.religion = religion:islam_religion 
+		}
+		reference = "gfx/interface/illustrations/activity_header_backgrounds/activity_pilgrimage.dds"
+	}
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_major_religion.dds"
+	}
+
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 0
+		duchy = 0
+		kingdom = 60
+		empire = 60
+		hegemony = 0
+	}
+	sort_order = 110
+	decision_group_type = admin
+
+	desc = change_state_faith_decision_desc
+	selection_tooltip = change_state_faith_decision_selection_tooltip
+
+	is_shown = {
+		has_ep3_dlc_trigger = yes
+		government_allows = state_faith
+		exists = primary_title.state_faith
+		faith != primary_title.state_faith
+	}
+
+	is_valid = {
+		government_allows = state_faith
+		NOT = { faith ?= top_liege.primary_title.state_faith }
+	}
+
+	is_valid_showing_failures_only = {
+		NOT = { exists = involved_activity }
+		is_imprisoned = no
+	}
+
+	##### Changed from Vanilla vvvvv
+	cost = {
+		influence = {
+			value = 5000
+			if = {
+				limit = {
+					has_character_flag = ep3_hof_state_faith_discount
+				}
+				multiply = {
+					value = 0.7
+					desc = hof_state_faith_discount
+				}
+			}
+			if = {
+				limit = {
+					domicile ?= { has_domicile_parameter = reduce_state_faith_cost }
+				}
+				multiply = {
+					value = 0.9
+					desc = domicile_large_temple
+				}
+			}
+			if = {
+				limit = {
+					has_perk = prophet_perk
+				}
+				multiply = {
+					value = 1
+					subtract = admin_state_faith_cost_perk_value
+					desc = "[GetPerk('prophet_perk').GetName(GetPlayer)]"
+				}
+			}
+			##### Changed from Vanilla vvvvv
+			if = {
+				limit = {
+					top_liege.primary_title.state_faith = { has_doctrine_parameter = unreformed }
+					NOT = { faith = { has_doctrine_parameter = unreformed } }
+				}
+				multiply = {
+					value = 0.05
+					desc = unreformed_state_faith_reformed_character_faith
+				}
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+		piety = {
+			value = 5000
+			if = {
+				limit = {
+					has_character_flag = ep3_hof_state_faith_discount
+				}
+				multiply = {
+					value = 0.7
+					desc = hof_state_faith_discount
+				}
+			}
+			if = {
+				limit = {
+					domicile ?= { has_domicile_parameter = reduce_state_faith_cost }
+				}
+				multiply = {
+					value = 0.9
+					desc = domicile_large_temple
+				}
+			}
+			if = {
+				limit = {
+					has_perk = prophet_perk
+				}
+				multiply = {
+					value = 1
+					subtract = admin_state_faith_cost_perk_value
+					desc = "[GetPerk('prophet_perk').GetName(GetPlayer)]"
+				}
+			}
+			##### Changed from Vanilla vvvvv
+			if = {
+				limit = {
+					top_liege.primary_title.state_faith = { has_doctrine_parameter = unreformed }
+					NOT = { faith = { has_doctrine_parameter = unreformed } }
+				}
+				multiply = {
+					value = 0.05
+					desc = unreformed_state_faith_reformed_character_faith
+				}
+			}
+			##### Changed from Vanilla ^^^^^
+		}
+		##### Changed from Vanilla ^^^^^
+	}
+
+	effect = {
+		hidden_effect = {
+			primary_title.state_faith = { save_scope_as = old_faith }
+			root.faith = { save_scope_as = new_faith }
+			create_character_memory = { type = changed_state_faith_memory }
+			scope:new_memory = {
+				set_variable = {
+					name = old_faith
+					value = scope:old_faith
+				}
+				set_variable = {
+					name = new_faith
+					value = scope:new_faith
+				}
+				set_variable = {
+					name = title
+					value = root.primary_title
+				}
+			}
+		}
+
+		primary_title = { set_state_faith = root.faith }
+		capital_county = { set_county_faith = root.faith }
+
+		# Some vassals who like you the most will convert
+		every_vassal = {
+			custom = vassals_change_state_faith
+			limit = {
+				opinion = {
+					target = root
+					value >= 30
+				}
+				faith != root.faith
+				NOT = { has_vassal_stance = zealot }
+				is_ai = yes
+			}
+
+			hidden_effect = {
+				faith = { save_scope_as = old_faith }
+				root.faith = { save_scope_as = new_faith }
+				create_character_memory = { type = adopted_state_faith_memory }
+				scope:new_memory = {
+					set_variable = {
+						name = old_faith
+						value = scope:old_faith
+					}
+					set_variable = {
+						name = new_faith
+						value = scope:new_faith
+					}
+					set_variable = {
+						name = title
+						value = root.primary_title
+					}
+				}
+			}
+
+			set_character_faith = root.faith
+		}
+
+		# Opinion malus with Zealot vassals
+		save_scope_as = root_scope
+		every_vassal = {
+			vassal_stance = zealot
+			limit = {
+				faith != root.faith
+			}
+			custom = every_zealot_vassal
+			add_opinion = {
+				target = root
+				modifier = changed_state_faith_opinion
+				opinion = -30
+			}
+		}
+
+		# Notify and let the players choose
+		every_vassal = {
+			limit = {
+				is_ai = no
+			}
+			trigger_event = {
+				id = ep3_emperor_yearly.2300
+				days = 1
+			}
+		}
+	}
+
+	ai_potential = {
+		government_has_flag = government_is_administrative
+		primary_title.tier >= tier_empire
+		faith != primary_title.state_faith
+	}
+
+	ai_will_do = {
+		base = 50
+		modifier = {
+			has_trait = ambitious
+			add = 30
+		}
+		modifier = {
+			has_trait = arbitrary
+			add = 30
+		}
+		modifier = {
+			has_trait = arrogant
+			add = 25
+		}
+		modifier = {
+			has_trait = lazy
+			add = -20
+		}
+		modifier = {
+			has_trait = content
+			add = -50
+		}
+		modifier = {
+			has_trait = cynical
+			add = -50
+		}
+		modifier = {
+			has_trait = zealous
+			factor = 2
+		}
+	}
+}
+
+
 ##### Changed from Vanilla: Tweaked the AI/Valid Logic in this case
 adopt_state_faith = {
 	picture = {

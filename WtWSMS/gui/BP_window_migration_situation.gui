@@ -574,7 +574,7 @@ window = {
 
 				#Migration to and fro buttons
 				vbox = {
-					name = "migration_targeting_buttons"
+					name = "migration_map_buttons"
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
 					
@@ -589,6 +589,10 @@ window = {
 						layoutpolicy_horizontal = expanding
 						
 						migration_where_can_migrate_to_map_button = {}
+						
+						expand = {}
+						
+						migration_who_can_i_target_map_button = {}
 						
 						expand = {}
 						
@@ -1129,7 +1133,7 @@ types MigrationSituationTypes
 
 	#Map Mode General Button
 	type button_situation_migration_mapmode = button_standard {
-		minimumsize = { 256 50 }
+		minimumsize = { 175 50 }
 
 		layoutpolicy_horizontal = expanding
 
@@ -1161,7 +1165,7 @@ types MigrationSituationTypes
 				size = { 30 30 }
 					icon = {
 
-						size = { 30 30 }
+						size = { 25 25 }
 						block "button_icon" {
 							texture = "[SituationParticipantGroup.GetType.GetIcon]"
 						}
@@ -1212,7 +1216,7 @@ types MigrationSituationTypes
 				text = "MIGRATION_TO_BUTTON"
 			}
 			blockoverride "button_icon" {
-				texture = "gfx/interface/icons/message_feed/martial.dds"
+				texture = "gfx/interface/icons/message_feed/champion.dds"
 			}
 		}
 		button_situation_migration_mapmode = {
@@ -1233,6 +1237,55 @@ types MigrationSituationTypes
 			
 			blockoverride "button_text" {
 				text = "MIGRATION_TO_BUTTON"
+			}
+			blockoverride "button_icon" {
+				texture = "gfx/interface/icons/message_feed/champion.dds"
+			}
+		}
+	}
+	type migration_who_can_i_target_map_button = hbox {
+		min_width = 50
+		ignoreinvisible = yes
+		button_situation_migration_mapmode = {
+			name = "migration_in_range_button_set"
+			visible = "[And(CanChangeMapMode,Not(GetGlobalVariable('custom_map_mode').IsSet))]"
+
+			size = { 50 50 }
+
+			datacontext = "[GetScriptedGui('migration_can_target_effect')]"
+
+			onclick = "[SetMapMode('migration_in_range_map_mode')]"
+			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+			enabled = "[GetScriptedGui('migration_can_target_effect').IsValid(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+
+			tooltip = "migration_targets_tooltip"
+			using = tooltip_ws
+			
+			blockoverride "button_text" {
+				text = "MIGRATION_TARGET_BUTTON"
+			}
+			blockoverride "button_icon" {
+				texture = "gfx/interface/icons/message_feed/martial.dds"
+			}
+		}
+		button_situation_migration_mapmode = {
+			name = "migration_in_range_button_unset"
+			visible = "[And(CanChangeMapMode,GetGlobalVariable('custom_map_mode').IsSet)]"
+
+			size = { 50 50 }
+			
+			datacontext = "[GetScriptedGui('migration_can_target_effect')]"
+
+			onclick = "[GetScriptedGui('reset_custom_map_mode_effect').Execute(GuiScope.End)]"
+			onclick = "[SetMapMode('realms')]"
+			down = "[IsMapMode('migration_in_range_map_mode')]"
+			enabled = "[GetScriptedGui('migration_can_target_effect').IsValid(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+
+			tooltip = "migration_targets_tooltip"
+			using = tooltip_ws
+			
+			blockoverride "button_text" {
+				text = "MIGRATION_TARGET_BUTTON"
 			}
 			blockoverride "button_icon" {
 				texture = "gfx/interface/icons/message_feed/martial.dds"
