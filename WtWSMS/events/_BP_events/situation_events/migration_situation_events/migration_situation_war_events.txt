@@ -668,7 +668,46 @@ scripted_effect change_original_culture_traditions_effect = {
 		add_random_peasant_culture_tradition = yes
 	}
 }
+scripted_effect cleanup_minority_cultures_effect = {
+	$COUNTY_SEARCH_TYPE$ = {
+		limit = {
+			trigger_if = {
+				limit = { always = $SEARCHING_EVENT_CHAR_REALM$ }
+				event_character_is_this_or_is_liege_or_above_trigger = { EVENT_CHAR = $EVENT_CHAR$ }
+			}
+			trigger_else = {
+				NOT = {
+					event_character_is_this_or_is_liege_or_above_trigger = { EVENT_CHAR = $EVENT_CHAR$ }
+				}
+			}
+			county_has_specific_minority_culture_trigger = { CULTURE = $OLD_CULTURE$ }
+		}
+		if = {
+			limit = {
+				county_has_specific_large_minority_culture_trigger = { CULTURE = $OLD_CULTURE$ }
+			}
+			delete_minority_effect = { CULTURE = $OLD_CULTURE$ }
+			add_culture_minority_effect = {
+				CULTURE = $NEW_CULTURE$
+				SIZE = large
+			}
+		}
+		else = {
+			delete_minority_effect = { CULTURE = $OLD_CULTURE$ }
+			add_culture_minority_effect = {
+				CULTURE = $NEW_CULTURE$
+				SIZE = small
+			}
+		}
+	}
+}
 
+scripted_trigger event_character_is_this_or_is_liege_or_above_trigger = {
+	OR = {
+		this = { any_liege_or_above = { this = root } }
+		this = root
+	}
+}
 scripted_trigger realm_to_rest_of_culture_distance_is_big_trigger = {
 	#Any culture county that is _not_ owned by us is well separated
 	custom_tooltip = {
@@ -723,6 +762,8 @@ migration_situation_war.0200 = {
 		}
 	}
 	immediate = {
+		#Save the old culture for reference
+		root.culture = { save_scope_as = original_culture }
 		#Pick who actually diverges the culture
 		if = { #I am the culture head; the peasants diverge!
 			limit = {
@@ -755,6 +796,14 @@ migration_situation_war.0200 = {
 	after = {
 		hidden_effect = {
 			remove_character_flag_if_has_it_effect = { FLAG = was_culture_head }
+			if = {
+				limit = { scope:original_culture = { has_variable = tradition_cooldown } }
+				scope:original_culture = { remove_variable = tradition_cooldown }
+			}
+			if = {
+				limit = { scope:diverged_culture = { has_variable = tradition_cooldown } }
+				scope:diverged_culture = { remove_variable = tradition_cooldown }
+			}
 		}
 	}
 	
@@ -804,6 +853,7 @@ migration_situation_war.0200 = {
 		hidden_effect = {
 			root = { save_scope_as = event_trigger_char }
 			scope:culture_former = { create_divergent_culture_effect = yes }
+			scope:culture_former.culture = { save_scope_as = diverged_culture }
 			if = {
 				limit = { NOT = { root = scope:culture_former } }
 				scope:culture_former.culture = { change_original_culture_traditions_effect = yes }
@@ -830,6 +880,27 @@ migration_situation_war.0200 = {
 				}
 			}
 			root = { apply_traditions_to_ruler_culture_effect = yes }
+			
+			#Cleanup Minorities
+			if = { #You aren't the culture former; all counties but your realm flip minorities
+				limit = { NOT = { root = scope:culture_former } }
+				cleanup_minority_cultures_effect = {
+					EVENT_CHAR = root
+					OLD_CULTURE = scope:original_culture
+					NEW_CULTURE = scope:culture_former.culture
+					COUNTY_SEARCH_TYPE = every_county
+					SEARCHING_EVENT_CHAR_REALM = no
+				}
+			}
+			else = {
+				cleanup_minority_cultures_effect = {
+					EVENT_CHAR = root
+					OLD_CULTURE = scope:original_culture
+					NEW_CULTURE = scope:culture_former.culture
+					COUNTY_SEARCH_TYPE = every_realm_county
+					SEARCHING_EVENT_CHAR_REALM = yes
+				}
+			}
 			
 			recalculate_cultural_heads_of_type = domain
 			recalculate_cultural_heads_of_type = herd
