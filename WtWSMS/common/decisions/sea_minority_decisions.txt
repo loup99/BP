@@ -1,10 +1,11 @@
-﻿
-expel_cultural_minority_decision = {
+﻿expel_minority_decision = {
 	picture = {
 		reference = "gfx/interface/illustrations/decisions/decision_expel.dds"
 	}
 
 	desc = expel_cultural_minority_decision_desc
+	
+	cooldown = { years = 10 }
 
 	ai_check_interval_by_tier = {
 		barony = 0
@@ -16,7 +17,10 @@ expel_cultural_minority_decision = {
 	}
 
 	is_shown = {
-		has_realm_law_flag = unlock_expel_cultural_minorities
+		OR = {
+			has_realm_law_flag = unlock_expel_cultural_minorities
+			has_realm_law_flag = unlock_expel_religious_minorities
+		}
 	}
 
 	is_valid_showing_failures_only = {
@@ -24,7 +28,13 @@ expel_cultural_minority_decision = {
 		custom_tooltip = {
 			text = has_minority_that_can_be_expelled
 			any_sub_realm_county = {
-				county_has_different_heritage_minority_culture_trigger = { CULTURE = root.culture }
+				OR = {
+					county_has_different_heritage_minority_culture_trigger = { CULTURE = root.culture }
+					AND = {
+						county_is_religiously_protected_trigger = no
+						county_has_astray_or_worse_minority_faith_trigger = { FAITH = root.faith }
+					}
+				}
 			}
 		}
 		custom_description = {
@@ -33,59 +43,58 @@ expel_cultural_minority_decision = {
 			NOT = { has_variable = expelled_or_purged_peasants }
 		}
 	}
+	
+	
 
-	effect = {
-		trigger_event = minorities.0001
-		set_variable = {
-			name = expelled_or_purged_peasants
-			years = 10
-		}
-		custom_tooltip = EXPULSION_COOLDOWN_WARNING
-	}
+	widget = {
+		gui = "decision_view_widget_option_list_generic"
+		controller = decision_option_list_controller
+		decision_to_second_step_button = "SELECT_ACTION"
+		show_from_start = yes
 
-	ai_potential = {
-		always = no
-	}
-}
-
-expel_religious_minority_decision = {
-	picture = {
-		reference = "gfx/interface/illustrations/decisions/decision_expel.dds"
-	}
-
-	desc = expel_religious_minority_decision_desc
-
-	ai_check_interval_by_tier = {
-		barony = 0
-		county = 36
-		duchy = 36
-		kingdom = 36
-		empire = 36
-		hegemony = 36
-	}
-
-	is_shown = {
-		has_realm_law_flag = unlock_expel_religious_minorities
-	}
-
-	is_valid_showing_failures_only = {
-		is_at_war = no
-		custom_tooltip = {
-			text = has_minority_that_can_be_expelled
-			any_sub_realm_county = {
-				county_is_religiously_protected_trigger = no
-				county_has_astray_or_worse_minority_faith_trigger = { FAITH = root.faith }
+		item = {
+			value = expel_cultures
+			is_valid = {
+				has_realm_law_flag = unlock_expel_cultural_minorities
+				custom_tooltip = {
+					text = has_minority_that_can_be_expelled
+					any_sub_realm_county = {
+						county_has_different_heritage_minority_culture_trigger = { CULTURE = root.culture }
+					}
+				}
 			}
+			localization = expel_cultural_minority_decision
+			icon = "gfx/interface/icons/scheme_types/icon_scheme_culture.dds"
+			ai_chance = { value = 50 }
 		}
-		custom_description = {
-			subject = root
-			text = "has_expel_purge_cooldown"
-			NOT = { has_variable = expelled_or_purged_peasants }
+
+		item = {
+			value = expel_faiths
+			is_valid = {
+				has_realm_law_flag = unlock_expel_religious_minorities
+				custom_tooltip = {
+					text = has_minority_that_can_be_expelled
+					any_sub_realm_county = {
+						county_is_religiously_protected_trigger = no
+						county_has_astray_or_worse_minority_faith_trigger = { FAITH = root.faith }
+					}
+				}
+			}
+			localization = expel_religious_minority_decision
+			icon = "gfx/interface/icons/court_position_types/court_guru_court_position.dds"
+			ai_chance = { value = 50 }
 		}
 	}
 
 	effect = {
-		trigger_event = minorities.1001
+		if = {
+			limit = { scope:expel_cultures = yes }
+			trigger_event = minorities.0001
+		}
+		else_if = {
+			limit = { scope:expel_faiths = yes }
+			trigger_event = minorities.1001
+		}
 		set_variable = {
 			name = expelled_or_purged_peasants
 			years = 10

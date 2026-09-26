@@ -3,6 +3,7 @@
 # scope:founder = The founder of the new culture
 on_culture_created = {
 	on_actions = {
+		bp_force_recalculation_of_culture_heads
 		bp_setup_necessary_divergence_name_tracking
 		bp_apply_special_hybrid_cases
 		bp_remove_certain_innovations
@@ -10,8 +11,15 @@ on_culture_created = {
 	}
 }
 
+bp_force_recalculation_of_culture_heads = {
+	effect = {
+		recalculate_cultural_heads_of_type = domain
+		recalculate_cultural_heads_of_type = herd
+	}
+}
+
 bp_setup_necessary_divergence_name_tracking = {
-	#Only divergent cultures have roots; hybrids are their own roots when diverging away from
+	#Only divergent cultures have roots; hybrids are their own roots when created
 	trigger = { is_divergent_culture = yes }
 	effect = {
 		#If a root already exists, track it.
@@ -34,7 +42,6 @@ bp_setup_necessary_divergence_name_tracking = {
 
 bp_apply_special_hybrid_cases = {
 	effect = {
-		#Glorious East Celtic Namelist!
 		random_parent_culture = {
 			limit = { has_same_culture_heritage = root }
 			save_scope_as = parent_1
@@ -46,13 +53,43 @@ bp_apply_special_hybrid_cases = {
 			}
 			save_scope_as = parent_2
 		}
+		debug_log = "SPECIAL_HYBRID"
 		if = {
 			limit = {
 				is_hybrid_culture = yes
 				exists = scope:parent_2
-				hybrid_has_new_namelist_trigger = yes
 			}
-			scope:founder = { trigger_event = bp_culture_emergence_events.1001 }
+			#Glorious East Celtic Name List!
+			if = {
+				limit = {
+					has_valid_east_celtic_ancestors_trigger = {
+						CULTURE_1 = scope:parent_1
+						CULTURE_2 = scope:parent_2
+					}
+				}
+				scope:founder = { trigger_event = bp_culture_emergence_events.9001 }
+			}
+			#Glorious Sarmato-Romans!
+			else_if = {
+				limit = {
+					OR = {
+						AND = {
+							#Scythian Parent
+							scope:parent_1 = { sarmatian_romance_scythian_parent_trigger = yes }
+							#Latin Parent
+							scope:parent_2 = { sarmatian_romance_proto_romance_parent_trigger = yes }
+						}
+						AND = {
+							#Scythian Parent
+							scope:parent_2 = { sarmatian_romance_scythian_parent_trigger = yes }
+							#Latin Parent
+							scope:parent_1 = { sarmatian_romance_proto_romance_parent_trigger = yes }
+						}
+					}
+				}
+				debug_log = "WHY_AM_I_NOT_FIRING?"
+				scope:founder = { trigger_event = bp_culture_emergence_events.9002 }
+			}
 		}
 	}
 }
@@ -372,6 +409,16 @@ historical_culture_ashkenazi = {
 					}
 					trigger_event = bp_culture_emergence_events.1100
 				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_culture_jewish_diaspora_entry
+						phase = culture
+						variables = {
+							culture = culture:ashkenazi
+							title = scope:patron_county
+						}
+					}
+				}
 			}
 		}
 	}
@@ -451,6 +498,16 @@ historical_culture_radhanite = {
 						}
 					}
 					trigger_event = bp_culture_emergence_events.1101
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_culture_jewish_diaspora_entry
+						phase = culture
+						variables = {
+							culture = culture:radhanite
+							title = scope:patron_county
+						}
+					}
 				}
 			}
 		}

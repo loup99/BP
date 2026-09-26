@@ -30,7 +30,7 @@ scripted_effect jumpstart_culture_progress_effect = {
 	}
 	$TARGET_CULTURE$ = {
 		if = {
-			limit = { NOT = { has_cultural_era_or_later = culture_era_classical_antiquity } }
+			limit = { no_longer_in_tribal_era_trigger = yes }
 			join_era = culture_era_classical_antiquity
 		}
 	}
@@ -158,6 +158,14 @@ migration_situation_war.0100 = {
 			this.culture = { has_innovation = innovation_social_stratification }
 			this.culture = { has_innovation = innovation_leges_barbarorum }
 		}
+		show_as_unavailable = {
+			has_character_flag = roman_government_bootstrap_available
+			NAND = {
+				this.culture = { has_innovation = innovation_writing }
+				this.culture = { has_innovation = innovation_social_stratification }
+				this.culture = { has_innovation = innovation_leges_barbarorum }
+			}
+		}
 		name = migration_situation_war.0100.adopt_subroman_government
 		
 		convert_to_subroman_government_effect = yes
@@ -173,6 +181,7 @@ migration_situation_war.0100 = {
 					limit = { bp_can_become_federate_trigger = yes }
 					convert_to_roman_federate_government_effect = yes
 				}
+				else = { convert_to_subroman_government_effect = yes }
 			}
 		}
 		#Should propagate down the whole tree
@@ -237,6 +246,25 @@ migration_situation_war.0100 = {
 			custom_tooltip = {
 				text = recieve_just_cash
 				give_cash_effect = yes
+			}
+		}
+		
+		#Remove various blocking variables
+		hidden_effect = {
+			if = {
+				limit = { has_variable = subroman_administrative_aristocracy_law_cooldown }
+				remove_variable = subroman_administrative_aristocracy_law_cooldown
+			}
+			if = {
+				limit = { has_variable = subroman_dynastic_aristocracy_law_cooldown }
+				remove_variable = subroman_dynastic_aristocracy_law_cooldown
+			}
+			if = {
+				limit = {
+					bp_can_have_roman_minority_law_trigger = yes
+					NOT = { has_realm_law = non_roman_minority_rule_law_2 }
+				}
+				add_realm_law_skip_effects = non_roman_minority_rule_law_2
 			}
 		}
 		
@@ -640,6 +668,64 @@ scripted_effect change_original_culture_traditions_effect = {
 		add_random_peasant_culture_tradition = yes
 	}
 }
+scripted_effect cleanup_minority_cultures_effect = {
+	$COUNTY_SEARCH_TYPE$ = {
+		limit = {
+			trigger_if = {
+				limit = { always = $SEARCHING_EVENT_CHAR_REALM$ }
+				$EVENT_CHAR$ = { event_character_is_this_or_is_liege_or_above_trigger = yes }
+			}
+			trigger_else = {
+				NOT = { $EVENT_CHAR$ = { event_character_is_this_or_is_liege_or_above_trigger = yes } }
+			}
+			county_has_specific_minority_culture_trigger = { CULTURE = $OLD_CULTURE$ }
+		}
+		if = {
+			limit = {
+				county_has_specific_large_minority_culture_trigger = { CULTURE = $OLD_CULTURE$ }
+			}
+			delete_minority_effect = { CULTURE = $OLD_CULTURE$ }
+			add_culture_minority_effect = {
+				COUNTY = this
+				CULTURE = $NEW_CULTURE$
+				SIZE = large
+			}
+		}
+		else = {
+			delete_minority_effect = { CULTURE = $OLD_CULTURE$ }
+			add_culture_minority_effect = {
+				COUNTY = this
+				CULTURE = $NEW_CULTURE$
+				SIZE = small
+			}
+		}
+	}
+}
+
+scripted_trigger event_character_is_this_or_is_liege_or_above_trigger = {
+	OR = {
+		this = { any_liege_or_above = { this = root } }
+		this = root
+	}
+}
+scripted_trigger realm_to_rest_of_culture_distance_is_big_trigger = {
+	#Any culture county that is _not_ owned by us is well separated
+	custom_tooltip = {
+		text = your_realm_is_well_separated_from_your_kin
+		#No county of your culture that is not in your realm is "too close" to your capital
+		root.culture = {
+			any_culture_county = {
+				count < 1
+				NOT = { this.holder = root }
+				NOT = { this.holder = { any_liege_or_above = { this = root } } }
+				squared_distance = {
+					target = root.capital_county
+					value < migration_war_well_separated_culture_distance
+				}
+			}
+		}
+	}
+}
 
 migration_situation_war.0200 = {
 	type = character_event
@@ -650,7 +736,20 @@ migration_situation_war.0200 = {
 	
 	title = migration_situation_war.0200.t
 	
-	desc = migration_situation_war.0200.desc
+	desc = {
+		desc = migration_situation_war.0200.desc.opening
+		first_valid = {
+			triggered_desc = {
+				trigger = { government_has_flag = is_a_roman_government }
+				desc = migration_situation_war.0200.desc.roman
+			}
+			triggered_desc = {
+				trigger = { government_has_flag = government_is_high_tribal }
+				desc = migration_situation_war.0200.desc.high_tribal_government
+			}
+		}
+		desc = migration_situation_war.0200.desc.closing
+	}
 	
 	trigger = {
 		has_dlc_feature = diverge_culture #Safety
@@ -663,6 +762,8 @@ migration_situation_war.0200 = {
 		}
 	}
 	immediate = {
+		#Save the old culture for reference
+		root.culture = { save_scope_as = original_culture }
 		#Pick who actually diverges the culture
 		if = { #I am the culture head; the peasants diverge!
 			limit = {
@@ -695,6 +796,14 @@ migration_situation_war.0200 = {
 	after = {
 		hidden_effect = {
 			remove_character_flag_if_has_it_effect = { FLAG = was_culture_head }
+			if = {
+				limit = { scope:original_culture = { has_variable = tradition_cooldown } }
+				scope:original_culture = { remove_variable = tradition_cooldown }
+			}
+			if = {
+				limit = { scope:diverged_culture = { has_variable = tradition_cooldown } }
+				scope:diverged_culture = { remove_variable = tradition_cooldown }
+			}
 		}
 	}
 	
@@ -703,8 +812,10 @@ migration_situation_war.0200 = {
 		animation = thinking
 	}
 	
-	option = {
-		name = migration_situation_war.become_migratory_culture
+	option = { #Migratory Culture Variant; only if you have an advanced government of some type
+		trigger = { NOT = { government_has_flag = government_is_tribal } }
+		
+		name = migration_situation_war.0200.become_migratory_culture
 		
 		#Summarize Changes
 		if = {
@@ -742,6 +853,7 @@ migration_situation_war.0200 = {
 		hidden_effect = {
 			root = { save_scope_as = event_trigger_char }
 			scope:culture_former = { create_divergent_culture_effect = yes }
+			scope:culture_former.culture = { save_scope_as = diverged_culture }
 			if = {
 				limit = { NOT = { root = scope:culture_former } }
 				scope:culture_former.culture = { change_original_culture_traditions_effect = yes }
@@ -768,6 +880,27 @@ migration_situation_war.0200 = {
 				}
 			}
 			root = { apply_traditions_to_ruler_culture_effect = yes }
+			
+			#Cleanup Minorities
+			if = { #You aren't the culture former; all counties but your realm flip minorities
+				limit = { NOT = { root = scope:culture_former } }
+				cleanup_minority_cultures_effect = {
+					EVENT_CHAR = root
+					OLD_CULTURE = scope:original_culture
+					NEW_CULTURE = scope:culture_former.culture
+					COUNTY_SEARCH_TYPE = every_county
+					SEARCHING_EVENT_CHAR_REALM = no
+				}
+			}
+			else = {
+				cleanup_minority_cultures_effect = {
+					EVENT_CHAR = root
+					OLD_CULTURE = scope:original_culture
+					NEW_CULTURE = scope:culture_former.culture
+					COUNTY_SEARCH_TYPE = every_realm_county
+					SEARCHING_EVENT_CHAR_REALM = yes
+				}
+			}
 			
 			recalculate_cultural_heads_of_type = domain
 			recalculate_cultural_heads_of_type = herd
@@ -819,8 +952,129 @@ migration_situation_war.0200 = {
 			}
 		}
 	}
-	option = {
-		name = migration_situation_war.do_not_become_migratory_culture
+	option = { #Diverge anyway; valid for AI if considered "Far enough away" from the rest of its fellows
+		trigger = {
+			trigger_if = {
+				limit = { is_ai = yes }
+				realm_to_rest_of_culture_distance_is_big_trigger = yes
+			}
+			government_has_flag = government_is_tribal
+		}
+		
+		name = migration_situation_war.0200.culture_diverges_anyway
+		
+		#Summarize Changes
+		if = {
+			limit = { root = scope:culture_former }
+			custom_description = {
+				text = new_culture_summary_me
+				subject = root.culture
+			}
+		}
+		else = {
+			custom_description = {
+				text = new_culture_summary_them
+				subject = scope:culture_former.culture
+			}
+			custom_tooltip = old_culture_adopts_new_traditions
+		}
+		
+		#Insert any culture name or name list shenanigans tooltips here
+		
+		#Do the Changes
+		hidden_effect = {
+			root = { save_scope_as = event_trigger_char }
+			scope:culture_former = { create_divergent_culture_effect = yes }
+			if = {
+				limit = { NOT = { root = scope:culture_former } }
+				scope:culture_former.culture = { change_original_culture_traditions_effect = yes }
+				root.culture = {
+					every_culture_county = {
+						limit = {
+							NOT = { this.holder = { any_liege_or_above = { this = root } } }
+							NOT = { this.holder = root }
+						}
+						set_county_culture = scope:culture_former.culture
+					}
+					every_ruler = {
+						limit = {
+							this.culture = root.culture
+							NOT = { this = { any_liege_or_above = { this = root } } }
+							NOT = { this = root }
+						}
+						set_culture = scope:culture_former.culture
+						every_courtier = {
+							limit = { this.culture = root.culture }
+							set_culture = scope:culture_former.culture
+						}
+					}
+				}
+			}
+			
+			recalculate_cultural_heads_of_type = domain
+			recalculate_cultural_heads_of_type = herd
+		}
+		
+		ai_chance = {
+			base = 90
+			modifier = { #Traditionalists Cultures say we won't do this
+				factor = 0
+				OR = {
+					culture = { has_cultural_tradition = tradition_xenophobic }
+					culture = { has_cultural_tradition = tradition_xenophobic_non_dlc }
+					culture = { has_cultural_tradition = tradition_strong_kinship }
+					culture = { has_cultural_tradition = tradition_staunch_traditionalists }
+					culture = { has_cultural_tradition = tradition_mpo_northern_tribes }
+					culture = { has_cultural_tradition = tradition_zealous_pagans }
+					culture = { has_cultural_tradition = tradition_zealous_pagans_non_dlc }
+					culture = { has_cultural_tradition = tradition_decentralized }
+					culture = { has_cultural_tradition = tradition_decentralized_non_dlc }
+				}
+			}
+			#Distance Ladder
+			modifier = { #We're abutting our homeland
+				factor = 0
+				any_realm_county = { any_neighboring_county = { this.culture = root.culture } }
+			}
+			modifier = { #Our homeland is close
+				factor = 0.1
+				any_county = {
+					this.culture = root.culture
+					this.holder = { realm_to_title_distance_squared = { target = root.capital_county value < 10000 } }
+				}
+			}
+			modifier = { #Our homeland is kinda close
+				factor = 0.25
+				any_county = {
+					this.culture = root.culture
+					this.holder = { realm_to_title_distance_squared = { target = root.capital_county value >= 10000 } }
+					this.holder = { realm_to_title_distance_squared = { target = root.capital_county value < 50000 } }
+				}
+			}
+			modifier = { #Our homeland is a bit of a walk
+				factor = 0.50
+				any_county = {
+					this.culture = root.culture
+					this.holder = { realm_to_title_distance_squared = { target = root.capital_county value >= 50000 } }
+					this.holder = { realm_to_title_distance_squared = { target = root.capital_county value < 100000 } }
+				}
+			}
+		}
+	}
+	option = { #Don't change; only valid if you're close enough to the original culture
+		trigger = { realm_to_rest_of_culture_distance_is_big_trigger = no }
+		show_as_unavailable = { realm_to_rest_of_culture_distance_is_big_trigger = yes }
+		flavor = {
+				first_valid = {
+					triggered_desc = {
+						trigger = { realm_to_rest_of_culture_distance_is_big_trigger = yes }
+						desc = migration_situation_war.0200.flavor.too_far_away
+					}
+					desc = BLANK
+				}
+		}
+		fallback = yes
+		name = migration_situation_war.0200.do_not_become_migratory_culture
 		
 		add_prestige = 500
 		add_prestige_level = 1

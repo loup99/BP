@@ -1,0 +1,182 @@
+﻿#Migration GUI triggers
+holder_or_above_is_migration_target_trigger = {
+	holder = { save_temporary_scope_as = the_holder }
+	OR = {
+		scope:the_holder = {
+			general_situation_regional_parameter_trigger = {
+				CHARACTER = scope:the_holder
+				PARAMETER = targetable_by_migration_cbs
+			}
+		}
+		trigger_if = {
+			limit = { scope:the_holder = { is_independent_ruler = no } }
+			scope:the_holder.top_liege = {
+				general_situation_regional_parameter_trigger = {
+					CHARACTER = scope:the_holder.top_liege
+					PARAMETER = targetable_by_migration_cbs
+				}
+			}
+		}
+	}
+}
+holder_or_above_is_migration_range_trigger = {
+	holder = { save_temporary_scope_as = the_holder }
+	OR = {
+		scope:the_holder = {
+			general_situation_regional_parameter_trigger = {
+				CHARACTER = scope:the_holder
+				PARAMETER = migration_cbs_enabled
+			}
+		}
+		trigger_if = {
+			limit = { scope:the_holder = { is_independent_ruler = no } }
+			scope:the_holder.top_liege = {
+				general_situation_regional_parameter_trigger = {
+					CHARACTER = scope:the_holder.top_liege
+					PARAMETER = migration_cbs_enabled
+				}
+			}
+		}
+	}
+}
+character_migrator_and_has_fame_level_trigger = {
+	AND = {
+		general_situation_regional_parameter_trigger = {
+			CHARACTER = $CHAR$
+			PARAMETER = migration_cbs_enabled
+		}
+		$CHAR$.migration_war_effective_fame_level > $VALUE$
+	}
+}
+#Make sure this stays linked well to bp_migration_war_distace_tier_logic_trigger
+bp_migration_war_general_distance_logic_gui_trigger = {
+	OR = {
+		#100k is about the distance from Constantinople to Chios or nearly to the Danube
+		# We base everything on this distance, keeping mind the actual distance is the square-root
+		# Of this value (i.e., 10k = 100)
+		trigger_if = {
+			limit = {
+				character_migrator_and_has_fame_level_trigger = {
+					CHAR = $MIGRATING_CHAR$
+					VALUE = 4
+				}
+			}
+			$TITLE$ ?= {
+				$HIERARCHY_TYPE_CHECK$ = {
+					tier = tier_county
+					holder = { in_diplomatic_range = scope:the_player }
+				}
+				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
+			}
+		}
+		trigger_if = {
+			limit = {
+				character_migrator_and_has_fame_level_trigger = {
+					CHAR = $MIGRATING_CHAR$
+					VALUE = 3
+				}
+			}
+			$TITLE$ ?= {
+				$HIERARCHY_TYPE_CHECK$ = {
+					tier = tier_county
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = {
+								target = scope:the_county
+								value < migration_fame_level_3_distance
+							}
+						}
+					}
+				}
+				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
+			}
+		}
+		trigger_if = {
+			limit = {
+				character_migrator_and_has_fame_level_trigger = {
+					CHAR = $MIGRATING_CHAR$
+					VALUE = 2
+				}
+			}
+			$TITLE$ ?= {
+				$HIERARCHY_TYPE_CHECK$ = {
+					tier = tier_county
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = {
+								target = scope:the_county
+								value < migration_fame_level_3_distance
+							}
+						}
+					}
+				}
+				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
+			}
+		}
+		trigger_if = {
+			limit = {
+				character_migrator_and_has_fame_level_trigger = {
+					CHAR = $MIGRATING_CHAR$
+					VALUE = 1
+				}
+			}
+			$TITLE$ ?= {
+				$HIERARCHY_TYPE_CHECK$ = {
+					tier = tier_county
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = {
+								target = scope:the_county
+								value < migration_fame_level_2_distance
+							}
+						}
+					}
+				}
+				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
+			}
+		}
+		trigger_if = {
+			limit = {
+				character_migrator_and_has_fame_level_trigger = {
+					CHAR = $MIGRATING_CHAR$
+					VALUE = 0
+				}
+			}
+			$TITLE$ ?= {
+				$HIERARCHY_TYPE_CHECK$ = {
+					tier = tier_county
+					save_temporary_scope_as = the_county
+					scope:the_player = {
+						any_realm_county = {
+							squared_distance = {
+								target = scope:the_county
+								value < migration_fame_level_1_distance
+							}
+						}
+					}
+				}
+				holder_or_above_is_migration_$TARGET_OR_RANGE$_trigger = yes
+			}
+		}
+		#Neighboring Kingdom is always valid
+		trigger_if = { #Needed to prevent self-referencing
+			limit = {
+				character_migrator_and_has_fame_level_trigger = {
+					CHAR = $MIGRATING_CHAR$
+					VALUE = -1
+				}
+			}
+			$TITLE$ ?= {
+				$HIERARCHY_TYPE_CHECK$ = {
+					tier = tier_county
+					any_title_to_title_neighboring_and_across_water_county = {
+						holder = { target_is_same_character_or_above = scope:the_player }
+					}
+				}
+			}
+		}
+	}
+}

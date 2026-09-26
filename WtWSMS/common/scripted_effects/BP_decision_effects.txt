@@ -122,6 +122,16 @@ create_ostrogothic_culture_effect = {
 				reset_culture_creation_date = yes
 				get_all_innovations_from = culture:gothic
 			}
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_culture_diverged_entry
+					phase = culture
+					variables = {
+						culture = culture:ostrogothic
+						parent1 = culture:gothic
+					}
+				}
+			}
 		}
 	}
 }
@@ -164,5 +174,68 @@ create_custom_titular_duchy_effect = {
 		set_primary_title_to = scope:new_title
 		
 		trigger_event = major_decisions.1101
+	}
+}
+
+celebrate_2000_year_anniversery_of_goths_effect = {
+	#Dynastic effects
+	dynasty = {
+		#Gain Renown, enough to gain 3 perks if you had none before
+		add_dynasty_prestige = 2000
+		
+		#Your dynasty prestige level increases to Well-Known or better
+		if = {
+			limit = { dynasty_prestige_level = 0 }
+			add_dynasty_prestige_level = 5
+		}
+		else_if = {
+			limit = { dynasty_prestige_level = 1 }
+			add_dynasty_prestige_level = 4
+		}
+		else_if = {
+			limit = { dynasty_prestige_level = 2 }
+			add_dynasty_prestige_level = 3
+		}
+		else_if = {
+			limit = { dynasty_prestige_level = 3 }
+			add_dynasty_prestige_level = 2
+		}
+		else_if = {
+			limit = { dynasty_prestige_level >= 4 }
+			add_dynasty_prestige_level = 1
+		}
+	}
+	
+	add_character_modifier = gothic_hero
+	
+	#You're asserting yourself over Rome, so your orientation wrt Rome declines
+	if = {
+		limit = { has_realm_law_in_group = non_roman_minority_rule_law }
+		if = {
+			limit = { has_realm_law = non_roman_minority_rule_law_4 }
+			add_realm_law = non_roman_minority_rule_law_3
+		}
+		else_if = {
+			limit = { has_realm_law = non_roman_minority_rule_law_3 }
+			add_realm_law = non_roman_minority_rule_law_2
+		}
+		else_if = {
+			limit = { has_realm_law = non_roman_minority_rule_law_2 }
+			add_realm_law = non_roman_minority_rule_law_1
+		}
+		else_if = {
+			limit = { has_realm_law = non_roman_minority_rule_law_1 }
+			add_realm_law = non_roman_minority_rule_law_0
+		}
+	}
+	
+	hidden_effect = {
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_celebrated_2000_anniversery_of_gothic_kingdom_entry
+				phase = migration_situation
+				variables = { char = root }
+			}
+		}
 	}
 }

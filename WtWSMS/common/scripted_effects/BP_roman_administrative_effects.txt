@@ -253,7 +253,7 @@ change_government_subroman_administrative_effect = {
 		limit = {
 			this = this.house.house_head
 			OR = {
-				this.primary_title.tier >= tier_duchy #Don't want nf running counties...
+				this.primary_title.tier >= tier_county #Don't want nf running baronies...
 				#Senators are always noble
 				has_trait = senator_west
 				has_trait = senator_east
@@ -279,14 +279,15 @@ change_government_subroman_administrative_effect = {
 			else = { this.domicile = { move_domicile = prev.top_liege.capital_county.title_province } }
 		}
 		hidden_effect = {
-			add_treasury = {
+			add_treasury = { #Give starting treasury
 				value = 100
 				multiply = {
 					value = primary_title.tier
-					subtract = 2
 					min = 1
 				}
 			}
+			# Give admins a modicum of influence to start
+			change_influence = 250
 		}
 	}
 }
@@ -295,7 +296,7 @@ change_government_roman_administrative_effect = {
 	if = {
 		limit = {
 			this = this.house.house_head
-			this.primary_title.tier >= tier_duchy #Don't want nf running counties...
+			this.primary_title.tier >= tier_county #Don't want nf running baronies...
 			any_held_title = { count < 1 is_noble_family_title = yes }
 		}
 		create_noble_family_effect = { GOVERNMENT_GIVER = this }
@@ -304,7 +305,6 @@ change_government_roman_administrative_effect = {
 				value = 100
 				multiply = {
 					value = primary_title.tier
-					subtract = 2
 					min = 1
 				}
 			}
@@ -442,6 +442,29 @@ save_sub_roman_type_law_effect = { #Top Liege Root
 		add_character_flag = subroman_$SOURCE_TYPE$_aristocracy_law_4
 	}
 	else = { add_character_flag = subroman_$SOURCE_TYPE$_aristocracy_law_0 }
+	#Non-Roman Rule Law, because it changes for some reason
+	if = {
+		limit = { has_realm_law = non_roman_minority_rule_law_0 }
+		add_character_flag = non_roman_minority_rule_law_0
+	}
+	else_if = {
+		limit = { has_realm_law = non_roman_minority_rule_law_1 }
+		add_character_flag = non_roman_minority_rule_law_1
+	}
+	else_if = {
+		limit = { has_realm_law = non_roman_minority_rule_law_2 }
+		add_character_flag = non_roman_minority_rule_law_2
+	}
+	else_if = {
+		limit = { has_realm_law = non_roman_minority_rule_law_3 }
+		add_character_flag = non_roman_minority_rule_law_3
+	}
+	else_if = {
+		limit = { has_realm_law = non_roman_minority_rule_law_4 }
+		add_character_flag = non_roman_minority_rule_law_4
+	}
+	else = { add_character_flag = non_roman_minority_rule_law_2 }
+	
 	every_vassal_or_below = {
 		limit = { has_government = subroman_$SOURCE_TYPE$_government }
 		if = {
@@ -552,6 +575,33 @@ set_sub_roman_type_law_effect = { #Top Liege Root
 		remove_character_flag = subroman_$SOURCE_TYPE$_aristocracy_law_4
 	}
 	else = { remove_character_flag = subroman_$SOURCE_TYPE$_aristocracy_law_0 }
+	#Non-Roman Rule Law
+	if = {
+		limit = { has_character_flag = non_roman_minority_rule_law_0 }
+		add_law_if_not_has_it_skip_effects_effect = { LAW = non_roman_minority_rule_law_0 }
+		remove_character_flag = non_roman_minority_rule_law_0
+	}
+	else_if = {
+		limit = { has_character_flag = non_roman_minority_rule_law_1 }
+		add_law_if_not_has_it_skip_effects_effect = { LAW = non_roman_minority_rule_law_1 }
+		remove_character_flag = non_roman_minority_rule_law_1
+	}
+	else_if = {
+		limit = { has_character_flag = non_roman_minority_rule_law_2 }
+		add_law_if_not_has_it_skip_effects_effect = { LAW = non_roman_minority_rule_law_2 }
+		remove_character_flag = non_roman_minority_rule_law_2
+	}
+	else_if = {
+		limit = { has_character_flag = non_roman_minority_rule_law_3 }
+		add_law_if_not_has_it_skip_effects_effect = { LAW = non_roman_minority_rule_law_3 }
+		remove_character_flag = non_roman_minority_rule_law_3
+	}
+	else_if = {
+		limit = { has_character_flag = non_roman_minority_rule_law_4 }
+		add_law_if_not_has_it_skip_effects_effect = { LAW = non_roman_minority_rule_law_4 }
+		remove_character_flag = non_roman_minority_rule_law_4
+	}
+	
 	every_vassal_or_below = {
 		limit = { has_government = subroman_$TARGET_TYPE$_government }
 		if = {
@@ -598,6 +648,17 @@ flip_subroman_government_types_effect = { #Root Char
 		}
 	}
 	if = {
+		limit = { always = $DESTROY_NON_PRIMARY_TITULARS$ }
+		every_held_title = {
+			limit = {
+				NOT = { prev.primary_title = this }
+				is_titular = yes
+				is_noble_family_title = no
+			}
+			this.holder = { destroy_title = prev }
+		}
+	}
+	if = {
 		limit = { always = $TITLE_TROOPS$ }
 		convert_personal_troops_to_title_troops_effect = yes
 	}
@@ -622,6 +683,17 @@ flip_subroman_government_types_effect = { #Root Char
 						TYPE = $TARGET_TYPE$
 					}
 				}
+			}
+		}
+		if = {
+			limit = { always = $DESTROY_NON_PRIMARY_TITULARS$ }
+			every_held_title = {
+				limit = {
+					NOT = { prev.primary_title = this }
+					is_titular = yes
+					is_noble_family_title = no
+				}
+				this.holder = { destroy_title = prev }
 			}
 		}
 	}

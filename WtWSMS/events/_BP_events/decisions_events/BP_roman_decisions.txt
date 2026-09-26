@@ -80,6 +80,17 @@ scripted_effect unite_roman_empire_effect = {
 		destroy_title = title:h_eastern_roman_empire
 		destroy_title = title:h_western_roman_empire
 	}
+	
+	situation:BP_chronicle = {
+		record_situation_special_event = {
+			key = situation_chronicle_unite_roman_empires_entry
+			phase = major_roman
+			variables = {
+				char = root
+				title = title:h_roman_empire
+			}
+		}
+	}
 }
 
 #The Pope gets the request
@@ -270,35 +281,42 @@ BP_roman_decisions.0002 = {
 		animation = admiration
 	}
 	
+	immediate = {
+		if = {
+			limit = { exists = title:h_eastern_roman_empire.holder }
+			title:h_eastern_roman_empire.holder = { save_scope_as = the_other_emperor }
+		}
+		else_if = {
+			limit = { exists = title:e_byzantium.holder }
+			title:e_byzantium.holder = { save_scope_as = the_other_emperor }
+		}
+	}
+	
 	option = { #Awesome
 		name = BP_roman_decisions.0002.a
 		
-		#If there's an Eastern Emperor, get his opinion
-		if = {
-			limit = { exists = title:e_byzantium.holder }
-			title:e_byzantium.holder = { #Goes to Eastern Emperor
-				save_scope_as = the_other_emperor
-				trigger_event = {
-					id = BP_roman_decisions.0004
-					days = { 3 10 }
-				}
+		if = { #If there's an Eastern Emperor, get his opinion
+			limit = { exists = scope:the_other_emperor }
+			trigger_event = {
+				id = BP_roman_decisions.0004
+				days = { 3 10 }
 			}
 		}
-		if = {
-			limit = { exists = title:h_eastern_roman_empire.holder }
-			title:h_eastern_roman_empire.holder = { #Goes to Eastern Emperor
-				save_scope_as = the_other_emperor
-				trigger_event = {
-					id = BP_roman_decisions.0004
-					days = { 3 10 }
-				}
-			}
-		}
-		#Otherwise, no one can contradict the Pope's proclamation
-		else = {
+		else = { #Otherwise, no one can contradict the Pope's proclamation
 			create_new_roman_empire_title_effect = {
 				EMPIRE_TITLE = h_western_roman_empire
 				TIER_ACKNOWLEDGE = tier_empire
+			}
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_asked_for_roman_empire_entry
+					phase = major_roman
+					variables = {
+						char = root
+						grantor = root.faith.religious_head
+						title = title:h_western_roman_empire
+					}
+				}
 			}
 		}
 	}
@@ -486,6 +504,17 @@ BP_roman_decisions.0005 = {
 			EMPIRE_TITLE = h_western_roman_empire
 			TIER_ACKNOWLEDGE = tier_empire
 		}
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_asked_for_roman_empire_entry
+				phase = major_roman
+				variables = {
+					char = root
+					grantor = scope:the_other_emperor
+					title = title:h_western_roman_empire
+				}
+			}
+		}
 		
 		#Inform people
 		every_player = { trigger_event = { id = BP_roman_decisions.0007 } }
@@ -523,6 +552,17 @@ BP_roman_decisions.0006 = {
 		create_new_roman_empire_title_effect = {
 			EMPIRE_TITLE = e_hre
 			TIER_ACKNOWLEDGE = tier_kingdom
+		}
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_asked_for_hre_entry
+				phase = major_roman
+				variables = {
+					char = root
+					grantor = root.faith.religious_head
+					title = title:e_hre
+				}
+			}
 		}
 		
 		#Inform people
@@ -615,15 +655,39 @@ BP_roman_decisions.0010 = { #WTWSMS id: imperial_legacy.10
 		animation = personality_honorable
 	}
 	
-	immediate = { add_pressed_claim = title:h_roman_empire }
+	immediate = {
+		add_pressed_claim = title:h_roman_empire
+		# For loc
+		title:h_western_roman_empire = { save_scope_as = other_title }
+		if = {
+			limit = {
+				OR = {
+					has_title = title:e_wre
+					has_title = title:h_western_roman_empire
+				}
+			}
+			title:h_eastern_roman_empire = { save_scope_as = other_title }
+		}
+	}
 	
 	option = {
 		name = BP_roman_decisions.0010.a
 		custom_tooltip = BP_roman_decisions.0010.a.tooltip
 		show_as_tooltip = { add_pressed_claim = title:h_roman_empire }
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_sole_roman_empire_entry
+				phase = major_roman
+				variables = {
+					char = root
+					title = root.primary_title
+					other_title = scope:other_title
+				}
+			}
+		}
 	}
 }
-#Sole Roman Empire
+#Unite the Roman Empire
 BP_roman_decisions.0011 = { #Cribbed from Vanilla roman_restoration.0001
 	type = character_event
 	title = roman_restoration.0001.t
@@ -677,6 +741,16 @@ BP_roman_decisions.0011 = { #Cribbed from Vanilla roman_restoration.0001
 		play_music_cue = "mx_cue_epic_sacral_moment"
 		save_scope_as = scoped_emperor
 		unite_roman_empire_effect = yes
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_unite_roman_empires_entry
+				phase = major_roman
+				variables = {
+					char = root
+					title = title:h_roman_empire
+				}
+			}
+		}
 	}
 	option = {
 		name = roman_restoration.0001.a
@@ -726,7 +800,7 @@ BP_roman_decisions.0050 = { #WTWSMS id: imperial_legacy.11
 		animation = acknowledging
 	}
 	
-	lower_left_portrait = faith:catholic.religious_head
+	lower_left_portrait = faith:nicene.religious_head
 	
 	lower_right_portrait = scope:other_emperor
 	
@@ -735,6 +809,16 @@ BP_roman_decisions.0050 = { #WTWSMS id: imperial_legacy.11
 		create_new_roman_empire_title_effect = {
 			EMPIRE_TITLE = h_western_roman_empire
 			TIER_ACKNOWLEDGE = tier_empire
+		}
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_restored_empire_entry
+				phase = major_roman
+				variables = {
+					char = root
+					title = root.primary_title
+				}
+			}
 		}
 		play_music_cue = "mx_cue_epic_sacral_moment"
 	}

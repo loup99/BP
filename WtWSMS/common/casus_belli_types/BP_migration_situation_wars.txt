@@ -13,10 +13,7 @@ bp_migration_war_cb = {
 	mutually_exclusive_titles = { always = yes }
 
 	allowed_for_character = {
-		OR = {
-			this.primary_title.tier = tier_duchy
-			this.primary_title.tier = tier_kingdom
-		}
+		migration_can_be_migrator_rank_trigger = { CHAR = this }
 		#Franks shouldn't migrate
 		trigger_if = {
 			limit = {
@@ -28,7 +25,6 @@ bp_migration_war_cb = {
 	}
 
 	allowed_for_character_display_regardless = {
-		this.prestige_level > this.migration_war_required_fame_level
 		custom_description = {
 			text = has_launched_migration_war_recently
 			NOT = { has_character_flag = launched_migration_war_recently }
@@ -43,7 +39,8 @@ bp_migration_war_cb = {
 			}
 		}
 		#Base Requirements
-		is_landed = yes 
+		is_landed = yes
+		migration_can_be_target_of_migration_trigger = { DEFENDER = scope:defender }
 		#No migrations against your own culture; use unification CBs instead
 		NOT = { scope:attacker.culture = scope:defender.culture }
 		#Has the Appropriate Situation Parameter
@@ -53,7 +50,7 @@ bp_migration_war_cb = {
 		}
 	}
 	
-	target_titles = neighbor_land_or_water
+	target_titles = all
 	target_title_tier = kingdom
 	target_de_jure_regions_above = yes
 	ignore_effect = change_title_holder
@@ -72,12 +69,7 @@ bp_migration_war_cb = {
 	}
 
 	valid_to_start = {
-		scope:target = {
-			any_in_de_jure_hierarchy = {
-				tier = tier_county
-				neighboring_county_or_viking_conquest_trigger = { CHARACTER = root }
-			}
-		}
+		bp_migration_war_distace_tier_logic_trigger = yes
 		#Can't multi-migrate
 		NOT = { scope:attacker = { any_character_war = { using_cb = bp_migration_war_cb } } }
 		
@@ -86,20 +78,10 @@ bp_migration_war_cb = {
 			TARGET_TITLE = scope:target
 			TIER = kingdom
 		}
-		#If the government is centralized, can't be a giant blob of Tribals (need to conquer instead)
+		#Block AI from being _extremely_ stupid
 		trigger_if = {
-			limit = { scope:defender = { government_has_flag = government_is_centralized } }
-			scope:target = {
-				any_in_de_jure_hierarchy = {
-					count >= 1
-					is_landless_type_title = no
-					this.tier = tier_county
-					OR = {
-						this.holder = { government_has_flag = government_is_tribal }
-						this.holder = { government_has_flag = government_is_roman_federate }
-					}
-				}
-			}
+			limit = { is_ai = yes }
+			scope:target = { general_bp_migration_constraints_trigger = no }
 		}
 	}
 
@@ -116,33 +98,17 @@ bp_migration_war_cb = {
 			save_scope_as = target_title
 		}
 		#Spawn armies
-		custom_description = {
-			text = armies_spawn_from_development
-			scope:attacker = {
-				every_held_title = {
-					limit = {
-						tier = tier_county
-						is_landless_type_title = no
-						AND = {
-							this.culture = scope:attacker.culture
-							this.faith = scope:attacker.faith
-						}
-					}
-					change_development_level = bp_migration_depopulation
-					prev = {
-						spawn_army = {
-							name = event_troop_default_name
-							levies = prev.bp_migration_levies
-							location = prev.title_province
-							uses_supply = no
-							war = scope:war
-							inheritable = no
-						}
-					}
-				}
+		create_migratory_armies_effect = {
+			ATTACKER = scope:attacker
+			WAR = scope:war
+		}
+		hidden_effect = {
+			scope:attacker = { update_number_of_bp_migrations_effect = yes }
+			if = {
+				limit = { scope:attacker = { has_character_flag = migration_can_move_capital } }
+				scope:attacker = { remove_character_flag = migration_can_move_capital }
 			}
 		}
-		hidden_effect = { scope:attacker = { update_number_of_bp_migrations_effect = yes } }
 	}
 	
 	should_invalidate = {
@@ -187,6 +153,19 @@ bp_migration_war_cb = {
 	on_victory = {
 		scope:attacker = { show_pow_release_message_effect = yes }
 		
+		#Record in the Chronicle
+		random_in_list = {
+			list = target_titles
+			limit = { tier = tier_kingdom }
+			save_scope_as = target_title
+		}
+		migration_record_chronicle_effect = {
+			CHAR = scope:attacker
+			TARGET_TITLE = scope:target_title
+			OLD_TITLE = scope:attacker.capital_county.kingdom
+			KEY = situation_chronicle_successful_migration_entry
+		}
+		
 		# Legitimacy
 		add_legitimacy_attacker_victory_effect  = yes
 		
@@ -220,6 +199,14 @@ bp_migration_war_cb = {
 			ATTACKER = scope:attacker
 			CHECK_CULTURE_DIVERGENCE_EVENT = yes
 		}
+		
+		if = {
+			limit = { NOT = { scope:attacker = { has_variable = migration_can_move_capital } } }
+			scope:attacker = {
+				set_variable = { name = block_immediate_variable_removal value = yes days = 1 }
+				set_variable = migration_can_move_capital
+			}
+		}
 	}
 	
 	on_white_peace_desc = {
@@ -238,6 +225,19 @@ bp_migration_war_cb = {
 	
 	on_white_peace = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#Record in the Chronicle
+		random_in_list = {
+			list = target_titles
+			limit = { tier = tier_kingdom }
+			save_scope_as = target_title
+		}
+		migration_record_chronicle_effect = {
+			CHAR = scope:attacker
+			TARGET_TITLE = scope:target_title
+			OLD_TITLE = scope:attacker.capital_county.kingdom
+			KEY = situation_chronicle_failed_migration_entry
+		}
 
 		# Prestige for the attacker's war allies
 		add_from_contribution_attackers = {
@@ -287,6 +287,19 @@ bp_migration_war_cb = {
 	
 	on_defeat = {
 		scope:attacker = { show_pow_release_message_effect = yes }
+
+		#Record in the Chronicle
+		random_in_list = {
+			list = target_titles
+			limit = { tier = tier_kingdom }
+			save_scope_as = target_title
+		}
+		migration_record_chronicle_effect = {
+			CHAR = scope:attacker
+			TARGET_TITLE = scope:target_title
+			OLD_TITLE = scope:attacker.capital_county.kingdom
+			KEY = situation_chronicle_failed_migration_entry
+		}
 
 		# Legitimacy
 		add_legitimacy_attacker_defeat_effect = yes
@@ -383,7 +396,6 @@ bp_migration_war_duchy_cb = {
 	}
 
 	allowed_for_character_display_regardless = {
-		this.prestige_level > this.minor_migration_war_required_fame_level
 		custom_description = {
 			text = has_launched_migration_war_recently
 			NOT = { has_character_flag = launched_migration_war_recently }
@@ -398,7 +410,8 @@ bp_migration_war_duchy_cb = {
 			}
 		}
 		#Base Requirements
-		is_landed = yes 
+		is_landed = yes
+		migration_can_be_target_of_migration_trigger = { DEFENDER = scope:defender }
 		#No migrations against your own culture; use unification CBs instead
 		NOT = { scope:attacker.culture = scope:defender.culture }
 		#Has the Appropriate Situation Parameter
@@ -441,21 +454,6 @@ bp_migration_war_duchy_cb = {
 			TARGET_TITLE = scope:target
 			TIER = kingdom
 		}
-		#If the government is centralized, can't be a giant blob of Tribals (need to conquer instead)
-		trigger_if = {
-			limit = { scope:defender = { government_has_flag = government_is_centralized } }
-			scope:target = {
-				any_in_de_jure_hierarchy = {
-					count >= 1
-					is_landless_type_title = no
-					this.tier = tier_county
-					OR = {
-						this.holder = { government_has_flag = government_is_tribal }
-						this.holder = { government_has_flag = government_is_roman_federate }
-					}
-				}
-			}
-		}
 	}
 
 	cost = {
@@ -471,33 +469,17 @@ bp_migration_war_duchy_cb = {
 			save_scope_as = target_title
 		}
 		#Spawn armies
-		custom_description = {
-			text = armies_spawn_from_development
-			scope:attacker = {
-				every_held_title = {
-					limit = {
-						tier = tier_county
-						is_landless_type_title = no
-						AND = {
-							this.culture = scope:attacker.culture
-							this.faith = scope:attacker.faith
-						}
-					}
-					change_development_level = bp_migration_depopulation
-					prev = {
-						spawn_army = {
-							name = event_troop_default_name
-							levies = prev.bp_migration_levies
-							location = prev.title_province
-							uses_supply = no
-							war = scope:war
-							inheritable = no
-						}
-					}
-				}
+		create_migratory_armies_effect = {
+			ATTACKER = scope:attacker
+			WAR = scope:war
+		}
+		hidden_effect = {
+			scope:attacker = { update_number_of_bp_migrations_effect = yes }
+			if = {
+				limit = { scope:attacker = { has_character_flag = migration_can_move_capital } }
+				scope:attacker = { remove_character_flag = migration_can_move_capital }
 			}
 		}
-		hidden_effect = { scope:attacker = { update_number_of_bp_migrations_effect = yes } }
 	}
 	
 	should_invalidate = {
@@ -574,6 +556,14 @@ bp_migration_war_duchy_cb = {
 		migration_war_fire_government_culture_events_effect = {
 			ATTACKER = scope:attacker
 			CHECK_CULTURE_DIVERGENCE_EVENT = no
+		}
+		
+		if = {
+			limit = { NOT = { scope:attacker = { has_variable = migration_can_move_capital } } }
+			scope:attacker = {
+				set_variable = { name = block_immediate_variable_removal value = yes days = 1 }
+				set_variable = migration_can_move_capital
+			}
 		}
 	}
 	

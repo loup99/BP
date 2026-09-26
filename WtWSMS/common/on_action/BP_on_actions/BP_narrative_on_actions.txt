@@ -1,0 +1,62 @@
+﻿BP_fall_of_rome_mechanic = {
+	trigger = { NOT = { has_global_variable = fall_of_rome } }
+	effect = {
+		if = {
+			limit = {
+				#Da Pope shouldn't trigger it ever; Translatio Imperii
+				NOT = { title:c_roma.holder.top_liege = { government_has_flag = government_is_theocracy } }
+				NOR = { #If any of the following is true, we would *not* be checking this
+					title:c_roma.holder.top_liege = { any_held_title = { this = title:e_wre } }
+					title:c_roma.holder.top_liege = { any_held_title = { this = title:e_byzantium } }
+					title:c_roma.holder.top_liege = { any_held_title = { this = title:h_roman_empire } }
+					title:c_roma.holder.top_liege = { any_held_title = { this = title:h_western_roman_empire } }
+					title:c_roma.holder.top_liege = { any_held_title = { this = title:h_eastern_roman_empire } }
+					title:c_roma.holder.top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition }
+				}
+			}
+			#Prevent from firing twice
+			set_global_variable = { name = fall_of_rome value = title:c_roma.holder.top_liege }
+			
+			every_independent_ruler = { add_to_list = rulers_to_send_event_to }
+			every_player = { add_to_list = rulers_to_send_event_to }
+			
+			every_in_list = {
+				list = rulers_to_send_event_to
+				trigger_event = { id = bp_narrative_events.0001 }
+			}
+		}
+	}
+}
+
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = {
+	on_actions = { BP_fall_of_rome_mechanic }
+}
+
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
+on_title_lost = {
+	on_actions = { BP_fall_of_rome_mechanic }
+}
+
+# A vassal changes their liege
+# root = vassal changing their status
+# scope:old_liege = the previous liege of the vassal
+# It is also fired for rulers gaining independence, those can be identified by checking current liege
+on_vassal_change = {
+	on_actions = { BP_fall_of_rome_mechanic }
+}
+
+# A character gains a vassal
+# root = character gaining vassal
+# scope:vassal = vassal being gained
+# scope:old_liege = the previous liege of the vassal. Might be the null character (vassal used to be a non-ruler or independent), so make sure to use "exists" checks where relevant
+on_vassal_gained = {
+	on_actions = {
+		BP_fall_of_rome_mechanic
+	}
+}

@@ -1,6 +1,7 @@
 ﻿namespace = BP_major_culture_decisions
 
 #0001-0099: Special one-offs
+#0100-0199: Other Decisiosn
 
 #Establishment of Ostrogothic culture
 BP_major_culture_decisions.0001 = {
@@ -162,5 +163,96 @@ BP_major_culture_decisions.0002 = {
 		fallback = yes
 		trigger = { NOT = { this = scope:culture_former } }
 		name = BP_major_culture_decisions.0002.neutral
+	}
+}
+
+#2000 year anniversery of the Goths
+BP_major_culture_decisions.0100 = {
+	type = character_event
+	title = BP_major_culture_decisions.0100.t
+	theme = realm
+	
+	override_background = { reference = throne_room_scope }
+	
+	content_source = dlc_WtWSMS
+	
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { this = scope:the_celebrant }
+				desc = BP_major_culture_decisions.0100.celebrant.desc
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { this = scope:the_celebrant }
+					this.culture = { has_cultural_pillar = heritage_gothic }
+				}
+				desc = BP_major_culture_decisions.0100.other_goths.desc
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { this = scope:the_celebrant }
+					OR = {
+						this.culture = { has_cultural_parameter = greco_roman_social_tradition }
+						this.culture = { has_cultural_parameter = can_restore_roman_empire }
+					}
+				}
+				desc = BP_major_culture_decisions.0100.romans.desc
+			}
+			desc = BP_major_culture_decisions.0100.others.desc
+		}
+	}
+	
+	left_portrait = {
+		character = scope:the_celebrant
+		animation = personality_bold
+	}
+	
+	immediate = {
+		scope:the_celebrant = { save_scope_as = background_throne_room_scope }
+		
+		if = {
+			limit = { NOT = { root = scope:the_celebrant } }
+			show_as_tooltip = {
+				scope:the_celebrant = { celebrate_2000_year_anniversery_of_goths_effect = yes }
+			}
+		}
+	}
+	
+	option = { #The Celebrant
+		trigger = { this = scope:the_celebrant }
+		name = BP_major_culture_decisions.0100.its_a_party
+		
+		celebrate_2000_year_anniversery_of_goths_effect = yes
+		
+		every_player = {
+			limit = { NOT = { this = scope:the_celebrant } }
+			trigger_event = { id = BP_major_culture_decisions.0100 }
+		}
+	}
+	option = { #Same Culture as the Celebrant
+		trigger = {
+			NOT = { this = scope:the_celebrant }
+			this.culture = { has_cultural_pillar = heritage_gothic }
+			NOT = { has_relation_grudge = scope:the_celebrant }
+			NOT = { has_relation_rival = scope:the_celebrant }
+			NOT = { has_relation_nemesis = scope:the_celebrant }
+		}
+		name = BP_major_culture_decisions.0100.other_goths
+	}
+	option = { #Same Culture as the Celebrant
+		trigger = {
+			NOT = { this = scope:the_celebrant }
+			NOT = { this.culture = { has_cultural_pillar = heritage_gothic } }
+			NOT = { has_relation_grudge = scope:the_celebrant }
+			NOT = { has_relation_rival = scope:the_celebrant }
+			NOT = { has_relation_nemesis = scope:the_celebrant }
+		}
+		name = BP_major_culture_decisions.0100.good_for_him
+	}
+	option = { #The fallback option
+		fallback = yes
+		trigger = { NOT = { this = scope:the_celebrant } }
+		name = BP_major_culture_decisions.0100.neutral
 	}
 }

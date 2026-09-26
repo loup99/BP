@@ -1,5 +1,4 @@
-﻿@subroman_administrative_aristocracy_law_cooldown = 10
-@non_roman_minority_rule_law_cooldown = 30
+﻿@non_roman_minority_rule_law_cooldown = 30
 
 #Covers Non-Romans ruling a Roman Realm; Visigothica, Ostrogothica, Vandalica, Italia, &c. ...
 #Also used by Dynastic without changes
@@ -19,7 +18,7 @@ non_roman_minority_rule_law = {
 		}
 		
 		modifier = {
-			cultural_head_acceptance_gain_mult = -1.00
+			cultural_head_acceptance_gain_mult = -0.50
 			same_culture_opinion = 20
 			different_culture_opinion = -20
 		}
@@ -209,7 +208,7 @@ non_roman_minority_rule_law = {
 		}
 		
 		modifier = {
-			cultural_head_acceptance_gain_mult = -0.75
+			cultural_head_acceptance_gain_mult = -0.375
 			same_culture_opinion = 15
 			different_culture_opinion = -15
 		}
@@ -462,7 +461,7 @@ non_roman_minority_rule_law = {
 		}
 		
 		modifier = {
-			cultural_head_acceptance_gain_mult = -0.50
+			cultural_head_acceptance_gain_mult = -0.25
 			same_culture_opinion = 10
 			different_culture_opinion = -10
 		}
@@ -687,7 +686,7 @@ non_roman_minority_rule_law = {
 		}
 		
 		modifier = {
-			cultural_head_acceptance_gain_mult = -0.25
+			cultural_head_acceptance_gain_mult = -0.125
 			same_culture_opinion = 5
 			different_culture_opinion = -5
 		}
@@ -1994,91 +1993,28 @@ subroman_administrative_aristocracy_law = {
 		}
 		
 		can_pass = {
-			trigger_if = {
-				limit = { top_liege != this }
-				custom_tooltip = {
-					text = mechanically_driven_law
-					always = no
-				}
-			}
-			trigger_else = {
-				custom_description = {
-					subject = root
-					text = "has_subroman_administrative_aristocracy_law_cooldown"
-					NAND = {
-						has_variable = subroman_administrative_aristocracy_law_cooldown
-						NOT = { culture = { has_innovation = innovation_all_things } }
-					}
-				}
-				#Adjacency
-				has_realm_law = subroman_administrative_aristocracy_law_1
-				#At least 50 percent plus one of your vassals are at this law or better
-				custom_tooltip = {
-					text = half_of_subroman_duke_vassals_has_law_0_or_better
-					root.percent_of_subroman_administrative_dukes_with_subroman_administrative_aristocracy_law_level_0 > root.subroman_vassal_with_law_cutoff_percent
-				}
-				#Trying to improve the law means you'll need some prestige and influence
-				trigger_if = {
-					limit = {
-						has_realm_law = subroman_administrative_aristocracy_law_1
-						is_ai = no
-					}
-					prestige_level >= 3
-					influence_level >= 3
-				}
+			subroman_TYPE_aristocracy_law_can_pass_trigger = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 0
+				CURRENT_ARISTOCRATIC_LEVEL = 0
+				MORE_ARISTOCRATIC_LEVEL = 1
+				USES_INFLUENCE = yes
 			}
 		}
 		
 		on_pass = {
-			if = {
-				limit = { top_liege != this }
-				
-			}
-			else = {
-				set_variable = {
-					name = subroman_administrative_aristocracy_law_cooldown
-					years = @subroman_administrative_aristocracy_law_cooldown
-				}
-				if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_1 }
-					custom_tooltip = {
-						text = every_vassal_may_decline_their_aristocracy_one_level
-						every_vassal = { #Decline Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_0 }
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
-								decline_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_less_powerful_tt
-									desc = top_liege_makes_aristocracy_less_powerful_desc
-								}
-							}
-						}
-					}
-				}
+			subroman_TYPE_aristocracy_law_can_pass_effect = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 0
+				CURRENT_ARISTOCRATIC_LEVEL = 0
+				MORE_ARISTOCRATIC_LEVEL = 1
+				LEAST_ARISTOCRATIC_LEVEL = 0
+				MOST_ARISTOCRATIC_LEVEL = 4
+				USES_INFLUENCE = yes
 			}
 		}
 		
-		ai_will_do = {
-			#AI will improve to this law if they're running short on prestige or influence
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_1 }
-				if = {
-					limit = { this.prestige < 0 }
-					value = 100
-				}
-				else_if = {
-					limit = { this.influence < 50 }
-					value = 50
-				}
-				else = { value = 0 }
-			}
-		}
+		ai_will_do = { value = 0 }
 	}
 	
 	subroman_administrative_aristocracy_law_1 = {
@@ -2098,127 +2034,29 @@ subroman_administrative_aristocracy_law = {
 		}
 		
 		can_pass = {
-			trigger_if = {
-				limit = { top_liege != this }
-				custom_tooltip = {
-					text = mechanically_driven_law
-					always = no
-				}
-			}
-			trigger_else = {
-				custom_description = {
-					subject = root
-					text = "has_subroman_administrative_aristocracy_law_cooldown"
-					NAND = {
-						has_variable = subroman_administrative_aristocracy_law_cooldown
-						NOT = { culture = { has_innovation = innovation_all_things } }
-					}
-				}
-				#Adjacency
-				OR = {
-					has_realm_law = subroman_administrative_aristocracy_law_0
-					has_realm_law = subroman_administrative_aristocracy_law_2
-				}
-				#At least 50 percent plus one of your vassals are at this law or better
-				custom_tooltip = {
-					text = half_of_subroman_duke_vassals_has_law_1_or_better
-					root.percent_of_subroman_administrative_dukes_with_subroman_administrative_aristocracy_law_level_1 > root.subroman_vassal_with_law_cutoff_percent
-				}
-				#Trying to improve the law means you'll need some prestige and influence
-				trigger_if = {
-					limit = {
-						has_realm_law = subroman_administrative_aristocracy_law_2
-						is_ai = no
-					}
-					prestige_level >= 3
-					influence_level >= 3
-				}
+			subroman_TYPE_aristocracy_law_can_pass_trigger = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 0
+				CURRENT_ARISTOCRATIC_LEVEL = 1
+				MORE_ARISTOCRATIC_LEVEL = 2
+				USES_INFLUENCE = yes
 			}
 		}
 		
 		on_pass = {
-			if = {
-				limit = { top_liege != this }
-				
-			}
-			else = {
-				set_variable = {
-					name = subroman_administrative_aristocracy_law_cooldown
-					years = @subroman_administrative_aristocracy_law_cooldown
-				}
-				if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_0 }
-					add_prestige = 150
-					change_influence = 150
-					custom_tooltip = {
-						text = every_vassal_may_improve_their_aristocracy_one_level
-						every_vassal = { #Improve Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
-								improve_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_more_powerful_tt
-									desc = top_liege_makes_aristocracy_more_powerful_desc
-								}
-							}
-						}
-					}
-				}
-				else_if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_2 }
-					custom_tooltip = {
-						text = every_vassal_may_decline_their_aristocracy_one_level
-						every_vassal = { #Decline Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_0 }
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
-								decline_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_less_powerful_tt
-									desc = top_liege_makes_aristocracy_less_powerful_desc
-								}
-							}
-						}
-					}
-				}
+			subroman_TYPE_aristocracy_law_can_pass_effect = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 0
+				CURRENT_ARISTOCRATIC_LEVEL = 1
+				MORE_ARISTOCRATIC_LEVEL = 2
+				LEAST_ARISTOCRATIC_LEVEL = 0
+				MOST_ARISTOCRATIC_LEVEL = 4
+				USES_INFLUENCE = yes
 			}
 		}
 		
 		#AI tries to improve to this law when it's influence is too low
-		ai_will_do = {
-			#AI will improve to this law if they're running short on prestige or influence
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_2 }
-				if = {
-					limit = { this.prestige < 0 }
-					value = 100
-				}
-				else_if = {
-					limit = { this.influence < 50 }
-					value = 50
-				}
-				else = { value = 0 }
-			}
-			#AI will decline to this the law when their children are not in succession
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_0 }
-				if = {
-					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
-					value = 100
-				}
-				else = { value = 0 }
-			}
-		}
+		ai_will_do = { value = 0 }
 	}
 	
 	subroman_administrative_aristocracy_law_2 = {
@@ -2239,127 +2077,29 @@ subroman_administrative_aristocracy_law = {
 		}
 		
 		can_pass = {
-			trigger_if = {
-				limit = { top_liege != this }
-				custom_tooltip = {
-					text = mechanically_driven_law
-					always = no
-				}
-			}
-			trigger_else = {
-				custom_description = {
-					subject = root
-					text = "has_subroman_administrative_aristocracy_law_cooldown"
-					NAND = {
-						has_variable = subroman_administrative_aristocracy_law_cooldown
-						NOT = { culture = { has_innovation = innovation_all_things } }
-					}
-				}
-				#Adjacency
-				OR = {
-					has_realm_law = subroman_administrative_aristocracy_law_1
-					has_realm_law = subroman_administrative_aristocracy_law_3
-				}
-				#At least 50 percent plus one of your vassals are at this law or better
-				custom_tooltip = {
-					text = half_of_subroman_duke_vassals_has_law_2_or_better
-					root.percent_of_subroman_administrative_dukes_with_subroman_administrative_aristocracy_law_level_2 > root.subroman_vassal_with_law_cutoff_percent
-				}
-				#Trying to improve the law means you'll need some prestige and influence
-				trigger_if = {
-					limit = {
-						has_realm_law = subroman_administrative_aristocracy_law_3
-						is_ai = no
-					}
-					prestige_level >= 3
-					influence_level >= 3
-				}
+			subroman_TYPE_aristocracy_law_can_pass_trigger = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 1
+				CURRENT_ARISTOCRATIC_LEVEL = 2
+				MORE_ARISTOCRATIC_LEVEL = 3
+				USES_INFLUENCE = yes
 			}
 		}
 		
 		on_pass = {
-			if = {
-				limit = { top_liege != this }
-				
-			}
-			else = {
-				set_variable = {
-					name = subroman_administrative_aristocracy_law_cooldown
-					years = @subroman_administrative_aristocracy_law_cooldown
-				}
-				if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_1 }
-					add_prestige = 150
-					change_influence = 150
-					custom_tooltip = {
-						text = every_vassal_may_improve_their_aristocracy_one_level
-						every_vassal = { #Improve Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
-								improve_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_more_powerful_tt
-									desc = top_liege_makes_aristocracy_more_powerful_desc
-								}
-							}
-						}
-					}
-				}
-				else_if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_3 }
-					custom_tooltip = {
-						text = every_vassal_may_decline_their_aristocracy_one_level
-						every_vassal = { #Decline Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_0 }
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
-								decline_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_less_powerful_tt
-									desc = top_liege_makes_aristocracy_less_powerful_desc
-								}
-							}
-						}
-					}
-				}
+			subroman_TYPE_aristocracy_law_can_pass_effect = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 1
+				CURRENT_ARISTOCRATIC_LEVEL = 2
+				MORE_ARISTOCRATIC_LEVEL = 3
+				LEAST_ARISTOCRATIC_LEVEL = 0
+				MOST_ARISTOCRATIC_LEVEL = 4
+				USES_INFLUENCE = yes
 			}
 		}
 		
 		#AI tries to improve to this law when it's influence is too low
-		ai_will_do = {
-			#AI will improve to this law if they're running short on prestige or influence
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_3 }
-				if = {
-					limit = { this.prestige < 0 }
-					value = 100
-				}
-				else_if = {
-					limit = { this.influence < 50 }
-					value = 50
-				}
-				else = { value = 0 }
-			}
-			#AI will decline to this the law when their children are not in succession
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_1 }
-				if = {
-					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
-					value = 100
-				}
-				else = { value = 0 }
-			}
-		}
+		ai_will_do = { value = 0 }
 	}
 	
 	subroman_administrative_aristocracy_law_3 = {
@@ -2382,126 +2122,28 @@ subroman_administrative_aristocracy_law = {
 		}
 		
 		can_pass = {
-			trigger_if = {
-				limit = { top_liege != this }
-				custom_tooltip = {
-					text = mechanically_driven_law
-					always = no
-				}
-			}
-			trigger_else = {
-				custom_description = {
-					subject = root
-					text = "has_subroman_administrative_aristocracy_law_cooldown"
-					NAND = {
-						has_variable = subroman_administrative_aristocracy_law_cooldown
-						NOT = { culture = { has_innovation = innovation_all_things } }
-					}
-				}
-				#Adjacency
-				OR = {
-					has_realm_law = subroman_administrative_aristocracy_law_2
-					has_realm_law = subroman_administrative_aristocracy_law_4
-				}
-				#At least 50 percent plus one of your vassals are at this law or better
-				custom_tooltip = {
-					text = half_of_subroman_duke_vassals_has_law_3_or_better
-					root.percent_of_subroman_administrative_dukes_with_subroman_administrative_aristocracy_law_level_3 > root.subroman_vassal_with_law_cutoff_percent
-				}
-				#Trying to improve the law means you'll need some prestige and influence
-				trigger_if = {
-					limit = {
-						has_realm_law = subroman_administrative_aristocracy_law_4
-						is_ai = no
-					}
-					prestige_level >= 3
-					influence_level >= 3
-				}
+			subroman_TYPE_aristocracy_law_can_pass_trigger = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 2
+				CURRENT_ARISTOCRATIC_LEVEL = 3
+				MORE_ARISTOCRATIC_LEVEL = 4
+				USES_INFLUENCE = yes
 			}
 		}
 		
 		on_pass = {
-			if = {
-				limit = { top_liege != this }
-				
-			}
-			else = {
-				set_variable = {
-					name = subroman_administrative_aristocracy_law_cooldown
-					years = @subroman_administrative_aristocracy_law_cooldown
-				}
-				if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_2 }
-					add_prestige = 150
-					change_influence = 150
-					custom_tooltip = {
-						text = every_vassal_may_improve_their_aristocracy_one_level
-						every_vassal = { #Improve Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
-								improve_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_more_powerful_tt
-									desc = top_liege_makes_aristocracy_more_powerful_desc
-								}
-							}
-						}
-					}
-				}
-				else_if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-					custom_tooltip = {
-						text = every_vassal_may_decline_their_aristocracy_one_level
-						every_vassal = { #Decline Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_0 }
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_decline_one_level
-								decline_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_less_powerful_tt
-									desc = top_liege_makes_aristocracy_less_powerful_desc
-								}
-							}
-						}
-					}
-				}
+			subroman_TYPE_aristocracy_law_can_pass_effect = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 2
+				CURRENT_ARISTOCRATIC_LEVEL = 3
+				MORE_ARISTOCRATIC_LEVEL = 4
+				LEAST_ARISTOCRATIC_LEVEL = 0
+				MOST_ARISTOCRATIC_LEVEL = 4
+				USES_INFLUENCE = yes
 			}
 		}
 		
-		ai_will_do = {
-			#AI will improve to this law if they're running short on prestige or influence
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-				if = {
-					limit = { this.prestige < 0 }
-					value = 100
-				}
-				else_if = {
-					limit = { this.influence < 50 }
-					value = 50
-				}
-				else = { value = 0 }
-			}
-			#AI will decline to this the law when their children are not in succession
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_2 }
-				if = {
-					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
-					value = 100
-				}
-				else = { value = 0 }
-			}
-		}
+		ai_will_do = { value = 0 }
 	}
 	
 	subroman_administrative_aristocracy_law_4 = {
@@ -2522,73 +2164,27 @@ subroman_administrative_aristocracy_law = {
 		}
 		
 		can_pass = {
-			trigger_if = {
-				limit = { top_liege != this }
-				custom_tooltip = {
-					text = mechanically_driven_law
-					always = no
-				}
-			}
-			trigger_else = {
-				custom_description = {
-					subject = root
-					text = "has_subroman_administrative_aristocracy_law_cooldown"
-					NAND = {
-						has_variable = subroman_administrative_aristocracy_law_cooldown
-						NOT = { culture = { has_innovation = innovation_all_things } }
-					}
-				}
-				has_realm_law = subroman_administrative_aristocracy_law_3
+			subroman_TYPE_aristocracy_law_can_pass_trigger = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 3
+				CURRENT_ARISTOCRATIC_LEVEL = 4
+				MORE_ARISTOCRATIC_LEVEL = 4
+				USES_INFLUENCE = yes
 			}
 		}
 		
 		on_pass = {
-			if = {
-				limit = { top_liege != this }
-				
-			}
-			else = {
-				set_variable = {
-					name = subroman_administrative_aristocracy_law_cooldown
-					years = @subroman_administrative_aristocracy_law_cooldown
-				}
-				if = {
-					limit = { has_realm_law = subroman_administrative_aristocracy_law_3 }
-					add_prestige = 150
-					change_influence = 150
-					custom_tooltip = {
-						text = every_vassal_may_improve_their_aristocracy_one_level
-						every_vassal = { #Improve Law One Level
-							limit = {
-								bp_realm_law_use_subroman_administrative_aristocracy_trigger = yes
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_0 }
-								NOT = { has_realm_law = subroman_administrative_aristocracy_law_4 }
-							}
-							random = {
-								chance = subroman_chance_vassal_gets_aristocratic_law_improve_one_level
-								improve_aristocracy_law_one_level_effect = yes
-								send_interface_message = {
-									type = event_generic_neutral
-									title = top_liege_makes_aristocracy_more_powerful_tt
-									desc = top_liege_makes_aristocracy_more_powerful_desc
-								}
-							}
-						}
-					}
-				}
+			subroman_TYPE_aristocracy_law_can_pass_effect = {
+				TYPE = administrative
+				LESS_ARISTOCRATIC_LEVEL = 3
+				CURRENT_ARISTOCRATIC_LEVEL = 4
+				MORE_ARISTOCRATIC_LEVEL = 4
+				LEAST_ARISTOCRATIC_LEVEL = 0
+				MOST_ARISTOCRATIC_LEVEL = 4
+				USES_INFLUENCE = yes
 			}
 		}
 		
-		ai_will_do = {
-			#AI will decline to this the law when their children are not in succession
-			if = {
-				limit = { has_realm_law = subroman_administrative_aristocracy_law_3 }
-				if = {
-					limit = { NOT = { any_child = { is_primary_heir_of = root } } }
-					value = 100
-				}
-				else = { value = 0 }
-			}
-		}
+		ai_will_do = { value = 0 }
 	}
 }

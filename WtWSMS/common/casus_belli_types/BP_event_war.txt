@@ -51,15 +51,7 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 	}
 	
 	on_victory = {
-		scope:attacker = {
-			show_pow_release_message_effect = yes
-			# Trigger narrative event before other events relating to title change
-			set_global_variable = {
-				name = fall_of_rome
-				value = scope:attacker
-			}
-			trigger_event = bp_narrative_events.0001
-		}
+		scope:attacker = { show_pow_release_message_effect = yes }
 		
 		# Legitimacy
 		add_legitimacy_attacker_victory_effect = yes
@@ -211,6 +203,10 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 		scope:skirian_title_holder ?= {
 			convert_personal_troops_to_title_troops_effect = yes
 			convert_to_subroman_government_ignore_tier_effect = yes
+			vassal_contract_set_obligation_level = {
+				type = roman_administrative_themes
+				level = roman_admin_theme_military_value
+			}
 		}
 		scope:heruli_title_holder ?= {
 			convert_to_roman_federate_government_effect = yes
@@ -225,15 +221,52 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 			trigger_event = { on_action = BP_create_federate_commander }
 		}
 		
-		
-		
 		#Step 5: Clean up extraneous claims of unlanded defenders
 		if = {
 			limit = { scope:defender = { is_landed = no } }
 			scope:defender = { every_claim = { prev = { remove_claim = prev } } }
 		}
 		
-		#Step 6: Handle the offices if playing with the DLC
+		#Step 6: If the defender is _still_ landed, that goes to either the duchy holder or Odoacer
+		if = {
+			limit = { scope:defender = { is_landed = yes } }
+			create_title_and_vassal_change = {
+				type = granted
+				save_scope_as = extra_county_delanding
+				add_claim_on_loss = no
+			}
+			scope:defender = {
+				every_held_title = {
+					limit = {
+						is_noble_family_title = no
+						tier = tier_county
+					}
+					add_to_list = counties_to_take_again
+				}
+			}
+			every_in_list = {
+				list = counties_to_take_again
+				if = {
+					limit = {
+						exists = this.duchy.holder
+						NOT = { this.duchy.holder = scope:defender }
+					}
+					change_title_holder = {
+						holder = this.duchy.holder
+						change = scope:extra_county_delanding
+					}
+				}
+				else = {
+					change_title_holder = {
+						holder = scope:attacker
+						change = scope:extra_county_delanding
+					}
+				}
+			}
+			resolve_title_and_vassal_change = scope:extra_county_delanding
+		}
+		
+		#Step 7: Handle the offices if playing with the DLC
 		if = {
 			limit = { BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes }
 			#Setup Italian Magister Officiorum
@@ -634,12 +667,87 @@ odoacer_takeover_war = { #Cribbed from invasion wars
 				}
 			}
 		}
+		title:d_laamp_odoacer_skirian.holder ?= {
+			hard_imprison_character_effect = {
+				TARGET = this
+				IMPRISONER = scope:defender
+			}
+			every_vassal = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
+			every_courtier = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
+			scope:defender = {
+				add_opinion = {
+					target = prev
+					modifier = vassal_lost_faction_revolt_war
+				}
+			}
+		}
+		title:d_laamp_odoacer_heruli.holder ?= {
+			hard_imprison_character_effect = {
+				TARGET = this
+				IMPRISONER = scope:defender
+			}
+			every_vassal = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
+			every_courtier = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
+			scope:defender = {
+				add_opinion = {
+					target = prev
+					modifier = vassal_lost_faction_revolt_war
+				}
+			}
+		}
+		title:d_laamp_odoacer_rugii.holder ?= {
+			hard_imprison_character_effect = {
+				TARGET = this
+				IMPRISONER = scope:defender
+			}
+			every_vassal = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
+			every_courtier = {
+				hard_imprison_character_effect = {
+					TARGET = this
+					IMPRISONER = scope:defender
+				}
+			}
+			scope:defender = {
+				add_opinion = {
+					target = prev
+					modifier = vassal_lost_faction_revolt_war
+				}
+			}
+		}
 		
 		#Destroy invalid titles
 		scope:attacker = {
 			destroy_title = this.primary_title
 			every_vassal = { destroy_title = this.primary_title }
 		}
+		title:d_laamp_odoacer_skirian.holder = { destroy_title = this.primary_title }
+		title:d_laamp_odoacer_heruli.holder = { destroy_title = this.primary_title }
+		title:d_laamp_odoacer_rugii.holder = { destroy_title = this.primary_title }
 		
 		# Attacker loses Prestige, all other war participants gain Prestige (Defender gains full prestige, all allies on both sides gain based on war contribution).
 		modify_all_participants_fame_values = {

@@ -13,6 +13,8 @@ git diff --exit-code --name-only $1 HEAD > tmp_file
 sed -i -b '/^diff/d' tmp_file
 sed -i -b '/^new/d' tmp_file
 sed -i -b '/^index/d' tmp_file
+sed -i -b '/deleted file mode 100644/{N;d}' tmp_file #In case of file delete
+sed -i -b '/Binary files /d' tmp_file #Binary file changes
 #Load the data back into file
 file_list=($(cat tmp_file))
 #Garbage collect

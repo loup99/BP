@@ -90,6 +90,20 @@ destroy_senate_effect = {
 	}
 }
 
+become_consul_memory_effect = {
+	if = {
+		limit = { has_character_modifier = roman_consul_west }
+		add_character_flag = roman_consul_west
+	}
+	else_if = {
+		limit = { has_character_modifier = roman_consul_east }
+		add_character_flag = roman_consul_east
+	}
+	create_character_memory = { type = elected_consul_memory }
+	if = { limit = { has_character_flag = roman_consul_west } remove_variable = roman_consul_west }
+	if = { limit = { has_character_flag = roman_consul_east } remove_variable = roman_consul_east }
+}
+
 senate_election_effect = {
 	every_living_character = { #Remove the old Consul
 		limit = { has_character_modifier = roman_consul_$REGION$ }
@@ -126,6 +140,8 @@ senate_election_effect = {
 			save_scope_as = new_consul_$REGION$
 		}
 	}
+	scope:new_consul_$REGION$ = { become_consul_memory_effect = yes }
+	
 	# Save the variables
 	remove_global_variable = $REGION$_consul_nominee
 	set_global_variable = {
@@ -178,6 +194,7 @@ add_senator_trait_and_participant_effect = {
 		add_trait = senator_$REGION$
 	}
 	situation:BP_senate = { add_manual_participant = prev }
+	create_character_memory = { type = elected_senator_memory }
 }
 
 made_a_senator_effect = { #recipient scope

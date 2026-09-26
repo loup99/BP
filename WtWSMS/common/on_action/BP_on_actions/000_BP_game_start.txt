@@ -44,6 +44,7 @@ bp_game_start = {
 		setup_roman_governments_based_on_dlc
 		setup_other_governments_based_on_dlc
 		end_situations_that_are_not_valid
+		make_negative_influence_positive
 	}
 }
 
@@ -492,7 +493,7 @@ setup_realm_and_title_succession_laws = {
 					has_title = title:k_alamannia
 					has_title = title:h_italy
 					has_title = title:k_lombardia
-					has_title = title:k_ostrogoths
+					has_title = title:d_ostrogoths
 					has_title = title:k_suebia
 					has_title = title:k_thuringia
 					has_title = title:k_vandalica
@@ -560,7 +561,7 @@ setup_realm_and_title_succession_laws = {
 					has_title = title:k_yemen
 					#Germans
 					has_title = title:h_italy
-					has_title = title:k_ostrogoths
+					has_title = title:d_ostrogoths
 				}
 				NOT = { has_realm_law = single_heir_succession_law }
 			}
@@ -1760,5 +1761,30 @@ end_situations_that_are_not_valid = {
 	effect = {
 		situation:silk_road_situation ?= { end_situation = yes }
 		situation:dynastic_cycle ?= { end_situation = yes }
+	}
+}
+
+make_negative_influence_positive = {
+	effect = {
+		every_ruler = {
+			limit = {
+				OR = {
+					government_has_flag = government_is_roman_administrative
+					government_has_flag = government_is_subroman_administrative
+				}
+			}
+			if = {
+				limit = { this.influence < 0 }
+				change_influence = {
+					value = this.influence
+					multiply = -1.00
+					add = 50 #At least 50
+					add = {
+						value = 250
+						multiply = this.primary_title.tier
+					}
+				}
+			}
+		}
 	}
 }

@@ -1,0 +1,427 @@
+﻿# A title is transferred to a new character
+# root = the new holder
+# scope:title = the title that changes hands
+# scope:previous_holder = previous holder. Might be dead
+on_title_gain = { on_actions = { bp_chronicle_title_gain } }
+
+bp_chronicle_title_gain = {
+	effect = {
+		if = {
+			limit = { scope:transfer_type = flag:created }
+			### Notable titles with special graphics
+			#### Roman Empire
+			if = {
+				limit = { scope:title = title:h_roman_empire }
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_reunified_entry
+						phase = major_roman
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					NOT = { exists = title:h_roman_empire.holder } # Don't do this for splitters
+					primary_title.tier <= scope:title.tier # Must be of equal or lower rank
+					OR = {
+						scope:title = title:e_wre
+						scope:title = title:h_western_roman_empire
+						scope:title = title:e_byzantium
+						scope:title = title:h_eastern_roman_empire
+					}
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_restored_entry
+						phase = major_roman
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					# Splitting the Roman empire by decision
+					exists = title:h_roman_empire.holder
+					scope:title = title:h_eastern_roman_empire
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_split_roman_empire_entry
+						phase = major_roman
+						variables = {
+							char = root
+							west_char = title:h_roman_empire.holder
+						}
+					}
+				}
+			}
+			#### Jerusalem
+			else_if = {
+				limit = {
+					OR = {
+						scope:title = title:k_jerusalem
+						scope:title = title:e_outremer
+						#scope:title = title:h_kingdom_of_heaven #TODO: BGA
+					}
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_created_entry
+						phase = major_christian_jerusalem
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+			#### Jewish Titles
+			else_if = {
+				limit = {
+					OR = {
+						scope:title = title:k_israel
+						AND = {
+							faith.religion = religion:judaism_religion
+							faith = { has_doctrine = special_doctrine_not_allowed_to_hof }
+							scope:title = { is_head_of_faith = yes }
+						}
+					}
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_restored_entry
+						phase = major_jewish
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+			#### Persian Titles
+			else_if = {
+				limit = {
+					OR = {
+						scope:title = title:h_persia
+						AND = {
+							faith.religion = religion:zoroastrianism_religion
+							faith = { has_doctrine = special_doctrine_not_allowed_to_hof }
+							scope:title = { is_head_of_faith = yes }
+						}
+					}
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_restored_entry
+						phase = major_zoroastrian
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+			#### Become Chakravartin
+			else_if = {
+				limit = {
+					scope:title = title:h_india
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_india_entry
+						phase = major_dharmic
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+			#### China
+			else_if = {
+				limit = {
+					scope:title = title:h_china
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_reunified_entry
+						phase = major_chinese
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+			### Other notable titles from decisions
+			### Generic
+			#### A new head of faith has been created
+			else_if = {
+				limit = { scope:title = { is_head_of_faith = yes } }
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_created_entry
+						phase = religion
+						variables = {
+							title = scope:title
+							char = root
+							#faith = root.faith
+						}
+					}
+				}
+			}
+			#### A new independent kingdom has been created
+			else_if = {
+				limit = {
+					is_independent_ruler = yes
+					scope:title.tier >= tier_kingdom
+					# Must rank up from this
+					NOT = {
+						any_held_title = {
+							tier >= scope:title.tier
+							NOT = { this = scope:title }
+						}
+					}
+				}
+				situation:BP_chronicle = {
+					record_situation_special_event = {
+						key = situation_chronicle_title_created_entry
+						phase = title
+						variables = {
+							title = scope:title
+							char = root
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# A title is destroyed
+# root = the holder before destruction
+# scope:landed_title = the title that is being destroyed
+# Does *not* provide scope:transfer_type
+on_title_destroyed = { on_actions = { bp_chronicle_title_loss } }
+
+bp_chronicle_title_loss = {
+	effect = {
+		### China
+		if = {
+			limit = { scope:landed_title = title:h_china }
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_title_destroyed_china_entry
+					phase = major_title_destroyed
+					variables = {
+						title = scope:landed_title
+						char = root
+					}
+				}
+			}
+		}
+		### Head of faith destroyed
+		else_if = {
+			limit = { scope:landed_title = { is_head_of_faith = yes } }
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_title_destroyed_entry
+					phase = religion
+					variables = {
+						title = scope:landed_title
+						char = root
+						#faith = root.faith
+					}
+				}
+			}
+		}
+		### Independent kingdom/empire destroyed
+		else_if = {
+			limit = {
+				is_independent_ruler = yes
+				scope:landed_title.tier >= tier_kingdom
+				scope:landed_title.tier < tier_hegemony
+				# Must rank down from this
+				NOT = {
+					any_held_title = {
+						tier >= scope:landed_title.tier
+					}
+				}
+			}
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_title_destroyed_entry
+					phase = title_destroyed
+					variables = {
+						title = scope:landed_title
+						char = root
+					}
+				}
+			}
+		}
+	}
+}
+
+on_culture_created = { on_actions = { bp_chronicle_culture } }
+
+bp_chronicle_culture = {
+	effect = {
+		if = {
+			limit = {
+				is_hybrid_culture = yes
+				exists = scope:parent_1
+				exists = scope:parent_2
+			}
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_culture_hybrid_entry
+					phase = culture
+					variables = {
+						culture = root
+						parent1 = scope:parent_1
+						parent2 = scope:parent_2
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				is_hybrid_culture = no
+				exists = scope:parent_1
+			}
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_culture_diverged_entry
+					phase = culture
+					variables = {
+						culture = root
+						parent1 = scope:parent_1
+					}
+				}
+			}
+		}
+	}
+}
+
+on_war_won_attacker = { on_actions = { bp_chronicle_war_win } }
+
+bp_chronicle_war_win = {
+	effect = {
+		if = {
+			limit = {
+				scope:war ={
+					OR = {
+						using_cb = undirected_great_holy_war
+						using_cb = directed_great_holy_war
+					}
+				}
+			}
+			# Get needed titles
+			scope:defender.primary_title ?= { save_scope_as = target_title }
+			every_in_list = {
+				list = target_titles
+				save_scope_as = target_title
+			}
+			
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_ghw_win_entry
+					phase = great_holy_war
+					variables = {
+						attacker = scope:attacker
+						faith = scope:attacker.faith
+						title = scope:target_title
+					}
+				}
+			}
+		}
+	}
+}
+
+on_war_won_defender = { on_actions = { bp_chronicle_war_lose } }
+
+bp_chronicle_war_lose = {
+	effect = {
+		if = {
+			limit = {
+				scope:war ={
+					OR = {
+						using_cb = undirected_great_holy_war
+						using_cb = directed_great_holy_war
+					}
+				}
+			}
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_ghw_lose_entry
+					phase = great_holy_war
+					variables = {
+						attacker = scope:attacker
+						defender = scope:defender
+						faith = scope:attacker.faith
+					}
+				}
+			}
+		}
+	}
+}
+
+on_faith_created = { on_actions = { bp_chronicle_faith } }
+
+bp_chronicle_faith = {
+	effect = {
+		if = {
+			limit = { scope:old_faith = { has_doctrine_parameter = unreformed } }
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_faith_reformed_entry
+					phase = religion
+					variables = {
+						char = root
+						faith = root.faith
+					}
+				}
+			}
+		}
+		else = {
+			situation:BP_chronicle = {
+				record_situation_special_event = {
+					key = situation_chronicle_faith_created_entry
+					phase = religion
+					variables = {
+						char = root
+						faith = root.faith
+					}
+				}
+			}
+		}
+	}
+}
+
+#### TODO: Revisit with BGA on_trait_gained addition
+
+#on_trait_gained = { on_actions = { bp_chronicle_trait } }
+
+#bp_chronicle_trait = {
+#	effect = {
+#		if = {
+#			limit = { scope:trait = conqueror }
+#			situation:BP_chronicle = {
+#				record_situation_special_event = {
+#					key = situation_chronicle_culture_diverged_entry
+#					phase = war
+#					variables = {
+#						char = root
+#					}
+#				}
+#			}
+#		}
+#	}
+#}

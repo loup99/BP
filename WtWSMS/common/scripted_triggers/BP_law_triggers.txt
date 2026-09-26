@@ -197,3 +197,58 @@ bp_can_have_roman_minority_law_trigger = {
 	is_landed = yes
 	this.primary_title.tier >= tier_county
 }
+
+subroman_TYPE_aristocracy_law_can_pass_trigger = {
+	trigger_if = {
+		limit = { top_liege != this }
+		custom_tooltip = {
+			text = mechanically_driven_law
+			always = no
+		}
+	}
+	trigger_else = {
+		custom_description = {
+			subject = root
+			text = has_subroman_$TYPE$_aristocracy_law_cooldown
+			NAND = {
+				has_variable = subroman_$TYPE$_aristocracy_law_cooldown
+				NOT = { culture = { has_innovation = innovation_all_things } }
+			}
+		}
+		#Adjacency
+		OR = {
+			trigger_if = {
+				limit = { NOT = { $LESS_ARISTOCRATIC_LEVEL$ = $CURRENT_ARISTOCRATIC_LEVEL$ } }
+				has_realm_law = subroman_$TYPE$_aristocracy_law_$LESS_ARISTOCRATIC_LEVEL$
+			}
+			trigger_if = {
+				limit = { NOT = { $CURRENT_ARISTOCRATIC_LEVEL$ = $MORE_ARISTOCRATIC_LEVEL$ } }
+				has_realm_law = subroman_$TYPE$_aristocracy_law_$MORE_ARISTOCRATIC_LEVEL$
+			}
+		}
+		trigger_if = {
+			limit = { NOT = { $CURRENT_ARISTOCRATIC_LEVEL$ = 4 } }
+			#At least 50 percent plus one of your vassals are at this law or better
+			custom_tooltip = {
+				text = half_of_subroman_duke_vassals_has_law_$LESS_ARISTOCRATIC_LEVEL$_or_better
+				root.percent_of_subroman_$TYPE$_dukes_with_subroman_$TYPE$_aristocracy_law_level_$CURRENT_ARISTOCRATIC_LEVEL$ > subroman_vassal_with_law_cutoff_percent
+			}
+		}
+		#Trying to improve the law means you'll need some prestige and influence
+		trigger_if = {
+			limit = {
+				has_realm_law = subroman_$TYPE$_aristocracy_law_$MORE_ARISTOCRATIC_LEVEL$
+				is_ai = no
+			}
+			prestige_level >= 3
+		}
+		trigger_if = {
+			limit = {
+				has_realm_law = subroman_$TYPE$_aristocracy_law_$MORE_ARISTOCRATIC_LEVEL$
+				is_ai = no
+				always = $USES_INFLUENCE$
+			}
+			influence_level >= 3
+		}
+	}
+}

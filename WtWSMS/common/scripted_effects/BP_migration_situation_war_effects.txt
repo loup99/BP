@@ -1,4 +1,5 @@
-﻿migration_cb_title_and_modifier_application_effect = {
+﻿#TODO: Character creation needs to change location to be IN THE COUNTY, not the leaders location
+migration_cb_title_and_modifier_application_effect = {
 	#Abandon your confederation if you have one, to make things simple
 	if = {
 		limit = { $ATTACKER$ = { is_confederation_member = yes } }
@@ -7,6 +8,11 @@
 			save_scope_as = the_confederation #To add new holders to the old confederation
 			remove_confederation_member = $ATTACKER$
 		}
+	}
+	
+	if = {
+		limit = { $ATTACKER$ = { is_tributary = yes } }
+		$ATTACKER$ = { end_tributary = yes }
 	}
 	
 	create_title_and_vassal_change = {
@@ -129,7 +135,10 @@
 		add_to_temporary_list = migrating_attackers
 		every_vassal = {
 			if = {
-				limit = { this.top_liege = scope:war_leader }
+				limit = {
+					this.top_liege = scope:war_leader
+					this.primary_title.tier >= tier_county
+				}
 				add_to_temporary_list = attacker_liberated_vassals
 			}
 			else = { add_to_temporary_list = attacker_handed_off_vassals }
@@ -263,13 +272,40 @@
 		}
 		scope:new_char = { becomes_independent = { change = scope:change_attacker_titles_vassals_independent } }
 	}
-	every_in_list = {
+	every_in_list = { #TODO: Generalize when we have multiple attackers
 		list = attacker_titles_to_liege
+		
+		create_character = {
+			location = scope:war_leader.location
+			culture = this.culture
+			faith = this.faith
+			gender_female_chance = {
+				if = {
+					limit = { this.faith = { has_doctrine = doctrine_gender_male_dominated } }
+					value = 0
+				}
+				else_if = {
+					limit = { this.faith = { has_doctrine = doctrine_gender_female_dominated } }
+					value = 100
+				}
+				else = { value = 50 }
+			}
+			trait = peasant_leader
+			save_scope_as = new_char
+			after_creation = {
+				add_trait_xp = {
+					trait = peasant_leader
+					value = { 10 90 }
+				}
+			}
+		}
+		scope:new_char = { add_to_list = new_holders }
 		change_title_holder = {
-			holder = this.liege
+			holder = scope:new_char
 			change = scope:change_attacker_titles_vassals_to_liege
 			take_baronies = yes
 		}
+		scope:new_char = { add_to_list = attacker_handed_off_vassals }
 	}
 	
 	#### Handle attacker vassals
@@ -279,7 +315,7 @@
 	}
 	every_in_list = {
 		list = attacker_handed_off_vassals
-		change_liege = { liege = this.liege.liege change = scope:change_attacker_titles_vassals_to_liege }
+		change_liege = { liege = $ATTACKER$.liege change = scope:change_attacker_titles_vassals_to_liege }
 	}
 	
 	#### Take Defender Titles
@@ -324,23 +360,24 @@
 		}
 	}
 	
-	#Figure out the optimal capital location
-	every_in_list = {
-		list = defender_titles_taken
-		this.duchy = { add_to_list = list_of_duchies }
-	}
-	ordered_in_list = {
-		list = list_of_duchies
-		order_by = this.duchy_value_as_capital
-		this.title_capital_county = { save_temporary_scope_as = the_new_capital }
-	}
-	
 	#### Update the changes
 	resolve_title_and_vassal_change = scope:change_defender_vassals_to_attacker
 	resolve_title_and_vassal_change = scope:change_conquered_new_lands
 	resolve_title_and_vassal_change = scope:change_attacker_titles_vassals_to_liege
 	resolve_title_and_vassal_change = scope:change_attacker_titles_vassals_independent
 	resolve_title_and_vassal_change = scope:change_defender_vassals_tributized
+	
+	#### Become Independent if you aren't already
+	if = {
+		limit = { $ATTACKER$ = { is_independent_ruler = no } }
+		create_title_and_vassal_change = {
+			type = independency
+			save_scope_as = attacker_becomes_independent
+			add_claim_on_loss = no
+		}
+		$ATTACKER$ = { becomes_independent = { change = scope:attacker_becomes_independent } }
+		resolve_title_and_vassal_change = scope:attacker_becomes_independent
+	}
 	
 	#### If you were in a confederation, your old holders join it
 	hidden_effect = {
@@ -354,7 +391,34 @@
 	}
 	
 	#### Set your new capital
-	$ATTACKER$ = { set_realm_capital = scope:the_new_capital }
+	#Figure out the optimal capital location
+	every_in_list = {
+		list = defender_titles_taken
+		this.duchy = { add_to_list = list_of_duchies }
+	}
+	ordered_in_list = {
+		list = list_of_duchies
+		order_by = this.duchy_value_as_capital
+		save_temporary_scope_as = the_duchy
+		if = {
+			limit = {
+				$ATTACKER$ = { any_realm_county = { this = scope:the_duchy.title_capital_county } }
+			}
+			this.title_capital_county = { save_temporary_scope_as = the_new_capital }
+		}
+		else = {
+			$ATTACKER$ = {
+				random_realm_county = {
+					limit = { this.duchy = scope:the_duchy }
+					save_temporary_scope_as = the_new_capital
+				}
+			}
+		}
+	}
+	if = {
+		limit = { exists = scope:the_new_capital }
+		$ATTACKER$ = { set_realm_capital = scope:the_new_capital }
+	}
 	
 	#### Disconnected realms become independent
 	create_title_and_vassal_change = {
@@ -424,7 +488,7 @@
 		object = scope:the_target_title
 		$ATTACKER$ = {
 			every_realm_county = {
-				limit = { is_target_in_variable_list = { name = migrating_attackers target = this.holder } }
+				limit = { any_in_list = { list = migrating_attackers this = prev.holder } }
 				if = {
 					limit = { has_county_modifier = recent_migration_to_modifier }
 					remove_county_modifier = recent_migration_to_modifier
@@ -441,7 +505,7 @@
 		object = scope:the_target_title
 		$ATTACKER$ = {
 			every_realm_county = {
-				limit = { NOT = { any_in_list = { list = migrating_attackers this = prev.holder } } }
+				limit = { any_in_list = { list = migrating_attackers this = prev.holder } }
 				migration_flip_holding_to_tribal_effect = {
 					THE_ATTACKER = $ATTACKER$
 					THE_COUNTY = this
@@ -453,6 +517,14 @@
 		text = all_conquered_counties_may_flip_culture_faith
 		object = scope:the_target_title
 		migration_flip_culture_faith_in_realm_effect = { THE_ATTACKER = $ATTACKER$ }
+	}
+	
+	#Garbage Collection
+	hidden_effect = {
+		if = {
+			limit = { $ATTACKER$ = { has_variable = number_of_migration_source_counties } }
+			$ATTACKER$ = { remove_variable = number_of_migration_source_counties }
+		}
 	}
 }
 migration_war_fire_government_culture_events_effect = {
@@ -475,6 +547,35 @@ migration_war_fire_government_culture_events_effect = {
 				$ATTACKER$ = { add_character_flag = was_culture_head }
 			}
 			$ATTACKER$ = { trigger_event = { id = migration_situation_war.0200 days = { 7 14 } } }
+		}
+	}
+}
+migration_record_chronicle_effect = {
+	if = {
+		limit = { $TARGET_TITLE$ = $OLD_TITLE$ }
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = $KEY$_internal
+				phase = migration_situation
+				variables = {
+					char = $CHAR$
+					title = $TARGET_TITLE$
+					old_title = $OLD_TITLE$
+				}
+			}
+		}
+	}
+	else = {
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = $KEY$
+				phase = migration_situation
+				variables = {
+					char = $CHAR$
+					title = $TARGET_TITLE$
+					old_title = $OLD_TITLE$
+				}
+			}
 		}
 	}
 }
@@ -940,5 +1041,138 @@ set_sub_roman_type_laws_for_migration_effect = {
 		limit = { has_character_flag = aristocracy_law_4 }
 		$TARGET_CHAR$ = { add_law_if_not_has_it_effect = { LAW = subroman_$TYPE$_aristocracy_law_4 } }
 		remove_character_flag = aristocracy_law_4
+	}
+}
+
+base_maa_random_effect = {
+	random_list = {
+		10 = { #Armored Footmen
+			trigger = { $ATTACKER$.culture = { has_innovation = innovation_quilted_armor } }
+			$ATTACKER$ = {
+				spawn_army = {
+					name = event_troop_default_name
+					levies = prev.bp_migration_levies
+					men_at_arms = {
+						type = armored_footmen
+						stacks = prev.bp_migration_stack_size
+					}
+					location = prev.title_province
+					uses_supply = no
+					war = $WAR$
+					inheritable = no
+				}
+			}
+		}
+		10 = { #Light Footmen
+			$ATTACKER$ = {
+				spawn_army = {
+					name = event_troop_default_name
+					levies = prev.bp_migration_levies
+					men_at_arms = {
+						type = light_footmen
+						stacks = prev.bp_migration_stack_size
+					}
+					location = prev.title_province
+					uses_supply = no
+					war = $WAR$
+					inheritable = no
+				}
+			}
+		}
+		10 = { #Bowmen
+			$ATTACKER$ = {
+				spawn_army = {
+					name = event_troop_default_name
+					levies = prev.bp_migration_levies
+					men_at_arms = {
+						type = bowmen
+						stacks = prev.bp_migration_stack_size
+					}
+					location = prev.title_province
+					uses_supply = no
+					war = $WAR$
+					inheritable = no
+				}
+			}
+		}
+		10 = { #Pikemen
+			$ATTACKER$ = {
+				spawn_army = {
+					name = event_troop_default_name
+					levies = prev.bp_migration_levies
+					men_at_arms = {
+						type = pikemen_unit
+						stacks = prev.bp_migration_stack_size
+					}
+					location = prev.title_province
+					uses_supply = no
+					war = $WAR$
+					inheritable = no
+				}
+			}
+		}
+	}
+}
+create_migratory_armies_effect = {
+	custom_description = {
+		text = armies_spawn_from_development
+		$ATTACKER$ = { save_temporary_scope_as = the_attacker }
+		
+		$ATTACKER$ = {
+			every_held_title = {
+				limit = {
+					tier = tier_county
+					is_landless_type_title = no
+					OR = {
+						this = $ATTACKER$.capital_county
+						this.culture = $ATTACKER$.culture
+						this.faith = $ATTACKER$.faith
+					}
+				}
+				if = {
+					limit = { this = $ATTACKER$.capital_county }
+					if = { #Horsey Cultures
+						limit = {
+							OR = {
+								$ATTACKER$.culture = { has_cultural_tradition = tradition_mpo_iron_cavalry }
+								$ATTACKER$.culture = { has_cultural_tradition = tradition_mpo_wolves_of_the_deep_steppe }
+								$ATTACKER$.culture = { has_cultural_tradition = tradition_devoted_horsemanship }
+								$ATTACKER$.culture = { has_cultural_tradition = tradition_horse_lords }
+								$ATTACKER$.culture = { has_cultural_tradition = tradition_devoted_horsemanship_western_steppe }
+								$ATTACKER$.culture = { has_cultural_tradition = tradition_light_cavalry_western_steppe }
+								$ATTACKER$.culture = { has_cultural_tradition = tradition_pastoralists }
+							}
+						}
+						$ATTACKER$ = {
+							spawn_army = {
+								name = event_troop_default_name
+								levies = prev.bp_migration_levies
+								men_at_arms = {
+									type = light_horsemen
+									stacks = prev.bp_migration_stack_size
+								}
+								location = prev.title_province
+								uses_supply = no
+								war = $WAR$
+								inheritable = no
+							}
+						}
+					}
+					else = {
+						base_maa_random_effect = {
+							ATTACKER = $ATTACKER$
+							WAR = $WAR$
+						}
+					}
+				}
+				else = {
+					base_maa_random_effect = {
+						ATTACKER = $ATTACKER$
+						WAR = $WAR$
+					}
+				}
+				change_development_level = bp_migration_depopulation
+			}
+		}
 	}
 }

@@ -39,3 +39,77 @@ bp_federate_war_validity_trigger = {
 		}
 	}
 }
+
+bp_migration_war_distace_tier_logic_trigger = {
+	OR = {
+		#100k is about the distance from Constantinople to Chios or nearly to the Danube
+		# We base everything on this distance, keeping mind the actual distance is the square-root
+		# Of this value (i.e., 10k = 100)
+		trigger_if = {
+			limit = { this.migration_war_effective_fame_level > 4 }
+			scope:target = {
+				any_in_de_jure_hierarchy = {
+					tier = tier_county
+					holder = { in_diplomatic_range = root }
+				}
+			}
+		}
+		trigger_if = {
+			limit = { this.migration_war_effective_fame_level > 3 }
+			scope:target = {
+				any_in_de_jure_hierarchy = {
+					tier = tier_county
+					squared_distance = {
+						target = root.capital_county
+						value < migration_fame_level_4_distance
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = { this.migration_war_effective_fame_level > 2 }
+			scope:target = {
+				any_in_de_jure_hierarchy = {
+					tier = tier_county
+					squared_distance = {
+						target = root.capital_county
+						value < migration_fame_level_3_distance
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = { this.migration_war_effective_fame_level > 1 }
+			scope:target = {
+				any_in_de_jure_hierarchy = {
+					tier = tier_county
+					squared_distance = {
+						target = root.capital_county
+						value < migration_fame_level_2_distance
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = { this.migration_war_effective_fame_level > 0 }
+			scope:target = {
+				any_in_de_jure_hierarchy = {
+					tier = tier_county
+					squared_distance = {
+						target = root.capital_county
+						value < migration_fame_level_1_distance
+					}
+				}
+			}
+		}
+		#Neighboring Kingdom is always valid
+		scope:target = {
+			any_in_de_jure_hierarchy = {
+				tier = tier_county
+				any_title_to_title_neighboring_and_across_water_county = {
+					holder = { target_is_same_character_or_above = root }
+				}
+			}
+		}
+	}
+}

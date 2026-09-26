@@ -39,12 +39,28 @@ pick_a_dev_specified_name_if_possible_effect = {
 	set_variable = no_custom_name_picked
 }
 pick_a_regional_name_if_possible_effect = {
+	#NB: Make sure to link the list here with geo_region_is_valid_migration_name_trigger
+	#otherwise it won't be picked up.
+	
+	#Calculate Main region
+	$NEW_CULTURE$ = { save_temporary_scope_as = culture_in_question }
+	$CULTURE_FORMER$ = { save_temporary_scope_as = the_culture_former }
+	ordered_geographical_region = {
+		#Limit's needed otherwise it'll pick any old region
+		limit = {
+			geo_region_is_valid_migration_name_trigger = yes
+			scope:culture_in_question = {
+				geo_region_has_counties_of_culture_trigger = { GEO_REGION = prev }
+			}
+		}
+		order_by = number_of_counties_in_region
+		save_scope_as = the_geo_region
+	}
+	
 	#Roman Imperial Regions
 	if = { #Gaul
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_divergence_gaul
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_divergence_gaul
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_divergence_gaul } }
 		}
 		set_culture_name = {
@@ -59,9 +75,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Dacia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_divergence_dacia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_divergence_dacia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_divergence_dacia } }
 		}
 		set_culture_name = {
@@ -76,9 +90,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Thrace
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_divergence_thrace
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_divergence_thrace
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_divergence_thrace } }
 		}
 		set_culture_name = {
@@ -93,9 +105,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Britannia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_divergence_britannia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_divergence_britannia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_divergence_britannia } }
 		}
 		set_culture_name = {
@@ -110,9 +120,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Pannonia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_pannonia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_pannonia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_pannonia } }
 		}
 		set_culture_name = {
@@ -127,9 +135,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Dalmatia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_dalmatia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_dalmatia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_dalmatia } }
 		}
 		set_culture_name = {
@@ -144,9 +150,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Raetia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_raetia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_raetia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_raetia } }
 		}
 		set_culture_name = {
@@ -161,9 +165,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Noricum
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_noricum
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_noricum
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_noricum } }
 		}
 		set_culture_name = {
@@ -178,9 +180,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Italia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_italia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_italia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_italia } }
 		}
 		set_culture_name = {
@@ -195,9 +195,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Hispania
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_hispania
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_hispania
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_hispania } }
 		}
 		set_culture_name = {
@@ -212,9 +210,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Africa
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_africa
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_africa
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_africa } }
 		}
 		set_culture_name = {
@@ -229,9 +225,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Egypt
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_egypt
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_egypt
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_egypt } }
 		}
 		set_culture_name = {
@@ -246,9 +240,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Levant
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_levant
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_levant
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_levant } }
 		}
 		set_culture_name = {
@@ -263,9 +255,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Asia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_asia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_asia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_asia } }
 		}
 		set_culture_name = {
@@ -280,9 +270,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Hellas
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_hellas
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_hellas
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_hellas } }
 		}
 		set_culture_name = {
@@ -297,9 +285,7 @@ pick_a_regional_name_if_possible_effect = {
 	}
 	else_if = { #Macedonia
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_macedonia
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_macedonia
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_macedonia } }
 		}
 		set_culture_name = {
@@ -315,9 +301,7 @@ pick_a_regional_name_if_possible_effect = {
 	#Barbarian Areas
 	else_if = { #Crimea
 		limit = {
-			$CULTURE_FORMER$.capital_county.title_province = {
-				geographical_region = migration_culture_region_crimea
-			}
+			scope:the_geo_region ?= geographical_region:migration_culture_region_crimea
 			NOT = { this.var:root_culture ?= { has_variable = migration_culture_region_crimea } }
 		}
 		set_culture_name = {
@@ -446,6 +430,7 @@ pick_a_new_culture_name_effect = {
 			limit = { has_variable = no_custom_name_picked }
 			remove_variable = no_custom_name_picked
 			pick_a_regional_name_if_possible_effect = {
+				NEW_CULTURE = $NEW_CULTURE$
 				CULTURE_FORMER = $CULTURE_FORMER$
 			}
 		}

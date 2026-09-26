@@ -1,0 +1,274 @@
+types Lists_BP_Overwrite 
+{
+	type widget_vassal_list_item = widget {
+		datacontext = "[CharacterListItem.GetCharacter]"
+
+		vbox = {
+			margin = { 5 0 }
+
+			background = {
+				using = Background_Area_With_Header
+			}
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				margin = { 5 5 }
+
+				text_single = {
+					layoutpolicy_horizontal = expanding
+					text = "[Character.GetUINameNoTooltip|U]"
+					using = Font_Size_Medium
+					autoresize = no
+					fontsize_min = 13
+					align = nobaseline
+					max_width = 340
+				}
+
+				expand = {}
+
+				hbox_skills_grid = {}
+			}
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				spacing = 5
+
+				portrait_head_small = {}
+
+				vbox = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					margin_right = 5
+
+					hbox = {
+						layoutpolicy_horizontal = expanding
+
+						vbox = {
+							layoutpolicy_horizontal = expanding
+
+							margin_top = 3
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+
+								text_single = {
+									name = "character_relation"
+									visible = "[Or(Character.GetLiege.IsLocalPlayer, Character.GetSuzerain.IsLocalPlayer)]"
+									layoutpolicy_horizontal = expanding
+									text = "[Character.GetRelationToString(GetPlayer)]"
+									tooltip = "EXTENDED_RELATIONS_TOOLTIP"
+									default_format = "#low"
+									autoresize = no
+									fontsize_min = 13
+									align = nobaseline
+									max_width = 420
+								}
+
+								expand = {}
+							}
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+								spacing = 5
+
+								text_single = {
+									visible = "[And( Character.HasOverlord, And( Character.UsesObedience, Character.IsObedientTo( Character.GetOverlord ) ) )]"
+
+									text = "MY_REALM_WINDOW_OBEDIENT"
+									align = nobaseline
+									max_width = 170
+
+									tooltipwidget = widget_obedience_tooltip
+								}
+
+								text_single = {
+									visible = "[And( Character.HasOverlord, And( Character.UsesObedience, Not( Character.IsObedientTo( Character.GetOverlord ) ) ) )]"
+
+									text = "MY_REALM_WINDOW_DISOBEDIENT"
+									align = nobaseline
+									max_width = 170
+
+									tooltipwidget = widget_obedience_tooltip
+								}
+
+								divider_light = {
+									visible = "[Character.UsesObedience]"
+									layoutpolicy_vertical = expanding
+								}
+
+								vassal_stance_icon = {
+									name = "vassal_stance"
+									size = { 30 30 }
+								}
+
+								divider_light = {
+									visible = "[And( Character.IsVassalOf( GetPlayer ), Not( Character.IsPlayer ) )]"
+									layoutpolicy_vertical = expanding
+								}
+
+								vassal_expected_legitimacy_widget = {
+									name = "legitimacy_expectation"
+									size = { 30 30 }
+								}
+
+								block "realm_size_powerful_status" {
+									flowcontainer = {
+										spacing = 10
+
+										text_single = {
+											visible = "[NotEqualTo_int32(Character.GetPrimaryTitle.GetTierFrame, '(int32)2')]" #nonbaron
+											layoutpolicy_horizontal = expanding
+
+											text = "REALM_WINDOW_SIZE"
+											align = nobaseline
+											max_width = 150
+
+											tooltip = "REALM_WINDOW_SIZE_TT"
+										}
+									}
+								}
+
+								##### Changed from Vanilla vvvvv
+								block "aristocracy_law" {
+									#Duplicated for Simplicity of visible field
+									divider_light = {
+										visible = "[And( And( Character.IsVassalOf( GetPlayer ), Not( Character.IsPlayer ) ), Character.GetGovernment.IsType('subroman_administrative_government') )]"
+										layoutpolicy_vertical = expanding
+									}
+									divider_light = {
+										visible = "[And( And( Character.IsVassalOf( GetPlayer ), Not( Character.IsPlayer ) ), Character.GetGovernment.IsType('subroman_dynastic_government') )]"
+										layoutpolicy_vertical = expanding
+									}
+									hbox = {
+										button_icon_highlight = {
+											visible = "[And( And( Character.IsVassalOf( GetPlayer ), Not( Character.IsPlayer ) ), Character.GetGovernment.IsType('subroman_administrative_government') )]"
+											datacontext = "[Character.GetActiveLawInGroupWithFlag('subroman_administrative_aristocracy_law')]"
+											size = { 32 32 }
+											texture = "[Law.GetIcon]"
+											tooltipwidget = { general_law_tooltip = {} }
+											using = tooltip_ws
+										}
+										button_icon_highlight = {
+											visible = "[And( And( Character.IsVassalOf( GetPlayer ), Not( Character.IsPlayer ) ), Character.GetGovernment.IsType('subroman_dynastic_government') )]"
+											datacontext = "[Character.GetActiveLawInGroupWithFlag('subroman_administrative_aristocracy_law')]"
+											size = { 32 32 }
+											texture = "[Law.GetIcon]"
+											tooltipwidget = { general_law_tooltip = {} }
+											using = tooltip_ws
+										}
+									}
+								}
+								##### Changed from Vanilla ^^^^^
+
+								expand = {}
+							}
+
+							block "vassal_buttons" {
+								hbox = {
+									visible = "[Character.IsPlayerInteractionShown('give_vassal_directive_interaction')]"
+									layoutpolicy_horizontal = expanding
+									spacing = 5
+
+									button_round = {
+										size = { 30 30 }
+
+										enabled = "[Character.IsPlayerInteractionValid('give_vassal_directive_interaction')]"
+										onclick = "[Character.OpenPlayerInteraction('give_vassal_directive_interaction')]"
+
+										tooltip = "[Character.GetPlayerInteractionTooltip('give_vassal_directive_interaction')]"
+										using = tooltip_se
+
+										button_give_directive = {
+											alwaystransparent = yes
+											parentanchor = center
+											size = { 24 24 }
+										}
+									}
+
+									widget = {
+										size = { 30 30 }
+
+										text_single = {
+											parentanchor = vcenter
+
+											text = "[Character.Custom('vassal_directive_icon')]"
+											align = nobaseline
+
+											tooltip = "VASSAL_DIRECTIVE_ICON_TOOLTIP"
+											using = tooltip_se
+										}
+									}
+
+									divider_light = {
+										visible = "[Character.IsPowerfulVassal]"
+										layoutpolicy_vertical = expanding
+									}
+
+									text_single = {
+										visible = "[Character.IsPowerfulVassal]"
+										layoutpolicy_horizontal = expanding
+
+										text = "MY_REALM_WINDOW_POWERFUL_VASSAL"
+										align = nobaseline
+										max_width = 200
+									}
+
+									expand = {}
+								}
+							}
+						}
+
+						block "own_vassal" {
+							vbox = {
+								visible = "[Character.GetLiege.IsLocalPlayer]"
+								layoutpolicy_vertical = expanding
+								margin_left = 10
+
+								hbox = {
+									coa_title_tiny_crown = {
+										name = "allegiance_flag"
+										datacontext = "[SubjectContract.GetTitleAllegiance]"
+										visible = "[Title.IsValid]"
+
+										tooltip = "MRW_TITLE_ALLEGIANCE"
+										blockoverride "coa_tooltip" {}
+									}
+								}
+							}
+						}
+					}
+
+					hbox_tributary_information = {
+						visible = "[And(Character.HasSuzerain,GreaterThanOrEqualTo_CFixedPoint(Character.GetSubjectContract.GetSubjectStanding,'(CFixedPoint)0'))]"
+						blockoverride "tooltip"
+						{
+							tooltip = "MY_REALM_WINDOW_SUBJECT_STANDING_TT"
+						}
+
+						blockoverride "text"
+						{
+							text_single = {
+								layoutpolicy_horizontal = expanding
+								text = "MY_REALM_WINDOW_SUBJECT_STANDING"
+								align = left|nobaseline
+							}
+						}
+					}
+
+					hbox_tributary_information = {
+						visible = "[And(Character.HasSuzerain,Not(GreaterThanOrEqualTo_CFixedPoint(Character.GetSubjectContract.GetSubjectStanding,'(CFixedPoint)0')))]"
+					}
+				}
+			}
+
+			block "own_vassal"
+			{
+				vbox_vassal_item_footer = {
+					datacontext = "[SubjectContract.GetContractGroup]"
+				}
+			}
+
+			expand = {}
+		}
+	}
+}

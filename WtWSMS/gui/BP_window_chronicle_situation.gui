@@ -1,0 +1,294 @@
+﻿######################################################
+##################### SITUATION ######################
+######################################################
+window = {
+	name = "BP_window_chronicle_situation"
+	widgetid = "BP_window_chronicle_situation"
+	datacontext = "[SituationWindow.GetSituation]"
+	datacontext = "[Situation.GetTopSubRegion]"
+	datacontext = "[Situation.GetTopCurrentPhase]"
+	datacontext = "[GetVariableSystem]"
+	datacontext = "[GetPlayer]"
+	parentanchor = top|right
+	layer = windows_layer
+	movable = no
+	allow_outside = yes
+	
+	using = Window_Size_MainTab
+	
+	state = {
+		name = _show
+		using = Animation_FadeIn_Quick
+		using = Sound_WindowShow_Standard
+		using = Window_Position_MainTab
+	}
+	
+	state = {
+		name = _hide
+		using = Animation_FadeOut_Quick
+		using = Sound_WindowHide_Standard
+		using = Window_Position_MainTab_Hide
+	}
+	
+	margin_widget = {
+		size = { 100% 100% }
+		margin = { 0 26 }
+		margin_right = 13
+		
+		widget = {
+			size = { 100% 100% }
+			
+			vbox = {
+				using = Window_Margins
+				
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+				
+				vbox = {
+					layoutpolicy_horizontal = expanding
+					spacing = 6
+					
+					header_pattern = {
+						layoutpolicy_horizontal = expanding
+						
+						blockoverride "header_text"
+						{
+							text = "[Situation.GetNameNoTooltip]"
+						}
+						
+						blockoverride "button_back"
+						{
+							onclick = "[OpenGameView( 'situations' )]"
+						}
+						
+						blockoverride "button_close"
+						{
+							onclick = "[SituationWindow.Close]"
+						}
+					}
+				}
+				
+				vbox = {
+					name = "catalyst_information_area"
+					
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					
+					
+					vbox = {
+						name = "paper_contract"
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						
+						spacing = 5
+						using = Background_Letter_Default
+						margin_bottom = 15
+						
+						scrollbox = {
+							layoutpolicy_vertical = expanding
+							layoutpolicy_horizontal = expanding
+							
+							blockoverride "scrollbox_background" {}
+							blockoverride "scrollbox_background_fade" {}
+							blockoverride "scrollbox_margins" {}
+							
+							blockoverride "scrollbox_content"
+							{
+								vbox = {
+									name = "history_entries"
+									margin_right = 16
+									max_height = 550
+									bottomtotop = yes
+									
+									block "history_data" {
+										datamodel = "[SituationWindow.GetCurrentHistoryPage]"
+									}
+									
+									layoutpolicy_horizontal = expanding
+									
+									item = {
+										vbox = {
+											layoutpolicy_horizontal = expanding
+											datacontext = "[SituationHistoryEntry.GetCatalyst]"
+											datacontext = "[SituationCatalystHistory.GetPhase]"
+											
+											bp_chronicle_standard_entry_hbox = {}
+											bp_chronicle_special_entry_hbox = {}
+										}
+									}
+								}
+							}
+							
+							blockoverride "scrollbox_expand"
+							{
+								expand = { }
+							}
+						}
+						icon = {
+							size = { 512 40 }
+							texture = "gfx/interface/skinned/window_letter/marginalia_divider.dds"
+						}
+					}
+					
+					
+					
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						margin_top = 8
+						margin_bottom = 10
+						
+						expand = {}
+						
+						button_select_arrow = {
+							enabled = "[GreaterThan_int32( SituationWindow.GetHistoryPageUIIndex, '(int32)1' )]"
+							size = { 25 25 }
+							mirror = horizontal
+							
+							block "onclick_prev"
+							{
+								onclick = "[SituationWindow.PreviousHistoryPage]"
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_decrement"
+							}
+						}
+						
+						text_single = {
+							margin = { 5 5 }
+							align = nobaseline
+							raw_text = "[SituationWindow.GetHistoryPageUIIndex] / [SituationWindow.GetHistoryPageCount]"
+						}
+						
+						button_select_arrow = {
+							enabled = "[SituationWindow.HasNextHistoryPage]"
+							size = { 25 25 }
+							
+							block "onclick_next"
+							{
+								onclick = "[SituationWindow.NextHistoryPage]"
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_increment"
+							}
+						}
+						expand = {}
+					}
+				}
+				
+				expand = {}
+				
+			}
+		}
+	}
+}
+
+types BP_ChronicleTypes
+{
+	type bp_chronicle_standard_entry_hbox = hbox
+	{
+		layoutpolicy_horizontal = expanding
+		maximumsize = { 660 50 }
+		
+		visible = "[Not( SituationPhaseType.HasParameter( 'show_illustration' ) )]"
+		
+		background = {
+			using = Background_Frame
+			alpha = 0.8
+		}
+		
+		# phase and value
+		hbox = {
+			datacontext = "[SituationHistoryEntry.GetCatalyst]"
+			minimumsize = { 78 45 }
+			margin = { 5 5 }
+			
+			background = {
+				using = Background_Area_Dark
+				alpha = 0.4
+			}
+			icon = {
+				size = { 35 35 }
+				datacontext = "[SituationCatalystHistory.GetPhase]"
+				texture = "[SituationPhaseType.GetIcon]"
+			}
+		}
+		
+		text_multi = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			text = "[SituationHistoryEntry.GetDescription( Situation.Self )]"
+			autoresize = no
+			align = nobaseline
+			max_width = 400
+			margin = { 10 5 }
+			default_format = "#light_background"
+		}
+		
+		expand = {}
+		
+		text_single = {
+			text = "[SituationHistoryEntry.GetCatalyst.GetDate.GetStringShort]"
+			default_format = "#light_background"
+			alpha = 0.5
+			align = nobaseline
+			margin = { 10 5 }
+		}
+	}
+	
+	type bp_chronicle_special_entry_hbox = hbox
+	{
+		layoutpolicy_horizontal = expanding
+		maximumsize = { 660 80 }
+		
+		visible = "[SituationPhaseType.HasParameter( 'show_illustration' )]"
+		
+		background = {
+			using = Background_Frame
+			alpha = 0.8
+		}
+		
+		background = {
+			
+			texture = "[SituationPhaseType.GetIllustration]"
+			fittype = centercrop
+			alpha = 0.4
+			
+			using = Mask_Rough_Edges
+			
+			modify_texture = {
+				texture = "gfx/interface/colors/blue.dds"
+				blend_mode = normal
+				alpha = 0.5
+			}
+		}
+		
+		# phase and value
+		hbox = {
+			minimumsize = { 78 78 }
+			margin = { 11 11 }
+			
+			icon = {
+				size = { 56 56 }
+				
+				visible = "[SituationPhaseType.IsValid]"
+				texture = "[SituationPhaseType.GetIcon]"
+			}
+		}
+		
+		text_multi = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			text = "[SituationHistoryEntry.GetDescription( Situation.Self )]"
+			autoresize = no
+			align = nobaseline
+			max_width = 400
+			margin = { 10 5 }
+			default_format = "#light_background"
+		}
+		
+		expand = {}
+		
+		text_single = {
+			text = "[SituationHistoryEntry.GetCatalyst.GetDate.GetStringShort]"
+			default_format = "#light_background"
+			alpha = 0.5
+			align = nobaseline
+			margin = { 10 5 }
+		}
+	}			

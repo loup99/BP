@@ -47,6 +47,7 @@ BP_convert_sub_roman_admin_to_dynastic = {
 			TARGET_TYPE = dynastic
 			ENOBLE_COURTIERS = no
 			TITLE_TROOPS = no
+			DESTROY_NON_PRIMARY_TITULARS = no
 		}
 		#Eliminate noble family titles
 		every_vassal_or_below = {
@@ -71,6 +72,7 @@ BP_convert_sub_roman_dynastic_to_admin = {
 			TARGET_TYPE = administrative
 			ENOBLE_COURTIERS = yes
 			TITLE_TROOPS = yes
+			DESTROY_NON_PRIMARY_TITULARS = yes
 		}
 	}
 }
@@ -89,6 +91,7 @@ BP_subroman_dynastic_under_subroman_admin = {
 			TARGET_TYPE = administrative
 			ENOBLE_COURTIERS = yes
 			TITLE_TROOPS = yes
+			DESTROY_NON_PRIMARY_TITULARS = yes
 		}
 	}
 }
@@ -122,26 +125,12 @@ on_title_gain = {
 	on_actions = {
 		BP_flip_federate_when_not_below_roman
 		BP_grants_to_tribals_become_federate
-		BP_keep_roman_federate_government
 		#Possibly during execution; the triggers do not overlap, so it *should* be safe
 		BP_convert_sub_roman_dynastic_to_admin
 		BP_convert_sub_roman_admin_to_dynastic
 	}
 }
 
-BP_keep_roman_federate_government = {
-	trigger = {
-		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
-		is_independent_ruler = no
-		this.top_liege = { government_has_flag = is_a_roman_government }
-	}
-	effect = {
-		if = {
-			limit = { scope:previous_holder ?= { has_government = roman_federate_government } }
-			change_government_roman_federate_effect = yes
-		}
-	}
-}
 BP_grants_to_tribals_become_federate = {
 	#Tribals and Migratory cultures become federates
 	trigger = {
@@ -180,6 +169,7 @@ BP_independent_roman_government_checks = {
 	trigger = {
 		BP_has_dlc_necessary_for_roman_admin_governments_trigger = yes
 		is_independent_ruler = yes
+		any_held_title = { is_head_of_faith = no }
 	}
 	effect = {
 		if = { #Independent Roman Admin governments must be at least empires, or they become subroman
@@ -281,6 +271,7 @@ BP_roman_admin_govs_under_nonroman_government_checks = {
 				TARGET_TYPE = dynastic
 				ENOBLE_COURTIERS = no
 				TITLE_TROOPS = no
+				DESTROY_NON_PRIMARY_TITULARS = no
 			}
 		}
 		else_if = {

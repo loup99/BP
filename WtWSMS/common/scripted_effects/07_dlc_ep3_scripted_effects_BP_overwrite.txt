@@ -724,6 +724,7 @@ ep3_become_landed_transfer_effect = {
 
 admin_government_reset_effect = {}
 
+##### Changed from Vanilla: Caught some weird edge effects relating to tribal landing
 ##### Changed from Vanilla: Catch some additional new admin governments!
 create_noble_family_effect = {
 	debug_log = create_noble_family_title
@@ -876,25 +877,43 @@ create_noble_family_effect = {
 				}
 			}
 		}
-		scope:new_title.holder ?= {
-			save_scope_as = noble_family_head
-			scope:new_title = { set_coa = scope:noble_family_head.house }
-		}
-		custom_description = { text = create_noble_family_tt }
-
-		#Notifications
-		every_player = {
+		##### Changed from Vanilla vvvvv
+		if = { #Only Tribal Holdings; remove that nf title
 			limit = {
-				top_liege = scope:new_noble_family_holder.top_liege
-				this != scope:new_noble_family_holder
-				# China has hundreds of Noble Families, it gets spammy
-				NOT = { government_allows = merit }
+				scope:new_noble_family_holder = {
+					any_held_title = {
+						count = all
+						OR = {
+							this.title_province = { has_holding_type = tribal_holding }
+							is_noble_family_title = yes
+						}
+					}
+				}
 			}
-			trigger_event = {
-				id = ep3_emperor_yearly.2410
-				days = 1
+			scope:new_noble_family_holder = { destroy_title = scope:new_title }
+		}
+		else = {
+			scope:new_title.holder ?= {
+				save_scope_as = noble_family_head
+				scope:new_title = { set_coa = scope:noble_family_head.house }
+			}
+			custom_description = { text = create_noble_family_tt }
+
+			#Notifications
+			every_player = {
+				limit = {
+					top_liege = scope:new_noble_family_holder.top_liege
+					this != scope:new_noble_family_holder
+					# China has hundreds of Noble Families, it gets spammy
+					NOT = { government_allows = merit }
+				}
+				trigger_event = {
+					id = ep3_emperor_yearly.2410
+					days = 1
+				}
 			}
 		}
+		##### Changed from Vanilla ^^^^^
 	}
 
 	debug_log_scopes = yes

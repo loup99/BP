@@ -1,0 +1,167 @@
+﻿migration_in_range_effect = {
+	effect = {
+		root = { save_temporary_scope_as = the_player }
+		set_global_variable = { name = custom_map_mode_changing value = 1 }
+		set_global_variable = { name = custom_map_mode value = flag:migration_in_range_map }
+		
+		every_county = {
+			limit = { is_landless_type_title = no }
+			save_temporary_scope_as = target
+			if = {
+				limit = {
+					OR = {
+						this.holder = scope:the_player
+						this.holder = { target_is_liege_or_above = scope:the_player }
+					}
+				}
+				every_county_province = { barony = { set_title_color = { 50 249 50 } } }
+			}
+			else_if = {
+				limit = {
+					migration_can_be_migrator_rank_trigger = { CHAR = scope:the_player }
+					bp_migration_war_general_distance_logic_gui_trigger = {
+						MIGRATING_CHAR = scope:the_player
+						TITLE = scope:target
+						HIERARCHY_TYPE_CHECK = any_in_de_jure_hierarchy
+						TARGET_OR_RANGE = target
+					}
+				}
+				every_county_province = { barony = { set_title_color = { 50 50 249 } } }
+			}
+			else = {
+				every_county_province = { barony = { set_title_color = { 84 78 60 } } }
+			}
+		}
+		remove_global_variable = custom_map_mode_changing
+	}
+	is_shown = {
+		exists = global_var:custom_map_mode
+		global_var:custom_map_mode = flag:migration_in_range_map
+	}
+	is_valid = {
+		NOT = { exists = global_var:custom_map_mode_changing }
+		trigger_if = {
+			limit = { exists = root }
+			root = { save_temporary_scope_as = the_player }
+			general_situation_regional_parameter_trigger = {
+				CHARACTER = scope:the_player
+				PARAMETER = migration_cbs_enabled
+			}
+			NOT = { government_has_flag = government_is_high_tribal }
+		}
+	}
+}
+migration_can_target_effect = {
+	effect = {
+		root = { save_temporary_scope_as = the_player }
+		set_global_variable = { name = custom_map_mode_changing value = 1 }
+		set_global_variable = { name = custom_map_mode value = flag:migration_in_range_map }
+		
+		every_county = {
+			limit = { is_landless_type_title = no }
+			save_temporary_scope_as = target
+			if = {
+				limit = {
+					OR = {
+						this.holder = scope:the_player
+						this.holder = { target_is_liege_or_above = scope:the_player }
+					}
+				}
+				every_county_province = { barony = { set_title_color = { 50 249 50 } } }
+			}
+			else_if = {
+				limit = {
+					migration_can_be_migrator_rank_trigger = { CHAR = scope:the_player }
+					bp_migration_war_general_distance_logic_gui_trigger = {
+						MIGRATING_CHAR = scope:the_player
+						TITLE = scope:target
+						HIERARCHY_TYPE_CHECK = any_in_de_jure_hierarchy
+						TARGET_OR_RANGE = target
+					}
+					migration_can_be_target_of_migration_trigger = { DEFENDER = this.holder.top_liege }
+				}
+				every_county_province = { barony = { set_title_color = { 50 50 249 } } }
+			}
+			else = {
+				every_county_province = { barony = { set_title_color = { 84 78 60 } } }
+			}
+		}
+		remove_global_variable = custom_map_mode_changing
+	}
+	is_shown = {
+		exists = global_var:custom_map_mode
+		global_var:custom_map_mode = flag:migration_in_range_map
+	}
+	is_valid = {
+		NOT = { exists = global_var:custom_map_mode_changing }
+		trigger_if = {
+			limit = { exists = root }
+			root = { save_temporary_scope_as = the_player }
+			general_situation_regional_parameter_trigger = {
+				CHARACTER = scope:the_player
+				PARAMETER = migration_cbs_enabled
+			}
+			NOT = { government_has_flag = government_is_high_tribal }
+		}
+	}
+}
+migration_in_range_to_be_migrated_effect = {
+	effect = {
+		root = { save_temporary_scope_as = the_player }
+		set_global_variable = { name = custom_map_mode_changing value = 1 }
+		set_global_variable = { name = custom_map_mode value = flag:migration_in_range_map }
+		
+		every_county = {
+			limit = {
+				is_landless_type_title = no
+			}
+			save_temporary_scope_as = target
+			if = {
+				limit = {
+					OR = {
+						this.holder = scope:the_player
+						this.holder = { target_is_liege_or_above = scope:the_player }
+					}
+				}
+				every_county_province = { barony = { set_title_color = { 50 249 50 } } }
+			}
+			else_if = {
+				limit = {
+					migration_can_be_target_of_migration_trigger = { DEFENDER = scope:the_player }
+					OR = {
+						migration_can_be_migrator_rank_trigger = { CHAR = this.holder }
+						migration_can_be_migrator_rank_trigger = { CHAR = this.holder.top_liege }
+					}
+					NOR = {
+						this.holder = { government_has_flag = government_is_high_tribal }
+						this.holder.top_liege = { government_has_flag = government_is_high_tribal }
+					}
+					OR = {
+						bp_migration_war_general_distance_logic_gui_trigger = {
+							MIGRATING_CHAR = scope:target.holder.top_liege
+							TITLE = scope:target.holder.top_liege.primary_title
+							HIERARCHY_TYPE_CHECK = any_in_de_facto_hierarchy
+							TARGET_OR_RANGE = range
+						}
+						bp_migration_war_general_distance_logic_gui_trigger = {
+							MIGRATING_CHAR = scope:target.holder
+							TITLE = scope:target.holder.primary_title
+							HIERARCHY_TYPE_CHECK = any_in_de_facto_hierarchy
+							TARGET_OR_RANGE = range
+						}
+					}
+				}
+				every_county_province = { barony = { set_title_color = { 249 50 50 } } }
+			}
+			else = {
+				every_county_province = { barony = { set_title_color = { 84 78 60 } } }
+			}
+		}
+		remove_global_variable = custom_map_mode_changing
+	}
+	is_shown = {
+		exists = global_var:custom_map_mode
+		global_var:custom_map_mode = flag:migration_in_range_map
+	}
+	is_valid = { NOT = { exists = global_var:custom_map_mode_changing } }
+}

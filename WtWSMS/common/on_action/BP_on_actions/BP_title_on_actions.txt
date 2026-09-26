@@ -65,10 +65,10 @@ on_title_gain = {
 		BP_apply_title_laws
 		#Specific other on-actions
 		BP_add_theocratic_traits
-		BP_fall_of_rome
 		BP_hegemonic_collapse
 		BP_check_independent_roman_polities
 		BP_fix_tribal_government_grants
+		BP_destroy_multiple_nf_titles
 	}
 }
 
@@ -101,26 +101,25 @@ BP_handle_independent_roman_polities = {
 }
 
 BP_handle_centralized_realm_stuff = {
+	trigger = {
+		government_has_flag = government_is_centralized
+		is_independent_ruler = yes
+		highest_held_title_tier >= tier_empire
+		scope:title.tier > primary_title.tier
+	}
 	effect = {
 		# Ensure Emperor keeps old realm capital in admin realms & apply unique domicile
 		# building bonus if appropriate
-		if = {
+		if = { # Ensure we keep the old realm capital
 			limit = {
-				government_has_flag = government_is_centralized
-				is_independent_ruler = yes
-				highest_held_title_tier >= tier_empire
-			}
-			if = { # Ensure we keep the old realm capital
-				limit = {
-					scope:title = {
-						tier = tier_empire
-						NOT = { title_capital_county = root.capital_county }
-						# Constantinople must have been inherited
-						title_capital_county.holder = root
-					}
+				scope:title = {
+					tier >= tier_empire
+					NOT = { title_capital_county = root.capital_county }
+					# Constantinople must have been inherited
+					title_capital_county.holder = root
 				}
-				set_realm_capital = scope:title.title_capital_county
 			}
+			set_realm_capital = scope:title.title_capital_county
 		}
 	}
 }
@@ -190,6 +189,17 @@ BP_hegemonic_collapse = {
 			scope:previous_holder = { save_scope_as = last_hegemon }
 			trigger_event = { id = bp_hegemonic_collapse.0001 }
 		}
+		# Add chronicle entry
+		situation:BP_chronicle = {
+			record_situation_special_event = {
+				key = situation_chronicle_title_destroyed_death_entry
+				phase = major_title_destroyed
+				variables = {
+					char = scope:previous_holder
+					title = scope:title
+				}
+			}
+		}
 	}
 }
 
@@ -221,6 +231,22 @@ BP_fix_tribal_government_grants = {
 	}
 }
 
+BP_destroy_multiple_nf_titles = {
+	trigger = { scope:title = { is_noble_family_title = yes } }
+	effect = {
+		#Don't accumulate NF titles
+		if = {
+			limit = {
+				any_held_title = {
+					is_noble_family_title = yes
+					NOT = { this = scope:title }
+				}
+			}
+			destroy_title = scope:title
+		}
+	}
+}
+
 # A vassal changes their liege
 # root = vassal changing their status
 # scope:old_liege = the previous liege of the vassal
@@ -228,10 +254,34 @@ BP_fix_tribal_government_grants = {
 on_vassal_change = {
 	on_actions = {
 		BP_degrade_roman_government
-		BP_fall_of_rome
 		BP_cleanup_landless_chars_under_non_admin
+		BP_completely_landless_realm_vassal_change
 	}
 }
+
+BP_completely_landless_realm_vassal_change = {
+	trigger = {
+		scope:old_liege ?= {
+			is_independent_ruler = yes
+			government_allows = administrative
+			is_landed = no
+			trigger_if = {
+				limit = { any_vassal = { count > 0 } }
+				any_vassal_or_below = { count < 1 is_landed = yes primary_title.tier >= tier_county }
+			}
+		}
+	}
+	effect = {
+		scope:old_liege ?= {
+			if = {
+				limit = { any_vassal = { count > 0 } }
+				every_vassal_or_below = { every_held_title = { prev = { destroy_title = prev } } }
+			}
+			every_held_title = { prev = { destroy_title = prev } }
+		}
+	}
+}
+
 
 BP_degrade_roman_government = {
 	effect = {
@@ -253,6 +303,7 @@ BP_cleanup_landless_chars_under_non_admin = {
 		root.top_liege != root
 		NOT = { root.top_liege ?= { government_allows = administrative } }
 		NOT = { any_held_title = { count > 0 is_landless_type_title = no } }
+		NOT = { any_held_title = { count > 0 is_head_of_faith = yes } }
 	}
 	effect = {
 		if = {
@@ -282,57 +333,71 @@ on_vassal_gained = {
 }
 
 BP_subroman_to_roman = {
+	trigger = {
+		government_has_flag = is_a_roman_government
+		NOT = { government_has_flag = is_a_transitory_roman_government }
+		scope:vassal = { government_has_flag = is_a_transitory_roman_government }
+	}
 	effect = {
 		#Sub-Romans change government to roman if they get vassalized
-		if = {
-			limit = {
-				root = {
-					government_has_flag = is_a_roman_government
-					NOT = { government_has_flag = is_a_transitory_roman_government }
-					scope:vassal = { government_has_flag = is_a_transitory_roman_government }
-				}
-			}
-			scope:vassal = {
+		scope:vassal = {
+			convert_to_roman_government_effect = yes
+			every_vassal_or_below = {
+				limit = { government_has_flag = is_a_transitory_roman_government }
 				convert_to_roman_government_effect = yes
-				every_vassal_or_below = {
-					limit = { government_has_flag = is_a_transitory_roman_government }
-					convert_to_roman_government_effect = yes
-				}
 			}
 		}
 	}
 }
 
+# A title is lost by a character
+# root = the old holder
+# scope:title = the title that changes hands
+# scope:new_holder = new holder.
 on_title_lost = {
 	on_actions = {
-		BP_fall_of_rome
+		BP_completely_landless_realm
 	}
 }
 
-##### Generic Modifiers
+##### Generic On Actions
 
-#Fires when Rome falls
-BP_fall_of_rome = {
+BP_completely_landless_realm = {
+	trigger = {
+		is_independent_ruler = yes
+		government_allows = administrative
+		is_landed = no
+		scope:title = { is_head_of_faith = no }
+		trigger_if = {
+			limit = { any_vassal = { count > 0 } }
+			any_vassal_or_below = { count < 1 is_landed = yes primary_title.tier >= tier_county }
+		}
+	}
+	effect = {
+		if = {
+			limit = { any_vassal = { count > 0 } }
+			every_vassal_or_below = { every_held_title = { prev = { destroy_title = prev } } }
+		}
+		every_held_title = { prev = { destroy_title = prev } }
+	}
+}
+
+on_realm_capital_change = {
+	on_actions = { bp_consume_capital_movement_variables }
+}
+
+# Called when realm capital changes. It can be manual move, loss in conquest, move after inheritance,
+# move when granted a better title, becoming landed for the first time
+# root: New realm capital barony
+# scope:old_capital - previous capital barony. Can be empty, can be owned by someone else
+bp_consume_capital_movement_variables = {
 	effect = {
 		if = {
 			limit = {
-				#Only shocking the first time...
-				NOT = { has_global_variable = fall_of_rome }
-				#Da Pope shouldn't trigger it ever; Translatio Imperii
-				NOT = { title:c_roma.holder.top_liege = { government_has_flag = government_is_theocracy } }
-				NOR = { #If any of the following is true, we would *not* be checking this
-					title:c_roma.holder.top_liege = { has_primary_title = title:e_wre }
-					title:c_roma.holder.top_liege = { has_primary_title = title:e_byzantium }
-					title:c_roma.holder.top_liege = { has_primary_title = title:h_roman_empire }
-					title:c_roma.holder.top_liege.culture = { has_cultural_parameter = greco_roman_social_tradition }
-				}
+				holder = { has_variable = migration_can_move_capital }
+				NOT = { holder = { has_variable = block_immediate_variable_removal } }
 			}
-			#Prevent from firing twice
-			set_global_variable = {
-				name = fall_of_rome
-				value = title:c_roma.holder.top_liege
-			}
-			title:c_roma.holder.top_liege = { trigger_event = bp_narrative_events.0001 }
+			holder = { remove_variable = migration_can_move_capital }
 		}
 	}
 }
