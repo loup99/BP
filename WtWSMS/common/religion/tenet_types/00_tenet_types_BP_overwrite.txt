@@ -264,7 +264,7 @@ tenet_communal_identity = {
 	}
 }
 
-##### Changed from Vanilla: Add Gothic Flavor
+##### Changed from Vanilla: Added Gothic Flavor
 
 # Communion
 tenet_communion = {
@@ -519,6 +519,110 @@ tenet_consolamentum = {
 	}
 }
 
+##### Changed from Vanilla: Add Latin/Greek Flavor
+
+# Adaptability
+tenet_adaptive = {
+	icon = tenet_adaptive
+
+	##### Changed from Vanilla vvvvv
+	name = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_latin }
+				desc = tenet_adaptive_latin_name
+			}
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_greek }
+				desc = tenet_adaptive_greek_name
+			}
+			desc = tenet_adaptive_name
+		}
+	}
+	desc = tenet_pursuit_of_power_desc
+	##### Changed from Vanilla ^^^^^
+
+	piety_cost = {
+		if = {
+			limit = {
+				OR = {
+					rite_religion_tag = christianity_religion
+					rite_religion_tag = islam_religion
+				}
+			}
+			value = faith_tenet_cost_high
+		}
+		else_if = {
+			limit = {
+				OR = {
+					rite_religion_tag = judaism_religion
+					rite_religion_tag = buddhism_religion
+					rite_religion_tag = jainism_religion
+					rite_has_doctrine = pagan_hostility_doctrine
+				}
+			}
+			value = faith_tenet_cost_low
+		}
+		else = {
+			value = faith_tenet_cost_mid
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_adaptive }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		custom_description = {
+			text = doctrine_inverted_pluralism_pluralistic_trigger
+			NOR = {
+				doctrine:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines }
+				doctrine:doctrine_pluralism_righteous = { is_in_list = selected_doctrines }
+			}
+		}
+	}
+
+	parameters = {
+		tenet_adaptive_conversion_resistance
+		reduced_vassal_religion_discontent
+		allow_adopt_any_holy_site
+		tenet_adaptive_study_rite_bonus
+	}
+
+	character_modifier = {
+		different_faith_county_opinion_mult = -0.25
+		different_faith_liege_opinion = 15
+		different_faith_suzerain_opinion = 15
+		opinion_of_different_faith_liege = 15
+		opinion_of_different_faith_suzerain = 15
+	}
+
+	personal_tenet_modifier = {
+		minority_opinion = 10
+		minority_tax_contribution_mult = 0.1
+		monthly_diplomacy_lifestyle_xp_gain_mult = 0.2
+		study_faith_scheme_phase_duration_add = medium_scheme_phase_duration_bonus_value
+		learn_language_scheme_phase_duration_add = medium_scheme_phase_duration_bonus_value
+		max_learn_language_schemes_add = 1
+	}
+
+	personal_tenet_parameters = {
+		adaptive_study_rite_cultural_acceptance
+		tenet_adaptive_study_rite_bonus
+	}
+
+	traits = {
+		virtues = {
+			fickle = { weight = 20 scale = 1 }
+		}
+		sins = {
+			stubborn = { weight = 20 scale = 1 }
+		}
+	}
+}
+
 ##### Changed from Vanilla: Gave dynamic name and description
 tenet_legalism = {
 	icon = tenet_legalism
@@ -706,6 +810,97 @@ tenet_literalism = {
 	}
 }
 
+##### Changed from Vanilla: Gave dynamic name and description
+
+# Bhakti / Patron Gods
+tenet_bhakti = {
+	icon = tenet_bhakti
+
+	##### Changed from Vanilla vvvvv
+	name = {
+		first_valid = {
+			##### Changed from Vanilla vvvvv
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_latin }
+				desc = tenet_bhakti_latin_name
+			}
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_greek }
+				desc = tenet_bhakti_greek_name
+			}
+			##### Changed from Vanilla ^^^^
+			triggered_desc = {
+				trigger = { rite_religion_tag = hinduism_religion }
+				desc = tenet_bhakti_name
+			}
+			desc = tenet_bhakti_patron_god_name
+		}
+	}
+	##### Changed from Vanilla ^^^^^
+
+	piety_cost = {
+		value = faith_tenet_cost_mid
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_bhakti }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		OR = {
+			religion = religion:hinduism_religion
+			# With FP1, Germanics also get personal deities.
+			trigger_if = {
+				limit = { has_fp1_dlc_trigger = yes }
+				religion = religion:germanic_religion
+			}
+		}
+		custom_tooltip = {
+			text = incompatible_doctrine_monotheist
+			NOT = { doctrine:doctrine_monotheist = { is_in_list = selected_doctrines } }
+		}
+	}
+
+	parameters = {
+		select_personal_god_active
+	}
+
+	can_pick_as_personal_tenet = {
+		trigger_if = {
+			limit = { has_particular_personal_deity_group = no }
+			rite = { rite_has_doctrine = doctrine_pluralism_pluralistic }
+			trigger_if = {
+				limit = { faith = { NOT = { has_doctrine = pagan_hostility_doctrine } } }
+				OR = {
+					has_personal_tenet = tenet_unreformed_syncretism
+					rite = { rite_has_parameter = unreformed_syncretic_actor }
+				}
+			}
+		}
+		NOT = { rite = { rite_has_doctrine = doctrine_monotheist } }
+	}
+
+	personal_tenet_modifier = {
+		piety_level_impact_mult = 0.2
+	}
+
+	personal_tenet_parameters = {
+		select_personal_god_active_personal # reduce the cost
+	}
+
+	traits = {
+		# Devotional intensity (bhakti yoga) - loving devotion is the tenet's primary spiritual discipline.
+		virtues = {
+			zealous = { weight = 20 scale = 1 }
+		}
+		sins = {
+			cynical = { weight = 10 scale = 1 }
+		}
+	}
+}
+
 ##### Changed from Vanilla: Triggered Icon for Eastern Faiths
 
 # Ancestor Worship
@@ -780,6 +975,173 @@ tenet_ancestor_worship = {
 		}
 	}
 }
+
+##### Changed from Vanilla: Custom Localizations
+
+# Ritual Celebrations
+tenet_ritual_celebrations = {
+	icon = tenet_ritual_celebrations
+
+	##### Changed from Vanilla vvvvv
+	name = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_latin }
+				desc = tenet_ritual_celebrations_latin_name
+			}
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_greek }
+				desc = tenet_ritual_celebrations_greek_name
+			}
+			desc = tenet_ritual_celebrations_name
+		}
+	}
+	desc = tenet_ritual_celebrations_desc
+	##### Changed from Vanilla ^^^^^
+
+	piety_cost = {
+		if = {
+			limit = {
+				OR = {
+					rite_religion_tag = hinduism_religion
+					rite_religion_tag = zoroastrianism_religion
+					rite_has_doctrine = pagan_hostility_doctrine
+				}
+			}
+			value = faith_tenet_cost_low
+		}
+		else = {
+			value = faith_tenet_cost_mid
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_ritual_celebrations }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	parameters = {
+		piety_from_feasts_active
+		piety_from_festivals_active
+		mandatory_feast_attendance
+		allows_brewery
+	}
+
+	character_modifier = {
+		vassal_opinion = 5
+		courtier_opinion = 5
+	}
+
+	personal_tenet_parameters = {
+		tenet_ritual_celebrations_praise_the_gods
+	}
+
+	traits = {
+		virtues = {
+			gregarious = { weight = 20 scale = 1 }
+		}
+		sins = {
+			shy = { weight = 15 scale = 1 }
+		}
+	}
+}
+
+##### Changed from Vanilla: Custom Localizations
+
+# Sanctity of Nature
+tenet_sanctity_of_nature = {
+	icon = tenet_sanctity_of_nature
+
+	##### Changed from Vanilla vvvvv
+	name = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_latin }
+				desc = tenet_sanctity_of_nature_latin_name
+			}
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_greek }
+				desc = tenet_sanctity_of_nature_greek_name
+			}
+			desc = tenet_sanctity_of_nature_name
+		}
+	}
+	desc = tenet_sanctity_of_nature_desc
+	##### Changed from Vanilla ^^^^^
+
+	piety_cost = {
+		if = {
+			limit = {
+				rite_religion_tag = hinduism_religion
+
+			}
+			value = faith_tenet_cost_high
+		}
+		else_if = {
+			limit = {
+				rite_has_doctrine = pagan_hostility_doctrine
+
+			}
+			value = faith_tenet_cost_low
+		}
+		else_if = {
+			limit = {
+				rite_has_doctrine = abrahamic_hostility_doctrine
+			}
+			value = faith_tenet_cost_massive
+		}
+		else = {
+			value = faith_tenet_cost_mid
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_sanctity_of_nature }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	parameters = {
+		believes_in_harmony_with_nature_invisible
+		sanctify_artifacts_natural
+		tenet_sanctity_of_nature_preserve_wilderness
+	}
+
+	personal_tenet_parameters = {
+		tenet_sanctity_of_nature_hike
+		tenet_sanctity_of_nature_wilderness_fulfillment
+	}
+	
+	personal_tenet_modifier = {
+		character_travel_safety = 10
+	}
+
+	character_modifier = {
+		forest_advantage = 5
+		forest_levy_size = 0.2
+		holding_build_gold_cost = 0.25
+		holding_build_speed = 0.25
+		nomad_government_opinion_same_faith = 20
+		tribal_government_opinion_same_faith = 20
+		wanua_government_opinion_same_faith = 20
+	}
+	
+	county_modifier = {
+		county_opinion_add = 5
+	}
+
+	traits = {
+		virtues = {
+			content = { weight = 15 scale = 1 }
+			patient = { weight = 10 scale = 1 }
+		}
+		sins = {
+			greedy = { weight = 10 scale = 1 }
+		}
+	}
+}
+
 
 ##### Changed from Vanilla: Made easier to pick in general, custom localization
 
@@ -870,7 +1232,6 @@ tenet_sun_worship = {
 		}
 	}
 }
-
 
 ##### Changed from Vanilla: simply unavailable
 tenet_household_gods = {
@@ -1017,8 +1378,22 @@ tenet_christian_syncretism = {
 tenet_pursuit_of_power = {
 	icon = tenet_pursuit_of_power
 
-	name = tenet_pursuit_of_power_name
+	##### Changed from Vanilla vvvvv
+	name = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_latin }
+				desc = tenet_pursuit_of_power_latin_name
+			}
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_greek }
+				desc = tenet_pursuit_of_power_greek_name
+			}
+			desc = tenet_pursuit_of_power_name
+		}
+	}
 	desc = tenet_pursuit_of_power_desc
+	##### Changed from Vanilla ^^^^^
 
 	piety_cost = {
 		if = {
