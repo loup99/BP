@@ -1,0 +1,433 @@
+﻿#Events for children developing personality traits
+
+namespace = child_personality
+
+scripted_trigger child_personality_0009_child_preacher_trigger = {
+	is_ai = yes
+	is_available_child_allow_travel = yes
+	age >= 4 # Kid should be able to talk in order to preach
+	this != root
+	NOT = { has_trait = cynical }
+}
+
+##### Changed from Vanilla: Tied zealous_trait_more_common into rite parameters as well
+
+#brave, calm or zealous
+child_personality.0009 = {
+	type = character_event
+	title = child_personality.0009.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					exists = scope:child_preacher
+				}
+				desc = child_personality.0009.desc
+			}
+			desc = child_personality.0009.desc_fallback
+		}
+	}
+	theme = education
+	override_background = {
+		reference = courtyard
+	}
+	left_portrait = {
+		character = root
+		animation = shock
+	}
+	right_portrait = {
+		character = scope:child_preacher
+		animation = personality_zealous
+	}
+
+	trigger = {
+		is_available_child_allow_travel = yes
+		NAND = {
+			OR = {
+				has_trait = brave
+				has_trait = craven
+			}
+			OR = {
+				has_trait = calm
+				has_trait = wrathful
+			}
+			OR = {
+				has_trait = zealous
+				has_trait = cynical
+			}
+		}
+		OR = {
+			any_courtier_or_guest = {
+				child_personality_0009_child_preacher_trigger = yes
+			}
+			AND = {
+				host ?= {
+					OR = {
+						any_courtier_or_guest = {
+							child_personality_0009_child_preacher_trigger = yes
+						}
+						any_vassal = {
+							any_courtier_or_guest = {
+								child_personality_0009_child_preacher_trigger = yes
+							}
+						}
+					}
+				}
+			}
+		}
+		is_valid_for_east_asian_events_trigger = no
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 2	
+			OR = {
+				guardian_or_court_tutor_trait_trigger = { TRAIT = brave }
+				guardian_or_court_tutor_trait_trigger = { TRAIT = calm }
+				guardian_or_court_tutor_trait_trigger = { TRAIT = zealous }
+			}
+		}
+		modifier = {
+			add = 5
+			##### Changed from Vanilla vvvvv
+			OR = {
+				culture = { has_cultural_parameter = zealous_trait_more_common }
+				rite = { rite_has_parameter = zealous_trait_more_common }
+			}
+			##### Changed from Vanilla ^^^^^
+			NOR = {
+				has_trait = zealous
+				has_trait = cynical
+			}
+		}
+		modifier = {
+			add = 5
+			culture = {
+				has_cultural_parameter = calm_trait_more_common
+			}
+			NOR = {
+				has_trait = calm
+				has_trait = wrathful
+			}
+		}
+	}
+
+	immediate = {
+		save_scope_as = child
+		if = {
+			limit = {
+				is_landed = yes
+			}
+			random_courtier_or_guest = {
+				limit = {
+					child_personality_0009_child_preacher_trigger = yes
+					has_trait = zealous
+				}
+				alternative_limit = {
+					child_personality_0009_child_preacher_trigger = yes
+				}
+				save_scope_as = child_preacher
+			}
+		}
+		if = {
+			limit = {
+				NOT = { exists = scope:child_preacher }
+			}
+			host = {
+				random_courtier_or_guest = {
+					limit = {
+						child_personality_0009_child_preacher_trigger = yes
+						has_trait = zealous
+					}
+					alternative_limit = {
+						child_personality_0009_child_preacher_trigger = yes
+					}
+					save_scope_as = child_preacher
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { exists = scope:child_preacher }
+			}
+			host = {
+				random_vassal = {
+					limit = {
+						any_courtier_or_guest = {
+							child_personality_0009_child_preacher_trigger = yes
+						}	
+					}
+					random_courtier_or_guest = {
+						limit = {
+							child_personality_0009_child_preacher_trigger = yes
+							has_trait = zealous
+						}
+						alternative_limit = {
+							child_personality_0009_child_preacher_trigger = yes
+						}
+						save_scope_as = child_preacher
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = child_personality.0009.a
+		trigger = {
+			NOR = {
+				has_trait = brave
+				has_trait = craven
+			}
+		}
+		ai_chance = {
+			base = 1
+			modifier = {
+				add = 4
+				guardian_or_court_tutor_trait_trigger = { TRAIT = brave }
+			}
+			modifier = {
+				add = -0.5
+				guardian_or_court_tutor_trait_trigger = { TRAIT = craven }
+			}
+		}
+		add_trait = brave
+		random = {
+			chance = 25
+			increase_wounds_effect = { REASON = fight }
+		}
+		if = {
+			limit = {
+				exists = scope:child_preacher
+				any_relation = {
+					type = bully
+					NOT = {
+						any_relation = {
+							type = friend
+							this = scope:child_preacher
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				random = {
+					chance = 50
+					show_as_tooltip = {
+						random_relation = {
+							type = bully
+							limit = {
+								NOT = {
+									any_relation = {
+										type = friend
+										this = scope:child_preacher
+									}
+								}
+							}
+							increase_wounds_effect = { REASON = fight }
+						}
+					}
+					hidden_effect = {
+						random_relation = {
+							type = bully
+							limit = {
+								NOT = {
+									any_relation = {
+										type = friend
+										this = scope:child_preacher
+									}
+								}
+							}
+							trigger_event = child_personality.2007
+						}
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			guardian_or_court_tutor_trigger_event_effect = { EVENT = child_personality.1091 }
+		}
+		if = {
+			limit = {
+				has_relation_bully = scope:child_preacher
+			}
+			show_as_tooltip = {
+				remove_relation_bully = scope:child_preacher
+			}
+		}
+		if = {
+			limit = {
+				has_relation_victim = scope:child_preacher
+			}
+			show_as_tooltip = {
+				remove_relation_victim = scope:child_preacher
+			}
+		}
+		show_as_tooltip = {
+			set_relation_friend = { reason = friend_saved_as_children target = scope:child_preacher }
+		}
+	}
+
+	option = {
+		name = child_personality.0009.b
+		trigger = {
+			NOR = {
+				has_trait = calm
+				has_trait = wrathful
+			}
+		}
+		ai_chance = {
+			base = 1
+			modifier = {
+				add = 4
+				guardian_or_court_tutor_trait_trigger = { TRAIT = calm }
+			}
+			modifier = {
+				add = -0.5
+				guardian_or_court_tutor_trait_trigger = { TRAIT = wrathful }
+			}
+			modifier = {
+				add = 100
+				culture = {
+					has_cultural_parameter = calm_trait_more_common
+				}
+			}
+		}
+		add_trait = calm
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			guardian_or_court_tutor_trigger_event_effect = { EVENT = child_personality.1092 }
+		}
+		if = {
+			limit = {
+				has_relation_bully = scope:child_preacher
+			}
+			show_as_tooltip = {
+				remove_relation_bully = scope:child_preacher
+			}
+		}
+		if = {
+			limit = {
+				has_relation_victim = scope:child_preacher
+			}
+			show_as_tooltip = {
+				remove_relation_victim = scope:child_preacher
+			}
+		}
+		show_as_tooltip = {
+			set_relation_friend = { reason = friend_saved_as_children target = scope:child_preacher }
+		}
+	}
+
+	option = {
+		name = child_personality.0009.c
+		trigger = {
+			NOR = {
+				has_trait = zealous
+				has_trait = cynical
+			}
+		}
+		ai_chance = {
+			base = 1
+			modifier = {
+				add = 4
+				guardian_or_court_tutor_trait_trigger = { TRAIT = zealous }
+			}
+			modifier = {
+				add = -0.5
+				guardian_or_court_tutor_trait_trigger = { TRAIT = cynical }
+			}
+			modifier = {
+				add = 100
+				##### Changed from Vanilla vvvvv
+				OR = {
+					culture = { has_cultural_parameter = zealous_trait_more_common }
+					rite = { rite_has_parameter = zealous_trait_more_common }
+				}
+				##### Changed from Vanilla ^^^^^
+			}
+			modifier = {	#court.6050
+				add = 50
+				OR = {
+					any_parent = { has_character_flag = burned_indecent_books }
+					warden ?= { has_character_flag = burned_indecent_books }
+					any_relation = {
+						type = guardian
+						has_character_flag = burned_indecent_books
+					}
+					AND = {
+						liege ?= { has_character_flag = burned_indecent_books }
+						location = liege.location
+					}
+				}
+			}
+		}
+		add_trait = zealous
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			guardian_or_court_tutor_trigger_event_effect = { EVENT = child_personality.1093 }
+		}
+		if = {
+			limit = {
+				has_relation_bully = scope:child_preacher
+			}
+			show_as_tooltip = {
+				remove_relation_bully = scope:child_preacher
+			}
+		}
+		if = {
+			limit = {
+				has_relation_victim = scope:child_preacher
+			}
+			show_as_tooltip = {
+				remove_relation_victim = scope:child_preacher
+			}
+		}
+		show_as_tooltip = {
+			set_relation_friend = { reason = friend_saved_as_children target = scope:child }
+		}	
+	}
+
+	option = {
+		name = child_personality.0009.d
+		trigger = {
+			OR = {
+				has_relation_victim = scope:child_preacher
+				has_relation_bully = scope:child_preacher
+			}
+		}
+		scope:child_preacher = {
+			random = {
+				chance = 25
+				increase_wounds_effect = { REASON = fight }
+			}
+		}
+		if = {
+			limit = {
+				NOR = {
+					has_trait = compassionate
+					has_trait = callous
+					has_trait = sadistic
+				}
+			}
+			add_trait = sadistic
+		}
+		
+		ai_chance = {
+			base = 0
+		}
+	}
+
+	after = {
+		scope:child_preacher = {
+			trigger_event = child_personality.2006
+		}
+	}
+}

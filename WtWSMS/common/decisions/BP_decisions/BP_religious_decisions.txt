@@ -9,8 +9,8 @@ raise_circumcellions_decision = {
 	selection_tooltip = raise_circumcellions_decision_tooltip
 	
 	is_shown = {
-		has_personal_tenet_flag = raise_circumcellions_decision
 		is_ruler = yes
+		rite = { rite_has_parameter = raise_circumcellions_decision_visible }
 		NOT = { government_has_flag = government_is_nomadic }
 		trigger_if = { #Available for high tribals, but not tribals
 			limit = { government_has_flag = government_is_tribal }
@@ -19,6 +19,7 @@ raise_circumcellions_decision = {
 	}
 	
 	is_valid = {
+		has_personal_tenet_flag = raise_circumcellions_decision
 		trigger_if = {
 			limit = { has_character_flag = recently_called_circumcellions }
 			custom_description = {
@@ -165,6 +166,155 @@ raise_circumcellions_decision = {
 			factor = 1.59 #sqrt(2.5) rounded up
 			has_trait = ambitious
 		}
+	}
+}
+reaffirm_faith_decision = {
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_personal_religious.dds"
+	}
+	decision_group_type = religious
+
+	desc = reaffirm_faith_decision_desc
+	selection_tooltip = reaffirm_faith_decision_tooltip
+	
+	is_shown = {
+		OR = {
+			rite = { rite_has_parameter = reaffirm_faith_decision_visible }
+			has_personal_tenet_flag = reaffirm_faith_decision
+		}
+	}
+	
+	is_valid = {
+		has_personal_tenet_flag = reaffirm_faith_decision
+		NOT = { has_trait = excommunicated } #Definitely not allowed in this case; get your affairs in order first
+		NOT = { has_trait = cynical }
+		trigger_if = {
+			limit = { has_character_flag = recently_reaffirmed_faith }
+			custom_description = {
+				text = recently_reaffirmed_faith
+				NOT = { has_character_flag = recently_reaffirmed_faith }
+			}
+		}
+	}
+	
+	is_valid_showing_failures_only = {
+		piety >= 0
+		is_imprisoned = no
+		is_available_adult = yes
+	}
+	
+	cost = {
+		piety = {
+			value = 50
+			multiply = primary_title.tier
+			if = {
+				limit = { has_trait = zealous }
+				multiply = 0.5
+			}
+		}
+	}
+	
+	effect = {
+		hidden_effect = {
+			root = { add_character_flag = { flag = recently_reaffirmed_faith years = 5 } }
+		}
+		change_spiritual_fulfillment = {
+			value = 10
+			if = {
+				limit = { root = { has_trait = fickle } }
+				add = 2
+			}
+			if = {
+				limit = { root = { has_trait = eccentric } }
+				add = 2
+			}
+			every_character_trait = {
+				save_temporary_scope_as = the_trait
+				if = {
+					limit = { root.rite = { trait_is_sin_rite = scope:the_trait } }
+					add = {
+						value = -5
+						if = {
+							limit = { root = { has_trait = zealous } }
+							subtract = 1
+						}
+						subtract = {
+							value = 0
+							if = {
+								limit = { root.piety_level >= 1 }
+								subtract = 1
+							}
+							if = {
+								limit = { root.piety_level >= 2 }
+								subtract = 2
+							}
+							if = {
+								limit = { root.piety_level >= 3 }
+								subtract = 3
+							}
+							if = {
+								limit = { root.piety_level >= 4 }
+								subtract = 4
+							}
+							if = {
+								limit = { root.piety_level >= 5 }
+								subtract = 5
+							}
+						}
+					}
+				}
+				else_if = {
+					limit = { root.rite = { trait_is_virtue_rite = scope:the_trait } }
+					add = {
+						value = 5
+						if = {
+							limit = { root = { has_trait = zealous } }
+							subtract = 1
+						}
+						subtract = {
+							value = 0
+							if = {
+								limit = { root.piety_level >= 1 }
+								subtract = 5
+							}
+							if = {
+								limit = { root.piety_level >= 2 }
+								subtract = 4
+							}
+							if = {
+								limit = { root.piety_level >= 3 }
+								subtract = 3
+							}
+							if = {
+								limit = { root.piety_level >= 4 }
+								subtract = 2
+							}
+							if = {
+								limit = { root.piety_level >= 5 }
+								subtract = 1
+							}
+						}
+					}
+				}
+			}
+			min = 5
+		}
+		custom_tooltip = reaffirm_faith_factors
+	}
+	
+	ai_check_interval_by_tier = {
+		barony = 0
+		county = 120
+		duchy = 120
+		kingdom = 120
+		empire = 120
+		hegemony = 120
+	}
+	
+	ai_potential = { is_at_war = no }
+	
+	ai_will_do = {
+		base = 100
 	}
 }
 

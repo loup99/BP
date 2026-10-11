@@ -1,0 +1,357 @@
+﻿#Events for children developing personality traits
+
+namespace = child_personality
+
+scripted_trigger appropriate_priest = {
+	is_available_ai_adult = yes
+	faith = root.faith
+	OR = {
+		is_clergy = yes
+		has_trait = devoted
+		has_council_position = councillor_court_chaplain
+		has_court_position = high_almoner_court_position
+		has_court_position = chief_qadi_court_position
+	}
+}
+
+##### Changed from Vanilla: Tied zealous_trait_more_common into rite parameters as well
+
+#zealous, ambitious, sadistic
+#Realm priest is holding a sermon for the children
+child_personality.7010 = {
+	type = character_event
+	title = child_personality.7010.t
+	desc = child_personality.7010.desc
+	theme = education
+	override_background = { reference = temple }
+	left_portrait = {
+		character = root
+		animation = personality_rational
+	}
+	right_portrait = {
+		character = scope:sermon_priest
+		animation = personality_zealous
+	}
+
+	trigger = {
+		is_available_child_allow_travel = yes
+		NAND = {
+			OR = {
+				has_trait = zealous
+				has_trait = cynical
+			}
+			OR = {
+				has_trait = ambitious
+				has_trait = content
+			}
+			OR = {
+				has_trait = sadistic
+				has_trait = compassionate
+				has_trait = callous
+			}
+		}
+		location.county.holder ?= {
+			OR = {
+				AND = {
+					is_ai = yes
+					cp:councillor_court_chaplain ?= {
+						is_ai = yes
+					}
+					root = {
+						is_ai = yes
+						any_relation = {
+							type = guardian
+							is_ai = yes
+						}
+					}
+				}
+				any_courtier = {
+					appropriate_priest = yes
+				}
+				any_vassal = {
+					appropriate_priest = yes
+				}
+			}
+		}
+		is_valid_for_east_asian_events_trigger = no
+	}
+
+	weight_multiplier = {
+		base = 1
+		modifier = {
+			add = 2
+			OR = {
+				guardian_or_court_tutor_trait_trigger = { TRAIT = zealous }
+				guardian_or_court_tutor_trait_trigger = { TRAIT = ambitious }
+				guardian_or_court_tutor_trait_trigger = { TRAIT = sadistic }
+			}
+		}
+		modifier = {
+			add = 5
+			##### Changed from Vanilla vvvvv
+			OR = {
+				culture = { has_cultural_parameter = zealous_trait_more_common }
+				rite = { rite_has_parameter = zealous_trait_more_common }
+			}
+			##### Changed from Vanilla ^^^^^
+			NOR = {
+				has_trait = zealous
+				has_trait = cynical
+			}
+		}
+		modifier = {
+			add = 5
+			culture = {
+				has_cultural_parameter = ambitious_trait_more_common
+			}
+			NOR = {
+				has_trait = content
+				has_trait = ambitious
+			}
+		}
+	}
+
+	immediate = {
+		save_scope_as = child
+		location.county.holder = {
+			if = {
+				limit = {
+					AND = {
+						is_ai = yes
+						cp:councillor_court_chaplain ?= {
+							is_ai = yes
+						}
+						root = {
+							is_ai = yes
+							any_relation = {
+								type = guardian
+								is_ai = yes
+							}
+						}
+					}
+				}
+				cp:councillor_court_chaplain = {
+					save_scope_as = sermon_priest
+				}
+			}
+			else = {
+				every_courtier = {
+					limit = {
+						appropriate_priest = yes
+					}
+					add_to_list = potential_priests
+				}
+				every_vassal = {
+					limit = {
+						appropriate_priest = yes
+					}
+					add_to_list = potential_priests
+				}
+				random_in_list = {
+					list = potential_priests
+					weight = {
+						base = 1
+						modifier = {
+							add = 10
+							is_of_major_interest_to_root_trigger = yes
+						}
+						modifier = {
+							add = 5
+							is_of_minor_interest_to_root_trigger = yes
+						}
+					}
+					save_scope_as = sermon_priest
+				}
+			}
+		}
+	}
+
+	option = { # zealous
+		name = child_personality.7010.a
+		trigger = {
+			NOR = {
+				has_trait = cynical
+				has_trait = zealous
+			}
+		}
+		add_trait = zealous
+		if = {
+			limit = {
+				scope:sermon_priest ?= {
+					NOT = {
+						has_trait = cynical
+					}
+				}
+			}
+			progress_towards_friend_effect = {
+				CHARACTER = scope:sermon_priest
+				OPINION = 50
+				REASON = friend_child_sermon
+			}
+		}
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			add_character_flag = zealous
+			guardian_or_court_tutor_trigger_event_effect = { EVENT = child_personality.7011 }
+		}
+		ai_chance = {
+			base = 1
+			modifier = {
+				add = 4
+				guardian_or_court_tutor_trait_trigger = { TRAIT = zealous }
+			}
+			modifier = {
+				add = -0.5
+				guardian_or_court_tutor_trait_trigger = { TRAIT = cynical }
+			}
+			modifier = {
+				add = 100
+				##### Changed from Vanilla vvvvv
+				OR = {
+					culture = { has_cultural_parameter = zealous_trait_more_common }
+					rite = { rite_has_parameter = zealous_trait_more_common }
+				}
+				##### Changed from Vanilla ^^^^^
+			}
+		}
+	}
+
+	option = { # ambitious
+		name = child_personality.7010.b
+		trigger = {
+			NOR = {
+				has_trait = content
+				has_trait = ambitious
+			}
+		}
+		add_trait = ambitious
+		if = {
+			limit = {
+				exists = scope:sermon_priest
+			}
+			scope:sermon_priest = {
+				if = {
+					limit = {
+						OR = {
+							has_trait = cynical
+							has_trait = ambitious
+							AND = {
+								NOT = {
+									has_trait = zealous
+								}
+								has_personality_malicious_trigger = yes
+							}
+						}
+					}
+					if = {
+						limit = {
+							can_set_relation_friend_trigger = { CHARACTER = scope:child }
+						}
+						set_relation_friend = { reason = friend_took_lessons_to_heart target = scope:child }
+						add_opinion = {
+							target = scope:child
+							modifier = clever_child_opinion
+						}
+					}
+				}
+				else = {
+					add_opinion = {
+						target = scope:child
+						modifier = disappointed_opinion
+						opinion = -10
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			add_character_flag = ambitious
+			guardian_or_court_tutor_trigger_event_effect = { EVENT = child_personality.7011 }
+		}
+		ai_chance = {
+			base = 1
+			modifier = {
+				add = 4
+				guardian_or_court_tutor_trait_trigger = { TRAIT = ambitious }
+			}
+			modifier = {
+				add = -0.5
+				guardian_or_court_tutor_trait_trigger = { TRAIT = content }
+			}
+			modifier = {
+				add = 100
+				culture = {
+					has_cultural_parameter = ambitious_trait_more_common
+				}
+			}
+		}
+	}
+
+	option = { # sadistic
+		name = child_personality.7010.c
+		trigger = {
+			NOR = {
+				has_trait = compassionate
+				has_trait = callous
+				has_trait = sadistic
+			}
+		}
+		add_trait = sadistic
+		if = {
+			limit = {
+				exists = scope:sermon_priest
+			}
+			scope:sermon_priest = {
+				if = {
+					limit = {
+						OR = {
+							has_trait = sadistic
+							AND = {
+								has_trait = cynical
+								has_personality_malicious_trigger = yes
+							}
+						}
+					}
+					if = {
+						limit = {
+							can_set_relation_friend_trigger = { CHARACTER = scope:child }
+						}
+						set_relation_friend = { reason = friend_took_lessons_to_heart target = scope:child }
+						add_opinion = {
+							target = scope:child
+							modifier = delightfully_devilish_opinion
+						}
+					}
+				}
+				else = {
+					add_opinion = {
+						target = scope:child
+						modifier = worried_opinion
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			add_character_flag = sadistic
+			guardian_or_court_tutor_trigger_event_effect = { EVENT = child_personality.7011 }
+		}
+		ai_chance = {
+			base = 1
+			modifier = {
+				add = 4
+				guardian_or_court_tutor_trait_trigger = { TRAIT = sadistic }
+			}
+			modifier = {
+				add = -0.5
+				guardian_or_court_tutor_trait_trigger = { TRAIT = compassionate }
+			}
+		}
+	}
+}

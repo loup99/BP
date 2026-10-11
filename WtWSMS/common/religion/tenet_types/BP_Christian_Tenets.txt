@@ -41,6 +41,7 @@
 	}
 
 	parameters = {
+		raise_circumcellions_decision_visible #No Loc
 		tenet_redeeming_struggle_resistance = yes
 		great_holy_wars_active = yes
 		peasant_and_populist_factions_more_common = yes
@@ -256,18 +257,59 @@ tenet_complex_exegesis = {
 	}
 }
 tenet_credobaptism = {
-	icon = tenet_credobaptism
-	name = tenet_credobaptism_name
-	desc = tenet_credobaptism_desc
+	icon = tenet_rite
+
+	name = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_latin }
+				desc = tenet_credobaptism_latin_name
+			}
+			triggered_desc = {
+				trigger = { rite_has_parameter = liturgical_language_greek }
+				desc = tenet_credobaptism_greek_name
+			}
+			desc = tenet_credobaptism_name
+		}
+	}
+
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { faith = faith:gnostic_faith }
+				desc = tenet_credobaptism_valentinianism_desc
+			}
+			triggered_desc = {
+				trigger = {
+					OR = {
+						tenet:tenet_gnosticism = { is_in_list = selected_doctrines }
+						religion = religion:dualism_religion
+					}
+				}
+				desc = tenet_credobaptism_gnostic_desc
+			}
+			triggered_desc = {
+				trigger = { religion = religion:christianity_religion }
+				desc = tenet_credobaptism_christian_desc
+			}
+			desc = tenet_credobaptism_desc
+		}
+	}
 
 	is_shown = {}
 
 	can_pick = {
-		religion = religion:christianity_religion
-		unique_christology_trigger = yes
+		custom_description = {
+			text = doctrine_sacraments_central_trigger
+			doctrine:doctrine_sacraments_central = { is_in_list = selected_doctrines }
+		}
 	}
 	can_pick_as_personal_tenet = {
-		unique_christology_personal_trigger = yes
+		custom_description = { #Not so much de jure, but you can't get piety for baptizing your kids
+			text = incompatible_tenet_original_sin_trigger
+			NOT = { doctrine:tenet_original_sin = { is_in_list = selected_doctrines } }
+		}
+		NOT = { has_trait = cynical }
 	}
 
 	piety_cost = {
@@ -280,23 +322,27 @@ tenet_credobaptism = {
 		}
 	}
 
-	divergence_multiplier = 1.5
+	divergence_multiplier = 2.0
 
-	character_modifier = {
-		different_faith_opinion = 15
+	character_modifier = {}
+
+	parameters = {
+		reaffirm_faith_decision_visible #No Loc
+		zealous_trait_more_common
+		adult_baptism_bonus
+		adult_conversion_bonus
 	}
 
-	parameters = {}
+	personal_tenet_modifier = {
+		monthly_piety_gain_mult = 0.05
+	}
 
-	personal_tenet_parameters = {}
+	personal_tenet_parameters = {
+		reaffirm_faith_decision
+	}
 
 	traits = {
-		# Doctrinal fidelity to the one-united-nature formula vs. dissimulation under Chalcedonian pressure.
-		virtues = {
-			humble = { weight = 15 scale = 1 }
-		}
-		sins = {
-			arbitrary = { weight = 15 scale = 1 }
-		}
+		virtues = { patient = { weight = 15 scale = 1 } }
+		sins = { impatient = { weight = 15 scale = 1 } }
 	}
 }

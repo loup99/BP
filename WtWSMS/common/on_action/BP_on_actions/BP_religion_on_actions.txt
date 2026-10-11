@@ -24,6 +24,7 @@ on_faith_conversion = {
 	on_actions = {
 		BP_check_zealous_pagans
 		BP_change_faith_dynasty_coa
+		BP_adult_credobaptism
 	}
 }
 
@@ -60,6 +61,32 @@ BP_change_faith_dynasty_coa = {
 	}
 }
 
+BP_adult_credobaptism = {
+	trigger = {
+		rite = { rite_has_parameter = adult_conversion_bonus }
+		trigger_if = {
+			limit = { has_variable = credobaptism_faith }
+			NOT = { this.var:credobaptism_faith = this.rite.faith }
+		}
+	}
+	effect = {
+		set_variable = {
+			name = credobaptism_faith
+			value = scope:the_char.rite.faith
+		}
+		send_interface_toast = {
+			type = event_toast_effect_good
+			title = tenet_credobaptism_toast
+			left_icon = scope:the_char
+			add_piety = major_piety_value
+			set_variable = {
+				name = credobaptism_faith
+				value = scope:the_char.rite.faith
+			}
+		}
+	}
+}
+
 # Code on-action: when a character selects a new personal tenet successfully this onaction is called.
 # Root is character picking the tenet
 # scope:tenet is the tenet they just picked
@@ -75,6 +102,41 @@ BP_personal_tenet_gain_effects = {
 				has_personal_tenet_flag = gain_level_of_piety_when_adopting_this_tenet
 			}
 			add_piety_level = 1
+		}
+	}
+}
+
+on_birthday = {
+	on_actions = {
+		bp_religious_birthday_actions
+	}
+}
+
+bp_religious_birthday_actions = {
+	first_valid_on_action = {
+		bp_on_16th_birthday
+	}
+}
+
+bp_on_16th_birthday = {
+	trigger = { is_adult = yes }
+	effect = {
+		save_temporary_scope_as = the_char
+		if = {
+			limit = { rite = { rite_has_parameter = adult_baptism_bonus } }
+			if = {
+				limit = { is_ai = no }
+				send_interface_toast = {
+					type = event_toast_effect_good
+					title = tenet_credobaptism_toast
+					left_icon = scope:the_char
+					add_piety = massive_piety_value
+					set_variable = {
+						name = credobaptism_faith
+						value = scope:the_char.rite.faith
+					}
+				}
+			}
 		}
 	}
 }
