@@ -124,6 +124,148 @@ tenet_aniconism = {
 	}
 }
 
+##### Changed from Vanilla: Not available to Christians (yes, really), as we have the Antioch/Alexandria split
+
+# Alexandrian Catechism / Islamic Rationalism / Catechesis Alexandrina / Alexandrinē Katēkhēsis
+tenet_alexandrian_catechism = {
+	icon = tenet_alexandrian_catechism
+
+	piety_cost = {
+		value = faith_tenet_cost_mid
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_alexandrian_catechism }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	name = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					NOT = { faith = { religion = religion:christianity_religion } }
+				}
+				desc = tenet_islamic_rationalism_name
+			}
+			triggered_desc = {
+				trigger = {
+					has_pam_dlc_trigger = yes
+					pam_latin_as_liturgical_language_trigger = yes
+				}
+				desc = tenet_alexandrian_catechism_latin_name
+			}
+			triggered_desc = {
+				trigger = {
+					has_pam_dlc_trigger = yes
+					pam_greek_as_liturgical_language_trigger = yes
+				}
+				desc = tenet_alexandrian_catechism_greek_name
+			}
+			triggered_desc = {
+				trigger = {
+					has_pam_dlc_trigger = yes
+					pam_greek_as_liturgical_language_trigger = no
+					pam_latin_as_liturgical_language_trigger = no
+				}
+				desc = tenet_alexandrian_catechism_default_name
+			}
+			triggered_desc = {
+				trigger = {
+					rite_religion_tag = christianity_religion
+					has_pam_dlc_trigger = no
+				}
+				desc = tenet_alexandrian_catechism_name
+			}
+			desc = tenet_islamic_rationalism_name
+		}
+	}
+
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					NOT = { faith = { religion = religion:christianity_religion } }
+				}
+				desc = tenet_islamic_rationalism_desc
+			}
+			triggered_desc = {
+				trigger = {
+					has_pam_dlc_trigger = yes
+					pam_latin_as_liturgical_language_trigger = yes
+				}
+				desc = tenet_alexandrian_catechism_latin_desc
+			}
+			triggered_desc = {
+				trigger = {
+					has_pam_dlc_trigger = yes
+					pam_greek_as_liturgical_language_trigger = yes
+				}
+				desc = tenet_alexandrian_catechism_greek_desc
+			}
+			triggered_desc = {
+				trigger = {
+					has_pam_dlc_trigger = yes
+					pam_greek_as_liturgical_language_trigger = no
+					pam_latin_as_liturgical_language_trigger = no
+				}
+				desc = tenet_alexandrian_catechism_default_desc
+			}
+			triggered_desc = {
+				trigger = {
+					faith = { religion = religion:christianity_religion }
+					has_pam_dlc_trigger = no
+				}
+				desc = tenet_alexandrian_catechism_desc
+			}
+			desc = tenet_islamic_rationalism_desc
+		}
+	}
+
+	##### Changed from Vanilla vvvvv
+	is_shown = {
+		always = no
+		NOT = { religion = religion:christianity_religion }
+	}
+	##### Changed from Vanilla ^^^^^
+
+	can_pick = {
+		##### Changed from Vanilla vvvvv
+		NOT = { religion = religion:christianity_religion }
+		##### Changed from Vanilla ^^^^^
+		religion = religion:islam_religion
+		custom_description = {
+			text = doctrine_pluralism_fundamentalist_trigger
+			NOT = { doctrine:doctrine_pluralism_fundamentalist = { is_in_list = selected_doctrines } }
+		}
+	}
+
+	divergence_multiplier = 1.5
+
+	character_modifier = {
+		monthly_learning_lifestyle_xp_gain_mult = 0.1
+		learning_per_stress_level = 2
+	}
+	
+	parameters = {
+		scholasticism_is_holy
+	}
+
+	personal_tenet_parameters = {
+		tenet_alexandrian_catechism_catechetical_school
+		tenet_alexandrian_catechism_catechesis_conversion
+	}
+
+	traits = {
+		virtues = {
+			eccentric = { weight = 15 scale = 1 }
+		}
+		sins = {
+			zealous = { weight = 15 scale = 1 }
+		}
+	}
+}
+
 ##### Changed from Vanilla: Extended Jewish name trigger effects, add Gothic Flavor
 
 # Communal Identity / Chosen People / Populus Dei / Laòs Theoũ
@@ -364,6 +506,10 @@ tenet_consolamentum = {
 		first_valid = {
 			##### Changed from Vanilla vvvvv
 			triggered_desc = {
+				trigger = { rite_religion_tag = germanic_religion }
+				desc = tenet_consolamentum_attestupa_name
+			}
+			triggered_desc = {
 				trigger = {
 					NOT = { rite_religion_tag = christianity_religion }
 					rite_has_parameter = liturgical_language_greek
@@ -414,6 +560,10 @@ tenet_consolamentum = {
 	desc = {
 		first_valid = {
 			##### Changed from Vanilla vvvvv
+			triggered_desc = {
+				trigger = { rite_religion_tag = germanic_religion }
+				desc = tenet_consolamentum_attestupa_desc
+			}
 			triggered_desc = {
 				trigger = {
 					NOT = { rite_religion_tag = christianity_religion }
@@ -745,6 +895,14 @@ tenet_literalism = {
 			NOT = { tenet:tenet_complex_exegesis = { is_in_list = selected_doctrines } }
 		}
 		custom_description = {
+			text = incompatible_tenet_alexandrian_school_trigger
+			NOT = { tenet:tenet_alexandrian_school = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_antiochene_school_trigger
+			NOT = { tenet:tenet_antiochene_school = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
 			text = requires_scriptural_basis_trigger
 			OR = {
 				doctrine:doctrine_scriptural = { is_in_list = selected_doctrines }
@@ -755,6 +913,8 @@ tenet_literalism = {
 	can_pick_as_personal_tenet = {
 		culture = { has_innovation = innovation_writing }
 		NOT = { has_personal_tenet = tenet_complex_exegesis }
+		NOT = { has_personal_tenet = tenet_alexandrian_school }
+		NOT = { has_personal_tenet = tenet_antiochene_school }
 	}
 	##### Changed from Vanilla ^^^^^
 
@@ -1141,7 +1301,6 @@ tenet_sanctity_of_nature = {
 		}
 	}
 }
-
 
 ##### Changed from Vanilla: Made easier to pick in general, custom localization
 

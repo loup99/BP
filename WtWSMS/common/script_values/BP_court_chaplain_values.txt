@@ -66,177 +66,6 @@ conversion_holy_site_amida = {
 # Faith Tenet Values
 organized_conversion_nerfed_value = -0.20
 
-### Ethnic religions
-conversion_tenet_ethnic_religion_conversion_resistance_value = 80#%; integer for localization
-conversion_tenet_ethnic_religion_conversion_resistance = {
-	value = 0
-	if = {
-		limit = {
-			scope:county.faith = { has_doctrine_parameter = tenet_ethnic_religion_conversion_resistance_active }
-			exists = scope:county
-			#Make sure culture and faith align
-			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:county
-				VARIABLE = ethnic_religion_culture
-			}
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_ethnic_religion_conversion_resistance_value
-		divide = 100
-	}
-}
-conversion_tenet_ethnic_religion_converting_foreigners_resistance_value = 100#%; integer for localization
-conversion_tenet_ethnic_religion_converting_foreigners_resistance = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_other_culture_conversion_penalty_active }
-			exists = scope:county
-			NAND = {
-				actor_is_faith_culture_for_cultural_religions_trigger = {
-					ACTOR = scope:county
-					TARGET = scope:councillor_liege
-					VARIABLE = ethnic_religion_culture
-				}
-				actor_is_faith_child_culture_for_cultural_religions_trigger = {
-					ACTOR = scope:county
-					TARGET = scope:councillor_liege
-					VARIABLE = ethnic_religion_culture
-				}
-			}
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_ethnic_religion_converting_foreigners_resistance_value
-		divide = 100
-	}
-}
-conversion_tenet_ethnic_religion_same_culture_conversion_bonus_value = 100#%; integer for localization
-conversion_tenet_ethnic_religion_same_culture_conversion_bonus = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
-			exists = scope:county
-			actor_is_faith_child_culture_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:councillor_liege
-				VARIABLE = ethnic_religion_culture
-			}
-		}
-		add = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_ethnic_religion_same_culture_conversion_bonus_value
-		divide = 100
-	}
-}
-conversion_tenet_ethnic_religion_child_culture_conversion_bonus_value = 50#%; integer for localization
-conversion_tenet_ethnic_religion_child_culture_conversion_bonus = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor.faith = { has_doctrine_parameter = tenet_ethnic_religion_same_culture_conversion_bonus_active }
-			exists = scope:county
-			scope:councillor_liege.culture = { any_parent_culture_or_above = { this = scope:county.faith.var:ethnic_religion_culture } }
-		}
-		add = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_ethnic_religion_child_culture_conversion_bonus_value
-		divide = 100
-	}
-}
-
-### Autocephaly Values
-conversion_tenet_autocephaly_same_culture_bonus_value = 30#%; integer for localization
-conversion_tenet_autocephaly_same_culture_bonus = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
-			exists = scope:county
-			actor_is_faith_culture_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:councillor_liege
-				VARIABLE = church_culture
-			}
-		}
-		add = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_autocephaly_same_culture_bonus_value
-		divide = 100
-	}
-}
-conversion_tenet_autocephaly_child_culture_bonus_value = 20#%; integer for localization
-conversion_tenet_autocephaly_child_culture_bonus = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
-			exists = scope:county
-			actor_is_faith_child_culture_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:councillor_liege
-				VARIABLE = church_culture
-			}
-		}
-		add = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_autocephaly_child_culture_bonus_value
-		divide = 100
-	}
-}
-conversion_tenet_autocephaly_same_heritage_bonus_value = 10#%; integer for localization
-conversion_tenet_autocephaly_same_heritage_bonus = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_same_culture_conversion_bonus_active }
-			exists = scope:county
-			actor_is_same_heritage_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:councillor_liege
-				VARIABLE = church_culture
-			}
-		}
-		add = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_autocephaly_same_heritage_bonus_value
-		divide = 100
-	}
-}
-conversion_tenet_autocephaly_different_heritage_conversion_malus_value = 30#%; integer for localization
-conversion_tenet_autocephaly_different_heritage_conversion_malus = {
-	value = 0
-	if = {
-		limit = {
-			scope:councillor_liege.faith = { has_doctrine_parameter = tenet_autocephaly_different_heritage_conversion_malus_active }
-			exists = scope:county
-			actor_is_different_heritage_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:councillor_liege
-				VARIABLE = church_culture
-			}
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_autocephaly_different_heritage_conversion_malus_value
-		divide = 100
-	}
-}
-conversion_tenet_autocephaly_different_heritage_conversion_resistance_value = 20#%; integer for localization
-conversion_tenet_autocephaly_different_heritage_conversion_resistance = {
-	value = 0
-	if = {
-		limit = {
-			scope:county.rite = { rite_has_parameter = tenet_autocephaly_conversion_resistance_active }
-			exists = scope:county
-			#Make sure culture and faith align
-			actor_is_faith_culture_or_child_culture_for_cultural_religions_trigger = {
-				ACTOR = scope:county
-				TARGET = scope:county
-				VARIABLE = church_culture
-			}
-		}
-		subtract = court_chaplain_conversion_base_total
-		multiply = conversion_tenet_autocephaly_different_heritage_conversion_resistance_value
-		divide = 100
-	}
-}
-
 #Redeeming Struggle Values
 tenet_redeeming_struggle_resistance_value = 0.3
 conversion_redeeming_struggle = {
@@ -262,6 +91,31 @@ conversion_mystery_religion = {
 		}
 		subtract = court_chaplain_conversion_base_total
 		multiply = tenet_mystery_religion_resistance_value
+	}
+}
+
+#Alexandrian School Values
+tenet_alexandrian_school_resistance_value = 0.33
+conversion_alexandrian_school = {
+	value = 0
+	if = {
+		limit = {
+			exists = scope:county
+			scope:county.rite = { rite_has_parameter = tenet_alexandrian_school }
+		}
+		subtract = court_chaplain_conversion_base_total
+		multiply = tenet_alexandrian_school_resistance_value
+	}
+}
+tenet_antiochene_school_speed_value = 0.33
+conversion_antiochene_school = {
+	value = 0
+	if = {
+		limit = {
+			scope:councillor.rite = { rite_has_parameter = tenet_antiochene_school_conversion_speed }
+		}
+		add = court_chaplain_conversion_base_total
+		multiply = tenet_antiochene_school_speed_value
 	}
 }
 
