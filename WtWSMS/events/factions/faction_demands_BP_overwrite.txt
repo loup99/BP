@@ -1,6 +1,38 @@
 ﻿##### Changed from Vanilla: Extended effects to other Zealous Traditions, Extended to roman_acclamation_succession_law
 namespace = faction_demand
 
+scripted_effect faction_demand_claimant_counter_offer_corule_accepted_effect_BP_Overwrite = {
+	# This effect should always be placed here, _before_ all the other effects in the block.
+	trigger_event = { on_action = on_faction_demand_accepted }
+
+	add_dread = medium_dread_loss
+
+	custom_tooltip = {
+		text = faction_demand.0000.truce_from_co_rule
+		scope:faction = {
+			every_faction_member = {
+				save_scope_as = recipient # Ensuring it localizes correctly
+				add_truce_both_ways = {
+					character = scope:faction.faction_target
+					years = faction_counter_offer_appointed_co_emperor_value
+					name = ep3_truce_appointed_faction_leader_coruler
+				}
+			}
+		}
+	}
+
+	# LEGITIMACY LOSS FOR ACCEPTING FACTION DEMANDS
+	faction_accept_demand_legitimacy_effect = yes
+	on_claimant_faction_war_win_common = {
+		TARGET_TITLES = target_titles
+		ATTACKER = scope:faction.faction_leader
+		DEFENDER = root
+		CLAIMANT = scope:faction.special_character
+	}
+
+	scope:faction = { destroy_faction = yes }
+}
+
 scripted_trigger faction_target_can_attempt_to_bribe_with_co_emperorship_trigger_BP_overwrite = {
 	may_appoint_co_emperors_trigger = yes
 	has_active_diarchy = no
@@ -512,7 +544,7 @@ faction_demand.2001 = {
 					desc = faction_demand.0000.faction_leader_accepts
 					show_chance = no
 					faction_demand_counter_offer_co_rule_start_diarchy_effect_BP_overwrite = yes
-					faction_demand_claimant_counter_offer_corule_accepted_effect = yes
+					faction_demand_claimant_counter_offer_corule_accepted_effect_BP_Overwrite = yes
 				}
 				# They decline.
 				100 = {

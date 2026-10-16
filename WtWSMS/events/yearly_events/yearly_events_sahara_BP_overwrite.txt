@@ -15,6 +15,42 @@ scripted_trigger appropriate_nomad_adjacent_county_trigger = {
 	NOT = { culture = { has_cultural_tradition = tradition_saharan_nomads } }
 }
 
+scripted_effect pick_nomad-appropriate_county_effect_BP_Overwrite = {
+	random_in_list = {
+		list = $LIST$
+		save_scope_as = target_county
+
+		weight = {
+			base = 100
+			#Nomads like to control strategic oases.
+			modifier = {
+				add = 50
+				title_province = { terrain = oasis }
+			}
+			#This event is chiefly for nomad tribes moving into desert territory that they specialise in controlling, not more fertile drylands.
+			modifier = {
+				add = -50
+				title_province = { terrain = drylands }
+			}
+			#Provinces that grant more levies are preferred.
+			modifier = {
+				add = {
+					value = building_levies
+					multiply = 0.1
+				}
+			}
+			#Weight down higher development counties proportionally: both not the focus of the event, and less likely to be accepted by the player.
+			modifier = {
+				add = {
+					value = development_level
+					multiply = -1
+				}
+				development_level >= bad_development_level
+			}
+		}
+	}
+}
+
 #	#An appropriate local Saharan culture's nomads are flocking to one of your counties.
 #		by Ewan Cowhig Croft
 yearly_saharan.0021 = {
@@ -79,11 +115,11 @@ yearly_saharan.0021 = {
 					count >= 1
 				}
 			}
-			pick_nomad-appropriate_county_effect = { LIST = prettified_saharan_nomad_county_spread }
+			pick_nomad-appropriate_county_effect_BP_Overwrite = { LIST = prettified_saharan_nomad_county_spread }
 		}
 		##If that list was empty, sort the county that could use the most buff from the original list.
 		else = {
-			pick_nomad-appropriate_county_effect = { LIST = saharan_nomad_counties }
+			pick_nomad-appropriate_county_effect_BP_Overwrite = { LIST = saharan_nomad_counties }
 		}
 
 		#Flag which nomads we're dealing with.
