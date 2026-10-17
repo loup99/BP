@@ -669,6 +669,186 @@ tenet_consolamentum = {
 	}
 }
 
+##### Changed from Vanilla: decreased_subjugation_limit
+
+# Pacifism
+tenet_pacifism = {
+	icon = tenet_pacifism
+
+	piety_cost = {
+		if = {
+			limit = {
+				OR = {
+					rite_religion_tag = christianity_religion
+					rite_religion_tag = taoism_religion
+				}
+			}
+			value = faith_tenet_cost_low
+		}
+		else_if = {
+			limit = {
+				rite_religion_tag = islam_religion
+			}
+			value = faith_tenet_cost_high
+		}
+		else = {
+			value = faith_tenet_cost_mid
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_pacifism }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		NOR = {
+			religion = religion:buddhism_religion
+			religion = religion:hinduism_religion
+			religion = religion:jainism_religion
+		}
+		custom_description = {
+			text = incompatible_tenet_human_sacrifice_trigger
+			NOT = { tenet:tenet_human_sacrifice = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_armed_pilgrimages_trigger
+			NOT = { tenet:tenet_armed_pilgrimages = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_gruesome_festivals_trigger
+			NOT = {
+				tenet:tenet_gruesome_festivals = { is_in_list = selected_doctrines }
+			}
+		}
+	}
+
+	parameters = {
+		holy_wars_forbidden
+		pacifist
+		###### Changed from Vanilla vvvvv
+		decreased_subjugation_limit
+		###### Changed from Vanilla ^^^^^
+	}
+
+	special_parameters = {
+		parameter_opinion_override = {
+			pacifist = 10
+		}
+
+		piety_from_long_peace = 1
+	}
+
+	divergence_multiplier = 1.25
+
+	traits = {
+		# Renunciation of violence is the tenet's defining act.
+		virtues = {
+			calm = { weight = 30 scale = 2 }
+		}
+		sins = {
+			wrathful = { weight = 30 scale = 2 }
+		}
+	}
+
+	character_modifier = {
+		ai_war_chance = -0.25
+		ai_war_cooldown = 5
+	}
+
+	personal_tenet_modifier = {
+		domain_limit = 1
+	}
+
+	personal_tenet_parameters = {
+		tenet_pacifism_no_offensive_war
+	}
+
+	county_modifier = {
+		development_growth_factor = 0.2
+		county_opinion_add = 10
+	}
+}
+
+##### Changed from Vanilla: decreased_subjugation_limit
+
+# Pastoral Isolation
+tenet_pastoral_isolation = {
+	icon = tenet_pastoral_isolation
+
+	can_pick = {
+		religion = religion:christianity_religion
+		custom_description = {
+			text = doctrine_no_head_of_faith_trigger
+			doctrine:doctrine_no_head = { is_in_list = selected_doctrines }
+		}
+		custom_description = {
+			text = incompatible_tenet_false_conversion_sanction_trigger
+			NOT = {
+				tenet:tenet_false_conversion_sanction = { is_in_list = selected_doctrines }
+			}
+		}
+	}
+
+	piety_cost = {
+		value = faith_tenet_cost_low
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_pastoral_isolation }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	parameters = {
+		sanctioned_false_conversion_county_resistance
+		sanctioned_false_conversion
+		unattractive_for_character_conversions
+		tenet_unlocks_t3_withdraw_from_view
+		###### Changed from Vanilla vvvvv
+		decreased_subjugation_limit
+		###### Changed from Vanilla ^^^^^
+	}
+
+	personal_tenet_parameters = {
+		tenet_pastoral_isolation_endogamy
+	}
+	
+	special_parameters = {
+		hostility_level_override = {
+			special_doctrine_is_christian_faith = righteous
+		}
+	}
+
+	character_modifier = {
+		different_faith_liege_opinion = 10
+		opinion_of_different_faith_liege = 10
+	}
+
+	county_modifier = {
+		epidemic_resistance = 10
+	}
+
+	personal_tenet_modifier = {
+		tax_mult = 0.05
+		development_growth_factor = 0.1
+		fertility = 0.1
+		diplomacy = -2
+		monthly_diplomacy_lifestyle_xp_gain_mult = -0.2
+	}
+
+	traits = {
+		virtues = {
+			shy = { weight = 15 scale = 1 }
+			patient = { weight = 10 scale = 1 }
+		}
+		sins = {
+			gregarious = { weight = 10 scale = 1 }
+		}
+	}
+}
+
 ##### Changed from Vanilla: Add Latin/Greek Flavor, selectability
 
 # Adaptability
@@ -973,6 +1153,217 @@ tenet_literalism = {
 	}
 }
 
+##### Changed from Vanilla: Custom localizations
+
+# Reincarnation / Raj'a
+tenet_reincarnation = {
+	icon = tenet_reincarnation
+
+	historical_glossary = {
+		first_valid = {
+			desc = tenet_reincarnation_samsara_historical_glossary
+		}
+	}
+
+	piety_cost = {
+		if = {
+			limit = {
+				rite_religion_tag = islam_religion
+			}
+			value = faith_tenet_cost_high
+		}
+		else_if = {
+			limit = {
+				OR = {
+					rite_religion_tag = dualism_religion
+					rite_religion_tag = hinduism_religion
+					rite_religion_tag = buddhism_religion
+					rite_religion_tag = jainism_religion
+				}
+			}
+			value = faith_tenet_cost_low
+		}
+		else = {
+			value = faith_tenet_cost_mid
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_reincarnation }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		NOR = {
+			AND = {
+				religion = religion:christianity_religion
+				this != faith:cathar
+			}
+			religion = religion:judaism_religion
+			##### Changed from Vanilla vvvvv
+			
+			#Implicit now, but should be considered permitted doctrinally for personal tenets
+			religion = religion:hinduism_religion
+			religion = religion:buddhism_religion
+			religion = religion:jainism_religion
+			##### Changed from Vanilla ^^^^^
+		}
+	}
+
+	parameters = {
+		reincarnation_resistance_to_conversion
+		reincarnation_events_active
+	}
+
+	personal_tenet_parameters = {
+		tenet_reincarnation_trigger_decision
+		tenet_reincarnation_piety_level_courage
+		tenet_reincarnation_ancestral_trait_decision
+	}
+
+	character_modifier = {
+		monthly_lifestyle_xp_gain_mult = 0.1
+	}
+
+	personal_tenet_modifier = {
+		dynasty_opinion = 5
+	}
+
+	name = {
+		first_valid = {
+			##### Changed from Vanilla vvvvv
+			triggered_desc = {
+				trigger = {
+					NOT = { rite_religion_tag = christianity_religion }
+					rite_has_parameter = liturgical_language_greek
+				}
+				desc = tenet_reincarnation_metempsychosis_name
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { rite_religion_tag = christianity_religion }
+					rite_has_parameter = liturgical_language_latin
+				}
+				desc = tenet_reincarnation_reincarnatio_name
+			}
+			##### Changed from Vanilla ^^^^^
+			triggered_desc = {
+				trigger = {
+					rite_religion_tag = zoroastrianism_religion
+				}
+				desc = tenet_reincarnation_zoroastrian_name
+			}
+			desc = tenet_reincarnation_name
+		}
+	}
+
+	desc = {
+		first_valid = {
+			##### Changed from Vanilla vvvvv
+			triggered_desc = {
+				trigger = {
+					NOT = { rite_religion_tag = christianity_religion }
+					rite_has_parameter = liturgical_language_greek
+				}
+				desc = tenet_reincarnation_metempsychosis_desc
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { rite_religion_tag = christianity_religion }
+					rite_has_parameter = liturgical_language_latin
+				}
+				desc = tenet_reincarnation_reincarnatio_desc
+			}
+			##### Changed from Vanilla ^^^^^
+			triggered_desc = {
+				trigger = {
+					rite_religion_tag = zoroastrianism_religion
+				}
+				desc = tenet_reincarnation_zoroastrian_desc
+			}
+			desc = tenet_reincarnation_desc
+		}
+	}
+
+	traits = {
+		virtues = {
+			patient = { weight = 10 scale = 1 }
+			content = { weight = 10 scale = 1 }
+		}
+		sins = {
+			impatient = { weight = 10 scale = 1 }
+		}
+	}
+}
+
+##### Changed from Vanilla: increased_subjugation_limit
+
+# Struggle and Submission
+tenet_struggle_submission = {
+	icon = tenet_struggle_submission
+
+	historical_glossary = {
+		first_valid = {
+			desc = tenet_struggle_submission_jihad_historical_glossary
+		}
+	}
+
+	piety_cost = {
+		if = {
+			limit = {
+				rite_religion_tag = islam_religion
+			}
+			value = faith_tenet_cost_low
+		}
+		else = {
+			value = faith_tenet_cost_high
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_struggle_submission }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		OR = {
+			religion = religion:islam_religion
+			religion = religion:dualism_religion
+		}
+	}
+
+	parameters = {
+		great_holy_wars_active
+		ghw_no_hof_conversion_buffs_active
+		bonus_holy_war_piety_active
+		pilgrimage_decision_active
+		unlock_voluntary_laampdom_faith
+		###### Changed from Vanilla vvvvv
+		increased_subjugation_limit
+		###### Changed from Vanilla ^^^^^
+	}
+
+	personal_tenet_parameters = {
+		unlock_voluntary_laampdom_faith
+	}
+	personal_tenet_modifier = {
+		martial_per_piety_level = 1
+		maa_toughness_mult = 0.05
+	}
+
+	traits = {
+		virtues = {
+			humble = { weight = 10 scale = 1 }
+			patient = { weight = 10 scale = 1 }
+		}
+		sins = {
+			arrogant = { weight = 10 scale = 1 }
+		}
+	}
+}
+
 ##### Changed from Vanilla: Gave dynamic name and description
 
 # Bhakti / Patron Gods
@@ -1087,6 +1478,106 @@ tenet_bhakti = {
 		sins = {
 			cynical = { weight = 10 scale = 1 }
 		}
+	}
+}
+
+##### Changed from Vanilla: decreased_subjugation_limit
+
+# Dharmic Pacifism
+tenet_dharmic_pacifism = { #Mix of reincarnation and pacifism rites
+	icon = tenet_dharmic_pacifism
+
+	historical_glossary = {
+		first_valid = {
+			desc = tenet_dharmic_pacifism_historical_glossary
+		}
+	}
+
+	piety_cost = {
+		if = {
+			limit = {
+				OR = {
+					rite_religion_tag = buddhism_religion
+					rite_religion_tag = jainism_religion
+				}
+			}
+			value = faith_tenet_cost_low
+		}
+		else = {
+			value = faith_tenet_cost_mid
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_dharmic_pacifism }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		OR = {
+			has_doctrine = eastern_hostility_doctrine
+			has_doctrine = sinitic_hostility_doctrine
+		}
+		NOT = { religion = religion:zoroastrianism_religion }
+		custom_description = {
+			text = incompatible_tenet_human_sacrifice_trigger
+			NOT = { tenet:tenet_human_sacrifice = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_armed_pilgrimages_trigger
+			NOT = { tenet:tenet_armed_pilgrimages = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_gruesome_festivals_trigger
+			NOT = {
+				tenet:tenet_gruesome_festivals = { is_in_list = selected_doctrines }
+			}
+		}
+	}
+	
+	parameters = {
+		reincarnation_resistance_to_conversion
+		holy_wars_forbidden
+		pacifist
+		###### Changed from Vanilla vvvvv
+		decreased_subjugation_limit
+		###### Changed from Vanilla ^^^^^
+	}
+
+	special_parameters = {
+		parameter_opinion_override = {
+			pacifist = 10
+		}
+
+		hostility_levels = {
+			same_religion = astray
+		}
+	}
+
+	personal_tenet_parameters = {
+		tenet_pacifism_no_offensive_war
+	}
+
+	personal_tenet_modifier = {
+		stress_gain_mult = -0.15
+		health = 0.1
+	}
+
+	traits = {
+		# Renunciation of violence is the tenet's defining act (ahimsa).
+		virtues = {
+			calm = { weight = 25 scale = 2 }
+		}
+		sins = {
+			wrathful = { weight = 25 scale = 2 }
+		}
+	}
+	
+	character_modifier = {
+		domain_limit = 1
+		ai_war_chance = -0.25
+		ai_war_cooldown = 0.25
 	}
 }
 
@@ -1421,6 +1912,94 @@ tenet_sun_worship = {
 	}
 }
 
+##### Changed from Vanilla: increased_subjugation_limit
+
+# Warmongering
+tenet_warmonger = {
+	icon = tenet_warmonger
+
+	piety_cost = {
+		if = {
+			limit = {
+				OR = {
+					rite_religion_tag = buddhism_religion
+					rite_religion_tag = jainism_religion
+					rite_religion_tag = taoism_religion
+				}
+			}
+			value = faith_tenet_cost_massive
+		}
+		else = {
+			value = faith_tenet_cost_mid
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_warmonger }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		NOR = {
+			religion = religion:christianity_religion
+			religion = religion:islam_religion
+			religion = religion:judaism_religion
+			religion = religion:dualism_religion
+		}
+		custom_description = {
+			text = incompatible_tenet_pacifism_trigger
+			NOT = { tenet:tenet_pacifism = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_dharmic_pacifism_trigger
+			NOT = { tenet:tenet_dharmic_pacifism = { is_in_list = selected_doctrines } }
+		}
+	}
+
+	parameters = {
+		warmonger
+		conquest_cb_enabled
+		invasion_cb_enabled
+		great_holy_wars_active_if_reformed
+		clergy_can_fight
+		sanctify_artifacts_weapons
+		###### Changed from Vanilla vvvvv
+		increased_subjugation_limit
+		###### Changed from Vanilla ^^^^^
+	}
+
+	special_parameters = {
+		warmonger = yes
+	}
+
+	character_modifier = {
+		ai_war_chance = 0.5
+		ai_war_cooldown = -0.25
+		accolade_glory_gain_mult = 0.1
+	}
+
+	personal_tenet_parameters = {
+		clergy_can_fight_personal
+	}
+
+	personal_tenet_modifier = {
+		prowess_per_piety_level = 1
+		maa_damage_mult = 0.05
+	}
+
+	traits = {
+		virtues = {
+			brave = { weight = 20 scale = 1 }
+			zealous = { weight = 10 scale = 1 }
+		}
+		sins = {
+			craven = { weight = 20 scale = 1 }
+		}
+	}
+}
+
+
 ##### Changed from Vanilla: simply unavailable
 tenet_household_gods = {
 	icon = tenet_household_gods
@@ -1752,3 +2331,72 @@ tenet_sacred_shadows = {
 		}
 	}
 }
+
+##### Changed from Vanilla: increased_subjugation_limit
+
+# Sacred Destruction
+tenet_sacred_destruction = {
+	icon = tenet_sacred_destruction
+
+	piety_cost = {
+		if = {
+			limit = { rite_has_tenet = tenet_warmonger }
+			value = faith_tenet_cost_mid
+		}
+		else = {
+			value = faith_tenet_cost_high
+		}
+
+		# Multiplier for keeping same tenet
+		if = {
+			limit = { rite_has_tenet = tenet_sacred_destruction }
+			multiply = faith_unchanged_doctrine_cost_mult
+		}
+	}
+
+	can_pick = {
+		religion = religion:hinduism_religion
+		custom_description = {
+			text = incompatible_tenet_pacifism_trigger
+			NOT = { tenet:tenet_pacifism = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_dharmic_pacifism_trigger
+			NOT = { tenet:tenet_dharmic_pacifism = { is_in_list = selected_doctrines } }
+		}
+		custom_description = {
+			text = incompatible_tenet_tenet_preservation_trigger
+			NOT = { tenet:tenet_preservation = { is_in_list = selected_doctrines } }
+		}
+	}
+
+	character_modifier = {
+		prowess_per_piety_level = 1
+		maa_damage_mult = 0.1
+	}
+
+	parameters = {
+		successful_sieges_give_piety
+		sanctify_artifacts_sacrificial
+		unlock_destruction_raid_intent
+		###### Changed from Vanilla vvvvv
+		increased_subjugation_limit
+		###### Changed from Vanilla ^^^^^
+	}
+
+	personal_tenet_modifier = {
+		maa_siege_value_mult = 0.1
+	}
+
+	personal_tenet_parameters = {
+		unlock_destruction_raid_intent_personal
+	}
+
+	traits = {
+		# Sanctified wrath is the entire premise.
+		virtues = {
+			wrathful = { weight = 25 scale = 2 }
+		}
+	}
+}
+
